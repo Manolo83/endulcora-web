@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endulcora · Estudio Gastronómico — eBooks, hojas de costeo, apps y talleres</title>
+<meta name="description" content="Manuales técnicos, calculadoras de costeo, aplicaciones y talleres en vivo para reposteros, banqueteros y emprendedores gastronómicos. Ciudad de México.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://endulcora.com/">
+<meta name="theme-color" content="#1B0720">
+
+<!-- Open Graph / Facebook / WhatsApp -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://endulcora.com/">
+<meta property="og:site_name" content="Endulcora · Estudio Gastronómico">
+<meta property="og:title" content="Endulcora · Estudio Gastronómico">
+<meta property="og:description" content="eBooks, hojas de costeo, apps y talleres en vivo para reposteros, banqueteros y emprendedores gastronómicos.">
+<meta property="og:image" content="https://endulcora.com/og-image.png">
+<meta property="og:locale" content="es_MX">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Endulcora · Estudio Gastronómico">
+<meta name="twitter:description" content="eBooks, hojas de costeo, apps y talleres en vivo para reposteros, banqueteros y emprendedores gastronómicos.">
+<meta name="twitter:image" content="https://endulcora.com/og-image.png">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F8B818', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Archivo Black"', 'sans-serif'],
+          titulo: ['"Bebas Neue"', 'sans-serif'],
+          firma: ['"Great Vibes"', 'cursive'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Endulcora · Estudio Gastronómico",
+  "url": "https://endulcora.com/",
+  "image": "https://endulcora.com/og-image.png",
+  "description": "Manuales técnicos, calculadoras de costeo, aplicaciones y talleres en vivo para reposteros, banqueteros y emprendedores gastronómicos.",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Ciudad de México",
+    "addressCountry": "MX"
+  },
+  "telephone": "+525665271901",
+  "priceRange": "$$"
+}
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background: #FBF4E9; }
+
+/* ---- Firma visual: la flama ---- */
+.flama-svg { transform-origin: 50% 100%; animation: parpadeo 2.6s ease-in-out infinite; }
+@keyframes parpadeo { 0%,100% { transform: scale(1) rotate(-1deg); opacity: .95; } 35% { transform: scale(1.06,.94) rotate(2deg); opacity: 1; } 65% { transform: scale(.96,1.05) rotate(-2deg); opacity: .9; } }
+.halo { animation: halo 2.6s ease-in-out infinite; }
+@keyframes halo { 0%,100%{opacity:.28; transform:scale(1)} 50%{opacity:.5; transform:scale(1.12)} }
+
+/* Goteo de cera del temporizador */
+.gota { animation: gotear 4.5s cubic-bezier(.4,0,.6,1) infinite; }
+.gota:nth-child(2){ animation-delay: 1.4s }
+.gota:nth-child(3){ animation-delay: 2.9s }
+@keyframes gotear { 0% { transform: translateY(0); opacity: 0 } 12% { opacity: 1 } 80% { transform: translateY(46px); opacity: 1 } 100% { transform: translateY(58px); opacity: 0 } }
+
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
+.reveal.visible { opacity: 1; transform: none; }
+
+.rule-flama { background-image: linear-gradient(90deg,#F8B818 0 22px,transparent 22px); height: 3px; }
+
+input[type=range] { -webkit-appearance:none; appearance:none; height:4px; border-radius:99px; background:#e6d9c6; outline:none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#7A2E7E; border:3px solid #F8B818; cursor:pointer; }
+input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%; background:#7A2E7E; border:3px solid #F8B818; cursor:pointer; }
+
+.num-input:focus { outline:2px solid #7A2E7E; outline-offset:1px; }
+:focus-visible { outline: 3px solid #F8B818; outline-offset: 3px; }
+
+.barra { transition: width .45s cubic-bezier(.2,.7,.3,1); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .flama-svg, .halo, .gota { animation: none !important; }
+  .reveal { opacity:1 !important; transform:none !important; transition:none; }
+}
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header id="top" class="sticky top-0 z-50 bg-carbon/95 backdrop-blur border-b border-white/10">
+  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+    <div class="flex h-20 items-center justify-between gap-6">
+
+      <a href="#top" class="flex items-center gap-3 shrink-0">
+        <span class="grid h-11 w-11 place-items-center rounded-full bg-morado ring-2 ring-flama/70">
+          <svg viewBox="0 0 24 32" class="h-6 w-6"><path class="flama-svg" fill="#F8B818" d="M12 0c1 6 6 7 6 13a6 6 0 1 1-12 0c0-3 2-4 3-7 .6 2 1.4 2.6 2 3 .4-3 1-6 1-9z"/></svg>
+        </span>
+        <span class="leading-none">
+          <span class="block font-firma text-3xl text-crema">Endulcora</span>
+          <span class="block font-titulo text-[11px] tracking-[.34em] text-flama">ESTUDIO GASTRONÓMICO</span>
+        </span>
+      </a>
+
+      <nav class="hidden lg:flex items-center gap-8 font-ui text-[13px] font-600 uppercase tracking-widest text-crema/80">
+        <a href="#tienda"     class="hover:text-flama transition">Tienda</a>
+        <a href="#productos"  class="hover:text-flama transition">eBooks</a>
+        <a href="#anexos"     class="hover:text-flama transition">Anexos</a>
+        <a href="#clase"      class="hover:text-flama transition">Clases en vivo</a>
+        <a href="#simulador"  class="hover:text-flama transition">Calculadora</a>
+        <a href="#cursos"     class="hover:text-flama transition">Cursos</a>
+        <a href="#galeria"    class="hover:text-flama transition">Galería</a>
+        <a href="#anuncios"   class="hover:text-flama transition">Anuncios</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <button type="button" onclick="abrirModal('acceso')"
+          class="hidden sm:inline-flex items-center gap-2 rounded-full bg-flama px-5 py-2.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 11V7a4 4 0 1 0-8 0v4"/><rect x="5" y="11" width="14" height="10" rx="2"/></svg>
+          Acceso clientes
+        </button>
+        <button type="button" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false" id="btnMenu"
+          class="lg:hidden grid h-11 w-11 place-items-center rounded-full border border-white/25 text-crema">
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="menuMovil" class="hidden lg:hidden border-t border-white/10 bg-carbon px-5 pb-6 pt-2">
+    <a href="#tienda" onclick="toggleMenu()" class="block border-b border-white/10 py-3 font-ui text-sm uppercase tracking-widest text-crema/85">Tienda</a>
+    <a href="#productos" onclick="toggleMenu()" class="block border-b border-white/10 py-3 font-ui text-sm uppercase tracking-widest text-crema/85">eBooks</a>
+    <a href="#anexos" onclick="toggleMenu()" class="block border-b border-white/10 py-3 font-ui text-sm uppercase tracking-widest text-crema/85">Anexos</a>
+    <a href="#clase" onclick="toggleMenu()" class="block border-b border-white/10 py-3 font-ui text-sm uppercase tracking-widest text-crema/85">Clases en vivo</a>
+    <a href="#simulador" onclick="toggleMenu()" class="block border-b border-white/10 py-3 font-ui text-sm uppercase tracking-widest text-crema/85">Calculadora</a>
+    <a href="#cursos" onclick="toggleMenu()" class="block border-b border-white/10 py-3 font-ui text-sm uppercase tracking-widest text-crema/85">Cursos</a>
+    <a href="#galeria" onclick="toggleMenu()" class="block border-b border-white/10 py-3 font-ui text-sm uppercase tracking-widest text-crema/85">Galería</a>
+    <a href="#anuncios" onclick="toggleMenu()" class="block border-b border-white/10 py-3 font-ui text-sm uppercase tracking-widest text-crema/85">Anuncios</a>
+    <button type="button" onclick="toggleMenu();abrirModal('acceso')" class="mt-5 w-full rounded-full bg-flama py-3 font-ui text-sm font-700 uppercase tracking-wider text-carbon">Acceso clientes</button>
+  </div>
+</header>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="relative overflow-hidden bg-carbon text-crema">
+  <div class="pointer-events-none absolute -left-40 top-0 h-[520px] w-[520px] rounded-full bg-morado/40 blur-[130px]"></div>
+  <div class="pointer-events-none absolute -right-24 bottom-[-120px] h-[420px] w-[420px] rounded-full bg-vino/60 blur-[120px]"></div>
+  <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-20 lg:grid-cols-[1.15fr_.85fr] lg:px-8 lg:py-28">
+    <div>
+      <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-flama/40 bg-flama/10 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-flama">
+        <span class="h-1.5 w-1.5 rounded-full bg-flama"></span> Ciudad de México · Desde 2024
+      </p>
+
+      <h1 class="font-display text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
+        Aprende la técnica.<br>
+        <span class="text-flama">Cobra lo que vale.</span>
+      </h1>
+
+      <p class="mt-6 max-w-xl text-[17px] leading-relaxed text-crema/75">
+        Manuales técnicos, hojas de costeo listas para usar, aplicaciones de bolsillo y talleres en vivo
+        para reposteros, banqueteros y emprendedores que quieren cocinar bien <em class="not-italic text-flama">y</em> vender con margen real.
+      </p>
+
+      <div class="mt-9 flex flex-wrap gap-4">
+        <a href="#tienda" class="inline-flex items-center gap-2 rounded-full bg-flama px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
+          Ir a la tienda
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </a>
+        <a href="#cursos" class="inline-flex items-center gap-2 rounded-full border border-crema/35 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">
+          Ver cursos y talleres
+        </a>
+      </div>
+
+      <dl class="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-7">
+        <div><dt class="font-titulo text-4xl text-flama">137</dt><dd class="font-ui text-[11px] uppercase tracking-widest text-crema/60">Páginas de manual</dd></div>
+        <div><dt class="font-titulo text-4xl text-flama">50</dt><dd class="font-ui text-[11px] uppercase tracking-widest text-crema/60">Fórmulas costeadas</dd></div>
+        <div><dt class="font-titulo text-4xl text-flama">2</dt><dd class="font-ui text-[11px] uppercase tracking-widest text-crema/60">Anexos en Excel</dd></div>
+      </dl>
+    </div>
+
+    <!-- Firma visual: la vela encendida -->
+    <div class="relative mx-auto w-full max-w-sm">
+      <div class="halo absolute left-1/2 top-6 h-56 w-56 -translate-x-1/2 rounded-full bg-flama/25 blur-3xl"></div>
+      <div class="relative rounded-[28px] border border-white/12 bg-gradient-to-b from-white/[.07] to-transparent p-8 text-center">
+        <svg viewBox="0 0 120 200" class="mx-auto h-72 w-auto" role="img" aria-label="Vela comestible encendida">
+          <ellipse cx="60" cy="188" rx="46" ry="9" fill="#000" opacity=".35"/>
+          <g class="flama-svg">
+            <path d="M60 6c4 22 22 26 22 46a22 22 0 1 1-44 0c0-11 7-15 11-26 2 7 5 9 7 11 1-11 4-20 4-31z" fill="#F8B818"/>
+            <path d="M60 30c2 12 11 15 11 25a11 11 0 1 1-22 0c0-7 8-14 11-25z" fill="#FBF4E9" opacity=".85"/>
+          </g>
+          <rect x="58.5" y="72" width="3" height="16" rx="1.5" fill="#4E1454"/>
+          <path d="M28 88h64c3 0 5 2 5 5v82c0 6-5 10-11 10H34c-6 0-11-4-11-10V93c0-3 2-5 5-5z" fill="#FBF4E9"/>
+          <path d="M28 88h64c3 0 5 2 5 5v14H23V93c0-3 2-5 5-5z" fill="#F1E3CC"/>
+          <path d="M35 107c6 10 3 16 8 24s14 6 12 16 6 14 12 12" stroke="#E7D5B8" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <rect x="23" y="150" width="74" height="35" rx="6" fill="#7A2E7E"/>
+          <text x="60" y="166" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#FBF4E9">MANTEQUILLA</text>
+          <text x="60" y="179" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#F8B818">TRUFADA</text>
+        </svg>
+        <p class="mt-2 font-firma text-2xl text-flama">se enciende, se derrite, se come</p>
+        <p class="mt-1 font-ui text-[11px] uppercase tracking-[.25em] text-crema/55">Receta 01 · Sección gourmet</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ ANUNCIOS (dinámico, desde el panel de administración) ══════════════ -->
+<section id="anuncios" class="scroll-mt-24 bg-flama/10 py-14">
+  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+    <div class="reveal mb-8 flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <div class="rule-flama mb-5 w-24"></div>
+        <h2 class="font-display text-2xl leading-tight text-vino sm:text-3xl">Anuncios y novedades</h2>
+      </div>
+      <p class="max-w-md text-sm leading-relaxed text-carbon/70">Fechas de clases, lanzamientos y avisos, publicados directamente desde el panel de administración.</p>
+    </div>
+    <div id="listaAnuncios" class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <p class="text-sm text-carbon/50">Cargando anuncios…</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PRODUCTOS DESTACADOS ══════════════ -->
+<section id="tienda" class="scroll-mt-24 bg-crema py-20 lg:py-28">
+  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+
+    <div class="reveal mb-14 flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <div class="rule-flama mb-5 w-24"></div>
+        <h2 id="productos" class="scroll-mt-24 font-display text-3xl leading-tight text-vino sm:text-4xl">Lo que se llevan<br>los que ya venden</h2>
+      </div>
+      <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">
+        Cada manual viene con su anexo de costeo. El libro te enseña la técnica; la hoja de cálculo
+        te dice cuánto cuesta hacerla y a cuánto tienes que venderla.
+      </p>
+    </div>
+
+    <div class="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+
+      <!-- eBook principal -->
+      <article class="reveal group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
+        <div class="relative aspect-[4/3] bg-gradient-to-br from-vino to-carbon p-7">
+          <span class="absolute right-5 top-5 rounded-full bg-flama px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-widest text-carbon">Más vendido</span>
+          <p class="font-titulo text-[11px] tracking-[.3em] text-flama">VOLUMEN I</p>
+          <h3 class="mt-2 font-display text-2xl leading-tight text-crema">Velas<br>Comestibles</h3>
+          <p class="mt-2 font-firma text-xl text-flama">El arte de derretir sabores</p>
+          <p class="absolute bottom-6 left-7 font-ui text-[10px] uppercase tracking-[.2em] text-crema/60">Guía técnica · Recetario · Negocio</p>
+        </div>
+        <div class="flex flex-1 flex-col p-7">
+          <ul class="space-y-2.5 text-sm text-carbon/75">
+            <li class="flex gap-2.5"><span class="text-flama">▸</span> 50 fórmulas con maridaje y punto de fusión</li>
+            <li class="flex gap-2.5"><span class="text-flama">▸</span> Capítulo completo de costeo, merma y precios</li>
+            <li class="flex gap-2.5"><span class="text-flama">▸</span> Empaque, etiquetado y cadena de frío</li>
+            <li class="flex gap-2.5"><span class="text-flama">▸</span> PDF de 137 páginas, descarga inmediata</li>
+          </ul>
+          <div class="mt-7 flex items-end gap-3">
+            <span class="font-display text-3xl text-vino">$499</span>
+            <span class="pb-1 text-sm text-humo line-through">$1,000</span>
+            <span class="pb-1 font-ui text-[11px] uppercase tracking-wider text-humo">MXN</span>
+          </div>
+          <button type="button" onclick="abrirModal('compra','Velas Comestibles · eBook')"
+            class="mt-5 w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+            Comprar eBook
+          </button>
+        </div>
+      </article>
+
+      <!-- Anexo contable -->
+      <article id="anexos" class="reveal scroll-mt-24 group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
+        <div class="relative aspect-[4/3] bg-gradient-to-br from-morado to-vino p-7">
+          <span class="absolute right-5 top-5 rounded-full bg-crema px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-widest text-vino">Anexo contable</span>
+          <p class="font-titulo text-[11px] tracking-[.3em] text-flama">HOJA DE CÁLCULO</p>
+          <h3 class="mt-2 font-display text-2xl leading-tight text-crema">Costos,<br>Merma y Precios</h3>
+          <div class="mt-4 space-y-1.5 font-ui text-[11px] uppercase tracking-wider text-crema/70">
+            <p class="rounded bg-black/20 px-2 py-1">Hoja 1 · Catálogo de insumos</p>
+            <p class="rounded bg-black/20 px-2 py-1">Hoja 2 · Recetas</p>
+            <p class="rounded bg-black/20 px-2 py-1">Hoja 3 · Costeo y precio</p>
+          </div>
+        </div>
+        <div class="flex flex-1 flex-col p-7">
+          <ul class="space-y-2.5 text-sm text-carbon/75">
+            <li class="flex gap-2.5"><span class="text-flama">▸</span> Costo por gramo automático de cada insumo</li>
+            <li class="flex gap-2.5"><span class="text-flama">▸</span> Merma repartida con la fórmula correcta</li>
+            <li class="flex gap-2.5"><span class="text-flama">▸</span> Precio de menudeo y mayoreo por canal</li>
+            <li class="flex gap-2.5"><span class="text-flama">▸</span> Excel y Google Sheets, sin macros</li>
+          </ul>
+          <div class="mt-7 flex items-end gap-3">
+            <span class="font-display text-3xl text-vino">$249</span>
+            <span class="pb-1 font-ui text-[11px] uppercase tracking-wider text-humo">MXN</span>
+          </div>
+          <button type="button" onclick="abrirModal('compra','Calculadora de Costos, Merma y Precios')"
+            class="mt-5 w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+            Comprar anexo
+          </button>
+        </div>
+      </article>
+
+      <!-- Paquete -->
+      <article class="reveal flex flex-col overflow-hidden rounded-3xl bg-carbon p-7 text-crema ring-1 ring-flama/30 md:col-span-2 lg:col-span-1">
+        <p class="font-titulo text-[11px] tracking-[.3em] text-flama">PAQUETE COMPLETO</p>
+        <h3 class="mt-2 font-display text-2xl leading-tight">Oficios Dulces<br>Vol. I + II</h3>
+        <p class="mt-4 text-sm leading-relaxed text-crema/70">
+          Los dos manuales de la colección con sus dos anexos de costeo y la app de bolsillo para
+          calcular precios desde el celular durante la producción.
+        </p>
+        <ul class="mt-6 space-y-2.5 text-sm text-crema/75">
+          <li class="flex gap-2.5"><span class="text-flama">▸</span> Velas Comestibles (137 pp.)</li>
+          <li class="flex gap-2.5"><span class="text-flama">▸</span> Galletas estilo Nueva York (113 pp.)</li>
+          <li class="flex gap-2.5"><span class="text-flama">▸</span> 2 hojas de costeo + app HTML</li>
+          <li class="flex gap-2.5"><span class="text-flama">▸</span> Acceso a una clase en vivo de regalo</li>
+        </ul>
+        <div class="mt-auto pt-7">
+          <div class="flex items-end gap-3">
+            <span class="font-display text-3xl text-flama">$1,190</span>
+            <span class="pb-1 text-sm text-humo line-through">$1,996</span>
+          </div>
+          <button type="button" onclick="abrirModal('compra','Paquete Oficios Dulces Vol. I + II')"
+            class="mt-5 w-full rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
+            Llevar el paquete
+          </button>
+        </div>
+      </article>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ CLASE EN VIVO · TEMPORIZADOR ══════════════ -->
+<section id="clase" class="scroll-mt-24 bg-vino py-20 lg:py-24">
+  <div class="mx-auto max-w-6xl px-5 lg:px-8">
+    <div class="reveal overflow-hidden rounded-[32px] bg-carbon ring-1 ring-flama/25">
+      <div class="grid lg:grid-cols-[1fr_.85fr]">
+
+        <div class="p-8 sm:p-12">
+          <p class="inline-flex items-center gap-2 rounded-full bg-flama/15 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.2em] text-flama">
+            <span class="relative flex h-2 w-2"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-flama opacity-75"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-flama"></span></span>
+            Próxima clase en vivo
+          </p>
+
+          <h2 class="mt-6 font-display text-3xl leading-tight text-crema sm:text-4xl">Vela de mantequilla<br>trufada, paso a paso</h2>
+          <p class="mt-4 max-w-md text-[15px] leading-relaxed text-crema/70">
+            Dos horas por videollamada con el Chef Luis Alfonso: temperatura de la mezcla, montaje del pabilo,
+            desmolde y costeo en vivo de la pieza que armes. Queda grabada.
+          </p>
+
+          <p id="fechaClase" class="mt-7 font-titulo text-xl tracking-wide text-flama">Cargando fecha…</p>
+
+          <!-- Temporizador -->
+          <div class="mt-6 grid max-w-md grid-cols-4 gap-3" role="timer" aria-live="polite" aria-label="Tiempo restante para la clase en vivo">
+            <div class="rounded-2xl bg-white/[.06] py-4 text-center ring-1 ring-white/10">
+              <p id="cdDias" class="font-display text-3xl text-crema tabular-nums">00</p>
+              <p class="mt-1 font-ui text-[10px] uppercase tracking-widest text-crema/50">Días</p>
+            </div>
+            <div class="rounded-2xl bg-white/[.06] py-4 text-center ring-1 ring-white/10">
+              <p id="cdHoras" class="font-display text-3xl text-crema tabular-nums">00</p>
+              <p class="mt-1 font-ui text-[10px] uppercase tracking-widest text-crema/50">Horas</p>
+            </div>
+            <div class="rounded-2xl bg-white/[.06] py-4 text-center ring-1 ring-white/10">
+              <p id="cdMin" class="font-display text-3xl text-crema tabular-nums">00</p>
+              <p class="mt-1 font-ui text-[10px] uppercase tracking-widest text-crema/50">Min</p>
+            </div>
+            <div class="rounded-2xl bg-flama py-4 text-center">
+              <p id="cdSeg" class="font-display text-3xl text-carbon tabular-nums">00</p>
+              <p class="mt-1 font-ui text-[10px] uppercase tracking-widest text-carbon/70">Seg</p>
+            </div>
+          </div>
+
+          <div class="mt-8 max-w-md">
+            <div class="flex items-center justify-between font-ui text-[11px] uppercase tracking-widest text-crema/60">
+              <span>Cupos apartados</span><span id="cuposTexto">17 de 25</span>
+            </div>
+            <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+              <div id="barraCupos" class="barra h-full rounded-full bg-flama" style="width:68%"></div>
+            </div>
+          </div>
+
+          <div class="mt-8 flex flex-wrap gap-4">
+            <button type="button" onclick="abrirModal('clase')" class="rounded-full bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">Apartar mi lugar</button>
+            <a href="#cursos" class="rounded-full border border-crema/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">Ver calendario</a>
+          </div>
+        </div>
+
+        <!-- Vela que gotea (guiño al tema) -->
+        <div class="relative hidden overflow-hidden bg-gradient-to-b from-morado/40 to-carbon lg:block">
+          <div class="absolute inset-x-0 top-0 h-24 bg-crema"></div>
+          <svg viewBox="0 0 200 120" class="absolute inset-x-0 top-16 w-full" preserveAspectRatio="none">
+            <path d="M0 0h200v18c-12 10-20-4-32 6s-18-2-30 8-22-6-34 4-20-4-34 6-26-4-40 4z" fill="#FBF4E9"/>
+          </svg>
+          <div class="absolute left-1/2 top-24 -translate-x-1/2">
+            <span class="gota block h-4 w-3 rounded-b-full rounded-t-[40%] bg-crema"></span>
+          </div>
+          <div class="absolute left-1/3 top-28 -translate-x-1/2">
+            <span class="gota block h-3 w-2 rounded-b-full rounded-t-[40%] bg-crema/80"></span>
+          </div>
+          <div class="absolute left-2/3 top-24 -translate-x-1/2">
+            <span class="gota block h-5 w-3 rounded-b-full rounded-t-[40%] bg-crema/90"></span>
+          </div>
+          <div class="absolute bottom-10 left-1/2 w-full max-w-[240px] -translate-x-1/2 text-center">
+            <p class="font-firma text-3xl text-flama">en vivo</p>
+            <p class="mt-2 font-ui text-[11px] uppercase tracking-[.25em] text-crema/60">Jueves · 19:00 h · CDMX</p>
+            <p class="mt-4 text-sm text-crema/60">Grabación disponible 30 días</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ SIMULADOR ══════════════ -->
+<section id="simulador" class="scroll-mt-24 bg-crema py-20 lg:py-28">
+  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+
+    <div class="reveal mb-12 max-w-2xl">
+      <div class="rule-flama mb-5 w-24"></div>
+      <h2 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Calculadora demo:<br>¿a cuánto vendes una pieza?</h2>
+      <p class="mt-4 text-[15px] leading-relaxed text-carbon/70">
+        Es una muestra del anexo contable. Mueve los datos de tu producción y el precio se recalcula solo,
+        con las mismas fórmulas del capítulo 10: <span class="font-ui font-600 text-vino">costo total = base ÷ (1 − merma)</span> y
+        <span class="font-ui font-600 text-vino">precio = costo total ÷ (1 − margen)</span>.
+      </p>
+    </div>
+
+    <div class="reveal grid gap-8 lg:grid-cols-[1fr_1fr]">
+
+      <!-- Entradas -->
+      <div class="rounded-3xl bg-white p-7 ring-1 ring-vino/10 sm:p-9">
+        <h3 class="font-titulo text-2xl tracking-wide text-vino">Costos por pieza</h3>
+        <p class="mt-1 text-sm text-carbon/60">En pesos mexicanos, por unidad producida.</p>
+
+        <div class="mt-7 grid gap-4 sm:grid-cols-2" id="campos">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Insumos</span>
+            <input id="insumos" type="number" min="0" step="0.5" value="58"
+              class="num-input mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 font-ui text-lg text-vino">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Empaque</span>
+            <input id="empaque" type="number" min="0" step="0.5" value="12"
+              class="num-input mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 font-ui text-lg text-vino">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Energía</span>
+            <input id="energia" type="number" min="0" step="0.5" value="3"
+              class="num-input mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 font-ui text-lg text-vino">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mano de obra</span>
+            <input id="mano" type="number" min="0" step="0.5" value="14"
+              class="num-input mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 font-ui text-lg text-vino">
+          </label>
+          <label class="block sm:col-span-2">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Gastos indirectos (renta, luz, apps)</span>
+            <input id="overhead" type="number" min="0" step="0.5" value="7"
+              class="num-input mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 font-ui text-lg text-vino">
+          </label>
+        </div>
+
+        <div class="mt-8 space-y-7 border-t border-vino/10 pt-7">
+          <div>
+            <div class="flex items-baseline justify-between">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Merma de producción</span>
+              <span id="mermaVal" class="font-titulo text-2xl text-vino">8%</span>
+            </div>
+            <input id="merma" type="range" min="0" max="35" step="1" value="8" class="mt-3 w-full">
+            <p class="mt-2 text-xs text-carbon/50">Piezas que se rompen, se derriten o no salen a la venta.</p>
+          </div>
+          <div>
+            <div class="flex items-baseline justify-between">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Margen de menudeo</span>
+              <span id="margenVal" class="font-titulo text-2xl text-vino">60%</span>
+            </div>
+            <input id="margen" type="range" min="20" max="80" step="1" value="60" class="mt-3 w-full">
+            <p class="mt-2 text-xs text-carbon/50">Recomendado: 55 %–70 % en regalo gourmet; 35 %–50 % en mayoreo.</p>
+          </div>
+          <div>
+            <div class="flex items-baseline justify-between">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Piezas por lote</span>
+              <span id="loteVal" class="font-titulo text-2xl text-vino">40</span>
+            </div>
+            <input id="lote" type="range" min="5" max="200" step="5" value="40" class="mt-3 w-full">
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="flex flex-col gap-6">
+        <div class="rounded-3xl bg-carbon p-7 text-crema sm:p-9">
+          <p class="font-ui text-[11px] font-600 uppercase tracking-[.22em] text-flama">Precio sugerido al público</p>
+          <p class="mt-3 font-display text-5xl text-flama sm:text-6xl"><span id="pvp">$0</span></p>
+          <p class="mt-2 text-sm text-crema/60">IVA no incluido. Redondea a un precio comercial cercano.</p>
+
+          <dl class="mt-8 grid grid-cols-2 gap-5 border-t border-white/10 pt-7 text-sm">
+            <div><dt class="text-crema/55">Costo base</dt><dd id="costoBase" class="font-titulo text-2xl text-crema">$0</dd></div>
+            <div><dt class="text-crema/55">Costo real con merma</dt><dd id="costoTotal" class="font-titulo text-2xl text-crema">$0</dd></div>
+            <div><dt class="text-crema/55">Utilidad por pieza</dt><dd id="utilidad" class="font-titulo text-2xl text-flama">$0</dd></div>
+            <div><dt class="text-crema/55">Precio de mayoreo</dt><dd id="mayoreo" class="font-titulo text-2xl text-crema">$0</dd></div>
+          </dl>
+
+          <div class="mt-7 rounded-2xl bg-flama/10 p-5 ring-1 ring-flama/25">
+            <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-flama">Utilidad del lote completo</p>
+            <p class="mt-1 font-display text-3xl text-crema"><span id="utilLote">$0</span></p>
+            <p id="notaLote" class="mt-1 text-xs text-crema/60">40 piezas vendidas a precio de menudeo.</p>
+          </div>
+        </div>
+
+        <div class="rounded-3xl bg-white p-7 ring-1 ring-vino/10 sm:p-9">
+          <h3 class="font-titulo text-xl tracking-wide text-vino">De qué está hecho tu costo</h3>
+          <div id="desglose" class="mt-5 space-y-3.5"></div>
+          <p id="alerta" class="mt-6 hidden rounded-xl bg-flama/15 px-4 py-3 text-sm text-vino"></p>
+          <button type="button" onclick="abrirModal('compra','Calculadora de Costos, Merma y Precios')"
+            class="mt-6 w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+            Quiero la hoja completa con mis 50 recetas
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ CURSOS ══════════════ -->
+<section id="cursos" class="scroll-mt-24 bg-white py-20 lg:py-24">
+  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+    <div class="reveal mb-12 flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <div class="rule-flama mb-5 w-24"></div>
+        <h2 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Talleres y cursos</h2>
+      </div>
+      <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">Grupos pequeños, en línea y presenciales en Ciudad de México. Cada taller incluye su manual y su hoja de costeo.</p>
+    </div>
+
+    <div class="grid gap-5 md:grid-cols-3">
+      <div class="reveal rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
+        <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">En línea · 2 h</p>
+        <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">Velas de mantequilla trufada</h3>
+        <p class="mt-3 text-sm leading-relaxed text-carbon/65">Del punto de fusión al montaje del pabilo comestible. Con costeo en vivo de tu pieza.</p>
+        <p class="mt-5 font-display text-xl text-vino">$690 <span class="font-cuerpo text-xs font-400 text-humo">MXN</span></p>
+      </div>
+      <div class="reveal rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
+        <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">Presencial · 5 h</p>
+        <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">Galletas estilo Nueva York</h3>
+        <p class="mt-3 text-sm leading-relaxed text-carbon/65">Masa madurada, relleno y horneado. Sales con producto terminado y ficha técnica.</p>
+        <p class="mt-5 font-display text-xl text-vino">$1,450 <span class="font-cuerpo text-xs font-400 text-humo">MXN</span></p>
+      </div>
+      <div class="reveal rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
+        <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">En línea · 3 h</p>
+        <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">Costeo para cocinas pequeñas</h3>
+        <p class="mt-3 text-sm leading-relaxed text-carbon/65">Arma tu catálogo de insumos, calcula merma real y fija precios por canal de venta.</p>
+        <p class="mt-5 font-display text-xl text-vino">$590 <span class="font-cuerpo text-xs font-400 text-humo">MXN</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ GALERÍA (dinámica, desde el panel de administración) ══════════════ -->
+<section id="galeria" class="scroll-mt-24 bg-crema py-20 lg:py-24">
+  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+    <div class="reveal mb-12 flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <div class="rule-flama mb-5 w-24"></div>
+        <h2 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Galería</h2>
+      </div>
+      <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">Fotos y video de piezas, clases y proceso, subidos directamente desde el panel de administración.</p>
+    </div>
+    <div id="listaGaleria" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <p class="text-sm text-carbon/50">Cargando galería…</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="bg-carbon pt-16 text-crema">
+  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+    <div class="grid gap-12 pb-14 md:grid-cols-2 lg:grid-cols-4">
+
+      <div>
+        <p class="font-firma text-4xl text-crema">Endulcora</p>
+        <p class="font-titulo text-[11px] tracking-[.34em] text-flama">ESTUDIO GASTRONÓMICO</p>
+        <p class="mt-5 max-w-xs text-sm leading-relaxed text-crema/60">
+          Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.
+        </p>
+        <a href="https://wa.me/525665271901" class="mt-6 inline-flex items-center gap-2 rounded-full border border-flama/40 px-4 py-2 font-ui text-[12px] font-600 tracking-wide text-flama hover:bg-flama hover:text-carbon transition">
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
+          WhatsApp 5665271901
+        </a>
+      </div>
+
+      <div>
+        <p class="font-ui text-[11px] font-700 uppercase tracking-[.22em] text-flama">Catálogo</p>
+        <ul class="mt-5 space-y-3 text-sm text-crema/65">
+          <li><a href="#productos" class="hover:text-flama transition">eBooks y manuales</a></li>
+          <li><a href="#anexos"    class="hover:text-flama transition">Anexos en hoja de cálculo</a></li>
+          <li><a href="#simulador" class="hover:text-flama transition">Apps y calculadoras</a></li>
+          <li><a href="#cursos"    class="hover:text-flama transition">Cursos y talleres</a></li>
+          <li><a href="#clase"     class="hover:text-flama transition">Clases en vivo</a></li>
+          <li><a href="#galeria"   class="hover:text-flama transition">Galería</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="font-ui text-[11px] font-700 uppercase tracking-[.22em] text-flama">Legal</p>
+        <ul class="mt-5 space-y-3 text-sm text-crema/65">
+          <li><button type="button" onclick="abrirModal('privacidad')" class="hover:text-flama transition">Aviso de privacidad</button></li>
+          <li><button type="button" onclick="abrirModal('terminos')"  class="hover:text-flama transition">Términos y condiciones</button></li>
+          <li><button type="button" onclick="abrirModal('reembolso')" class="hover:text-flama transition">Política de reembolso</button></li>
+          <li><button type="button" onclick="abrirModal('licencia')"  class="hover:text-flama transition">Licencia de uso digital</button></li>
+          <li><button type="button" onclick="abrirModal('inocuidad')" class="hover:text-flama transition">Aviso de inocuidad</button></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="font-ui text-[11px] font-700 uppercase tracking-[.22em] text-flama">Síguenos</p>
+        <div class="mt-5 flex gap-3">
+          <a href="#" aria-label="Instagram" class="grid h-11 w-11 place-items-center rounded-full border border-white/15 hover:border-flama hover:text-flama transition">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="#" aria-label="Facebook" class="grid h-11 w-11 place-items-center rounded-full border border-white/15 hover:border-flama hover:text-flama transition">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v2H8v3h2v7h3v-7h3l1-3h-4v-2c0-.6.4-1 1-1z"/></svg>
+          </a>
+          <a href="#" aria-label="TikTok" class="grid h-11 w-11 place-items-center rounded-full border border-white/15 hover:border-flama hover:text-flama transition">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><path d="M16 3c.4 2.3 1.9 3.8 4 4v3c-1.6 0-3-.5-4-1.3V15a6 6 0 1 1-6-6c.3 0 .7 0 1 .1v3.1a3 3 0 1 0 2 2.8V3h3z"/></svg>
+          </a>
+          <a href="#" aria-label="YouTube" class="grid h-11 w-11 place-items-center rounded-full border border-white/15 hover:border-flama hover:text-flama transition">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><path d="M22 12s0-3.3-.4-4.9a2.6 2.6 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.3A2.6 2.6 0 0 0 2.4 7.1C2 8.7 2 12 2 12s0 3.3.4 4.9a2.6 2.6 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.3a2.6 2.6 0 0 0 1.8-1.8C22 15.3 22 12 22 12zM10 15V9l5 3-5 3z"/></svg>
+          </a>
+        </div>
+
+        <p class="mt-8 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-flama">Recetas al correo</p>
+        <div class="mt-4 flex gap-2">
+          <label for="correoFooter" class="sr-only">Tu correo</label>
+          <input id="correoFooter" type="email" placeholder="tu@correo.com"
+            class="w-full rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-crema placeholder:text-crema/35">
+          <button type="button" onclick="suscribir()" class="shrink-0 rounded-full bg-flama px-5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">Enviar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center justify-between gap-4 border-t border-white/10 py-7 text-center sm:flex-row sm:text-left">
+      <p class="text-xs text-crema/45">© <span id="anio">2026</span> Endulcora · Estudio Gastronómico. Todos los derechos reservados.</p>
+      <p class="text-xs text-crema/45">Contenido: Chef Luis Alfonso Jiménez Cárdenas · Edición: Manuel Ramiro Justo Guzmán</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════ MODAL ══════════════ -->
+<div id="modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-carbon/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
+  <div class="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-crema p-8 shadow-2xl">
+    <div class="flex items-start justify-between gap-4">
+      <h3 id="modalTitulo" class="font-titulo text-3xl tracking-wide text-vino"></h3>
+      <button type="button" onclick="cerrarModal()" aria-label="Cerrar" class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-vino/10 text-vino hover:bg-vino hover:text-crema transition">
+        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div id="modalCuerpo" class="mt-5 space-y-4 text-sm leading-relaxed text-carbon/75"></div>
+  </div>
+</div>
+
+<!-- ══════════════ TOAST ══════════════ -->
+<div id="toast" class="pointer-events-none fixed bottom-6 left-1/2 z-[70] hidden -translate-x-1/2 rounded-full bg-vino px-6 py-3 font-ui text-sm text-crema shadow-xl"></div>
+
+<script>
+/* ---------- Navegación ---------- */
+function toggleMenu(){
+  const m = document.getElementById('menuMovil');
+  const b = document.getElementById('btnMenu');
+  const abierto = m.classList.toggle('hidden') === false;
+  b.setAttribute('aria-expanded', abierto);
+}
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.add('hidden'), 3200);
+}
+
+/* ---------- Modales ---------- */
+const CONTENIDOS = {
+  acceso: { titulo: 'Acceso clientes', html: `<p>Entra con el correo con el que hiciste tu compra para descargar tus manuales, anexos y grabaciones.</p>
+    <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo</span>
+    <input type="email" placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+    <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Contraseña</span>
+    <input type="password" placeholder="••••••••" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+    <button type="button" onclick="cerrarModal();toast('Demo: aquí se abriría tu biblioteca')" class="w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Entrar a mi biblioteca</button>
+    <p class="text-xs text-carbon/50">¿Compraste por WhatsApp y no tienes acceso? Escríbenos al 5665271901 y lo activamos.</p>` },
+
+  clase: { titulo: 'Apartar mi lugar', html: `<p>Clase en vivo por videollamada. Te enviamos el enlace y la lista de insumos 48 horas antes.</p>
+    <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nombre</span>
+    <input type="text" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+    <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">WhatsApp</span>
+    <input type="tel" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+    <button type="button" onclick="cerrarModal();toast('Demo: recibirías tu confirmación por WhatsApp')" class="w-full rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon">Confirmar lugar</button>` },
+
+  privacidad: { titulo: 'Aviso de privacidad', html: `<p><strong>Endulcora · Estudio Gastronómico</strong>, con domicilio en Ciudad de México, es responsable del tratamiento de tus datos personales.</p>
+    <p><strong>Qué recabamos.</strong> Nombre, correo electrónico y teléfono, y los datos de facturación cuando los solicitas.</p>
+    <p><strong>Para qué.</strong> Entregar tus compras digitales, darte acceso a tus cursos, emitir comprobantes y avisarte de nuevas publicaciones. No vendemos ni compartimos tus datos con terceros ajenos a estos fines.</p>
+    <p><strong>Tus derechos ARCO.</strong> Puedes acceder, rectificar, cancelar u oponerte al uso de tus datos escribiendo a nuestro WhatsApp 5665271901. Respondemos en un máximo de 20 días hábiles.</p>
+    <p class="text-xs text-carbon/50">Texto de muestra. Sustituye razón social, RFC y domicilio fiscal antes de publicar.</p>` },
+
+  terminos: { titulo: 'Términos y condiciones', html: `<p>La compra de cualquier producto digital de Endulcora otorga una licencia personal e intransferible de uso.</p>
+    <p>Los precios están en pesos mexicanos. La entrega de eBooks y anexos es inmediata al confirmarse el pago, mediante enlace de descarga a tu correo.</p>
+    <p>Las clases en vivo se imparten en la fecha publicada; si no puedes asistir, la grabación queda disponible 30 días.</p>
+    <p class="text-xs text-carbon/50">Texto de muestra pendiente de revisión legal.</p>` },
+
+  reembolso: { titulo: 'Política de reembolso', html: `<p>Por tratarse de productos digitales descargables, no hay devoluciones una vez entregado el archivo.</p>
+    <p>Si el archivo llega dañado, incompleto o no puedes abrirlo, lo reponemos sin costo. Escríbenos dentro de los 7 días siguientes a tu compra.</p>
+    <p>En cursos en vivo puedes cambiar tu fecha hasta 48 horas antes de la sesión.</p>` },
+
+  licencia: { titulo: 'Licencia de uso digital', html: `<p>Puedes usar el contenido para producir y vender tus propios productos, sin límite de piezas.</p>
+    <p>No puedes revender, regalar, subir a plataformas de descarga ni reproducir total o parcialmente el manual o las hojas de cálculo.</p>
+    <p>Si vas a impartir clases con este material, escríbenos: existe una licencia para escuelas y talleres.</p>` },
+
+  inocuidad: { titulo: 'Aviso de inocuidad', html: `<p>Las velas comestibles combinan alimento y fuego. Nunca las dejes encendidas sin vigilancia, cerca de niños, corrientes de aire o materiales inflamables.</p>
+    <p>Se encienden por minutos, con fines sensoriales, y se apagan para consumir la grasa fundida tibia.</p>
+    <p>Varias fórmulas contienen lácteos, frutos secos, ajonjolí y gluten: declara siempre los alérgenos y respeta la cadena de frío.</p>` }
+};
+
+function abrirModal(clave, extra){
+  const m = document.getElementById('modal');
+  let datos = CONTENIDOS[clave];
+  if(clave === 'compra'){
+    datos = { titulo: 'Finalizar compra', html: `<p>Producto seleccionado: <strong class="text-vino">${extra}</strong></p>
+      <p>Recibirás el enlace de descarga en tu correo en cuanto se confirme el pago. Aceptamos tarjeta, transferencia y pago en efectivo.</p>
+      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo para la entrega</span>
+      <input type="email" placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+      <button type="button" onclick="cerrarModal();toast('Demo: aquí continuaría el pago')" class="w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Continuar al pago</button>
+      <p class="text-xs text-carbon/50">¿Prefieres pedirlo por WhatsApp? Escríbenos al 5665271901.</p>` };
+  }
+  document.getElementById('modalTitulo').textContent = datos.titulo;
+  document.getElementById('modalCuerpo').innerHTML = datos.html;
+  m.classList.remove('hidden');
+  m.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+function cerrarModal(){
+  const m = document.getElementById('modal');
+  m.classList.add('hidden');
+  m.classList.remove('flex');
+  document.body.style.overflow = '';
+}
+document.getElementById('modal').addEventListener('click', e => { if(e.target.id === 'modal') cerrarModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarModal(); });
+
+function suscribir(){
+  const c = document.getElementById('correoFooter').value.trim();
+  if(!c || !c.includes('@')){ toast('Escribe un correo válido'); return; }
+  document.getElementById('correoFooter').value = '';
+  toast('Listo, te escribimos con la próxima receta');
+}
+
+/* ---------- Temporizador de la clase en vivo ---------- */
+function proximaClase(){
+  const ahora = new Date();
+  const d = new Date(ahora);
+  d.setHours(19,0,0,0);
+  const diasAlJueves = (4 - d.getDay() + 7) % 7; // 4 = jueves
+  d.setDate(d.getDate() + diasAlJueves);
+  if(d <= ahora) d.setDate(d.getDate() + 7);
+  return d;
+}
+let fechaClase = proximaClase();
+document.getElementById('fechaClase').textContent = fechaClase.toLocaleDateString('es-MX',{weekday:'long', day:'numeric', month:'long'}).replace(/^\w/, c=>c.toUpperCase()) + ' · 19:00 h';
+const dosDig = n => String(Math.max(0,n)).padStart(2,'0');
+function tick(){
+  let resta = fechaClase - new Date();
+  if(resta <= 0){
+    fechaClase = proximaClase();
+    document.getElementById('fechaClase').textContent = fechaClase.toLocaleDateString('es-MX',{weekday:'long', day:'numeric', month:'long'}).replace(/^\w/, c=>c.toUpperCase()) + ' · 19:00 h';
+    resta = fechaClase - new Date();
+  }
+  const s = Math.floor(resta/1000);
+  document.getElementById('cdDias').textContent = dosDig(Math.floor(s/86400));
+  document.getElementById('cdHoras').textContent = dosDig(Math.floor(s%86400/3600));
+  document.getElementById('cdMin').textContent = dosDig(Math.floor(s%3600/60));
+  document.getElementById('cdSeg').textContent = dosDig(s%60);
+  const faltanDias = resta/86400000;
+  const apartados = Math.min(24, Math.round(25 - faltanDias*1.1));
+  document.getElementById('cuposTexto').textContent = apartados + ' de 25';
+  document.getElementById('barraCupos').style.width = (apartados/25*100) + '%';
+}
+tick();
+setInterval(tick, 1000);
+
+/* ---------- Calculadora de costeo ---------- */
+const mxn = new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:2});
+const $ = id => document.getElementById(id);
+const CAMPOS = [
+  {id:'insumos', etiqueta:'Insumos'},
+  {id:'empaque', etiqueta:'Empaque'},
+  {id:'energia', etiqueta:'Energía'},
+  {id:'mano', etiqueta:'Mano de obra'},
+  {id:'overhead', etiqueta:'Gastos indirectos'}
+];
+function calcular(){
+  const valor = id => Math.max(0, parseFloat($(id).value) || 0);
+  const partes = CAMPOS.map(c => ({...c, monto: valor(c.id)}));
+  const base = partes.reduce((a,c)=>a+c.monto, 0);
+  const merma = parseInt($('merma').value, 10) / 100;
+  const margen = parseInt($('margen').value, 10) / 100;
+  const lote = parseInt($('lote').value, 10);
+
+  $('mermaVal').textContent = (merma*100) + '%';
+  $('margenVal').textContent = (margen*100) + '%';
+  $('loteVal').textContent = lote;
+
+  const costoTotal = base / (1 - merma);
+  const pvp = costoTotal / (1 - margen);
+  const utilidad = pvp - costoTotal;
+  const margenMayoreo= Math.max(0.30, margen - 0.20);
+  const mayoreo = costoTotal / (1 - margenMayoreo);
+
+  $('costoBase').textContent = mxn.format(base);
+  $('costoTotal').textContent = mxn.format(costoTotal);
+  $('pvp').textContent = mxn.format(pvp);
+  $('utilidad').textContent = mxn.format(utilidad);
+  $('mayoreo').textContent = mxn.format(mayoreo);
+  $('utilLote').textContent = mxn.format(utilidad * lote);
+  $('notaLote').textContent = lote + ' piezas vendidas a precio de menudeo (' + (margen*100) + ' % de margen).';
+
+  const colores = ['#7A2E7E','#4E1454','#F8B818','#9C9C9C','#5C2360'];
+  $('desglose').innerHTML = partes.map((p,i)=>{
+    const pct = base ? (p.monto/base*100) : 0;
+    return `<div>
+      <div class="flex justify-between text-xs font-ui uppercase tracking-wider text-carbon/60">
+        <span>${p.etiqueta}</span><span>${mxn.format(p.monto)} · ${pct.toFixed(0)}%</span>
+      </div>
+      <div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-crema">
+        <div class="barra h-full rounded-full" style="width:${pct}%;background:${colores[i]}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const alerta = $('alerta');
+  if(base === 0){
+    alerta.textContent = 'Captura al menos un costo para calcular tu precio.';
+    alerta.classList.remove('hidden');
+  } else if(merma >= 0.25){
+    alerta.textContent = 'Con ' + (merma*100) + ' % de merma estás regalando una de cada cuatro piezas. Antes de subir el precio, revisa temperatura y desmolde.';
+    alerta.classList.remove('hidden');
+  } else if(margen < 0.35){
+    alerta.textContent = 'Por debajo del 35 % de margen apenas cubres imprevistos. Úsalo solo en pedidos grandes de mayoreo.';
+    alerta.classList.remove('hidden');
+  } else {
+    alerta.classList.add('hidden');
+  }
+}
+['insumos','empaque','energia','mano','overhead','merma','margen','lote'].forEach(id=>{
+  $(id).addEventListener('input', calcular);
+});
+calcular();
+
+/* ---------- Revelado al hacer scroll ---------- */
+const obs = new IntersectionObserver(entradas=>{
+  entradas.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+document.getElementById('anio').textContent = new Date().getFullYear();
+
+/* ---------- Anuncios y Galería (contenido subido desde /admin) ---------- */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function cargarAnuncios(){
+  const cont = document.getElementById('listaAnuncios');
+  try{
+    const res = await fetch('/api/announcements');
+    const items = await res.json();
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Por ahora no hay anuncios publicados. Vuelve pronto.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(a => `
+      <article class="reveal visible rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${new Date(a.createdAt).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})}</p>
+        <h3 class="mt-2 font-titulo text-xl tracking-wide text-vino">${escapeHtml(a.title)}</h3>
+        <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-carbon/70">${escapeHtml(a.body)}</p>
+      </article>
+    `).join('');
+  }catch(e){
+    cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudieron cargar los anuncios.</p>';
+  }
+}
+
+function tarjetaMedia(m){
+  const titulo = m.title ? `<p class="p-4 font-ui text-sm text-vino">${escapeHtml(m.title)}</p>` : '';
+  if(m.kind === 'photo'){
+    return `<figure class="reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+      <img src="${m.url}" alt="${escapeHtml(m.title || 'Foto de Endulcora')}" loading="lazy" class="aspect-[4/3] w-full object-cover">
+      ${titulo}
+    </figure>`;
+  }
+  if(m.source === 'embed'){
+    const embedUrl = toEmbedUrl(m.url);
+    return `<figure class="reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+      <div class="aspect-video w-full"><iframe class="h-full w-full" src="${embedUrl}" title="${escapeHtml(m.title || 'Video de Endulcora')}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      ${titulo}
+    </figure>`;
+  }
+  return `<figure class="reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+    <video class="aspect-video w-full bg-black" src="${m.url}" controls preload="metadata"></video>
+    ${titulo}
+  </figure>`;
+}
+
+function toEmbedUrl(url){
+  try{
+    const u = new URL(url);
+    if(u.hostname.includes('youtube.com') || u.hostname === 'youtu.be'){
+      let id = u.searchParams.get('v');
+      if(!id && u.hostname === 'youtu.be') id = u.pathname.slice(1);
+      if(id) return `https://www.youtube.com/embed/${id}`;
+    }
+    if(u.hostname.includes('vimeo.com')){
+      const id = u.pathname.split('/').filter(Boolean).pop();
+      if(id) return `https://player.vimeo.com/video/${id}`;
+    }
+  }catch(e){}
+  return url;
+}
+
+async function cargarGaleria(){
+  const cont = document.getElementById('listaGaleria');
+  try{
+    const res = await fetch('/api/media');
+    const items = await res.json();
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Aún no hay fotos ni videos en la galería.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(tarjetaMedia).join('');
+  }catch(e){
+    cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudo cargar la galería.</p>';
+  }
+}
+
+cargarAnuncios();
+cargarGaleria();
+</script>
+</body>
+</html>

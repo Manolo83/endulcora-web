@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de administración · Endulcora</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', morado: '#7A2E7E', flama: '#F8B818', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: { titulo: ['"Bebas Neue"', 'sans-serif'], cuerpo: ['Poppins', 'sans-serif'], ui: ['Montserrat', 'sans-serif'] }
+      }
+    }
+  }
+</script>
+<style>
+  body { background: #FBF4E9; }
+  .spinner { border: 3px solid rgba(0,0,0,.1); border-top-color: #7A2E7E; border-radius: 50%; width: 18px; height: 18px; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<!-- ---------- LOGIN ---------- -->
+<section id="vistaLogin" class="flex min-h-screen items-center justify-center bg-carbon px-5">
+  <form id="formLogin" class="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl">
+    <p class="font-titulo text-[11px] tracking-[.34em] text-morado">ENDULCORA</p>
+    <h1 class="mt-1 font-titulo text-3xl tracking-wide text-vino">Panel de administración</h1>
+    <p class="mt-3 text-sm text-carbon/60">Entra con la contraseña de administrador para publicar anuncios y subir fotos o videos.</p>
+    <label class="mt-6 block">
+      <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Contraseña</span>
+      <input id="passwordInput" type="password" required autofocus
+        class="mt-1.5 w-full rounded-xl border border-vino/20 bg-crema/60 px-4 py-3 font-ui text-base">
+    </label>
+    <button type="submit" class="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+      <span id="loginSpinner" class="spinner hidden" style="border-top-color:#FBF4E9"></span>
+      Entrar
+    </button>
+    <p id="loginError" class="mt-4 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+  </form>
+</section>
+
+<!-- ---------- DASHBOARD ---------- -->
+<section id="vistaDashboard" class="hidden min-h-screen">
+  <header class="sticky top-0 z-10 border-b border-vino/10 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
+      <div>
+        <p class="font-titulo text-[11px] tracking-[.34em] text-morado">ENDULCORA</p>
+        <h1 class="font-titulo text-2xl tracking-wide text-vino">Panel de administración</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/" target="_blank" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Ver sitio</a>
+        <button id="btnLogout" class="rounded-full bg-carbon px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-crema hover:bg-vino transition">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-5 py-10">
+    <div id="toast" class="fixed bottom-6 left-1/2 z-50 hidden -translate-x-1/2 rounded-full bg-vino px-6 py-3 font-ui text-sm text-crema shadow-xl"></div>
+
+    <!-- ANUNCIOS -->
+    <section class="mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Anuncios</h2>
+      <p class="mt-1 text-sm text-carbon/60">Publica avisos, fechas de clases o novedades. Aparecen de inmediato en la sección "Anuncios" del sitio.</p>
+
+      <form id="formAnuncio" class="mt-6 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10 sm:grid-cols-2">
+        <label class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
+          <input id="anuncioTitulo" type="text" required maxlength="120"
+            class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mensaje</span>
+          <textarea id="anuncioBody" required maxlength="1000" rows="3"
+            class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <label class="flex items-center gap-2 sm:col-span-2">
+          <input id="anuncioPublicado" type="checkbox" checked class="h-4 w-4 rounded border-vino/30">
+          <span class="text-sm text-carbon/70">Publicar de inmediato</span>
+        </label>
+        <button type="submit" class="sm:col-span-2 rounded-full bg-vino py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Publicar anuncio</button>
+      </form>
+
+      <div id="listaAnunciosAdmin" class="mt-6 space-y-3"></div>
+    </section>
+
+    <!-- GALERÍA -->
+    <section>
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Galería (fotos y video)</h2>
+      <p class="mt-1 text-sm text-carbon/60">Sube fotos o video (hasta 150&nbsp;MB), o pega un enlace de YouTube/Vimeo para videos más pesados. Aparecen de inmediato en la sección "Galería" del sitio.</p>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-2">
+        <form id="formSubida" class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Subir archivo</h3>
+          <label class="mt-4 block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Archivo (JPG, PNG, WEBP, GIF, MP4, WEBM, MOV)</span>
+            <input id="archivoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" required
+              class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+          </label>
+          <label class="mt-4 block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título (opcional)</span>
+            <input id="archivoTitulo" type="text" maxlength="120" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <button type="submit" class="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-vino py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+            <span id="uploadSpinner" class="spinner hidden" style="border-top-color:#FBF4E9"></span>
+            Subir
+          </button>
+          <div id="uploadProgressWrap" class="mt-3 hidden h-2 overflow-hidden rounded-full bg-crema">
+            <div id="uploadProgressBar" class="h-full rounded-full bg-flama" style="width:0%"></div>
+          </div>
+        </form>
+
+        <form id="formEmbed" class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Video por enlace (YouTube / Vimeo)</h3>
+          <label class="mt-4 block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">URL del video</span>
+            <input id="embedUrl" type="url" required placeholder="https://www.youtube.com/watch?v=..."
+              class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="mt-4 block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título (opcional)</span>
+            <input id="embedTitulo" type="text" maxlength="120" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <button type="submit" class="mt-4 rounded-full bg-carbon py-3 w-full font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-vino transition">Añadir video</button>
+          <p class="mt-3 text-xs text-carbon/50">Recomendado para videos largos: sube primero a YouTube (puede ser "oculto") y pega aquí el enlace.</p>
+        </form>
+      </div>
+
+      <div id="listaGaleriaAdmin" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+  </main>
+</section>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function toast(msg){
+  const t = $('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(()=> t.classList.add('hidden'), 3200);
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function api(url, options = {}){
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  let data = null;
+  try { data = await res.json(); } catch(e) {}
+  if(!res.ok){
+    throw new Error((data && data.error) || 'Error inesperado');
+  }
+  return data;
+}
+
+function mostrarDashboard(mostrar){
+  $('vistaLogin').classList.toggle('hidden', mostrar);
+  $('vistaDashboard').classList.toggle('hidden', !mostrar);
+  if(mostrar){ cargarAnuncios(); cargarGaleria(); }
+}
+
+async function verificarSesion(){
+  try{
+    const data = await api('/admin/api/session');
+    mostrarDashboard(!!data.isAdmin);
+  }catch(e){
+    mostrarDashboard(false);
+  }
+}
+
+$('formLogin').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = $('loginError');
+  err.classList.add('hidden');
+  $('loginSpinner').classList.remove('hidden');
+  try{
+    await api('/admin/login', { method: 'POST', body: JSON.stringify({ password: $('passwordInput').value }) });
+    $('passwordInput').value = '';
+    mostrarDashboard(true);
+  }catch(e){
+    err.textContent = e.message;
+    err.classList.remove('hidden');
+  }finally{
+    $('loginSpinner').classList.add('hidden');
+  }
+});
+
+$('btnLogout').addEventListener('click', async () => {
+  await api('/admin/logout', { method: 'POST' });
+  mostrarDashboard(false);
+});
+
+/* ---------- Anuncios ---------- */
+async function cargarAnuncios(){
+  const cont = $('listaAnunciosAdmin');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
+  try{
+    const items = await api('/admin/api/announcements');
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay anuncios.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(a => `
+      <article class="flex items-start justify-between gap-4 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+        <div>
+          <p class="font-ui text-[11px] uppercase tracking-widest ${a.published ? 'text-morado' : 'text-humo'}">
+            ${a.published ? 'Publicado' : 'Borrador'} · ${new Date(a.createdAt).toLocaleDateString('es-MX')}
+          </p>
+          <h3 class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(a.title)}</h3>
+          <p class="mt-1 whitespace-pre-line text-sm text-carbon/70">${escapeHtml(a.body)}</p>
+        </div>
+        <div class="flex shrink-0 flex-col gap-2">
+          <button data-id="${a.id}" data-pub="${a.published ? 0 : 1}" class="btnTogglePub rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">
+            ${a.published ? 'Ocultar' : 'Publicar'}
+          </button>
+          <button data-id="${a.id}" class="btnBorrarAnuncio rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+        </div>
+      </article>
+    `).join('');
+
+    cont.querySelectorAll('.btnBorrarAnuncio').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar este anuncio?')) return;
+        await api(`/admin/api/announcements/${btn.dataset.id}`, { method: 'DELETE' });
+        cargarAnuncios();
+      });
+    });
+    cont.querySelectorAll('.btnTogglePub').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await api(`/admin/api/announcements/${btn.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ published: btn.dataset.pub === '1' }) });
+        cargarAnuncios();
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('formAnuncio').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try{
+    await api('/admin/api/announcements', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: $('anuncioTitulo').value.trim(),
+        body: $('anuncioBody').value.trim(),
+        published: $('anuncioPublicado').checked,
+      }),
+    });
+    $('formAnuncio').reset();
+    $('anuncioPublicado').checked = true;
+    toast('Anuncio guardado');
+    cargarAnuncios();
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+/* ---------- Galería ---------- */
+async function cargarGaleria(){
+  const cont = $('listaGaleriaAdmin');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
+  try{
+    const items = await api('/admin/api/media');
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay fotos ni videos.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(m => `
+      <article class="overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+        <div class="aspect-video w-full bg-carbon/5">
+          ${m.kind === 'photo'
+            ? `<img src="${m.url}" alt="${escapeHtml(m.title || '')}" class="h-full w-full object-cover">`
+            : m.source === 'embed'
+              ? `<div class="flex h-full items-center justify-center text-xs text-carbon/50 p-3 text-center">Video enlazado<br>${escapeHtml(m.url)}</div>`
+              : `<video src="${m.url}" controls class="h-full w-full bg-black"></video>`
+          }
+        </div>
+        <div class="flex items-center justify-between gap-3 p-4">
+          <div>
+            <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${m.kind === 'photo' ? 'Foto' : 'Video'}</p>
+            <p class="text-sm text-carbon/70">${escapeHtml(m.title || '(sin título)')}</p>
+          </div>
+          <button data-id="${m.id}" class="btnBorrarMedia shrink-0 rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+        </div>
+      </article>
+    `).join('');
+
+    cont.querySelectorAll('.btnBorrarMedia').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar este elemento de la galería?')) return;
+        await api(`/admin/api/media/${btn.dataset.id}`, { method: 'DELETE' });
+        cargarGaleria();
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('formSubida').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = $('archivoInput').files[0];
+  if(!file){ toast('Elige un archivo'); return; }
+
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('title', $('archivoTitulo').value.trim());
+
+  $('uploadSpinner').classList.remove('hidden');
+  $('uploadProgressWrap').classList.remove('hidden');
+  $('uploadProgressBar').style.width = '0%';
+
+  try{
+    await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/admin/api/media/upload');
+      xhr.upload.onprogress = (ev) => {
+        if(ev.lengthComputable){
+          $('uploadProgressBar').style.width = Math.round((ev.loaded / ev.total) * 100) + '%';
+        }
+      };
+      xhr.onload = () => {
+        if(xhr.status >= 200 && xhr.status < 300) resolve();
+        else{
+          let msg = 'No se pudo subir el archivo';
+          try{ msg = JSON.parse(xhr.responseText).error || msg; }catch(err){}
+          reject(new Error(msg));
+        }
+      };
+      xhr.onerror = () => reject(new Error('Error de red al subir el archivo'));
+      xhr.send(fd);
+    });
+    $('formSubida').reset();
+    toast('Archivo subido');
+    cargarGaleria();
+  }catch(e){
+    toast(e.message);
+  }finally{
+    $('uploadSpinner').classList.add('hidden');
+    $('uploadProgressWrap').classList.add('hidden');
+  }
+});
+
+$('formEmbed').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try{
+    await api('/admin/api/media/embed', {
+      method: 'POST',
+      body: JSON.stringify({ url: $('embedUrl').value.trim(), title: $('embedTitulo').value.trim() }),
+    });
+    $('formEmbed').reset();
+    toast('Video añadido');
+    cargarGaleria();
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+verificarSesion();
+</script>
+</body>
+</html>
