@@ -5,19 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel de administración · Endulcora</title>
 <meta name="robots" content="noindex, nofollow">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
     theme: {
       extend: {
-        colors: { carbon: '#1B0720', vino: '#4E1454', morado: '#7A2E7E', flama: '#F8B818', crema: '#FBF4E9', humo: '#9C9C9C' },
-        fontFamily: { titulo: ['"Bebas Neue"', 'sans-serif'], cuerpo: ['Poppins', 'sans-serif'], ui: ['Montserrat', 'sans-serif'] }
+        colors: { carbon: '#1B0720', vino: '#4E1454', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: { titulo: ['"Baloo 2"', 'sans-serif'], cuerpo: ['Poppins', 'sans-serif'], ui: ['Montserrat', 'sans-serif'] }
       }
     }
   }
 </script>
 <style>
+  .font-titulo { font-weight: 800; }
   body { background: #FBF4E9; }
   .spinner { border: 3px solid rgba(0,0,0,.1); border-top-color: #7A2E7E; border-radius: 50%; width: 18px; height: 18px; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }

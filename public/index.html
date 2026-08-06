@@ -29,16 +29,16 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
     theme: {
       extend: {
-        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F8B818', crema: '#FBF4E9', humo: '#9C9C9C' },
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
         fontFamily: {
-          display: ['"Archivo Black"', 'sans-serif'],
-          titulo: ['"Bebas Neue"', 'sans-serif'],
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
           firma: ['"Great Vibes"', 'cursive'],
           cuerpo: ['Poppins', 'sans-serif'],
           ui: ['Montserrat', 'sans-serif']
@@ -67,6 +67,7 @@
 <style>
 html { scroll-behavior: smooth; }
 body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
 
 /* ---- Firma visual: la flama ---- */
 .flama-svg { transform-origin: 50% 100%; animation: parpadeo 2.6s ease-in-out infinite; }
@@ -109,12 +110,11 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <div class="flex h-20 items-center justify-between gap-6">
 
       <a href="#top" class="flex items-center gap-3 shrink-0">
-        <span class="grid h-11 w-11 place-items-center rounded-full bg-morado ring-2 ring-flama/70">
-          <svg viewBox="0 0 24 32" class="h-6 w-6"><path class="flama-svg" fill="#F8B818" d="M12 0c1 6 6 7 6 13a6 6 0 1 1-12 0c0-3 2-4 3-7 .6 2 1.4 2.6 2 3 .4-3 1-6 1-9z"/></svg>
-        </span>
         <span class="leading-none">
-          <span class="block font-firma text-3xl text-crema">Endulcora</span>
-          <span class="block font-titulo text-[11px] tracking-[.34em] text-flama">ESTUDIO GASTRONÓMICO</span>
+          <span class="font-display text-2xl sm:text-3xl tracking-tight">
+            <span class="text-crema">ENDUL</span><span class="text-flama">CORA</span>
+          </span>
+          <span class="mt-1 block font-ui text-[10px] sm:text-[11px] font-600 tracking-[.34em] text-humo">ESTUDIO GASTRONÓMICO</span>
         </span>
       </a>
 
@@ -587,8 +587,8 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <div class="grid gap-12 pb-14 md:grid-cols-2 lg:grid-cols-4">
 
       <div>
-        <p class="font-firma text-4xl text-crema">Endulcora</p>
-        <p class="font-titulo text-[11px] tracking-[.34em] text-flama">ESTUDIO GASTRONÓMICO</p>
+        <p class="font-display text-3xl tracking-tight"><span class="text-crema">ENDUL</span><span class="text-flama">CORA</span></p>
+        <p class="mt-1 font-ui text-[11px] font-600 tracking-[.34em] text-humo">ESTUDIO GASTRONÓMICO</p>
         <p class="mt-5 max-w-xs text-sm leading-relaxed text-crema/60">
           Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.
         </p>
