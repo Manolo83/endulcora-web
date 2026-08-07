@@ -29,6 +29,21 @@ const upload = multer({
   },
 });
 
+const uploadImage = multer({
+  storage,
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB, suficiente para fotos de producto/hero
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_IMAGE.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Tipo de archivo no permitido. Usa JPG, PNG, WEBP o GIF.'));
+  },
+});
+
+function borrarSiEsSubida(url) {
+  if (typeof url === 'string' && url.startsWith('/uploads/')) {
+    fs.unlink(path.join(UPLOAD_DIR, path.basename(url)), () => {});
+  }
+}
+
 // ---- Autenticacion ----
 router.post('/login', (req, res) => {
   const { password } = req.body || {};
@@ -101,6 +116,97 @@ router.delete('/api/media/:id', requireAdmin, (req, res) => {
   if (item && item.source === 'upload' && item.filename) {
     fs.unlink(path.join(UPLOAD_DIR, item.filename), () => {});
   }
+  res.json({ ok: true });
+});
+
+// ---- Contenido general del sitio ----
+router.get('/api/content', requireAdmin, (req, res) => {
+  res.json(store.getContent());
+});
+
+router.patch('/api/content', requireAdmin, (req, res) => {
+  const item = store.updateContent(req.body || {});
+  res.json(item);
+});
+
+const CAMPOS_IMAGEN_CONTENIDO = ['hero_imagen'];
+router.post('/api/content/:key/image', requireAdmin, uploadImage.single('file'), (req, res) => {
+  const { key } = req.params;
+  if (!CAMPOS_IMAGEN_CONTENIDO.includes(key)) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    return res.status(400).json({ error: 'Campo de imagen no valido' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
+  const anterior = store.getContent()[key];
+  const url = `/uploads/${req.file.filename}`;
+  const content = store.updateContent({ [key]: url });
+  borrarSiEsSubida(anterior);
+  res.status(201).json({ url, content });
+});
+
+router.delete('/api/content/:key/image', requireAdmin, (req, res) => {
+  const { key } = req.params;
+  if (!CAMPOS_IMAGEN_CONTENIDO.includes(key)) return res.status(400).json({ error: 'Campo de imagen no valido' });
+  const anterior = store.getContent()[key];
+  const content = store.updateContent({ [key]: '' });
+  borrarSiEsSubida(anterior);
+  res.json({ content });
+});
+
+// ---- Productos de la tienda ----
+router.get('/api/products', requireAdmin, (req, res) => {
+  res.json(store.getProducts());
+});
+
+router.post('/api/products', requireAdmin, (req, res) => {
+  const item = store.addProduct(req.body || {});
+  res.status(201).json(item);
+});
+
+router.patch('/api/products/:id', requireAdmin, (req, res) => {
+  const item = store.updateProduct(req.params.id, req.body || {});
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+router.delete('/api/products/:id', requireAdmin, (req, res) => {
+  const item = store.deleteProduct(req.params.id);
+  if (item) borrarSiEsSubida(item.imagen);
+  res.json({ ok: true });
+});
+
+router.post('/api/products/:id/image', requireAdmin, uploadImage.single('file'), (req, res) => {
+  const producto = store.getProduct(req.params.id);
+  if (!producto) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    return res.status(404).json({ error: 'No encontrado' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
+  const url = `/uploads/${req.file.filename}`;
+  const anterior = producto.imagen;
+  const item = store.updateProduct(req.params.id, { imagen: url });
+  borrarSiEsSubida(anterior);
+  res.status(201).json(item);
+});
+
+// ---- Cursos y talleres ----
+router.get('/api/cursos', requireAdmin, (req, res) => {
+  res.json(store.getCursos());
+});
+
+router.post('/api/cursos', requireAdmin, (req, res) => {
+  const item = store.addCurso(req.body || {});
+  res.status(201).json(item);
+});
+
+router.patch('/api/cursos/:id', requireAdmin, (req, res) => {
+  const item = store.updateCurso(req.params.id, req.body || {});
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+router.delete('/api/cursos/:id', requireAdmin, (req, res) => {
+  store.deleteCurso(req.params.id);
   res.json({ ok: true });
 });
 

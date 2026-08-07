@@ -11,4 +11,16 @@ router.get('/media', (req, res) => {
   res.json(store.getMedia());
 });
 
+router.get('/content', (req, res) => {
+  res.json(store.getContent());
+});
+
+router.get('/products', (req, res) => {
+  res.json(store.getProducts());
+});
+
+router.get('/cursos', (req, res) => {
+  res.json(store.getCursos());
+});
+
 module.exports = router;

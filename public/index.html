@@ -162,33 +162,33 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
   <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:py-20 lg:grid-cols-[1.15fr_.85fr] lg:px-8 lg:py-28">
     <div>
       <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-morado/30 bg-morado/5 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-vino">
-        <span class="h-1.5 w-1.5 rounded-full bg-flama"></span> Ciudad de México · Desde 2024
+        <span class="h-1.5 w-1.5 rounded-full bg-flama"></span> <span id="heroBadge">Ciudad de México · Desde 2024</span>
       </p>
 
       <h1 class="font-display text-4xl leading-[1.05] text-vino sm:text-5xl lg:text-6xl">
-        Aprende la técnica.<br>
-        <span class="text-flama">Cobra lo que vale.</span>
+        <span id="heroTitulo1">Aprende la técnica.</span><br>
+        <span id="heroTitulo2" class="text-flama">Cobra lo que vale.</span>
       </h1>
 
-      <p class="mt-6 max-w-xl text-[17px] leading-relaxed text-carbon/70">
+      <p id="heroParrafo" class="mt-6 max-w-xl text-[17px] leading-relaxed text-carbon/70">
         Manuales técnicos, hojas de costeo listas para usar, aplicaciones de bolsillo y talleres en vivo
-        para reposteros, banqueteros y emprendedores que quieren cocinar bien <em class="not-italic text-vino font-600">y</em> vender con margen real.
+        para reposteros, banqueteros y emprendedores que quieren cocinar bien y vender con margen real.
       </p>
 
       <div class="mt-9 flex flex-wrap gap-4">
         <a href="#tienda" class="inline-flex items-center gap-2 rounded-full bg-flama px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
-          Ir a la tienda
+          <span id="heroCtaPrimario">Ir a la tienda</span>
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
         </a>
         <a href="#cursos" class="inline-flex items-center gap-2 rounded-full border border-vino/30 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
-          Ver cursos y talleres
+          <span id="heroCtaSecundario">Ver cursos y talleres</span>
         </a>
       </div>
 
       <dl class="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-vino/10 pt-7">
-        <div><dt class="font-titulo text-4xl text-flama">137</dt><dd class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Páginas de manual</dd></div>
-        <div><dt class="font-titulo text-4xl text-flama">50</dt><dd class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Fórmulas costeadas</dd></div>
-        <div><dt class="font-titulo text-4xl text-flama">2</dt><dd class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Anexos en Excel</dd></div>
+        <div><dt id="heroStat1Valor" class="font-titulo text-4xl text-flama">137</dt><dd id="heroStat1Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Páginas de manual</dd></div>
+        <div><dt id="heroStat2Valor" class="font-titulo text-4xl text-flama">50</dt><dd id="heroStat2Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Fórmulas costeadas</dd></div>
+        <div><dt id="heroStat3Valor" class="font-titulo text-4xl text-flama">2</dt><dd id="heroStat3Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Anexos en Excel</dd></div>
       </dl>
     </div>
 
@@ -196,22 +196,24 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <div class="relative mx-auto w-full max-w-sm">
       <div class="halo absolute left-1/2 top-6 h-56 w-56 -translate-x-1/2 rounded-full bg-flama/20 blur-3xl"></div>
       <div class="relative rounded-[28px] border border-vino/10 bg-white p-8 text-center shadow-[0_8px_40px_rgba(78,20,84,.08)]">
-        <svg viewBox="0 0 120 200" class="mx-auto h-72 w-auto" role="img" aria-label="Vela comestible encendida">
-          <ellipse cx="60" cy="188" rx="46" ry="9" fill="#000" opacity=".12"/>
-          <g class="flama-svg">
-            <path d="M60 6c4 22 22 26 22 46a22 22 0 1 1-44 0c0-11 7-15 11-26 2 7 5 9 7 11 1-11 4-20 4-31z" fill="#F5A623"/>
-            <path d="M60 30c2 12 11 15 11 25a11 11 0 1 1-22 0c0-7 8-14 11-25z" fill="#FBF4E9" opacity=".85"/>
-          </g>
-          <rect x="58.5" y="72" width="3" height="16" rx="1.5" fill="#4E1454"/>
-          <path d="M28 88h64c3 0 5 2 5 5v82c0 6-5 10-11 10H34c-6 0-11-4-11-10V93c0-3 2-5 5-5z" fill="#FBF4E9"/>
-          <path d="M28 88h64c3 0 5 2 5 5v14H23V93c0-3 2-5 5-5z" fill="#F1E3CC"/>
-          <path d="M35 107c6 10 3 16 8 24s14 6 12 16 6 14 12 12" stroke="#E7D5B8" stroke-width="3" fill="none" stroke-linecap="round"/>
-          <rect x="23" y="150" width="74" height="35" rx="6" fill="#7A2E7E"/>
-          <text x="60" y="166" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#FBF4E9">MANTEQUILLA</text>
-          <text x="60" y="179" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#F5A623">TRUFADA</text>
-        </svg>
-        <p class="mt-2 font-firma text-2xl text-vino">se enciende, se derrite, se come</p>
-        <p class="mt-1 font-ui text-[11px] uppercase tracking-[.25em] text-carbon/45">Receta 01 · Sección gourmet</p>
+        <div id="heroImagenWrap">
+          <svg viewBox="0 0 120 200" class="mx-auto h-72 w-auto" role="img" aria-label="Vela comestible encendida">
+            <ellipse cx="60" cy="188" rx="46" ry="9" fill="#000" opacity=".12"/>
+            <g class="flama-svg">
+              <path d="M60 6c4 22 22 26 22 46a22 22 0 1 1-44 0c0-11 7-15 11-26 2 7 5 9 7 11 1-11 4-20 4-31z" fill="#F5A623"/>
+              <path d="M60 30c2 12 11 15 11 25a11 11 0 1 1-22 0c0-7 8-14 11-25z" fill="#FBF4E9" opacity=".85"/>
+            </g>
+            <rect x="58.5" y="72" width="3" height="16" rx="1.5" fill="#4E1454"/>
+            <path d="M28 88h64c3 0 5 2 5 5v82c0 6-5 10-11 10H34c-6 0-11-4-11-10V93c0-3 2-5 5-5z" fill="#FBF4E9"/>
+            <path d="M28 88h64c3 0 5 2 5 5v14H23V93c0-3 2-5 5-5z" fill="#F1E3CC"/>
+            <path d="M35 107c6 10 3 16 8 24s14 6 12 16 6 14 12 12" stroke="#E7D5B8" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <rect x="23" y="150" width="74" height="35" rx="6" fill="#7A2E7E"/>
+            <text x="60" y="166" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#FBF4E9">MANTEQUILLA</text>
+            <text x="60" y="179" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#F5A623">TRUFADA</text>
+          </svg>
+        </div>
+        <p id="heroCaption" class="mt-2 font-firma text-2xl text-vino">se enciende, se derrite, se come</p>
+        <p id="heroCaptionSub" class="mt-1 font-ui text-[11px] uppercase tracking-[.25em] text-carbon/45">Receta 01 · Sección gourmet</p>
       </div>
     </div>
   </div>
@@ -248,91 +250,9 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       </p>
     </div>
 
-    <div class="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-
-      <!-- eBook principal -->
-      <article class="reveal group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
-        <div class="relative aspect-[4/3] bg-gradient-to-br from-vino to-uva p-7">
-          <span class="absolute right-5 top-5 rounded-full bg-flama px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-widest text-carbon">Más vendido</span>
-          <p class="font-titulo text-[11px] tracking-[.3em] text-flama">VOLUMEN I</p>
-          <h3 class="mt-2 font-display text-2xl leading-tight text-crema">Velas<br>Comestibles</h3>
-          <p class="mt-2 font-firma text-xl text-flama">El arte de derretir sabores</p>
-          <p class="absolute bottom-6 left-7 font-ui text-[10px] uppercase tracking-[.2em] text-crema/60">Guía técnica · Recetario · Negocio</p>
-        </div>
-        <div class="flex flex-1 flex-col p-7">
-          <ul class="space-y-2.5 text-sm text-carbon/75">
-            <li class="flex gap-2.5"><span class="text-flama">▸</span> 50 fórmulas con maridaje y punto de fusión</li>
-            <li class="flex gap-2.5"><span class="text-flama">▸</span> Capítulo completo de costeo, merma y precios</li>
-            <li class="flex gap-2.5"><span class="text-flama">▸</span> Empaque, etiquetado y cadena de frío</li>
-            <li class="flex gap-2.5"><span class="text-flama">▸</span> PDF de 137 páginas, descarga inmediata</li>
-          </ul>
-          <div class="mt-7 flex items-end gap-3">
-            <span class="font-display text-3xl text-vino">$499</span>
-            <span class="pb-1 text-sm text-humo line-through">$1,000</span>
-            <span class="pb-1 font-ui text-[11px] uppercase tracking-wider text-humo">MXN</span>
-          </div>
-          <button type="button" onclick="abrirModal('compra','Velas Comestibles · eBook')"
-            class="mt-5 w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
-            Comprar eBook
-          </button>
-        </div>
-      </article>
-
-      <!-- Anexo contable -->
-      <article id="anexos" class="reveal scroll-mt-24 group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
-        <div class="relative aspect-[4/3] bg-gradient-to-br from-morado to-vino p-7">
-          <span class="absolute right-5 top-5 rounded-full bg-crema px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-widest text-vino">Anexo contable</span>
-          <p class="font-titulo text-[11px] tracking-[.3em] text-flama">HOJA DE CÁLCULO</p>
-          <h3 class="mt-2 font-display text-2xl leading-tight text-crema">Costos,<br>Merma y Precios</h3>
-          <div class="mt-4 space-y-1.5 font-ui text-[11px] uppercase tracking-wider text-crema/70">
-            <p class="rounded bg-black/20 px-2 py-1">Hoja 1 · Catálogo de insumos</p>
-            <p class="rounded bg-black/20 px-2 py-1">Hoja 2 · Recetas</p>
-            <p class="rounded bg-black/20 px-2 py-1">Hoja 3 · Costeo y precio</p>
-          </div>
-        </div>
-        <div class="flex flex-1 flex-col p-7">
-          <ul class="space-y-2.5 text-sm text-carbon/75">
-            <li class="flex gap-2.5"><span class="text-flama">▸</span> Costo por gramo automático de cada insumo</li>
-            <li class="flex gap-2.5"><span class="text-flama">▸</span> Merma repartida con la fórmula correcta</li>
-            <li class="flex gap-2.5"><span class="text-flama">▸</span> Precio de menudeo y mayoreo por canal</li>
-            <li class="flex gap-2.5"><span class="text-flama">▸</span> Excel y Google Sheets, sin macros</li>
-          </ul>
-          <div class="mt-7 flex items-end gap-3">
-            <span class="font-display text-3xl text-vino">$249</span>
-            <span class="pb-1 font-ui text-[11px] uppercase tracking-wider text-humo">MXN</span>
-          </div>
-          <button type="button" onclick="abrirModal('compra','Calculadora de Costos, Merma y Precios')"
-            class="mt-5 w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
-            Comprar anexo
-          </button>
-        </div>
-      </article>
-
-      <!-- Paquete -->
-      <article class="reveal flex flex-col overflow-hidden rounded-3xl bg-vino p-7 text-crema ring-1 ring-flama/30 md:col-span-2 lg:col-span-1">
-        <p class="font-titulo text-[11px] tracking-[.3em] text-flama">PAQUETE COMPLETO</p>
-        <h3 class="mt-2 font-display text-2xl leading-tight">Oficios Dulces<br>Vol. I + II</h3>
-        <p class="mt-4 text-sm leading-relaxed text-crema/70">
-          Los dos manuales de la colección con sus dos anexos de costeo y la app de bolsillo para
-          calcular precios desde el celular durante la producción.
-        </p>
-        <ul class="mt-6 space-y-2.5 text-sm text-crema/75">
-          <li class="flex gap-2.5"><span class="text-flama">▸</span> Velas Comestibles (137 pp.)</li>
-          <li class="flex gap-2.5"><span class="text-flama">▸</span> Galletas estilo Nueva York (113 pp.)</li>
-          <li class="flex gap-2.5"><span class="text-flama">▸</span> 2 hojas de costeo + app HTML</li>
-          <li class="flex gap-2.5"><span class="text-flama">▸</span> Acceso a una clase en vivo de regalo</li>
-        </ul>
-        <div class="mt-auto pt-7">
-          <div class="flex items-end gap-3">
-            <span class="font-display text-3xl text-flama">$1,190</span>
-            <span class="pb-1 text-sm text-humo line-through">$1,996</span>
-          </div>
-          <button type="button" onclick="abrirModal('compra','Paquete Oficios Dulces Vol. I + II')"
-            class="mt-5 w-full rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
-            Llevar el paquete
-          </button>
-        </div>
-      </article>
+    <div id="anexos" class="scroll-mt-24"></div>
+    <div id="listaProductos" class="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+      <p class="text-sm text-carbon/50">Cargando productos…</p>
     </div>
 
   </div>
@@ -350,8 +270,9 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
             Próxima clase en vivo
           </p>
 
-          <h2 class="mt-6 font-display text-3xl leading-tight text-crema sm:text-4xl">Vela de mantequilla<br>trufada, paso a paso</h2>
-          <p class="mt-4 max-w-md text-[15px] leading-relaxed text-crema/70">
+          <h2 id="claseTitulo" class="mt-6 whitespace-pre-line font-display text-3xl leading-tight text-crema sm:text-4xl">Vela de mantequilla
+trufada, paso a paso</h2>
+          <p id="claseDescripcion" class="mt-4 max-w-md text-[15px] leading-relaxed text-crema/70">
             Dos horas por videollamada con el Chef Luis Alfonso: temperatura de la mezcla, montaje del pabilo,
             desmolde y costeo en vivo de la pieza que armes. Queda grabada.
           </p>
@@ -542,25 +463,8 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">Grupos pequeños, en línea y presenciales en Ciudad de México. Cada taller incluye su manual y su hoja de costeo.</p>
     </div>
 
-    <div class="grid gap-5 md:grid-cols-3">
-      <div class="reveal rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
-        <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">En línea · 2 h</p>
-        <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">Velas de mantequilla trufada</h3>
-        <p class="mt-3 text-sm leading-relaxed text-carbon/65">Del punto de fusión al montaje del pabilo comestible. Con costeo en vivo de tu pieza.</p>
-        <p class="mt-5 font-display text-xl text-vino">$690 <span class="font-cuerpo text-xs font-400 text-humo">MXN</span></p>
-      </div>
-      <div class="reveal rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
-        <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">Presencial · 5 h</p>
-        <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">Galletas estilo Nueva York</h3>
-        <p class="mt-3 text-sm leading-relaxed text-carbon/65">Masa madurada, relleno y horneado. Sales con producto terminado y ficha técnica.</p>
-        <p class="mt-5 font-display text-xl text-vino">$1,450 <span class="font-cuerpo text-xs font-400 text-humo">MXN</span></p>
-      </div>
-      <div class="reveal rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
-        <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">En línea · 3 h</p>
-        <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">Costeo para cocinas pequeñas</h3>
-        <p class="mt-3 text-sm leading-relaxed text-carbon/65">Arma tu catálogo de insumos, calcula merma real y fija precios por canal de venta.</p>
-        <p class="mt-5 font-display text-xl text-vino">$590 <span class="font-cuerpo text-xs font-400 text-humo">MXN</span></p>
-      </div>
+    <div id="listaCursos" class="grid gap-5 md:grid-cols-3">
+      <p class="text-sm text-carbon/50">Cargando cursos…</p>
     </div>
   </div>
 </section>
@@ -589,12 +493,12 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       <div>
         <p class="font-display text-3xl tracking-tight"><span class="text-vino">ENDUL</span><span class="text-flama">CORA</span></p>
         <p class="mt-1 font-ui text-[11px] font-600 tracking-[.34em] text-humo">ESTUDIO GASTRONÓMICO</p>
-        <p class="mt-5 max-w-xs text-sm leading-relaxed text-carbon/60">
+        <p id="footerDescripcion" class="mt-5 max-w-xs text-sm leading-relaxed text-carbon/60">
           Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.
         </p>
-        <a href="https://wa.me/525665271901" class="mt-6 inline-flex items-center gap-2 rounded-full border border-vino/30 px-4 py-2 font-ui text-[12px] font-600 tracking-wide text-vino hover:bg-vino hover:text-crema transition">
+        <a id="whatsappFooter" href="https://wa.me/525665271901" class="mt-6 inline-flex items-center gap-2 rounded-full border border-vino/30 px-4 py-2 font-ui text-[12px] font-600 tracking-wide text-vino hover:bg-vino hover:text-crema transition">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
-          WhatsApp 5665271901
+          <span id="whatsappFooterTexto">WhatsApp 5665271901</span>
         </a>
       </div>
 
@@ -705,57 +609,45 @@ function toast(msg){
 }
 
 /* ---------- Modales ---------- */
+function parrafosDesdeTexto(texto){
+  return (texto || '').split(/\n\s*\n/).map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+}
+
 const CONTENIDOS = {
-  acceso: { titulo: 'Acceso clientes', html: `<p>Entra con el correo con el que hiciste tu compra para descargar tus manuales, anexos y grabaciones.</p>
+  acceso: () => ({ titulo: 'Acceso clientes', html: `<p>Entra con el correo con el que hiciste tu compra para descargar tus manuales, anexos y grabaciones.</p>
     <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo</span>
     <input type="email" placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
     <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Contraseña</span>
     <input type="password" placeholder="••••••••" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
     <button type="button" onclick="cerrarModal();toast('Demo: aquí se abriría tu biblioteca')" class="w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Entrar a mi biblioteca</button>
-    <p class="text-xs text-carbon/50">¿Compraste por WhatsApp y no tienes acceso? Escríbenos al 5665271901 y lo activamos.</p>` },
+    <p class="text-xs text-carbon/50">¿Compraste por WhatsApp y no tienes acceso? Escríbenos al ${numeroWhatsapp()} y lo activamos.</p>` }),
 
-  clase: { titulo: 'Apartar mi lugar', html: `<p>Clase en vivo por videollamada. Te enviamos el enlace y la lista de insumos 48 horas antes.</p>
+  clase: () => ({ titulo: 'Apartar mi lugar', html: `<p>Clase en vivo por videollamada. Te enviamos el enlace y la lista de insumos 48 horas antes.</p>
     <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nombre</span>
     <input type="text" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
     <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">WhatsApp</span>
     <input type="tel" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
-    <button type="button" onclick="cerrarModal();toast('Demo: recibirías tu confirmación por WhatsApp')" class="w-full rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon">Confirmar lugar</button>` },
+    <button type="button" onclick="cerrarModal();toast('Demo: recibirías tu confirmación por WhatsApp')" class="w-full rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon">Confirmar lugar</button>` }),
 
-  privacidad: { titulo: 'Aviso de privacidad', html: `<p><strong>Endulcora · Estudio Gastronómico</strong>, con domicilio en Ciudad de México, es responsable del tratamiento de tus datos personales.</p>
-    <p><strong>Qué recabamos.</strong> Nombre, correo electrónico y teléfono, y los datos de facturación cuando los solicitas.</p>
-    <p><strong>Para qué.</strong> Entregar tus compras digitales, darte acceso a tus cursos, emitir comprobantes y avisarte de nuevas publicaciones. No vendemos ni compartimos tus datos con terceros ajenos a estos fines.</p>
-    <p><strong>Tus derechos ARCO.</strong> Puedes acceder, rectificar, cancelar u oponerte al uso de tus datos escribiendo a nuestro WhatsApp 5665271901. Respondemos en un máximo de 20 días hábiles.</p>
-    <p class="text-xs text-carbon/50">Texto de muestra. Sustituye razón social, RFC y domicilio fiscal antes de publicar.</p>` },
-
-  terminos: { titulo: 'Términos y condiciones', html: `<p>La compra de cualquier producto digital de Endulcora otorga una licencia personal e intransferible de uso.</p>
-    <p>Los precios están en pesos mexicanos. La entrega de eBooks y anexos es inmediata al confirmarse el pago, mediante enlace de descarga a tu correo.</p>
-    <p>Las clases en vivo se imparten en la fecha publicada; si no puedes asistir, la grabación queda disponible 30 días.</p>
-    <p class="text-xs text-carbon/50">Texto de muestra pendiente de revisión legal.</p>` },
-
-  reembolso: { titulo: 'Política de reembolso', html: `<p>Por tratarse de productos digitales descargables, no hay devoluciones una vez entregado el archivo.</p>
-    <p>Si el archivo llega dañado, incompleto o no puedes abrirlo, lo reponemos sin costo. Escríbenos dentro de los 7 días siguientes a tu compra.</p>
-    <p>En cursos en vivo puedes cambiar tu fecha hasta 48 horas antes de la sesión.</p>` },
-
-  licencia: { titulo: 'Licencia de uso digital', html: `<p>Puedes usar el contenido para producir y vender tus propios productos, sin límite de piezas.</p>
-    <p>No puedes revender, regalar, subir a plataformas de descarga ni reproducir total o parcialmente el manual o las hojas de cálculo.</p>
-    <p>Si vas a impartir clases con este material, escríbenos: existe una licencia para escuelas y talleres.</p>` },
-
-  inocuidad: { titulo: 'Aviso de inocuidad', html: `<p>Las velas comestibles combinan alimento y fuego. Nunca las dejes encendidas sin vigilancia, cerca de niños, corrientes de aire o materiales inflamables.</p>
-    <p>Se encienden por minutos, con fines sensoriales, y se apagan para consumir la grasa fundida tibia.</p>
-    <p>Varias fórmulas contienen lácteos, frutos secos, ajonjolí y gluten: declara siempre los alérgenos y respeta la cadena de frío.</p>` }
+  privacidad: () => ({ titulo: 'Aviso de privacidad', html: parrafosDesdeTexto(SITE_CONTENT.legal_privacidad) }),
+  terminos: () => ({ titulo: 'Términos y condiciones', html: parrafosDesdeTexto(SITE_CONTENT.legal_terminos) }),
+  reembolso: () => ({ titulo: 'Política de reembolso', html: parrafosDesdeTexto(SITE_CONTENT.legal_reembolso) }),
+  licencia: () => ({ titulo: 'Licencia de uso digital', html: parrafosDesdeTexto(SITE_CONTENT.legal_licencia) }),
+  inocuidad: () => ({ titulo: 'Aviso de inocuidad', html: parrafosDesdeTexto(SITE_CONTENT.legal_inocuidad) }),
 };
 
 function abrirModal(clave, extra){
   const m = document.getElementById('modal');
-  let datos = CONTENIDOS[clave];
+  let datos = CONTENIDOS[clave] ? CONTENIDOS[clave]() : null;
   if(clave === 'compra'){
-    datos = { titulo: 'Finalizar compra', html: `<p>Producto seleccionado: <strong class="text-vino">${extra}</strong></p>
+    datos = { titulo: 'Finalizar compra', html: `<p>Producto seleccionado: <strong class="text-vino">${escapeHtml(extra)}</strong></p>
       <p>Recibirás el enlace de descarga en tu correo en cuanto se confirme el pago. Aceptamos tarjeta, transferencia y pago en efectivo.</p>
       <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo para la entrega</span>
       <input type="email" placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
       <button type="button" onclick="cerrarModal();toast('Demo: aquí continuaría el pago')" class="w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Continuar al pago</button>
-      <p class="text-xs text-carbon/50">¿Prefieres pedirlo por WhatsApp? Escríbenos al 5665271901.</p>` };
+      <p class="text-xs text-carbon/50">¿Prefieres pedirlo por WhatsApp? Escríbenos al ${numeroWhatsapp()}.</p>` };
   }
+  if(!datos) return;
   document.getElementById('modalTitulo').textContent = datos.titulo;
   document.getElementById('modalCuerpo').innerHTML = datos.html;
   m.classList.remove('hidden');
@@ -932,9 +824,133 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 document.getElementById('anio').textContent = new Date().getFullYear();
 
-/* ---------- Anuncios y Galería (contenido subido desde /admin) ---------- */
+/* ---------- Contenido, productos y cursos (editables desde /admin) ---------- */
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+let SITE_CONTENT = {};
+function numeroWhatsapp(){
+  return (SITE_CONTENT.whatsapp_numero || '5665271901').trim();
+}
+
+function texto(id, valor){
+  const el = document.getElementById(id);
+  if(el && typeof valor === 'string' && valor !== '') el.textContent = valor;
+}
+
+async function cargarContenido(){
+  try{
+    const res = await fetch('/api/content');
+    SITE_CONTENT = await res.json();
+  }catch(e){
+    SITE_CONTENT = {};
+    return;
+  }
+  const c = SITE_CONTENT;
+  texto('heroBadge', c.hero_badge);
+  texto('heroTitulo1', c.hero_titulo_1);
+  texto('heroTitulo2', c.hero_titulo_2);
+  texto('heroParrafo', c.hero_parrafo);
+  texto('heroCtaPrimario', c.hero_cta_primario);
+  texto('heroCtaSecundario', c.hero_cta_secundario);
+  texto('heroStat1Valor', c.hero_stat1_valor);
+  texto('heroStat1Etiqueta', c.hero_stat1_etiqueta);
+  texto('heroStat2Valor', c.hero_stat2_valor);
+  texto('heroStat2Etiqueta', c.hero_stat2_etiqueta);
+  texto('heroStat3Valor', c.hero_stat3_valor);
+  texto('heroStat3Etiqueta', c.hero_stat3_etiqueta);
+  texto('heroCaption', c.hero_caption);
+  texto('heroCaptionSub', c.hero_caption_sub);
+  texto('claseTitulo', c.clase_titulo);
+  texto('claseDescripcion', c.clase_descripcion);
+  texto('footerDescripcion', c.footer_descripcion);
+
+  if(c.hero_imagen){
+    const wrap = document.getElementById('heroImagenWrap');
+    if(wrap) wrap.innerHTML = `<img src="${c.hero_imagen}" alt="Imagen destacada" class="mx-auto h-72 w-full rounded-2xl object-cover">`;
+  }
+
+  const numero = numeroWhatsapp();
+  const wa = document.getElementById('whatsappFooter');
+  if(wa) wa.href = `https://wa.me/52${numero}`;
+  texto('whatsappFooterTexto', `WhatsApp ${numero}`);
+}
+
+function tarjetaProducto(p){
+  const imagenEstilo = p.imagen
+    ? `background-image:url('${p.imagen}');background-size:cover;background-position:center;`
+    : '';
+  const bullets = (p.bullets || []).map(b => `<li class="flex gap-2.5"><span class="text-flama">▸</span> ${escapeHtml(b)}</li>`).join('');
+  const anteriorPrecio = p.precioAnterior
+    ? `<span class="pb-1 text-sm text-humo line-through">$${escapeHtml(p.precioAnterior)}</span>`
+    : '';
+  const destacado = p.destacado
+    ? `<span class="absolute right-5 top-5 rounded-full bg-flama px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-widest text-carbon">${escapeHtml(p.destacado)}</span>`
+    : '';
+  const subtitulo = p.subtitulo ? `<p class="mt-2 font-firma text-xl text-flama">${escapeHtml(p.subtitulo)}</p>` : '';
+  return `
+    <article class="reveal visible group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
+      <div class="relative aspect-[4/3] bg-gradient-to-br from-vino to-uva p-7" style="${imagenEstilo}">
+        ${destacado}
+        <p class="font-titulo text-[11px] tracking-[.3em] text-flama">${escapeHtml(p.etiqueta || '')}</p>
+        <h3 class="mt-2 font-display text-2xl leading-tight text-crema">${escapeHtml(p.titulo || '')}</h3>
+        ${subtitulo}
+        <p class="absolute bottom-6 left-7 right-7 font-ui text-[10px] uppercase tracking-[.2em] text-crema/60">${escapeHtml(p.descripcionCorta || '')}</p>
+      </div>
+      <div class="flex flex-1 flex-col p-7">
+        <ul class="space-y-2.5 text-sm text-carbon/75">${bullets}</ul>
+        <div class="mt-7 flex items-end gap-3">
+          <span class="font-display text-3xl text-vino">$${escapeHtml(p.precio || '0')}</span>
+          ${anteriorPrecio}
+          <span class="pb-1 font-ui text-[11px] uppercase tracking-wider text-humo">MXN</span>
+        </div>
+        <button type="button" onclick="abrirModal('compra', ${escapeHtml(JSON.stringify(p.titulo || ''))})"
+          class="mt-5 w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+          ${escapeHtml(p.boton || 'Comprar')}
+        </button>
+      </div>
+    </article>`;
+}
+
+async function cargarProductos(){
+  const cont = document.getElementById('listaProductos');
+  try{
+    const res = await fetch('/api/products');
+    const items = await res.json();
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Aún no hay productos publicados.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(tarjetaProducto).join('');
+  }catch(e){
+    cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudieron cargar los productos.</p>';
+  }
+}
+
+function tarjetaCurso(c){
+  return `
+    <div class="reveal visible rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
+      <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">${escapeHtml(c.modalidad || '')}</p>
+      <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">${escapeHtml(c.titulo || '')}</h3>
+      <p class="mt-3 text-sm leading-relaxed text-carbon/65">${escapeHtml(c.descripcion || '')}</p>
+      <p class="mt-5 font-display text-xl text-vino">$${escapeHtml(c.precio || '0')} <span class="font-cuerpo text-xs font-400 text-humo">MXN</span></p>
+    </div>`;
+}
+
+async function cargarCursos(){
+  const cont = document.getElementById('listaCursos');
+  try{
+    const res = await fetch('/api/cursos');
+    const items = await res.json();
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Aún no hay cursos publicados.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(tarjetaCurso).join('');
+  }catch(e){
+    cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudieron cargar los cursos.</p>';
+  }
 }
 
 async function cargarAnuncios(){
@@ -1010,6 +1026,9 @@ async function cargarGaleria(){
   }
 }
 
+cargarContenido();
+cargarProductos();
+cargarCursos();
 cargarAnuncios();
 cargarGaleria();
 </script>

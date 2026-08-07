@@ -59,13 +59,247 @@
         <button id="btnLogout" class="rounded-full bg-carbon px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-crema hover:bg-vino transition">Salir</button>
       </div>
     </div>
+    <nav class="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-5 pb-3 font-ui text-[12px] font-600 uppercase tracking-wider text-vino/70">
+      <a href="#seccionContenido" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Contenido general</a>
+      <a href="#seccionProductos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Productos</a>
+      <a href="#seccionCursos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Cursos</a>
+      <a href="#seccionLegales" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Legales</a>
+      <a href="#seccionAnuncios" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Anuncios</a>
+      <a href="#seccionGaleria" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Galería</a>
+    </nav>
   </header>
 
   <main class="mx-auto max-w-6xl px-5 py-10">
     <div id="toast" class="fixed bottom-6 left-1/2 z-50 hidden -translate-x-1/2 rounded-full bg-vino px-6 py-3 font-ui text-sm text-crema shadow-xl"></div>
 
+    <!-- CONTENIDO GENERAL -->
+    <section id="seccionContenido" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Contenido general del sitio</h2>
+      <p class="mt-1 text-sm text-carbon/60">Textos del inicio, la sección "Clase en vivo", el footer y tu WhatsApp. Los cambios se ven en el sitio de inmediato.</p>
+
+      <form id="formContenido" class="mt-6 space-y-8">
+        <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Inicio (hero)</h3>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Etiqueta pequeña</span>
+              <input data-content-key="hero_badge" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título línea 1</span>
+              <input data-content-key="hero_titulo_1" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título línea 2 (dorado)</span>
+              <input data-content-key="hero_titulo_2" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Párrafo</span>
+              <textarea data-content-key="hero_parrafo" rows="3" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Botón principal</span>
+              <input data-content-key="hero_cta_primario" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Botón secundario</span>
+              <input data-content-key="hero_cta_secundario" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+          </div>
+          <div class="mt-5 grid gap-4 sm:grid-cols-3">
+            <div class="rounded-xl border border-vino/10 p-3">
+              <span class="font-ui text-[10px] font-600 uppercase tracking-widest text-carbon/50">Cifra 1</span>
+              <input data-content-key="hero_stat1_valor" type="text" placeholder="Valor" class="mt-1.5 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm">
+              <input data-content-key="hero_stat1_etiqueta" type="text" placeholder="Etiqueta" class="mt-2 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm">
+            </div>
+            <div class="rounded-xl border border-vino/10 p-3">
+              <span class="font-ui text-[10px] font-600 uppercase tracking-widest text-carbon/50">Cifra 2</span>
+              <input data-content-key="hero_stat2_valor" type="text" placeholder="Valor" class="mt-1.5 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm">
+              <input data-content-key="hero_stat2_etiqueta" type="text" placeholder="Etiqueta" class="mt-2 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm">
+            </div>
+            <div class="rounded-xl border border-vino/10 p-3">
+              <span class="font-ui text-[10px] font-600 uppercase tracking-widest text-carbon/50">Cifra 3</span>
+              <input data-content-key="hero_stat3_valor" type="text" placeholder="Valor" class="mt-1.5 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm">
+              <input data-content-key="hero_stat3_etiqueta" type="text" placeholder="Etiqueta" class="mt-2 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm">
+            </div>
+          </div>
+          <div class="mt-5 grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Frase bajo la imagen</span>
+              <input data-content-key="hero_caption" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Subtítulo bajo la imagen</span>
+              <input data-content-key="hero_caption_sub" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Clase en vivo</h3>
+          <div class="mt-4 grid gap-4">
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
+              <textarea data-content-key="clase_titulo" rows="2" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción</span>
+              <textarea data-content-key="clase_descripcion" rows="3" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Footer y contacto</h3>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción del footer</span>
+              <textarea data-content-key="footer_descripcion" rows="2" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Número de WhatsApp (10 dígitos)</span>
+              <input data-content-key="whatsapp_numero" type="text" maxlength="10" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="rounded-full bg-vino px-8 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar contenido general</button>
+      </form>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Imagen destacada del inicio</h3>
+        <p class="mt-1 text-xs text-carbon/50">Si subes una foto, reemplaza la ilustración de la vela junto al encabezado. Quítala para volver a la ilustración.</p>
+        <div id="heroImagenPreview" class="mt-4"></div>
+        <form id="formHeroImagen" class="mt-4 flex flex-wrap items-center gap-3">
+          <input id="heroImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="text-sm">
+          <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir</button>
+          <button type="button" id="btnQuitarHeroImagen" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar imagen</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- PRODUCTOS -->
+    <section id="seccionProductos" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Productos de la tienda</h2>
+      <p class="mt-1 text-sm text-carbon/60">Agrega, edita o borra los productos que se muestran en la sección "Tienda". Puedes subir una foto para cada uno; si no subes nada, se usa un fondo morado de marca.</p>
+
+      <form id="formProducto" class="mt-6 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10 sm:grid-cols-2">
+        <input type="hidden" id="productoEditandoId" value="">
+        <p id="productoModoTexto" class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado sm:col-span-2">Nuevo producto</p>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Etiqueta (ej. VOLUMEN I)</span>
+          <input id="prodEtiqueta" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Insignia (ej. Más vendido, opcional)</span>
+          <input id="prodDestacado" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
+          <input id="prodTitulo" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Subtítulo cursivo (opcional)</span>
+          <input id="prodSubtitulo" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Texto corto (bajo la imagen)</span>
+          <input id="prodDescripcionCorta" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Beneficios (uno por línea)</span>
+          <textarea id="prodBullets" rows="4" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio (MXN)</span>
+          <input id="prodPrecio" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio anterior (opcional)</span>
+          <input id="prodPrecioAnterior" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Texto del botón</span>
+          <input id="prodBoton" type="text" placeholder="Comprar" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Foto (opcional)</span>
+          <input id="prodImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="mt-1.5 w-full text-sm">
+        </label>
+        <div class="flex gap-3 sm:col-span-2">
+          <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar producto</button>
+          <button type="button" id="btnCancelarProducto" class="hidden rounded-full border border-vino/20 px-6 py-3 font-ui text-[13px] font-600 uppercase tracking-wider text-vino">Cancelar edición</button>
+        </div>
+      </form>
+
+      <div id="listaProductosAdmin" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
+    <!-- CURSOS -->
+    <section id="seccionCursos" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Cursos y talleres</h2>
+      <p class="mt-1 text-sm text-carbon/60">Agrega, edita o borra los talleres que se muestran en la sección "Talleres y cursos".</p>
+
+      <form id="formCurso" class="mt-6 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10 sm:grid-cols-2">
+        <input type="hidden" id="cursoEditandoId" value="">
+        <p id="cursoModoTexto" class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado sm:col-span-2">Nuevo curso</p>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Modalidad (ej. En línea · 2 h)</span>
+          <input id="cursoModalidad" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio (MXN)</span>
+          <input id="cursoPrecio" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
+          <input id="cursoTitulo" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción</span>
+          <textarea id="cursoDescripcion" rows="2" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <div class="flex gap-3 sm:col-span-2">
+          <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar curso</button>
+          <button type="button" id="btnCancelarCurso" class="hidden rounded-full border border-vino/20 px-6 py-3 font-ui text-[13px] font-600 uppercase tracking-wider text-vino">Cancelar edición</button>
+        </div>
+      </form>
+
+      <div id="listaCursosAdmin" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
+    <!-- TEXTOS LEGALES -->
+    <section id="seccionLegales" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Textos legales</h2>
+      <p class="mt-1 text-sm text-carbon/60">Los avisos que se muestran en los enlaces "Legal" del footer. Deja una línea en blanco entre párrafos.</p>
+
+      <form id="formLegales" class="mt-6 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Aviso de privacidad</span>
+          <textarea data-content-key="legal_privacidad" rows="5" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Términos y condiciones</span>
+          <textarea data-content-key="legal_terminos" rows="4" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Política de reembolso</span>
+          <textarea data-content-key="legal_reembolso" rows="4" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Licencia de uso digital</span>
+          <textarea data-content-key="legal_licencia" rows="4" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Aviso de inocuidad</span>
+          <textarea data-content-key="legal_inocuidad" rows="4" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <button type="submit" class="rounded-full bg-vino px-8 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar textos legales</button>
+      </form>
+    </section>
+
     <!-- ANUNCIOS -->
-    <section class="mb-14">
+    <section id="seccionAnuncios" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Anuncios</h2>
       <p class="mt-1 text-sm text-carbon/60">Publica avisos, fechas de clases o novedades. Aparecen de inmediato en la sección "Anuncios" del sitio.</p>
 
@@ -91,7 +325,7 @@
     </section>
 
     <!-- GALERÍA -->
-    <section>
+    <section id="seccionGaleria" class="scroll-mt-32">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Galería (fotos y video)</h2>
       <p class="mt-1 text-sm text-carbon/60">Sube fotos o video (hasta 150&nbsp;MB), o pega un enlace de YouTube/Vimeo para videos más pesados. Aparecen de inmediato en la sección "Galería" del sitio.</p>
 
@@ -169,7 +403,13 @@ async function api(url, options = {}){
 function mostrarDashboard(mostrar){
   $('vistaLogin').classList.toggle('hidden', mostrar);
   $('vistaDashboard').classList.toggle('hidden', !mostrar);
-  if(mostrar){ cargarAnuncios(); cargarGaleria(); }
+  if(mostrar){
+    cargarContenidoAdmin();
+    cargarProductosAdmin();
+    cargarCursosAdmin();
+    cargarAnuncios();
+    cargarGaleria();
+  }
 }
 
 async function verificarSesion(){
@@ -365,6 +605,267 @@ $('formEmbed').addEventListener('submit', async (e) => {
     $('formEmbed').reset();
     toast('Video añadido');
     cargarGaleria();
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+/* ---------- Contenido general y legales ---------- */
+function camposContenido(){
+  return document.querySelectorAll('[data-content-key]');
+}
+
+function pintarHeroImagen(url){
+  const cont = $('heroImagenPreview');
+  cont.innerHTML = url
+    ? `<img src="${url}" alt="Imagen del inicio" class="h-32 rounded-xl object-cover ring-1 ring-vino/10">`
+    : '<p class="text-sm text-carbon/50">Usando la ilustración por defecto.</p>';
+}
+
+let CONTENIDO_ACTUAL = {};
+
+async function cargarContenidoAdmin(){
+  try{
+    CONTENIDO_ACTUAL = await api('/admin/api/content');
+    camposContenido().forEach(el => {
+      const key = el.dataset.contentKey;
+      if(Object.prototype.hasOwnProperty.call(CONTENIDO_ACTUAL, key)) el.value = CONTENIDO_ACTUAL[key];
+    });
+    pintarHeroImagen(CONTENIDO_ACTUAL.hero_imagen);
+  }catch(e){
+    toast('No se pudo cargar el contenido general');
+  }
+}
+
+$('formContenido').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const patch = {};
+  camposContenido().forEach(el => { patch[el.dataset.contentKey] = el.value; });
+  try{
+    await api('/admin/api/content', { method: 'PATCH', body: JSON.stringify(patch) });
+    toast('Contenido guardado');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('formLegales').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const patch = {};
+  document.querySelectorAll('#formLegales [data-content-key]').forEach(el => { patch[el.dataset.contentKey] = el.value; });
+  try{
+    await api('/admin/api/content', { method: 'PATCH', body: JSON.stringify(patch) });
+    toast('Textos legales guardados');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('formHeroImagen').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = $('heroImagenInput').files[0];
+  if(!file){ toast('Elige una imagen'); return; }
+  const fd = new FormData();
+  fd.append('file', file);
+  try{
+    const res = await fetch('/admin/api/content/hero_imagen/image', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir la imagen');
+    pintarHeroImagen(data.url);
+    $('formHeroImagen').reset();
+    toast('Imagen actualizada');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('btnQuitarHeroImagen').addEventListener('click', async () => {
+  try{
+    await api('/admin/api/content/hero_imagen/image', { method: 'DELETE' });
+    pintarHeroImagen('');
+    toast('Imagen quitada');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+/* ---------- Productos ---------- */
+function resetFormProducto(){
+  $('formProducto').reset();
+  $('productoEditandoId').value = '';
+  $('productoModoTexto').textContent = 'Nuevo producto';
+  $('btnCancelarProducto').classList.add('hidden');
+}
+
+async function cargarProductosAdmin(){
+  const cont = $('listaProductosAdmin');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
+  try{
+    const items = await api('/admin/api/products');
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay productos.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(p => `
+      <article class="overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+        <div class="aspect-video w-full bg-vino/10" style="${p.imagen ? `background-image:url('${p.imagen}');background-size:cover;background-position:center;` : ''}"></div>
+        <div class="p-4">
+          <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${escapeHtml(p.etiqueta || '')}</p>
+          <p class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(p.titulo || '')}</p>
+          <p class="mt-1 text-sm text-carbon/70">$${escapeHtml(p.precio || '0')} MXN</p>
+          <div class="mt-3 flex gap-2">
+            <button data-id="${p.id}" class="btnEditarProducto flex-1 rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Editar</button>
+            <button data-id="${p.id}" class="btnBorrarProducto rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+          </div>
+        </div>
+      </article>
+    `).join('');
+
+    cont.querySelectorAll('.btnEditarProducto').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const p = items.find(x => x.id === Number(btn.dataset.id));
+        if(!p) return;
+        $('productoEditandoId').value = p.id;
+        $('productoModoTexto').textContent = `Editando: ${p.titulo}`;
+        $('btnCancelarProducto').classList.remove('hidden');
+        $('prodEtiqueta').value = p.etiqueta || '';
+        $('prodDestacado').value = p.destacado || '';
+        $('prodTitulo').value = p.titulo || '';
+        $('prodSubtitulo').value = p.subtitulo || '';
+        $('prodDescripcionCorta').value = p.descripcionCorta || '';
+        $('prodBullets').value = (p.bullets || []).join('\n');
+        $('prodPrecio').value = p.precio || '';
+        $('prodPrecioAnterior').value = p.precioAnterior || '';
+        $('prodBoton').value = p.boton || '';
+        document.getElementById('seccionProductos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    cont.querySelectorAll('.btnBorrarProducto').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar este producto?')) return;
+        await api(`/admin/api/products/${btn.dataset.id}`, { method: 'DELETE' });
+        cargarProductosAdmin();
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('btnCancelarProducto').addEventListener('click', resetFormProducto);
+
+$('formProducto').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('productoEditandoId').value;
+  const payload = {
+    etiqueta: $('prodEtiqueta').value.trim(),
+    destacado: $('prodDestacado').value.trim(),
+    titulo: $('prodTitulo').value.trim(),
+    subtitulo: $('prodSubtitulo').value.trim(),
+    descripcionCorta: $('prodDescripcionCorta').value.trim(),
+    bullets: $('prodBullets').value.split('\n').map(s => s.trim()).filter(Boolean),
+    precio: $('prodPrecio').value.trim(),
+    precioAnterior: $('prodPrecioAnterior').value.trim(),
+    boton: $('prodBoton').value.trim() || 'Comprar',
+  };
+  try{
+    let productoId = id;
+    if(id){
+      await api(`/admin/api/products/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+    }else{
+      const creado = await api('/admin/api/products', { method: 'POST', body: JSON.stringify(payload) });
+      productoId = creado.id;
+    }
+    const file = $('prodImagenInput').files[0];
+    if(file){
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`/admin/api/products/${productoId}/image`, { method: 'POST', body: fd });
+      if(!res.ok){ const d = await res.json().catch(()=>({})); throw new Error(d.error || 'No se pudo subir la imagen'); }
+    }
+    resetFormProducto();
+    toast('Producto guardado');
+    cargarProductosAdmin();
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+/* ---------- Cursos ---------- */
+function resetFormCurso(){
+  $('formCurso').reset();
+  $('cursoEditandoId').value = '';
+  $('cursoModoTexto').textContent = 'Nuevo curso';
+  $('btnCancelarCurso').classList.add('hidden');
+}
+
+async function cargarCursosAdmin(){
+  const cont = $('listaCursosAdmin');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
+  try{
+    const items = await api('/admin/api/cursos');
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay cursos.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(c => `
+      <article class="rounded-2xl bg-white p-4 ring-1 ring-vino/10">
+        <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${escapeHtml(c.modalidad || '')}</p>
+        <p class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(c.titulo || '')}</p>
+        <p class="mt-1 text-sm text-carbon/70">$${escapeHtml(c.precio || '0')} MXN</p>
+        <div class="mt-3 flex gap-2">
+          <button data-id="${c.id}" class="btnEditarCurso flex-1 rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Editar</button>
+          <button data-id="${c.id}" class="btnBorrarCurso rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+        </div>
+      </article>
+    `).join('');
+
+    cont.querySelectorAll('.btnEditarCurso').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const c = items.find(x => x.id === Number(btn.dataset.id));
+        if(!c) return;
+        $('cursoEditandoId').value = c.id;
+        $('cursoModoTexto').textContent = `Editando: ${c.titulo}`;
+        $('btnCancelarCurso').classList.remove('hidden');
+        $('cursoModalidad').value = c.modalidad || '';
+        $('cursoPrecio').value = c.precio || '';
+        $('cursoTitulo').value = c.titulo || '';
+        $('cursoDescripcion').value = c.descripcion || '';
+        document.getElementById('seccionCursos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    cont.querySelectorAll('.btnBorrarCurso').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar este curso?')) return;
+        await api(`/admin/api/cursos/${btn.dataset.id}`, { method: 'DELETE' });
+        cargarCursosAdmin();
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('btnCancelarCurso').addEventListener('click', resetFormCurso);
+
+$('formCurso').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('cursoEditandoId').value;
+  const payload = {
+    modalidad: $('cursoModalidad').value.trim(),
+    titulo: $('cursoTitulo').value.trim(),
+    descripcion: $('cursoDescripcion').value.trim(),
+    precio: $('cursoPrecio').value.trim(),
+  };
+  try{
+    if(id){
+      await api(`/admin/api/cursos/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+    }else{
+      await api('/admin/api/cursos', { method: 'POST', body: JSON.stringify(payload) });
+    }
+    resetFormCurso();
+    toast('Curso guardado');
+    cargarCursosAdmin();
   }catch(e){
     toast(e.message);
   }
