@@ -21,6 +21,11 @@ const DEFAULT_CONTENT = {
   hero_imagen: '',
   hero_caption: 'se enciende, se derrite, se come',
   hero_caption_sub: 'Receta 01 · Sección gourmet',
+  chef_imagen: '',
+  chef_badge: 'Fundador de Endulcora',
+  chef_nombre: 'Chef Luis Alfonso Jiménez Cárdenas',
+  chef_bio:
+    'Formado en cocina profesional y especializado en repostería técnica, Luis Alfonso creó Endulcora para enseñar recetas de estudio con el mismo rigor con el que se costean: al gramo, con margen real y listas para vender. Cada manual y cada clase en vivo nacen de su cocina en Ciudad de México.',
   clase_titulo: 'Vela de mantequilla\ntrufada, paso a paso',
   clase_descripcion:
     'Dos horas por videollamada con el Chef Luis Alfonso: temperatura de la mezcla, montaje del pabilo, desmolde y costeo en vivo de la pieza que armes. Queda grabada.',

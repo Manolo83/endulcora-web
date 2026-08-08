@@ -137,6 +137,24 @@
         </div>
 
         <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Sobre el chef</h3>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Etiqueta pequeña</span>
+              <input data-content-key="chef_badge" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nombre</span>
+              <input data-content-key="chef_nombre" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Biografía</span>
+              <textarea data-content-key="chef_bio" rows="4" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
           <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Clase en vivo</h3>
           <div class="mt-4 grid gap-4">
             <label class="block">
@@ -175,6 +193,17 @@
           <input id="heroImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="text-sm">
           <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir</button>
           <button type="button" id="btnQuitarHeroImagen" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar imagen</button>
+        </form>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Foto del chef</h3>
+        <p class="mt-1 text-xs text-carbon/50">Aparece en la sección "Sobre el chef". Si no subes nada, se muestra una ilustración de marca.</p>
+        <div id="chefImagenPreview" class="mt-4"></div>
+        <form id="formChefImagen" class="mt-4 flex flex-wrap items-center gap-3">
+          <input id="chefImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="text-sm">
+          <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir</button>
+          <button type="button" id="btnQuitarChefImagen" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar imagen</button>
         </form>
       </div>
     </section>
@@ -636,6 +665,13 @@ function pintarHeroImagen(url){
     : '<p class="text-sm text-carbon/50">Usando la ilustración por defecto.</p>';
 }
 
+function pintarChefImagen(url){
+  const cont = $('chefImagenPreview');
+  cont.innerHTML = url
+    ? `<img src="${url}" alt="Foto del chef" class="h-32 rounded-xl object-cover ring-1 ring-vino/10">`
+    : '<p class="text-sm text-carbon/50">Usando la ilustración por defecto.</p>';
+}
+
 let CONTENIDO_ACTUAL = {};
 
 async function cargarContenidoAdmin(){
@@ -646,6 +682,7 @@ async function cargarContenidoAdmin(){
       if(Object.prototype.hasOwnProperty.call(CONTENIDO_ACTUAL, key)) el.value = CONTENIDO_ACTUAL[key];
     });
     pintarHeroImagen(CONTENIDO_ACTUAL.hero_imagen);
+    pintarChefImagen(CONTENIDO_ACTUAL.chef_imagen);
   }catch(e){
     toast('No se pudo cargar el contenido general');
   }
@@ -697,6 +734,34 @@ $('btnQuitarHeroImagen').addEventListener('click', async () => {
   try{
     await api('/admin/api/content/hero_imagen/image', { method: 'DELETE' });
     pintarHeroImagen('');
+    toast('Imagen quitada');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('formChefImagen').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = $('chefImagenInput').files[0];
+  if(!file){ toast('Elige una imagen'); return; }
+  const fd = new FormData();
+  fd.append('file', file);
+  try{
+    const res = await fetch('/admin/api/content/chef_imagen/image', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir la imagen');
+    pintarChefImagen(data.url);
+    $('formChefImagen').reset();
+    toast('Imagen actualizada');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('btnQuitarChefImagen').addEventListener('click', async () => {
+  try{
+    await api('/admin/api/content/chef_imagen/image', { method: 'DELETE' });
+    pintarChefImagen('');
     toast('Imagen quitada');
   }catch(e){
     toast(e.message);

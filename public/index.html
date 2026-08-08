@@ -255,6 +255,57 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
   </div>
 </section>
 
+<!-- ══════════════ SOBRE EL CHEF ══════════════ -->
+<section id="chef" class="scroll-mt-24 relative overflow-hidden bg-white py-20 lg:py-24">
+  <div class="pointer-events-none absolute -left-24 top-16 h-64 w-64 rounded-full bg-flama/10 blur-[110px]"></div>
+  <div class="pointer-events-none absolute -right-16 bottom-0 h-56 w-56 rounded-full bg-morado/10 blur-[100px]"></div>
+  <div class="relative mx-auto max-w-6xl px-5 lg:px-8">
+    <div class="grid items-center gap-14 lg:grid-cols-[.85fr_1fr]">
+
+      <div class="reveal relative mx-auto w-full max-w-sm">
+        <div class="absolute -inset-4 -z-10 rounded-[2.5rem] bg-gradient-to-br from-flama/25 to-morado/20 blur-2xl" aria-hidden="true"></div>
+        <div id="chefImagenWrap" class="tarjeta-viva relative flex aspect-[4/5] w-full items-center justify-center overflow-hidden rounded-[2rem] bg-gradient-to-br from-vino to-uva ring-1 ring-vino/10">
+          <svg viewBox="0 0 24 24" class="h-24 w-24 text-crema/25" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 2a4 4 0 0 0-4 4c0 2 1 3 1 4H8a2 2 0 0 0-2 2v1c0 3.3 2.7 6 6 6s6-2.7 6-6v-1a2 2 0 0 0-2-2h-1c0-1 1-2 1-4a4 4 0 0 0-4-4Z"/><path d="M9 19v1a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-1"/></svg>
+        </div>
+        <div class="entrada-rebote absolute -bottom-5 -right-3 rounded-2xl bg-white px-5 py-3 shadow-xl ring-1 ring-vino/10">
+          <p class="font-firma text-2xl text-vino">Endulcora</p>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="rule-flama mb-5 w-24"></div>
+        <p id="chefBadge" class="font-ui text-[11px] font-700 uppercase tracking-[.25em] text-morado">Fundador de Endulcora</p>
+        <h2 id="chefNombre" class="mt-3 font-display text-3xl leading-tight text-vino sm:text-4xl">Chef Luis Alfonso Jiménez Cárdenas</h2>
+        <p id="chefBio" class="mt-5 max-w-lg text-[15px] leading-relaxed text-carbon/70">
+          Formado en cocina profesional y especializado en repostería técnica, Luis Alfonso creó Endulcora para
+          enseñar recetas de estudio con el mismo rigor con el que se costean: al gramo, con margen real y listas
+          para vender. Cada manual y cada clase en vivo nacen de su cocina en Ciudad de México.
+        </p>
+
+        <ul class="mt-8 grid gap-4 sm:grid-cols-3">
+          <li class="reveal flex flex-col items-start gap-2 rounded-2xl border border-vino/10 p-4">
+            <svg viewBox="0 0 24 24" class="h-6 w-6 text-flama" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <p class="font-ui text-[12px] font-600 leading-snug text-carbon/75">Recetas con costeo real, no aproximado</p>
+          </li>
+          <li class="reveal flex flex-col items-start gap-2 rounded-2xl border border-vino/10 p-4">
+            <svg viewBox="0 0 24 24" class="h-6 w-6 text-flama" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <p class="font-ui text-[12px] font-600 leading-snug text-carbon/75">Clases en vivo, no grabaciones genéricas</p>
+          </li>
+          <li class="reveal flex flex-col items-start gap-2 rounded-2xl border border-vino/10 p-4">
+            <svg viewBox="0 0 24 24" class="h-6 w-6 text-flama" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            <p class="font-ui text-[12px] font-600 leading-snug text-carbon/75">Soporte directo por WhatsApp</p>
+          </li>
+        </ul>
+
+        <a href="#tienda" class="mt-8 inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
+          Conoce sus manuales
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════ ANUNCIOS (dinámico, desde el panel de administración) ══════════════ -->
 <section id="anuncios" class="scroll-mt-24 bg-flama/10 py-14">
   <div class="mx-auto max-w-7xl px-5 lg:px-8">
@@ -1050,6 +1101,9 @@ async function cargarContenido(){
   texto('heroStat3Etiqueta', c.hero_stat3_etiqueta);
   texto('heroCaption', c.hero_caption);
   texto('heroCaptionSub', c.hero_caption_sub);
+  texto('chefBadge', c.chef_badge);
+  texto('chefNombre', c.chef_nombre);
+  texto('chefBio', c.chef_bio);
   texto('claseTitulo', c.clase_titulo);
   texto('claseDescripcion', c.clase_descripcion);
   texto('footerDescripcion', c.footer_descripcion);
@@ -1057,6 +1111,10 @@ async function cargarContenido(){
   if(c.hero_imagen){
     const wrap = document.getElementById('heroImagenWrap');
     if(wrap) wrap.innerHTML = `<img src="${c.hero_imagen}" alt="Imagen destacada" class="mx-auto h-72 w-full rounded-2xl object-cover">`;
+  }
+  if(c.chef_imagen){
+    const wrapChef = document.getElementById('chefImagenWrap');
+    if(wrapChef) wrapChef.innerHTML = `<img src="${c.chef_imagen}" alt="${escapeHtml(c.chef_nombre || 'Chef de Endulcora')}" class="h-full w-full object-cover">`;
   }
 
   const numero = numeroWhatsapp();

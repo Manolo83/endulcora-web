@@ -129,7 +129,7 @@ router.patch('/api/content', requireAdmin, (req, res) => {
   res.json(item);
 });
 
-const CAMPOS_IMAGEN_CONTENIDO = ['hero_imagen'];
+const CAMPOS_IMAGEN_CONTENIDO = ['hero_imagen', 'chef_imagen'];
 router.post('/api/content/:key/image', requireAdmin, uploadImage.single('file'), (req, res) => {
   const { key } = req.params;
   if (!CAMPOS_IMAGEN_CONTENIDO.includes(key)) {
