@@ -1107,19 +1107,19 @@ function tarjetaMedia(m){
   const titulo = m.title ? `<p class="p-4 font-ui text-sm text-vino">${escapeHtml(m.title)}</p>` : '';
   if(m.kind === 'photo'){
     return `<figure class="card-lift reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
-      <img src="${m.url}" alt="${escapeHtml(m.title || 'Foto de Endulcora')}" loading="lazy" class="aspect-[4/3] w-full object-cover">
+      <img src="${escapeHtml(m.url)}" alt="${escapeHtml(m.title || 'Foto de Endulcora')}" loading="lazy" class="aspect-[4/3] w-full object-cover">
       ${titulo}
     </figure>`;
   }
   if(m.source === 'embed'){
     const embedUrl = toEmbedUrl(m.url);
     return `<figure class="card-lift reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
-      <div class="aspect-video w-full"><iframe class="h-full w-full" src="${embedUrl}" title="${escapeHtml(m.title || 'Video de Endulcora')}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      <div class="aspect-video w-full"><iframe class="h-full w-full" src="${escapeHtml(embedUrl)}" title="${escapeHtml(m.title || 'Video de Endulcora')}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
       ${titulo}
     </figure>`;
   }
   return `<figure class="card-lift reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
-    <video class="aspect-video w-full bg-black" src="${m.url}" controls preload="metadata"></video>
+    <video class="aspect-video w-full bg-black" src="${escapeHtml(m.url)}" controls preload="metadata"></video>
     ${titulo}
   </figure>`;
 }
@@ -1136,8 +1136,10 @@ function toEmbedUrl(url){
       const id = u.pathname.split('/').filter(Boolean).pop();
       if(id) return `https://player.vimeo.com/video/${id}`;
     }
+    // Solo se permite incrustar por http(s); evita esquemas como javascript:
+    if(u.protocol === 'http:' || u.protocol === 'https:') return url;
   }catch(e){}
-  return url;
+  return '';
 }
 
 async function cargarGaleria(){

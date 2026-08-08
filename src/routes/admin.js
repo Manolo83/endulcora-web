@@ -12,10 +12,22 @@ const router = express.Router();
 const ALLOWED_IMAGE = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const ALLOWED_VIDEO = ['video/mp4', 'video/webm', 'video/quicktime'];
 
+// La extension se deriva del MIME validado (no del nombre que envia el cliente),
+// para no guardar archivos con extensiones peligrosas (p. ej. .html) en /uploads.
+const EXT_POR_MIME = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+  'video/mp4': '.mp4',
+  'video/webm': '.webm',
+  'video/quicktime': '.mov',
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
+    const ext = EXT_POR_MIME[file.mimetype] || '';
     cb(null, `${crypto.randomUUID()}${ext}`);
   },
 });
