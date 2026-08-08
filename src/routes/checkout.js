@@ -77,7 +77,10 @@ router.post('/preference', async (req, res) => {
     });
 
     store.updateOrder(order.id, { mpPreferenceId: resultado.id });
-    const url = resultado.sandbox_init_point || resultado.init_point;
+    const esCredencialDePrueba = /^TEST-/.test(process.env.MP_ACCESS_TOKEN || '');
+    const url = esCredencialDePrueba
+      ? (resultado.sandbox_init_point || resultado.init_point)
+      : (resultado.init_point || resultado.sandbox_init_point);
     res.status(201).json({ url });
   } catch (err) {
     store.updateOrder(order.id, { estado: 'error' });
