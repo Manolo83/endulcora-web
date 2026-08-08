@@ -191,6 +191,7 @@
         <p class="mt-1 text-xs text-carbon/50">Sube una o varias fotos para el marco junto al encabezado. Con 2 o más, rotan solas cada pocos segundos. Sin ninguna, se muestra la ilustración de la vela.</p>
         <form id="formHeroCarrusel" class="mt-4 flex flex-wrap items-center gap-3">
           <input id="heroCarruselInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="text-sm">
+          <input id="heroCarruselTitulo" type="text" placeholder="Pie de foto (opcional)" class="min-w-[180px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
           <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Agregar imagen</button>
         </form>
         <div id="listaHeroCarrusel" class="mt-4 grid gap-3 sm:grid-cols-3"></div>
@@ -739,9 +740,22 @@ async function cargarHeroCarrusel(){
     cont.innerHTML = items.map(m => `
       <div class="overflow-hidden rounded-xl bg-white ring-1 ring-vino/10">
         <img src="${m.url}" alt="" class="aspect-square w-full object-cover">
+        <div class="p-2">
+          <input type="text" value="${escapeHtml(m.titulo || '')}" placeholder="Pie de foto" data-id="${m.id}" class="inputCaptionHeroCarrusel w-full rounded-lg border border-vino/15 bg-crema/60 px-2.5 py-1.5 text-xs">
+        </div>
         <button type="button" data-id="${m.id}" class="btnBorrarHeroCarrusel w-full border-t border-red-100 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:bg-red-50 transition">Borrar</button>
       </div>
     `).join('');
+    cont.querySelectorAll('.inputCaptionHeroCarrusel').forEach(input => {
+      input.addEventListener('change', async () => {
+        try{
+          await api(`/admin/api/hero-carrusel/${input.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ titulo: input.value.trim() }) });
+          toast('Pie de foto guardado');
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
     cont.querySelectorAll('.btnBorrarHeroCarrusel').forEach(btn => {
       btn.addEventListener('click', async () => {
         if(!confirm('¿Borrar esta imagen del carrusel?')) return;
@@ -760,6 +774,7 @@ $('formHeroCarrusel').addEventListener('submit', async (e) => {
   if(!file){ toast('Elige una imagen'); return; }
   const fd = new FormData();
   fd.append('file', file);
+  fd.append('title', $('heroCarruselTitulo').value.trim());
   try{
     const res = await fetch('/admin/api/hero-carrusel/upload', { method: 'POST', body: fd });
     const data = await res.json();

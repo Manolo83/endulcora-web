@@ -148,7 +148,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
         </span>
       </a>
 
-      <nav class="hidden lg:flex items-center gap-8 font-ui text-[13px] font-600 uppercase tracking-widest text-carbon/70">
+      <nav class="hidden xl:flex items-center gap-5 font-ui text-[12px] font-600 uppercase tracking-wide text-carbon/70">
         <a href="#tienda"     class="hover:text-vino transition">Tienda</a>
         <a href="#productos"  class="hover:text-vino transition">eBooks</a>
         <a href="#anexos"     class="hover:text-vino transition">Anexos</a>
@@ -172,13 +172,13 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
           <span id="carritoBadge" class="absolute -right-1 -top-1 hidden h-5 min-w-[20px] place-items-center rounded-full bg-flama px-1 font-ui text-[10px] font-700 text-carbon">0</span>
         </button>
         <button type="button" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false" id="btnMenu"
-          class="lg:hidden grid h-11 w-11 place-items-center rounded-full border border-vino/25 text-vino">
+          class="xl:hidden grid h-11 w-11 place-items-center rounded-full border border-vino/25 text-vino">
           <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
       </div>
     </div>
   </div>
-  <div id="menuMovil" class="hidden lg:hidden border-t border-vino/10 bg-crema px-5 pb-6 pt-2">
+  <div id="menuMovil" class="hidden xl:hidden border-t border-vino/10 bg-crema px-5 pb-6 pt-2">
     <a href="#tienda" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Tienda</a>
     <a href="#productos" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">eBooks</a>
     <a href="#anexos" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anexos</a>
@@ -198,7 +198,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
   <div class="pointer-events-none absolute -left-32 -top-20 h-[460px] w-[460px] rounded-full bg-[#A9D9BE] opacity-40 blur-[110px]"></div>
   <div class="pointer-events-none absolute right-[-60px] top-1/4 h-[480px] w-[480px] rounded-full bg-morado/40 opacity-40 blur-[120px]"></div>
   <div class="pointer-events-none absolute -left-10 bottom-[-160px] h-[420px] w-[420px] rounded-full bg-flama/45 opacity-45 blur-[120px]"></div>
-  <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:py-20 lg:grid-cols-[1.15fr_.85fr] lg:px-8 lg:py-28">
+  <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:py-20 lg:grid-cols-[.95fr_1.05fr] lg:px-8 lg:py-28">
     <div>
       <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-morado/30 bg-white/60 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-vino">
         <span class="h-1.5 w-1.5 rounded-full bg-flama"></span> <span id="heroBadge">Ciudad de México · Desde 2024</span>
@@ -245,15 +245,15 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     </div>
 
     <!-- Firma visual: la vela encendida o carrusel de publicidad, marco festoneado -->
-    <div class="relative mx-auto w-full max-w-sm">
-      <div class="halo absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-flama/25 blur-3xl"></div>
-      <div class="relative mx-auto aspect-square w-full max-w-[300px]">
+    <div class="relative mx-auto w-full max-w-[460px]">
+      <div class="halo absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-flama/25 blur-3xl"></div>
+      <div class="relative mx-auto aspect-square w-full max-w-[440px]">
         <svg viewBox="0 0 300 300" class="absolute inset-0 h-full w-full drop-shadow-[0_18px_40px_rgba(78,20,84,.18)]" aria-hidden="true">
           <path d="M 76.00 42.00 A 22.90 22.90 0 0 1 116.28 42.00 A 22.90 22.90 0 0 1 156.56 42.00 A 22.90 22.90 0 0 1 196.84 42.00 A 22.70 22.70 0 0 1 236.80 44.50 A 21.02 21.02 0 0 1 258.00 76.00 A 22.90 22.90 0 0 1 258.00 116.28 A 22.90 22.90 0 0 1 258.00 156.56 A 22.90 22.90 0 0 1 258.00 196.84 A 22.70 22.70 0 0 1 255.50 236.80 A 21.02 21.02 0 0 1 224.00 258.00 A 22.90 22.90 0 0 1 183.72 258.00 A 22.90 22.90 0 0 1 143.44 258.00 A 22.90 22.90 0 0 1 103.16 258.00 A 22.70 22.70 0 0 1 63.20 255.50 A 21.02 21.02 0 0 1 42.00 224.00 A 22.90 22.90 0 0 1 42.00 183.72 A 22.90 22.90 0 0 1 42.00 143.44 A 22.90 22.90 0 0 1 42.00 103.16 A 22.70 22.70 0 0 1 44.50 63.20 A 21.02 21.02 0 0 1 76.00 42.00 Z" fill="#F5A623"/>
         </svg>
         <div class="absolute inset-[15.33%] flex items-center justify-center overflow-hidden rounded-[10%] bg-white">
           <div id="heroImagenWrap" class="flex h-full w-full items-center justify-center">
-            <svg viewBox="0 0 120 200" class="mx-auto h-52 w-auto" role="img" aria-label="Vela comestible encendida">
+            <svg viewBox="0 0 120 200" class="mx-auto h-64 w-auto" role="img" aria-label="Vela comestible encendida">
               <ellipse cx="60" cy="188" rx="46" ry="9" fill="#000" opacity=".12"/>
               <g class="flama-svg">
                 <path d="M60 6c4 22 22 26 22 46a22 22 0 1 1-44 0c0-11 7-15 11-26 2 7 5 9 7 11 1-11 4-20 4-31z" fill="#F5A623"/>
@@ -269,6 +269,12 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
             </svg>
           </div>
           <div id="heroCarruselDots" class="absolute inset-x-0 bottom-3 z-10 flex items-center justify-center gap-1.5"></div>
+          <button type="button" id="btnHeroCarruselPrev" onclick="pasoHeroCarrusel(-1)" aria-label="Imagen anterior" class="hidden absolute left-3 top-1/2 z-10 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-vino shadow-md transition hover:bg-white">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button type="button" id="btnHeroCarruselNext" onclick="pasoHeroCarrusel(1)" aria-label="Siguiente imagen" class="hidden absolute right-3 top-1/2 z-10 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-vino shadow-md transition hover:bg-white">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
         </div>
       </div>
       <p id="heroCaption" class="mt-6 text-center font-firma text-2xl text-vino">se enciende, se derrite, se come</p>
@@ -1431,44 +1437,70 @@ async function cargarHeroCarrusel(){
 
 function pintarHeroCarrusel(){
   const dots = document.getElementById('heroCarruselDots');
+  const btnPrev = document.getElementById('btnHeroCarruselPrev');
+  const btnNext = document.getElementById('btnHeroCarruselNext');
   clearInterval(heroCarruselTimer);
   heroCarruselIndex = 0;
 
   if(!HERO_CARRUSEL.length){
     if(dots) dots.innerHTML = '';
+    if(btnPrev) btnPrev.classList.add('hidden');
+    if(btnNext) btnNext.classList.add('hidden');
     return; // se queda la ilustración por defecto que ya está en el HTML
   }
 
   renderHeroSlide();
 
-  if(HERO_CARRUSEL.length > 1 && dots){
+  const hayVarias = HERO_CARRUSEL.length > 1;
+  if(btnPrev) btnPrev.classList.toggle('hidden', !hayVarias);
+  if(btnNext) btnNext.classList.toggle('hidden', !hayVarias);
+
+  if(hayVarias && dots){
     dots.innerHTML = HERO_CARRUSEL.map((_, i) =>
       `<button type="button" onclick="irASlideHero(${i})" aria-label="Imagen ${i + 1}" class="h-2 w-2 rounded-full transition ${i === 0 ? 'bg-flama' : 'bg-white/70'}"></button>`
     ).join('');
-    if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      heroCarruselTimer = setInterval(() => irASlideHero((heroCarruselIndex + 1) % HERO_CARRUSEL.length), 5000);
-    }
+    iniciarAutoavanceHero();
   } else if(dots){
     dots.innerHTML = '';
   }
+}
+
+function iniciarAutoavanceHero(){
+  clearInterval(heroCarruselTimer);
+  if(HERO_CARRUSEL.length < 2) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  heroCarruselTimer = setInterval(() => irASlideHero((heroCarruselIndex + 1) % HERO_CARRUSEL.length), 5000);
 }
 
 function renderHeroSlide(){
   const wrap = document.getElementById('heroImagenWrap');
   const item = HERO_CARRUSEL[heroCarruselIndex];
   if(!wrap || !item) return;
-  wrap.innerHTML = `<img src="${item.url}" alt="Publicidad Endulcora" class="h-full w-full object-cover">`;
+  const captionHtml = item.titulo
+    ? `<div class="absolute inset-x-0 bottom-0 z-[5] bg-gradient-to-t from-carbon/75 to-transparent px-4 pb-7 pt-10 text-center">
+         <p class="font-ui text-[12px] font-600 text-crema">${escapeHtml(item.titulo)}</p>
+       </div>`
+    : '';
+  wrap.innerHTML = `<div class="relative h-full w-full"><img src="${item.url}" alt="${escapeHtml(item.titulo || 'Publicidad Endulcora')}" class="h-full w-full object-cover">${captionHtml}</div>`;
 }
 
 function irASlideHero(i){
   heroCarruselIndex = i;
   renderHeroSlide();
   const dots = document.getElementById('heroCarruselDots');
-  if(!dots) return;
-  [...dots.children].forEach((d, idx) => {
-    d.classList.toggle('bg-flama', idx === i);
-    d.classList.toggle('bg-white/70', idx !== i);
-  });
+  if(dots){
+    [...dots.children].forEach((d, idx) => {
+      d.classList.toggle('bg-flama', idx === i);
+      d.classList.toggle('bg-white/70', idx !== i);
+    });
+  }
+  iniciarAutoavanceHero();
+}
+
+function pasoHeroCarrusel(delta){
+  if(!HERO_CARRUSEL.length) return;
+  const total = HERO_CARRUSEL.length;
+  irASlideHero((heroCarruselIndex + delta + total) % total);
 }
 
 function tarjetaProducto(p){

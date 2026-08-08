@@ -331,16 +331,25 @@ module.exports = {
     const data = load();
     return [...data.heroCarrusel].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
   },
-  addHeroCarruselImagen({ url, filename }) {
+  addHeroCarruselImagen({ url, filename, titulo }) {
     const data = load();
     const item = {
       id: nextId(data.heroCarrusel),
       orden: data.heroCarrusel.length,
       url,
       filename: filename || null,
+      titulo: titulo || '',
       createdAt: new Date().toISOString(),
     };
     data.heroCarrusel.push(item);
+    save(data);
+    return item;
+  },
+  updateHeroCarruselImagen(id, patch) {
+    const data = load();
+    const item = data.heroCarrusel.find((m) => m.id === Number(id));
+    if (!item) return null;
+    if (typeof patch.titulo === 'string') item.titulo = patch.titulo;
     save(data);
     return item;
   },

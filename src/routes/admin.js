@@ -164,8 +164,15 @@ router.post('/api/hero-carrusel/upload', requireAdmin, uploadImage.single('file'
   const item = store.addHeroCarruselImagen({
     url: `/uploads/${req.file.filename}`,
     filename: req.file.filename,
+    titulo: req.body.title || '',
   });
   res.status(201).json(item);
+});
+
+router.patch('/api/hero-carrusel/:id', requireAdmin, (req, res) => {
+  const item = store.updateHeroCarruselImagen(req.params.id, req.body || {});
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
 });
 
 router.delete('/api/hero-carrusel/:id', requireAdmin, (req, res) => {
