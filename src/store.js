@@ -1,8 +1,13 @@
 const fs = require('fs');
+const path = require('path');
 const { DATA_DIR, UPLOAD_DIR, DB_PATH } = require('./config');
+
+const BACKUP_DIR = path.join(DATA_DIR, 'backups');
+const MAX_BACKUPS = 100;
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+fs.mkdirSync(BACKUP_DIR, { recursive: true });
 
 const DEFAULT_CONTENT = {
   hero_badge: 'Ciudad de México · Desde 2024',
@@ -122,15 +127,48 @@ const DEFAULT_CURSOS = [
   },
 ];
 
+function ultimoBackupValido() {
+  let archivos = [];
+  try {
+    archivos = fs.readdirSync(BACKUP_DIR)
+      .filter((f) => f.startsWith('db-') && f.endsWith('.json'))
+      .sort()
+      .reverse();
+  } catch (e) {
+    return null;
+  }
+  for (const f of archivos) {
+    try {
+      return JSON.parse(fs.readFileSync(path.join(BACKUP_DIR, f), 'utf8'));
+    } catch (e) {
+      // este respaldo tambien esta danado, prueba el siguiente
+    }
+  }
+  return null;
+}
+
 function load() {
   let data = null;
   if (fs.existsSync(DB_PATH)) {
     try {
       data = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
     } catch (e) {
+      console.error('[store] db.json no se pudo leer, se intentara recuperar de un respaldo:', e.message);
+      try {
+        fs.copyFileSync(DB_PATH, path.join(DATA_DIR, `db.danado.${Date.now()}.json`));
+      } catch (e2) { /* no bloquear la recuperacion si esto falla */ }
       data = null;
     }
   }
+
+  if (!data) {
+    const backup = ultimoBackupValido();
+    if (backup) {
+      console.warn('[store] No se encontro (o estaba danado) el archivo principal de datos; se restauro el respaldo mas reciente.');
+      data = backup;
+    }
+  }
+
   if (!data) data = {};
 
   let changed = false;
@@ -154,8 +192,28 @@ function load() {
 
 function save(data) {
   const tmp = `${DB_PATH}.tmp`;
-  fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
+  const json = JSON.stringify(data, null, 2);
+  fs.writeFileSync(tmp, json);
   fs.renameSync(tmp, DB_PATH);
+  guardarBackup(json);
+}
+
+function guardarBackup(json) {
+  try {
+    const marca = new Date().toISOString().replace(/[:.]/g, '-');
+    fs.writeFileSync(path.join(BACKUP_DIR, `db-${marca}.json`), json);
+    const archivos = fs.readdirSync(BACKUP_DIR)
+      .filter((f) => f.startsWith('db-') && f.endsWith('.json'))
+      .sort();
+    const sobrantes = archivos.length - MAX_BACKUPS;
+    if (sobrantes > 0) {
+      for (const f of archivos.slice(0, sobrantes)) {
+        fs.unlink(path.join(BACKUP_DIR, f), () => {});
+      }
+    }
+  } catch (e) {
+    console.error('[store] No se pudo guardar el respaldo:', e.message);
+  }
 }
 
 function nextId(list) {
