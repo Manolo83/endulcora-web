@@ -1,9 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
 const store = require('../store');
-const { enviarCorreoRecuperacion } = require('../email');
-const { SITE_URL } = require('../config');
 
 const router = express.Router();
 
@@ -85,48 +82,6 @@ router.get('/orders', requireCliente, (req, res) => {
   const user = store.getUserById(req.session.userId);
   if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
   res.json(store.getOrdersByUser(user.id, user.email));
-});
-
-router.post('/forgot-password', (req, res) => {
-  const { email } = req.body || {};
-  const mensaje = { ok: true, message: 'Si ese correo tiene una cuenta, te enviamos un enlace para restablecer tu contraseña.' };
-
-  const user = store.getUserByEmail(email);
-  if (!user) return res.json(mensaje);
-
-  const token = crypto.randomBytes(32).toString('hex');
-  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-  store.updateUser(user.id, {
-    resetTokenHash: tokenHash,
-    resetTokenExpires: Date.now() + 60 * 60 * 1000,
-  });
-
-  const resetUrl = `${SITE_URL}/?resetToken=${token}`;
-  enviarCorreoRecuperacion({ to: user.email, resetUrl }).catch(() => {
-    // Si el correo no se pudo enviar (ej. servicio no configurado), no lo revelamos al cliente.
-  });
-
-  res.json(mensaje);
-});
-
-router.post('/reset-password', (req, res) => {
-  const { token, password } = req.body || {};
-  if (!token || !password) return res.status(400).json({ error: 'Faltan datos.' });
-  if (String(password).length < 6) {
-    return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
-  }
-
-  const tokenHash = crypto.createHash('sha256').update(String(token)).digest('hex');
-  const user = store.getUserByResetToken(tokenHash);
-  if (!user) return res.status(400).json({ error: 'El enlace no es válido o ya expiró. Solicita uno nuevo.' });
-
-  const actualizado = store.updateUser(user.id, {
-    passwordHash: bcrypt.hashSync(String(password), 10),
-    resetTokenHash: null,
-    resetTokenExpires: null,
-  });
-  req.session.userId = actualizado.id;
-  res.json({ user: usuarioPublico(actualizado) });
 });
 
 module.exports = router;

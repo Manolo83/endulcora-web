@@ -715,8 +715,7 @@ function parrafosDesdeTexto(texto){
 }
 
 let SESION = { isLoggedIn: false, user: null };
-let VISTA_ACCESO = 'login'; // 'login' | 'registro' | 'olvide' | 'reset'
-let RESET_TOKEN = null;
+let VISTA_ACCESO = 'login'; // 'login' | 'registro' | 'olvide'
 
 function vistaAcceso(vista){
   VISTA_ACCESO = vista;
@@ -767,29 +766,12 @@ function vistaRegistro(){
 
 function vistaOlvide(){
   return { titulo: 'Recuperar contraseña', html: `
-    <p class="text-sm text-carbon/70">Escribe tu correo y te enviamos un enlace para elegir una nueva contraseña.</p>
-    <form id="formOlvideCliente" class="mt-4 space-y-4">
-      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo</span>
-      <input id="olvideEmail" type="email" required placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
-      <p id="olvideClienteMensaje" class="hidden rounded-xl bg-flama/15 px-4 py-3 text-sm text-vino"></p>
-      <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">
-        <span id="olvideClienteSpinner" class="spinner hidden" style="border-top-color:#FBF4E9"></span>
-        Enviar enlace
-      </button>
-    </form>
+    <p class="text-sm text-carbon/70">Por ahora la recuperación de contraseña se hace por WhatsApp: escríbenos con el correo de tu cuenta y te ayudamos a restablecerla.</p>
+    <a href="https://wa.me/52${numeroWhatsapp()}" target="_blank" rel="noopener"
+      class="mt-5 flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">
+      Escribir por WhatsApp
+    </a>
     <button type="button" onclick="vistaAcceso('login')" class="mt-4 font-ui text-[11px] font-600 uppercase tracking-wider text-vino underline underline-offset-2">Volver a entrar</button>
-  ` };
-}
-
-function vistaReset(){
-  return { titulo: 'Elegir nueva contraseña', html: `
-    <p class="text-sm text-carbon/70">Escribe tu nueva contraseña para tu cuenta.</p>
-    <form id="formResetCliente" class="mt-4 space-y-4">
-      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nueva contraseña (mínimo 6 caracteres)</span>
-      <input id="resetPassword" type="password" required minlength="6" placeholder="••••••••" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
-      <p id="resetClienteError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
-      <button type="submit" class="w-full rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Guardar y entrar</button>
-    </form>
   ` };
 }
 
@@ -829,7 +811,6 @@ const CONTENIDOS = {
   acceso: () => {
     if(VISTA_ACCESO === 'registro') return vistaRegistro();
     if(VISTA_ACCESO === 'olvide') return vistaOlvide();
-    if(VISTA_ACCESO === 'reset') return vistaReset();
     return vistaLogin();
   },
   perfil: () => vistaPerfil(),
@@ -889,14 +870,6 @@ async function cargarSesion(){
     SESION = { isLoggedIn: false, user: null };
   }
   actualizarHeaderSesion();
-
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('resetToken');
-  if(token){
-    RESET_TOKEN = token;
-    VISTA_ACCESO = 'reset';
-    abrirModal('acceso');
-  }
 }
 
 async function cerrarSesionCliente(){
@@ -967,53 +940,6 @@ function iniciarModalAcceso(){
     }
   });
 
-  const formOlvide = document.getElementById('formOlvideCliente');
-  if(formOlvide) formOlvide.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msg = document.getElementById('olvideClienteMensaje');
-    const spinner = document.getElementById('olvideClienteSpinner');
-    spinner.classList.remove('hidden');
-    try{
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: document.getElementById('olvideEmail').value.trim() }),
-      });
-      const data = await res.json();
-      msg.textContent = data.message || 'Si ese correo tiene una cuenta, te enviamos un enlace.';
-      msg.classList.remove('hidden');
-    }catch(e){
-      msg.textContent = 'No se pudo enviar la solicitud. Intenta de nuevo.';
-      msg.classList.remove('hidden');
-    }finally{
-      spinner.classList.add('hidden');
-    }
-  });
-
-  const formReset = document.getElementById('formResetCliente');
-  if(formReset) formReset.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const err = document.getElementById('resetClienteError');
-    err.classList.add('hidden');
-    try{
-      const res = await fetch('/api/auth/reset-password', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: RESET_TOKEN, password: document.getElementById('resetPassword').value }),
-      });
-      const data = await res.json();
-      if(!res.ok) throw new Error(data.error || 'No se pudo restablecer tu contraseña');
-      SESION = { isLoggedIn: true, user: data.user };
-      RESET_TOKEN = null;
-      actualizarHeaderSesion();
-      cerrarModal();
-      toast('Contraseña actualizada. ¡Ya iniciaste sesión!');
-      const url = new URL(window.location.href);
-      url.searchParams.delete('resetToken');
-      window.history.replaceState({}, '', url.pathname + url.search);
-    }catch(err2){
-      err.textContent = err2.message;
-      err.classList.remove('hidden');
-    }
-  });
 }
 
 function iniciarModalPerfil(){

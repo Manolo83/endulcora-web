@@ -373,14 +373,6 @@ module.exports = {
   getUserById(id) {
     return load().users.find((u) => u.id === Number(id)) || null;
   },
-  getUserByResetToken(tokenHash) {
-    const ahora = Date.now();
-    return (
-      load().users.find(
-        (u) => u.resetTokenHash === tokenHash && u.resetTokenExpires && u.resetTokenExpires > ahora
-      ) || null
-    );
-  },
   addUser({ email, passwordHash, nombre }) {
     const data = load();
     const item = {
@@ -388,8 +380,6 @@ module.exports = {
       email: String(email).trim().toLowerCase(),
       passwordHash,
       nombre: nombre || '',
-      resetTokenHash: null,
-      resetTokenExpires: null,
       createdAt: new Date().toISOString(),
     };
     data.users.push(item);

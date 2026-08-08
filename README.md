@@ -74,8 +74,6 @@ git push origin claude/endulcora-website-bns9po
    | `SITE_URL` | `https://www.endulcora.com` |
    | `MP_ACCESS_TOKEN` | tu Access Token de Mercado Pago (ver sección 8) |
    | `MP_PUBLIC_KEY` | tu Public Key de Mercado Pago (ver sección 8) |
-   | `RESEND_API_KEY` | para que funcione "olvidé mi contraseña" de tus clientes (ver sección 9) |
-   | `RESEND_FROM` | `Endulcora <onboarding@resend.dev>` mientras no verifiques tu dominio (ver sección 9) |
 
    Railway define `PORT` automáticamente, no hace falta agregarlo.
 6. Railway construye y despliega. Al terminar te da una URL tipo
@@ -176,27 +174,9 @@ Los visitantes pueden crear una cuenta (correo, contraseña y nombre) desde
 (vinculados automáticamente cuando compran habiendo iniciado sesión, o por
 correo si compraron sin sesión) y cambiar su nombre o contraseña.
 
-Para que "¿Olvidaste tu contraseña?" funcione y les llegue el correo con el
-enlace para elegir una nueva:
-
-1. Crea una cuenta gratis en [resend.com](https://resend.com).
-2. En su panel, ve a **API Keys → Create API Key** y cópiala.
-3. En Railway, agrega la variable `RESEND_API_KEY` con esa clave.
-4. Deja `RESEND_FROM` como `Endulcora <onboarding@resend.dev>` para empezar
-   a probar de inmediato (Resend permite enviar desde ese remitente de
-   prueba sin configurar nada más).
-5. Cuando quieras que los correos salgan como `noreply@endulcora.com` en vez
-   del remitente de prueba, en Resend ve a **Domains → Add Domain**, agrega
-   `endulcora.com` y sigue sus instrucciones para añadir los registros DNS
-   que te den en el panel de tu dominio (Squarespace) — igual que hicimos
-   con el dominio del sitio. Una vez verificado, cambia `RESEND_FROM` a
-   algo como `Endulcora <noreply@endulcora.com>`.
-
-Si `RESEND_API_KEY` no está configurada, el registro/login sigue funcionando
-normal; solo el correo de recuperación no se puede enviar (en ese caso, tú
-puedes ayudar a un cliente a recuperar el acceso creando una cuenta nueva o,
-si lo prefieres más adelante, pedirme que agregue un botón en `/admin` para
-restablecer contraseñas de clientes manualmente).
+Si un cliente olvida su contraseña, el botón "¿Olvidaste tu contraseña?" lo
+manda directo a tu WhatsApp para que le ayudes manualmente — el sitio no
+envía correos de recuperación automáticos.
 
 ## 10. Notas técnicas y mejoras futuras (opcionales)
 

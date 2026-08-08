@@ -58,7 +58,6 @@ const clienteAuthLimiter = rateLimit({
 });
 app.use('/api/auth/login', clienteAuthLimiter);
 app.use('/api/auth/register', clienteAuthLimiter);
-app.use('/api/auth/forgot-password', clienteAuthLimiter);
 
 const checkoutLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
