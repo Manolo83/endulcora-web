@@ -152,6 +152,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
         <a href="#tienda"     class="hover:text-vino transition">Tienda</a>
         <a href="#productos"  class="hover:text-vino transition">eBooks</a>
         <a href="#anexos"     class="hover:text-vino transition">Anexos</a>
+        <a href="#recetarios" class="hover:text-vino transition">Recetarios</a>
         <a href="#clase"      class="hover:text-vino transition">Clases en vivo</a>
         <a href="#simulador"  class="hover:text-vino transition">Calculadora</a>
         <a href="#cursos"     class="hover:text-vino transition">Cursos</a>
@@ -181,6 +182,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <a href="#tienda" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Tienda</a>
     <a href="#productos" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">eBooks</a>
     <a href="#anexos" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anexos</a>
+    <a href="#recetarios" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Recetarios</a>
     <a href="#clase" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Clases en vivo</a>
     <a href="#simulador" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calculadora</a>
     <a href="#cursos" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Cursos</a>
@@ -353,7 +355,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <div class="reveal mb-14 flex flex-wrap items-end justify-between gap-6">
       <div>
         <div class="rule-flama mb-5 w-24"></div>
-        <h2 id="productos" class="scroll-mt-24 font-display text-3xl leading-tight text-vino sm:text-4xl">Lo que se llevan<br>los que ya venden</h2>
+        <h2 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Lo que se llevan<br>los que ya venden</h2>
       </div>
       <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">
         Cada manual viene con su anexo de costeo. El libro te enseña la técnica; la hoja de cálculo
@@ -361,9 +363,25 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       </p>
     </div>
 
-    <div id="anexos" class="scroll-mt-24"></div>
-    <div id="listaProductos" class="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-      <p class="text-sm text-carbon/50">Cargando productos…</p>
+    <div id="productos" class="scroll-mt-24">
+      <h3 class="font-titulo text-xl tracking-wide text-vino">eBooks</h3>
+      <div id="listaEbooks" class="mt-6 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+        <p class="text-sm text-carbon/50">Cargando productos…</p>
+      </div>
+    </div>
+
+    <div id="anexos" class="scroll-mt-24 mt-16">
+      <h3 class="font-titulo text-xl tracking-wide text-vino">Anexos</h3>
+      <div id="listaAnexos" class="mt-6 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+        <p class="text-sm text-carbon/50">Cargando anexos…</p>
+      </div>
+    </div>
+
+    <div id="recetarios" class="scroll-mt-24 mt-16">
+      <h3 class="font-titulo text-xl tracking-wide text-vino">Recetarios</h3>
+      <div id="listaRecetarios" class="mt-6 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+        <p class="text-sm text-carbon/50">Cargando recetarios…</p>
+      </div>
     </div>
 
   </div>
@@ -1489,18 +1507,28 @@ function tarjetaProducto(p){
     </article>`;
 }
 
+const CONTENEDORES_PRODUCTOS = { ebook: 'listaEbooks', anexo: 'listaAnexos', recetario: 'listaRecetarios' };
+const MENSAJE_VACIO_PRODUCTOS = {
+  ebook: 'Aún no hay eBooks publicados.',
+  anexo: 'Aún no hay anexos publicados.',
+  recetario: 'Aún no hay recetarios publicados.',
+};
+
 async function cargarProductos(){
-  const cont = document.getElementById('listaProductos');
   try{
     const res = await fetch('/api/products');
     const items = await res.json();
-    if(!items.length){
-      cont.innerHTML = '<p class="text-sm text-carbon/50">Aún no hay productos publicados.</p>';
-      return;
-    }
-    cont.innerHTML = items.map(tarjetaProducto).join('');
+    Object.keys(CONTENEDORES_PRODUCTOS).forEach(cat => {
+      const cont = document.getElementById(CONTENEDORES_PRODUCTOS[cat]);
+      if(!cont) return;
+      const propios = items.filter(p => (p.categoria || 'ebook') === cat);
+      cont.innerHTML = propios.length ? propios.map(tarjetaProducto).join('') : `<p class="text-sm text-carbon/50">${MENSAJE_VACIO_PRODUCTOS[cat]}</p>`;
+    });
   }catch(e){
-    cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudieron cargar los productos.</p>';
+    Object.values(CONTENEDORES_PRODUCTOS).forEach(id => {
+      const cont = document.getElementById(id);
+      if(cont) cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudieron cargar los productos.</p>';
+    });
   }
 }
 

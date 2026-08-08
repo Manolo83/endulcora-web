@@ -45,6 +45,7 @@ const DEFAULT_CONTENT = {
 
 const DEFAULT_PRODUCTS = [
   {
+    categoria: 'ebook',
     etiqueta: 'VOLUMEN I',
     destacado: 'Más vendido',
     titulo: 'Velas Comestibles',
@@ -62,6 +63,7 @@ const DEFAULT_PRODUCTS = [
     imagen: '',
   },
   {
+    categoria: 'anexo',
     etiqueta: 'HOJA DE CÁLCULO',
     destacado: 'Anexo contable',
     titulo: 'Costos, Merma y Precios',
@@ -79,6 +81,7 @@ const DEFAULT_PRODUCTS = [
     imagen: '',
   },
   {
+    categoria: 'ebook',
     etiqueta: 'PAQUETE COMPLETO',
     destacado: '',
     titulo: 'Oficios Dulces Vol. I + II',
@@ -251,6 +254,7 @@ module.exports = {
     const item = {
       id: nextId(data.products),
       orden: data.products.length,
+      categoria: 'ebook',
       etiqueta: '',
       destacado: '',
       titulo: '',
