@@ -284,6 +284,11 @@ router.get('/api/orders', requireAdmin, (req, res) => {
   res.json(store.getOrders());
 });
 
+// ---- Suscriptores del correo (footer) ----
+router.get('/api/newsletter', requireAdmin, (req, res) => {
+  res.json(store.getSubscribers());
+});
+
 // ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----
 router.get('/api/users/buscar', requireAdmin, (req, res) => {
   const user = store.getUserByEmail(req.query.email || '');

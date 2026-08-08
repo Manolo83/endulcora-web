@@ -186,6 +186,7 @@ function load() {
   if (!data.orders) { data.orders = []; changed = true; }
   if (!data.users) { data.users = []; changed = true; }
   if (!data.heroCarrusel) { data.heroCarrusel = []; changed = true; }
+  if (!data.subscribers) { data.subscribers = []; changed = true; }
   if (changed) save(data);
   return data;
 }
@@ -492,6 +493,21 @@ module.exports = {
     const item = data.users.find((u) => u.id === Number(id));
     if (!item) return null;
     Object.assign(item, patch);
+    save(data);
+    return item;
+  },
+
+  // ---- Suscriptores del correo (footer) ----
+  getSubscribers() {
+    return [...load().subscribers].sort((a, b) => b.id - a.id);
+  },
+  addSubscriber(email) {
+    const data = load();
+    const correo = String(email || '').trim().toLowerCase();
+    const existente = data.subscribers.find((s) => s.email === correo);
+    if (existente) return existente;
+    const item = { id: nextId(data.subscribers), email: correo, createdAt: new Date().toISOString() };
+    data.subscribers.push(item);
     save(data);
     return item;
   },

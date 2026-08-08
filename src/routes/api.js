@@ -29,6 +29,14 @@ router.get('/hero-carrusel', (req, res) => {
   res.json(store.getHeroCarrusel());
 });
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+router.post('/newsletter/suscribir', (req, res) => {
+  const email = String((req.body && req.body.email) || '').trim();
+  if (!EMAIL_RE.test(email)) return res.status(400).json({ error: 'Escribe un correo válido.' });
+  store.addSubscriber(email);
+  res.status(201).json({ ok: true });
+});
+
 router.get('/pedidos/:orderId/descarga/:itemIndex', (req, res) => {
   const order = store.getOrder(req.params.orderId);
   if (!order || order.estado !== 'aprobado') {

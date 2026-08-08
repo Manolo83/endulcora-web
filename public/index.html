@@ -1184,11 +1184,23 @@ function cerrarModal(){
 document.getElementById('modal').addEventListener('click', e => { if(e.target.id === 'modal') cerrarModal(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarModal(); });
 
-function suscribir(){
-  const c = document.getElementById('correoFooter').value.trim();
+async function suscribir(){
+  const campo = document.getElementById('correoFooter');
+  const c = campo.value.trim();
   if(!c || !c.includes('@')){ toast('Escribe un correo válido'); return; }
-  document.getElementById('correoFooter').value = '';
-  toast('Listo, te escribimos con la próxima receta');
+  try{
+    const res = await fetch('/api/newsletter/suscribir', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: c }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo guardar tu correo');
+    campo.value = '';
+    toast('Listo, te escribimos con la próxima receta');
+  }catch(err){
+    toast(err.message);
+  }
 }
 
 /* ---------- Temporizador de la clase en vivo ---------- */

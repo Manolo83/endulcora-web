@@ -68,6 +68,15 @@ const checkoutLimiter = rateLimit({
 });
 app.use('/api/checkout/preference', checkoutLimiter);
 
+const newsletterLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
+});
+app.use('/api/newsletter/suscribir', newsletterLimiter);
+
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/auth', authRoutes);
