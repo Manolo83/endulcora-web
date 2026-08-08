@@ -265,6 +265,11 @@
           <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Foto (opcional)</span>
           <input id="prodImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="mt-1.5 w-full text-sm">
         </label>
+        <label class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Archivo que se entrega al comprarlo (PDF, Excel o ZIP)</span>
+          <input id="prodArchivoInput" type="file" accept="application/pdf,.pdf,.xls,.xlsx,.zip" class="mt-1.5 w-full text-sm">
+          <p id="prodArchivoEstado" class="mt-1.5 text-xs text-carbon/50"></p>
+        </label>
         <div class="flex gap-3 sm:col-span-2">
           <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar producto</button>
           <button type="button" id="btnCancelarProducto" class="hidden rounded-full border border-vino/20 px-6 py-3 font-ui text-[13px] font-600 uppercase tracking-wider text-vino">Cancelar edición</button>
@@ -831,6 +836,7 @@ function resetFormProducto(){
   $('productoEditandoId').value = '';
   $('productoModoTexto').textContent = 'Nuevo producto';
   $('btnCancelarProducto').classList.add('hidden');
+  $('prodArchivoEstado').textContent = '';
 }
 
 async function cargarProductosAdmin(){
@@ -849,10 +855,12 @@ async function cargarProductosAdmin(){
           <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${escapeHtml(ETIQUETA_CATEGORIA[p.categoria] || 'eBook')} · ${escapeHtml(p.etiqueta || '')}</p>
           <p class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(p.titulo || '')}</p>
           <p class="mt-1 text-sm text-carbon/70">$${escapeHtml(p.precio || '0')} MXN</p>
+          <p class="mt-2 text-xs ${p.archivo ? 'text-green-700' : 'text-humo'}">${p.archivo ? `Archivo: ${escapeHtml(p.archivoNombre || 'adjunto')}` : 'Sin archivo para entregar todavía'}</p>
           <div class="mt-3 flex gap-2">
             <button data-id="${p.id}" class="btnEditarProducto flex-1 rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Editar</button>
             <button data-id="${p.id}" class="btnBorrarProducto rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
           </div>
+          ${p.archivo ? `<button data-id="${p.id}" class="btnQuitarArchivoProducto mt-2 w-full rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar archivo</button>` : ''}
         </div>
       </article>
     `).join('');
@@ -874,6 +882,7 @@ async function cargarProductosAdmin(){
         $('prodPrecio').value = p.precio || '';
         $('prodPrecioAnterior').value = p.precioAnterior || '';
         $('prodBoton').value = p.boton || '';
+        $('prodArchivoEstado').textContent = p.archivo ? `Archivo actual: ${p.archivoNombre || 'adjunto'}` : 'Todavía no tiene archivo para entregar.';
         document.getElementById('seccionProductos').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
@@ -882,6 +891,18 @@ async function cargarProductosAdmin(){
         if(!confirm('¿Borrar este producto?')) return;
         await api(`/admin/api/products/${btn.dataset.id}`, { method: 'DELETE' });
         cargarProductosAdmin();
+      });
+    });
+    cont.querySelectorAll('.btnQuitarArchivoProducto').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Quitar el archivo de este producto? Ya no se entregará al comprarlo.')) return;
+        try{
+          await api(`/admin/api/products/${btn.dataset.id}/archivo`, { method: 'DELETE' });
+          toast('Archivo quitado');
+          cargarProductosAdmin();
+        }catch(e){
+          toast(e.message);
+        }
       });
     });
   }catch(e){
@@ -920,6 +941,13 @@ $('formProducto').addEventListener('submit', async (e) => {
       fd.append('file', file);
       const res = await fetch(`/admin/api/products/${productoId}/image`, { method: 'POST', body: fd });
       if(!res.ok){ const d = await res.json().catch(()=>({})); throw new Error(d.error || 'No se pudo subir la imagen'); }
+    }
+    const archivo = $('prodArchivoInput').files[0];
+    if(archivo){
+      const fd = new FormData();
+      fd.append('file', archivo);
+      const res = await fetch(`/admin/api/products/${productoId}/archivo`, { method: 'POST', body: fd });
+      if(!res.ok){ const d = await res.json().catch(()=>({})); throw new Error(d.error || 'No se pudo subir el archivo'); }
     }
     resetFormProducto();
     toast('Producto guardado');

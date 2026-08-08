@@ -169,11 +169,40 @@ tarjetas.
    **Credenciales de producción** y reemplaza esas mismas dos variables en
    Railway.
 5. En el panel `/admin` → **Ventas** puedes ver cada pedido y su estado
-   (pendiente/aprobado/rechazado). Cuando un pedido diga "Aprobado", entrega
-   el archivo o confirma el curso al correo del comprador — esa parte sigue
-   siendo manual, el sitio no envía los archivos automáticamente todavía.
+   (pendiente/aprobado/rechazado).
 
-## 9. Cuentas de clientes
+## 9. Entrega automática de compras
+
+Cuando un pedido de un eBook, anexo o recetario queda "Aprobado", el sitio le
+manda automáticamente un correo al comprador con un botón para descargar su
+archivo. Los cursos no llevan archivo — el correo le avisa que le confirmarás
+por WhatsApp.
+
+Para que esto funcione necesitas dos cosas:
+
+1. **Sube el archivo de cada producto**: en `/admin` → **Productos**, al
+   editar cualquiera verás el campo "Archivo que se entrega al comprarlo"
+   (PDF, Excel o ZIP, hasta 80 MB). Sin este archivo, el correo le dice al
+   cliente que se lo enviarás pronto, y tú sigues entregándolo manual desde
+   **Ventas** como antes.
+2. **Configura el envío de correos** (mismo servicio que usamos para
+   "olvidé mi contraseña" en su momento, ahora reactivado):
+   - Crea una cuenta gratis en [resend.com](https://resend.com).
+   - En su panel, ve a **API Keys → Create API Key**, dale un nombre y
+     cópiala en cuanto aparezca.
+   - En Railway, agrega la variable `RESEND_API_KEY` con esa clave.
+   - Deja `RESEND_FROM` como `Endulcora <onboarding@resend.dev>` para
+     empezar a probar de inmediato. Cuando quieras que los correos salgan
+     como `noreply@endulcora.com`, en Resend ve a **Domains → Add Domain**,
+     agrega `endulcora.com` y sigue sus instrucciones para añadir los
+     registros DNS en Squarespace — igual que hicimos con el dominio del
+     sitio. Luego cambia `RESEND_FROM` a `Endulcora <noreply@endulcora.com>`.
+
+Si `RESEND_API_KEY` no está configurada, todo sigue funcionando normal; el
+pedido se aprueba igual, solo que el correo automático no se envía y tienes
+que entregar manualmente desde **Ventas**, como siempre.
+
+## 10. Cuentas de clientes
 
 Los visitantes pueden crear una cuenta (correo, contraseña y nombre) desde
 "Acceso clientes". Con su cuenta pueden ver el historial de sus pedidos
@@ -184,7 +213,7 @@ Si un cliente olvida su contraseña, el botón "¿Olvidaste tu contraseña?" lo
 manda directo a tu WhatsApp para que le ayudes manualmente — el sitio no
 envía correos de recuperación automáticos.
 
-## 10. Notas técnicas y mejoras futuras (opcionales)
+## 11. Notas técnicas y mejoras futuras (opcionales)
 
 - El sitio usa Tailwind CSS por CDN para mantener el HTML original tal cual
   — funciona perfecto para el tráfico de un sitio personal/pequeño negocio.

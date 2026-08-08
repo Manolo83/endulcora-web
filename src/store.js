@@ -265,6 +265,8 @@ module.exports = {
       precioAnterior: '',
       boton: 'Comprar',
       imagen: '',
+      archivo: '',
+      archivoNombre: '',
       ...fields,
     };
     data.products.push(item);
@@ -380,6 +382,8 @@ module.exports = {
       estado: 'pendiente',
       mpPreferenceId: null,
       mpPaymentId: null,
+      descargaToken: null,
+      correoEnviado: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

@@ -39,6 +39,22 @@ const uploadImage = multer({
   },
 });
 
+const ALLOWED_DOCUMENTO = [
+  'application/pdf',
+  'application/zip',
+  'application/x-zip-compressed',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+];
+const uploadDocumento = multer({
+  storage,
+  limits: { fileSize: 80 * 1024 * 1024 }, // 80MB, suficiente para eBooks/anexos
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_DOCUMENTO.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Tipo de archivo no permitido. Usa PDF, Excel o ZIP.'));
+  },
+});
+
 function borrarSiEsSubida(url) {
   if (typeof url === 'string' && url.startsWith('/uploads/')) {
     fs.unlink(path.join(UPLOAD_DIR, path.basename(url)), () => {});
@@ -217,6 +233,29 @@ router.post('/api/products/:id/image', requireAdmin, uploadImage.single('file'),
   const item = store.updateProduct(req.params.id, { imagen: url });
   borrarSiEsSubida(anterior);
   res.status(201).json(item);
+});
+
+router.post('/api/products/:id/archivo', requireAdmin, uploadDocumento.single('file'), (req, res) => {
+  const producto = store.getProduct(req.params.id);
+  if (!producto) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    return res.status(404).json({ error: 'No encontrado' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
+  const url = `/uploads/${req.file.filename}`;
+  const anterior = producto.archivo;
+  const item = store.updateProduct(req.params.id, { archivo: url, archivoNombre: req.file.originalname });
+  borrarSiEsSubida(anterior);
+  res.status(201).json(item);
+});
+
+router.delete('/api/products/:id/archivo', requireAdmin, (req, res) => {
+  const producto = store.getProduct(req.params.id);
+  if (!producto) return res.status(404).json({ error: 'No encontrado' });
+  const anterior = producto.archivo;
+  const item = store.updateProduct(req.params.id, { archivo: '', archivoNombre: '' });
+  borrarSiEsSubida(anterior);
+  res.json(item);
 });
 
 // ---- Cursos y talleres ----

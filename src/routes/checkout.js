@@ -1,7 +1,9 @@
 const express = require('express');
+const crypto = require('crypto');
 const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const store = require('../store');
 const { SITE_URL } = require('../config');
+const { enviarCorreoConfirmacionCompra } = require('../email');
 
 const router = express.Router();
 
@@ -116,10 +118,33 @@ router.post('/webhook', async (req, res) => {
       cancelled: 'cancelado',
       refunded: 'reembolsado',
     };
-    store.updateOrder(order.id, {
-      estado: mapaEstado[info.status] || info.status,
-      mpPaymentId: String(info.id),
-    });
+    const nuevoEstado = mapaEstado[info.status] || info.status;
+    const yaSeHabiaAprobado = order.estado === 'aprobado';
+
+    const patch = { estado: nuevoEstado, mpPaymentId: String(info.id) };
+    if (nuevoEstado === 'aprobado' && !order.descargaToken) {
+      patch.descargaToken = crypto.randomBytes(24).toString('hex');
+    }
+    const actualizado = store.updateOrder(order.id, patch);
+
+    if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado && !order.correoEnviado && actualizado.email) {
+      const itemsConArchivo = actualizado.items.map((item) => {
+        if (item.tipo !== 'producto') return item;
+        const producto = store.getProduct(item.itemId);
+        return { ...item, archivoDisponible: !!(producto && producto.archivo) };
+      });
+      const contenido = store.getContent();
+      enviarCorreoConfirmacionCompra({
+        to: actualizado.email,
+        order: { ...actualizado, items: itemsConArchivo },
+        siteUrl: SITE_URL,
+        numeroWhatsapp: contenido.whatsapp_numero,
+      })
+        .then(() => store.updateOrder(order.id, { correoEnviado: true }))
+        .catch(() => {
+          // Si el correo no se pudo enviar (ej. servicio no configurado), el pedido sigue visible en /admin > Ventas.
+        });
+    }
   } catch (err) {
     // Si Mercado Pago reintenta despues, se procesa en el proximo intento.
   }
