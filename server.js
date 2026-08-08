@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const express = require('express');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -29,10 +30,26 @@ app.use(compression());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Nunca usar un secreto por defecto conocido: permitiría forjar sesiones de admin.
+// En produccion se exige SESSION_SECRET; fuera de produccion se genera uno aleatorio
+// por arranque (las sesiones no persisten entre reinicios, pero no es forjable).
+let sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret) {
+  if (process.env.NODE_ENV === 'production') {
+    console.error(
+      'FATAL: falta SESSION_SECRET. Define un valor largo y aleatorio en el entorno.\n' +
+      'Genera uno con: node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'hex\'))"'
+    );
+    process.exit(1);
+  }
+  sessionSecret = crypto.randomBytes(48).toString('hex');
+  console.warn('AVISO: SESSION_SECRET no definido; usando un secreto aleatorio temporal (solo desarrollo).');
+}
+
 app.use(
   cookieSession({
     name: 'endulcora_session',
-    secret: process.env.SESSION_SECRET || 'cambia-esta-clave-en-las-variables-de-entorno',
+    secret: sessionSecret,
     maxAge: 12 * 60 * 60 * 1000,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',

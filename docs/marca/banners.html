@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kit de banners · Endulcora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --carbon:#1B0720; --vino:#4E1454; --uva:#5C2360; --morado:#7A2E7E;
+    --flama:#F5A623; --crema:#FBF4E9; --humo:#9C9C9C;
+    --display:'Baloo 2',sans-serif; --firma:'Great Vibes',cursive;
+    --ui:'Montserrat',sans-serif; --cuerpo:'Poppins',sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{background:#2a2130; font-family:var(--cuerpo); padding:32px; color:#fff}
+  .page-title{font-family:var(--display); font-weight:800; font-size:22px; margin-bottom:6px}
+  .page-sub{font-family:var(--ui); font-size:13px; color:#c9bfd0; margin-bottom:28px; max-width:70ch; line-height:1.6}
+  .lbl{font-family:var(--ui); font-weight:700; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#c9bfd0; margin:26px 0 10px}
+
+  /* Cada banner se exporta a PNG por su id. Dimensiones reales de red social. */
+  .banner{position:relative; overflow:hidden; font-family:var(--cuerpo); color:var(--crema); border-radius:4px}
+  .b-post{width:1080px; height:1080px}
+  .b-story{width:1080px; height:1920px}
+  .b-wide{width:1200px; height:628px}
+
+  /* Fondos de marca */
+  .bg-vino{background:radial-gradient(120% 90% at 20% 0%, #6a2470 0%, #3d0f44 45%, #1B0720 100%)}
+  .bg-carbon{background:radial-gradient(130% 100% at 80% 10%, #4E1454 0%, #2a0a30 40%, #120416 100%)}
+  .halo{position:absolute; border-radius:50%; background:rgba(245,166,35,.22); filter:blur(120px); pointer-events:none}
+
+  .kicker{display:inline-flex; align-items:center; gap:14px; font-family:var(--ui); font-weight:700;
+    text-transform:uppercase; letter-spacing:.28em; color:var(--flama)}
+  .kicker .dot{width:12px; height:12px; border-radius:50%; background:var(--flama); box-shadow:0 0 24px 4px rgba(245,166,35,.6)}
+  .h-big{font-family:var(--display); font-weight:800; color:var(--crema); line-height:1.02; letter-spacing:-.01em}
+  .em{color:var(--flama)}
+  .firma{font-family:var(--firma); color:var(--flama)}
+  .rule{background-image:linear-gradient(90deg,var(--flama) 0 46px,transparent 46px); border-radius:3px}
+  .logo{font-family:var(--display); font-weight:800; letter-spacing:-.01em; line-height:1}
+  .logo .a{color:var(--crema)} .logo .b{color:var(--flama)}
+  .tag{font-family:var(--ui); font-weight:600; text-transform:uppercase; color:var(--humo)}
+  .pill{display:inline-flex; align-items:center; gap:16px; font-family:var(--ui); font-weight:700;
+    text-transform:uppercase; letter-spacing:.1em; color:var(--crema);
+    background:rgba(245,166,35,.12); border:2px solid rgba(245,166,35,.5); border-radius:999px}
+  .cta{display:inline-flex; align-items:center; gap:14px; font-family:var(--ui); font-weight:700;
+    text-transform:uppercase; letter-spacing:.08em; color:var(--carbon); background:var(--flama); border-radius:999px; white-space:nowrap}
+  @keyframes fl{0%,100%{transform:scale(1) rotate(-1deg)}50%{transform:scale(1.05,.95) rotate(2deg)}}
+  .flama-svg{transform-origin:50% 100%}
+</style>
+</head>
+<body>
+
+<div class="page-title">Kit de banners · Endulcora</div>
+<div class="page-sub">Plantillas on-brand en tamaños reales de red social. Fondos oscuros (vino/carbón) para que el ámbar sea legible y dramático. Edita los textos y exporta cada banner como PNG (o haz captura 1:1). Los PNG generados están en <b>docs/marca/banners/</b>.</div>
+
+<!-- ══════════ 1 · POST CLASE EN VIVO (1080×1080) ══════════ -->
+<div class="lbl">1 · Instagram / Facebook — Post cuadrado 1080×1080 — Clase en vivo</div>
+<div id="post-clase" class="banner b-post bg-vino">
+  <div class="halo" style="width:640px;height:640px;right:-160px;top:-160px"></div>
+  <div style="position:absolute;inset:0;padding:96px 88px;display:flex;flex-direction:column">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div class="logo" style="font-size:52px"><span class="a">ENDUL</span><span class="b">CORA</span></div>
+      <div class="tag" style="letter-spacing:.34em;font-size:15px;text-align:right;padding-top:14px">Estudio<br>Gastronómico</div>
+    </div>
+
+    <div style="margin-top:auto">
+      <div class="kicker" style="font-size:22px"><span class="dot"></span> Próxima clase en vivo</div>
+      <div class="h-big" style="font-size:104px;margin-top:34px">Vela de<br>mantequilla<br><span class="em">trufada</span></div>
+      <div class="firma" style="font-size:64px;margin-top:18px">se enciende, se derrite, se come</div>
+    </div>
+
+    <div style="margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end">
+      <div>
+        <div class="tag" style="font-size:20px;letter-spacing:.24em;color:var(--flama)">Jueves · 19:00 h · CDMX</div>
+        <div style="font-family:var(--cuerpo);font-size:26px;color:rgba(251,244,233,.72);margin-top:12px">2 h por videollamada · queda grabada</div>
+      </div>
+      <div class="cta" style="font-size:24px;padding:26px 44px">Aparta tu lugar →</div>
+    </div>
+  </div>
+  <!-- vela -->
+  <svg viewBox="0 0 120 200" style="position:absolute;right:70px;top:150px;height:360px;opacity:.9" aria-hidden="true">
+    <g class="flama-svg"><path d="M60 6c4 22 22 26 22 46a22 22 0 1 1-44 0c0-11 7-15 11-26 2 7 5 9 7 11 1-11 4-20 4-31z" fill="#F5A623"/>
+    <path d="M60 30c2 12 11 15 11 25a11 11 0 1 1-22 0c0-7 8-14 11-25z" fill="#FBF4E9" opacity=".85"/></g>
+    <rect x="58.5" y="72" width="3" height="16" rx="1.5" fill="#FBF4E9"/>
+    <path d="M28 88h64c3 0 5 2 5 5v82c0 6-5 10-11 10H34c-6 0-11-4-11-10V93c0-3 2-5 5-5z" fill="#FBF4E9" opacity=".14"/>
+  </svg>
+</div>
+
+<!-- ══════════ 2 · STORY PRÓXIMO TALLER (1080×1920) ══════════ -->
+<div class="lbl">2 · Instagram / Facebook — Story vertical 1080×1920 — Próximo taller</div>
+<div id="story-taller" class="banner b-story bg-carbon">
+  <div class="halo" style="width:720px;height:720px;left:-200px;top:520px"></div>
+  <div style="position:absolute;inset:0;padding:140px 96px;display:flex;flex-direction:column;text-align:center;align-items:center">
+    <div class="logo" style="font-size:56px"><span class="a">ENDUL</span><span class="b">CORA</span></div>
+    <div class="tag" style="letter-spacing:.44em;font-size:17px;margin-top:14px">Estudio Gastronómico</div>
+
+    <div class="rule" style="height:5px;width:138px;margin:80px 0 40px"></div>
+    <div class="kicker" style="font-size:24px"><span class="dot"></span> Próximo taller</div>
+
+    <div class="h-big" style="font-size:120px;margin-top:56px">Aprende la<br><span class="em">técnica</span>.</div>
+    <div class="h-big" style="font-size:120px;margin-top:6px">Cobra lo<br>que vale.</div>
+
+    <div style="font-family:var(--cuerpo);font-size:34px;line-height:1.5;color:rgba(251,244,233,.75);margin-top:64px;max-width:22ch">
+      Manuales, hojas de costeo y talleres en vivo para vender con margen real.</div>
+
+    <div class="firma" style="font-size:96px;margin-top:auto">en vivo</div>
+
+    <div class="pill" style="font-size:26px;padding:28px 52px;margin-top:56px">Cupos limitados</div>
+    <div class="cta" style="font-size:30px;padding:34px 64px;margin-top:40px">Reserva por WhatsApp</div>
+  </div>
+</div>
+
+<!-- ══════════ 3 · POST NUEVO EBOOK (1080×1080) ══════════ -->
+<div class="lbl">3 · Instagram / Facebook — Post cuadrado 1080×1080 — Lanzamiento de eBook</div>
+<div id="post-ebook" class="banner b-post bg-carbon">
+  <div class="halo" style="width:600px;height:600px;left:-160px;bottom:-200px"></div>
+  <div style="position:absolute;inset:0;padding:96px 88px;display:flex;flex-direction:column">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="logo" style="font-size:48px"><span class="a">ENDUL</span><span class="b">CORA</span></div>
+      <div class="pill" style="font-size:19px;padding:16px 30px;color:var(--flama);border-color:var(--flama)">Nuevo lanzamiento</div>
+    </div>
+
+    <div style="margin:auto 0">
+      <div class="rule" style="height:5px;width:120px;margin-bottom:44px"></div>
+      <div class="h-big" style="font-size:112px">eBook técnico<br>+ <span class="em">anexo de<br>costeo</span></div>
+      <div style="font-family:var(--cuerpo);font-size:32px;line-height:1.5;color:rgba(251,244,233,.75);margin-top:44px;max-width:26ch">
+        137 páginas de técnica y 50 fórmulas ya costeadas en Excel. El libro te enseña; la hoja te dice a cuánto vender.</div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div style="display:flex;gap:64px">
+        <div><div class="h-big em" style="font-size:76px">137</div><div class="tag" style="font-size:17px;letter-spacing:.16em;margin-top:8px">Páginas</div></div>
+        <div><div class="h-big em" style="font-size:76px">50</div><div class="tag" style="font-size:17px;letter-spacing:.16em;margin-top:8px">Fórmulas</div></div>
+        <div><div class="h-big em" style="font-size:76px">2</div><div class="tag" style="font-size:17px;letter-spacing:.16em;margin-top:8px">Anexos Excel</div></div>
+      </div>
+      <div class="cta" style="font-size:24px;padding:26px 44px">Ver en la tienda →</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 4 · BANNER ANCHO / ANUNCIO (1200×628) ══════════ -->
+<div class="lbl">4 · Facebook / Web — Banner ancho 1200×628 — Anuncio genérico (Open Graph)</div>
+<div id="wide-anuncio" class="banner b-wide bg-vino">
+  <div class="halo" style="width:420px;height:420px;right:-120px;top:-120px"></div>
+  <div style="position:absolute;inset:0;padding:64px 72px;display:flex;flex-direction:column">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="logo" style="font-size:38px"><span class="a">ENDUL</span><span class="b">CORA</span></div>
+      <div class="tag" style="letter-spacing:.3em;font-size:13px">Estudio Gastronómico · CDMX</div>
+    </div>
+
+    <div style="margin:auto 0">
+      <div class="kicker" style="font-size:16px"><span class="dot" style="width:9px;height:9px"></span> Anuncios y novedades</div>
+      <div class="h-big" style="font-size:76px;margin-top:22px;max-width:16ch">Fechas de clases y <span class="em">lanzamientos</span></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div class="firma" style="font-size:46px">cocina con oficio</div>
+      <div class="tag" style="font-size:16px;letter-spacing:.14em;color:rgba(251,244,233,.6)">endulcora.com</div>
+    </div>
+  </div>
+</div>
+
+<div style="height:40px"></div>
+</body>
+</html>
