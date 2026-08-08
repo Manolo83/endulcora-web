@@ -97,10 +97,38 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 .spinner { border: 3px solid rgba(255,255,255,.35); border-top-color: #FBF4E9; border-radius: 50%; width: 16px; height: 16px; animation: girar .7s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
 
+/* ---- Reveal escalonado: cada tarjeta de una fila aparece un poco despues que la anterior ---- */
+.reveal:nth-child(1){ transition-delay: 0ms }
+.reveal:nth-child(2){ transition-delay: 90ms }
+.reveal:nth-child(3){ transition-delay: 180ms }
+.reveal:nth-child(4){ transition-delay: 270ms }
+.reveal:nth-child(5){ transition-delay: 360ms }
+.reveal:nth-child(6){ transition-delay: 450ms }
+
+/* ---- Botones y tarjetas con vida: se levantan/aprietan al tocarlos ---- */
+.tarjeta-viva { transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .28s ease; }
+.tarjeta-viva:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(78,20,84,.28); }
+.boton-vivo { transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease; }
+.boton-vivo:hover { transform: translateY(-2px) scale(1.03); }
+.boton-vivo:active { transform: scale(.95); }
+
+/* ---- Flotar: para botones flotantes y decoraciones ---- */
+@keyframes flotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.flotar { animation: flotar 3.4s ease-in-out infinite; }
+
+/* ---- Entrada con rebote, para burbujas y botones flotantes ---- */
+@keyframes entradaRebote { 0% { opacity:0; transform: translateY(24px) scale(.85); } 60% { opacity:1; transform: translateY(-6px) scale(1.03); } 100% { opacity:1; transform: translateY(0) scale(1); } }
+.entrada-rebote { animation: entradaRebote .55s cubic-bezier(.34,1.56,.64,1) both; }
+
+/* ---- Divisor ondulado entre secciones ---- */
+.divisor-ondulado { display:block; width:100%; height:48px; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .flama-svg, .halo, .gota { animation: none !important; }
+  .flama-svg, .halo, .gota, .flotar, .entrada-rebote { animation: none !important; }
   .reveal { opacity:1 !important; transform:none !important; transition:none; }
+  .tarjeta-viva:hover { transform:none; }
+  .boton-vivo:hover, .boton-vivo:active { transform:none; }
 }
 </style>
 </head>
@@ -133,12 +161,12 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 
       <div class="flex items-center gap-3">
         <button type="button" onclick="abrirModal('acceso')"
-          class="hidden sm:inline-flex items-center gap-2 rounded-full bg-flama px-5 py-2.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
+          class="hidden sm:inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-5 py-2.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 11V7a4 4 0 1 0-8 0v4"/><rect x="5" y="11" width="14" height="10" rx="2"/></svg>
           Acceso clientes
         </button>
         <button type="button" onclick="abrirModal('carrito')" aria-label="Ver carrito"
-          class="relative grid h-11 w-11 shrink-0 place-items-center rounded-full border border-vino/25 text-vino hover:border-vino transition">
+          class="relative grid h-11 w-11 shrink-0 place-items-center rounded-full boton-vivo border border-vino/25 text-vino hover:border-vino transition">
           <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           <span id="carritoBadge" class="absolute -right-1 -top-1 hidden h-5 min-w-[20px] place-items-center rounded-full bg-flama px-1 font-ui text-[10px] font-700 text-carbon">0</span>
         </button>
@@ -158,8 +186,8 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <a href="#cursos" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Cursos</a>
     <a href="#galeria" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Galería</a>
     <a href="#anuncios" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anuncios</a>
-    <button type="button" onclick="toggleMenu();abrirModal('carrito')" class="mt-5 w-full rounded-full border border-vino/25 py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-vino">Ver carrito</button>
-    <button type="button" onclick="toggleMenu();abrirModal('acceso')" class="mt-3 w-full rounded-full bg-flama py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-carbon">Acceso clientes</button>
+    <button type="button" onclick="toggleMenu();abrirModal('carrito')" class="mt-5 w-full rounded-full boton-vivo border border-vino/25 py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-vino">Ver carrito</button>
+    <button type="button" onclick="toggleMenu();abrirModal('acceso')" class="mt-3 w-full rounded-full boton-vivo bg-flama py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-carbon">Acceso clientes</button>
   </div>
 </header>
 
@@ -184,11 +212,11 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       </p>
 
       <div class="mt-9 flex flex-wrap gap-4">
-        <a href="#tienda" class="inline-flex items-center gap-2 rounded-full bg-flama px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
+        <a href="#tienda" class="inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
           <span id="heroCtaPrimario">Ir a la tienda</span>
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
         </a>
-        <a href="#cursos" class="inline-flex items-center gap-2 rounded-full border border-vino/30 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
+        <a href="#cursos" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
           <span id="heroCtaSecundario">Ver cursos y talleres</span>
         </a>
       </div>
@@ -243,9 +271,13 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
   </div>
 </section>
 
+<svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-flama/10" aria-hidden="true"><path d="M0,20 C240,40 480,0 720,14 C960,28 1200,40 1440,18 L1440,40 L0,40 Z" fill="#FBF4E9"/></svg>
+
 <!-- ══════════════ PRODUCTOS DESTACADOS ══════════════ -->
-<section id="tienda" class="scroll-mt-24 bg-crema py-20 lg:py-28">
-  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+<section id="tienda" class="scroll-mt-24 relative overflow-hidden bg-crema py-20 lg:py-28">
+  <div class="pointer-events-none absolute -right-32 top-10 h-72 w-72 rounded-full bg-morado/10 blur-[110px]"></div>
+  <div class="pointer-events-none absolute -left-24 bottom-0 h-56 w-56 rounded-full bg-flama/10 blur-[100px]"></div>
+  <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
 
     <div class="reveal mb-14 flex flex-wrap items-end justify-between gap-6">
       <div>
@@ -317,8 +349,8 @@ trufada, paso a paso</h2>
           </div>
 
           <div class="mt-8 flex flex-wrap gap-4">
-            <button type="button" onclick="abrirModal('clase')" class="rounded-full bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">Apartar mi lugar</button>
-            <a href="#cursos" class="rounded-full border border-crema/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">Ver calendario</a>
+            <button type="button" onclick="abrirModal('clase')" class="rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">Apartar mi lugar</button>
+            <a href="#cursos" class="rounded-full boton-vivo border border-crema/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">Ver calendario</a>
           </div>
         </div>
 
@@ -450,7 +482,7 @@ trufada, paso a paso</h2>
           <div id="desglose" class="mt-5 space-y-3.5"></div>
           <p id="alerta" class="mt-6 hidden rounded-xl bg-flama/15 px-4 py-3 text-sm text-vino"></p>
           <a href="#anexos"
-            class="mt-6 block w-full rounded-full bg-vino py-3.5 text-center font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+            class="mt-6 block w-full rounded-full boton-vivo bg-vino py-3.5 text-center font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
             Quiero la hoja completa con mis 50 recetas
           </a>
         </div>
@@ -461,8 +493,9 @@ trufada, paso a paso</h2>
 </section>
 
 <!-- ══════════════ CURSOS ══════════════ -->
-<section id="cursos" class="scroll-mt-24 bg-white py-20 lg:py-24">
-  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+<section id="cursos" class="scroll-mt-24 relative overflow-hidden bg-white py-20 lg:py-24">
+  <div class="pointer-events-none absolute -left-28 top-0 h-64 w-64 rounded-full bg-flama/10 blur-[110px]"></div>
+  <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
     <div class="reveal mb-12 flex flex-wrap items-end justify-between gap-6">
       <div>
         <div class="rule-flama mb-5 w-24"></div>
@@ -476,6 +509,8 @@ trufada, paso a paso</h2>
     </div>
   </div>
 </section>
+
+<svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-white" aria-hidden="true"><path d="M0,18 C240,40 480,0 720,16 C960,32 1200,4 1440,20 L1440,40 L0,40 Z" fill="#FBF4E9"/></svg>
 
 <!-- ══════════════ GALERÍA (dinámica, desde el panel de administración) ══════════════ -->
 <section id="galeria" class="scroll-mt-24 bg-crema py-20 lg:py-24">
@@ -504,7 +539,7 @@ trufada, paso a paso</h2>
         <p id="footerDescripcion" class="mt-5 max-w-xs text-sm leading-relaxed text-carbon/60">
           Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.
         </p>
-        <a id="whatsappFooter" href="https://wa.me/525665271901" class="mt-6 inline-flex items-center gap-2 rounded-full border border-vino/30 px-4 py-2 font-ui text-[12px] font-600 tracking-wide text-vino hover:bg-vino hover:text-crema transition">
+        <a id="whatsappFooter" href="https://wa.me/525665271901" class="mt-6 inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 px-4 py-2 font-ui text-[12px] font-600 tracking-wide text-vino hover:bg-vino hover:text-crema transition">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
           <span id="whatsappFooterTexto">WhatsApp 5665271901</span>
         </a>
@@ -552,7 +587,7 @@ trufada, paso a paso</h2>
           <label for="correoFooter" class="sr-only">Tu correo</label>
           <input id="correoFooter" type="email" placeholder="tu@correo.com"
             class="w-full rounded-full border border-vino/20 bg-white px-4 py-2.5 text-sm text-carbon placeholder:text-carbon/35">
-          <button type="button" onclick="suscribir()" class="shrink-0 rounded-full bg-flama px-5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">Enviar</button>
+          <button type="button" onclick="suscribir()" class="shrink-0 rounded-full boton-vivo bg-flama px-5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">Enviar</button>
         </div>
       </div>
     </div>
@@ -591,11 +626,18 @@ trufada, paso a paso</h2>
     <p class="mt-1.5 font-titulo text-lg leading-tight tracking-wide">Vela de mantequilla trufada</p>
     <p id="burbujaFecha" class="mt-1 font-ui text-[12px] text-crema/70">Cargando fecha…</p>
     <a href="#clase" onclick="cerrarBurbujaTalleres()"
-      class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-flama px-4 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
+      class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-flama px-4 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
       Ver detalles
     </a>
   </div>
 </div>
+
+<!-- ══════════════ BOTÓN FLOTANTE · WHATSAPP ══════════════ -->
+<a id="whatsappFlotante" href="https://wa.me/525665271901" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"
+  class="entrada-rebote flotar fixed bottom-4 left-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl transition hover:scale-110 sm:bottom-6 sm:left-6">
+  <span class="absolute inset-0 rounded-full bg-[#25D366] opacity-60 motion-reduce:animate-none animate-ping"></span>
+  <svg viewBox="0 0 24 24" class="relative h-7 w-7" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
+</a>
 
 <script>
 /* ---------- Navegación ---------- */
@@ -627,7 +669,7 @@ const CONTENIDOS = {
     <input type="email" placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
     <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Contraseña</span>
     <input type="password" placeholder="••••••••" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
-    <button type="button" onclick="cerrarModal();toast('Demo: aquí se abriría tu biblioteca')" class="w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Entrar a mi biblioteca</button>
+    <button type="button" onclick="cerrarModal();toast('Demo: aquí se abriría tu biblioteca')" class="w-full rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Entrar a mi biblioteca</button>
     <p class="text-xs text-carbon/50">¿Compraste por WhatsApp y no tienes acceso? Escríbenos al ${numeroWhatsapp()} y lo activamos.</p>` }),
 
   clase: () => ({ titulo: 'Apartar mi lugar', html: `<p>Clase en vivo por videollamada. Te enviamos el enlace y la lista de insumos 48 horas antes.</p>
@@ -635,7 +677,7 @@ const CONTENIDOS = {
     <input type="text" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
     <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">WhatsApp</span>
     <input type="tel" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
-    <button type="button" onclick="cerrarModal();toast('Demo: recibirías tu confirmación por WhatsApp')" class="w-full rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon">Confirmar lugar</button>` }),
+    <button type="button" onclick="cerrarModal();toast('Demo: recibirías tu confirmación por WhatsApp')" class="w-full rounded-full boton-vivo bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon">Confirmar lugar</button>` }),
 
   privacidad: () => ({ titulo: 'Aviso de privacidad', html: parrafosDesdeTexto(SITE_CONTENT.legal_privacidad) }),
   terminos: () => ({ titulo: 'Términos y condiciones', html: parrafosDesdeTexto(SITE_CONTENT.legal_terminos) }),
@@ -729,7 +771,7 @@ function htmlCarrito(){
     <form id="formCarrito" class="mt-5">
       <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo para la entrega</span>
       <input id="carritoEmail" type="email" required placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
-      <button type="submit" id="btnPagarCarrito" class="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+      <button type="submit" id="btnPagarCarrito" class="mt-4 flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
         <span id="pagarCarritoSpinner" class="spinner hidden"></span>
         Ir a pagar con Mercado Pago
       </button>
@@ -958,6 +1000,33 @@ function texto(id, valor){
   if(el && typeof valor === 'string' && valor !== '') el.textContent = valor;
 }
 
+function contador(id, valorFinal){
+  const el = document.getElementById(id);
+  if(!el || typeof valorFinal !== 'string' || valorFinal === '') return;
+  const numero = parseInt(valorFinal.replace(/[^\d-]/g, ''), 10);
+  const sufijo = valorFinal.replace(/^-?\d+/, '');
+  if(!Number.isFinite(numero) || window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    el.textContent = valorFinal;
+    return;
+  }
+  const obs = new IntersectionObserver(entradas => {
+    entradas.forEach(entrada => {
+      if(!entrada.isIntersecting) return;
+      obs.disconnect();
+      const inicio = performance.now();
+      const duracion = 1300;
+      (function paso(ahora){
+        const progreso = Math.min(1, (ahora - inicio) / duracion);
+        const facilitado = 1 - Math.pow(1 - progreso, 3);
+        el.textContent = Math.round(numero * facilitado) + sufijo;
+        if(progreso < 1) requestAnimationFrame(paso);
+        else el.textContent = valorFinal;
+      })(performance.now());
+    });
+  }, { threshold: .4 });
+  obs.observe(el);
+}
+
 async function cargarContenido(){
   try{
     const res = await fetch('/api/content');
@@ -973,11 +1042,11 @@ async function cargarContenido(){
   texto('heroParrafo', c.hero_parrafo);
   texto('heroCtaPrimario', c.hero_cta_primario);
   texto('heroCtaSecundario', c.hero_cta_secundario);
-  texto('heroStat1Valor', c.hero_stat1_valor);
+  contador('heroStat1Valor', c.hero_stat1_valor);
   texto('heroStat1Etiqueta', c.hero_stat1_etiqueta);
-  texto('heroStat2Valor', c.hero_stat2_valor);
+  contador('heroStat2Valor', c.hero_stat2_valor);
   texto('heroStat2Etiqueta', c.hero_stat2_etiqueta);
-  texto('heroStat3Valor', c.hero_stat3_valor);
+  contador('heroStat3Valor', c.hero_stat3_valor);
   texto('heroStat3Etiqueta', c.hero_stat3_etiqueta);
   texto('heroCaption', c.hero_caption);
   texto('heroCaptionSub', c.hero_caption_sub);
@@ -994,6 +1063,8 @@ async function cargarContenido(){
   const wa = document.getElementById('whatsappFooter');
   if(wa) wa.href = `https://wa.me/52${numero}`;
   texto('whatsappFooterTexto', `WhatsApp ${numero}`);
+  const waFlotante = document.getElementById('whatsappFlotante');
+  if(waFlotante) waFlotante.href = `https://wa.me/52${numero}`;
 }
 
 function tarjetaProducto(p){
@@ -1009,7 +1080,7 @@ function tarjetaProducto(p){
     : '';
   const subtitulo = p.subtitulo ? `<p class="mt-2 font-firma text-xl text-flama">${escapeHtml(p.subtitulo)}</p>` : '';
   return `
-    <article class="reveal visible group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
+    <article class="reveal visible tarjeta-viva group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
       <div class="relative aspect-[4/3] bg-gradient-to-br from-vino to-uva p-7" style="${imagenEstilo}">
         ${destacado}
         <p class="font-titulo text-[11px] tracking-[.3em] text-flama">${escapeHtml(p.etiqueta || '')}</p>
@@ -1025,7 +1096,7 @@ function tarjetaProducto(p){
           <span class="pb-1 font-ui text-[11px] uppercase tracking-wider text-humo">MXN</span>
         </div>
         <button type="button" onclick="agregarAlCarrito(${escapeHtml(JSON.stringify({ tipo: 'producto', id: p.id, titulo: p.titulo || '', precio: parseFloat(String(p.precio || '0').replace(/,/g,'')) || 0 }))})"
-          class="mt-5 w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+          class="mt-5 w-full rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
           ${escapeHtml(p.boton || 'Agregar al carrito')}
         </button>
       </div>
@@ -1049,13 +1120,13 @@ async function cargarProductos(){
 
 function tarjetaCurso(c){
   return `
-    <div class="reveal visible flex flex-col rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
+    <div class="reveal visible tarjeta-viva flex flex-col rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
       <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">${escapeHtml(c.modalidad || '')}</p>
       <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">${escapeHtml(c.titulo || '')}</h3>
       <p class="mt-3 text-sm leading-relaxed text-carbon/65">${escapeHtml(c.descripcion || '')}</p>
       <p class="mt-5 font-display text-xl text-vino">$${escapeHtml(c.precio || '0')} <span class="font-cuerpo text-xs font-400 text-humo">MXN</span></p>
       <button type="button" onclick="agregarAlCarrito(${escapeHtml(JSON.stringify({ tipo: 'curso', id: c.id, titulo: c.titulo || '', precio: parseFloat(String(c.precio || '0').replace(/,/g,'')) || 0 }))})"
-        class="mt-5 w-full rounded-full border border-vino/30 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino hover:text-crema transition">
+        class="mt-5 w-full rounded-full boton-vivo border border-vino/30 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino hover:text-crema transition">
         Agregar al carrito
       </button>
     </div>`;
@@ -1086,7 +1157,7 @@ async function cargarAnuncios(){
       return;
     }
     cont.innerHTML = items.map(a => `
-      <article class="reveal visible rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+      <article class="reveal visible tarjeta-viva rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${new Date(a.createdAt).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})}</p>
         <h3 class="mt-2 font-titulo text-xl tracking-wide text-vino">${escapeHtml(a.title)}</h3>
         <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-carbon/70">${escapeHtml(a.body)}</p>
@@ -1100,19 +1171,19 @@ async function cargarAnuncios(){
 function tarjetaMedia(m){
   const titulo = m.title ? `<p class="p-4 font-ui text-sm text-vino">${escapeHtml(m.title)}</p>` : '';
   if(m.kind === 'photo'){
-    return `<figure class="reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+    return `<figure class="reveal visible tarjeta-viva overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
       <img src="${m.url}" alt="${escapeHtml(m.title || 'Foto de Endulcora')}" loading="lazy" class="aspect-[4/3] w-full object-cover">
       ${titulo}
     </figure>`;
   }
   if(m.source === 'embed'){
     const embedUrl = toEmbedUrl(m.url);
-    return `<figure class="reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+    return `<figure class="reveal visible tarjeta-viva overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
       <div class="aspect-video w-full"><iframe class="h-full w-full" src="${embedUrl}" title="${escapeHtml(m.title || 'Video de Endulcora')}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
       ${titulo}
     </figure>`;
   }
-  return `<figure class="reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+  return `<figure class="reveal visible tarjeta-viva overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
     <video class="aspect-video w-full bg-black" src="${m.url}" controls preload="metadata"></video>
     ${titulo}
   </figure>`;
