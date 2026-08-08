@@ -138,6 +138,7 @@ function load() {
     data.cursos = DEFAULT_CURSOS.map((c, i) => ({ id: i + 1, orden: i, ...c }));
     changed = true;
   }
+  if (!data.orders) { data.orders = []; changed = true; }
   if (changed) save(data);
   return data;
 }
@@ -311,6 +312,40 @@ module.exports = {
     const data = load();
     const item = data.cursos.find((c) => c.id === Number(id));
     data.cursos = data.cursos.filter((c) => c.id !== Number(id));
+    save(data);
+    return item;
+  },
+
+  // ---- Pedidos (Mercado Pago) ----
+  getOrders() {
+    const data = load();
+    return [...data.orders].sort((a, b) => b.id - a.id);
+  },
+  getOrder(id) {
+    return load().orders.find((o) => o.id === Number(id)) || null;
+  },
+  addOrder({ items, total, email }) {
+    const data = load();
+    const item = {
+      id: nextId(data.orders),
+      items,
+      total,
+      email: email || '',
+      estado: 'pendiente',
+      mpPreferenceId: null,
+      mpPaymentId: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    data.orders.push(item);
+    save(data);
+    return item;
+  },
+  updateOrder(id, patch) {
+    const data = load();
+    const item = data.orders.find((o) => o.id === Number(id));
+    if (!item) return null;
+    Object.assign(item, patch, { updatedAt: new Date().toISOString() });
     save(data);
     return item;
   },

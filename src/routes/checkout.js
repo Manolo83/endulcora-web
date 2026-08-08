@@ -1,0 +1,123 @@
+const express = require('express');
+const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
+const store = require('../store');
+const { SITE_URL } = require('../config');
+
+const router = express.Router();
+
+const MAX_ARTICULOS = 15;
+const MAX_CANTIDAD_POR_ARTICULO = 20;
+
+function mpClient() {
+  const accessToken = process.env.MP_ACCESS_TOKEN;
+  if (!accessToken) return null;
+  return new MercadoPagoConfig({ accessToken });
+}
+
+function parsePrecio(valor) {
+  const numero = parseFloat(String(valor).replace(/,/g, ''));
+  return Number.isFinite(numero) ? numero : 0;
+}
+
+router.post('/preference', async (req, res) => {
+  const client = mpClient();
+  if (!client) return res.status(503).json({ error: 'Los pagos todavia no estan configurados.' });
+
+  const { items: pedido, email } = req.body || {};
+  if (!Array.isArray(pedido) || pedido.length === 0) {
+    return res.status(400).json({ error: 'Tu carrito esta vacio.' });
+  }
+  if (pedido.length > MAX_ARTICULOS) {
+    return res.status(400).json({ error: 'Demasiados artículos distintos en un solo pedido.' });
+  }
+
+  const resueltos = [];
+  for (const linea of pedido) {
+    if (!['producto', 'curso'].includes(linea.tipo) || !linea.id) {
+      return res.status(400).json({ error: 'Uno de los artículos del carrito no es valido.' });
+    }
+    const cantidad = Math.max(1, Math.min(MAX_CANTIDAD_POR_ARTICULO, parseInt(linea.cantidad, 10) || 1));
+    const item = linea.tipo === 'producto' ? store.getProduct(linea.id) : store.getCurso(linea.id);
+    if (!item) {
+      return res.status(404).json({ error: `"${linea.titulo || 'Un artículo'}" ya no esta disponible.` });
+    }
+    const precio = parsePrecio(item.precio);
+    if (precio <= 0) continue;
+    resueltos.push({ tipo: linea.tipo, itemId: item.id, titulo: item.titulo, precio, cantidad });
+  }
+
+  if (!resueltos.length) {
+    return res.status(400).json({ error: 'No hay artículos validos en tu carrito.' });
+  }
+
+  const total = resueltos.reduce((acc, r) => acc + r.precio * r.cantidad, 0);
+  const order = store.addOrder({ items: resueltos, total, email: email || '' });
+
+  try {
+    const preference = new Preference(client);
+    const resultado = await preference.create({
+      body: {
+        items: resueltos.map((r) => ({
+          id: String(r.itemId),
+          title: r.titulo,
+          quantity: r.cantidad,
+          unit_price: r.precio,
+          currency_id: 'MXN',
+        })),
+        payer: email ? { email } : undefined,
+        external_reference: String(order.id),
+        back_urls: {
+          success: `${SITE_URL}/?pago=exito`,
+          failure: `${SITE_URL}/?pago=error`,
+          pending: `${SITE_URL}/?pago=pendiente`,
+        },
+        auto_return: 'approved',
+        notification_url: `${SITE_URL}/api/checkout/webhook`,
+      },
+    });
+
+    store.updateOrder(order.id, { mpPreferenceId: resultado.id });
+    const url = resultado.sandbox_init_point || resultado.init_point;
+    res.status(201).json({ url });
+  } catch (err) {
+    store.updateOrder(order.id, { estado: 'error' });
+    res.status(502).json({ error: 'No se pudo iniciar el pago. Intenta de nuevo en un momento.' });
+  }
+});
+
+router.post('/webhook', async (req, res) => {
+  res.status(200).end();
+
+  const client = mpClient();
+  if (!client) return;
+
+  const paymentId = (req.body && req.body.data && req.body.data.id) || req.query.id || req.query['data.id'];
+  const topic = req.query.topic || req.query.type || (req.body && req.body.type);
+  if (!paymentId || (topic && topic !== 'payment')) return;
+
+  try {
+    const payment = new Payment(client);
+    const info = await payment.get({ id: paymentId });
+    const orderId = info.external_reference;
+    if (!orderId) return;
+    const order = store.getOrder(orderId);
+    if (!order) return;
+
+    const mapaEstado = {
+      approved: 'aprobado',
+      pending: 'pendiente',
+      in_process: 'en_proceso',
+      rejected: 'rechazado',
+      cancelled: 'cancelado',
+      refunded: 'reembolsado',
+    };
+    store.updateOrder(order.id, {
+      estado: mapaEstado[info.status] || info.status,
+      mpPaymentId: String(info.id),
+    });
+  } catch (err) {
+    // Si Mercado Pago reintenta despues, se procesa en el proximo intento.
+  }
+});
+
+module.exports = router;

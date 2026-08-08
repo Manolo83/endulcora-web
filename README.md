@@ -10,8 +10,17 @@ página pública, sin tocar código.
   secciones nuevas y dinámicas — **Anuncios** y **Galería** — que se llenan
   solas leyendo datos del servidor.
 - **Panel de administración** (`/admin`): protegido con contraseña. Permite:
-  - Publicar/ocultar/borrar anuncios.
-  - Subir fotos y videos (hasta 150 MB) o pegar un enlace de YouTube/Vimeo.
+  - Editar todo el contenido del inicio, la sección "Clase en vivo", el
+    footer y el WhatsApp (**Contenido general**).
+  - Agregar/editar/borrar **productos** de la tienda y **cursos**, con foto
+    opcional.
+  - Editar los **textos legales** del footer.
+  - Ver las **ventas** hechas por Mercado Pago.
+  - Publicar/ocultar/borrar anuncios y subir fotos/videos a la galería
+    (hasta 150 MB), o pegar un enlace de YouTube/Vimeo.
+- **Carrito y pagos**: los visitantes agregan productos/cursos a un carrito
+  (guardado en su navegador) y pagan todo junto con **Mercado Pago**
+  (tarjeta, OXXO, transferencia) vía Checkout Pro.
 - **Backend** en Node.js + Express (`server.js`, `src/`): sirve el sitio,
   guarda los datos en un archivo JSON y los archivos subidos en disco.
 - **SEO básico**: `robots.txt`, `sitemap.xml`, metadatos Open Graph/Twitter,
@@ -62,6 +71,9 @@ git push origin claude/endulcora-website-bns9po
    | `SESSION_SECRET` | un texto largo y aleatorio (cualquier cadena de 32+ caracteres) |
    | `DATA_DIR` | `/data` |
    | `NODE_ENV` | `production` |
+   | `SITE_URL` | `https://www.endulcora.com` |
+   | `MP_ACCESS_TOKEN` | tu Access Token de Mercado Pago (ver sección 9) |
+   | `MP_PUBLIC_KEY` | tu Public Key de Mercado Pago (ver sección 9) |
 
    Railway define `PORT` automáticamente, no hace falta agregarlo.
 6. Railway construye y despliega. Al terminar te da una URL tipo
@@ -133,7 +145,29 @@ pasa por el panel.
   simplemente vuelve a subir tus fotos/videos importantes a otro lugar
   (Google Drive, etc.) como respaldo.
 
-## 8. Notas técnicas y mejoras futuras (opcionales)
+## 8. Pagos con Mercado Pago
+
+El sitio usa **Checkout Pro** de Mercado Pago: el visitante arma su carrito,
+pulsa "Ir a pagar" y se le redirige a la página de pago de Mercado Pago
+(tarjeta, OXXO, transferencia). El sitio nunca ve ni guarda datos de
+tarjetas.
+
+1. Crea/entra a tu cuenta en [mercadopago.com.mx](https://www.mercadopago.com.mx)
+   y vincula la cuenta bancaria (CLABE) donde quieres recibir el dinero.
+2. Ve a [mercadopago.com.mx/developers/panel](https://www.mercadopago.com.mx/developers/panel)
+   y crea una aplicación de tipo **Checkout Pro**.
+3. En **Credenciales de prueba**, copia el **Access Token** y el **Public
+   Key** y ponlos en Railway como `MP_ACCESS_TOKEN` y `MP_PUBLIC_KEY` — así
+   puedes probar compras completas sin usar dinero real.
+4. Cuando quieras cobrar de verdad, repite el paso con la pestaña
+   **Credenciales de producción** y reemplaza esas mismas dos variables en
+   Railway.
+5. En el panel `/admin` → **Ventas** puedes ver cada pedido y su estado
+   (pendiente/aprobado/rechazado). Cuando un pedido diga "Aprobado", entrega
+   el archivo o confirma el curso al correo del comprador — esa parte sigue
+   siendo manual, el sitio no envía los archivos automáticamente todavía.
+
+## 9. Notas técnicas y mejoras futuras (opcionales)
 
 - El sitio usa Tailwind CSS por CDN para mantener el HTML original tal cual
   — funciona perfecto para el tráfico de un sitio personal/pequeño negocio.

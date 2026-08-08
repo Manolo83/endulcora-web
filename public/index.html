@@ -94,6 +94,8 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 :focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
 
 .barra { transition: width .45s cubic-bezier(.2,.7,.3,1); }
+.spinner { border: 3px solid rgba(255,255,255,.35); border-top-color: #FBF4E9; border-radius: 50%; width: 16px; height: 16px; animation: girar .7s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -135,6 +137,11 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 11V7a4 4 0 1 0-8 0v4"/><rect x="5" y="11" width="14" height="10" rx="2"/></svg>
           Acceso clientes
         </button>
+        <button type="button" onclick="abrirModal('carrito')" aria-label="Ver carrito"
+          class="relative grid h-11 w-11 shrink-0 place-items-center rounded-full border border-vino/25 text-vino hover:border-vino transition">
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span id="carritoBadge" class="absolute -right-1 -top-1 hidden h-5 min-w-[20px] place-items-center rounded-full bg-flama px-1 font-ui text-[10px] font-700 text-carbon">0</span>
+        </button>
         <button type="button" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false" id="btnMenu"
           class="lg:hidden grid h-11 w-11 place-items-center rounded-full border border-vino/25 text-vino">
           <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -151,7 +158,8 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <a href="#cursos" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Cursos</a>
     <a href="#galeria" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Galería</a>
     <a href="#anuncios" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anuncios</a>
-    <button type="button" onclick="toggleMenu();abrirModal('acceso')" class="mt-5 w-full rounded-full bg-flama py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-carbon">Acceso clientes</button>
+    <button type="button" onclick="toggleMenu();abrirModal('carrito')" class="mt-5 w-full rounded-full border border-vino/25 py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-vino">Ver carrito</button>
+    <button type="button" onclick="toggleMenu();abrirModal('acceso')" class="mt-3 w-full rounded-full bg-flama py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-carbon">Acceso clientes</button>
   </div>
 </header>
 
@@ -441,10 +449,10 @@ trufada, paso a paso</h2>
           <h3 class="font-titulo text-xl tracking-wide text-vino">De qué está hecho tu costo</h3>
           <div id="desglose" class="mt-5 space-y-3.5"></div>
           <p id="alerta" class="mt-6 hidden rounded-xl bg-flama/15 px-4 py-3 text-sm text-vino"></p>
-          <button type="button" onclick="abrirModal('compra','Calculadora de Costos, Merma y Precios')"
-            class="mt-6 w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+          <a href="#anexos"
+            class="mt-6 block w-full rounded-full bg-vino py-3.5 text-center font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
             Quiero la hoja completa con mis 50 recetas
-          </button>
+          </a>
         </div>
       </div>
     </div>
@@ -639,13 +647,8 @@ const CONTENIDOS = {
 function abrirModal(clave, extra){
   const m = document.getElementById('modal');
   let datos = CONTENIDOS[clave] ? CONTENIDOS[clave]() : null;
-  if(clave === 'compra'){
-    datos = { titulo: 'Finalizar compra', html: `<p>Producto seleccionado: <strong class="text-vino">${escapeHtml(extra)}</strong></p>
-      <p>Recibirás el enlace de descarga en tu correo en cuanto se confirme el pago. Aceptamos tarjeta, transferencia y pago en efectivo.</p>
-      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo para la entrega</span>
-      <input type="email" placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
-      <button type="button" onclick="cerrarModal();toast('Demo: aquí continuaría el pago')" class="w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Continuar al pago</button>
-      <p class="text-xs text-carbon/50">¿Prefieres pedirlo por WhatsApp? Escríbenos al ${numeroWhatsapp()}.</p>` };
+  if(clave === 'carrito'){
+    datos = { titulo: 'Tu carrito', html: htmlCarrito() };
   }
   if(!datos) return;
   document.getElementById('modalTitulo').textContent = datos.titulo;
@@ -653,6 +656,122 @@ function abrirModal(clave, extra){
   m.classList.remove('hidden');
   m.classList.add('flex');
   document.body.style.overflow = 'hidden';
+  if(clave === 'carrito') iniciarModalCarrito();
+}
+
+/* ---------- Carrito de compras ---------- */
+let CARRITO = [];
+try{ CARRITO = JSON.parse(localStorage.getItem('endulcora_carrito') || '[]'); }catch(e){ CARRITO = []; }
+
+function guardarCarrito(){
+  localStorage.setItem('endulcora_carrito', JSON.stringify(CARRITO));
+  actualizarBadgeCarrito();
+}
+
+function actualizarBadgeCarrito(){
+  const total = CARRITO.reduce((a, i) => a + i.cantidad, 0);
+  const badge = document.getElementById('carritoBadge');
+  if(!badge) return;
+  badge.textContent = total > 99 ? '99+' : String(total);
+  badge.classList.toggle('hidden', total === 0);
+}
+
+function agregarAlCarrito(item){
+  const existente = CARRITO.find(i => i.tipo === item.tipo && i.id === item.id);
+  if(existente) existente.cantidad += 1;
+  else CARRITO.push({ tipo: item.tipo, id: item.id, titulo: item.titulo, precio: item.precio, cantidad: 1 });
+  guardarCarrito();
+  toast(`"${item.titulo}" se agregó al carrito`);
+}
+
+function cambiarCantidadCarrito(tipo, id, delta){
+  const linea = CARRITO.find(i => i.tipo === tipo && i.id === id);
+  if(!linea) return;
+  linea.cantidad += delta;
+  if(linea.cantidad <= 0) CARRITO = CARRITO.filter(i => !(i.tipo === tipo && i.id === id));
+  guardarCarrito();
+  if(!document.getElementById('modal').classList.contains('hidden')) abrirModal('carrito');
+}
+
+function quitarDelCarrito(tipo, id){
+  CARRITO = CARRITO.filter(i => !(i.tipo === tipo && i.id === id));
+  guardarCarrito();
+  if(!document.getElementById('modal').classList.contains('hidden')) abrirModal('carrito');
+}
+
+function totalCarrito(){
+  return CARRITO.reduce((a, i) => a + i.precio * i.cantidad, 0);
+}
+
+function htmlCarrito(){
+  if(!CARRITO.length){
+    return `<p class="text-sm text-carbon/60">Tu carrito está vacío. Agrega algún eBook, anexo o curso desde la tienda.</p>`;
+  }
+  const filas = CARRITO.map(i => `
+    <div class="flex items-center justify-between gap-3 border-b border-vino/10 py-3">
+      <div class="min-w-0">
+        <p class="truncate text-sm font-600 text-carbon">${escapeHtml(i.titulo)}</p>
+        <p class="text-xs text-carbon/50">$${formatoMonto(i.precio)} c/u</p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <button type="button" onclick="cambiarCantidadCarrito('${i.tipo}',${i.id},-1)" class="grid h-7 w-7 place-items-center rounded-full border border-vino/20 text-vino">−</button>
+        <span class="w-5 text-center text-sm">${i.cantidad}</span>
+        <button type="button" onclick="cambiarCantidadCarrito('${i.tipo}',${i.id},1)" class="grid h-7 w-7 place-items-center rounded-full border border-vino/20 text-vino">+</button>
+        <button type="button" onclick="quitarDelCarrito('${i.tipo}',${i.id})" aria-label="Quitar" class="ml-1 text-red-500 hover:text-red-700">✕</button>
+      </div>
+    </div>`).join('');
+
+  return `
+    <div>${filas}</div>
+    <div class="mt-4 flex items-center justify-between font-ui text-sm font-700 uppercase tracking-wide text-vino">
+      <span>Total</span><span>$${formatoMonto(totalCarrito())} MXN</span>
+    </div>
+    <form id="formCarrito" class="mt-5">
+      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo para la entrega</span>
+      <input id="carritoEmail" type="email" required placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+      <button type="submit" id="btnPagarCarrito" class="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        <span id="pagarCarritoSpinner" class="spinner hidden"></span>
+        Ir a pagar con Mercado Pago
+      </button>
+      <p id="carritoError" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+    </form>
+    <p class="mt-4 text-xs text-carbon/50">¿Prefieres pedirlo por WhatsApp? Escríbenos al ${numeroWhatsapp()}.</p>`;
+}
+
+function formatoMonto(n){
+  return Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function iniciarModalCarrito(){
+  const form = document.getElementById('formCarrito');
+  if(!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const boton = document.getElementById('btnPagarCarrito');
+    const spinner = document.getElementById('pagarCarritoSpinner');
+    const error = document.getElementById('carritoError');
+    error.classList.add('hidden');
+    boton.disabled = true;
+    spinner.classList.remove('hidden');
+    try{
+      const res = await fetch('/api/checkout/preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: CARRITO.map(i => ({ tipo: i.tipo, id: i.id, titulo: i.titulo, cantidad: i.cantidad })),
+          email: document.getElementById('carritoEmail').value.trim(),
+        }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
+      window.location.href = data.url;
+    }catch(err){
+      error.textContent = err.message;
+      error.classList.remove('hidden');
+      boton.disabled = false;
+      spinner.classList.add('hidden');
+    }
+  });
 }
 function cerrarModal(){
   const m = document.getElementById('modal');
@@ -905,9 +1024,9 @@ function tarjetaProducto(p){
           ${anteriorPrecio}
           <span class="pb-1 font-ui text-[11px] uppercase tracking-wider text-humo">MXN</span>
         </div>
-        <button type="button" onclick="abrirModal('compra', ${escapeHtml(JSON.stringify(p.titulo || ''))})"
+        <button type="button" onclick="agregarAlCarrito(${escapeHtml(JSON.stringify({ tipo: 'producto', id: p.id, titulo: p.titulo || '', precio: parseFloat(String(p.precio || '0').replace(/,/g,'')) || 0 }))})"
           class="mt-5 w-full rounded-full bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
-          ${escapeHtml(p.boton || 'Comprar')}
+          ${escapeHtml(p.boton || 'Agregar al carrito')}
         </button>
       </div>
     </article>`;
@@ -930,11 +1049,15 @@ async function cargarProductos(){
 
 function tarjetaCurso(c){
   return `
-    <div class="reveal visible rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
+    <div class="reveal visible flex flex-col rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
       <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">${escapeHtml(c.modalidad || '')}</p>
       <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">${escapeHtml(c.titulo || '')}</h3>
       <p class="mt-3 text-sm leading-relaxed text-carbon/65">${escapeHtml(c.descripcion || '')}</p>
       <p class="mt-5 font-display text-xl text-vino">$${escapeHtml(c.precio || '0')} <span class="font-cuerpo text-xs font-400 text-humo">MXN</span></p>
+      <button type="button" onclick="agregarAlCarrito(${escapeHtml(JSON.stringify({ tipo: 'curso', id: c.id, titulo: c.titulo || '', precio: parseFloat(String(c.precio || '0').replace(/,/g,'')) || 0 }))})"
+        class="mt-5 w-full rounded-full border border-vino/30 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino hover:text-crema transition">
+        Agregar al carrito
+      </button>
     </div>`;
 }
 
@@ -1031,6 +1154,26 @@ cargarProductos();
 cargarCursos();
 cargarAnuncios();
 cargarGaleria();
+actualizarBadgeCarrito();
+manejarRegresoDePago();
+
+function manejarRegresoDePago(){
+  const params = new URLSearchParams(window.location.search);
+  const pago = params.get('pago');
+  if(!pago) return;
+  if(pago === 'exito'){
+    CARRITO = [];
+    guardarCarrito();
+    toast('¡Pago confirmado! Te llegará la confirmación a tu correo.');
+  }else if(pago === 'pendiente'){
+    toast('Tu pago está en proceso. Te avisaremos cuando se confirme.');
+  }else if(pago === 'error'){
+    toast('El pago no se pudo completar. Tu carrito sigue guardado.');
+  }
+  params.delete('pago');
+  const query = params.toString();
+  history.replaceState({}, '', window.location.pathname + (query ? `?${query}` : ''));
+}
 </script>
 </body>
 </html>

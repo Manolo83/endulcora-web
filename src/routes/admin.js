@@ -210,6 +210,11 @@ router.delete('/api/cursos/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- Ventas (pedidos de Mercado Pago) ----
+router.get('/api/orders', requireAdmin, (req, res) => {
+  res.json(store.getOrders());
+});
+
 // ---- Manejo de errores (ej. archivo demasiado grande, tipo no permitido) ----
 router.use((err, req, res, next) => {
   res.status(400).json({ error: err.message || 'Error al procesar la solicitud' });

@@ -11,6 +11,7 @@ const rateLimit = require('express-rate-limit');
 const { UPLOAD_DIR } = require('./src/config');
 const apiRoutes = require('./src/routes/api');
 const adminRoutes = require('./src/routes/admin');
+const checkoutRoutes = require('./src/routes/checkout');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
@@ -47,7 +48,17 @@ const loginLimiter = rateLimit({
 });
 app.use('/admin/login', loginLimiter);
 
+const checkoutLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos de compra. Intenta de nuevo en unos minutos.' },
+});
+app.use('/api/checkout/preference', checkoutLimiter);
+
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
+app.use('/api/checkout', checkoutRoutes);
 app.use('/api', apiRoutes);
 app.use('/admin', adminRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
