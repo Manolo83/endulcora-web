@@ -29,7 +29,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -192,12 +192,13 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 </header>
 
 <!-- ══════════════ HERO ══════════════ -->
-<section class="relative overflow-hidden bg-crema text-carbon">
-  <div class="pointer-events-none absolute -left-40 top-0 h-[520px] w-[520px] rounded-full bg-morado/15 blur-[130px]"></div>
-  <div class="pointer-events-none absolute -right-24 bottom-[-120px] h-[420px] w-[420px] rounded-full bg-flama/15 blur-[120px]"></div>
+<section class="relative overflow-hidden bg-gradient-to-b from-crema to-flama/10 text-carbon">
+  <div class="pointer-events-none absolute -left-32 -top-20 h-[460px] w-[460px] rounded-full bg-[#A9D9BE] opacity-40 blur-[110px]"></div>
+  <div class="pointer-events-none absolute right-[-60px] top-1/4 h-[480px] w-[480px] rounded-full bg-morado/40 opacity-40 blur-[120px]"></div>
+  <div class="pointer-events-none absolute -left-10 bottom-[-160px] h-[420px] w-[420px] rounded-full bg-flama/45 opacity-45 blur-[120px]"></div>
   <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:py-20 lg:grid-cols-[1.15fr_.85fr] lg:px-8 lg:py-28">
     <div>
-      <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-morado/30 bg-morado/5 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-vino">
+      <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-morado/30 bg-white/60 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-vino">
         <span class="h-1.5 w-1.5 rounded-full bg-flama"></span> <span id="heroBadge">Ciudad de México · Desde 2024</span>
       </p>
 
@@ -213,44 +214,62 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 
       <div class="mt-9 flex flex-wrap gap-4">
         <a href="#tienda" class="inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>
           <span id="heroCtaPrimario">Ir a la tienda</span>
-          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
         </a>
-        <a href="#cursos" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
+        <a href="#cursos" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 bg-morado/10 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.6V16c0 1.1 2.7 3 6 3s6-1.9 6-3v-5.4"/></svg>
           <span id="heroCtaSecundario">Ver cursos y talleres</span>
         </a>
       </div>
 
       <dl class="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-vino/10 pt-7">
-        <div><dt id="heroStat1Valor" class="font-titulo text-4xl text-flama">137</dt><dd id="heroStat1Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Páginas de manual</dd></div>
-        <div><dt id="heroStat2Valor" class="font-titulo text-4xl text-flama">50</dt><dd id="heroStat2Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Fórmulas costeadas</dd></div>
-        <div><dt id="heroStat3Valor" class="font-titulo text-4xl text-flama">2</dt><dd id="heroStat3Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Anexos en Excel</dd></div>
+        <div>
+          <svg viewBox="0 0 24 24" class="h-6 w-6 text-flama" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+          <dt id="heroStat1Valor" class="mt-1.5 font-titulo text-4xl text-flama">137</dt>
+          <dd id="heroStat1Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Páginas de manual</dd>
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" class="h-6 w-6 text-morado" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <dt id="heroStat2Valor" class="mt-1.5 font-titulo text-4xl text-flama">50</dt>
+          <dd id="heroStat2Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Fórmulas costeadas</dd>
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" class="h-6 w-6 text-vino" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>
+          <dt id="heroStat3Valor" class="mt-1.5 font-titulo text-4xl text-flama">2</dt>
+          <dd id="heroStat3Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Anexos en Excel</dd>
+        </div>
       </dl>
     </div>
 
-    <!-- Firma visual: la vela encendida -->
+    <!-- Firma visual: la vela encendida, marco festoneado tipo medallón -->
     <div class="relative mx-auto w-full max-w-sm">
-      <div class="halo absolute left-1/2 top-6 h-56 w-56 -translate-x-1/2 rounded-full bg-flama/20 blur-3xl"></div>
-      <div class="relative rounded-[28px] border border-vino/10 bg-white p-8 text-center shadow-[0_8px_40px_rgba(78,20,84,.08)]">
-        <div id="heroImagenWrap">
-          <svg viewBox="0 0 120 200" class="mx-auto h-72 w-auto" role="img" aria-label="Vela comestible encendida">
-            <ellipse cx="60" cy="188" rx="46" ry="9" fill="#000" opacity=".12"/>
-            <g class="flama-svg">
-              <path d="M60 6c4 22 22 26 22 46a22 22 0 1 1-44 0c0-11 7-15 11-26 2 7 5 9 7 11 1-11 4-20 4-31z" fill="#F5A623"/>
-              <path d="M60 30c2 12 11 15 11 25a11 11 0 1 1-22 0c0-7 8-14 11-25z" fill="#FBF4E9" opacity=".85"/>
-            </g>
-            <rect x="58.5" y="72" width="3" height="16" rx="1.5" fill="#4E1454"/>
-            <path d="M28 88h64c3 0 5 2 5 5v82c0 6-5 10-11 10H34c-6 0-11-4-11-10V93c0-3 2-5 5-5z" fill="#FBF4E9"/>
-            <path d="M28 88h64c3 0 5 2 5 5v14H23V93c0-3 2-5 5-5z" fill="#F1E3CC"/>
-            <path d="M35 107c6 10 3 16 8 24s14 6 12 16 6 14 12 12" stroke="#E7D5B8" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <rect x="23" y="150" width="74" height="35" rx="6" fill="#7A2E7E"/>
-            <text x="60" y="166" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#FBF4E9">MANTEQUILLA</text>
-            <text x="60" y="179" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#F5A623">TRUFADA</text>
-          </svg>
+      <div class="halo absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-flama/25 blur-3xl"></div>
+      <div class="relative mx-auto aspect-square w-full max-w-[300px]">
+        <svg viewBox="0 0 300 300" class="absolute inset-0 h-full w-full drop-shadow-[0_18px_40px_rgba(78,20,84,.18)]" aria-hidden="true">
+          <path d="M 150.00 22.00 A 19.26 19.26 0 0 1 186.06 27.18 A 19.26 19.26 0 0 1 219.20 42.32 A 19.26 19.26 0 0 1 246.74 66.18 A 19.26 19.26 0 0 1 266.43 96.83 A 19.26 19.26 0 0 1 276.70 131.78 A 19.26 19.26 0 0 1 276.70 168.22 A 19.26 19.26 0 0 1 266.43 203.17 A 19.26 19.26 0 0 1 246.74 233.82 A 19.26 19.26 0 0 1 219.20 257.68 A 19.26 19.26 0 0 1 186.06 272.82 A 19.26 19.26 0 0 1 150.00 278.00 A 19.26 19.26 0 0 1 113.94 272.82 A 19.26 19.26 0 0 1 80.80 257.68 A 19.26 19.26 0 0 1 53.26 233.82 A 19.26 19.26 0 0 1 33.57 203.17 A 19.26 19.26 0 0 1 23.30 168.22 A 19.26 19.26 0 0 1 23.30 131.78 A 19.26 19.26 0 0 1 33.57 96.83 A 19.26 19.26 0 0 1 53.26 66.18 A 19.26 19.26 0 0 1 80.80 42.32 A 19.26 19.26 0 0 1 113.94 27.18 A 19.26 19.26 0 0 1 150.00 22.00 Z" fill="#F5A623"/>
+        </svg>
+        <div class="absolute inset-[19px] flex items-center justify-center overflow-hidden rounded-full bg-white">
+          <div id="heroImagenWrap">
+            <svg viewBox="0 0 120 200" class="mx-auto h-52 w-auto" role="img" aria-label="Vela comestible encendida">
+              <ellipse cx="60" cy="188" rx="46" ry="9" fill="#000" opacity=".12"/>
+              <g class="flama-svg">
+                <path d="M60 6c4 22 22 26 22 46a22 22 0 1 1-44 0c0-11 7-15 11-26 2 7 5 9 7 11 1-11 4-20 4-31z" fill="#F5A623"/>
+                <path d="M60 30c2 12 11 15 11 25a11 11 0 1 1-22 0c0-7 8-14 11-25z" fill="#FBF4E9" opacity=".85"/>
+              </g>
+              <rect x="58.5" y="72" width="3" height="16" rx="1.5" fill="#4E1454"/>
+              <path d="M28 88h64c3 0 5 2 5 5v82c0 6-5 10-11 10H34c-6 0-11-4-11-10V93c0-3 2-5 5-5z" fill="#FBF4E9"/>
+              <path d="M28 88h64c3 0 5 2 5 5v14H23V93c0-3 2-5 5-5z" fill="#F1E3CC"/>
+              <path d="M35 107c6 10 3 16 8 24s14 6 12 16 6 14 12 12" stroke="#E7D5B8" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <rect x="23" y="150" width="74" height="35" rx="6" fill="#7A2E7E"/>
+              <text x="60" y="166" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#FBF4E9">MANTEQUILLA</text>
+              <text x="60" y="179" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#F5A623">TRUFADA</text>
+            </svg>
+          </div>
         </div>
-        <p id="heroCaption" class="mt-2 font-firma text-2xl text-vino">se enciende, se derrite, se come</p>
-        <p id="heroCaptionSub" class="mt-1 font-ui text-[11px] uppercase tracking-[.25em] text-carbon/45">Receta 01 · Sección gourmet</p>
       </div>
+      <p id="heroCaption" class="mt-6 text-center font-firma text-2xl text-vino">se enciende, se derrite, se come</p>
+      <p id="heroCaptionSub" class="mt-1 text-center font-ui text-[11px] uppercase tracking-[.25em] text-carbon/45">Receta 01 · Sección gourmet</p>
     </div>
   </div>
 </section>
@@ -1365,7 +1384,7 @@ async function cargarContenido(){
 
   if(c.hero_imagen){
     const wrap = document.getElementById('heroImagenWrap');
-    if(wrap) wrap.innerHTML = `<img src="${c.hero_imagen}" alt="Imagen destacada" class="mx-auto h-72 w-full rounded-2xl object-cover">`;
+    if(wrap) wrap.innerHTML = `<img src="${c.hero_imagen}" alt="Imagen destacada" class="h-full w-full rounded-full object-cover">`;
   }
   if(c.chef_imagen){
     const wrapChef = document.getElementById('chefImagenWrap');
