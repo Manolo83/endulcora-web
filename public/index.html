@@ -160,10 +160,10 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       </nav>
 
       <div class="flex items-center gap-3">
-        <button type="button" onclick="abrirModal('acceso')"
+        <button type="button" id="btnAccesoDesktop" onclick="abrirCuenta()"
           class="hidden sm:inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-5 py-2.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 11V7a4 4 0 1 0-8 0v4"/><rect x="5" y="11" width="14" height="10" rx="2"/></svg>
-          Acceso clientes
+          <span id="btnAccesoDesktopTexto">Acceso clientes</span>
         </button>
         <button type="button" onclick="abrirModal('carrito')" aria-label="Ver carrito"
           class="relative grid h-11 w-11 shrink-0 place-items-center rounded-full boton-vivo border border-vino/25 text-vino hover:border-vino transition">
@@ -187,7 +187,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <a href="#galeria" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Galería</a>
     <a href="#anuncios" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anuncios</a>
     <button type="button" onclick="toggleMenu();abrirModal('carrito')" class="mt-5 w-full rounded-full boton-vivo border border-vino/25 py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-vino">Ver carrito</button>
-    <button type="button" onclick="toggleMenu();abrirModal('acceso')" class="mt-3 w-full rounded-full boton-vivo bg-flama py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-carbon">Acceso clientes</button>
+    <button type="button" id="btnAccesoMovil" onclick="toggleMenu();abrirCuenta()" class="mt-3 w-full rounded-full boton-vivo bg-flama py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-carbon"><span id="btnAccesoMovilTexto">Acceso clientes</span></button>
   </div>
 </header>
 
@@ -714,14 +714,125 @@ function parrafosDesdeTexto(texto){
   return (texto || '').split(/\n\s*\n/).map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
 }
 
+let SESION = { isLoggedIn: false, user: null };
+let VISTA_ACCESO = 'login'; // 'login' | 'registro' | 'olvide' | 'reset'
+let RESET_TOKEN = null;
+
+function vistaAcceso(vista){
+  VISTA_ACCESO = vista;
+  abrirModal('acceso');
+}
+
+function vistaLogin(){
+  return { titulo: 'Acceso clientes', html: `
+    <p class="text-sm text-carbon/70">Entra con tu correo y contraseña para ver tu historial de compras.</p>
+    <form id="formLoginCliente" class="mt-4 space-y-4">
+      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo</span>
+      <input id="loginEmail" type="email" required placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Contraseña</span>
+      <input id="loginPassword" type="password" required placeholder="••••••••" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+      <p id="loginClienteError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+      <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">
+        <span id="loginClienteSpinner" class="spinner hidden" style="border-top-color:#FBF4E9"></span>
+        Entrar
+      </button>
+    </form>
+    <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+      <button type="button" onclick="vistaAcceso('olvide')" class="font-ui text-[11px] font-600 uppercase tracking-wider text-vino underline underline-offset-2">¿Olvidaste tu contraseña?</button>
+      <button type="button" onclick="vistaAcceso('registro')" class="font-ui text-[11px] font-600 uppercase tracking-wider text-vino underline underline-offset-2">Crear cuenta</button>
+    </div>
+    <p class="mt-5 text-xs text-carbon/50">¿Compraste por WhatsApp y no tienes acceso? Escríbenos al ${numeroWhatsapp()} y lo activamos.</p>
+  ` };
+}
+
+function vistaRegistro(){
+  return { titulo: 'Crear cuenta', html: `
+    <p class="text-sm text-carbon/70">Crea tu cuenta para ver el historial de tus compras cuando quieras.</p>
+    <form id="formRegistroCliente" class="mt-4 space-y-4">
+      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nombre</span>
+      <input id="registroNombre" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo</span>
+      <input id="registroEmail" type="email" required placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Contraseña (mínimo 6 caracteres)</span>
+      <input id="registroPassword" type="password" required minlength="6" placeholder="••••••••" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+      <p id="registroClienteError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+      <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">
+        <span id="registroClienteSpinner" class="spinner hidden" style="border-top-color:#FBF4E9"></span>
+        Crear mi cuenta
+      </button>
+    </form>
+    <button type="button" onclick="vistaAcceso('login')" class="mt-4 font-ui text-[11px] font-600 uppercase tracking-wider text-vino underline underline-offset-2">Ya tengo cuenta</button>
+  ` };
+}
+
+function vistaOlvide(){
+  return { titulo: 'Recuperar contraseña', html: `
+    <p class="text-sm text-carbon/70">Escribe tu correo y te enviamos un enlace para elegir una nueva contraseña.</p>
+    <form id="formOlvideCliente" class="mt-4 space-y-4">
+      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo</span>
+      <input id="olvideEmail" type="email" required placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+      <p id="olvideClienteMensaje" class="hidden rounded-xl bg-flama/15 px-4 py-3 text-sm text-vino"></p>
+      <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">
+        <span id="olvideClienteSpinner" class="spinner hidden" style="border-top-color:#FBF4E9"></span>
+        Enviar enlace
+      </button>
+    </form>
+    <button type="button" onclick="vistaAcceso('login')" class="mt-4 font-ui text-[11px] font-600 uppercase tracking-wider text-vino underline underline-offset-2">Volver a entrar</button>
+  ` };
+}
+
+function vistaReset(){
+  return { titulo: 'Elegir nueva contraseña', html: `
+    <p class="text-sm text-carbon/70">Escribe tu nueva contraseña para tu cuenta.</p>
+    <form id="formResetCliente" class="mt-4 space-y-4">
+      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nueva contraseña (mínimo 6 caracteres)</span>
+      <input id="resetPassword" type="password" required minlength="6" placeholder="••••••••" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+      <p id="resetClienteError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+      <button type="submit" class="w-full rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Guardar y entrar</button>
+    </form>
+  ` };
+}
+
+function vistaPerfil(){
+  const u = SESION.user || {};
+  return { titulo: 'Mi cuenta', html: `
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <p class="font-titulo text-lg tracking-wide text-vino">${escapeHtml(u.nombre || '')}</p>
+        <p class="text-sm text-carbon/60">${escapeHtml(u.email || '')}</p>
+      </div>
+      <button type="button" onclick="cerrarSesionCliente()" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Cerrar sesión</button>
+    </div>
+
+    <div class="mt-6">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Mis compras</p>
+      <div id="perfilOrdenes" class="mt-3 space-y-3"><p class="text-sm text-carbon/50">Cargando…</p></div>
+    </div>
+
+    <details class="mt-6 rounded-2xl border border-vino/10 p-4">
+      <summary class="cursor-pointer font-ui text-[12px] font-700 uppercase tracking-wider text-vino">Editar mis datos</summary>
+      <form id="formEditarPerfil" class="mt-4 space-y-4">
+        <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nombre</span>
+        <input id="perfilNombre" type="text" value="${escapeHtml(u.nombre || '')}" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+        <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nueva contraseña (déjalo en blanco para no cambiarla)</span>
+        <input id="perfilPasswordNueva" type="password" minlength="6" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+        <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Tu contraseña actual (solo si vas a cambiarla)</span>
+        <input id="perfilPasswordActual" type="password" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+        <p id="perfilError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+        <button type="submit" class="w-full rounded-full boton-vivo bg-vino py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Guardar cambios</button>
+      </form>
+    </details>
+  ` };
+}
+
 const CONTENIDOS = {
-  acceso: () => ({ titulo: 'Acceso clientes', html: `<p>Entra con el correo con el que hiciste tu compra para descargar tus manuales, anexos y grabaciones.</p>
-    <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo</span>
-    <input type="email" placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
-    <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Contraseña</span>
-    <input type="password" placeholder="••••••••" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
-    <button type="button" onclick="cerrarModal();toast('Demo: aquí se abriría tu biblioteca')" class="w-full rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema">Entrar a mi biblioteca</button>
-    <p class="text-xs text-carbon/50">¿Compraste por WhatsApp y no tienes acceso? Escríbenos al ${numeroWhatsapp()} y lo activamos.</p>` }),
+  acceso: () => {
+    if(VISTA_ACCESO === 'registro') return vistaRegistro();
+    if(VISTA_ACCESO === 'olvide') return vistaOlvide();
+    if(VISTA_ACCESO === 'reset') return vistaReset();
+    return vistaLogin();
+  },
+  perfil: () => vistaPerfil(),
 
   clase: () => ({ titulo: 'Apartar mi lugar', html: `<p>Clase en vivo por videollamada. Te enviamos el enlace y la lista de insumos 48 horas antes.</p>
     <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nombre</span>
@@ -750,6 +861,220 @@ function abrirModal(clave, extra){
   m.classList.add('flex');
   document.body.style.overflow = 'hidden';
   if(clave === 'carrito') iniciarModalCarrito();
+  if(clave === 'acceso') iniciarModalAcceso();
+  if(clave === 'perfil') iniciarModalPerfil();
+}
+
+/* ---------- Cuentas de clientes ---------- */
+function abrirCuenta(){
+  if(SESION.isLoggedIn){ abrirModal('perfil'); }
+  else{ VISTA_ACCESO = 'login'; abrirModal('acceso'); }
+}
+
+function actualizarHeaderSesion(){
+  const nombre = SESION.isLoggedIn && SESION.user ? (SESION.user.nombre || '').trim().split(' ')[0] : '';
+  const texto = SESION.isLoggedIn ? `Hola, ${nombre || 'cliente'}` : 'Acceso clientes';
+  const d = document.getElementById('btnAccesoDesktopTexto');
+  const m = document.getElementById('btnAccesoMovilTexto');
+  if(d) d.textContent = texto;
+  if(m) m.textContent = texto;
+}
+
+async function cargarSesion(){
+  try{
+    const res = await fetch('/api/auth/session');
+    const data = await res.json();
+    SESION = { isLoggedIn: !!data.isLoggedIn, user: data.user || null };
+  }catch(e){
+    SESION = { isLoggedIn: false, user: null };
+  }
+  actualizarHeaderSesion();
+
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('resetToken');
+  if(token){
+    RESET_TOKEN = token;
+    VISTA_ACCESO = 'reset';
+    abrirModal('acceso');
+  }
+}
+
+async function cerrarSesionCliente(){
+  try{ await fetch('/api/auth/logout', { method: 'POST' }); }catch(e){}
+  SESION = { isLoggedIn: false, user: null };
+  actualizarHeaderSesion();
+  cerrarModal();
+  toast('Cerraste sesión');
+}
+
+function iniciarModalAcceso(){
+  const formLogin = document.getElementById('formLoginCliente');
+  if(formLogin) formLogin.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('loginClienteError');
+    const spinner = document.getElementById('loginClienteSpinner');
+    err.classList.add('hidden');
+    spinner.classList.remove('hidden');
+    try{
+      const res = await fetch('/api/auth/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('loginEmail').value.trim(),
+          password: document.getElementById('loginPassword').value,
+        }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'No se pudo iniciar sesión');
+      SESION = { isLoggedIn: true, user: data.user };
+      actualizarHeaderSesion();
+      cerrarModal();
+      toast(`¡Hola, ${data.user.nombre}!`);
+    }catch(err2){
+      err.textContent = err2.message;
+      err.classList.remove('hidden');
+    }finally{
+      spinner.classList.add('hidden');
+    }
+  });
+
+  const formRegistro = document.getElementById('formRegistroCliente');
+  if(formRegistro) formRegistro.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('registroClienteError');
+    const spinner = document.getElementById('registroClienteSpinner');
+    err.classList.add('hidden');
+    spinner.classList.remove('hidden');
+    try{
+      const res = await fetch('/api/auth/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: document.getElementById('registroNombre').value.trim(),
+          email: document.getElementById('registroEmail').value.trim(),
+          password: document.getElementById('registroPassword').value,
+        }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'No se pudo crear la cuenta');
+      SESION = { isLoggedIn: true, user: data.user };
+      actualizarHeaderSesion();
+      cerrarModal();
+      toast(`¡Bienvenido, ${data.user.nombre}!`);
+    }catch(err2){
+      err.textContent = err2.message;
+      err.classList.remove('hidden');
+    }finally{
+      spinner.classList.add('hidden');
+    }
+  });
+
+  const formOlvide = document.getElementById('formOlvideCliente');
+  if(formOlvide) formOlvide.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('olvideClienteMensaje');
+    const spinner = document.getElementById('olvideClienteSpinner');
+    spinner.classList.remove('hidden');
+    try{
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: document.getElementById('olvideEmail').value.trim() }),
+      });
+      const data = await res.json();
+      msg.textContent = data.message || 'Si ese correo tiene una cuenta, te enviamos un enlace.';
+      msg.classList.remove('hidden');
+    }catch(e){
+      msg.textContent = 'No se pudo enviar la solicitud. Intenta de nuevo.';
+      msg.classList.remove('hidden');
+    }finally{
+      spinner.classList.add('hidden');
+    }
+  });
+
+  const formReset = document.getElementById('formResetCliente');
+  if(formReset) formReset.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('resetClienteError');
+    err.classList.add('hidden');
+    try{
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: RESET_TOKEN, password: document.getElementById('resetPassword').value }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'No se pudo restablecer tu contraseña');
+      SESION = { isLoggedIn: true, user: data.user };
+      RESET_TOKEN = null;
+      actualizarHeaderSesion();
+      cerrarModal();
+      toast('Contraseña actualizada. ¡Ya iniciaste sesión!');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('resetToken');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }catch(err2){
+      err.textContent = err2.message;
+      err.classList.remove('hidden');
+    }
+  });
+}
+
+function iniciarModalPerfil(){
+  cargarOrdenesPerfil();
+
+  const form = document.getElementById('formEditarPerfil');
+  if(form) form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('perfilError');
+    err.classList.add('hidden');
+    const payload = { nombre: document.getElementById('perfilNombre').value.trim() };
+    const nueva = document.getElementById('perfilPasswordNueva').value;
+    if(nueva){
+      payload.password = nueva;
+      payload.passwordActual = document.getElementById('perfilPasswordActual').value;
+    }
+    try{
+      const res = await fetch('/api/auth/me', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'No se pudo guardar');
+      SESION.user = data.user;
+      actualizarHeaderSesion();
+      toast('Datos actualizados');
+      abrirModal('perfil');
+    }catch(err2){
+      err.textContent = err2.message;
+      err.classList.remove('hidden');
+    }
+  });
+}
+
+const ETIQUETA_ESTADO_CLIENTE = {
+  pendiente: 'Pendiente', en_proceso: 'En proceso', aprobado: 'Aprobado',
+  rechazado: 'Rechazado', cancelado: 'Cancelado', reembolsado: 'Reembolsado', error: 'Error al iniciar',
+};
+
+async function cargarOrdenesPerfil(){
+  const cont = document.getElementById('perfilOrdenes');
+  if(!cont) return;
+  try{
+    const res = await fetch('/api/auth/orders');
+    const items = await res.json();
+    if(!res.ok) throw new Error((items && items.error) || 'No se pudo cargar tu historial');
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no tienes compras.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(o => {
+      const lineas = (o.items || []).map(i => `<li>${i.cantidad}× ${escapeHtml(i.titulo)}</li>`).join('');
+      return `<div class="rounded-2xl border border-vino/10 p-4">
+        <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${escapeHtml(ETIQUETA_ESTADO_CLIENTE[o.estado] || o.estado)} · ${new Date(o.createdAt).toLocaleDateString('es-MX')}</p>
+        <ul class="mt-1 space-y-0.5 text-sm text-carbon/75">${lineas}</ul>
+        <p class="mt-1 font-titulo text-base text-vino">Total: $${escapeHtml(String(o.total))} MXN</p>
+      </div>`;
+    }).join('');
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
 }
 
 /* ---------- Carrito de compras ---------- */
@@ -838,6 +1163,10 @@ function formatoMonto(n){
 function iniciarModalCarrito(){
   const form = document.getElementById('formCarrito');
   if(!form) return;
+  if(SESION.isLoggedIn && SESION.user && SESION.user.email){
+    const campoEmail = document.getElementById('carritoEmail');
+    if(campoEmail && !campoEmail.value) campoEmail.value = SESION.user.email;
+  }
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const boton = document.getElementById('btnPagarCarrito');
@@ -1285,6 +1614,7 @@ cargarAnuncios();
 cargarGaleria();
 actualizarBadgeCarrito();
 manejarRegresoDePago();
+cargarSesion();
 
 function manejarRegresoDePago(){
   const params = new URLSearchParams(window.location.search);

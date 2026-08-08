@@ -51,7 +51,9 @@ router.post('/preference', async (req, res) => {
   }
 
   const total = resueltos.reduce((acc, r) => acc + r.precio * r.cantidad, 0);
-  const order = store.addOrder({ items: resueltos, total, email: email || '' });
+  const userId = req.session && req.session.userId ? req.session.userId : null;
+  const usuario = userId ? store.getUserById(userId) : null;
+  const order = store.addOrder({ items: resueltos, total, email: email || (usuario ? usuario.email : ''), userId });
 
   try {
     const preference = new Preference(client);

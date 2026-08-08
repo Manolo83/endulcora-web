@@ -144,6 +144,7 @@ function load() {
     changed = true;
   }
   if (!data.orders) { data.orders = []; changed = true; }
+  if (!data.users) { data.users = []; changed = true; }
   if (changed) save(data);
   return data;
 }
@@ -329,13 +330,14 @@ module.exports = {
   getOrder(id) {
     return load().orders.find((o) => o.id === Number(id)) || null;
   },
-  addOrder({ items, total, email }) {
+  addOrder({ items, total, email, userId }) {
     const data = load();
     const item = {
       id: nextId(data.orders),
       items,
       total,
       email: email || '',
+      userId: userId || null,
       estado: 'pendiente',
       mpPreferenceId: null,
       mpPaymentId: null,
@@ -351,6 +353,54 @@ module.exports = {
     const item = data.orders.find((o) => o.id === Number(id));
     if (!item) return null;
     Object.assign(item, patch, { updatedAt: new Date().toISOString() });
+    save(data);
+    return item;
+  },
+  getOrdersByUser(userId, email) {
+    const data = load();
+    const correo = (email || '').toLowerCase();
+    return data.orders
+      .filter((o) => o.userId === Number(userId) || (correo && (o.email || '').toLowerCase() === correo))
+      .sort((a, b) => b.id - a.id);
+  },
+
+  // ---- Cuentas de clientes ----
+  getUserByEmail(email) {
+    const correo = String(email || '').trim().toLowerCase();
+    if (!correo) return null;
+    return load().users.find((u) => u.email === correo) || null;
+  },
+  getUserById(id) {
+    return load().users.find((u) => u.id === Number(id)) || null;
+  },
+  getUserByResetToken(tokenHash) {
+    const ahora = Date.now();
+    return (
+      load().users.find(
+        (u) => u.resetTokenHash === tokenHash && u.resetTokenExpires && u.resetTokenExpires > ahora
+      ) || null
+    );
+  },
+  addUser({ email, passwordHash, nombre }) {
+    const data = load();
+    const item = {
+      id: nextId(data.users),
+      email: String(email).trim().toLowerCase(),
+      passwordHash,
+      nombre: nombre || '',
+      resetTokenHash: null,
+      resetTokenExpires: null,
+      createdAt: new Date().toISOString(),
+    };
+    data.users.push(item);
+    save(data);
+    return item;
+  },
+  updateUser(id, patch) {
+    const data = load();
+    const item = data.users.find((u) => u.id === Number(id));
+    if (!item) return null;
+    Object.assign(item, patch);
     save(data);
     return item;
   },

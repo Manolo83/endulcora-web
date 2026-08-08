@@ -12,6 +12,7 @@ const { UPLOAD_DIR } = require('./src/config');
 const apiRoutes = require('./src/routes/api');
 const adminRoutes = require('./src/routes/admin');
 const checkoutRoutes = require('./src/routes/checkout');
+const authRoutes = require('./src/routes/auth');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
@@ -48,6 +49,17 @@ const loginLimiter = rateLimit({
 });
 app.use('/admin/login', loginLimiter);
 
+const clienteAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
+});
+app.use('/api/auth/login', clienteAuthLimiter);
+app.use('/api/auth/register', clienteAuthLimiter);
+app.use('/api/auth/forgot-password', clienteAuthLimiter);
+
 const checkoutLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 30,
@@ -59,6 +71,7 @@ app.use('/api/checkout/preference', checkoutLimiter);
 
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
 app.use('/api/checkout', checkoutRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
 app.use('/admin', adminRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
