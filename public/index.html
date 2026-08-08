@@ -369,6 +369,16 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       </p>
     </div>
 
+    <div class="reveal relative mb-12 max-w-md">
+      <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-vino/40" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="buscadorTienda" type="text" placeholder="Buscar eBooks, anexos o recetarios…"
+        class="w-full rounded-full border border-vino/15 bg-white py-3.5 pl-12 pr-11 text-sm text-carbon placeholder:text-carbon/40 focus:border-vino/40 focus:outline-none">
+      <button type="button" id="btnLimpiarBusquedaTienda" onclick="limpiarBusquedaTienda()" aria-label="Limpiar búsqueda"
+        class="hidden absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-carbon/40 hover:bg-vino/10 hover:text-vino transition">
+        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
     <div id="productos" class="scroll-mt-24">
       <h3 class="font-titulo text-xl tracking-wide text-vino">eBooks</h3>
       <div id="listaEbooks" class="mt-6 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
@@ -1546,22 +1556,52 @@ const MENSAJE_VACIO_PRODUCTOS = {
   recetario: 'Aún no hay recetarios publicados.',
 };
 
+let TODOS_PRODUCTOS = [];
+
 async function cargarProductos(){
   try{
     const res = await fetch('/api/products');
-    const items = await res.json();
-    Object.keys(CONTENEDORES_PRODUCTOS).forEach(cat => {
-      const cont = document.getElementById(CONTENEDORES_PRODUCTOS[cat]);
-      if(!cont) return;
-      const propios = items.filter(p => (p.categoria || 'ebook') === cat);
-      cont.innerHTML = propios.length ? propios.map(tarjetaProducto).join('') : `<p class="text-sm text-carbon/50">${MENSAJE_VACIO_PRODUCTOS[cat]}</p>`;
-    });
+    TODOS_PRODUCTOS = await res.json();
+    pintarProductosFiltrados();
   }catch(e){
     Object.values(CONTENEDORES_PRODUCTOS).forEach(id => {
       const cont = document.getElementById(id);
       if(cont) cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudieron cargar los productos.</p>';
     });
   }
+}
+
+function coincideBusquedaProducto(p, q){
+  if(!q) return true;
+  const texto = `${p.titulo || ''} ${p.subtitulo || ''} ${p.etiqueta || ''} ${p.descripcionCorta || ''}`.toLowerCase();
+  return texto.includes(q);
+}
+
+function pintarProductosFiltrados(){
+  const campo = document.getElementById('buscadorTienda');
+  const q = (campo ? campo.value : '').trim().toLowerCase();
+  const btnLimpiar = document.getElementById('btnLimpiarBusquedaTienda');
+  if(btnLimpiar) btnLimpiar.classList.toggle('hidden', !q);
+
+  const items = TODOS_PRODUCTOS.filter(p => coincideBusquedaProducto(p, q));
+  Object.keys(CONTENEDORES_PRODUCTOS).forEach(cat => {
+    const cont = document.getElementById(CONTENEDORES_PRODUCTOS[cat]);
+    if(!cont) return;
+    const propios = items.filter(p => (p.categoria || 'ebook') === cat);
+    if(propios.length){
+      cont.innerHTML = propios.map(tarjetaProducto).join('');
+    }else if(q){
+      cont.innerHTML = `<p class="text-sm text-carbon/50">Sin resultados para "${escapeHtml(q)}" en esta categoría.</p>`;
+    }else{
+      cont.innerHTML = `<p class="text-sm text-carbon/50">${MENSAJE_VACIO_PRODUCTOS[cat]}</p>`;
+    }
+  });
+}
+
+function limpiarBusquedaTienda(){
+  const campo = document.getElementById('buscadorTienda');
+  if(campo) campo.value = '';
+  pintarProductosFiltrados();
 }
 
 function tarjetaCurso(c){
@@ -1675,6 +1715,9 @@ actualizarBadgeCarrito();
 manejarRegresoDePago();
 cargarSesion();
 cargarHeroCarrusel();
+
+const campoBuscadorTienda = document.getElementById('buscadorTienda');
+if(campoBuscadorTienda) campoBuscadorTienda.addEventListener('input', pintarProductosFiltrados);
 
 function manejarRegresoDePago(){
   const params = new URLSearchParams(window.location.search);
