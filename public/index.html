@@ -97,10 +97,16 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 .spinner { border: 3px solid rgba(255,255,255,.35); border-top-color: #FBF4E9; border-radius: 50%; width: 16px; height: 16px; animation: girar .7s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
 
+/* Elevación premium al pasar el cursor sobre tarjetas (GPU: transform/box-shadow) */
+.card-lift { transition: transform .3s cubic-bezier(.2,.7,.3,1), box-shadow .3s ease; will-change: transform; }
+.card-lift:hover { transform: translateY(-4px); box-shadow: 0 18px 44px rgba(78,20,84,.16); }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .flama-svg, .halo, .gota { animation: none !important; }
   .reveal { opacity:1 !important; transform:none !important; transition:none; }
+  .card-lift { transition:none; }
+  .card-lift:hover { transform:none; box-shadow:none; }
 }
 </style>
 </head>
@@ -1000,7 +1006,7 @@ function tarjetaProducto(p){
   const imagenEstilo = p.imagen
     ? `background-image:url('${p.imagen}');background-size:cover;background-position:center;`
     : '';
-  const bullets = (p.bullets || []).map(b => `<li class="flex gap-2.5"><span class="text-flama">▸</span> ${escapeHtml(b)}</li>`).join('');
+  const bullets = (p.bullets || []).map(b => `<li class="flex gap-2.5"><span class="text-morado">▸</span> ${escapeHtml(b)}</li>`).join('');
   const anteriorPrecio = p.precioAnterior
     ? `<span class="pb-1 text-sm text-humo line-through">$${escapeHtml(p.precioAnterior)}</span>`
     : '';
@@ -1009,7 +1015,7 @@ function tarjetaProducto(p){
     : '';
   const subtitulo = p.subtitulo ? `<p class="mt-2 font-firma text-xl text-flama">${escapeHtml(p.subtitulo)}</p>` : '';
   return `
-    <article class="reveal visible group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
+    <article class="card-lift reveal visible group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
       <div class="relative aspect-[4/3] bg-gradient-to-br from-vino to-uva p-7" style="${imagenEstilo}">
         ${destacado}
         <p class="font-titulo text-[11px] tracking-[.3em] text-flama">${escapeHtml(p.etiqueta || '')}</p>
@@ -1049,7 +1055,7 @@ async function cargarProductos(){
 
 function tarjetaCurso(c){
   return `
-    <div class="reveal visible flex flex-col rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
+    <div class="card-lift reveal visible flex flex-col rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
       <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">${escapeHtml(c.modalidad || '')}</p>
       <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">${escapeHtml(c.titulo || '')}</h3>
       <p class="mt-3 text-sm leading-relaxed text-carbon/65">${escapeHtml(c.descripcion || '')}</p>
@@ -1086,7 +1092,7 @@ async function cargarAnuncios(){
       return;
     }
     cont.innerHTML = items.map(a => `
-      <article class="reveal visible rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+      <article class="card-lift reveal visible rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${new Date(a.createdAt).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})}</p>
         <h3 class="mt-2 font-titulo text-xl tracking-wide text-vino">${escapeHtml(a.title)}</h3>
         <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-carbon/70">${escapeHtml(a.body)}</p>
@@ -1100,19 +1106,19 @@ async function cargarAnuncios(){
 function tarjetaMedia(m){
   const titulo = m.title ? `<p class="p-4 font-ui text-sm text-vino">${escapeHtml(m.title)}</p>` : '';
   if(m.kind === 'photo'){
-    return `<figure class="reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+    return `<figure class="card-lift reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
       <img src="${m.url}" alt="${escapeHtml(m.title || 'Foto de Endulcora')}" loading="lazy" class="aspect-[4/3] w-full object-cover">
       ${titulo}
     </figure>`;
   }
   if(m.source === 'embed'){
     const embedUrl = toEmbedUrl(m.url);
-    return `<figure class="reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+    return `<figure class="card-lift reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
       <div class="aspect-video w-full"><iframe class="h-full w-full" src="${embedUrl}" title="${escapeHtml(m.title || 'Video de Endulcora')}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
       ${titulo}
     </figure>`;
   }
-  return `<figure class="reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+  return `<figure class="card-lift reveal visible overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
     <video class="aspect-video w-full bg-black" src="${m.url}" controls preload="metadata"></video>
     ${titulo}
   </figure>`;
