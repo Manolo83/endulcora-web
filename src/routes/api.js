@@ -23,4 +23,8 @@ router.get('/cursos', (req, res) => {
   res.json(store.getCursos());
 });
 
+router.get('/hero-carrusel', (req, res) => {
+  res.json(store.getHeroCarrusel());
+});
+
 module.exports = router;

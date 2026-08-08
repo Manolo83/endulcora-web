@@ -125,7 +125,13 @@ queda correctamente preparado para ser indexado.
 4. **Galería**: sube una foto o video directamente (JPG, PNG, WEBP, GIF,
    MP4, WEBM, MOV — hasta 150 MB), o pega un enlace de YouTube/Vimeo si el
    video es muy pesado. Aparece al momento en la sección "Galería".
-5. **Salir** cierra la sesión del panel.
+5. **Carrusel del inicio** (dentro de "Contenido general"): sube una o
+   varias fotos de publicidad — aparecen dentro del marco junto al
+   encabezado del sitio. Con 2 o más, rotan solas cada pocos segundos con
+   puntos para navegar. Sin ninguna, se muestra la ilustración de la vela.
+6. **Clientes**: si alguien te escribe por WhatsApp porque olvidó su
+   contraseña, búscalo por su correo en esta pestaña y asígnale una nueva.
+7. **Salir** cierra la sesión del panel.
 
 No hace falta redeploy ni tocar código para publicar contenido nuevo — todo
 pasa por el panel.

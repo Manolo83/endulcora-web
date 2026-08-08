@@ -242,15 +242,15 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       </dl>
     </div>
 
-    <!-- Firma visual: la vela encendida, marco festoneado tipo medallón -->
+    <!-- Firma visual: la vela encendida o carrusel de publicidad, marco festoneado -->
     <div class="relative mx-auto w-full max-w-sm">
       <div class="halo absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-flama/25 blur-3xl"></div>
       <div class="relative mx-auto aspect-square w-full max-w-[300px]">
         <svg viewBox="0 0 300 300" class="absolute inset-0 h-full w-full drop-shadow-[0_18px_40px_rgba(78,20,84,.18)]" aria-hidden="true">
-          <path d="M 150.00 22.00 A 19.26 19.26 0 0 1 186.06 27.18 A 19.26 19.26 0 0 1 219.20 42.32 A 19.26 19.26 0 0 1 246.74 66.18 A 19.26 19.26 0 0 1 266.43 96.83 A 19.26 19.26 0 0 1 276.70 131.78 A 19.26 19.26 0 0 1 276.70 168.22 A 19.26 19.26 0 0 1 266.43 203.17 A 19.26 19.26 0 0 1 246.74 233.82 A 19.26 19.26 0 0 1 219.20 257.68 A 19.26 19.26 0 0 1 186.06 272.82 A 19.26 19.26 0 0 1 150.00 278.00 A 19.26 19.26 0 0 1 113.94 272.82 A 19.26 19.26 0 0 1 80.80 257.68 A 19.26 19.26 0 0 1 53.26 233.82 A 19.26 19.26 0 0 1 33.57 203.17 A 19.26 19.26 0 0 1 23.30 168.22 A 19.26 19.26 0 0 1 23.30 131.78 A 19.26 19.26 0 0 1 33.57 96.83 A 19.26 19.26 0 0 1 53.26 66.18 A 19.26 19.26 0 0 1 80.80 42.32 A 19.26 19.26 0 0 1 113.94 27.18 A 19.26 19.26 0 0 1 150.00 22.00 Z" fill="#F5A623"/>
+          <path d="M 76.00 42.00 A 22.90 22.90 0 0 1 116.28 42.00 A 22.90 22.90 0 0 1 156.56 42.00 A 22.90 22.90 0 0 1 196.84 42.00 A 22.70 22.70 0 0 1 236.80 44.50 A 21.02 21.02 0 0 1 258.00 76.00 A 22.90 22.90 0 0 1 258.00 116.28 A 22.90 22.90 0 0 1 258.00 156.56 A 22.90 22.90 0 0 1 258.00 196.84 A 22.70 22.70 0 0 1 255.50 236.80 A 21.02 21.02 0 0 1 224.00 258.00 A 22.90 22.90 0 0 1 183.72 258.00 A 22.90 22.90 0 0 1 143.44 258.00 A 22.90 22.90 0 0 1 103.16 258.00 A 22.70 22.70 0 0 1 63.20 255.50 A 21.02 21.02 0 0 1 42.00 224.00 A 22.90 22.90 0 0 1 42.00 183.72 A 22.90 22.90 0 0 1 42.00 143.44 A 22.90 22.90 0 0 1 42.00 103.16 A 22.70 22.70 0 0 1 44.50 63.20 A 21.02 21.02 0 0 1 76.00 42.00 Z" fill="#F5A623"/>
         </svg>
-        <div class="absolute inset-[19px] flex items-center justify-center overflow-hidden rounded-full bg-white">
-          <div id="heroImagenWrap">
+        <div class="absolute inset-[15.33%] flex items-center justify-center overflow-hidden rounded-[10%] bg-white">
+          <div id="heroImagenWrap" class="flex h-full w-full items-center justify-center">
             <svg viewBox="0 0 120 200" class="mx-auto h-52 w-auto" role="img" aria-label="Vela comestible encendida">
               <ellipse cx="60" cy="188" rx="46" ry="9" fill="#000" opacity=".12"/>
               <g class="flama-svg">
@@ -266,6 +266,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
               <text x="60" y="179" text-anchor="middle" font-family="Bebas Neue" font-size="13" letter-spacing="2.5" fill="#F5A623">TRUFADA</text>
             </svg>
           </div>
+          <div id="heroCarruselDots" class="absolute inset-x-0 bottom-3 z-10 flex items-center justify-center gap-1.5"></div>
         </div>
       </div>
       <p id="heroCaption" class="mt-6 text-center font-firma text-2xl text-vino">se enciende, se derrite, se come</p>
@@ -1382,10 +1383,6 @@ async function cargarContenido(){
   texto('claseDescripcion', c.clase_descripcion);
   texto('footerDescripcion', c.footer_descripcion);
 
-  if(c.hero_imagen){
-    const wrap = document.getElementById('heroImagenWrap');
-    if(wrap) wrap.innerHTML = `<img src="${c.hero_imagen}" alt="Imagen destacada" class="h-full w-full rounded-full object-cover">`;
-  }
   if(c.chef_imagen){
     const wrapChef = document.getElementById('chefImagenWrap');
     if(wrapChef) wrapChef.innerHTML = `<img src="${c.chef_imagen}" alt="${escapeHtml(c.chef_nombre || 'Chef de Endulcora')}" class="h-full w-full object-cover">`;
@@ -1397,6 +1394,63 @@ async function cargarContenido(){
   texto('whatsappFooterTexto', `WhatsApp ${numero}`);
   const waFlotante = document.getElementById('whatsappFlotante');
   if(waFlotante) waFlotante.href = `https://wa.me/52${numero}`;
+}
+
+/* ---------- Carrusel de imágenes del hero (publicidad) ---------- */
+let HERO_CARRUSEL = [];
+let heroCarruselIndex = 0;
+let heroCarruselTimer = null;
+
+async function cargarHeroCarrusel(){
+  try{
+    const res = await fetch('/api/hero-carrusel');
+    HERO_CARRUSEL = await res.json();
+  }catch(e){
+    HERO_CARRUSEL = [];
+  }
+  pintarHeroCarrusel();
+}
+
+function pintarHeroCarrusel(){
+  const dots = document.getElementById('heroCarruselDots');
+  clearInterval(heroCarruselTimer);
+  heroCarruselIndex = 0;
+
+  if(!HERO_CARRUSEL.length){
+    if(dots) dots.innerHTML = '';
+    return; // se queda la ilustración por defecto que ya está en el HTML
+  }
+
+  renderHeroSlide();
+
+  if(HERO_CARRUSEL.length > 1 && dots){
+    dots.innerHTML = HERO_CARRUSEL.map((_, i) =>
+      `<button type="button" onclick="irASlideHero(${i})" aria-label="Imagen ${i + 1}" class="h-2 w-2 rounded-full transition ${i === 0 ? 'bg-flama' : 'bg-white/70'}"></button>`
+    ).join('');
+    if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      heroCarruselTimer = setInterval(() => irASlideHero((heroCarruselIndex + 1) % HERO_CARRUSEL.length), 5000);
+    }
+  } else if(dots){
+    dots.innerHTML = '';
+  }
+}
+
+function renderHeroSlide(){
+  const wrap = document.getElementById('heroImagenWrap');
+  const item = HERO_CARRUSEL[heroCarruselIndex];
+  if(!wrap || !item) return;
+  wrap.innerHTML = `<img src="${item.url}" alt="Publicidad Endulcora" class="h-full w-full object-cover">`;
+}
+
+function irASlideHero(i){
+  heroCarruselIndex = i;
+  renderHeroSlide();
+  const dots = document.getElementById('heroCarruselDots');
+  if(!dots) return;
+  [...dots.children].forEach((d, idx) => {
+    d.classList.toggle('bg-flama', idx === i);
+    d.classList.toggle('bg-white/70', idx !== i);
+  });
 }
 
 function tarjetaProducto(p){
@@ -1560,6 +1614,7 @@ cargarGaleria();
 actualizarBadgeCarrito();
 manejarRegresoDePago();
 cargarSesion();
+cargarHeroCarrusel();
 
 function manejarRegresoDePago(){
   const params = new URLSearchParams(window.location.search);

@@ -18,7 +18,6 @@ const DEFAULT_CONTENT = {
   hero_stat2_etiqueta: 'Fórmulas costeadas',
   hero_stat3_valor: '2',
   hero_stat3_etiqueta: 'Anexos en Excel',
-  hero_imagen: '',
   hero_caption: 'se enciende, se derrite, se come',
   hero_caption_sub: 'Receta 01 · Sección gourmet',
   chef_imagen: '',
@@ -145,6 +144,7 @@ function load() {
   }
   if (!data.orders) { data.orders = []; changed = true; }
   if (!data.users) { data.users = []; changed = true; }
+  if (!data.heroCarrusel) { data.heroCarrusel = []; changed = true; }
   if (changed) save(data);
   return data;
 }
@@ -318,6 +318,32 @@ module.exports = {
     const data = load();
     const item = data.cursos.find((c) => c.id === Number(id));
     data.cursos = data.cursos.filter((c) => c.id !== Number(id));
+    save(data);
+    return item;
+  },
+
+  // ---- Carrusel de imágenes del inicio (publicidad) ----
+  getHeroCarrusel() {
+    const data = load();
+    return [...data.heroCarrusel].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+  },
+  addHeroCarruselImagen({ url, filename }) {
+    const data = load();
+    const item = {
+      id: nextId(data.heroCarrusel),
+      orden: data.heroCarrusel.length,
+      url,
+      filename: filename || null,
+      createdAt: new Date().toISOString(),
+    };
+    data.heroCarrusel.push(item);
+    save(data);
+    return item;
+  },
+  deleteHeroCarruselImagen(id) {
+    const data = load();
+    const item = data.heroCarrusel.find((m) => m.id === Number(id));
+    data.heroCarrusel = data.heroCarrusel.filter((m) => m.id !== Number(id));
     save(data);
     return item;
   },

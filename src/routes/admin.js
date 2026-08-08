@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR } = require('../config');
@@ -129,7 +130,7 @@ router.patch('/api/content', requireAdmin, (req, res) => {
   res.json(item);
 });
 
-const CAMPOS_IMAGEN_CONTENIDO = ['hero_imagen', 'chef_imagen'];
+const CAMPOS_IMAGEN_CONTENIDO = ['chef_imagen'];
 router.post('/api/content/:key/image', requireAdmin, uploadImage.single('file'), (req, res) => {
   const { key } = req.params;
   if (!CAMPOS_IMAGEN_CONTENIDO.includes(key)) {
@@ -151,6 +152,28 @@ router.delete('/api/content/:key/image', requireAdmin, (req, res) => {
   const content = store.updateContent({ [key]: '' });
   borrarSiEsSubida(anterior);
   res.json({ content });
+});
+
+// ---- Carrusel de imagenes del inicio (publicidad) ----
+router.get('/api/hero-carrusel', requireAdmin, (req, res) => {
+  res.json(store.getHeroCarrusel());
+});
+
+router.post('/api/hero-carrusel/upload', requireAdmin, uploadImage.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
+  const item = store.addHeroCarruselImagen({
+    url: `/uploads/${req.file.filename}`,
+    filename: req.file.filename,
+  });
+  res.status(201).json(item);
+});
+
+router.delete('/api/hero-carrusel/:id', requireAdmin, (req, res) => {
+  const item = store.deleteHeroCarruselImagen(req.params.id);
+  if (item && item.filename) {
+    fs.unlink(path.join(UPLOAD_DIR, item.filename), () => {});
+  }
+  res.json({ ok: true });
 });
 
 // ---- Productos de la tienda ----
@@ -213,6 +236,24 @@ router.delete('/api/cursos/:id', requireAdmin, (req, res) => {
 // ---- Ventas (pedidos de Mercado Pago) ----
 router.get('/api/orders', requireAdmin, (req, res) => {
   res.json(store.getOrders());
+});
+
+// ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----
+router.get('/api/users/buscar', requireAdmin, (req, res) => {
+  const user = store.getUserByEmail(req.query.email || '');
+  if (!user) return res.status(404).json({ error: 'No hay ninguna cuenta con ese correo.' });
+  res.json({ id: user.id, email: user.email, nombre: user.nombre });
+});
+
+router.post('/api/users/:id/reset-password', requireAdmin, (req, res) => {
+  const { password } = req.body || {};
+  if (!password || String(password).length < 6) {
+    return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
+  }
+  const user = store.getUserById(req.params.id);
+  if (!user) return res.status(404).json({ error: 'No encontrado' });
+  store.updateUser(user.id, { passwordHash: bcrypt.hashSync(String(password), 10) });
+  res.json({ ok: true });
 });
 
 // ---- Manejo de errores (ej. archivo demasiado grande, tipo no permitido) ----

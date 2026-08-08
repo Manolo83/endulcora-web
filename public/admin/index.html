@@ -65,6 +65,7 @@
       <a href="#seccionCursos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Cursos</a>
       <a href="#seccionLegales" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Legales</a>
       <a href="#seccionVentas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Ventas</a>
+      <a href="#seccionClientes" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clientes</a>
       <a href="#seccionAnuncios" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Anuncios</a>
       <a href="#seccionGaleria" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Galería</a>
     </nav>
@@ -186,14 +187,13 @@
       </form>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
-        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Imagen destacada del inicio</h3>
-        <p class="mt-1 text-xs text-carbon/50">Si subes una foto, reemplaza la ilustración de la vela junto al encabezado. Quítala para volver a la ilustración.</p>
-        <div id="heroImagenPreview" class="mt-4"></div>
-        <form id="formHeroImagen" class="mt-4 flex flex-wrap items-center gap-3">
-          <input id="heroImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="text-sm">
-          <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir</button>
-          <button type="button" id="btnQuitarHeroImagen" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar imagen</button>
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Carrusel del inicio (publicidad)</h3>
+        <p class="mt-1 text-xs text-carbon/50">Sube una o varias fotos para el marco junto al encabezado. Con 2 o más, rotan solas cada pocos segundos. Sin ninguna, se muestra la ilustración de la vela.</p>
+        <form id="formHeroCarrusel" class="mt-4 flex flex-wrap items-center gap-3">
+          <input id="heroCarruselInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="text-sm">
+          <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Agregar imagen</button>
         </form>
+        <div id="listaHeroCarrusel" class="mt-4 grid gap-3 sm:grid-cols-3"></div>
       </div>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
@@ -340,6 +340,20 @@
       <div id="listaVentas" class="mt-6 space-y-3"></div>
     </section>
 
+    <!-- CLIENTES -->
+    <section id="seccionClientes" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Clientes</h2>
+      <p class="mt-1 text-sm text-carbon/60">Si un cliente te escribe por WhatsApp porque olvidó su contraseña, búscalo por su correo y asígnale una nueva.</p>
+
+      <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <form id="formBuscarCliente" class="flex flex-wrap gap-3">
+          <input id="clienteBuscarEmail" type="email" required placeholder="correo@delcliente.com" class="min-w-[220px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Buscar</button>
+        </form>
+        <div id="clienteResultado" class="mt-5"></div>
+      </div>
+    </section>
+
     <!-- ANUNCIOS -->
     <section id="seccionAnuncios" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Anuncios</h2>
@@ -447,6 +461,7 @@ function mostrarDashboard(mostrar){
   $('vistaDashboard').classList.toggle('hidden', !mostrar);
   if(mostrar){
     cargarContenidoAdmin();
+    cargarHeroCarrusel();
     cargarProductosAdmin();
     cargarCursosAdmin();
     cargarVentas();
@@ -658,13 +673,6 @@ function camposContenido(){
   return document.querySelectorAll('[data-content-key]');
 }
 
-function pintarHeroImagen(url){
-  const cont = $('heroImagenPreview');
-  cont.innerHTML = url
-    ? `<img src="${url}" alt="Imagen del inicio" class="h-32 rounded-xl object-cover ring-1 ring-vino/10">`
-    : '<p class="text-sm text-carbon/50">Usando la ilustración por defecto.</p>';
-}
-
 function pintarChefImagen(url){
   const cont = $('chefImagenPreview');
   cont.innerHTML = url
@@ -681,7 +689,6 @@ async function cargarContenidoAdmin(){
       const key = el.dataset.contentKey;
       if(Object.prototype.hasOwnProperty.call(CONTENIDO_ACTUAL, key)) el.value = CONTENIDO_ACTUAL[key];
     });
-    pintarHeroImagen(CONTENIDO_ACTUAL.hero_imagen);
     pintarChefImagen(CONTENIDO_ACTUAL.chef_imagen);
   }catch(e){
     toast('No se pudo cargar el contenido general');
@@ -712,29 +719,46 @@ $('formLegales').addEventListener('submit', async (e) => {
   }
 });
 
-$('formHeroImagen').addEventListener('submit', async (e) => {
+async function cargarHeroCarrusel(){
+  const cont = $('listaHeroCarrusel');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
+  try{
+    const items = await api('/admin/api/hero-carrusel');
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay imágenes; se muestra la ilustración por defecto.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(m => `
+      <div class="overflow-hidden rounded-xl bg-white ring-1 ring-vino/10">
+        <img src="${m.url}" alt="" class="aspect-square w-full object-cover">
+        <button type="button" data-id="${m.id}" class="btnBorrarHeroCarrusel w-full border-t border-red-100 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:bg-red-50 transition">Borrar</button>
+      </div>
+    `).join('');
+    cont.querySelectorAll('.btnBorrarHeroCarrusel').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar esta imagen del carrusel?')) return;
+        await api(`/admin/api/hero-carrusel/${btn.dataset.id}`, { method: 'DELETE' });
+        cargarHeroCarrusel();
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('formHeroCarrusel').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const file = $('heroImagenInput').files[0];
+  const file = $('heroCarruselInput').files[0];
   if(!file){ toast('Elige una imagen'); return; }
   const fd = new FormData();
   fd.append('file', file);
   try{
-    const res = await fetch('/admin/api/content/hero_imagen/image', { method: 'POST', body: fd });
+    const res = await fetch('/admin/api/hero-carrusel/upload', { method: 'POST', body: fd });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo subir la imagen');
-    pintarHeroImagen(data.url);
-    $('formHeroImagen').reset();
-    toast('Imagen actualizada');
-  }catch(e){
-    toast(e.message);
-  }
-});
-
-$('btnQuitarHeroImagen').addEventListener('click', async () => {
-  try{
-    await api('/admin/api/content/hero_imagen/image', { method: 'DELETE' });
-    pintarHeroImagen('');
-    toast('Imagen quitada');
+    $('formHeroCarrusel').reset();
+    toast('Imagen agregada al carrusel');
+    cargarHeroCarrusel();
   }catch(e){
     toast(e.message);
   }
@@ -987,6 +1011,42 @@ async function cargarVentas(){
 }
 
 $('btnRefrescarVentas').addEventListener('click', cargarVentas);
+
+/* ---------- Clientes: restablecer contraseña ---------- */
+$('formBuscarCliente').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const cont = $('clienteResultado');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Buscando…</p>';
+  try{
+    const email = $('clienteBuscarEmail').value.trim();
+    const user = await api(`/admin/api/users/buscar?email=${encodeURIComponent(email)}`);
+    cont.innerHTML = `
+      <div class="rounded-xl border border-vino/10 p-4">
+        <p class="font-titulo text-lg text-vino">${escapeHtml(user.nombre)}</p>
+        <p class="text-sm text-carbon/60">${escapeHtml(user.email)}</p>
+        <form id="formResetClientePassword" class="mt-4 flex flex-wrap gap-3">
+          <input id="clienteNuevaPassword" type="text" required minlength="6" placeholder="Nueva contraseña (mínimo 6 caracteres)" class="min-w-[220px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar nueva contraseña</button>
+        </form>
+      </div>`;
+    $('formResetClientePassword').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      try{
+        await api(`/admin/api/users/${user.id}/reset-password`, {
+          method: 'POST',
+          body: JSON.stringify({ password: $('clienteNuevaPassword').value }),
+        });
+        toast(`Contraseña actualizada para ${user.email}. Avísale al cliente por WhatsApp.`);
+        $('formBuscarCliente').reset();
+        cont.innerHTML = '';
+      }catch(err){
+        toast(err.message);
+      }
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+});
 
 verificarSesion();
 </script>
