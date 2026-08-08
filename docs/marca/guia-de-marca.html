@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía de marca · Endulcora — Estudio Gastronómico</title>
+<meta name="description" content="Sistema de identidad visual de Endulcora: concepto, logotipo, paleta con contraste WCAG, tipografía, componentes y voz de marca.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --carbon:#1B0720; --vino:#4E1454; --uva:#5C2360; --morado:#7A2E7E;
+    --flama:#F5A623; --crema:#FBF4E9; --humo:#9C9C9C; --blanco:#FFFFFF;
+    --papel:#F1E3CC;
+    --display:'Baloo 2',system-ui,sans-serif;
+    --firma:'Great Vibes',cursive;
+    --ui:'Montserrat',system-ui,sans-serif;
+    --cuerpo:'Poppins',system-ui,sans-serif;
+    --sombra:0 8px 40px rgba(78,20,84,.10);
+    --radio:22px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; font-family:var(--cuerpo); color:var(--carbon);
+    background:var(--crema);
+    line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--display); font-weight:800; line-height:1.1; text-wrap:balance; margin:0}
+  .firma{font-family:var(--firma); font-weight:400}
+  .eyebrow{
+    font-family:var(--ui); font-weight:700; font-size:11px;
+    text-transform:uppercase; letter-spacing:.26em; color:var(--morado);
+  }
+  a{color:var(--vino)}
+  .wrap{max-width:1080px; margin-inline:auto; padding-inline:clamp(20px,5vw,48px)}
+
+  /* ---------- Regla flama ---------- */
+  .rule{background-image:linear-gradient(90deg,var(--flama) 0 22px,transparent 22px); height:3px; width:96px; border-radius:2px}
+
+  /* ---------- Portada ---------- */
+  header.hero{
+    position:relative; overflow:hidden;
+    background:radial-gradient(120% 120% at 15% -10%, rgba(122,46,126,.35), transparent 55%), var(--carbon);
+    color:var(--crema); padding:clamp(56px,9vw,110px) 0 clamp(48px,7vw,84px);
+  }
+  header.hero .halo{position:absolute; right:-80px; top:-60px; width:360px; height:360px;
+    background:rgba(245,166,35,.20); filter:blur(120px); border-radius:50%; pointer-events:none}
+  .logo{font-family:var(--display); font-weight:800; letter-spacing:-.01em; line-height:1}
+  .logo .a{color:var(--crema)} .logo .b{color:var(--flama)}
+  .hero-tag{font-family:var(--ui); font-weight:600; letter-spacing:.34em; text-transform:uppercase; color:var(--humo); font-size:clamp(10px,1.6vw,13px)}
+  header.hero h1{font-size:clamp(30px,6vw,60px); color:var(--crema); margin-top:.5em}
+  header.hero h1 .em{color:var(--flama)}
+  header.hero p.lead{max-width:52ch; color:rgba(251,244,233,.72); font-size:clamp(15px,2.2vw,19px); margin-top:1.1em}
+  .meta{display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:2.2em; font-family:var(--ui); font-size:12px; letter-spacing:.05em; color:rgba(251,244,233,.6)}
+  .meta b{color:var(--flama); font-weight:700}
+
+  /* ---------- Índice ---------- */
+  nav.toc{position:sticky; top:0; z-index:20; background:rgba(251,244,233,.92); backdrop-filter:blur(8px); border-bottom:1px solid rgba(78,20,84,.12)}
+  nav.toc ul{display:flex; flex-wrap:wrap; gap:4px 6px; list-style:none; margin:0; padding:10px clamp(20px,5vw,48px)}
+  nav.toc a{font-family:var(--ui); font-weight:600; font-size:12px; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--vino); text-decoration:none; padding:6px 12px; border-radius:99px; white-space:nowrap; transition:.2s}
+  nav.toc a:hover{background:var(--vino); color:var(--crema)}
+
+  section{padding:clamp(48px,7vw,88px) 0; scroll-margin-top:56px}
+  section:nth-of-type(even){background:var(--blanco)}
+  .sec-head{max-width:60ch; margin-bottom:2.4em}
+  .sec-head h2{font-size:clamp(24px,4vw,40px); color:var(--vino); margin-top:.5em}
+  .sec-head p{color:rgba(27,7,32,.7); margin-top:.7em; font-size:16px}
+
+  /* ---------- Grids utilitarios ---------- */
+  .grid{display:grid; gap:22px}
+  @media(min-width:640px){.g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}}
+  .card{background:var(--crema); border:1px solid rgba(78,20,84,.10); border-radius:var(--radio); padding:26px}
+  section:nth-of-type(even) .card{background:var(--crema)}
+
+  /* ---------- Concepto ---------- */
+  .vela-box{display:grid; gap:28px; align-items:center}
+  @media(min-width:820px){.vela-box{grid-template-columns:1.2fr .8fr}}
+  .vela-card{background:var(--blanco); border-radius:28px; border:1px solid rgba(78,20,84,.10); box-shadow:var(--sombra); padding:34px; text-align:center}
+  @keyframes parpadeo{0%,100%{transform:scale(1) rotate(-1deg); opacity:.95}35%{transform:scale(1.06,.94) rotate(2deg); opacity:1}65%{transform:scale(.96,1.05) rotate(-2deg); opacity:.9}}
+  .flama-svg{transform-origin:50% 100%; animation:parpadeo 2.6s ease-in-out infinite}
+  .firma-caption{font-family:var(--firma); font-size:28px; color:var(--vino); margin-top:.3em}
+  .pilares li{margin-bottom:14px}
+  .pilares b{color:var(--vino); font-family:var(--ui); font-weight:700; text-transform:uppercase; letter-spacing:.06em; font-size:12px; display:block}
+
+  /* ---------- Logo ---------- */
+  .logo-demo{display:flex; align-items:center; justify-content:center; min-height:150px; border-radius:var(--radio); border:1px solid rgba(78,20,84,.1)}
+  .on-crema{background:var(--crema)} .on-carbon{background:var(--carbon)} .on-vino{background:var(--vino)}
+  .do-dont{display:grid; gap:14px}
+  @media(min-width:640px){.do-dont{grid-template-columns:1fr 1fr}}
+  .chip{font-family:var(--ui); font-size:12px; font-weight:700; letter-spacing:.04em; padding:4px 12px; border-radius:99px; display:inline-flex; gap:6px; align-items:center}
+  .chip.si{background:rgba(122,46,126,.12); color:var(--vino)} .chip.no{background:rgba(220,60,60,.12); color:#B42318}
+  ul.lista{padding-left:0; list-style:none}
+  ul.lista li{position:relative; padding-left:26px; margin-bottom:10px}
+  ul.lista li::before{content:''; position:absolute; left:0; top:.55em; width:12px; height:3px; background:var(--flama); border-radius:2px}
+
+  /* ---------- Color ---------- */
+  .swatch{border-radius:var(--radio); overflow:hidden; border:1px solid rgba(78,20,84,.12)}
+  .swatch .cap{height:104px; display:flex; align-items:flex-end; padding:14px}
+  .swatch .body{padding:14px 16px; background:var(--blanco)}
+  .swatch .name{font-family:var(--display); font-weight:700; font-size:18px}
+  .swatch .hex{font-family:var(--ui); font-weight:600; font-size:13px; letter-spacing:.05em; color:rgba(27,7,32,.6)}
+  .swatch .role{font-size:12.5px; color:rgba(27,7,32,.7); margin-top:6px}
+  .tag{font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:3px 8px; border-radius:6px; background:rgba(255,255,255,.75); color:var(--carbon)}
+
+  table.contraste{width:100%; border-collapse:collapse; font-size:14px; background:var(--blanco); border-radius:var(--radio); overflow:hidden}
+  table.contraste th,table.contraste td{padding:12px 14px; text-align:left; border-bottom:1px solid rgba(78,20,84,.08)}
+  table.contraste th{font-family:var(--ui); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--vino); background:rgba(122,46,126,.06)}
+  table.contraste td.num{font-family:var(--ui); font-weight:700; font-variant-numeric:tabular-nums}
+  .badge{font-family:var(--ui); font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap}
+  .b-aaa{background:rgba(34,120,60,.14); color:#1B6B34}
+  .b-aa{background:rgba(122,46,126,.14); color:var(--vino)}
+  .b-ui{background:rgba(245,166,35,.2); color:#8a5a06}
+  .b-no{background:rgba(220,60,60,.14); color:#B42318}
+  .muestra{display:inline-flex; align-items:center; justify-content:center; width:64px; height:30px; border-radius:7px; font-family:var(--display); font-weight:700; font-size:14px}
+
+  .alerta{border-left:4px solid var(--flama); background:rgba(245,166,35,.10); border-radius:12px; padding:16px 20px; margin-top:22px}
+  .alerta b{color:var(--vino)}
+
+  /* ---------- Tipografía ---------- */
+  .type-row{border-bottom:1px solid rgba(78,20,84,.1); padding:22px 0}
+  .type-row:last-child{border-bottom:0}
+  .type-name{font-family:var(--ui); font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--morado)}
+  .type-meta{font-family:var(--ui); font-size:12.5px; color:rgba(27,7,32,.6); margin-top:4px}
+  .scale div{border-bottom:1px dashed rgba(78,20,84,.14); padding:10px 0; display:flex; align-items:baseline; gap:16px; flex-wrap:wrap}
+  .scale .lbl{font-family:var(--ui); font-size:11px; color:var(--humo); width:120px; letter-spacing:.05em}
+
+  /* ---------- Componentes ---------- */
+  .btn{font-family:var(--ui); font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.06em; border:none; border-radius:99px; padding:14px 26px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:.2s}
+  .btn-primary{background:var(--flama); color:var(--carbon)} .btn-primary:hover{background:var(--vino); color:var(--crema)}
+  .btn-ghost{background:transparent; color:var(--vino); border:1px solid rgba(78,20,84,.3)} .btn-ghost:hover{border-color:var(--flama); background:rgba(245,166,35,.1)}
+  .pill{display:inline-flex; align-items:center; gap:8px; font-family:var(--ui); font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.16em; color:var(--vino); background:rgba(122,46,126,.06); border:1px solid rgba(122,46,126,.25); border-radius:99px; padding:7px 16px}
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--flama)}
+  .demo-card{background:var(--blanco); border-radius:var(--radio); border:1px solid rgba(78,20,84,.1); padding:24px; box-shadow:var(--sombra)}
+
+  /* ---------- Voz ---------- */
+  .voz-grid{display:grid; gap:16px}
+  @media(min-width:640px){.voz-grid{grid-template-columns:1fr 1fr}}
+  .voz .si,.voz .no{border-radius:14px; padding:16px 18px}
+  .voz .si{background:rgba(122,46,126,.07); border:1px solid rgba(122,46,126,.2)}
+  .voz .no{background:rgba(156,156,156,.1); border:1px solid rgba(156,156,156,.3)}
+  .voz p{margin:.4em 0 0}
+  .quote{font-family:var(--firma); font-size:clamp(26px,4vw,40px); color:var(--vino); line-height:1.25; max-width:20ch}
+
+  footer{background:var(--carbon); color:rgba(251,244,233,.7); padding:48px 0; font-size:13px}
+  footer .logo{font-size:26px}
+  footer .tag{background:none; color:var(--humo)}
+
+  @media (prefers-reduced-motion: reduce){ .flama-svg{animation:none} html{scroll-behavior:auto} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="halo"></span>
+  <div class="wrap">
+    <div class="logo" style="font-size:clamp(34px,7vw,68px)"><span class="a">ENDUL</span><span class="b">CORA</span></div>
+    <div class="hero-tag" style="margin-top:8px">Estudio Gastronómico</div>
+    <h1>Guía de <span class="em">marca</span></h1>
+    <p class="lead">El sistema de identidad visual y verbal que mantiene a Endulcora coherente, profesional y reconocible en cada página, anuncio y publicación.</p>
+    <div class="meta">
+      <span>Versión <b>1.0</b></span>
+      <span>Actualizada <b>2026</b></span>
+      <span>Ciudad de México</span>
+      <span>Contenido: <b>Chef Luis Alfonso Jiménez</b></span>
+      <span>Edición: <b>Manuel R. Justo</b></span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Índice">
+  <div class="wrap" style="padding:0">
+    <ul>
+      <li><a href="#concepto">Concepto</a></li>
+      <li><a href="#logo">Logotipo</a></li>
+      <li><a href="#color">Color</a></li>
+      <li><a href="#contraste">Contraste</a></li>
+      <li><a href="#tipografia">Tipografía</a></li>
+      <li><a href="#componentes">Componentes</a></li>
+      <li><a href="#voz">Voz y tono</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ═══════════ CONCEPTO ═══════════ -->
+<section id="concepto">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="rule"></div>
+      <div class="eyebrow" style="margin-top:1em">Esencia de marca</div>
+      <h2>La técnica, servida con oficio</h2>
+      <p>Endulcora enseña a reposteros y emprendedores gastronómicos a cocinar con técnica y a cobrar con margen real. La marca vive en la tensión entre dos mundos: el <b>calor artesanal</b> de la cocina y la <b>precisión</b> del costeo. Cálida pero rigurosa; cercana pero profesional.</p>
+    </div>
+
+    <div class="vela-box">
+      <ul class="pilares lista" style="font-size:16px">
+        <li><b>Posicionamiento</b> Manuales técnicos, hojas de costeo, apps y talleres en vivo para quien cocina con oficio y quiere vivir de eso.</li>
+        <li><b>Personalidad</b> Maestra de taller: sabe del tema, va al grano, no presume. Habla claro y con cariño por el gremio.</li>
+        <li><b>Promesa</b> «Aprende la técnica. Cobra lo que vale.»</li>
+        <li><b>Símbolo</b> La <b>vela comestible</b> —se enciende, se derrite, se come— resume el mensaje: producto gourmet con truco técnico. La flama es la firma visual de la marca.</li>
+      </ul>
+
+      <div class="vela-card">
+        <svg viewBox="0 0 120 200" style="height:220px;width:auto" role="img" aria-label="Vela comestible encendida, símbolo de Endulcora">
+          <ellipse cx="60" cy="188" rx="46" ry="9" fill="#000" opacity=".12"/>
+          <g class="flama-svg">
+            <path d="M60 6c4 22 22 26 22 46a22 22 0 1 1-44 0c0-11 7-15 11-26 2 7 5 9 7 11 1-11 4-20 4-31z" fill="#F5A623"/>
+            <path d="M60 30c2 12 11 15 11 25a11 11 0 1 1-22 0c0-7 8-14 11-25z" fill="#FBF4E9" opacity=".85"/>
+          </g>
+          <rect x="58.5" y="72" width="3" height="16" rx="1.5" fill="#4E1454"/>
+          <path d="M28 88h64c3 0 5 2 5 5v82c0 6-5 10-11 10H34c-6 0-11-4-11-10V93c0-3 2-5 5-5z" fill="#FBF4E9"/>
+          <path d="M28 88h64c3 0 5 2 5 5v14H23V93c0-3 2-5 5-5z" fill="#F1E3CC"/>
+          <rect x="23" y="150" width="74" height="35" rx="6" fill="#7A2E7E"/>
+          <text x="60" y="166" text-anchor="middle" font-family="Montserrat" font-weight="700" font-size="11" letter-spacing="2" fill="#FBF4E9">MANTEQUILLA</text>
+          <text x="60" y="179" text-anchor="middle" font-family="Montserrat" font-weight="700" font-size="11" letter-spacing="2" fill="#F5A623">TRUFADA</text>
+        </svg>
+        <p class="firma-caption">se enciende, se derrite, se come</p>
+        <div class="hero-tag" style="color:var(--humo); margin-top:6px">Firma visual · La flama</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ LOGO ═══════════ -->
+<section id="logo">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="rule"></div>
+      <div class="eyebrow" style="margin-top:1em">Logotipo</div>
+      <h2>Un nombre, dos colores</h2>
+      <p>El logotipo es tipográfico: <b>ENDUL</b> en el color de fondo dominante y <b>CORA</b> en flama, en <b>Baloo&nbsp;2 ExtraBold</b>. Debajo, el descriptor «Estudio Gastronómico» en Montserrat con amplio tracking. Nunca se separan las dos mitades del nombre.</p>
+    </div>
+
+    <div class="grid g3">
+      <div class="card" style="padding:0; overflow:hidden">
+        <div class="logo-demo on-crema"><span class="logo" style="font-size:34px"><span style="color:var(--vino)">ENDUL</span><span style="color:var(--flama)">CORA</span></span></div>
+        <div style="padding:14px 18px"><span class="tag" style="background:rgba(122,46,126,.1)">Sobre crema</span></div>
+      </div>
+      <div class="card" style="padding:0; overflow:hidden">
+        <div class="logo-demo on-carbon"><span class="logo" style="font-size:34px"><span style="color:var(--crema)">ENDUL</span><span style="color:var(--flama)">CORA</span></span></div>
+        <div style="padding:14px 18px"><span class="tag" style="background:rgba(122,46,126,.1)">Sobre carbón</span></div>
+      </div>
+      <div class="card" style="padding:0; overflow:hidden">
+        <div class="logo-demo on-vino"><span class="logo" style="font-size:34px"><span style="color:var(--crema)">ENDUL</span><span style="color:var(--flama)">CORA</span></span></div>
+        <div style="padding:14px 18px"><span class="tag" style="background:rgba(122,46,126,.1)">Sobre vino</span></div>
+      </div>
+    </div>
+
+    <div class="do-dont" style="margin-top:28px">
+      <div class="card">
+        <span class="chip si">✓ Sí</span>
+        <ul class="lista" style="margin-top:14px">
+          <li>Mantener «CORA» siempre en flama para conservar el guiño de la llama.</li>
+          <li>Dejar un margen mínimo libre igual a la altura de la letra «E» alrededor del logo.</li>
+          <li>Usar la versión clara (crema) sobre fondos oscuros; la de vino sobre crema/blanco.</li>
+          <li>Acompañarlo del descriptor en mayúsculas con tracking ancho (.34em).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="chip no">✕ No</span>
+        <ul class="lista" style="margin-top:14px">
+          <li>No cambiar las fuentes ni poner el nombre en cursiva o condensada.</li>
+          <li>No colorear «ENDUL» de flama sobre crema (falla el contraste, ver abajo).</li>
+          <li>No aplicar sombras, contornos, degradados ni deformar la proporción.</li>
+          <li>No colocarlo sobre fotos sin una capa de color que garantice legibilidad.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ COLOR ═══════════ -->
+<section id="color">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="rule"></div>
+      <div class="eyebrow" style="margin-top:1em">Paleta</div>
+      <h2>Vino, flama y crema</h2>
+      <p>Una paleta cálida y premium: la profundidad del <b>vino</b> y el <b>carbón</b> como base, el <b>ámbar flama</b> como único acento de energía, y la <b>crema</b> como lienzo que da aire. El morado y la uva son puentes entre el fondo oscuro y el acento.</p>
+    </div>
+
+    <div class="grid g4">
+      <!-- Carbón -->
+      <div class="swatch">
+        <div class="cap" style="background:#1B0720"><span class="tag">Texto / Fondo</span></div>
+        <div class="body"><div class="name">Carbón</div><div class="hex">#1B0720</div><div class="role">Texto principal y fondos profundos.</div></div>
+      </div>
+      <!-- Vino -->
+      <div class="swatch">
+        <div class="cap" style="background:#4E1454"><span class="tag">Primario</span></div>
+        <div class="body"><div class="name">Vino</div><div class="hex">#4E1454</div><div class="role">Color de marca. Títulos, botones sólidos, fondos de sección.</div></div>
+      </div>
+      <!-- Uva -->
+      <div class="swatch">
+        <div class="cap" style="background:#5C2360"><span class="tag">Apoyo</span></div>
+        <div class="body"><div class="name">Uva</div><div class="hex">#5C2360</div><div class="role">Degradados y variaciones del primario.</div></div>
+      </div>
+      <!-- Morado -->
+      <div class="swatch">
+        <div class="cap" style="background:#7A2E7E"><span class="tag">Secundario</span></div>
+        <div class="body"><div class="name">Morado</div><div class="hex">#7A2E7E</div><div class="role">Hover, detalles, controles interactivos.</div></div>
+      </div>
+      <!-- Flama -->
+      <div class="swatch">
+        <div class="cap" style="background:#F5A623"><span class="tag">Acento / CTA</span></div>
+        <div class="body"><div class="name">Flama</div><div class="hex">#F5A623</div><div class="role">Acento único. CTAs, datos destacados, la firma de la llama.</div></div>
+      </div>
+      <!-- Crema -->
+      <div class="swatch">
+        <div class="cap" style="background:#FBF4E9; border-bottom:1px solid rgba(0,0,0,.06)"><span class="tag">Lienzo</span></div>
+        <div class="body"><div class="name">Crema</div><div class="hex">#FBF4E9</div><div class="role">Fondo por defecto del sitio y texto sobre oscuro.</div></div>
+      </div>
+      <!-- Papel -->
+      <div class="swatch">
+        <div class="cap" style="background:#F1E3CC"><span class="tag">Neutro</span></div>
+        <div class="body"><div class="name">Papel</div><div class="hex">#F1E3CC</div><div class="role">Tarjetas y separaciones suaves sobre crema.</div></div>
+      </div>
+      <!-- Humo -->
+      <div class="swatch">
+        <div class="cap" style="background:#9C9C9C"><span class="tag">Neutro</span></div>
+        <div class="body"><div class="name">Humo</div><div class="hex">#9C9C9C</div><div class="role">Descriptores y metadatos. Solo texto ≥18px o decorativo.</div></div>
+      </div>
+    </div>
+
+    <div class="alerta">
+      <b>Regla del 60·30·10.</b> Aproximadamente 60&nbsp;% crema (lienzo), 30&nbsp;% vino/carbón (estructura) y 10&nbsp;% flama (acento). Si la flama ocupa más, deja de ser un acento y la pieza pierde jerarquía.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CONTRASTE ═══════════ -->
+<section id="contraste">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="rule"></div>
+      <div class="eyebrow" style="margin-top:1em">Accesibilidad · WCAG 2.1</div>
+      <h2>Qué combinaciones son seguras para texto</h2>
+      <p>Contrastes reales de la paleta. <b>AA</b> exige 4.5:1 para texto normal y 3:1 para texto grande (≥24&nbsp;px o ≥18.7&nbsp;px en negrita) y elementos de interfaz. La regla más importante: <b>la flama nunca va como texto sobre crema o blanco.</b></p>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table class="contraste">
+        <thead>
+          <tr><th>Muestra</th><th>Texto / Fondo</th><th>Ratio</th><th>Uso permitido</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="muestra" style="background:#FBF4E9;color:#1B0720">Aa</span></td><td>Carbón sobre crema</td><td class="num">17.5:1</td><td><span class="badge b-aaa">AAA · texto normal</span></td></tr>
+          <tr><td><span class="muestra" style="background:#FBF4E9;color:#4E1454">Aa</span></td><td>Vino sobre crema</td><td class="num">12.4:1</td><td><span class="badge b-aaa">AAA · texto normal</span></td></tr>
+          <tr><td><span class="muestra" style="background:#4E1454;color:#FBF4E9">Aa</span></td><td>Crema sobre vino</td><td class="num">12.4:1</td><td><span class="badge b-aaa">AAA · texto normal</span></td></tr>
+          <tr><td><span class="muestra" style="background:#FBF4E9;color:#7A2E7E">Aa</span></td><td>Morado sobre crema</td><td class="num">7.6:1</td><td><span class="badge b-aaa">AAA · texto normal</span></td></tr>
+          <tr><td><span class="muestra" style="background:#1B0720;color:#F5A623">Aa</span></td><td>Flama sobre carbón</td><td class="num">9.4:1</td><td><span class="badge b-aaa">AAA · texto normal</span></td></tr>
+          <tr><td><span class="muestra" style="background:#4E1454;color:#F5A623">Aa</span></td><td>Flama sobre vino</td><td class="num">6.7:1</td><td><span class="badge b-aa">AA · texto normal</span></td></tr>
+          <tr><td><span class="muestra" style="background:#FBF4E9;color:#9C9C9C">Aa</span></td><td>Humo sobre crema</td><td class="num">2.5:1</td><td><span class="badge b-no">Solo decorativo</span></td></tr>
+          <tr><td><span class="muestra" style="background:#FBF4E9;color:#F5A623">Aa</span></td><td>Flama sobre crema</td><td class="num">1.9:1</td><td><span class="badge b-no">✕ Nunca como texto</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alerta">
+      <b>Cómo destacar cifras en dorado sobre fondo claro.</b> En lugar de poner el número en flama sobre crema, usa <b>vino o morado</b> para el número y reserva la flama para un subrayado, un punto o un borde. Así conservas el acento cálido sin sacrificar legibilidad. La flama como <em>texto</em> solo brilla sobre carbón o vino.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ TIPOGRAFÍA ═══════════ -->
+<section id="tipografia">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="rule"></div>
+      <div class="eyebrow" style="margin-top:1em">Tipografía</div>
+      <h2>Cuatro voces, un solo tono</h2>
+      <p>Un sistema de cuatro familias con roles claros. Baloo&nbsp;2 aporta calidez redondeada a los titulares; Great&nbsp;Vibes firma con un gesto de repostería; Montserrat ordena la interfaz; Poppins mantiene el cuerpo legible y neutro.</p>
+    </div>
+
+    <div class="type-row">
+      <div class="type-name">Display · Titulares</div>
+      <div style="font-family:var(--display); font-weight:800; font-size:clamp(32px,6vw,56px); color:var(--vino); line-height:1.05; margin-top:8px">Aprende la técnica</div>
+      <div class="type-meta">Baloo 2 · pesos 600–800 · usar en H1–H3 y cifras grandes. Redondeada, cálida, apetitosa.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-name">Firma · Acentos</div>
+      <div style="font-family:var(--firma); font-size:clamp(36px,7vw,60px); color:var(--morado); margin-top:4px">se enciende, se derrite</div>
+      <div class="type-meta">Great Vibes · un solo peso · frases cortas y evocadoras, jamás en bloques ni en mayúsculas. Máximo una por sección.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-name">Interfaz · Etiquetas y botones</div>
+      <div style="font-family:var(--ui); font-weight:700; text-transform:uppercase; letter-spacing:.18em; font-size:15px; color:var(--vino); margin-top:10px">ESTUDIO GASTRONÓMICO · TIENDA · CLASES</div>
+      <div class="type-meta">Montserrat · pesos 500–700 · mayúsculas con tracking .06–.34em para navegación, botones, eyebrows y metadatos.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-name">Cuerpo · Texto corrido</div>
+      <div style="font-family:var(--cuerpo); font-size:17px; color:rgba(27,7,32,.8); max-width:62ch; margin-top:8px">Manuales técnicos, hojas de costeo listas para usar y talleres en vivo para reposteros y emprendedores que quieren cocinar bien y vender con margen real.</div>
+      <div class="type-meta">Poppins · pesos 300–500 · tamaño base 16–17 px, interlínea 1.6, ancho de línea ≤ 65 caracteres.</div>
+    </div>
+
+    <div class="card" style="margin-top:30px; background:var(--crema)">
+      <div class="type-name" style="margin-bottom:14px">Escala tipográfica sugerida</div>
+      <div class="scale">
+        <div><span class="lbl">H1 · 48–60px</span><span style="font-family:var(--display);font-weight:800;font-size:34px;color:var(--vino)">Cobra lo que vale</span></div>
+        <div><span class="lbl">H2 · 32–40px</span><span style="font-family:var(--display);font-weight:800;font-size:26px;color:var(--vino)">Talleres y cursos</span></div>
+        <div><span class="lbl">H3 · 22–24px</span><span style="font-family:var(--display);font-weight:700;font-size:20px;color:var(--vino)">Costos por pieza</span></div>
+        <div><span class="lbl">Cuerpo · 16–17px</span><span style="font-family:var(--cuerpo);font-size:16px;color:var(--carbon)">Cada manual viene con su anexo de costeo.</span></div>
+        <div><span class="lbl">Etiqueta · 11–13px</span><span style="font-family:var(--ui);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:var(--morado)">Próxima clase en vivo</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ COMPONENTES ═══════════ -->
+<section id="componentes">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="rule"></div>
+      <div class="eyebrow" style="margin-top:1em">Componentes</div>
+      <h2>Piezas que se repiten</h2>
+      <p>Radios generosos (18–28&nbsp;px), botones tipo píldora, y la <b>regla flama</b> —una línea con guion dorado— como separador recurrente que ancla el inicio de cada sección.</p>
+    </div>
+
+    <div class="grid g2">
+      <div class="demo-card">
+        <div class="type-name" style="margin-bottom:16px">Botones</div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center">
+          <button class="btn btn-primary">Ir a la tienda →</button>
+          <button class="btn btn-ghost">Ver cursos</button>
+        </div>
+        <p style="font-size:13.5px; color:rgba(27,7,32,.6); margin-top:16px">Primario en flama sobre texto carbón (contraste 9.4:1). En hover invierte a vino con texto crema. Altura táctil mínima 44&nbsp;px.</p>
+      </div>
+
+      <div class="demo-card">
+        <div class="type-name" style="margin-bottom:16px">Píldora y separador</div>
+        <span class="pill"><span class="dot"></span> Próxima clase en vivo</span>
+        <div class="rule" style="margin-top:22px"></div>
+        <p style="font-size:13.5px; color:rgba(27,7,32,.6); margin-top:16px">La regla flama abre cada sección; las píldoras etiquetan estados y categorías con un punto ámbar de acento.</p>
+      </div>
+
+      <div class="demo-card" style="background:var(--vino); color:var(--crema)">
+        <div class="type-name" style="color:var(--flama); margin-bottom:8px">Dato destacado</div>
+        <div style="font-family:var(--display); font-weight:800; font-size:52px; color:var(--flama); line-height:1">$187</div>
+        <p style="font-size:13.5px; color:rgba(251,244,233,.65); margin-top:8px">Cifras grandes en flama <b>solo</b> sobre fondos vino o carbón. Sobre crema, ver la regla de contraste.</p>
+      </div>
+
+      <div class="demo-card">
+        <div class="type-name" style="margin-bottom:14px">Tarjeta sobre lienzo</div>
+        <div style="border-radius:16px; border:1px solid rgba(78,20,84,.12); padding:18px; background:var(--crema)">
+          <div style="font-family:var(--display); font-weight:700; font-size:19px; color:var(--vino)">Vela de mantequilla trufada</div>
+          <p style="font-size:14px; color:rgba(27,7,32,.7); margin:6px 0 0">Manual + anexo de costeo · Receta 01</p>
+        </div>
+        <p style="font-size:13.5px; color:rgba(27,7,32,.6); margin-top:16px">Fondo blanco o crema, borde vino al 10–12&nbsp;%, sombra suave morada. Nada de bordes duros ni grises fríos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ VOZ ═══════════ -->
+<section id="voz">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="rule"></div>
+      <div class="eyebrow" style="margin-top:1em">Voz y tono</div>
+      <h2>Como una maestra de taller</h2>
+      <p>Directa, cálida y sin humo. Habla de tú, usa el vocabulario del gremio (merma, margen, costeo, mayoreo) y siempre aterriza en el beneficio concreto: cocinar mejor y ganar más.</p>
+    </div>
+
+    <p class="quote">«Aprende la técnica. Cobra lo que vale.»</p>
+
+    <div class="voz-grid voz" style="margin-top:32px">
+      <div class="si">
+        <span class="chip si">✓ Así hablamos</span>
+        <p><b>Claro y útil:</b> «El libro te enseña la técnica; la hoja te dice a cuánto venderla.»</p>
+        <p><b>Con oficio:</b> «Recomendado: 55–70 % de margen en regalo gourmet.»</p>
+        <p><b>Cercano:</b> «¿Compraste por WhatsApp y no tienes acceso? Escríbenos y lo activamos.»</p>
+      </div>
+      <div class="no">
+        <span class="chip no">✕ Así no</span>
+        <p><b>Vago o publicitario:</b> «¡La mejor experiencia gastronómica premium del mercado!»</p>
+        <p><b>Técnico frío:</b> «Configure sus parámetros de producción en el módulo contable.»</p>
+        <p><b>Con relleno:</b> «En Endulcora nos apasiona la excelencia y la calidad ante todo.»</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:26px; background:var(--crema)">
+      <div class="type-name" style="margin-bottom:10px">Principios de redacción</div>
+      <ul class="lista">
+        <li>Verbo en voz activa y en presente: «Mueve los datos y el precio se recalcula solo.»</li>
+        <li>El botón dice exactamente qué pasa: «Apartar mi lugar», «Ir a pagar con Mercado Pago».</li>
+        <li>Cifras y ejemplos concretos antes que adjetivos. Lo específico convence.</li>
+        <li>Español de México, cálido pero profesional. Nada de anglicismos innecesarios.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="logo"><span class="a">ENDUL</span><span class="b">CORA</span></div>
+    <div class="tag" style="margin-top:6px; font-family:var(--ui); font-weight:600; letter-spacing:.34em; text-transform:uppercase; font-size:11px">Estudio Gastronómico</div>
+    <p style="margin-top:18px; max-width:60ch">Guía de marca v1.0 · Documento interno de referencia para diseño, web y comunicación. Basada en la identidad existente del sitio y validada con criterios de accesibilidad WCAG 2.1.</p>
+    <p style="margin-top:10px; color:var(--humo)">© 2026 Endulcora · Estudio Gastronómico · Ciudad de México</p>
+  </div>
+</footer>
+
+</body>
+</html>
