@@ -84,4 +84,16 @@ router.get('/orders', requireCliente, (req, res) => {
   res.json(store.getOrdersByUser(user.id, user.email));
 });
 
+router.post('/resenas', requireCliente, (req, res) => {
+  const user = store.getUserById(req.session.userId);
+  if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
+  const { texto, estrellas } = req.body || {};
+  if (!texto || !String(texto).trim()) return res.status(400).json({ error: 'Escribe tu reseña.' });
+  if (!estrellas || Number(estrellas) < 1 || Number(estrellas) > 5) {
+    return res.status(400).json({ error: 'Elige una calificación de 1 a 5 estrellas.' });
+  }
+  const item = store.addResena({ userId: user.id, nombreAutor: user.nombre, texto, estrellas });
+  res.status(201).json(item);
+});
+
 module.exports = router;

@@ -37,6 +37,10 @@ router.get('/sesiones-taller', (req, res) => {
   res.json(store.getSesionesTaller(req.query.sedeId));
 });
 
+router.get('/resenas', (req, res) => {
+  res.json(store.getResenas(true));
+});
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 router.post('/newsletter/suscribir', (req, res) => {
   const email = String((req.body && req.body.email) || '').trim();

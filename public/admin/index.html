@@ -68,6 +68,7 @@
       <a href="#seccionVentas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Ventas</a>
       <a href="#seccionClientes" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clientes</a>
       <a href="#seccionSuscriptores" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Suscriptores</a>
+      <a href="#seccionResenas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Reseñas</a>
       <a href="#seccionAnuncios" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Anuncios</a>
       <a href="#seccionGaleria" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Galería</a>
     </nav>
@@ -440,6 +441,13 @@
       <div id="listaSuscriptores" class="mt-6 overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10"></div>
     </section>
 
+    <!-- RESEÑAS -->
+    <section id="seccionResenas" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Reseñas</h2>
+      <p class="mt-1 text-sm text-carbon/60">Opiniones que dejan los alumnos con inicio de sesión. Revísalas y publícalas para que aparezcan en el muro del sitio.</p>
+      <div id="listaResenas" class="mt-6 grid gap-4"></div>
+    </section>
+
     <!-- ANUNCIOS -->
     <section id="seccionAnuncios" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Anuncios</h2>
@@ -553,6 +561,7 @@ function mostrarDashboard(mostrar){
     cargarSedes();
     cargarVentas();
     cargarSuscriptores();
+    cargarResenas();
     cargarAnuncios();
     cargarGaleria();
   }
@@ -1409,6 +1418,56 @@ $('btnExportarSuscriptores').addEventListener('click', () => {
   a.click();
   URL.revokeObjectURL(url);
 });
+
+/* ---------- Reseñas ---------- */
+function estrellasHtml(n){
+  return Array.from({ length: 5 }, (_, i) => `<span class="${i < n ? 'text-flama' : 'text-carbon/20'}">★</span>`).join('');
+}
+async function cargarResenas(){
+  const cont = $('listaResenas');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
+  try{
+    const items = await api('/admin/api/resenas');
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay reseñas.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(r => `
+      <article class="flex items-start justify-between gap-4 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+        <div>
+          <p class="font-ui text-[11px] uppercase tracking-widest ${r.publicado ? 'text-morado' : 'text-humo'}">
+            ${r.publicado ? 'Publicada' : 'Pendiente'} · ${new Date(r.createdAt).toLocaleDateString('es-MX')}
+          </p>
+          <p class="mt-1 text-sm">${estrellasHtml(r.estrellas)}</p>
+          <h3 class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(r.nombreAutor)}</h3>
+          <p class="mt-1 whitespace-pre-line text-sm text-carbon/70">${escapeHtml(r.texto)}</p>
+        </div>
+        <div class="flex shrink-0 flex-col gap-2">
+          <button data-id="${r.id}" data-pub="${r.publicado ? 0 : 1}" class="btnTogglePubResena rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">
+            ${r.publicado ? 'Ocultar' : 'Publicar'}
+          </button>
+          <button data-id="${r.id}" class="btnBorrarResena rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+        </div>
+      </article>
+    `).join('');
+
+    cont.querySelectorAll('.btnBorrarResena').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar esta reseña?')) return;
+        await api(`/admin/api/resenas/${btn.dataset.id}`, { method: 'DELETE' });
+        cargarResenas();
+      });
+    });
+    cont.querySelectorAll('.btnTogglePubResena').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await api(`/admin/api/resenas/${btn.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ publicado: btn.dataset.pub === '1' }) });
+        cargarResenas();
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
 
 /* ---------- Clientes: restablecer contraseña ---------- */
 $('formBuscarCliente').addEventListener('submit', async (e) => {

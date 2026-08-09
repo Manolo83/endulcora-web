@@ -154,6 +154,7 @@ function datosPorDefecto() {
     subscribers: [],
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
     sesionesTaller: [],
+    resenas: [],
   };
 }
 
@@ -564,6 +565,42 @@ module.exports = {
   deleteSesionTaller(id) {
     const data = load();
     data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== Number(id));
+    save(data);
+  },
+
+  // ---- Reseñas de alumnos ----
+  getResenas(onlyPublicadas = false) {
+    const data = load();
+    const items = [...data.resenas].sort((a, b) => b.id - a.id);
+    return onlyPublicadas ? items.filter((r) => r.publicado) : items;
+  },
+  addResena({ userId, nombreAutor, texto, estrellas }) {
+    const data = load();
+    const item = {
+      id: nextId(data.resenas),
+      userId: userId || null,
+      nombreAutor: String(nombreAutor || '').trim(),
+      texto: String(texto || '').trim(),
+      estrellas: Math.max(1, Math.min(5, Number(estrellas) || 5)),
+      publicado: false,
+      createdAt: new Date().toISOString(),
+    };
+    data.resenas.push(item);
+    save(data);
+    return item;
+  },
+  updateResena(id, patch) {
+    const data = load();
+    const item = data.resenas.find((r) => r.id === Number(id));
+    if (!item) return null;
+    if (typeof patch.publicado === 'boolean') item.publicado = patch.publicado;
+    if (typeof patch.texto === 'string') item.texto = patch.texto;
+    save(data);
+    return item;
+  },
+  deleteResena(id) {
+    const data = load();
+    data.resenas = data.resenas.filter((r) => r.id !== Number(id));
     save(data);
   },
 };

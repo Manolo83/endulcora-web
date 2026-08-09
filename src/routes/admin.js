@@ -357,6 +357,22 @@ router.delete('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- Reseñas de alumnos (moderación) ----
+router.get('/api/resenas', requireAdmin, (req, res) => {
+  res.json(store.getResenas());
+});
+
+router.patch('/api/resenas/:id', requireAdmin, (req, res) => {
+  const item = store.updateResena(req.params.id, req.body || {});
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+router.delete('/api/resenas/:id', requireAdmin, (req, res) => {
+  store.deleteResena(req.params.id);
+  res.json({ ok: true });
+});
+
 // ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----
 router.get('/api/users/buscar', requireAdmin, (req, res) => {
   const user = store.getUserByEmail(req.query.email || '');
