@@ -221,7 +221,26 @@ Si un cliente olvida su contraseña, el botón "¿Olvidaste tu contraseña?" lo
 manda directo a tu WhatsApp para que le ayudes manualmente — el sitio no
 envía correos de recuperación automáticos.
 
-## 11. Notas técnicas y mejoras futuras (opcionales)
+## 11. Asistente de IA (burbuja de chat)
+
+El sitio tiene una burbuja de chat flotante (esquina inferior derecha) que
+responde preguntas sobre productos, cursos y la calculadora de costeo,
+usando la API gratuita de Google Gemini.
+
+1. Entra a [aistudio.google.com](https://aistudio.google.com) e inicia
+   sesión con tu cuenta de Google.
+2. Busca **Get API key → Create API key**. No pide tarjeta para el nivel
+   gratuito.
+3. En Railway, agrega la variable `GEMINI_API_KEY` con esa clave.
+
+Nota: la suscripción de "Gemini Pro"/"Gemini Advanced" (la app de chat) es
+un producto distinto y **no** sirve como esta clave — la clave se saca
+siempre desde aistudio.google.com.
+
+Si `GEMINI_API_KEY` no está configurada, la burbuja del asistente sigue
+apareciendo, pero responde que todavía no está activado.
+
+## 12. Notas técnicas y mejoras futuras (opcionales)
 
 - El sitio usa Tailwind CSS por CDN para mantener el HTML original tal cual
   — funciona perfecto para el tráfico de un sitio personal/pequeño negocio.

@@ -14,6 +14,7 @@ const apiRoutes = require('./src/routes/api');
 const adminRoutes = require('./src/routes/admin');
 const checkoutRoutes = require('./src/routes/checkout');
 const authRoutes = require('./src/routes/auth');
+const asistenteRoutes = require('./src/routes/asistente');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
@@ -78,9 +79,19 @@ const newsletterLimiter = rateLimit({
 });
 app.use('/api/newsletter/suscribir', newsletterLimiter);
 
+const asistenteLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas preguntas seguidas. Espera unos minutos.' },
+});
+app.use('/api/asistente/chat', asistenteLimiter);
+
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/asistente', asistenteRoutes);
 app.use('/api', apiRoutes);
 app.use('/admin', adminRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));

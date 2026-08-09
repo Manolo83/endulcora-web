@@ -804,7 +804,7 @@ trufada, paso a paso</h2>
 <div id="toast" class="pointer-events-none fixed bottom-6 left-1/2 z-[70] hidden -translate-x-1/2 rounded-full bg-vino px-6 py-3 font-ui text-sm text-crema shadow-xl"></div>
 
 <!-- ══════════════ BURBUJA · PRÓXIMOS TALLERES ══════════════ -->
-<div id="burbujaTalleres" class="fixed bottom-4 right-4 z-40 hidden max-w-[calc(100vw-2rem)] sm:bottom-6 sm:right-6">
+<div id="burbujaTalleres" class="fixed bottom-24 right-4 z-40 hidden max-w-[calc(100vw-2rem)] sm:bottom-28 sm:right-6">
   <div class="relative w-72 max-w-full rounded-3xl bg-vino p-5 text-crema shadow-2xl ring-1 ring-flama/25">
     <button type="button" onclick="cerrarBurbujaTalleres()" aria-label="Cerrar aviso de próximos talleres"
       class="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full bg-white/10 text-crema/80 hover:bg-white/20 transition">
@@ -826,6 +826,30 @@ trufada, paso a paso</h2>
   <span class="absolute inset-0 rounded-full bg-[#25D366] opacity-60 motion-reduce:animate-none animate-ping"></span>
   <svg viewBox="0 0 24 24" class="relative h-7 w-7" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
 </a>
+
+<!-- ══════════════ ASISTENTE DE IA ══════════════ -->
+<button type="button" id="btnAsistenteToggle" aria-label="Abrir asistente de Endulcora"
+  class="entrada-rebote fixed bottom-4 right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-vino text-crema shadow-2xl transition hover:scale-110 sm:bottom-6 sm:right-6">
+  <svg id="iconoAsistenteAbrir" viewBox="0 0 24 24" class="h-7 w-7 text-flama" fill="currentColor" aria-hidden="true"><path d="M12 2l1.7 5.1L19 9l-5.3 1.9L12 16l-1.7-5.1L5 9l5.3-1.9L12 2z"/><path d="M19 13.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6z" opacity=".7"/></svg>
+  <svg id="iconoAsistenteCerrar" viewBox="0 0 24 24" class="hidden h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+</button>
+
+<div id="panelAsistente" class="fixed bottom-24 right-4 z-40 hidden w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-vino/10 sm:bottom-28 sm:right-6">
+  <div class="flex items-center gap-3 bg-vino px-5 py-4 text-crema">
+    <svg viewBox="0 0 24 24" class="h-6 w-6 shrink-0 text-flama" fill="currentColor" aria-hidden="true"><path d="M12 2l1.7 5.1L19 9l-5.3 1.9L12 16l-1.7-5.1L5 9l5.3-1.9L12 2z"/></svg>
+    <div>
+      <p class="font-titulo text-base tracking-wide">Asistente Endulcora</p>
+      <p class="font-ui text-[11px] text-crema/70">Productos, cursos y costeo</p>
+    </div>
+  </div>
+  <div id="mensajesAsistente" class="flex max-h-[50vh] min-h-[220px] flex-col gap-3 overflow-y-auto px-4 py-4"></div>
+  <form id="formAsistente" class="flex items-center gap-2 border-t border-vino/10 p-3">
+    <input id="inputAsistente" type="text" required placeholder="Pregunta algo…" autocomplete="off" maxlength="500" class="min-w-0 flex-1 rounded-full border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+    <button type="submit" id="btnEnviarAsistente" class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-flama text-carbon transition hover:bg-vino hover:text-crema disabled:opacity-50">
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+    </button>
+  </form>
+</div>
 
 <script>
 /* ---------- Navegación ---------- */
@@ -1990,6 +2014,78 @@ if(formResenaEl) formResenaEl.addEventListener('submit', async (e) => {
     errorEl.classList.remove('hidden');
   }finally{
     spinner.classList.add('hidden');
+  }
+});
+
+/* ---------- Asistente de IA ---------- */
+let ASISTENTE_HISTORIAL = [];
+let asistenteEnviando = false;
+
+function toggleAsistente(){
+  const panel = document.getElementById('panelAsistente');
+  const abierto = !panel.classList.contains('hidden');
+  panel.classList.toggle('hidden', abierto);
+  panel.classList.toggle('flex', !abierto);
+  document.getElementById('iconoAsistenteAbrir').classList.toggle('hidden', !abierto);
+  document.getElementById('iconoAsistenteCerrar').classList.toggle('hidden', abierto);
+  if(!abierto && !ASISTENTE_HISTORIAL.length){
+    pintarMensajeAsistente('model', '¡Hola! Soy el asistente de Endulcora. Puedo ayudarte a elegir un eBook, anexo o curso, resolver dudas del sitio o explicarte la calculadora de costeo. ¿En qué te ayudo?');
+    document.getElementById('inputAsistente').focus();
+  }
+}
+
+function pintarMensajeAsistente(rol, texto){
+  const cont = document.getElementById('mensajesAsistente');
+  const esUsuario = rol === 'user';
+  const burbuja = document.createElement('div');
+  burbuja.className = esUsuario
+    ? 'self-end max-w-[85%] rounded-2xl rounded-br-sm bg-vino px-4 py-2.5 text-sm text-crema'
+    : 'self-start max-w-[85%] rounded-2xl rounded-bl-sm bg-crema/70 px-4 py-2.5 text-sm text-carbon/85';
+  burbuja.textContent = texto;
+  cont.appendChild(burbuja);
+  cont.scrollTop = cont.scrollHeight;
+}
+
+const btnAsistenteToggle = document.getElementById('btnAsistenteToggle');
+if(btnAsistenteToggle) btnAsistenteToggle.addEventListener('click', toggleAsistente);
+
+const formAsistente = document.getElementById('formAsistente');
+if(formAsistente) formAsistente.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if(asistenteEnviando) return;
+  const input = document.getElementById('inputAsistente');
+  const texto = input.value.trim();
+  if(!texto) return;
+  input.value = '';
+  pintarMensajeAsistente('user', texto);
+  ASISTENTE_HISTORIAL.push({ role: 'user', text: texto });
+  asistenteEnviando = true;
+  const btn = document.getElementById('btnEnviarAsistente');
+  btn.disabled = true;
+  const cont = document.getElementById('mensajesAsistente');
+  const indicador = document.createElement('div');
+  indicador.id = 'asistenteEscribiendo';
+  indicador.className = 'self-start max-w-[85%] rounded-2xl rounded-bl-sm bg-crema/70 px-4 py-2.5 text-sm text-carbon/50';
+  indicador.textContent = 'Escribiendo…';
+  cont.appendChild(indicador);
+  cont.scrollTop = cont.scrollHeight;
+  try{
+    const res = await fetch('/api/asistente/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ historial: ASISTENTE_HISTORIAL }),
+    });
+    const data = await res.json();
+    document.getElementById('asistenteEscribiendo')?.remove();
+    if(!res.ok) throw new Error(data.error || 'No se pudo responder.');
+    pintarMensajeAsistente('model', data.respuesta);
+    ASISTENTE_HISTORIAL.push({ role: 'model', text: data.respuesta });
+  }catch(err){
+    document.getElementById('asistenteEscribiendo')?.remove();
+    pintarMensajeAsistente('model', 'Tuve un problema para responder. Intenta de nuevo o escríbenos por WhatsApp.');
+  }finally{
+    asistenteEnviando = false;
+    btn.disabled = false;
   }
 });
 
