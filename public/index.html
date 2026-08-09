@@ -820,13 +820,24 @@ trufada, paso a paso</h2>
 </a>
 
 <!-- ══════════════ ASISTENTE DE IA ══════════════ -->
+<div id="burbujaAsistente" class="fixed bottom-24 right-4 z-40 hidden w-56 max-w-[calc(100vw-2rem)] sm:bottom-28 sm:right-6">
+  <div class="relative rounded-3xl bg-white px-4 py-3 shadow-2xl ring-1 ring-vino/10">
+    <button type="button" onclick="cerrarBurbujaAsistente()" aria-label="Cerrar aviso del asistente"
+      class="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-vino text-crema shadow hover:bg-morado transition">
+      <svg viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+    <p class="font-ui text-[13px] leading-snug text-carbon/80">¿Necesitas ayuda? Soy <span class="font-700 text-vino">Endulcorito</span> y estoy para ti.</p>
+    <span class="absolute -bottom-[9px] right-9 h-0 w-0 border-l-[10px] border-r-[10px] border-t-[10px] border-l-transparent border-r-transparent border-t-white"></span>
+  </div>
+</div>
+
 <button type="button" id="btnAsistenteToggle" aria-label="Abrir asistente de Endulcora"
-  class="entrada-rebote fixed bottom-4 right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-vino text-crema shadow-2xl transition hover:scale-110 sm:bottom-6 sm:right-6">
+  class="entrada-rebote fixed bottom-4 right-4 z-40 grid h-20 w-20 place-items-center rounded-full bg-vino text-crema shadow-2xl transition hover:scale-110 sm:bottom-6 sm:right-6 sm:h-24 sm:w-24">
   <span id="iconoAsistenteAbrir" class="grid h-full w-full place-items-center">
-    <svg id="iconoAsistenteSvg" viewBox="0 0 24 24" class="h-7 w-7 text-flama" fill="currentColor" aria-hidden="true"><path d="M12 2l1.7 5.1L19 9l-5.3 1.9L12 16l-1.7-5.1L5 9l5.3-1.9L12 2z"/><path d="M19 13.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6z" opacity=".7"/></svg>
+    <svg id="iconoAsistenteSvg" viewBox="0 0 24 24" class="h-9 w-9 text-flama sm:h-11 sm:w-11" fill="currentColor" aria-hidden="true"><path d="M12 2l1.7 5.1L19 9l-5.3 1.9L12 16l-1.7-5.1L5 9l5.3-1.9L12 2z"/><path d="M19 13.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6z" opacity=".7"/></svg>
     <img id="iconoAsistenteImg" src="" alt="Asistente Endulcorito" class="hidden h-full w-full rounded-full object-cover">
   </span>
-  <svg id="iconoAsistenteCerrar" viewBox="0 0 24 24" class="hidden h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+  <svg id="iconoAsistenteCerrar" viewBox="0 0 24 24" class="hidden h-7 w-7" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
 </button>
 
 <div id="panelAsistente" class="fixed bottom-24 right-4 z-40 hidden w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-vino/10 sm:bottom-28 sm:right-6">
@@ -1363,6 +1374,7 @@ setInterval(tick, 1000);
     if(mostrada || sessionStorage.getItem('burbujaTalleresCerrada')) return;
     if(window.scrollY > window.innerHeight * 0.6){
       mostrada = true;
+      cerrarBurbujaAsistente();
       refrescar();
     }
   }, { passive: true });
@@ -1382,6 +1394,26 @@ function cerrarBurbujaTalleres(){
   document.getElementById('burbujaTalleres').classList.add('hidden');
   sessionStorage.setItem('burbujaTalleresCerrada', '1');
 }
+
+/* ---------- Burbuja del asistente (Endulcorito) ---------- */
+function cerrarBurbujaAsistente(){
+  const burbuja = document.getElementById('burbujaAsistente');
+  if(burbuja) burbuja.classList.add('hidden');
+  sessionStorage.setItem('burbujaAsistenteCerrada', '1');
+}
+(function(){
+  if(sessionStorage.getItem('burbujaAsistenteCerrada')) return;
+  setTimeout(() => {
+    if(sessionStorage.getItem('burbujaAsistenteCerrada')) return;
+    const panelAbierto = !document.getElementById('panelAsistente').classList.contains('hidden');
+    const burbujaTalleresVisible = !document.getElementById('burbujaTalleres').classList.contains('hidden');
+    if(panelAbierto || burbujaTalleresVisible) return;
+    document.getElementById('burbujaAsistente').classList.remove('hidden');
+    setTimeout(() => {
+      if(!sessionStorage.getItem('burbujaAsistenteCerrada')) document.getElementById('burbujaAsistente').classList.add('hidden');
+    }, 9000);
+  }, 2500);
+})();
 
 /* ---------- Calculadora de costeo ---------- */
 const mxn = new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:2});
@@ -2102,6 +2134,7 @@ let ASISTENTE_HISTORIAL = [];
 let asistenteEnviando = false;
 
 function toggleAsistente(){
+  cerrarBurbujaAsistente();
   const panel = document.getElementById('panelAsistente');
   const abierto = !panel.classList.contains('hidden');
   panel.classList.toggle('hidden', abierto);
@@ -2109,7 +2142,7 @@ function toggleAsistente(){
   document.getElementById('iconoAsistenteAbrir').classList.toggle('hidden', !abierto);
   document.getElementById('iconoAsistenteCerrar').classList.toggle('hidden', abierto);
   if(!abierto && !ASISTENTE_HISTORIAL.length){
-    pintarMensajeAsistente('model', '¡Hola! Soy el asistente de Endulcora. Puedo ayudarte a elegir un eBook, anexo o curso, resolver dudas del sitio o explicarte la calculadora de costeo. ¿En qué te ayudo?');
+    pintarMensajeAsistente('model', '¡Hola! Soy Endulcorito, el asistente de Endulcora. Puedo ayudarte a elegir un eBook, anexo o curso, resolver dudas del sitio o explicarte la calculadora de costeo. ¿En qué te ayudo?');
     document.getElementById('inputAsistente').focus();
   }
 }
