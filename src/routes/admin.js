@@ -289,27 +289,6 @@ router.delete('/api/products/:id/archivo', requireAdmin, (req, res) => {
   res.json(item);
 });
 
-// ---- Cursos y talleres ----
-router.get('/api/cursos', requireAdmin, (req, res) => {
-  res.json(store.getCursos());
-});
-
-router.post('/api/cursos', requireAdmin, (req, res) => {
-  const item = store.addCurso(req.body || {});
-  res.status(201).json(item);
-});
-
-router.patch('/api/cursos/:id', requireAdmin, (req, res) => {
-  const item = store.updateCurso(req.params.id, req.body || {});
-  if (!item) return res.status(404).json({ error: 'No encontrado' });
-  res.json(item);
-});
-
-router.delete('/api/cursos/:id', requireAdmin, (req, res) => {
-  store.deleteCurso(req.params.id);
-  res.json({ ok: true });
-});
-
 // ---- Ventas (pedidos de Mercado Pago) ----
 router.get('/api/orders', requireAdmin, (req, res) => {
   res.json(store.getOrders());

@@ -21,10 +21,6 @@ router.get('/products', (req, res) => {
   res.json(store.getProducts());
 });
 
-router.get('/cursos', (req, res) => {
-  res.json(store.getCursos());
-});
-
 router.get('/hero-carrusel', (req, res) => {
   res.json(store.getHeroCarrusel());
 });

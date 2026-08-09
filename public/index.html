@@ -155,7 +155,6 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
         <a href="#recetarios" class="hover:text-vino transition">Recetarios</a>
         <a href="#clase"      class="hover:text-vino transition">Clases en vivo</a>
         <a href="#simulador"  class="hover:text-vino transition">Calculadora</a>
-        <a href="#cursos"     class="hover:text-vino transition">Cursos</a>
         <a href="#calendario" class="hover:text-vino transition">Calendario</a>
         <a href="#galeria"    class="hover:text-vino transition">Galería</a>
         <a href="#resenas"    class="hover:text-vino transition">Reseñas</a>
@@ -187,7 +186,6 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <a href="#recetarios" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Recetarios</a>
     <a href="#clase" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Clases en vivo</a>
     <a href="#simulador" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calculadora</a>
-    <a href="#cursos" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Cursos</a>
     <a href="#calendario" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calendario</a>
     <a href="#galeria" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Galería</a>
     <a href="#resenas" onclick="toggleMenu()" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Reseñas</a>
@@ -223,9 +221,9 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>
           <span id="heroCtaPrimario">Ir a la tienda</span>
         </a>
-        <a href="#cursos" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 bg-morado/10 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
+        <a href="#calendario" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 bg-morado/10 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.6V16c0 1.1 2.7 3 6 3s6-1.9 6-3v-5.4"/></svg>
-          <span id="heroCtaSecundario">Ver cursos y talleres</span>
+          <span id="heroCtaSecundario">Ver calendario de talleres</span>
         </a>
       </div>
 
@@ -456,7 +454,7 @@ trufada, paso a paso</h2>
 
           <div class="mt-8 flex flex-wrap gap-4">
             <button type="button" onclick="abrirModal('clase')" class="rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">Apartar mi lugar</button>
-            <a href="#cursos" class="rounded-full boton-vivo border border-crema/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">Ver calendario</a>
+            <a href="#calendario" class="rounded-full boton-vivo border border-crema/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">Ver calendario</a>
           </div>
         </div>
 
@@ -598,26 +596,6 @@ trufada, paso a paso</h2>
   </div>
 </section>
 
-<!-- ══════════════ CURSOS ══════════════ -->
-<section id="cursos" class="scroll-mt-24 relative overflow-hidden bg-white py-20 lg:py-24">
-  <div class="pointer-events-none absolute -left-28 top-0 h-64 w-64 rounded-full bg-flama/10 blur-[110px]"></div>
-  <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
-    <div class="reveal mb-12 flex flex-wrap items-end justify-between gap-6">
-      <div>
-        <div class="rule-flama mb-5 w-24"></div>
-        <h2 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Talleres y cursos</h2>
-      </div>
-      <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">Grupos pequeños, en línea y presenciales en Ciudad de México. Cada taller incluye su manual y su hoja de costeo.</p>
-    </div>
-
-    <div id="listaCursos" class="grid gap-5 md:grid-cols-3">
-      <p class="text-sm text-carbon/50">Cargando cursos…</p>
-    </div>
-  </div>
-</section>
-
-<svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-white" aria-hidden="true"><path d="M0,18 C240,40 480,0 720,16 C960,32 1200,4 1440,20 L1440,40 L0,40 Z" fill="#FBF4E9"/></svg>
-
 <!-- ══════════════ CALENDARIO DE TALLERES (dinámico) ══════════════ -->
 <section id="calendario" class="scroll-mt-24 bg-crema py-20 lg:py-24">
   <div class="mx-auto max-w-7xl px-5 lg:px-8">
@@ -739,7 +717,7 @@ trufada, paso a paso</h2>
           <li><a href="#productos" class="hover:text-vino transition">eBooks y manuales</a></li>
           <li><a href="#anexos"    class="hover:text-vino transition">Anexos en hoja de cálculo</a></li>
           <li><a href="#simulador" class="hover:text-vino transition">Apps y calculadoras</a></li>
-          <li><a href="#cursos"    class="hover:text-vino transition">Cursos y talleres</a></li>
+          <li><a href="#calendario" class="hover:text-vino transition">Calendario de talleres</a></li>
           <li><a href="#clase"     class="hover:text-vino transition">Clases en vivo</a></li>
           <li><a href="#galeria"   class="hover:text-vino transition">Galería</a></li>
         </ul>
@@ -1212,7 +1190,7 @@ function totalCarrito(){
 
 function htmlCarrito(){
   if(!CARRITO.length){
-    return `<p class="text-sm text-carbon/60">Tu carrito está vacío. Agrega algún eBook, anexo o curso desde la tienda.</p>`;
+    return `<p class="text-sm text-carbon/60">Tu carrito está vacío. Agrega algún eBook o anexo desde la tienda.</p>`;
   }
   const filas = CARRITO.map(i => `
     <div class="flex items-center justify-between gap-3 border-b border-vino/10 py-3">
@@ -1726,35 +1704,6 @@ function limpiarBusquedaTienda(){
   pintarProductosFiltrados();
 }
 
-function tarjetaCurso(c){
-  return `
-    <div class="reveal visible tarjeta-viva flex flex-col rounded-2xl border border-vino/12 p-7 hover:border-flama transition">
-      <p class="font-ui text-[11px] font-600 uppercase tracking-widest text-morado">${escapeHtml(c.modalidad || '')}</p>
-      <h3 class="mt-3 font-titulo text-2xl tracking-wide text-vino">${escapeHtml(c.titulo || '')}</h3>
-      <p class="mt-3 text-sm leading-relaxed text-carbon/65">${escapeHtml(c.descripcion || '')}</p>
-      <p class="mt-5 font-display text-xl text-vino">$${escapeHtml(c.precio || '0')} <span class="font-cuerpo text-xs font-400 text-humo">MXN</span></p>
-      <button type="button" onclick="agregarAlCarrito(${escapeHtml(JSON.stringify({ tipo: 'curso', id: c.id, titulo: c.titulo || '', precio: parseFloat(String(c.precio || '0').replace(/,/g,'')) || 0 }))})"
-        class="mt-5 w-full rounded-full boton-vivo border border-vino/30 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino hover:text-crema transition">
-        Agregar al carrito
-      </button>
-    </div>`;
-}
-
-async function cargarCursos(){
-  const cont = document.getElementById('listaCursos');
-  try{
-    const res = await fetch('/api/cursos');
-    const items = await res.json();
-    if(!items.length){
-      cont.innerHTML = '<p class="text-sm text-carbon/50">Aún no hay cursos publicados.</p>';
-      return;
-    }
-    cont.innerHTML = items.map(tarjetaCurso).join('');
-  }catch(e){
-    cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudieron cargar los cursos.</p>';
-  }
-}
-
 /* ---------- Calendario de talleres por sede ---------- */
 let CALENDARIO_SEDES = [];
 let CALENDARIO_SESIONES = [];
@@ -2091,7 +2040,6 @@ if(formAsistente) formAsistente.addEventListener('submit', async (e) => {
 
 cargarContenido();
 cargarProductos();
-cargarCursos();
 cargarCalendario();
 cargarAnuncios();
 cargarGaleria();
