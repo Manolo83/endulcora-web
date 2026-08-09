@@ -81,10 +81,11 @@ router.post('/preference', async (req, res) => {
     });
 
     store.updateOrder(order.id, { mpPreferenceId: resultado.id });
-    const esCredencialDePrueba = /^TEST-/.test(process.env.MP_ACCESS_TOKEN || '');
-    const url = esCredencialDePrueba
-      ? (resultado.sandbox_init_point || resultado.init_point)
-      : (resultado.init_point || resultado.sandbox_init_point);
+    // Mercado Pago solo devuelve sandbox_init_point cuando la preferencia se
+    // creo con credenciales de prueba (sin importar el prefijo del token,
+    // que varia segun la cuenta) - preferirlo es mas confiable que adivinar
+    // por el texto del Access Token.
+    const url = resultado.sandbox_init_point || resultado.init_point;
     res.status(201).json({ url });
   } catch (err) {
     store.updateOrder(order.id, { estado: 'error' });
