@@ -1536,15 +1536,16 @@ function tarjetaProducto(p){
   const destacado = p.destacado
     ? `<span class="absolute right-5 top-5 rounded-full bg-flama px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-widest text-carbon">${escapeHtml(p.destacado)}</span>`
     : '';
-  const subtitulo = p.subtitulo ? `<p class="mt-2 font-firma text-xl text-flama">${escapeHtml(p.subtitulo)}</p>` : '';
+  const subtitulo = p.subtitulo ? `<p class="relative mt-2 font-firma text-xl text-flama">${escapeHtml(p.subtitulo)}</p>` : '';
   return `
     <article class="reveal visible tarjeta-viva group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
       <div class="relative aspect-[4/3] bg-gradient-to-br from-vino to-uva p-7" style="${imagenEstilo}">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/30"></div>
         ${destacado}
-        <p class="font-titulo text-[11px] tracking-[.3em] text-flama">${escapeHtml(p.etiqueta || '')}</p>
-        <h3 class="mt-2 font-display text-2xl leading-tight text-crema">${escapeHtml(p.titulo || '')}</h3>
+        <p class="relative font-titulo text-[11px] tracking-[.3em] text-flama">${escapeHtml(p.etiqueta || '')}</p>
+        <h3 class="relative mt-2 font-display text-2xl leading-tight text-crema">${escapeHtml(p.titulo || '')}</h3>
         ${subtitulo}
-        <p class="absolute bottom-6 left-7 right-7 font-ui text-[10px] uppercase tracking-[.2em] text-crema/60">${escapeHtml(p.descripcionCorta || '')}</p>
+        <p class="absolute bottom-6 left-7 right-7 font-ui text-[10px] uppercase tracking-[.2em] text-crema/80">${escapeHtml(p.descripcionCorta || '')}</p>
       </div>
       <div class="flex flex-1 flex-col p-7">
         <ul class="space-y-2.5 text-sm text-carbon/75">${bullets}</ul>
