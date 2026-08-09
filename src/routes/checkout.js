@@ -144,8 +144,9 @@ router.post('/webhook', async (req, res) => {
         numeroWhatsapp: contenido.whatsapp_numero,
       })
         .then(() => store.updateOrder(order.id, { correoEnviado: true }))
-        .catch(() => {
+        .catch((err) => {
           // Si el correo no se pudo enviar (ej. servicio no configurado), el pedido sigue visible en /admin > Ventas.
+          console.error(`[checkout] No se pudo enviar el correo de confirmacion del pedido ${order.id}:`, err.message);
         });
     }
   } catch (err) {
