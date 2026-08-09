@@ -290,6 +290,51 @@ router.get('/api/newsletter', requireAdmin, (req, res) => {
   res.json(store.getSubscribers());
 });
 
+// ---- Sedes (calendario de talleres presenciales) ----
+router.get('/api/sedes', requireAdmin, (req, res) => {
+  res.json(store.getSedes());
+});
+
+router.post('/api/sedes', requireAdmin, (req, res) => {
+  const { nombre } = req.body || {};
+  if (!nombre || !String(nombre).trim()) return res.status(400).json({ error: 'Falta el nombre de la sede' });
+  res.status(201).json(store.addSede(nombre));
+});
+
+router.patch('/api/sedes/:id', requireAdmin, (req, res) => {
+  const { nombre } = req.body || {};
+  const item = store.updateSede(req.params.id, nombre);
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+router.delete('/api/sedes/:id', requireAdmin, (req, res) => {
+  store.deleteSede(req.params.id);
+  res.json({ ok: true });
+});
+
+// ---- Calendario de talleres presenciales ----
+router.get('/api/sesiones-taller', requireAdmin, (req, res) => {
+  res.json(store.getSesionesTaller(req.query.sedeId));
+});
+
+router.post('/api/sesiones-taller', requireAdmin, (req, res) => {
+  const { sedeId, fecha, titulo, estado } = req.body || {};
+  if (!sedeId || !fecha || !titulo) return res.status(400).json({ error: 'Falta sede, fecha o título' });
+  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado }));
+});
+
+router.patch('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
+  const item = store.updateSesionTaller(req.params.id, req.body || {});
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+router.delete('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
+  store.deleteSesionTaller(req.params.id);
+  res.json({ ok: true });
+});
+
 // ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----
 router.get('/api/users/buscar', requireAdmin, (req, res) => {
   const user = store.getUserByEmail(req.query.email || '');

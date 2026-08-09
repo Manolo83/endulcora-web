@@ -29,6 +29,14 @@ router.get('/hero-carrusel', (req, res) => {
   res.json(store.getHeroCarrusel());
 });
 
+router.get('/sedes', (req, res) => {
+  res.json(store.getSedes());
+});
+
+router.get('/sesiones-taller', (req, res) => {
+  res.json(store.getSesionesTaller(req.query.sedeId));
+});
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 router.post('/newsletter/suscribir', (req, res) => {
   const email = String((req.body && req.body.email) || '').trim();

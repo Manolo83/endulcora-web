@@ -139,6 +139,8 @@ const DEFAULT_CURSOS = [
 let data = null;
 let colaEscritura = Promise.resolve();
 
+const DEFAULT_SEDES = ['Nativitas', 'División del Norte'];
+
 function datosPorDefecto() {
   return {
     announcements: [],
@@ -150,6 +152,8 @@ function datosPorDefecto() {
     users: [],
     heroCarrusel: [],
     subscribers: [],
+    sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
+    sesionesTaller: [],
   };
 }
 
@@ -496,5 +500,69 @@ module.exports = {
     data.subscribers.push(item);
     save(data);
     return item;
+  },
+
+  // ---- Sedes (para el calendario de talleres presenciales) ----
+  getSedes() {
+    return [...load().sedes].sort((a, b) => a.id - b.id);
+  },
+  addSede(nombre) {
+    const data = load();
+    const item = { id: nextId(data.sedes), nombre: String(nombre || '').trim() };
+    data.sedes.push(item);
+    save(data);
+    return item;
+  },
+  updateSede(id, nombre) {
+    const data = load();
+    const item = data.sedes.find((s) => s.id === Number(id));
+    if (!item) return null;
+    item.nombre = String(nombre || '').trim();
+    save(data);
+    return item;
+  },
+  deleteSede(id) {
+    const data = load();
+    data.sedes = data.sedes.filter((s) => s.id !== Number(id));
+    data.sesionesTaller = data.sesionesTaller.filter((s) => s.sedeId !== Number(id));
+    save(data);
+  },
+
+  // ---- Calendario de talleres presenciales ----
+  getSesionesTaller(sedeId) {
+    const data = load();
+    let items = [...data.sesionesTaller];
+    if (sedeId) items = items.filter((s) => s.sedeId === Number(sedeId));
+    return items.sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.orden ?? 0) - (b.orden ?? 0));
+  },
+  addSesionTaller({ sedeId, fecha, titulo, estado }) {
+    const data = load();
+    const mismaFecha = data.sesionesTaller.filter((s) => s.sedeId === Number(sedeId) && s.fecha === fecha);
+    const item = {
+      id: nextId(data.sesionesTaller),
+      sedeId: Number(sedeId),
+      fecha,
+      titulo: String(titulo || '').trim(),
+      estado: estado || 'disponible',
+      orden: mismaFecha.length,
+    };
+    data.sesionesTaller.push(item);
+    save(data);
+    return item;
+  },
+  updateSesionTaller(id, patch) {
+    const data = load();
+    const item = data.sesionesTaller.find((s) => s.id === Number(id));
+    if (!item) return null;
+    if (typeof patch.titulo === 'string') item.titulo = patch.titulo;
+    if (typeof patch.estado === 'string') item.estado = patch.estado;
+    if (typeof patch.fecha === 'string') item.fecha = patch.fecha;
+    save(data);
+    return item;
+  },
+  deleteSesionTaller(id) {
+    const data = load();
+    data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== Number(id));
+    save(data);
   },
 };
