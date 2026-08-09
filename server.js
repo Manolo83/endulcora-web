@@ -9,6 +9,7 @@ const cookieSession = require('cookie-session');
 const rateLimit = require('express-rate-limit');
 
 const { UPLOAD_DIR } = require('./src/config');
+const store = require('./src/store');
 const apiRoutes = require('./src/routes/api');
 const adminRoutes = require('./src/routes/admin');
 const checkoutRoutes = require('./src/routes/checkout');
@@ -93,6 +94,25 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Endulcora escuchando en el puerto ${PORT}`);
+let servidor;
+store.init()
+  .then(() => {
+    servidor = app.listen(PORT, () => {
+      console.log(`Endulcora escuchando en el puerto ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('No se pudo conectar a la base de datos, el servidor no arranco:', err.message);
+    process.exit(1);
+  });
+
+// Al apagar el contenedor (ej. redeploy en Railway), espera a que termine de
+// guardar en la base de datos antes de salir, para no perder el ultimo cambio.
+process.on('SIGTERM', async () => {
+  try {
+    await store.flush();
+  } finally {
+    if (servidor) servidor.close(() => process.exit(0));
+    else process.exit(0);
+  }
 });

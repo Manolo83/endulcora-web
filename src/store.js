@@ -1,13 +1,17 @@
 const fs = require('fs');
-const path = require('path');
-const { DATA_DIR, UPLOAD_DIR, DB_PATH } = require('./config');
-
-const BACKUP_DIR = path.join(DATA_DIR, 'backups');
-const MAX_BACKUPS = 100;
+const { Pool } = require('pg');
+const { DATA_DIR, UPLOAD_DIR } = require('./config');
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-fs.mkdirSync(BACKUP_DIR, { recursive: true });
+
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    '[store] Falta la variable DATABASE_URL. Agrega el plugin de PostgreSQL en Railway (New > Database > PostgreSQL); Railway crea esta variable automaticamente.'
+  );
+}
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 const DEFAULT_CONTENT = {
   hero_badge: 'Ciudad de México · Desde 2024',
@@ -127,94 +131,74 @@ const DEFAULT_CURSOS = [
   },
 ];
 
-function ultimoBackupValido() {
-  let archivos = [];
-  try {
-    archivos = fs.readdirSync(BACKUP_DIR)
-      .filter((f) => f.startsWith('db-') && f.endsWith('.json'))
-      .sort()
-      .reverse();
-  } catch (e) {
-    return null;
-  }
-  for (const f of archivos) {
-    try {
-      return JSON.parse(fs.readFileSync(path.join(BACKUP_DIR, f), 'utf8'));
-    } catch (e) {
-      // este respaldo tambien esta danado, prueba el siguiente
+// ---- Persistencia en PostgreSQL ----
+// `data` vive en memoria mientras el proceso corre (rapido de leer, igual que
+// antes); cada cambio se encola para guardarse en PostgreSQL en orden, sin
+// bloquear la respuesta al navegador. init() debe terminar (await) antes de
+// que el servidor empiece a aceptar peticiones.
+let data = null;
+let colaEscritura = Promise.resolve();
+
+function datosPorDefecto() {
+  return {
+    announcements: [],
+    media: [],
+    content: { ...DEFAULT_CONTENT },
+    products: DEFAULT_PRODUCTS.map((p, i) => ({ id: i + 1, orden: i, ...p })),
+    cursos: DEFAULT_CURSOS.map((c, i) => ({ id: i + 1, orden: i, ...c })),
+    orders: [],
+    users: [],
+    heroCarrusel: [],
+    subscribers: [],
+  };
+}
+
+async function persistirAhora() {
+  await pool.query('UPDATE app_data SET data = $1, updated_at = now() WHERE id = 1', [JSON.stringify(data)]);
+}
+
+async function init() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS app_data (
+      id INT PRIMARY KEY DEFAULT 1,
+      data JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+  `);
+  const res = await pool.query('SELECT data FROM app_data WHERE id = 1');
+  if (res.rows.length) {
+    data = res.rows[0].data;
+    let changed = false;
+    const defaults = datosPorDefecto();
+    for (const key of Object.keys(defaults)) {
+      if (!data[key]) {
+        data[key] = defaults[key];
+        changed = true;
+      }
     }
+    if (changed) await persistirAhora();
+  } else {
+    data = datosPorDefecto();
+    await pool.query('INSERT INTO app_data (id, data) VALUES (1, $1)', [JSON.stringify(data)]);
   }
-  return null;
+  console.log('[store] Datos cargados desde PostgreSQL.');
 }
 
 function load() {
-  let data = null;
-  if (fs.existsSync(DB_PATH)) {
-    try {
-      data = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-    } catch (e) {
-      console.error('[store] db.json no se pudo leer, se intentara recuperar de un respaldo:', e.message);
-      try {
-        fs.copyFileSync(DB_PATH, path.join(DATA_DIR, `db.danado.${Date.now()}.json`));
-      } catch (e2) { /* no bloquear la recuperacion si esto falla */ }
-      data = null;
-    }
-  }
-
   if (!data) {
-    const backup = ultimoBackupValido();
-    if (backup) {
-      console.warn('[store] No se encontro (o estaba danado) el archivo principal de datos; se restauro el respaldo mas reciente.');
-      data = backup;
-    }
+    throw new Error('[store] Los datos todavia no se han cargado (falta llamar a init antes de usar el store).');
   }
-
-  if (!data) data = {};
-
-  let changed = false;
-  if (!data.announcements) { data.announcements = []; changed = true; }
-  if (!data.media) { data.media = []; changed = true; }
-  if (!data.content) { data.content = { ...DEFAULT_CONTENT }; changed = true; }
-  if (!data.products) {
-    data.products = DEFAULT_PRODUCTS.map((p, i) => ({ id: i + 1, orden: i, ...p }));
-    changed = true;
-  }
-  if (!data.cursos) {
-    data.cursos = DEFAULT_CURSOS.map((c, i) => ({ id: i + 1, orden: i, ...c }));
-    changed = true;
-  }
-  if (!data.orders) { data.orders = []; changed = true; }
-  if (!data.users) { data.users = []; changed = true; }
-  if (!data.heroCarrusel) { data.heroCarrusel = []; changed = true; }
-  if (!data.subscribers) { data.subscribers = []; changed = true; }
-  if (changed) save(data);
   return data;
 }
 
-function save(data) {
-  const tmp = `${DB_PATH}.tmp`;
-  const json = JSON.stringify(data, null, 2);
-  fs.writeFileSync(tmp, json);
-  fs.renameSync(tmp, DB_PATH);
-  guardarBackup(json);
+function save() {
+  colaEscritura = colaEscritura
+    .then(() => persistirAhora())
+    .catch((e) => console.error('[store] No se pudo guardar en la base de datos:', e.message));
 }
 
-function guardarBackup(json) {
-  try {
-    const marca = new Date().toISOString().replace(/[:.]/g, '-');
-    fs.writeFileSync(path.join(BACKUP_DIR, `db-${marca}.json`), json);
-    const archivos = fs.readdirSync(BACKUP_DIR)
-      .filter((f) => f.startsWith('db-') && f.endsWith('.json'))
-      .sort();
-    const sobrantes = archivos.length - MAX_BACKUPS;
-    if (sobrantes > 0) {
-      for (const f of archivos.slice(0, sobrantes)) {
-        fs.unlink(path.join(BACKUP_DIR, f), () => {});
-      }
-    }
-  } catch (e) {
-    console.error('[store] No se pudo guardar el respaldo:', e.message);
-  }
+function flush() {
+  return colaEscritura;
 }
 
 function nextId(list) {
@@ -222,6 +206,8 @@ function nextId(list) {
 }
 
 module.exports = {
+  init,
+  flush,
   UPLOAD_DIR,
 
   getAnnouncements(onlyPublished = false) {

@@ -60,11 +60,16 @@ git push origin claude/endulcora-website-bns9po
    (rama `main`, o la rama que quieras dejar en producción).
 3. Railway detecta que es un proyecto Node.js automáticamente (usa
    `npm install` y `npm start`). No necesitas Dockerfile.
-4. **Añade un Volume** (para que las fotos/videos y los anuncios no se
-   borren cada vez que se reinicia el servicio):
+4. **Agrega el plugin de PostgreSQL** (aquí se guardan productos, cursos,
+   ventas, cuentas de clientes, suscriptores — todo el contenido dinámico):
+   - En el proyecto, **New → Database → Add PostgreSQL**.
+   - Railway crea la variable `DATABASE_URL` sola en el servicio; no hay
+     que copiar ni pegar nada.
+5. **Añade un Volume** (solo para las fotos/videos/PDFs que subas, no para
+   los demás datos):
    - En el servicio, pestaña **Volumes → New Volume**.
    - Móntalo en la ruta `/data`.
-5. **Variables de entorno** (pestaña **Variables**):
+6. **Variables de entorno** (pestaña **Variables**):
    | Variable | Valor |
    |---|---|
    | `ADMIN_PASSWORD` | una contraseña fuerte para entrar a `/admin` |
@@ -75,8 +80,9 @@ git push origin claude/endulcora-website-bns9po
    | `MP_ACCESS_TOKEN` | tu Access Token de Mercado Pago (ver sección 8) |
    | `MP_PUBLIC_KEY` | tu Public Key de Mercado Pago (ver sección 8) |
 
-   Railway define `PORT` automáticamente, no hace falta agregarlo.
-6. Railway construye y despliega. Al terminar te da una URL tipo
+   `DATABASE_URL` y `PORT` los define Railway automáticamente, no hace
+   falta agregarlos a mano.
+7. Railway construye y despliega. Al terminar te da una URL tipo
    `endulcora-web-production.up.railway.app` — pruébala antes de conectar el
    dominio.
 
@@ -144,11 +150,13 @@ pasa por el panel.
 - El panel está bloqueado para buscadores (`robots.txt` y meta `noindex`) y
   tiene límite de intentos de inicio de sesión (20 cada 15 minutos) para
   frenar ataques de fuerza bruta.
-- Todo el contenido (anuncios y archivos subidos) vive en el Volume de
-  Railway montado en `/data`. Railway conserva los Volumes entre
-  despliegues, pero **no hay respaldo automático en la nube**: de vez en
-  cuando descarga una copia con `railway volume` / `railway ssh` o
-  simplemente vuelve a subir tus fotos/videos importantes a otro lugar
+- Todo el contenido dinámico (productos, cursos, ventas, cuentas de
+  clientes, suscriptores, textos) vive en la base de datos PostgreSQL de
+  Railway, no en el Volume — así sobrevive a cada despliegue. Solo las
+  fotos/videos/PDFs que subes quedan en el Volume montado en `/data`.
+  Railway no ofrece respaldo automático en la nube en el plan gratuito: de
+  vez en cuando exporta la base de datos (`railway connect postgres` y
+  `pg_dump`) o vuelve a subir tus fotos/videos importantes a otro lugar
   (Google Drive, etc.) como respaldo.
 
 ## 8. Pagos con Mercado Pago
