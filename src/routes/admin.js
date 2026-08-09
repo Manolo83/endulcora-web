@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const sharp = require('sharp');
 const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR } = require('../config');
@@ -55,6 +56,35 @@ const uploadDocumento = multer({
     else cb(new Error('Tipo de archivo no permitido. Usa PDF, Excel, ZIP o HTML.'));
   },
 });
+
+// Las fotos subidas desde el celular suelen venir a resolucion de camara
+// (varios MB, 4000px+). Eso hace que muchos celulares no puedan decodificarlas
+// (se ven como "imagen rota"), aunque en computadora carguen bien. Aqui se
+// redimensionan y comprimen antes de guardarlas, para que se vean bien en
+// cualquier dispositivo y carguen mas rapido.
+const IMAGEN_LADO_MAXIMO = 2000;
+async function procesarImagenSubida(req, res, next) {
+  if (!req.file || !ALLOWED_IMAGE.includes(req.file.mimetype) || req.file.mimetype === 'image/gif') {
+    return next();
+  }
+  try {
+    const ruta = req.file.path;
+    const metadata = await sharp(ruta).metadata();
+    let imagen = sharp(ruta)
+      .rotate() // aplica la orientacion EXIF de la camara y la deja fija en los pixeles
+      .resize({ width: IMAGEN_LADO_MAXIMO, height: IMAGEN_LADO_MAXIMO, fit: 'inside', withoutEnlargement: true });
+    if (metadata.format === 'png') imagen = imagen.png({ quality: 82, compressionLevel: 8 });
+    else if (metadata.format === 'webp') imagen = imagen.webp({ quality: 82 });
+    else imagen = imagen.jpeg({ quality: 82, mozjpeg: true });
+
+    const buffer = await imagen.toBuffer();
+    fs.writeFileSync(ruta, buffer);
+    req.file.size = buffer.length;
+  } catch (e) {
+    console.error('No se pudo redimensionar la imagen subida, se guarda tal cual:', e.message);
+  }
+  next();
+}
 
 function borrarSiEsSubida(url) {
   if (typeof url === 'string' && url.startsWith('/uploads/')) {
@@ -109,7 +139,7 @@ router.get('/api/media', requireAdmin, (req, res) => {
   res.json(store.getMedia());
 });
 
-router.post('/api/media/upload', requireAdmin, upload.single('file'), (req, res) => {
+router.post('/api/media/upload', requireAdmin, upload.single('file'), procesarImagenSubida, (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
   const kind = ALLOWED_VIDEO.includes(req.file.mimetype) ? 'video' : 'photo';
   const item = store.addMedia({
@@ -148,7 +178,7 @@ router.patch('/api/content', requireAdmin, (req, res) => {
 });
 
 const CAMPOS_IMAGEN_CONTENIDO = ['chef_imagen'];
-router.post('/api/content/:key/image', requireAdmin, uploadImage.single('file'), (req, res) => {
+router.post('/api/content/:key/image', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
   const { key } = req.params;
   if (!CAMPOS_IMAGEN_CONTENIDO.includes(key)) {
     if (req.file) fs.unlink(req.file.path, () => {});
@@ -176,7 +206,7 @@ router.get('/api/hero-carrusel', requireAdmin, (req, res) => {
   res.json(store.getHeroCarrusel());
 });
 
-router.post('/api/hero-carrusel/upload', requireAdmin, uploadImage.single('file'), (req, res) => {
+router.post('/api/hero-carrusel/upload', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
   const item = store.addHeroCarruselImagen({
     url: `/uploads/${req.file.filename}`,
@@ -222,7 +252,7 @@ router.delete('/api/products/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-router.post('/api/products/:id/image', requireAdmin, uploadImage.single('file'), (req, res) => {
+router.post('/api/products/:id/image', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
   const producto = store.getProduct(req.params.id);
   if (!producto) {
     if (req.file) fs.unlink(req.file.path, () => {});
@@ -312,7 +342,7 @@ router.delete('/api/sedes/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-router.post('/api/sedes/:id/imagen', requireAdmin, uploadImage.single('file'), (req, res) => {
+router.post('/api/sedes/:id/imagen', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
   const sede = store.getSedes().find((s) => s.id === Number(req.params.id));
   if (!sede) {
     if (req.file) fs.unlink(req.file.path, () => {});
