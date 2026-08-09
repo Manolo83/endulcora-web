@@ -248,14 +248,30 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       </dl>
     </div>
 
-    <!-- Firma visual: la vela encendida o carrusel de publicidad, marco festoneado -->
+    <!-- Firma visual: la vela encendida o carrusel de publicidad, marco de cera derretida -->
     <div class="relative mx-auto w-full max-w-[580px]">
       <div class="halo absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-flama/25 blur-3xl"></div>
-      <div class="relative mx-auto aspect-square w-full max-w-[560px]">
-        <svg viewBox="0 0 300 300" class="absolute inset-0 h-full w-full drop-shadow-[0_18px_40px_rgba(78,20,84,.18)]" aria-hidden="true">
-          <path d="M 76.00 42.00 A 22.90 22.90 0 0 1 116.28 42.00 A 22.90 22.90 0 0 1 156.56 42.00 A 22.90 22.90 0 0 1 196.84 42.00 A 22.70 22.70 0 0 1 236.80 44.50 A 21.02 21.02 0 0 1 258.00 76.00 A 22.90 22.90 0 0 1 258.00 116.28 A 22.90 22.90 0 0 1 258.00 156.56 A 22.90 22.90 0 0 1 258.00 196.84 A 22.70 22.70 0 0 1 255.50 236.80 A 21.02 21.02 0 0 1 224.00 258.00 A 22.90 22.90 0 0 1 183.72 258.00 A 22.90 22.90 0 0 1 143.44 258.00 A 22.90 22.90 0 0 1 103.16 258.00 A 22.70 22.70 0 0 1 63.20 255.50 A 21.02 21.02 0 0 1 42.00 224.00 A 22.90 22.90 0 0 1 42.00 183.72 A 22.90 22.90 0 0 1 42.00 143.44 A 22.90 22.90 0 0 1 42.00 103.16 A 22.70 22.70 0 0 1 44.50 63.20 A 21.02 21.02 0 0 1 76.00 42.00 Z" fill="#F5A623"/>
+      <div class="relative mx-auto aspect-[15/16] w-full max-w-[560px]">
+        <svg viewBox="0 0 300 320" class="absolute inset-0 h-full w-full drop-shadow-[0_18px_40px_rgba(78,20,84,.18)]" aria-hidden="true">
+          <defs>
+            <linearGradient id="marcoCera" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#F8BB56"/>
+              <stop offset="100%" stop-color="#F0981A"/>
+            </linearGradient>
+          </defs>
+          <path d="M 88.00 241.00 A 8 8 0 1 1 104.00 241.00 Q 100.40 253.00, 96.00 261.00 Q 91.60 253.00, 88.00 241.00 Z" fill="url(#marcoCera)"/>
+          <path d="M 137.50 258.50 A 12.5 12.5 0 1 1 162.50 258.50 Q 156.88 280.10, 150.00 294.50 Q 143.13 280.10, 137.50 258.50 Z" fill="url(#marcoCera)"/>
+          <path d="M 199.00 242.00 A 7 7 0 1 1 213.00 242.00 Q 209.85 251.60, 206.00 258.00 Q 202.15 251.60, 199.00 242.00 Z" fill="url(#marcoCera)"/>
+          <path d="M 150.00 36.00 C 168.11 36.97, 185.67 47.96, 202.64 56.82 C 219.61 65.69, 243.82 74.00, 251.84 89.20 C 259.87 104.40, 251.93 129.05, 250.80 148.00 C 249.67 166.95, 251.77 185.42, 245.05 202.88 C 238.33 220.34, 226.32 244.73, 210.48 252.75 C 194.64 260.78, 169.60 252.01, 150.00 251.04 C 130.40 250.07, 108.40 255.15, 92.88 246.93 C 77.36 238.72, 67.15 218.25, 56.88 201.76 C 46.62 185.27, 30.31 165.36, 31.28 148.00 C 32.25 130.64, 52.25 113.77, 62.70 97.60 C 73.16 81.43, 79.45 61.27, 94.00 51.01 C 108.55 40.74, 131.89 35.03, 150.00 36.00 Z" fill="url(#marcoCera)"/>
         </svg>
-        <div class="absolute inset-[15.33%] flex items-center justify-center overflow-hidden rounded-[10%] bg-white">
+        <div class="absolute left-1/2 top-[4%] z-10 -translate-x-1/2">
+          <svg viewBox="0 0 24 32" class="h-8 w-6 drop-shadow-[0_4px_8px_rgba(78,20,84,.35)]" aria-hidden="true">
+            <g class="flama-svg">
+              <path d="M12 1c1 5 5 6 5 11a5 5 0 1 1-10 0c0-2.5 1.6-3.4 2.5-5.9.4 1.6 1.1 2 1.6 2.5.2-2.5.9-4.4.9-7.6z" fill="#F5A623"/>
+            </g>
+          </svg>
+        </div>
+        <div class="absolute left-[13%] right-[15%] top-[13%] bottom-[31%] flex items-center justify-center overflow-hidden rounded-[10%] bg-white">
           <div id="heroImagenWrap" class="flex h-full w-full items-center justify-center">
             <svg viewBox="0 0 120 200" class="mx-auto h-64 w-auto" role="img" aria-label="Vela comestible encendida">
               <ellipse cx="60" cy="188" rx="46" ry="9" fill="#000" opacity=".12"/>
@@ -1579,7 +1595,7 @@ function iniciarAutoavanceHero(){
   clearInterval(heroCarruselTimer);
   if(HERO_CARRUSEL.length < 2) return;
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  heroCarruselTimer = setInterval(() => irASlideHero((heroCarruselIndex + 1) % HERO_CARRUSEL.length), 5000);
+  heroCarruselTimer = setInterval(() => irASlideHero((heroCarruselIndex + 1) % HERO_CARRUSEL.length), 3000);
 }
 
 function renderHeroSlide(){
