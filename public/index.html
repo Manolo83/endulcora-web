@@ -802,13 +802,14 @@ trufada, paso a paso</h2>
       class="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full bg-white/10 text-crema/80 hover:bg-white/20 transition">
       <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 6 12 12M18 6 6 18"/></svg>
     </button>
-    <p class="pr-6 font-ui text-[10px] font-700 uppercase tracking-[.2em] text-flama">Próximo taller</p>
-    <p class="mt-1.5 font-titulo text-lg leading-tight tracking-wide">Vela de mantequilla trufada</p>
-    <p id="burbujaFecha" class="mt-1 font-ui text-[12px] text-crema/70">Cargando fecha…</p>
-    <a href="#clase" onclick="cerrarBurbujaTalleres()"
-      class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-flama px-4 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
-      Ver detalles
-    </a>
+    <p class="pr-6 font-ui text-[10px] font-700 uppercase tracking-[.2em] text-flama">Taller de la semana</p>
+    <p id="burbujaTallerTitulo" class="mt-1.5 font-titulo text-lg leading-tight tracking-wide">Cargando…</p>
+    <p id="burbujaTallerDescripcion" class="mt-1 line-clamp-2 font-ui text-[12px] text-crema/70"></p>
+    <button type="button" id="burbujaTallerBtn"
+      class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-[#25D366] px-4 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-white hover:bg-[#1ea952] transition">
+      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
+      Agenda tu taller
+    </button>
   </div>
 </div>
 
@@ -1333,14 +1334,12 @@ function formatoFechaClase(d){
 }
 let fechaClase = proximaClase();
 document.getElementById('fechaClase').textContent = formatoFechaClase(fechaClase);
-document.getElementById('burbujaFecha').textContent = formatoFechaClase(fechaClase);
 const dosDig = n => String(Math.max(0,n)).padStart(2,'0');
 function tick(){
   let resta = fechaClase - new Date();
   if(resta <= 0){
     fechaClase = proximaClase();
     document.getElementById('fechaClase').textContent = formatoFechaClase(fechaClase);
-    document.getElementById('burbujaFecha').textContent = formatoFechaClase(fechaClase);
     resta = fechaClase - new Date();
   }
   const s = Math.floor(resta/1000);
@@ -1356,10 +1355,24 @@ function tick(){
 tick();
 setInterval(tick, 1000);
 
-/* ---------- Burbuja de próximos talleres ---------- */
+/* ---------- Burbuja de próximos talleres (toma la promo destacada de la semana) ---------- */
+function pintarBurbujaTaller(){
+  const titulo = document.getElementById('burbujaTallerTitulo');
+  const desc = document.getElementById('burbujaTallerDescripcion');
+  const btn = document.getElementById('burbujaTallerBtn');
+  if(!titulo || !desc || !btn) return;
+  const item = PROMOS_TALLER[0];
+  titulo.textContent = item ? (item.titulo || 'Taller de la semana') : '';
+  desc.textContent = item ? (item.descripcion || '') : '';
+  btn.onclick = () => {
+    if(item) agendarPromoTaller(item.id);
+    cerrarBurbujaTalleres();
+  };
+}
+
 (function(){
   const burbuja = document.getElementById('burbujaTalleres');
-  const clase = document.getElementById('clase');
+  const seccionPromos = document.getElementById('seccionPromosTaller');
   const pie = document.querySelector('footer');
   if(sessionStorage.getItem('burbujaTalleresCerrada')) return;
 
@@ -1367,11 +1380,12 @@ setInterval(tick, 1000);
   let ocultarPorSeccion = false;
 
   function refrescar(){
-    burbuja.classList.toggle('hidden', !mostrada || ocultarPorSeccion);
+    burbuja.classList.toggle('hidden', !mostrada || ocultarPorSeccion || !PROMOS_TALLER.length);
   }
 
   window.addEventListener('scroll', () => {
     if(mostrada || sessionStorage.getItem('burbujaTalleresCerrada')) return;
+    if(!PROMOS_TALLER.length) return;
     if(window.scrollY > window.innerHeight * 0.6){
       mostrada = true;
       cerrarBurbujaAsistente();
@@ -1379,7 +1393,7 @@ setInterval(tick, 1000);
     }
   }, { passive: true });
 
-  const objetivos = [clase, pie].filter(Boolean);
+  const objetivos = [seccionPromos, pie].filter(Boolean);
   if(objetivos.length){
     const estados = new Map();
     const obs = new IntersectionObserver(entradas => {
@@ -1689,6 +1703,7 @@ async function cargarPromosTaller(){
     PROMOS_TALLER = [];
   }
   pintarPromoTaller();
+  pintarBurbujaTaller();
 }
 
 function pintarPromoTaller(){
