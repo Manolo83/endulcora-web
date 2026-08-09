@@ -45,13 +45,14 @@ const ALLOWED_DOCUMENTO = [
   'application/x-zip-compressed',
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/html',
 ];
 const uploadDocumento = multer({
   storage,
   limits: { fileSize: 80 * 1024 * 1024 }, // 80MB, suficiente para eBooks/anexos
   fileFilter: (req, file, cb) => {
     if (ALLOWED_DOCUMENTO.includes(file.mimetype)) cb(null, true);
-    else cb(new Error('Tipo de archivo no permitido. Usa PDF, Excel o ZIP.'));
+    else cb(new Error('Tipo de archivo no permitido. Usa PDF, Excel, ZIP o HTML.'));
   },
 });
 
