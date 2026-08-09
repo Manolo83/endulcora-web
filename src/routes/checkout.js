@@ -81,11 +81,13 @@ router.post('/preference', async (req, res) => {
     });
 
     store.updateOrder(order.id, { mpPreferenceId: resultado.id });
-    // Mercado Pago solo devuelve sandbox_init_point cuando la preferencia se
-    // creo con credenciales de prueba (sin importar el prefijo del token,
-    // que varia segun la cuenta) - preferirlo es mas confiable que adivinar
-    // por el texto del Access Token.
-    const url = resultado.sandbox_init_point || resultado.init_point;
+    // Mercado Pago devuelve tanto init_point como sandbox_init_point sin
+    // importar el tipo de credencial usada, asi que no se puede adivinar
+    // cual corresponde. Se usa init_point (el real) siempre, salvo que se
+    // active explicitamente MP_SANDBOX=true en las variables de entorno
+    // (util solo mientras se prueba con credenciales de prueba).
+    const usarSandbox = process.env.MP_SANDBOX === 'true';
+    const url = usarSandbox ? (resultado.sandbox_init_point || resultado.init_point) : resultado.init_point;
     res.status(201).json({ url });
   } catch (err) {
     store.updateOrder(order.id, { estado: 'error' });
