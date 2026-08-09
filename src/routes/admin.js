@@ -302,8 +302,7 @@ router.post('/api/sedes', requireAdmin, (req, res) => {
 });
 
 router.patch('/api/sedes/:id', requireAdmin, (req, res) => {
-  const { nombre } = req.body || {};
-  const item = store.updateSede(req.params.id, nombre);
+  const item = store.updateSede(req.params.id, req.body || {});
   if (!item) return res.status(404).json({ error: 'No encontrado' });
   res.json(item);
 });
@@ -311,6 +310,29 @@ router.patch('/api/sedes/:id', requireAdmin, (req, res) => {
 router.delete('/api/sedes/:id', requireAdmin, (req, res) => {
   store.deleteSede(req.params.id);
   res.json({ ok: true });
+});
+
+router.post('/api/sedes/:id/imagen', requireAdmin, uploadImage.single('file'), (req, res) => {
+  const sede = store.getSedes().find((s) => s.id === Number(req.params.id));
+  if (!sede) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    return res.status(404).json({ error: 'No encontrado' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
+  const url = `/uploads/${req.file.filename}`;
+  const anterior = sede.imagenFondo;
+  const item = store.updateSede(req.params.id, { imagenFondo: url });
+  borrarSiEsSubida(anterior);
+  res.status(201).json(item);
+});
+
+router.delete('/api/sedes/:id/imagen', requireAdmin, (req, res) => {
+  const sede = store.getSedes().find((s) => s.id === Number(req.params.id));
+  if (!sede) return res.status(404).json({ error: 'No encontrado' });
+  const anterior = sede.imagenFondo;
+  const item = store.updateSede(req.params.id, { imagenFondo: '' });
+  borrarSiEsSubida(anterior);
+  res.json(item);
 });
 
 // ---- Calendario de talleres presenciales ----

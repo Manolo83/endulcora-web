@@ -508,16 +508,17 @@ module.exports = {
   },
   addSede(nombre) {
     const data = load();
-    const item = { id: nextId(data.sedes), nombre: String(nombre || '').trim() };
+    const item = { id: nextId(data.sedes), nombre: String(nombre || '').trim(), imagenFondo: '' };
     data.sedes.push(item);
     save(data);
     return item;
   },
-  updateSede(id, nombre) {
+  updateSede(id, patch) {
     const data = load();
     const item = data.sedes.find((s) => s.id === Number(id));
     if (!item) return null;
-    item.nombre = String(nombre || '').trim();
+    if (typeof patch.nombre === 'string') item.nombre = patch.nombre.trim();
+    if (typeof patch.imagenFondo === 'string') item.imagenFondo = patch.imagenFondo;
     save(data);
     return item;
   },
