@@ -30,6 +30,7 @@ const DEFAULT_CONTENT = {
   hero_caption: 'se enciende, se derrite, se come',
   hero_caption_sub: 'Receta 01 · Sección gourmet',
   chef_imagen: '',
+  asistente_icono: '',
   chef_badge: 'Fundador de Endulcora',
   chef_nombre: 'Chef Luis Alfonso Jiménez Cárdenas',
   chef_bio:
@@ -151,6 +152,7 @@ function datosPorDefecto() {
     orders: [],
     users: [],
     heroCarrusel: [],
+    promosTaller: [],
     subscribers: [],
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
     sesionesTaller: [],
@@ -178,6 +180,12 @@ async function init() {
     for (const key of Object.keys(defaults)) {
       if (!data[key]) {
         data[key] = defaults[key];
+        changed = true;
+      }
+    }
+    for (const key of Object.keys(DEFAULT_CONTENT)) {
+      if (!Object.prototype.hasOwnProperty.call(data.content, key)) {
+        data.content[key] = DEFAULT_CONTENT[key];
         changed = true;
       }
     }
@@ -409,6 +417,43 @@ module.exports = {
     const data = load();
     const item = data.heroCarrusel.find((m) => m.id === Number(id));
     data.heroCarrusel = data.heroCarrusel.filter((m) => m.id !== Number(id));
+    save(data);
+    return item;
+  },
+
+  // ---- Promos semanales de talleres (carrusel de anuncios) ----
+  getPromosTaller() {
+    const data = load();
+    return [...data.promosTaller].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+  },
+  addPromoTaller({ url, filename, titulo, descripcion }) {
+    const data = load();
+    const item = {
+      id: nextId(data.promosTaller),
+      orden: data.promosTaller.length,
+      url,
+      filename: filename || null,
+      titulo: titulo || '',
+      descripcion: descripcion || '',
+      createdAt: new Date().toISOString(),
+    };
+    data.promosTaller.push(item);
+    save(data);
+    return item;
+  },
+  updatePromoTaller(id, patch) {
+    const data = load();
+    const item = data.promosTaller.find((m) => m.id === Number(id));
+    if (!item) return null;
+    if (typeof patch.titulo === 'string') item.titulo = patch.titulo;
+    if (typeof patch.descripcion === 'string') item.descripcion = patch.descripcion;
+    save(data);
+    return item;
+  },
+  deletePromoTaller(id) {
+    const data = load();
+    const item = data.promosTaller.find((m) => m.id === Number(id));
+    data.promosTaller = data.promosTaller.filter((m) => m.id !== Number(id));
     save(data);
     return item;
   },

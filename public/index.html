@@ -282,6 +282,20 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
   </div>
 </section>
 
+<!-- ══════════════ PROMOS DE TALLERES (semanal) ══════════════ -->
+<section id="seccionPromosTaller" class="hidden relative overflow-hidden bg-carbon">
+  <div class="relative aspect-[4/5] w-full sm:aspect-[16/9] lg:aspect-[3/1]">
+    <div id="promoTallerSlide" class="absolute inset-0"></div>
+    <div id="promoTallerDots" class="absolute inset-x-0 bottom-4 z-10 flex items-center justify-center gap-1.5"></div>
+    <button type="button" id="btnPromoTallerPrev" onclick="pasoPromoTaller(-1)" aria-label="Anuncio anterior" class="hidden absolute left-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-vino shadow-md transition hover:bg-white sm:left-5">
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button type="button" id="btnPromoTallerNext" onclick="pasoPromoTaller(1)" aria-label="Siguiente anuncio" class="hidden absolute right-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-vino shadow-md transition hover:bg-white sm:right-5">
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+</section>
+
 <!-- ══════════════ SOBRE EL CHEF ══════════════ -->
 <section id="chef" class="scroll-mt-24 relative overflow-hidden bg-white py-20 lg:py-24">
   <div class="pointer-events-none absolute -left-24 top-16 h-64 w-64 rounded-full bg-flama/10 blur-[110px]"></div>
@@ -808,7 +822,10 @@ trufada, paso a paso</h2>
 <!-- ══════════════ ASISTENTE DE IA ══════════════ -->
 <button type="button" id="btnAsistenteToggle" aria-label="Abrir asistente de Endulcora"
   class="entrada-rebote fixed bottom-4 right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-vino text-crema shadow-2xl transition hover:scale-110 sm:bottom-6 sm:right-6">
-  <svg id="iconoAsistenteAbrir" viewBox="0 0 24 24" class="h-7 w-7 text-flama" fill="currentColor" aria-hidden="true"><path d="M12 2l1.7 5.1L19 9l-5.3 1.9L12 16l-1.7-5.1L5 9l5.3-1.9L12 2z"/><path d="M19 13.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6z" opacity=".7"/></svg>
+  <span id="iconoAsistenteAbrir" class="grid h-full w-full place-items-center">
+    <svg id="iconoAsistenteSvg" viewBox="0 0 24 24" class="h-7 w-7 text-flama" fill="currentColor" aria-hidden="true"><path d="M12 2l1.7 5.1L19 9l-5.3 1.9L12 16l-1.7-5.1L5 9l5.3-1.9L12 2z"/><path d="M19 13.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6z" opacity=".7"/></svg>
+    <img id="iconoAsistenteImg" src="" alt="Asistente Endulcorito" class="hidden h-full w-full rounded-full object-cover">
+  </span>
   <svg id="iconoAsistenteCerrar" viewBox="0 0 24 24" class="hidden h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
 </button>
 
@@ -1521,6 +1538,21 @@ async function cargarContenido(){
     if(wrapChef) wrapChef.innerHTML = `<img src="${c.chef_imagen}" alt="${escapeHtml(c.chef_nombre || 'Chef de Endulcora')}" class="h-full w-full object-cover">`;
   }
 
+  if(c.asistente_icono){
+    const imgAsistente = document.getElementById('iconoAsistenteImg');
+    const svgAsistente = document.getElementById('iconoAsistenteSvg');
+    const btnAsistente = document.getElementById('btnAsistenteToggle');
+    if(imgAsistente && svgAsistente){
+      imgAsistente.src = c.asistente_icono;
+      imgAsistente.classList.remove('hidden');
+      svgAsistente.classList.add('hidden');
+    }
+    if(btnAsistente){
+      btnAsistente.classList.remove('bg-vino');
+      btnAsistente.classList.add('bg-white');
+    }
+  }
+
   const numero = numeroWhatsapp();
   const wa = document.getElementById('whatsappFooter');
   if(wa) wa.href = `https://wa.me/52${numero}`;
@@ -1610,6 +1642,105 @@ function pasoHeroCarrusel(delta){
   if(!HERO_CARRUSEL.length) return;
   const total = HERO_CARRUSEL.length;
   irASlideHero((heroCarruselIndex + delta + total) % total);
+}
+
+/* ---------- Carrusel de promos semanales de talleres ---------- */
+let PROMOS_TALLER = [];
+let promoTallerIndex = 0;
+let promoTallerTimer = null;
+
+async function cargarPromosTaller(){
+  try{
+    const res = await fetch('/api/promos-taller');
+    PROMOS_TALLER = await res.json();
+  }catch(e){
+    PROMOS_TALLER = [];
+  }
+  pintarPromoTaller();
+}
+
+function pintarPromoTaller(){
+  const seccion = document.getElementById('seccionPromosTaller');
+  const dots = document.getElementById('promoTallerDots');
+  const btnPrev = document.getElementById('btnPromoTallerPrev');
+  const btnNext = document.getElementById('btnPromoTallerNext');
+  clearInterval(promoTallerTimer);
+  promoTallerIndex = 0;
+
+  if(!seccion) return;
+  if(!PROMOS_TALLER.length){
+    seccion.classList.add('hidden');
+    if(dots) dots.innerHTML = '';
+    return;
+  }
+  seccion.classList.remove('hidden');
+
+  renderPromoTallerSlide();
+
+  const hayVarias = PROMOS_TALLER.length > 1;
+  if(btnPrev) btnPrev.classList.toggle('hidden', !hayVarias);
+  if(btnNext) btnNext.classList.toggle('hidden', !hayVarias);
+
+  if(hayVarias && dots){
+    dots.innerHTML = PROMOS_TALLER.map((_, i) =>
+      `<button type="button" onclick="irASlidePromoTaller(${i})" aria-label="Anuncio ${i + 1}" class="h-2 w-2 rounded-full transition ${i === 0 ? 'bg-flama' : 'bg-white/70'}"></button>`
+    ).join('');
+    iniciarAutoavancePromoTaller();
+  } else if(dots){
+    dots.innerHTML = '';
+  }
+}
+
+function iniciarAutoavancePromoTaller(){
+  clearInterval(promoTallerTimer);
+  if(PROMOS_TALLER.length < 2) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  promoTallerTimer = setInterval(() => irASlidePromoTaller((promoTallerIndex + 1) % PROMOS_TALLER.length), 5000);
+}
+
+function renderPromoTallerSlide(){
+  const wrap = document.getElementById('promoTallerSlide');
+  const item = PROMOS_TALLER[promoTallerIndex];
+  if(!wrap || !item) return;
+  wrap.innerHTML = `<div class="relative h-full w-full">
+    <img src="${item.url}" alt="${escapeHtml(item.titulo || 'Taller de Endulcora')}" class="h-full w-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-t from-carbon/90 via-carbon/25 to-transparent"></div>
+    <div class="absolute inset-x-0 bottom-0 z-[5] px-5 pb-16 pt-10 text-center sm:px-10 sm:pb-20 md:text-left">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-[.22em] text-flama">Taller de la semana</p>
+      ${item.titulo ? `<h3 class="mt-1 font-display text-2xl text-crema sm:text-3xl">${escapeHtml(item.titulo)}</h3>` : ''}
+      ${item.descripcion ? `<p class="mt-2 max-w-xl text-sm text-crema/80 sm:text-base">${escapeHtml(item.descripcion)}</p>` : ''}
+      <div class="mt-5 flex flex-wrap justify-center gap-3 md:justify-start">
+        <a href="#calendario" class="rounded-full boton-vivo border border-crema/40 bg-white/10 px-6 py-3 font-ui text-xs font-700 uppercase tracking-wider text-crema hover:bg-white/20 transition">Ver calendario</a>
+        <button type="button" onclick="agendarPromoTaller(${item.id})" class="rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-xs font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">Agenda tu taller</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function irASlidePromoTaller(i){
+  promoTallerIndex = i;
+  renderPromoTallerSlide();
+  const dots = document.getElementById('promoTallerDots');
+  if(dots){
+    [...dots.children].forEach((d, idx) => {
+      d.classList.toggle('bg-flama', idx === i);
+      d.classList.toggle('bg-white/70', idx !== i);
+    });
+  }
+  iniciarAutoavancePromoTaller();
+}
+
+function pasoPromoTaller(delta){
+  if(!PROMOS_TALLER.length) return;
+  const total = PROMOS_TALLER.length;
+  irASlidePromoTaller((promoTallerIndex + delta + total) % total);
+}
+
+function agendarPromoTaller(promoId){
+  const item = PROMOS_TALLER.find(p => p.id === promoId);
+  const titulo = item && item.titulo ? item.titulo : 'un taller';
+  const mensaje = `Hola, me interesa agendar el taller: ${titulo}`;
+  window.open(`https://wa.me/52${numeroWhatsapp()}?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
 
 function tarjetaProducto(p){
@@ -2048,6 +2179,7 @@ actualizarBadgeCarrito();
 manejarRegresoDePago();
 cargarSesion();
 cargarHeroCarrusel();
+cargarPromosTaller();
 
 const campoBuscadorTienda = document.getElementById('buscadorTienda');
 if(campoBuscadorTienda) campoBuscadorTienda.addEventListener('input', pintarProductosFiltrados);

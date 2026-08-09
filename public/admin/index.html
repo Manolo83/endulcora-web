@@ -68,6 +68,7 @@
       <a href="#seccionClientes" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clientes</a>
       <a href="#seccionSuscriptores" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Suscriptores</a>
       <a href="#seccionResenas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Reseñas</a>
+      <a href="#seccionPromosTaller" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Promos de talleres</a>
       <a href="#seccionAnuncios" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Anuncios</a>
       <a href="#seccionGaleria" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Galería</a>
     </nav>
@@ -207,6 +208,17 @@
           <input id="chefImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="text-sm">
           <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir</button>
           <button type="button" id="btnQuitarChefImagen" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar imagen</button>
+        </form>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Ícono del asistente de IA</h3>
+        <p class="mt-1 text-xs text-carbon/50">Sustituye el ícono del botón flotante del asistente (esquina inferior derecha). Si no subes nada, se muestra el ícono por defecto.</p>
+        <div id="asistenteIconoPreview" class="mt-4"></div>
+        <form id="formAsistenteIcono" class="mt-4 flex flex-wrap items-center gap-3">
+          <input id="asistenteIconoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="text-sm">
+          <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir</button>
+          <button type="button" id="btnQuitarAsistenteIcono" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar imagen</button>
         </form>
       </div>
     </section>
@@ -415,6 +427,32 @@
     </section>
 
     <!-- ANUNCIOS -->
+    <!-- PROMOS DE TALLERES -->
+    <section id="seccionPromosTaller" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Promos de talleres</h2>
+      <p class="mt-1 text-sm text-carbon/60">Sube el arte de cada taller de la semana con una descripción corta. Aparecen en un carrusel al inicio del sitio, con botones para ver el calendario o agendar por WhatsApp. Bórralas cuando ya no apliquen.</p>
+
+      <form id="formPromoTaller" class="mt-6 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Imagen del taller</span>
+          <input id="promoTallerInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required class="mt-1.5 w-full text-sm">
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
+          <input id="promoTallerTitulo" type="text" maxlength="120" placeholder="Ej. Chiles en nogada · Sesión presencial"
+            class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción corta</span>
+          <textarea id="promoTallerDescripcion" maxlength="280" rows="2" placeholder="Fecha, sede y lo más atractivo del taller"
+            class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <button type="submit" class="rounded-full bg-vino py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Agregar promo</button>
+      </form>
+
+      <div id="listaPromosTaller" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
     <section id="seccionAnuncios" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Anuncios</h2>
       <p class="mt-1 text-sm text-carbon/60">Publica avisos, fechas de clases o novedades. Aparecen de inmediato en la sección "Anuncios" del sitio.</p>
@@ -522,6 +560,7 @@ function mostrarDashboard(mostrar){
   if(mostrar){
     cargarContenidoAdmin();
     cargarHeroCarrusel();
+    cargarPromosTallerAdmin();
     cargarProductosAdmin();
     cargarSedes();
     cargarVentas();
@@ -752,9 +791,17 @@ async function cargarContenidoAdmin(){
       if(Object.prototype.hasOwnProperty.call(CONTENIDO_ACTUAL, key)) el.value = CONTENIDO_ACTUAL[key];
     });
     pintarChefImagen(CONTENIDO_ACTUAL.chef_imagen);
+    pintarAsistenteIcono(CONTENIDO_ACTUAL.asistente_icono);
   }catch(e){
     toast('No se pudo cargar el contenido general');
   }
+}
+
+function pintarAsistenteIcono(url){
+  const cont = $('asistenteIconoPreview');
+  cont.innerHTML = url
+    ? `<img src="${url}" alt="Ícono del asistente" class="h-20 w-20 rounded-full object-cover ring-1 ring-vino/10">`
+    : '<p class="text-sm text-carbon/50">Usando el ícono por defecto.</p>';
 }
 
 $('formContenido').addEventListener('submit', async (e) => {
@@ -848,6 +895,77 @@ $('formHeroCarrusel').addEventListener('submit', async (e) => {
   }
 });
 
+/* ---------- Promos de talleres ---------- */
+async function cargarPromosTallerAdmin(){
+  const cont = $('listaPromosTaller');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
+  try{
+    const items = await api('/admin/api/promos-taller');
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay promos de talleres.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(m => `
+      <div class="overflow-hidden rounded-xl bg-white ring-1 ring-vino/10">
+        <img src="${m.url}" alt="" class="aspect-video w-full object-cover">
+        <div class="space-y-2 p-3">
+          <input type="text" value="${escapeHtml(m.titulo || '')}" placeholder="Título" data-id="${m.id}" class="inputTituloPromoTaller w-full rounded-lg border border-vino/15 bg-crema/60 px-2.5 py-1.5 text-xs">
+          <textarea rows="2" placeholder="Descripción corta" data-id="${m.id}" class="inputDescripcionPromoTaller w-full rounded-lg border border-vino/15 bg-crema/60 px-2.5 py-1.5 text-xs">${escapeHtml(m.descripcion || '')}</textarea>
+          <button type="button" data-id="${m.id}" class="btnGuardarPromoTaller w-full rounded-lg bg-vino py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar</button>
+        </div>
+        <button type="button" data-id="${m.id}" class="btnBorrarPromoTaller w-full border-t border-red-100 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:bg-red-50 transition">Borrar</button>
+      </div>
+    `).join('');
+    cont.querySelectorAll('.btnGuardarPromoTaller').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const titulo = cont.querySelector(`.inputTituloPromoTaller[data-id="${btn.dataset.id}"]`);
+        const descripcion = cont.querySelector(`.inputDescripcionPromoTaller[data-id="${btn.dataset.id}"]`);
+        if(!titulo || !descripcion) return;
+        try{
+          await api(`/admin/api/promos-taller/${btn.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ titulo: titulo.value.trim(), descripcion: descripcion.value.trim() }) });
+          toast('Promo guardada');
+        }catch(e){
+          toast(`No se pudo guardar: ${e.message}. Actualizando la lista…`);
+          cargarPromosTallerAdmin();
+        }
+      });
+    });
+    cont.querySelectorAll('.btnBorrarPromoTaller').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar esta promo?')) return;
+        try{
+          await api(`/admin/api/promos-taller/${btn.dataset.id}`, { method: 'DELETE' });
+        }catch(e){
+          toast(e.message);
+        }
+        cargarPromosTallerAdmin();
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('formPromoTaller').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = $('promoTallerInput').files[0];
+  if(!file){ toast('Elige una imagen'); return; }
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('titulo', $('promoTallerTitulo').value.trim());
+  fd.append('descripcion', $('promoTallerDescripcion').value.trim());
+  try{
+    const res = await fetch('/admin/api/promos-taller/upload', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir la imagen');
+    $('formPromoTaller').reset();
+    toast('Promo agregada');
+    cargarPromosTallerAdmin();
+  }catch(e){
+    toast(e.message);
+  }
+});
+
 $('formChefImagen').addEventListener('submit', async (e) => {
   e.preventDefault();
   const file = $('chefImagenInput').files[0];
@@ -871,6 +989,34 @@ $('btnQuitarChefImagen').addEventListener('click', async () => {
     await api('/admin/api/content/chef_imagen/image', { method: 'DELETE' });
     pintarChefImagen('');
     toast('Imagen quitada');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('formAsistenteIcono').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = $('asistenteIconoInput').files[0];
+  if(!file){ toast('Elige una imagen'); return; }
+  const fd = new FormData();
+  fd.append('file', file);
+  try{
+    const res = await fetch('/admin/api/content/asistente_icono/image', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir la imagen');
+    pintarAsistenteIcono(data.url);
+    $('formAsistenteIcono').reset();
+    toast('Ícono actualizado');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('btnQuitarAsistenteIcono').addEventListener('click', async () => {
+  try{
+    await api('/admin/api/content/asistente_icono/image', { method: 'DELETE' });
+    pintarAsistenteIcono('');
+    toast('Ícono quitado');
   }catch(e){
     toast(e.message);
   }
