@@ -4,7 +4,7 @@ const store = require('../store');
 
 const router = express.Router();
 
-const MODELO = 'gemini-2.5-flash';
+const MODELO = 'gemini-3.6-flash';
 const NUMERO_WHATSAPP = '+52 56 6527 1901';
 
 let cliente = null;
