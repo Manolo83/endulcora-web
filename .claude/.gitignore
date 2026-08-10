@@ -1,0 +1,4 @@
+# Claude Ads managed Python runtime (rebuild locally: bash install.sh --target=claude)
+**/.venv/
+**/__pycache__/
+skills/ads/managed-runtime-receipt.json
