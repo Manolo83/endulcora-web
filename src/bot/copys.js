@@ -51,13 +51,15 @@ function fechasDeTaller(tallerId) {
 function bloqueFechas(tallerId) {
   const fechas = fechasDeTaller(tallerId);
   if (!fechas.length) return '';
+  // El mismo formato que usa el equipo de ventas: la fecha con su sucursal en
+  // una linea y el horario debajo.
   return fechas
     .map((f) => {
+      const sedes = f.sedes.length ? ` — Sucursal ${f.sedes.join(' y ')}` : '';
       const horarios = f.horarios.length ? `\n⏰ ${f.horarios.join('   ')}` : '';
-      const sedes = f.sedes.length > 1 ? `\n📍 ${f.sedes.join(' / ')}` : '';
-      return `🗓 ${fechaLarga(f.fecha)}${horarios}${sedes}`;
+      return `🗓️ *${fechaLarga(f.fecha)}*${sedes}${horarios}`;
     })
-    .join('\n\n');
+    .join('\n');
 }
 
 function reemplazar(texto, valores) {
@@ -83,6 +85,8 @@ function copyTaller(taller) {
       PRECIO_REGULAR: pesos(taller.precioRegular),
       PRECIO_PROMO: pesos(taller.precioPromo),
       ANTICIPO_POR_PERSONA: pesos(store.getBotConfig().anticipoPorPersona),
+      // El anticipo que se anuncia antes de desbloquear la promo.
+      ANTICIPO_REGULAR: pesos(store.getBotConfig().anticipoRegular),
       TALLER: taller.nombre,
     }),
     hayFechas: !!fechas,
@@ -101,6 +105,7 @@ function copyPromo(taller) {
     PRECIO_PROMO: pesos(taller.precioPromo),
     AHORRO: pesos(Math.max(0, taller.precioRegular - taller.precioPromo)),
     ANTICIPO_POR_PERSONA: pesos(anticipo),
+    ANTICIPO_REGULAR: pesos(config.anticipoRegular),
     SALDO_POR_PERSONA: pesos(saldo),
   });
 }
@@ -110,12 +115,18 @@ function copyPromo(taller) {
 function horaLimite(horas) {
   const limite = new Date(Date.now() + horas * 60 * 60 * 1000);
   limite.setMinutes(limite.getMinutes() > 30 ? 60 : 30, 0, 0);
-  return limite.toLocaleTimeString('es-MX', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'America/Mexico_City',
-  }).toUpperCase().replace(/\s+/g, ' ');
+  return limite
+    .toLocaleTimeString('es-MX', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'America/Mexico_City',
+    })
+    .toUpperCase()
+    // El formato de es-MX devuelve "7:30 P.M." y el copy ya cierra con punto,
+    // asi que quedarian dos seguidos.
+    .replace(/\./g, '')
+    .replace(/\s+/g, ' ');
 }
 
 // Paso 7: el aviso urgente, con el anticipo ya multiplicado por personas.
@@ -129,10 +140,13 @@ function copyAvisoUrgente({ taller, personas }) {
     texto: reemplazar(copys.aviso_urgente, {
       TALLER: taller.nombre,
       PERSONAS: personas,
-      DETALLE_PERSONAS: personas > 1 ? ` (por las ${personas} personas)` : '',
+      DETALLE_PERSONAS: personas > 1 ? ` por las ${personas} personas` : '',
       ANTICIPO: pesos(anticipo),
+      PRECIO_REGULAR: pesos(taller.precioRegular),
+      PRECIO_PROMO: pesos(taller.precioPromo),
       TOTAL: pesos(total),
       SALDO: pesos(Math.max(0, total - anticipo)),
+      HORAS_PROMO: config.horasParaPagar,
       HORA_LIMITE: horaLimite(config.horasParaPagar),
     }),
     anticipo,

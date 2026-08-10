@@ -361,17 +361,22 @@ async function procesarMensaje(entrante) {
   // 6. De donde viene: si llego por un anuncio, Meta dice cual. Eso pesa mas
   // que adivinar por el texto, sobre todo cuando no escribio nada.
   const desdeAnuncio = entrante.referral ? store.buscarTallerPorAnuncio(entrante.referral) : null;
-  const porPalabra = entrante.texto ? store.buscarTallerPorPalabra(entrante.texto) : null;
-  const taller = desdeAnuncio || porPalabra;
+  const porPalabra = entrante.texto ? store.buscarTalleresPorPalabra(entrante.texto) : [];
 
   const pistas = [];
+  // Hay claves a proposito repetidas (COCTELES sirve para Cocteleria Basica y
+  // para Cocteleria Mexicana). Cuando pasa, el bot pregunta en vez de adivinar.
+  if (!desdeAnuncio && porPalabra.length > 1) {
+    const opciones = porPalabra.map((t) => `"${t.nombre}" (id ${t.id})`).join(' y ');
+    pistas.push(`(Esa palabra clave sirve para dos talleres distintos: ${opciones}. Pregúntale cuál quiere antes de mandar nada.)`);
+  }
   if (desdeAnuncio) {
     pistas.push(`(Llegó desde el anuncio "${entrante.referral.titulo || entrante.referral.adId}", que es del taller "${desdeAnuncio.nombre}", id ${desdeAnuncio.id}.)`);
   } else if (entrante.referral) {
     pistas.push('(Llegó desde un anuncio, pero no se pudo identificar de qué taller. Pregúntaselo.)');
   }
-  if (porPalabra && !desdeAnuncio) {
-    pistas.push(`(El sistema detectó la palabra clave del taller "${porPalabra.nombre}", id ${porPalabra.id}.)`);
+  if (porPalabra.length === 1 && !desdeAnuncio) {
+    pistas.push(`(El sistema detectó la palabra clave del taller "${porPalabra[0].nombre}", id ${porPalabra[0].id}.)`);
   }
   if (entrante.tipo === 'arranque') {
     pistas.push('(Abrió el chat desde el anuncio sin escribir nada. Salúdalo y mándale la información del taller.)');

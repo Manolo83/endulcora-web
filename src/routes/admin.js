@@ -508,6 +508,13 @@ router.delete('/api/bot/talleres/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// Carga los 18 talleres del documento de ventas con sus fechas. Se puede
+// repetir: solo agrega lo que falte, nunca pisa lo editado en el panel.
+router.post('/api/bot/importar-semilla', requireAdmin, (req, res) => {
+  const semilla = require('../bot/semilla');
+  res.json(store.importarSemilla(semilla));
+});
+
 router.get('/api/bot/conversaciones', requireAdmin, async (req, res) => {
   try {
     res.json(await botAlmacen.listarConversaciones());

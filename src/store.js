@@ -62,10 +62,12 @@ const DEFAULT_BOT_COPYS = {
     '¡Hola! Soy Endulcorito, el asistente de Endulcora. Te aviso que soy un asistente automático y que guardo tu mensaje solo para atenderte; si no quieres recibir más mensajes escribe BAJA.',
   gancho:
     '*¡DESBLOQUEA TU REGALO!*🎁 \n\nConfirma de LECTURA COMPLETA y recibe un descuento VIP exclusivo en tu próximo taller.',
+  // El desbloqueo va en DOS mensajes, nunca juntos: primero la buena noticia,
+  // luego el reloj. Asi lo pide el manual de ventas.
   promo:
-    '🤩 ¡SUPER PROMO EXCLUSIVA PARA TI!\n\n 🤫 Solo por leernos completo, te hemos reservado una SUPER PROMO PERSONALIZADA con un ahorro de ${{AHORRO}} MXN.\n\nPrecio Regular: ❌ ${{PRECIO_REGULAR}} MXN\nPrecio Exclusivo: ✅ *¡Paga solo ${{PRECIO_PROMO}} MXN!*\n\nAsegura tu lugar con este precio especial apartando hoy mismo con solo ${{ANTICIPO_POR_PERSONA}} MXN. Paga los ${{SALDO_POR_PERSONA}} MXN restantes el día del taller.\n\n*¡ATENCIÓN!* Esta promoción es por tiempo limitado y solo es válida en este momento.',
+    '¡Perfecto! 🔓 Aquí va tu promoción:\n\n💰 Precio normal: ~${{PRECIO_REGULAR}}~\n🎉 Tu precio hoy: *${{PRECIO_PROMO}}*\n\nY apartas con solo *${{ANTICIPO_POR_PERSONA}}* en lugar de ${{ANTICIPO_REGULAR}}.\nEl resto lo liquidas el día del taller.',
   aviso_urgente:
-    '⏳ *AVISO URGENTE:*\n\nRecuerda que esta SUPER PROMO es flash y no se libera si no recibo el apartado de ${{ANTICIPO}} MXN{{DETALLE_PERSONAS}}.\n\n¿Cuento con tu pago antes de las {{HORA_LIMITE}} para que no pierdas tu descuento exclusivo?\n\n¿Te comparto las instrucciones de pago?',
+    '⏰ *Esta promo es exprés.* Solo dura *{{HORAS_PROMO}} horas.*\nDespués el taller regresa a ${{PRECIO_REGULAR}}.\n\nSon *${{ANTICIPO}}* de apartado{{DETALLE_PERSONAS}}, antes de las {{HORA_LIMITE}}.\n\n¿Te aparto tu lugar? 😊',
   // Las cuentas bancarias NO viven en el repositorio. Pegalas desde
   // /admin > Bot de ventas para que no queden en el historial de codigo.
   instrucciones_pago:
@@ -192,7 +194,10 @@ function datosPorDefecto() {
     talleresBot: [],
     botConfig: {
       activo: false,
+      // El de la promo: con el que el bot aparta. El regular ($400) solo
+      // aparece en el copy informativo, antes de desbloquear el descuento.
       anticipoPorPersona: 200,
+      anticipoRegular: 400,
       horasParaPagar: 2,
       correoNotificaciones: 'endulcora@gmail.com',
     },
@@ -639,6 +644,7 @@ module.exports = {
     const c = data.botConfig;
     if (typeof patch.activo === 'boolean') c.activo = patch.activo;
     if (patch.anticipoPorPersona !== undefined) c.anticipoPorPersona = Math.max(0, parseInt(patch.anticipoPorPersona, 10) || 0);
+    if (patch.anticipoRegular !== undefined) c.anticipoRegular = Math.max(0, parseInt(patch.anticipoRegular, 10) || 0);
     if (patch.horasParaPagar !== undefined) c.horasParaPagar = Math.max(1, Math.min(48, parseInt(patch.horasParaPagar, 10) || 2));
     if (typeof patch.correoNotificaciones === 'string') c.correoNotificaciones = patch.correoNotificaciones.trim();
     save(data);
@@ -651,18 +657,22 @@ module.exports = {
   getTallerBot(id) {
     return load().talleresBot.find((t) => t.id === Number(id)) || null;
   },
-  // Busca el taller por su palabra clave (PAYS, GALLETAS...). El cliente puede
-  // escribirla con acentos, minusculas o dentro de una frase.
-  buscarTallerPorPalabra(texto) {
+  // Todos los talleres cuya palabra clave aparece en el texto. Devuelve una
+  // lista porque hay claves repetidas a proposito (COCTELES sirve para
+  // Cocteleria Basica y para Cocteleria Mexicana): cuando hay mas de uno, el
+  // bot tiene que preguntar cual, no adivinar.
+  buscarTalleresPorPalabra(texto) {
     const normal = normalizar(texto);
-    if (!normal) return null;
-    return (
-      load().talleresBot.find((t) => {
-        if (!t.activo || !t.palabraClave) return false;
-        const clave = normalizar(t.palabraClave);
-        return clave && new RegExp(`(^|\\W)${clave}(\\W|$)`).test(normal);
-      }) || null
-    );
+    if (!normal) return [];
+    return load().talleresBot.filter((t) => {
+      if (!t.activo || !t.palabraClave) return false;
+      const clave = normalizar(t.palabraClave);
+      return clave && new RegExp(`(^|\\W)${clave}(\\W|$)`).test(normal);
+    });
+  },
+  buscarTallerPorPalabra(texto) {
+    const encontrados = this.buscarTalleresPorPalabra(texto);
+    return encontrados.length === 1 ? encontrados[0] : null;
   },
   // Busca el taller al que corresponde un anuncio, con el titular y el id que
   // Meta manda cuando alguien llega desde una campana. Primero por id exacto
@@ -700,7 +710,7 @@ module.exports = {
         .sort((a, b) => b.nombre.length - a.nombre.length)[0] || null
     );
   },
-  addTallerBot({ nombre, palabraClave, copy, precioRegular, precioPromo, adIds }) {
+  addTallerBot({ nombre, palabraClave, copy, precioRegular, precioPromo, adIds, aviso }) {
     const data = load();
     const item = {
       id: nextId(data.talleresBot),
@@ -710,6 +720,9 @@ module.exports = {
       // Ids de los anuncios de Meta que llevan a este taller, separados por
       // coma. Opcional: sin ellos se intenta por el titular del anuncio.
       adIds: String(adIds || '').trim(),
+      // Nota interna que el bot debe respetar en este taller (mayores de 18,
+      // no prometer nada medico, etc.). El cliente nunca la ve.
+      aviso: String(aviso || '').trim(),
       precioRegular: Math.max(0, parseInt(precioRegular, 10) || 0),
       precioPromo: Math.max(0, parseInt(precioPromo, 10) || 0),
       activo: true,
@@ -726,11 +739,71 @@ module.exports = {
     if (typeof patch.palabraClave === 'string') item.palabraClave = patch.palabraClave.trim().toUpperCase();
     if (typeof patch.copy === 'string') item.copy = patch.copy;
     if (typeof patch.adIds === 'string') item.adIds = patch.adIds.trim();
+    if (typeof patch.aviso === 'string') item.aviso = patch.aviso.trim();
     if (patch.precioRegular !== undefined) item.precioRegular = Math.max(0, parseInt(patch.precioRegular, 10) || 0);
     if (patch.precioPromo !== undefined) item.precioPromo = Math.max(0, parseInt(patch.precioPromo, 10) || 0);
     if (typeof patch.activo === 'boolean') item.activo = patch.activo;
     save(data);
     return item;
+  },
+  // Carga los talleres del documento de ventas. Es idempotente a proposito: no
+  // pisa lo que ya editaste en el panel, solo agrega lo que falte. Asi se puede
+  // volver a correr sin miedo.
+  importarSemilla(semilla) {
+    const data = load();
+    const resumen = { talleresNuevos: 0, talleresYaExistian: 0, sesionesNuevas: 0, sesionesYaExistian: 0 };
+
+    for (const plantilla of semilla.TALLERES) {
+      let taller = data.talleresBot.find((t) => t.nombre === plantilla.nombre);
+      if (taller) {
+        resumen.talleresYaExistian += 1;
+      } else {
+        taller = {
+          id: nextId(data.talleresBot),
+          nombre: plantilla.nombre,
+          palabraClave: plantilla.palabraClave,
+          copy: plantilla.copy,
+          adIds: '',
+          aviso: plantilla.aviso || '',
+          precioRegular: semilla.PRECIO_REGULAR,
+          precioPromo: semilla.PRECIO_PROMO,
+          activo: true,
+        };
+        data.talleresBot.push(taller);
+        resumen.talleresNuevos += 1;
+      }
+
+      for (const s of plantilla.sesiones) {
+        let sede = data.sedes.find((x) => x.nombre === s.sede);
+        if (!sede) {
+          sede = { id: nextId(data.sedes), nombre: s.sede, imagenFondo: '' };
+          data.sedes.push(sede);
+        }
+        const yaEsta = data.sesionesTaller.some(
+          (x) => x.sedeId === sede.id && x.fecha === s.fecha && x.tallerBotId === taller.id && x.horario === s.horario
+        );
+        if (yaEsta) {
+          resumen.sesionesYaExistian += 1;
+          continue;
+        }
+        const mismaFecha = data.sesionesTaller.filter((x) => x.sedeId === sede.id && x.fecha === s.fecha);
+        data.sesionesTaller.push({
+          id: nextId(data.sesionesTaller),
+          sedeId: sede.id,
+          fecha: s.fecha,
+          titulo: plantilla.nombre,
+          estado: 'disponible',
+          cupo: semilla.CUPO_MAXIMO,
+          tallerBotId: taller.id,
+          horario: s.horario,
+          orden: mismaFecha.length,
+        });
+        resumen.sesionesNuevas += 1;
+      }
+    }
+
+    save(data);
+    return resumen;
   },
   deleteTallerBot(id) {
     const data = load();

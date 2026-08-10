@@ -458,7 +458,11 @@
         <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Talleres que promociona</h3>
         <p class="mt-1 text-sm text-carbon/60">Pega el copy de cada taller. Escribe <code class="rounded bg-crema px-1">{{FECHAS}}</code> donde van las fechas y el sistema pondrá las de tu calendario, nunca una ya pasada.</p>
         <div id="listaTalleresBot" class="mt-5 space-y-3"></div>
-        <button id="btnNuevoTallerBot" class="mt-4 rounded-full border border-vino/20 px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Agregar taller</button>
+        <div class="mt-4 flex flex-wrap gap-3">
+          <button id="btnNuevoTallerBot" class="rounded-full border border-vino/20 px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Agregar taller</button>
+          <button id="btnImportarSemilla" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Cargar los 18 talleres de agosto-septiembre</button>
+        </div>
+        <p class="mt-2 text-[11px] text-carbon/45">La carga trae los copys y las fechas del documento de ventas. Se puede repetir sin miedo: solo agrega lo que falte, nunca pisa lo que ya editaste aquí.</p>
       </div>
 
       <div class="mt-6 grid gap-6 lg:grid-cols-2">
@@ -1692,6 +1696,16 @@ async function cargarTalleresBot(){
     });
   });
 }
+
+$('btnImportarSemilla').addEventListener('click', async () => {
+  if(!confirm('Se cargarán los 18 talleres con sus copys y sus fechas. Lo que ya tengas editado no se toca. ¿Continuamos?')) return;
+  try{
+    const r = await api('/admin/api/bot/importar-semilla', { method: 'POST' });
+    toast(`${r.talleresNuevos} talleres y ${r.sesionesNuevas} fechas cargadas`);
+    cargarTalleresBot();
+    cargarSesionesTaller();
+  }catch(e){ toast(e.message); }
+});
 
 $('btnNuevoTallerBot').addEventListener('click', async () => {
   const nombre = prompt('Nombre del taller (ej. Pays y Tartas)');

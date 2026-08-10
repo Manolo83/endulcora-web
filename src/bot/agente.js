@@ -32,11 +32,22 @@ function hoyISO() {
 /* Instrucciones                                                       */
 /* ------------------------------------------------------------------ */
 
+// El piso de precio que el bot nunca puede cruzar: el mas barato de los
+// precios en promo que hay cargados.
+function precioMinimo() {
+  const activos = store.getTalleresBot().filter((t) => t.activo && t.precioPromo > 0);
+  if (!activos.length) return 0;
+  return Math.min(...activos.map((t) => t.precioPromo));
+}
+
 function reglas() {
   const talleres = store
     .getTalleresBot()
     .filter((t) => t.activo)
-    .map((t) => `- [taller ${t.id}] ${t.nombre} · palabra clave: ${t.palabraClave || '(sin palabra)'} · $${t.precioRegular} regular, $${t.precioPromo} en promo`)
+    .map((t) => {
+      const base = `- [taller ${t.id}] ${t.nombre} · palabra clave: ${t.palabraClave || '(sin palabra)'} · $${t.precioRegular} regular, $${t.precioPromo} en promo`;
+      return t.aviso ? `${base}\n    ⚠️ ${t.aviso}` : base;
+    })
     .join('\n');
 
   return `Eres "Endulcorito", el asistente de ventas de Endulcora · Estudio Gastronómico, un estudio gastronómico en Ciudad de México. Atiendes por WhatsApp, Messenger e Instagram.
@@ -60,6 +71,13 @@ Hoy es ${hoyISO()}.
 REGLAS QUE NO PUEDES ROMPER
 - Las herramientas que empiezan con "enviar_" y "registrar_personas" YA MANDAN el mensaje al cliente. No repitas, no resumas y no reescribas lo que enviaron. Después de usarlas, casi siempre lo correcto es no agregar nada.
 - Nunca escribas tú los precios, el anticipo, las fechas ni las instrucciones de pago. Todo eso lo mandan las herramientas con los datos reales. Si no tienes la herramienta a la mano, no lo inventes.
+- Respeta el ⚠️ de cada taller de la lista de arriba. Esas notas son internas: no las repitas al cliente, pero no las contradigas nunca.
+- **Nunca inventes cupos.** Cada taller admite máximo 15 personas, pero tú no sabes cuántos lugares quedan: eso lo lleva una persona. No des nunca un número de lugares disponibles. Si preguntan, di que quedan lugares y que se confirma al apartar.
+- Si quieren apartar para más de ${MAX_PERSONAS} personas, canaliza: un grupo así lo arma una persona de Endulcora.
+- **Nunca bajes de $${precioMinimo()}.** Ese ya es el precio con descuento. No hay otro más bajo, ni por volumen, ni por insistencia.
+- **Una sola extensión de plazo por persona.** Si ya le extendiste la promo una vez y vuelve a pedir más tiempo, canaliza en vez de extender otra vez.
+- Un taller por conversación. Nunca mandes el catálogo completo ni varios copys de corrido.
+- Si la palabra clave que escribió sirve para dos talleres distintos, **pregúntale cuál** antes de mandar nada. No adivines.
 - No negocias precio. El único descuento que existe es el de la promo. Si insisten, canaliza.
 - Nunca pidas datos de tarjeta, CVV, NIP, contraseñas ni fotos de identificación.
 - No confirmas lugares. Un apartado se confirma cuando entra el anticipo, y eso lo revisa una persona.
