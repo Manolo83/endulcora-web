@@ -10,8 +10,15 @@ const { pool } = require('../store');
 // mas costo por mensaje y mas riesgo de que se le olvide la instruccion.
 const MENSAJES_DE_CONTEXTO = 16;
 
-// Una reserva sin anticipo pagado libera el lugar sola.
-const HORAS_PARA_EXPIRAR_RESERVA = 24;
+// Etapas del embudo. El bot llega hasta 'instrucciones_enviadas' y ahi entrega
+// la conversacion: no cobra, no valida comprobantes, no inscribe.
+const ETAPAS = [
+  'nuevo',
+  'copy_enviado',
+  'promo_enviada',
+  'personas_confirmadas',
+  'instrucciones_enviadas',
+];
 
 async function init() {
   await pool.query(`
@@ -37,20 +44,23 @@ async function init() {
     );
     CREATE INDEX IF NOT EXISTS bot_mensajes_contacto_idx ON bot_mensajes (contacto_id, id DESC);
 
-    CREATE TABLE IF NOT EXISTS bot_reservas (
+    CREATE TABLE IF NOT EXISTS bot_solicitudes (
       id SERIAL PRIMARY KEY,
       contacto_id INT NOT NULL REFERENCES bot_contactos(id) ON DELETE CASCADE,
-      sesion_id INT NOT NULL,
-      sede TEXT NOT NULL DEFAULT '',
-      fecha DATE NOT NULL,
-      titulo TEXT NOT NULL DEFAULT '',
-      nombre TEXT NOT NULL DEFAULT '',
+      taller_bot_id INT,
+      taller TEXT NOT NULL DEFAULT '',
+      sesion_id INT,
+      fecha_texto TEXT NOT NULL DEFAULT '',
       personas INT NOT NULL DEFAULT 1,
-      estado TEXT NOT NULL DEFAULT 'apartada',
-      expira_at TIMESTAMPTZ,
-      creado_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      anticipo INT NOT NULL DEFAULT 0,
+      total INT NOT NULL DEFAULT 0,
+      saldo INT NOT NULL DEFAULT 0,
+      etapa TEXT NOT NULL DEFAULT 'nuevo',
+      limite_pago TIMESTAMPTZ,
+      creado_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      actualizado_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
-    CREATE INDEX IF NOT EXISTS bot_reservas_sesion_idx ON bot_reservas (sesion_id);
+    CREATE INDEX IF NOT EXISTS bot_solicitudes_contacto_idx ON bot_solicitudes (contacto_id, id DESC);
 
     CREATE TABLE IF NOT EXISTS bot_eventos (
       id TEXT PRIMARY KEY,
@@ -60,8 +70,8 @@ async function init() {
   console.log('[bot] Tablas del bot listas.');
 }
 
-// Meta reenvia el mismo webhook cuando no recibe un 200 a tiempo. Sin esto,
-// un reintento genera una segunda respuesta (y una segunda reserva).
+// Meta reenvia el mismo webhook cuando no recibe un 200 a tiempo. Sin esto, un
+// reintento genera una segunda respuesta (y un segundo copy enviado).
 // Devuelve true solo la primera vez que se ve ese id de mensaje.
 async function esEventoNuevo(idMensaje) {
   if (!idMensaje) return true;
@@ -84,7 +94,7 @@ async function obtenerOCrearContacto({ canal, externoId, nombre, telefono }) {
        SET ultimo_mensaje_at = now(),
            nombre = CASE WHEN bot_contactos.nombre = '' THEN EXCLUDED.nombre ELSE bot_contactos.nombre END,
            telefono = CASE WHEN bot_contactos.telefono = '' THEN EXCLUDED.telefono ELSE bot_contactos.telefono END
-     RETURNING *`,
+     RETURNING *, (xmax = 0) AS es_nuevo`,
     [canal, String(externoId), nombre || '', telefono || '']
   );
   return res.rows[0];
@@ -103,85 +113,102 @@ async function actualizarContacto(id, { estado, motivoEscalado, nombre }) {
   return res.rows[0] || null;
 }
 
+// Cuenta cuantos mensajes ha mandado el bot a este contacto. Sirve para saber
+// si ya se presento (y no repetir la bienvenida en cada mensaje).
+async function yaSaludo(contactoId) {
+  const res = await pool.query(
+    "SELECT 1 FROM bot_mensajes WHERE contacto_id = $1 AND rol = 'bot' LIMIT 1",
+    [contactoId]
+  );
+  return res.rowCount > 0;
+}
+
 async function guardarMensaje(contactoId, rol, texto) {
+  const limpio = String(texto || '').slice(0, 4000);
+  if (!limpio.trim()) return;
   await pool.query('INSERT INTO bot_mensajes (contacto_id, rol, texto) VALUES ($1, $2, $3)', [
     contactoId,
     rol,
-    String(texto || '').slice(0, 4000),
+    limpio,
   ]);
 }
 
-async function historial(contactoId) {
+async function historial(contactoId, limite = MENSAJES_DE_CONTEXTO) {
   const res = await pool.query(
-    'SELECT rol, texto FROM bot_mensajes WHERE contacto_id = $1 ORDER BY id DESC LIMIT $2',
-    [contactoId, MENSAJES_DE_CONTEXTO]
+    'SELECT rol, texto, creado_at FROM bot_mensajes WHERE contacto_id = $1 ORDER BY id DESC LIMIT $2',
+    [contactoId, limite]
   );
   return res.rows.reverse();
 }
 
-// Cuenta los lugares que siguen vivos para una sesion del calendario: los
-// apartados sin vencer y los ya confirmados.
-async function lugaresTomados(sesionId) {
+/* ---- Solicitudes (intencion de apartar; el apartado real lo confirmas tu) ---- */
+
+async function solicitudAbierta(contactoId) {
   const res = await pool.query(
-    `SELECT COALESCE(SUM(personas), 0)::int AS total
-     FROM bot_reservas
-     WHERE sesion_id = $1
-       AND (estado = 'confirmada' OR (estado = 'apartada' AND expira_at > now()))`,
-    [sesionId]
+    `SELECT * FROM bot_solicitudes
+     WHERE contacto_id = $1 AND etapa <> 'cancelada'
+     ORDER BY id DESC LIMIT 1`,
+    [contactoId]
   );
-  return res.rows[0].total;
+  return res.rows[0] || null;
 }
 
-async function crearReserva({ contactoId, sesionId, sede, fecha, titulo, nombre, personas }) {
+async function crearSolicitud({ contactoId, tallerBotId, taller }) {
   const res = await pool.query(
-    `INSERT INTO bot_reservas (contacto_id, sesion_id, sede, fecha, titulo, nombre, personas, expira_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, now() + ($8 || ' hours')::interval)
+    `INSERT INTO bot_solicitudes (contacto_id, taller_bot_id, taller, etapa)
+     VALUES ($1, $2, $3, 'copy_enviado')
      RETURNING *`,
-    [contactoId, sesionId, sede, fecha, titulo, nombre, personas, String(HORAS_PARA_EXPIRAR_RESERVA)]
+    [contactoId, tallerBotId, taller]
   );
   return res.rows[0];
 }
 
-async function reservasVivasDeContacto(contactoId) {
+async function actualizarSolicitud(id, patch) {
+  const campos = [];
+  const valores = [id];
+  const mapa = {
+    etapa: 'etapa',
+    personas: 'personas',
+    anticipo: 'anticipo',
+    total: 'total',
+    saldo: 'saldo',
+    fechaTexto: 'fecha_texto',
+    sesionId: 'sesion_id',
+    limitePago: 'limite_pago',
+  };
+  for (const [clave, columna] of Object.entries(mapa)) {
+    if (patch[clave] !== undefined) {
+      valores.push(patch[clave]);
+      campos.push(`${columna} = $${valores.length}`);
+    }
+  }
+  if (!campos.length) return null;
   const res = await pool.query(
-    `SELECT * FROM bot_reservas
-     WHERE contacto_id = $1
-       AND (estado = 'confirmada' OR (estado = 'apartada' AND expira_at > now()))
-     ORDER BY fecha`,
-    [contactoId]
+    `UPDATE bot_solicitudes SET ${campos.join(', ')}, actualizado_at = now() WHERE id = $1 RETURNING *`,
+    valores
   );
-  return res.rows;
+  return res.rows[0] || null;
 }
 
-// Marca como expiradas las que nadie pago a tiempo, para que su cupo se libere.
-async function expirarReservasVencidas() {
+async function listarSolicitudes() {
   const res = await pool.query(
-    "UPDATE bot_reservas SET estado = 'expirada' WHERE estado = 'apartada' AND expira_at <= now() RETURNING id"
-  );
-  return res.rowCount;
-}
-
-async function listarReservas() {
-  const res = await pool.query(
-    `SELECT r.*, c.canal, c.telefono, c.externo_id
-     FROM bot_reservas r
-     JOIN bot_contactos c ON c.id = r.contacto_id
-     ORDER BY r.creado_at DESC
+    `SELECT s.*, c.canal, c.telefono, c.externo_id, c.nombre AS contacto_nombre, c.estado AS contacto_estado
+     FROM bot_solicitudes s
+     JOIN bot_contactos c ON c.id = s.contacto_id
+     ORDER BY s.actualizado_at DESC
      LIMIT 300`
   );
   return res.rows;
 }
 
-async function cambiarEstadoReserva(id, estado) {
-  const res = await pool.query('UPDATE bot_reservas SET estado = $2 WHERE id = $1 RETURNING *', [id, estado]);
-  return res.rows[0] || null;
-}
+/* ---- Lecturas para el panel ---- */
 
 async function listarConversaciones() {
   const res = await pool.query(
     `SELECT c.*,
             (SELECT texto FROM bot_mensajes m WHERE m.contacto_id = c.id ORDER BY m.id DESC LIMIT 1) AS ultimo_texto,
-            (SELECT count(*) FROM bot_mensajes m WHERE m.contacto_id = c.id)::int AS total_mensajes
+            (SELECT count(*) FROM bot_mensajes m WHERE m.contacto_id = c.id)::int AS total_mensajes,
+            (SELECT etapa FROM bot_solicitudes s WHERE s.contacto_id = c.id ORDER BY s.id DESC LIMIT 1) AS etapa
      FROM bot_contactos c
      ORDER BY c.ultimo_mensaje_at DESC
      LIMIT 200`
@@ -197,21 +224,26 @@ async function mensajesDeContacto(contactoId) {
   return res.rows;
 }
 
+async function contactoPorId(id) {
+  const res = await pool.query('SELECT * FROM bot_contactos WHERE id = $1', [id]);
+  return res.rows[0] || null;
+}
+
 module.exports = {
   init,
+  ETAPAS,
   esEventoNuevo,
   limpiarEventosViejos,
   obtenerOCrearContacto,
   actualizarContacto,
+  contactoPorId,
+  yaSaludo,
   guardarMensaje,
   historial,
-  lugaresTomados,
-  crearReserva,
-  reservasVivasDeContacto,
-  expirarReservasVencidas,
-  listarReservas,
-  cambiarEstadoReserva,
+  solicitudAbierta,
+  crearSolicitud,
+  actualizarSolicitud,
+  listarSolicitudes,
   listarConversaciones,
   mensajesDeContacto,
-  HORAS_PARA_EXPIRAR_RESERVA,
 };

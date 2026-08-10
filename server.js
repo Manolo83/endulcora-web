@@ -15,6 +15,8 @@ const adminRoutes = require('./src/routes/admin');
 const checkoutRoutes = require('./src/routes/checkout');
 const authRoutes = require('./src/routes/auth');
 const asistenteRoutes = require('./src/routes/asistente');
+const metaRoutes = require('./src/routes/meta');
+const botAlmacen = require('./src/bot/almacen');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
@@ -29,7 +31,16 @@ app.use(
   })
 );
 app.use(compression());
-app.use(express.json({ limit: '2mb' }));
+app.use(
+  express.json({
+    limit: '2mb',
+    // Meta firma el cuerpo tal cual lo manda, byte por byte. Hay que guardarlo
+    // antes de parsearlo para poder verificar la firma en /api/meta/webhook.
+    verify: (req, res, buf) => {
+      if (req.originalUrl.startsWith('/api/meta/')) req.rawBody = buf;
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
@@ -88,7 +99,18 @@ const asistenteLimiter = rateLimit({
 });
 app.use('/api/asistente/chat', asistenteLimiter);
 
+// El webhook de Meta trae su propio limite: reintenta agresivamente y no debe
+// competir con el resto de la API por el mismo cubo.
+const metaLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 600,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/meta', metaLimiter);
+
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
+app.use('/api/meta', metaRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/asistente', asistenteRoutes);
@@ -107,10 +129,15 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 3000;
 let servidor;
 store.init()
+  .then(() => botAlmacen.init())
   .then(() => {
     servidor = app.listen(PORT, () => {
       console.log(`Endulcora escuchando en el puerto ${PORT}`);
     });
+    // Los ids de mensajes de Meta solo sirven para no procesar dos veces el
+    // mismo webhook; a los pocos dias son basura.
+    botAlmacen.limpiarEventosViejos().catch(() => {});
+    setInterval(() => botAlmacen.limpiarEventosViejos().catch(() => {}), 24 * 60 * 60 * 1000).unref();
   })
   .catch((err) => {
     console.error('No se pudo conectar a la base de datos, el servidor no arranco:', err.message);

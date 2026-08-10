@@ -1,15 +1,25 @@
 const express = require('express');
 const crypto = require('crypto');
-const { Payment } = require('mercadopago');
+const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const store = require('../store');
 const { SITE_URL } = require('../config');
 const { enviarCorreoConfirmacionCompra } = require('../email');
-const { mpClient, parsePrecio, crearPreferencia } = require('../pagos');
 
 const router = express.Router();
 
 const MAX_ARTICULOS = 15;
 const MAX_CANTIDAD_POR_ARTICULO = 20;
+
+function mpClient() {
+  const accessToken = process.env.MP_ACCESS_TOKEN;
+  if (!accessToken) return null;
+  return new MercadoPagoConfig({ accessToken });
+}
+
+function parsePrecio(valor) {
+  const numero = parseFloat(String(valor).replace(/,/g, ''));
+  return Number.isFinite(numero) ? numero : 0;
+}
 
 router.post('/preference', async (req, res) => {
   const client = mpClient();
@@ -48,8 +58,36 @@ router.post('/preference', async (req, res) => {
   const order = store.addOrder({ items: resueltos, total, email: email || (usuario ? usuario.email : ''), userId });
 
   try {
-    const { url, preferenceId } = await crearPreferencia({ resueltos, email, orderId: order.id });
-    store.updateOrder(order.id, { mpPreferenceId: preferenceId });
+    const preference = new Preference(client);
+    const resultado = await preference.create({
+      body: {
+        items: resueltos.map((r) => ({
+          id: String(r.itemId),
+          title: r.titulo,
+          quantity: r.cantidad,
+          unit_price: r.precio,
+          currency_id: 'MXN',
+        })),
+        payer: email ? { email } : undefined,
+        external_reference: String(order.id),
+        back_urls: {
+          success: `${SITE_URL}/?pago=exito`,
+          failure: `${SITE_URL}/?pago=error`,
+          pending: `${SITE_URL}/?pago=pendiente`,
+        },
+        auto_return: 'approved',
+        notification_url: `${SITE_URL}/api/checkout/webhook`,
+      },
+    });
+
+    store.updateOrder(order.id, { mpPreferenceId: resultado.id });
+    // Mercado Pago devuelve tanto init_point como sandbox_init_point sin
+    // importar el tipo de credencial usada, asi que no se puede adivinar
+    // cual corresponde. Se usa init_point (el real) siempre, salvo que se
+    // active explicitamente MP_SANDBOX=true en las variables de entorno
+    // (util solo mientras se prueba con credenciales de prueba).
+    const usarSandbox = process.env.MP_SANDBOX === 'true';
+    const url = usarSandbox ? (resultado.sandbox_init_point || resultado.init_point) : resultado.init_point;
     res.status(201).json({ url });
   } catch (err) {
     store.updateOrder(order.id, { estado: 'error' });

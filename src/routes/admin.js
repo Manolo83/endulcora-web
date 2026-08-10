@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const sharp = require('sharp');
 const store = require('../store');
+const botAlmacen = require('../bot/almacen');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
@@ -440,9 +441,9 @@ router.get('/api/sesiones-taller', requireAdmin, (req, res) => {
 });
 
 router.post('/api/sesiones-taller', requireAdmin, (req, res) => {
-  const { sedeId, fecha, titulo, estado, cupo } = req.body || {};
+  const { sedeId, fecha, titulo, estado, cupo, tallerBotId, horario } = req.body || {};
   if (!sedeId || !fecha || !titulo) return res.status(400).json({ error: 'Falta sede, fecha o título' });
-  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado, cupo }));
+  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado, cupo, tallerBotId, horario }));
 });
 
 router.patch('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
@@ -473,6 +474,77 @@ router.delete('/api/resenas/:id', requireAdmin, (req, res) => {
 });
 
 // ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----
+/* ---------- Bot de ventas de Meta ---------- */
+
+router.get('/api/bot/config', requireAdmin, (req, res) => {
+  res.json({ config: store.getBotConfig(), copys: store.getBotCopys() });
+});
+
+router.post('/api/bot/config', requireAdmin, (req, res) => {
+  const { config, copys } = req.body || {};
+  if (config) store.updateBotConfig(config);
+  if (copys) store.updateBotCopys(copys);
+  res.json({ config: store.getBotConfig(), copys: store.getBotCopys() });
+});
+
+router.get('/api/bot/talleres', requireAdmin, (req, res) => {
+  res.json(store.getTalleresBot());
+});
+
+router.post('/api/bot/talleres', requireAdmin, (req, res) => {
+  const { id, nombre, palabraClave, copy, precioRegular, precioPromo, activo } = req.body || {};
+  if (!id && !String(nombre || '').trim()) {
+    return res.status(400).json({ error: 'Ponle nombre al taller.' });
+  }
+  const item = id
+    ? store.updateTallerBot(id, { nombre, palabraClave, copy, precioRegular, precioPromo, activo })
+    : store.addTallerBot({ nombre, palabraClave, copy, precioRegular, precioPromo });
+  if (!item) return res.status(404).json({ error: 'Ese taller ya no existe.' });
+  res.status(id ? 200 : 201).json(item);
+});
+
+router.delete('/api/bot/talleres/:id', requireAdmin, (req, res) => {
+  store.deleteTallerBot(req.params.id);
+  res.json({ ok: true });
+});
+
+router.get('/api/bot/conversaciones', requireAdmin, async (req, res) => {
+  try {
+    res.json(await botAlmacen.listarConversaciones());
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudieron cargar las conversaciones.' });
+  }
+});
+
+router.get('/api/bot/conversaciones/:id', requireAdmin, async (req, res) => {
+  try {
+    const contacto = await botAlmacen.contactoPorId(req.params.id);
+    if (!contacto) return res.status(404).json({ error: 'Esa conversación no existe.' });
+    res.json({ contacto, mensajes: await botAlmacen.mensajesDeContacto(req.params.id) });
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo cargar la conversación.' });
+  }
+});
+
+// Devolverle una conversacion al bot despues de haberla atendido a mano.
+router.post('/api/bot/conversaciones/:id/reactivar', requireAdmin, async (req, res) => {
+  try {
+    const contacto = await botAlmacen.actualizarContacto(Number(req.params.id), { estado: 'bot', motivoEscalado: '' });
+    if (!contacto) return res.status(404).json({ error: 'Esa conversación no existe.' });
+    res.json(contacto);
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo reactivar.' });
+  }
+});
+
+router.get('/api/bot/solicitudes', requireAdmin, async (req, res) => {
+  try {
+    res.json(await botAlmacen.listarSolicitudes());
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudieron cargar las solicitudes.' });
+  }
+});
+
 router.get('/api/users/buscar', requireAdmin, (req, res) => {
   const user = store.getUserByEmail(req.query.email || '');
   if (!user) return res.status(404).json({ error: 'No hay ninguna cuenta con ese correo.' });

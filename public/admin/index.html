@@ -64,6 +64,7 @@
       <a href="#seccionProductos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Productos</a>
       <a href="#seccionCalendario" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Calendario</a>
       <a href="#seccionLegales" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Legales</a>
+      <a href="#seccionBot" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Bot de ventas</a>
       <a href="#seccionVentas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Ventas</a>
       <a href="#seccionClientes" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clientes</a>
       <a href="#seccionSuscriptores" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Suscriptores</a>
@@ -356,6 +357,20 @@
             <input id="sesionTitulo" type="text" required class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
           </label>
           <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Horario</span>
+            <input id="sesionHorario" type="text" placeholder="10:00 AM" class="mt-1 w-[120px] rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Cupo (0 = sin límite)</span>
+            <input id="sesionCupo" type="number" min="0" class="mt-1 w-[110px] rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Taller del bot</span>
+            <select id="sesionTallerBot" class="mt-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+              <option value="">— ninguno —</option>
+            </select>
+          </label>
+          <label>
             <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Estado</span>
             <select id="sesionEstado" class="mt-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
               <option value="disponible">Disponible</option>
@@ -400,6 +415,65 @@
         </label>
         <button type="submit" class="rounded-full bg-vino px-8 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar textos legales</button>
       </form>
+    </section>
+
+    <!-- VENTAS -->
+    <!-- BOT DE VENTAS -->
+    <section id="seccionBot" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Bot de ventas</h2>
+      <p class="mt-1 text-sm text-carbon/60">Atiende WhatsApp, Messenger e Instagram. Manda la información del taller, la promo y las instrucciones de pago; ahí se detiene y te avisa por correo. Nunca cobra ni confirma lugares.</p>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <label class="flex items-center gap-3">
+            <input id="botActivo" type="checkbox" class="h-5 w-5 rounded border-vino/30">
+            <span class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Bot encendido</span>
+          </label>
+          <p id="botEstadoTexto" class="font-ui text-[11px] uppercase tracking-widest text-carbon/50"></p>
+        </div>
+        <div class="mt-5 grid gap-4 sm:grid-cols-3">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Anticipo por persona ($)</span>
+            <input id="botAnticipo" type="number" min="0" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Horas para pagar</span>
+            <input id="botHoras" type="number" min="1" max="48" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo de avisos</span>
+            <input id="botCorreo" type="email" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+        </div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Mensajes del embudo</h3>
+        <p class="mt-1 text-sm text-carbon/60">Se mandan tal cual los escribas. Los <code class="rounded bg-crema px-1">{{MARCADORES}}</code> los rellena el sistema con datos reales.</p>
+        <div id="botCopysCampos" class="mt-5 space-y-5"></div>
+        <button id="btnGuardarBot" class="mt-6 rounded-full bg-vino px-7 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar ajustes y mensajes</button>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Talleres que promociona</h3>
+        <p class="mt-1 text-sm text-carbon/60">Pega el copy de cada taller. Escribe <code class="rounded bg-crema px-1">{{FECHAS}}</code> donde van las fechas y el sistema pondrá las de tu calendario, nunca una ya pasada.</p>
+        <div id="listaTalleresBot" class="mt-5 space-y-3"></div>
+        <button id="btnNuevoTallerBot" class="mt-4 rounded-full border border-vino/20 px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Agregar taller</button>
+      </div>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-2">
+        <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Apartados pendientes</h3>
+            <button id="btnRefrescarBot" class="rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Actualizar</button>
+          </div>
+          <div id="listaSolicitudesBot" class="mt-4 space-y-3"></div>
+        </div>
+        <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Conversaciones</h3>
+          <div id="listaConversacionesBot" class="mt-4 space-y-2"></div>
+        </div>
+      </div>
     </section>
 
     <!-- VENTAS -->
@@ -584,6 +658,7 @@ function mostrarDashboard(mostrar){
     cargarPromosTallerAdmin();
     cargarProductosAdmin();
     cargarSedes();
+    cargarBot();
     cargarVentas();
     cargarSuscriptores();
     cargarResenas();
@@ -1380,6 +1455,13 @@ function abrirFormSesion(sesion){
   $('sesionFechaTexto').textContent = new Date(sesion.fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
   $('sesionTitulo').value = sesion.titulo || '';
   $('sesionEstado').value = sesion.estado || 'disponible';
+  $('sesionHorario').value = sesion.horario || '';
+  $('sesionCupo').value = sesion.cupo || 0;
+  // Ligar la fecha con un taller del bot es lo que hace que el copy anuncie
+  // esta fecha en WhatsApp.
+  $('sesionTallerBot').innerHTML = '<option value="">— ninguno —</option>' +
+    TALLERES_BOT.map(t => `<option value="${t.id}">${escapeHtml(t.nombre)}</option>`).join('');
+  $('sesionTallerBot').value = sesion.tallerBotId || '';
   $('btnEliminarSesion').classList.toggle('hidden', !sesion.id);
   $('sesionTitulo').focus();
 }
@@ -1413,6 +1495,9 @@ $('formSesionTaller').addEventListener('submit', async (e) => {
     fecha: $('sesionFechaValor').value,
     titulo: $('sesionTitulo').value.trim(),
     estado: $('sesionEstado').value,
+    horario: $('sesionHorario').value.trim(),
+    cupo: $('sesionCupo').value,
+    tallerBotId: $('sesionTallerBot').value || null,
   };
   try{
     if(id){
@@ -1474,6 +1559,201 @@ async function cargarVentas(){
 }
 
 $('btnRefrescarVentas').addEventListener('click', cargarVentas);
+
+/* ---------- Bot de ventas ---------- */
+let TALLERES_BOT = [];
+
+const CAMPOS_COPY = [
+  ['bienvenida', 'Bienvenida (solo el primer mensaje)', 'Se manda una sola vez, antes de todo.'],
+  ['gancho', 'Gancho del regalo', 'Va justo después del copy del taller.'],
+  ['promo', 'Promo exclusiva', 'Marcadores: {{PRECIO_REGULAR}} {{PRECIO_PROMO}} {{AHORRO}} {{ANTICIPO_POR_PERSONA}} {{SALDO_POR_PERSONA}}'],
+  ['aviso_urgente', 'Aviso urgente', 'Marcadores: {{ANTICIPO}} {{DETALLE_PERSONAS}} {{HORA_LIMITE}} {{TOTAL}} {{SALDO}} — el anticipo ya viene multiplicado por personas.'],
+  ['instrucciones_pago', 'Instrucciones de pago', 'Aquí van tus cuentas. Es el último mensaje que manda el bot.'],
+  ['espera_apartado', 'Cierre tras las instrucciones', ''],
+  ['redireccion', 'Canalización a una persona', 'Se manda cuando el bot no puede seguir y te avisa por correo.'],
+  ['sin_fechas', 'Taller sin fechas abiertas', ''],
+];
+
+const ETAPA_TEXTO = {
+  copy_enviado: { texto: 'Leyendo info', clase: 'text-humo' },
+  promo_enviada: { texto: 'Vio la promo', clase: 'text-flama' },
+  personas_confirmadas: { texto: 'Definió personas', clase: 'text-flama' },
+  instrucciones_enviadas: { texto: 'Esperando pago', clase: 'text-[#3F8F5F]' },
+};
+
+async function cargarBot(){
+  try{
+    const { config, copys } = await api('/admin/api/bot/config');
+    $('botActivo').checked = !!config.activo;
+    $('botAnticipo').value = config.anticipoPorPersona;
+    $('botHoras').value = config.horasParaPagar;
+    $('botCorreo').value = config.correoNotificaciones || '';
+    $('botEstadoTexto').textContent = config.activo ? 'Respondiendo mensajes' : 'Apagado · no contesta nada';
+
+    $('botCopysCampos').innerHTML = CAMPOS_COPY.map(([clave, titulo, ayuda]) => `
+      <label class="block">
+        <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">${escapeHtml(titulo)}</span>
+        ${ayuda ? `<span class="mt-0.5 block text-[11px] text-carbon/45">${escapeHtml(ayuda)}</span>` : ''}
+        <textarea data-copy-key="${clave}" rows="4" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 font-mono text-[12px]">${escapeHtml(copys[clave] || '')}</textarea>
+      </label>`).join('');
+  }catch(e){
+    toast(e.message);
+  }
+  cargarTalleresBot();
+  cargarPanelBot();
+}
+
+$('btnGuardarBot').addEventListener('click', async () => {
+  const copys = {};
+  document.querySelectorAll('[data-copy-key]').forEach(el => { copys[el.dataset.copyKey] = el.value; });
+  try{
+    await api('/admin/api/bot/config', {
+      method: 'POST',
+      body: JSON.stringify({
+        config: {
+          activo: $('botActivo').checked,
+          anticipoPorPersona: $('botAnticipo').value,
+          horasParaPagar: $('botHoras').value,
+          correoNotificaciones: $('botCorreo').value,
+        },
+        copys,
+      }),
+    });
+    toast('Ajustes guardados');
+    cargarBot();
+  }catch(e){ toast(e.message); }
+});
+
+async function cargarTalleresBot(){
+  const cont = $('listaTalleresBot');
+  try{
+    TALLERES_BOT = await api('/admin/api/bot/talleres');
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+    return;
+  }
+  if(!TALLERES_BOT.length){
+    cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay talleres. Agrega uno y pega su copy.</p>';
+    return;
+  }
+  cont.innerHTML = TALLERES_BOT.map(t => `
+    <details class="rounded-xl border border-vino/10 bg-crema/40 p-4">
+      <summary class="cursor-pointer font-ui text-sm font-700 text-vino">
+        ${escapeHtml(t.nombre)} ${t.palabraClave ? `<span class="ml-2 rounded-full bg-vino/10 px-2 py-0.5 text-[10px] tracking-widest">${escapeHtml(t.palabraClave)}</span>` : ''}
+        ${t.activo ? '' : '<span class="ml-2 text-[11px] text-humo">(apagado)</span>'}
+      </summary>
+      <div class="mt-4 grid gap-3 sm:grid-cols-2">
+        <label class="block"><span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Nombre</span>
+          <input data-taller="${t.id}" data-campo="nombre" type="text" value="${escapeHtml(t.nombre)}" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm"></label>
+        <label class="block"><span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Palabra clave</span>
+          <input data-taller="${t.id}" data-campo="palabraClave" type="text" value="${escapeHtml(t.palabraClave)}" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm"></label>
+        <label class="block"><span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Precio regular</span>
+          <input data-taller="${t.id}" data-campo="precioRegular" type="number" value="${t.precioRegular}" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm"></label>
+        <label class="block"><span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Precio en promo</span>
+          <input data-taller="${t.id}" data-campo="precioPromo" type="number" value="${t.precioPromo}" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm"></label>
+        <label class="block sm:col-span-2"><span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Copy del taller (usa {{FECHAS}})</span>
+          <textarea data-taller="${t.id}" data-campo="copy" rows="10" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 font-mono text-[12px]">${escapeHtml(t.copy)}</textarea></label>
+      </div>
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <button data-guardar="${t.id}" class="rounded-full bg-vino px-5 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar</button>
+        <label class="flex items-center gap-2 text-sm text-carbon/70">
+          <input data-taller="${t.id}" data-campo="activo" type="checkbox" ${t.activo ? 'checked' : ''} class="h-4 w-4 rounded border-vino/30"> Activo
+        </label>
+        <button data-borrar="${t.id}" class="ml-auto rounded-full border border-red-300 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-red-600">Borrar</button>
+      </div>
+    </details>`).join('');
+
+  cont.querySelectorAll('[data-guardar]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = Number(btn.dataset.guardar);
+      const cuerpo = { id };
+      cont.querySelectorAll(`[data-taller="${id}"]`).forEach(el => {
+        cuerpo[el.dataset.campo] = el.type === 'checkbox' ? el.checked : el.value;
+      });
+      try{
+        await api('/admin/api/bot/talleres', { method: 'POST', body: JSON.stringify(cuerpo) });
+        toast('Taller guardado');
+        cargarTalleresBot();
+      }catch(e){ toast(e.message); }
+    });
+  });
+  cont.querySelectorAll('[data-borrar]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if(!confirm('¿Borrar este taller del bot?')) return;
+      try{
+        await api(`/admin/api/bot/talleres/${btn.dataset.borrar}`, { method: 'DELETE' });
+        cargarTalleresBot();
+      }catch(e){ toast(e.message); }
+    });
+  });
+}
+
+$('btnNuevoTallerBot').addEventListener('click', async () => {
+  const nombre = prompt('Nombre del taller (ej. Pays y Tartas)');
+  if(!nombre) return;
+  try{
+    await api('/admin/api/bot/talleres', { method: 'POST', body: JSON.stringify({ nombre, palabraClave: '', copy: '' }) });
+    cargarTalleresBot();
+  }catch(e){ toast(e.message); }
+});
+
+async function cargarPanelBot(){
+  try{
+    const solicitudes = await api('/admin/api/bot/solicitudes');
+    const cont = $('listaSolicitudesBot');
+    const vivas = solicitudes.filter(s => s.etapa !== 'copy_enviado');
+    cont.innerHTML = vivas.length ? vivas.slice(0, 25).map(s => {
+      const etapa = ETAPA_TEXTO[s.etapa] || { texto: s.etapa, clase: 'text-humo' };
+      return `
+      <article class="rounded-xl border border-vino/10 p-4">
+        <p class="font-ui text-[10px] uppercase tracking-widest ${etapa.clase}">${escapeHtml(etapa.texto)} · ${escapeHtml(s.canal)}</p>
+        <p class="mt-1 font-700 text-vino">${escapeHtml(s.taller)}</p>
+        <p class="text-sm text-carbon/70">${escapeHtml(s.contacto_nombre || s.telefono || s.externo_id)} · ${s.personas} ${s.personas === 1 ? 'persona' : 'personas'}</p>
+        ${s.anticipo ? `<p class="mt-1 text-sm text-carbon/70">Anticipo esperado <strong>$${Number(s.anticipo).toLocaleString('es-MX')}</strong> · saldo $${Number(s.saldo).toLocaleString('es-MX')}</p>` : ''}
+        ${s.fecha_texto ? `<p class="text-sm text-carbon/50">${escapeHtml(s.fecha_texto)}</p>` : ''}
+      </article>`;
+    }).join('') : '<p class="text-sm text-carbon/50">Nada pendiente por ahora.</p>';
+  }catch(e){
+    $('listaSolicitudesBot').innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+
+  try{
+    const convs = await api('/admin/api/bot/conversaciones');
+    const cont = $('listaConversacionesBot');
+    cont.innerHTML = convs.length ? convs.slice(0, 30).map(c => `
+      <button data-conv="${c.id}" class="block w-full rounded-xl border border-vino/10 p-3 text-left hover:border-vino/30 transition">
+        <p class="font-ui text-[10px] uppercase tracking-widest ${c.estado === 'bot' ? 'text-[#3F8F5F]' : c.estado === 'baja' ? 'text-humo' : 'text-flama'}">
+          ${c.estado === 'bot' ? 'con el bot' : c.estado === 'baja' ? 'dado de baja' : 'te toca a ti'} · ${escapeHtml(c.canal)}
+        </p>
+        <p class="mt-0.5 text-sm font-700 text-vino">${escapeHtml(c.nombre || c.telefono || c.externo_id)}</p>
+        <p class="truncate text-sm text-carbon/60">${escapeHtml(c.ultimo_texto || '')}</p>
+        ${c.motivo_escalado ? `<p class="mt-1 text-[11px] text-flama">${escapeHtml(c.motivo_escalado)}</p>` : ''}
+      </button>`).join('') : '<p class="text-sm text-carbon/50">Todavía no hay conversaciones.</p>';
+
+    cont.querySelectorAll('[data-conv]').forEach(btn => {
+      btn.addEventListener('click', () => verConversacionBot(btn.dataset.conv));
+    });
+  }catch(e){
+    $('listaConversacionesBot').innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+async function verConversacionBot(id){
+  try{
+    const { contacto, mensajes } = await api(`/admin/api/bot/conversaciones/${id}`);
+    const hilo = mensajes.map(m => `${m.rol === 'cliente' ? '👤' : '🤖'} ${m.texto}`).join('\n\n');
+    const reactivar = contacto.estado !== 'bot' && confirm(`${hilo}\n\n———\nEstá marcada como "${contacto.estado}". ¿Devolvérsela al bot?`);
+    if(reactivar){
+      await api(`/admin/api/bot/conversaciones/${id}/reactivar`, { method: 'POST' });
+      toast('El bot vuelve a atenderla');
+      cargarPanelBot();
+    } else if(contacto.estado === 'bot'){
+      alert(hilo);
+    }
+  }catch(e){ toast(e.message); }
+}
+
+$('btnRefrescarBot').addEventListener('click', cargarPanelBot);
 
 /* ---------- Suscriptores ---------- */
 let SUSCRIPTORES = [];

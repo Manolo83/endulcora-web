@@ -21,6 +21,10 @@ página pública, sin tocar código.
 - **Carrito y pagos**: los visitantes agregan productos/cursos a un carrito
   (guardado en su navegador) y pagan todo junto con **Mercado Pago**
   (tarjeta, OXXO, transferencia) vía Checkout Pro.
+- **Bot de ventas** en WhatsApp, Messenger e Instagram (`/admin` → Bot de
+  ventas): manda la información del taller con las fechas reales, la promo y
+  las instrucciones de pago, y te avisa por correo cuando toca que sigas tú.
+  No cobra ni confirma lugares. Ver la sección 12.
 - **Backend** en Node.js + Express (`server.js`, `src/`): sirve el sitio,
   guarda los datos en un archivo JSON y los archivos subidos en disco.
 - **SEO básico**: `robots.txt`, `sitemap.xml`, metadatos Open Graph/Twitter,
@@ -240,7 +244,90 @@ siempre desde aistudio.google.com.
 Si `GEMINI_API_KEY` no está configurada, la burbuja del asistente sigue
 apareciendo, pero responde que todavía no está activado.
 
-## 12. Notas técnicas y mejoras futuras (opcionales)
+## 12. Bot de ventas en WhatsApp, Messenger e Instagram
+
+Atiende los tres canales de Meta Business y lleva a quien pide informes por
+el mismo embudo que usas hoy a mano.
+
+### Hasta dónde llega
+
+1. Detecta de qué taller preguntan (por la palabra clave o porque el cliente
+   lo dice).
+2. Manda el copy del taller, **con las fechas de tu calendario inyectadas**.
+   Nunca anuncia una fecha ya pasada ni un taller agotado.
+3. Manda el gancho del regalo y espera la confirmación de lectura.
+4. Manda la promo con el precio exclusivo.
+5. Pregunta para cuántas personas y manda el aviso urgente con el anticipo
+   **multiplicado por persona** y la hora límite calculada.
+6. Si el cliente acepta, manda las instrucciones de pago y **ahí se detiene**.
+
+De ahí en adelante todo es manual, igual que hoy: tú recibes el comprobante,
+lo validas contra tu banco y haces el registro. El bot nunca cobra, nunca
+genera links de pago y nunca confirma un lugar.
+
+Te avisa por correo (el que configures en el panel) cuando:
+- un cliente llega al final del embudo y toca esperar su comprobante;
+- el bot canaliza a alguien porque la pregunta no le toca;
+- alguien manda una foto (probablemente un comprobante).
+
+Cada correo lleva la conversación completa, así que no tienes que abrir el
+panel para saber de qué se trata.
+
+### Qué hace siempre, sin excepción
+
+- Se presenta como asistente automático y da el aviso de privacidad en el
+  primer mensaje.
+- Respeta **BAJA**: deja de escribir y lo registra.
+- Canaliza contigo ante alergias, reclamos, devoluciones, mayoreo, temas
+  ajenos a talleres, cliente molesto o si le piden hablar con una persona.
+- Nunca pide datos de tarjeta, CVV, NIP ni identificaciones.
+- Nunca negocia precio ni inventa fechas, montos o promociones.
+
+### Configurar Meta (una sola vez)
+
+1. En [developers.facebook.com](https://developers.facebook.com) crea una app
+   de tipo **Empresa** y agrégale los productos **WhatsApp** y **Messenger**.
+2. En **Configuración → Básica**, copia la *Clave secreta de la app* a la
+   variable `META_APP_SECRET` de Railway.
+3. Inventa un texto cualquiera y ponlo en `META_VERIFY_TOKEN`.
+4. En **WhatsApp → Configuración**, da de alta el webhook con la URL
+   `https://www.endulcora.com/api/meta/webhook` y ese mismo token. Suscríbete
+   al campo `messages`.
+5. Repite el alta del webhook en **Messenger → Configuración** y en
+   **Instagram**, con la misma URL y el mismo token.
+6. Copia el token permanente y el id del número a `WHATSAPP_TOKEN` y
+   `WHATSAPP_PHONE_NUMBER_ID`; el token de la página a `META_PAGE_TOKEN`.
+7. Agrega tu clave de Claude en `ANTHROPIC_API_KEY`
+   ([console.anthropic.com](https://console.anthropic.com)).
+
+> **Ojo con el número.** Un número de WhatsApp solo puede estar en un lado: si
+> migras el que usas hoy a la API, dejas de poder abrirlo en la app de
+> WhatsApp de tu celular. Todo pasaría por el sistema.
+
+### Configurar el bot (en `/admin` → Bot de ventas)
+
+- **Enciéndelo.** Llega apagado: mientras esté apagado recibe y guarda los
+  mensajes, pero no contesta nada.
+- **Anticipo por persona, horas para pagar y correo de avisos.**
+- **Los mensajes del embudo.** Se mandan tal cual los escribas. Aquí es donde
+  pegas tus cuentas bancarias, en *Instrucciones de pago* — no viven en el
+  código.
+- **Los talleres.** Uno por cada copy, con su palabra clave (PAYS, GALLETAS…),
+  su precio regular y su precio en promo. En el copy escribe `{{FECHAS}}`
+  donde van las fechas.
+- **Liga las fechas.** En *Calendario*, cada día tiene ahora un selector
+  **Taller del bot**, un **horario** y un **cupo**. Las fechas que ligues ahí
+  son las que anuncia el copy. Si no ligas ninguna, el bot dice que no hay
+  fechas abiertas en vez de inventarlas.
+
+### Costo
+
+El bot corre sobre Claude Opus 5 con esfuerzo bajo y caché de contexto: el
+copy y las reglas se cachean, así que a partir del segundo mensaje de una
+conversación esa parte cuesta cerca de una décima parte. Los copys los manda
+el código, no el modelo, así que las respuestas del modelo son cortas.
+
+## 13. Notas técnicas y mejoras futuras (opcionales)
 
 - El sitio usa Tailwind CSS por CDN para mantener el HTML original tal cual
   — funciona perfecto para el tráfico de un sitio personal/pequeño negocio.

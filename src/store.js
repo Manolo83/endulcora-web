@@ -53,6 +53,30 @@ const DEFAULT_CONTENT = {
     'Las velas comestibles combinan alimento y fuego. Nunca las dejes encendidas sin vigilancia, cerca de niños, corrientes de aire o materiales inflamables.\n\nSe encienden por minutos, con fines sensoriales, y se apagan para consumir la grasa fundida tibia.\n\nVarias fórmulas contienen lácteos, frutos secos, ajonjolí y gluten: declara siempre los alérgenos y respeta la cadena de frío.',
 };
 
+// Textos que manda el bot de ventas de Meta. Se editan desde /admin, nunca en
+// codigo: son de marketing y cambian seguido. Los {{MARCADORES}} los rellena el
+// sistema con datos reales (fechas del calendario, montos calculados), para que
+// nunca se anuncie una fecha ya pasada ni un anticipo equivocado.
+const DEFAULT_BOT_COPYS = {
+  bienvenida:
+    '¡Hola! Soy Endulcorito, el asistente de Endulcora. Te aviso que soy un asistente automático y que guardo tu mensaje solo para atenderte; si no quieres recibir más mensajes escribe BAJA.',
+  gancho:
+    '*¡DESBLOQUEA TU REGALO!*🎁 \n\nConfirma de LECTURA COMPLETA y recibe un descuento VIP exclusivo en tu próximo taller.',
+  promo:
+    '🤩 ¡SUPER PROMO EXCLUSIVA PARA TI!\n\n 🤫 Solo por leernos completo, te hemos reservado una SUPER PROMO PERSONALIZADA con un ahorro de ${{AHORRO}} MXN.\n\nPrecio Regular: ❌ ${{PRECIO_REGULAR}} MXN\nPrecio Exclusivo: ✅ *¡Paga solo ${{PRECIO_PROMO}} MXN!*\n\nAsegura tu lugar con este precio especial apartando hoy mismo con solo ${{ANTICIPO_POR_PERSONA}} MXN. Paga los ${{SALDO_POR_PERSONA}} MXN restantes el día del taller.\n\n*¡ATENCIÓN!* Esta promoción es por tiempo limitado y solo es válida en este momento.',
+  aviso_urgente:
+    '⏳ *AVISO URGENTE:*\n\nRecuerda que esta SUPER PROMO es flash y no se libera si no recibo el apartado de ${{ANTICIPO}} MXN{{DETALLE_PERSONAS}}.\n\n¿Cuento con tu pago antes de las {{HORA_LIMITE}} para que no pierdas tu descuento exclusivo?\n\n¿Te comparto las instrucciones de pago?',
+  // Las cuentas bancarias NO viven en el repositorio. Pegalas desde
+  // /admin > Bot de ventas para que no queden en el historial de codigo.
+  instrucciones_pago:
+    '✨ *Instrucciones de Pago* ✨\n\n(Pega aquí tus instrucciones de pago desde /admin > Bot de ventas: cuentas, OXXO, Mercado Pago y PayPal.)',
+  espera_apartado: 'Quedamos a la espera de su apartado ✨',
+  redireccion:
+    'Déjame te canalizo con la persona encargada de ese tema para darte una atención personalizada. En un momento te contactan por aquí ✨',
+  sin_fechas:
+    'Ahorita no tengo fechas abiertas de ese taller. ¿Quieres que te avisemos en cuanto se publiquen?',
+};
+
 const DEFAULT_PRODUCTS = [
   {
     categoria: 'ebook',
@@ -157,6 +181,14 @@ function datosPorDefecto() {
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
     sesionesTaller: [],
     resenas: [],
+    botCopys: { ...DEFAULT_BOT_COPYS },
+    talleresBot: [],
+    botConfig: {
+      activo: false,
+      anticipoPorPersona: 200,
+      horasParaPagar: 2,
+      correoNotificaciones: 'endulcora@gmail.com',
+    },
   };
 }
 
@@ -189,6 +221,20 @@ async function init() {
         changed = true;
       }
     }
+    // Copys y ajustes del bot: se agregan los que falten sin pisar los que el
+    // admin ya haya editado.
+    for (const key of Object.keys(DEFAULT_BOT_COPYS)) {
+      if (!Object.prototype.hasOwnProperty.call(data.botCopys, key)) {
+        data.botCopys[key] = DEFAULT_BOT_COPYS[key];
+        changed = true;
+      }
+    }
+    for (const key of Object.keys(defaults.botConfig)) {
+      if (!Object.prototype.hasOwnProperty.call(data.botConfig, key)) {
+        data.botConfig[key] = defaults.botConfig[key];
+        changed = true;
+      }
+    }
     if (changed) await persistirAhora();
   } else {
     data = datosPorDefecto();
@@ -216,6 +262,16 @@ function flush() {
 
 function nextId(list) {
   return list.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+}
+
+// Minusculas y sin acentos, para comparar lo que escribe el cliente (que puede
+// venir como "pays", "PAYS" o "Payś") contra las palabras clave.
+function normalizar(texto) {
+  return String(texto || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
 }
 
 module.exports = {
@@ -553,6 +609,91 @@ module.exports = {
     return item;
   },
 
+  // ---- Bot de ventas de Meta: copys, talleres y ajustes ----
+  getBotCopys() {
+    return load().botCopys;
+  },
+  updateBotCopys(patch) {
+    const data = load();
+    Object.keys(patch).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(data.botCopys, key) && typeof patch[key] === 'string') {
+        data.botCopys[key] = patch[key];
+      }
+    });
+    save(data);
+    return data.botCopys;
+  },
+
+  getBotConfig() {
+    return load().botConfig;
+  },
+  updateBotConfig(patch) {
+    const data = load();
+    const c = data.botConfig;
+    if (typeof patch.activo === 'boolean') c.activo = patch.activo;
+    if (patch.anticipoPorPersona !== undefined) c.anticipoPorPersona = Math.max(0, parseInt(patch.anticipoPorPersona, 10) || 0);
+    if (patch.horasParaPagar !== undefined) c.horasParaPagar = Math.max(1, Math.min(48, parseInt(patch.horasParaPagar, 10) || 2));
+    if (typeof patch.correoNotificaciones === 'string') c.correoNotificaciones = patch.correoNotificaciones.trim();
+    save(data);
+    return c;
+  },
+
+  getTalleresBot() {
+    return [...load().talleresBot].sort((a, b) => a.id - b.id);
+  },
+  getTallerBot(id) {
+    return load().talleresBot.find((t) => t.id === Number(id)) || null;
+  },
+  // Busca el taller por su palabra clave (PAYS, GALLETAS...). El cliente puede
+  // escribirla con acentos, minusculas o dentro de una frase.
+  buscarTallerPorPalabra(texto) {
+    const normal = normalizar(texto);
+    if (!normal) return null;
+    return (
+      load().talleresBot.find((t) => {
+        if (!t.activo || !t.palabraClave) return false;
+        const clave = normalizar(t.palabraClave);
+        return clave && new RegExp(`(^|\\W)${clave}(\\W|$)`).test(normal);
+      }) || null
+    );
+  },
+  addTallerBot({ nombre, palabraClave, copy, precioRegular, precioPromo }) {
+    const data = load();
+    const item = {
+      id: nextId(data.talleresBot),
+      nombre: String(nombre || '').trim(),
+      palabraClave: String(palabraClave || '').trim().toUpperCase(),
+      copy: String(copy || ''),
+      precioRegular: Math.max(0, parseInt(precioRegular, 10) || 0),
+      precioPromo: Math.max(0, parseInt(precioPromo, 10) || 0),
+      activo: true,
+    };
+    data.talleresBot.push(item);
+    save(data);
+    return item;
+  },
+  updateTallerBot(id, patch) {
+    const data = load();
+    const item = data.talleresBot.find((t) => t.id === Number(id));
+    if (!item) return null;
+    if (typeof patch.nombre === 'string') item.nombre = patch.nombre.trim();
+    if (typeof patch.palabraClave === 'string') item.palabraClave = patch.palabraClave.trim().toUpperCase();
+    if (typeof patch.copy === 'string') item.copy = patch.copy;
+    if (patch.precioRegular !== undefined) item.precioRegular = Math.max(0, parseInt(patch.precioRegular, 10) || 0);
+    if (patch.precioPromo !== undefined) item.precioPromo = Math.max(0, parseInt(patch.precioPromo, 10) || 0);
+    if (typeof patch.activo === 'boolean') item.activo = patch.activo;
+    save(data);
+    return item;
+  },
+  deleteTallerBot(id) {
+    const data = load();
+    data.talleresBot = data.talleresBot.filter((t) => t.id !== Number(id));
+    data.sesionesTaller.forEach((s) => {
+      if (s.tallerBotId === Number(id)) s.tallerBotId = null;
+    });
+    save(data);
+  },
+
   // ---- Sedes (para el calendario de talleres presenciales) ----
   getSedes() {
     return [...load().sedes].sort((a, b) => a.id - b.id);
@@ -587,7 +728,7 @@ module.exports = {
     if (sedeId) items = items.filter((s) => s.sedeId === Number(sedeId));
     return items.sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.orden ?? 0) - (b.orden ?? 0));
   },
-  addSesionTaller({ sedeId, fecha, titulo, estado, cupo }) {
+  addSesionTaller({ sedeId, fecha, titulo, estado, cupo, tallerBotId, horario }) {
     const data = load();
     const mismaFecha = data.sesionesTaller.filter((s) => s.sedeId === Number(sedeId) && s.fecha === fecha);
     const item = {
@@ -599,6 +740,10 @@ module.exports = {
       // Cupo maximo de personas. 0 = sin limite numerico (solo cuenta el estado).
       // El bot de WhatsApp lo usa para no apartar mas lugares de los que hay.
       cupo: Math.max(0, parseInt(cupo, 10) || 0),
+      // Liga la fecha con el taller del bot, para que el copy que se manda por
+      // WhatsApp anuncie estas fechas y no las que alguien pego a mano.
+      tallerBotId: tallerBotId ? Number(tallerBotId) : null,
+      horario: String(horario || '').trim(),
       orden: mismaFecha.length,
     };
     data.sesionesTaller.push(item);
@@ -613,6 +758,8 @@ module.exports = {
     if (typeof patch.estado === 'string') item.estado = patch.estado;
     if (typeof patch.fecha === 'string') item.fecha = patch.fecha;
     if (patch.cupo !== undefined) item.cupo = Math.max(0, parseInt(patch.cupo, 10) || 0);
+    if (patch.tallerBotId !== undefined) item.tallerBotId = patch.tallerBotId ? Number(patch.tallerBotId) : null;
+    if (typeof patch.horario === 'string') item.horario = patch.horario.trim();
     save(data);
     return item;
   },
