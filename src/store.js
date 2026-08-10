@@ -222,6 +222,11 @@ module.exports = {
   init,
   flush,
   UPLOAD_DIR,
+  // El bot de Meta guarda conversaciones y reservas en tablas propias (no en el
+  // JSON de app_data, que se reescribe entero en cada save y no aguanta el
+  // ritmo de un chat). Comparten el mismo pool para no abrir una segunda
+  // conexion a Postgres.
+  pool,
 
   getAnnouncements(onlyPublished = false) {
     const data = load();
@@ -582,7 +587,7 @@ module.exports = {
     if (sedeId) items = items.filter((s) => s.sedeId === Number(sedeId));
     return items.sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.orden ?? 0) - (b.orden ?? 0));
   },
-  addSesionTaller({ sedeId, fecha, titulo, estado }) {
+  addSesionTaller({ sedeId, fecha, titulo, estado, cupo }) {
     const data = load();
     const mismaFecha = data.sesionesTaller.filter((s) => s.sedeId === Number(sedeId) && s.fecha === fecha);
     const item = {
@@ -591,6 +596,9 @@ module.exports = {
       fecha,
       titulo: String(titulo || '').trim(),
       estado: estado || 'disponible',
+      // Cupo maximo de personas. 0 = sin limite numerico (solo cuenta el estado).
+      // El bot de WhatsApp lo usa para no apartar mas lugares de los que hay.
+      cupo: Math.max(0, parseInt(cupo, 10) || 0),
       orden: mismaFecha.length,
     };
     data.sesionesTaller.push(item);
@@ -604,8 +612,12 @@ module.exports = {
     if (typeof patch.titulo === 'string') item.titulo = patch.titulo;
     if (typeof patch.estado === 'string') item.estado = patch.estado;
     if (typeof patch.fecha === 'string') item.fecha = patch.fecha;
+    if (patch.cupo !== undefined) item.cupo = Math.max(0, parseInt(patch.cupo, 10) || 0);
     save(data);
     return item;
+  },
+  getSesionTaller(id) {
+    return load().sesionesTaller.find((s) => s.id === Number(id)) || null;
   },
   deleteSesionTaller(id) {
     const data = load();

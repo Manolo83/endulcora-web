@@ -440,9 +440,9 @@ router.get('/api/sesiones-taller', requireAdmin, (req, res) => {
 });
 
 router.post('/api/sesiones-taller', requireAdmin, (req, res) => {
-  const { sedeId, fecha, titulo, estado } = req.body || {};
+  const { sedeId, fecha, titulo, estado, cupo } = req.body || {};
   if (!sedeId || !fecha || !titulo) return res.status(400).json({ error: 'Falta sede, fecha o título' });
-  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado }));
+  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado, cupo }));
 });
 
 router.patch('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
