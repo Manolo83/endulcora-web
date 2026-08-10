@@ -110,12 +110,33 @@ function copyPromo(taller) {
   });
 }
 
-// La hora limite: tantas horas despues de este momento, redondeada a la media
-// hora siguiente para que suene a hora y no a cronometro.
-function horaLimite(horas) {
-  const limite = new Date(Date.now() + horas * 60 * 60 * 1000);
+// La hora limite: tantas horas despues del primer contacto, redondeada a la
+// media hora siguiente para que suene a hora y no a cronometro.
+function calcularLimite(horas, desde) {
+  const arranque = desde ? new Date(desde) : new Date();
+  const limite = new Date(arranque.getTime() + horas * 60 * 60 * 1000);
   limite.setMinutes(limite.getMinutes() > 30 ? 60 : 30, 0, 0);
-  return limite
+  return limite;
+}
+
+// Como se le dice al cliente. Si el plazo cae en otro dia, hay que decirlo:
+// "mañana a las 10:30 AM" no es lo mismo que "a las 10:30 AM".
+function horaLimite(horas, desde) {
+  const limite = calcularLimite(horas, desde);
+  const hoy = new Date().toDateString();
+  const manana = new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString();
+  const dia = limite.toDateString();
+  // Se devuelve con su preposicion incluida ("las 5:00 PM", "mañana a las
+  // 5:00 PM") para que el copy diga "antes de {{HORA_LIMITE}}" y no quede
+  // "antes de las mañana a...".
+  const prefijo =
+    dia === hoy
+      ? 'las '
+      : dia === manana
+        ? 'mañana a las '
+        : `el ${limite.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Mexico_City' })} a las `;
+
+  const hora = limite
     .toLocaleTimeString('es-MX', {
       hour: 'numeric',
       minute: '2-digit',
@@ -127,14 +148,24 @@ function horaLimite(horas) {
     // asi que quedarian dos seguidos.
     .replace(/\./g, '')
     .replace(/\s+/g, ' ');
+
+  return `${prefijo}${hora}`;
 }
 
-// Paso 7: el aviso urgente, con el anticipo ya multiplicado por personas.
-function copyAvisoUrgente({ taller, personas }) {
+// Paso 7: el aviso urgente, con el anticipo ya multiplicado por personas y el
+// plazo contado desde el primer mensaje del cliente (`desde`), no desde ahora.
+function copyAvisoUrgente({ taller, personas, desde }) {
   const copys = store.getBotCopys();
   const config = store.getBotConfig();
   const anticipo = config.anticipoPorPersona * personas;
   const total = taller.precioPromo * personas;
+  const limite = calcularLimite(config.horasParaPagar, desde);
+
+  // Si el cliente vuelve dias despues, la promo ya no esta viva y no le toca
+  // al bot decidir si se le extiende.
+  if (limite.getTime() <= Date.now()) {
+    return { vencida: true, limite };
+  }
 
   return {
     texto: reemplazar(copys.aviso_urgente, {
@@ -147,12 +178,12 @@ function copyAvisoUrgente({ taller, personas }) {
       TOTAL: pesos(total),
       SALDO: pesos(Math.max(0, total - anticipo)),
       HORAS_PROMO: config.horasParaPagar,
-      HORA_LIMITE: horaLimite(config.horasParaPagar),
+      HORA_LIMITE: horaLimite(config.horasParaPagar, desde),
     }),
     anticipo,
     total,
     saldo: Math.max(0, total - anticipo),
-    limite: new Date(Date.now() + config.horasParaPagar * 60 * 60 * 1000),
+    limite,
   };
 }
 

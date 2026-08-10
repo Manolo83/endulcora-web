@@ -67,7 +67,7 @@ const DEFAULT_BOT_COPYS = {
   promo:
     '¡Perfecto! 🔓 Aquí va tu promoción:\n\n💰 Precio normal: ~${{PRECIO_REGULAR}}~\n🎉 Tu precio hoy: *${{PRECIO_PROMO}}*\n\nY apartas con solo *${{ANTICIPO_POR_PERSONA}}* en lugar de ${{ANTICIPO_REGULAR}}.\nEl resto lo liquidas el día del taller.',
   aviso_urgente:
-    '⏰ *Esta promo es exprés.* Solo dura *{{HORAS_PROMO}} horas.*\nDespués el taller regresa a ${{PRECIO_REGULAR}}.\n\nSon *${{ANTICIPO}}* de apartado{{DETALLE_PERSONAS}}, antes de las {{HORA_LIMITE}}.\n\n¿Te aparto tu lugar? 😊',
+    '⏰ *Esta promo es exprés.* Solo dura *{{HORAS_PROMO}} horas.*\nDespués el taller regresa a ${{PRECIO_REGULAR}}.\n\nSon *${{ANTICIPO}}* de apartado{{DETALLE_PERSONAS}}, antes de {{HORA_LIMITE}}.\n\n¿Te aparto tu lugar? 😊',
   // Las cuentas bancarias NO viven en el repositorio. Pegalas desde
   // /admin > Bot de ventas para que no queden en el historial de codigo.
   instrucciones_pago:
@@ -198,7 +198,9 @@ function datosPorDefecto() {
       // aparece en el copy informativo, antes de desbloquear el descuento.
       anticipoPorPersona: 200,
       anticipoRegular: 400,
-      horasParaPagar: 2,
+      // La promo dura esto desde el PRIMER mensaje del cliente, no desde que
+      // el bot manda el aviso.
+      horasParaPagar: 24,
       correoNotificaciones: 'endulcora@gmail.com',
     },
   };

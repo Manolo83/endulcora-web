@@ -238,7 +238,13 @@ async function ejecutarHerramienta(nombre, entrada, ctx) {
       const taller = store.getTallerBot(ctx.solicitud.taller_bot_id);
       if (!taller) return { error: 'El taller ya no está disponible. Canaliza al cliente.' };
 
-      const aviso = copysBot.copyAvisoUrgente({ taller, personas });
+      // El plazo corre desde el primer mensaje del cliente, no desde ahora.
+      const aviso = copysBot.copyAvisoUrgente({ taller, personas, desde: ctx.contacto.creado_at });
+      if (aviso.vencida) {
+        return {
+          error: 'La promo de este cliente ya venció: pasaron más de las horas que dura desde su primer mensaje. Tú no puedes extenderla. Usa canalizar y di que una persona revisa si todavía le alcanza el precio.',
+        };
+      }
       await ctx.enviar(aviso.texto);
 
       ctx.solicitud = await almacen.actualizarSolicitud(ctx.solicitud.id, {

@@ -258,7 +258,10 @@ el mismo embudo que usas hoy a mano.
 3. Manda el gancho del regalo y espera la confirmación de lectura.
 4. Manda la promo con el precio exclusivo.
 5. Pregunta para cuántas personas y manda el aviso urgente con el anticipo
-   **multiplicado por persona** y la hora límite calculada.
+   **multiplicado por persona** y la hora límite calculada. La promo dura 24
+   horas **contadas desde el primer mensaje del cliente**, no desde que el bot
+   manda el aviso; si alguien vuelve después de ese plazo, el bot no se la
+   extiende: canaliza para que una persona decida.
 6. Si el cliente acepta, manda las instrucciones de pago y **ahí se detiene**.
 
 De ahí en adelante todo es manual, igual que hoy: tú recibes el comprobante,
@@ -332,9 +335,17 @@ configura `META_PAGE_ID` y `META_IG_ID`.
 - **Los mensajes del embudo.** Se mandan tal cual los escribas. Aquí es donde
   pegas tus cuentas bancarias, en *Instrucciones de pago* — no viven en el
   código.
-- **Los talleres.** Uno por cada copy, con su palabra clave (PAYS, GALLETAS…),
-  su precio regular y su precio en promo. En el copy escribe `{{FECHAS}}`
-  donde van las fechas.
+- **Los talleres.** Hay un botón que carga de golpe los 18 talleres de
+  agosto-septiembre con sus copys y sus 37 fechas. Se puede repetir sin miedo:
+  solo agrega lo que falte, nunca pisa lo que ya editaste. Para uno nuevo,
+  ponle su palabra clave, su precio regular y el de promo, y escribe
+  `{{FECHAS}}` en el copy donde van las fechas.
+- **El aviso interno de cada taller.** Es una nota que el bot obedece pero
+  nunca le repite al cliente: "solo mayores de 18", "no prometas control de
+  glucosa", etc.
+- **Ojo con las palabras clave repetidas.** COCTELES sirve para Coctelería
+  Básica y para Coctelería Mexicana. El bot detecta la ambigüedad y pregunta
+  cuál en vez de adivinar, así que no es un error tenerlas repetidas.
 - **Liga las fechas.** En *Calendario*, cada día tiene ahora un selector
   **Taller del bot**, un **horario** y un **cupo**. Las fechas que ligues ahí
   son las que anuncia el copy. Si no ligas ninguna, el bot dice que no hay
