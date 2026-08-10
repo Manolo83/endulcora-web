@@ -102,4 +102,43 @@ async function marcarLeido({ canal, idMensaje }) {
   }
 }
 
-module.exports = { enviarTexto, marcarLeido, configurado };
+/* ----------------------------- Comentarios ----------------------------- */
+//
+// Un comentario se contesta en dos lugares: en publico debajo del comentario
+// (lo lee quien pase por la publicacion) y en privado, que es lo que abre la
+// conversacion y mete a esa persona al embudo.
+//
+// Meta solo permite UNA respuesta privada por comentario, asi que este camino
+// no se puede reintentar a la ligera.
+
+async function responderComentarioPublico({ canal, comentarioId, texto }) {
+  if (!configurado(canal) || !texto || !texto.trim()) return;
+  // Facebook responde al comentario con /comments; Instagram con /replies.
+  const ruta = canal === 'instagram' ? 'replies' : 'comments';
+  await llamarGraph(`${BASE}/${comentarioId}/${ruta}`, { message: texto.trim() }, tokenDe(canal));
+}
+
+async function responderComentarioPrivado({ canal, comentarioId, texto }) {
+  if (!configurado(canal) || !texto || !texto.trim()) return;
+
+  if (canal === 'instagram') {
+    // En Instagram el privado se manda por la API de mensajes, apuntando al
+    // comentario como destinatario.
+    await llamarGraph(
+      `${BASE}/me/messages`,
+      { recipient: { comment_id: comentarioId }, message: { text: texto.trim() } },
+      tokenDe(canal)
+    );
+    return;
+  }
+
+  await llamarGraph(`${BASE}/${comentarioId}/private_replies`, { message: texto.trim() }, tokenDe(canal));
+}
+
+module.exports = {
+  enviarTexto,
+  marcarLeido,
+  configurado,
+  responderComentarioPublico,
+  responderComentarioPrivado,
+};

@@ -75,6 +75,13 @@ const DEFAULT_BOT_COPYS = {
     'Déjame te canalizo con la persona encargada de ese tema para darte una atención personalizada. En un momento te contactan por aquí ✨',
   sin_fechas:
     'Ahorita no tengo fechas abiertas de ese taller. ¿Quieres que te avisemos en cuanto se publiquen?',
+  // Lo que Endulcorito deja escrito EN PÚBLICO debajo del comentario. Lo lee
+  // cualquiera que pase por la publicación, asi que va corto y amable.
+  comentario_publico:
+    '¡Hola! Soy Endulcorito 🧁 Te acabo de mandar toda la información por privado ✨',
+  // Y lo que le llega a esa persona al privado, para abrir la conversación.
+  comentario_privado:
+    '¡Hola! Soy Endulcorito, el asistente de Endulcora 🧁 Vi tu comentario y te escribo por aquí para pasarte la información. Te aviso que soy un asistente automático; si no quieres recibir más mensajes escribe BAJA.',
 };
 
 const DEFAULT_PRODUCTS = [
@@ -657,13 +664,52 @@ module.exports = {
       }) || null
     );
   },
-  addTallerBot({ nombre, palabraClave, copy, precioRegular, precioPromo }) {
+  // Busca el taller al que corresponde un anuncio, con el titular y el id que
+  // Meta manda cuando alguien llega desde una campana. Primero por id exacto
+  // (lo mas confiable), luego por el texto del anuncio.
+  buscarTallerPorAnuncio({ adId, titulo, texto }) {
+    const talleres = load().talleresBot.filter((t) => t.activo);
+    const id = String(adId || '').trim();
+
+    if (id) {
+      const porId = talleres.find((t) =>
+        String(t.adIds || '')
+          .split(/[,\s]+/)
+          .filter(Boolean)
+          .includes(id)
+      );
+      if (porId) return porId;
+    }
+
+    const contenido = normalizar(`${titulo || ''} ${texto || ''}`);
+    if (!contenido) return null;
+
+    // La palabra clave primero, que es la senal mas explicita.
+    const porPalabra = talleres.find((t) => {
+      const clave = normalizar(t.palabraClave);
+      return clave && new RegExp(`(^|\\W)${clave}(\\W|$)`).test(contenido);
+    });
+    if (porPalabra) return porPalabra;
+
+    // Y si no, el nombre del taller dentro del titular del anuncio. Se toma el
+    // nombre mas largo que coincida, para que "Tamales Gourmet" gane sobre
+    // "Tamales" cuando los dos existan.
+    return (
+      talleres
+        .filter((t) => t.nombre && contenido.includes(normalizar(t.nombre)))
+        .sort((a, b) => b.nombre.length - a.nombre.length)[0] || null
+    );
+  },
+  addTallerBot({ nombre, palabraClave, copy, precioRegular, precioPromo, adIds }) {
     const data = load();
     const item = {
       id: nextId(data.talleresBot),
       nombre: String(nombre || '').trim(),
       palabraClave: String(palabraClave || '').trim().toUpperCase(),
       copy: String(copy || ''),
+      // Ids de los anuncios de Meta que llevan a este taller, separados por
+      // coma. Opcional: sin ellos se intenta por el titular del anuncio.
+      adIds: String(adIds || '').trim(),
       precioRegular: Math.max(0, parseInt(precioRegular, 10) || 0),
       precioPromo: Math.max(0, parseInt(precioPromo, 10) || 0),
       activo: true,
@@ -679,6 +725,7 @@ module.exports = {
     if (typeof patch.nombre === 'string') item.nombre = patch.nombre.trim();
     if (typeof patch.palabraClave === 'string') item.palabraClave = patch.palabraClave.trim().toUpperCase();
     if (typeof patch.copy === 'string') item.copy = patch.copy;
+    if (typeof patch.adIds === 'string') item.adIds = patch.adIds.trim();
     if (patch.precioRegular !== undefined) item.precioRegular = Math.max(0, parseInt(patch.precioRegular, 10) || 0);
     if (patch.precioPromo !== undefined) item.precioPromo = Math.max(0, parseInt(patch.precioPromo, 10) || 0);
     if (typeof patch.activo === 'boolean') item.activo = patch.activo;

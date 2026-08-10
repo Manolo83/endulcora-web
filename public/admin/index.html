@@ -1572,6 +1572,8 @@ const CAMPOS_COPY = [
   ['espera_apartado', 'Cierre tras las instrucciones', ''],
   ['redireccion', 'Canalización a una persona', 'Se manda cuando el bot no puede seguir y te avisa por correo.'],
   ['sin_fechas', 'Taller sin fechas abiertas', ''],
+  ['comentario_publico', 'Respuesta pública a un comentario', 'Lo ve cualquiera que pase por la publicación. Córtalo y que sea amable.'],
+  ['comentario_privado', 'Privado tras un comentario', 'Meta solo permite UN privado por comentario. Si el copy del taller cabe junto con este saludo, se manda todo de una vez.'],
 ];
 
 const ETAPA_TEXTO = {
@@ -1651,6 +1653,9 @@ async function cargarTalleresBot(){
           <input data-taller="${t.id}" data-campo="precioRegular" type="number" value="${t.precioRegular}" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm"></label>
         <label class="block"><span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Precio en promo</span>
           <input data-taller="${t.id}" data-campo="precioPromo" type="number" value="${t.precioPromo}" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm"></label>
+        <label class="block sm:col-span-2"><span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Ids de anuncios de Meta que llevan a este taller (separados por coma)</span>
+          <input data-taller="${t.id}" data-campo="adIds" type="text" value="${escapeHtml(t.adIds || '')}" placeholder="120210000000000000, 120210000000000001" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 font-mono text-[12px]">
+          <span class="mt-0.5 block text-[11px] text-carbon/45">Con esto el bot sabe de qué taller preguntan en cuanto abren el chat desde el anuncio, sin adivinar por el texto.</span></label>
         <label class="block sm:col-span-2"><span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Copy del taller (usa {{FECHAS}})</span>
           <textarea data-taller="${t.id}" data-campo="copy" rows="10" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 font-mono text-[12px]">${escapeHtml(t.copy)}</textarea></label>
       </div>

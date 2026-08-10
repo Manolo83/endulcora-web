@@ -492,13 +492,13 @@ router.get('/api/bot/talleres', requireAdmin, (req, res) => {
 });
 
 router.post('/api/bot/talleres', requireAdmin, (req, res) => {
-  const { id, nombre, palabraClave, copy, precioRegular, precioPromo, activo } = req.body || {};
+  const { id, nombre, palabraClave, copy, precioRegular, precioPromo, activo, adIds } = req.body || {};
   if (!id && !String(nombre || '').trim()) {
     return res.status(400).json({ error: 'Ponle nombre al taller.' });
   }
   const item = id
-    ? store.updateTallerBot(id, { nombre, palabraClave, copy, precioRegular, precioPromo, activo })
-    : store.addTallerBot({ nombre, palabraClave, copy, precioRegular, precioPromo });
+    ? store.updateTallerBot(id, { nombre, palabraClave, copy, precioRegular, precioPromo, activo, adIds })
+    : store.addTallerBot({ nombre, palabraClave, copy, precioRegular, precioPromo, adIds });
   if (!item) return res.status(404).json({ error: 'Ese taller ya no existe.' });
   res.status(id ? 200 : 201).json(item);
 });

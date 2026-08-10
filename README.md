@@ -273,6 +273,26 @@ Te avisa por correo (el que configures en el panel) cuando:
 Cada correo lleva la conversación completa, así que no tienes que abrir el
 panel para saber de qué se trata.
 
+### De dónde le llega la gente
+
+**Anuncios.** Todos tus conjuntos de anuncios están optimizados a
+conversaciones, así que quien toca el anuncio cae directo en el chat. Meta
+manda además el id del anuncio; si lo registras en el taller (campo *Ids de
+anuncios*), el bot sabe de qué taller preguntan sin adivinar, incluso cuando
+la persona abre el chat y no escribe nada.
+
+**Comentarios.** El bot atiende los comentarios de todas tus publicaciones,
+no solo de los anuncios. Deja una respuesta pública corta y amable firmada
+como Endulcorito, y manda a esa persona un privado para abrir la
+conversación. Si el comentario deja claro de qué taller preguntan y el copy
+cabe, se lo manda de una vez.
+
+> Meta permite **un solo mensaje privado por comentario**. Por eso el bot no
+> reintenta ese envío, y por eso el privado lleva lo más útil que quepa.
+
+Para que el bot no conteste sus propios comentarios (y se quede en un bucle),
+configura `META_PAGE_ID` y `META_IG_ID`.
+
 ### Qué hace siempre, sin excepción
 
 - Se presenta como asistente automático y da el aviso de privacidad en el
