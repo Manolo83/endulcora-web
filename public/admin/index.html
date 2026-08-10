@@ -290,6 +290,27 @@
         </div>
       </form>
 
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Subir varios archivos a la vez</h3>
+        <p class="mt-1 text-xs text-carbon/50">Elige varios PDF/Excel/ZIP juntos; se crea un producto por archivo. Ponle nombre y precio a cada uno antes de guardar. Si el archivo es PDF, su primera página se usa como imagen automáticamente (puedes cambiarla después subiendo una foto propia al producto ya creado).</p>
+        <form id="formLoteProductos" class="mt-4 space-y-4">
+          <label class="block max-w-xs">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Categoría (aplica a todos)</span>
+            <select id="loteCategoria" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <option value="ebook">eBook</option>
+              <option value="anexo">Anexo (hoja de cálculo)</option>
+              <option value="recetario">Recetario</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Archivos</span>
+            <input id="loteArchivosInput" type="file" multiple accept="application/pdf,.pdf,.xls,.xlsx,.zip,.html" class="mt-1.5 w-full text-sm">
+          </label>
+          <div id="loteListaArchivos" class="space-y-2"></div>
+          <button type="submit" id="btnSubirLote" class="hidden rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Crear productos</button>
+        </form>
+      </div>
+
       <div id="listaProductosAdmin" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
     </section>
 
@@ -1145,6 +1166,46 @@ $('formProducto').addEventListener('submit', async (e) => {
     }
     resetFormProducto();
     toast('Producto guardado');
+    cargarProductosAdmin();
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+/* ---------- Carga masiva de productos ---------- */
+function pintarLoteArchivos(){
+  const files = [...$('loteArchivosInput').files];
+  const cont = $('loteListaArchivos');
+  $('btnSubirLote').classList.toggle('hidden', !files.length);
+  cont.innerHTML = files.map((f, i) => `
+    <div class="flex flex-wrap items-center gap-2 rounded-xl bg-crema/60 p-3">
+      <span class="min-w-0 flex-1 truncate text-xs text-carbon/60" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+      <input type="text" data-i="${i}" class="loteTitulo min-w-[160px] flex-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm" placeholder="Título" value="${escapeHtml(f.name.replace(/\.[^.]+$/, ''))}">
+      <input type="text" data-i="${i}" class="loteImportePrecio w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm" placeholder="Precio">
+    </div>
+  `).join('');
+}
+$('loteArchivosInput').addEventListener('change', pintarLoteArchivos);
+
+$('formLoteProductos').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const files = [...$('loteArchivosInput').files];
+  if(!files.length){ toast('Elige al menos un archivo'); return; }
+  const titulosVals = [...document.querySelectorAll('.loteTitulo')].map(el => el.value.trim());
+  const preciosVals = [...document.querySelectorAll('.loteImportePrecio')].map(el => el.value.trim());
+  const fd = new FormData();
+  files.forEach(f => fd.append('archivos', f));
+  fd.append('categoria', $('loteCategoria').value);
+  fd.append('titulos', JSON.stringify(titulosVals));
+  fd.append('precios', JSON.stringify(preciosVals));
+  try{
+    const res = await fetch('/admin/api/products/subir-lote', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir el lote');
+    $('formLoteProductos').reset();
+    $('loteListaArchivos').innerHTML = '';
+    $('btnSubirLote').classList.add('hidden');
+    toast(`${data.length} producto(s) creado(s)`);
     cargarProductosAdmin();
   }catch(e){
     toast(e.message);

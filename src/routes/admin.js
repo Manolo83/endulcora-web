@@ -8,6 +8,7 @@ const sharp = require('sharp');
 const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR } = require('../config');
+const { generarCaratulaPDF } = require('../caratula');
 
 const router = express.Router();
 
@@ -89,6 +90,22 @@ async function procesarImagenSubida(req, res, next) {
 function borrarSiEsSubida(url) {
   if (typeof url === 'string' && url.startsWith('/uploads/')) {
     fs.unlink(path.join(UPLOAD_DIR, path.basename(url)), () => {});
+  }
+}
+
+// Genera la carátula de un PDF (primera página), la comprime y la guarda como
+// imagen subida; regresa su URL o null si no se pudo generar.
+async function generarYGuardarCaratula(rutaPDF) {
+  const buffer = await generarCaratulaPDF(rutaPDF);
+  if (!buffer) return null;
+  try {
+    const comprimido = await sharp(buffer).png({ quality: 82, compressionLevel: 8 }).toBuffer();
+    const nombreImagen = `${crypto.randomUUID()}.png`;
+    fs.writeFileSync(path.join(UPLOAD_DIR, nombreImagen), comprimido);
+    return `/uploads/${nombreImagen}`;
+  } catch (e) {
+    console.error('No se pudo guardar la carátula generada:', e.message);
+    return null;
   }
 }
 
@@ -296,7 +313,7 @@ router.post('/api/products/:id/image', requireAdmin, uploadImage.single('file'),
   res.status(201).json(item);
 });
 
-router.post('/api/products/:id/archivo', requireAdmin, uploadDocumento.single('file'), (req, res) => {
+router.post('/api/products/:id/archivo', requireAdmin, uploadDocumento.single('file'), async (req, res) => {
   const producto = store.getProduct(req.params.id);
   if (!producto) {
     if (req.file) fs.unlink(req.file.path, () => {});
@@ -305,7 +322,16 @@ router.post('/api/products/:id/archivo', requireAdmin, uploadDocumento.single('f
   if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
   const url = `/uploads/${req.file.filename}`;
   const anterior = producto.archivo;
-  const item = store.updateProduct(req.params.id, { archivo: url, archivoNombre: req.file.originalname });
+  const patch = { archivo: url, archivoNombre: req.file.originalname };
+
+  // Si es un PDF y todavía no hay imagen puesta a mano, usamos la primera
+  // página como carátula. Si el administrador ya eligió una imagen, se respeta.
+  if (req.file.mimetype === 'application/pdf' && !producto.imagen) {
+    const caratula = await generarYGuardarCaratula(req.file.path);
+    if (caratula) patch.imagen = caratula;
+  }
+
+  const item = store.updateProduct(req.params.id, patch);
   borrarSiEsSubida(anterior);
   res.status(201).json(item);
 });
@@ -317,6 +343,40 @@ router.delete('/api/products/:id/archivo', requireAdmin, (req, res) => {
   const item = store.updateProduct(req.params.id, { archivo: '', archivoNombre: '' });
   borrarSiEsSubida(anterior);
   res.json(item);
+});
+
+// Carga masiva: varios archivos a la vez, cada uno con su propio nombre y
+// precio. Crea un producto por archivo; si es PDF, genera su carátula sola.
+router.post('/api/products/subir-lote', requireAdmin, uploadDocumento.array('archivos', 20), async (req, res) => {
+  if (!req.files || !req.files.length) return res.status(400).json({ error: 'Selecciona al menos un archivo' });
+  const categoria = ['ebook', 'anexo', 'recetario'].includes(req.body.categoria) ? req.body.categoria : 'ebook';
+  let titulos = [];
+  let precios = [];
+  try { titulos = JSON.parse(req.body.titulos || '[]'); } catch (e) { titulos = []; }
+  try { precios = JSON.parse(req.body.precios || '[]'); } catch (e) { precios = []; }
+
+  const creados = [];
+  for (let i = 0; i < req.files.length; i++) {
+    const file = req.files[i];
+    const titulo = (titulos[i] && String(titulos[i]).trim()) || path.parse(file.originalname).name;
+    const precio = precios[i] != null ? String(precios[i]).trim() : '';
+
+    let item = store.addProduct({
+      categoria,
+      titulo,
+      precio,
+      archivo: `/uploads/${file.filename}`,
+      archivoNombre: file.originalname,
+    });
+
+    if (file.mimetype === 'application/pdf') {
+      const caratula = await generarYGuardarCaratula(file.path);
+      if (caratula) item = store.updateProduct(item.id, { imagen: caratula }) || item;
+    }
+
+    creados.push(item);
+  }
+  res.status(201).json(creados);
 });
 
 // ---- Ventas (pedidos de Mercado Pago) ----
