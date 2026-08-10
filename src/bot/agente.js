@@ -1,4 +1,4 @@
-// El bot de ventas: Claude conduciendo el embudo de Endulcora.
+// El bot de ventas: el modelo de Gemini conduciendo el embudo de Endulcora.
 //
 // Regla de diseno: los copys los manda el CODIGO, palabra por palabra, tal como
 // estan escritos en /admin. El modelo decide cuando avanzar de paso y responde
@@ -6,21 +6,22 @@
 // nunca cobra. El embudo termina en las instrucciones de pago: de ahi en
 // adelante la conversacion es de una persona.
 
-const Anthropic = require('@anthropic-ai/sdk');
+const { GoogleGenAI } = require('@google/genai');
 const store = require('../store');
 const almacen = require('./almacen');
 const copysBot = require('./copys');
 const notificaciones = require('./notificaciones');
 
-const MODELO = 'claude-opus-5';
-const MAX_TOKENS = 2048;
+// El mismo modelo que ya mueve al asistente del sitio, para no depender de
+// una segunda cuenta ni de un segundo saldo.
+const MODELO = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const MAX_VUELTAS = 6;
 const MAX_PERSONAS = 8;
 
 let cliente = null;
 function obtenerCliente() {
-  if (!process.env.ANTHROPIC_API_KEY) return null;
-  if (!cliente) cliente = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  if (!process.env.GEMINI_API_KEY) return null;
+  if (!cliente) cliente = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   return cliente;
 }
 
@@ -303,12 +304,16 @@ async function ejecutarHerramienta(nombre, entrada, ctx) {
 /* Ciclo principal                                                     */
 /* ------------------------------------------------------------------ */
 
-function textoDeRespuesta(bloques) {
-  return bloques
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('\n')
-    .trim();
+// Las herramientas en el formato que espera Gemini. El esquema de cada una es
+// JSON Schema normal, que es lo que ya tenemos escrito arriba.
+const DECLARACIONES = HERRAMIENTAS.map((h) => ({
+  name: h.name,
+  description: h.description,
+  parametersJsonSchema: h.input_schema,
+}));
+
+function textoDeRespuesta(respuesta) {
+  return String(respuesta.text || '').trim();
 }
 
 // `enviar` es la funcion que manda un mensaje por el canal del cliente. La
@@ -321,60 +326,61 @@ async function responder({ contacto, mensajeCliente, enviar }) {
 
   const solicitud = await almacen.solicitudAbierta(contacto.id);
   const previos = await almacen.historial(contacto.id);
-  const messages = previos.map((m) => ({
-    role: m.rol === 'cliente' ? 'user' : 'assistant',
-    content: m.texto,
+  // Gemini llama "model" a lo que dice el bot y "user" a lo que dice el
+  // cliente, y cada turno es una lista de partes.
+  const contents = previos.map((m) => ({
+    role: m.rol === 'cliente' ? 'user' : 'model',
+    parts: [{ text: m.texto }],
   }));
-  messages.push({ role: 'user', content: mensajeCliente });
+  contents.push({ role: 'user', parts: [{ text: mensajeCliente }] });
 
   const ctx = { contacto, solicitud, entregado: false, enviar };
 
-  const system = [
-    // Bloque estable: se cachea y a partir del segundo mensaje cuesta una
-    // decima parte. Por eso las reglas y el catalogo van aparte del estado.
-    { type: 'text', text: reglas(), cache_control: { type: 'ephemeral' } },
-    { type: 'text', text: `ESTADO DE ESTA CONVERSACIÓN: ${estadoActual({ contacto, solicitud })}` },
-  ];
+  const systemInstruction = `${reglas()}\n\nESTADO DE ESTA CONVERSACIÓN: ${estadoActual({ contacto, solicitud })}`;
 
   try {
     for (let vuelta = 0; vuelta < MAX_VUELTAS; vuelta++) {
-      const respuesta = await ai.messages.create({
+      const respuesta = await ai.models.generateContent({
         model: MODELO,
-        max_tokens: MAX_TOKENS,
-        // Conversacion corta y sensible a latencia. El razonamiento queda
-        // activo: apagarlo hace que a veces escriba la llamada a la
-        // herramienta como texto en vez de ejecutarla, y aqui eso significaria
-        // que el copy nunca se manda.
-        output_config: { effort: 'low' },
-        system,
-        tools: HERRAMIENTAS,
-        messages,
+        contents,
+        config: {
+          systemInstruction,
+          tools: [{ functionDeclarations: DECLARACIONES }],
+        },
       });
 
-      if (respuesta.stop_reason === 'refusal') {
-        await ejecutarHerramienta('canalizar', { motivo: 'El asistente no pudo atender la solicitud' }, ctx);
-        return { texto: '', entregado: true };
+      const llamadas = respuesta.functionCalls || [];
+      if (!llamadas.length) {
+        return { texto: textoDeRespuesta(respuesta), entregado: ctx.entregado };
       }
 
-      if (respuesta.stop_reason !== 'tool_use') {
-        return { texto: textoDeRespuesta(respuesta.content), entregado: ctx.entregado };
-      }
-
-      messages.push({ role: 'assistant', content: respuesta.content });
+      // El turno del modelo se devuelve tal cual vino, con sus llamadas dentro.
+      const partesModelo =
+        (respuesta.candidates &&
+          respuesta.candidates[0] &&
+          respuesta.candidates[0].content &&
+          respuesta.candidates[0].content.parts) ||
+        llamadas.map((l) => ({ functionCall: l }));
+      contents.push({ role: 'model', parts: partesModelo });
 
       const resultados = [];
-      for (const bloque of respuesta.content) {
-        if (bloque.type !== 'tool_use') continue;
+      for (const llamada of llamadas) {
         let salida;
         try {
-          salida = await ejecutarHerramienta(bloque.name, bloque.input || {}, ctx);
+          salida = await ejecutarHerramienta(llamada.name, llamada.args || {}, ctx);
         } catch (e) {
-          console.error(`[bot] Falló la herramienta ${bloque.name}:`, e.message);
+          console.error(`[bot] Falló la herramienta ${llamada.name}:`, e.message);
           salida = { error: 'No se pudo completar esa operación. Discúlpate en una frase.' };
         }
-        resultados.push({ type: 'tool_result', tool_use_id: bloque.id, content: JSON.stringify(salida) });
+        resultados.push({
+          functionResponse: {
+            id: llamada.id,
+            name: llamada.name,
+            response: { output: salida },
+          },
+        });
       }
-      messages.push({ role: 'user', content: resultados });
+      contents.push({ role: 'user', parts: resultados });
 
       // Si ya se entrego la conversacion, no hay nada mas que decir.
       if (ctx.entregado) return { texto: '', entregado: true };
@@ -391,4 +397,4 @@ async function responder({ contacto, mensajeCliente, enviar }) {
   }
 }
 
-module.exports = { responder, MODELO, MAX_PERSONAS };
+module.exports = { responder, MODELO, MAX_PERSONAS, DECLARACIONES };

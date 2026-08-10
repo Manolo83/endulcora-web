@@ -320,8 +320,8 @@ configura `META_PAGE_ID` y `META_IG_ID`.
    **Instagram**, con la misma URL y el mismo token.
 6. Copia el token permanente y el id del número a `WHATSAPP_TOKEN` y
    `WHATSAPP_PHONE_NUMBER_ID`; el token de la página a `META_PAGE_TOKEN`.
-7. Agrega tu clave de Claude en `ANTHROPIC_API_KEY`
-   ([console.anthropic.com](https://console.anthropic.com)).
+7. No necesitas ninguna clave nueva de inteligencia artificial: el bot usa la
+   misma `GEMINI_API_KEY` que ya mueve al asistente del sitio.
 
 > **Ojo con el número.** Un número de WhatsApp solo puede estar en un lado: si
 > migras el que usas hoy a la API, dejas de poder abrirlo en la app de
@@ -353,10 +353,18 @@ configura `META_PAGE_ID` y `META_IG_ID`.
 
 ### Costo
 
-El bot corre sobre Claude Opus 5 con esfuerzo bajo y caché de contexto: el
-copy y las reglas se cachean, así que a partir del segundo mensaje de una
-conversación esa parte cuesta cerca de una décima parte. Los copys los manda
-el código, no el modelo, así que las respuestas del modelo son cortas.
+El bot corre sobre el mismo modelo de Gemini que el asistente del sitio y con
+la misma clave, así que no agrega ninguna cuenta ni ningún cobro nuevo.
+
+Eso alcanza porque el trabajo del modelo aquí es chico: los copys los manda el
+código palabra por palabra, y los montos y las fechas los calcula el sistema.
+Lo único que decide el modelo es cuándo avanzar de paso y qué contestar a lo
+que se sale del guion.
+
+Ten en cuenta que el nivel gratuito de Google tiene límites de peticiones por
+minuto y que Google puede usar esas conversaciones para mejorar sus modelos.
+Como por aquí pasan nombres y teléfonos de clientes, conviene saberlo; el
+nivel de pago de Google no usa los datos así.
 
 ## 13. Notas técnicas y mejoras futuras (opcionales)
 
