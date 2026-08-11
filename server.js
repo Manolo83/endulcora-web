@@ -16,6 +16,7 @@ const checkoutRoutes = require('./src/routes/checkout');
 const authRoutes = require('./src/routes/auth');
 const asistenteRoutes = require('./src/routes/asistente');
 const metaRoutes = require('./src/routes/meta');
+const legalRoutes = require('./src/routes/legal');
 const botAlmacen = require('./src/bot/almacen');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -116,6 +117,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/asistente', asistenteRoutes);
 app.use('/api', apiRoutes);
 app.use('/admin', adminRoutes);
+app.use(legalRoutes);
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
