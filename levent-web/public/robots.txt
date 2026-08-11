@@ -1,0 +1,5 @@
+# Landing de campana de pago: no debe indexarse.
+# El trafico entra por el anuncio, y el trafico organico ensucia las metricas
+# de la campana (aparecen conversiones que el anuncio no pago).
+User-agent: *
+Disallow: /

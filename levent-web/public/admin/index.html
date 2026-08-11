@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel · Levent</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Si el CDN de Tailwind no carga, `tailwind` no existe y esta linea lanzaria
+  // un error que ensucia la consola justo cuando se esta depurando el Pixel.
+  if (window.tailwind) tailwind.config = {
+    theme: {
+      extend: {
+        colors: { noche: '#0B1220', tinta: '#16233A', acento: '#E0A33E', nieve: '#F7F5F1', humo: '#6B7280' },
+        fontFamily: { ui: ['Inter', 'system-ui', 'sans-serif'] },
+      },
+    },
+  };
+</script>
+<style>
+  .campo { width: 100%; border: 1px solid rgba(22,35,58,.15); border-radius: .6rem; padding: .6rem .8rem; font-size: 14px; outline: none; }
+  .campo:focus { border-color: #E0A33E; }
+  .etiqueta { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #6B7280; margin-bottom: .3rem; }
+</style>
+</head>
+<body class="bg-nieve font-ui text-tinta">
+
+<!-- ============================== LOGIN ============================== -->
+<div id="pantallaLogin" class="hidden min-h-screen items-center justify-center px-5">
+  <form id="formLogin" class="w-full max-w-sm rounded-3xl border border-tinta/10 bg-white p-8 shadow-sm">
+    <p class="text-[11px] font-700 uppercase tracking-[.28em] text-acento">Levent</p>
+    <h1 class="mt-1 text-2xl font-700 text-noche">Panel de campana</h1>
+    <label class="mt-7 block">
+      <span class="etiqueta">Contrasena</span>
+      <input type="password" name="password" required class="campo" autocomplete="current-password">
+    </label>
+    <p id="loginError" class="mt-3 hidden text-[13px] font-600 text-red-600"></p>
+    <button type="submit" class="mt-6 w-full rounded-full bg-noche py-3.5 text-[13px] font-700 uppercase tracking-wider text-nieve transition hover:bg-tinta">Entrar</button>
+  </form>
+</div>
+
+<!-- ============================== PANEL ============================== -->
+<div id="pantallaPanel" class="hidden">
+  <header class="border-b border-tinta/10 bg-white">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-4">
+      <div>
+        <p class="text-[11px] font-700 uppercase tracking-[.28em] text-acento">Levent</p>
+        <h1 class="text-xl font-700 text-noche">Panel de campana</h1>
+      </div>
+      <div class="flex gap-2">
+        <a href="/" target="_blank" class="rounded-full border border-tinta/20 px-4 py-2 text-[12px] font-600 text-tinta transition hover:border-tinta">Ver landing</a>
+        <button id="btnSalir" class="rounded-full bg-noche px-4 py-2 text-[12px] font-600 text-nieve transition hover:bg-tinta">Salir</button>
+      </div>
+    </div>
+    <nav class="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-5 pb-3 text-[12px] font-600 uppercase tracking-wider">
+      <button data-tab="leads" class="tab rounded-full px-4 py-2">Leads</button>
+      <button data-tab="contenido" class="tab rounded-full px-4 py-2">Contenido</button>
+      <button data-tab="oferta" class="tab rounded-full px-4 py-2">Oferta</button>
+      <button data-tab="ventas" class="tab rounded-full px-4 py-2">Ventas</button>
+      <button data-tab="meta" class="tab rounded-full px-4 py-2">Meta Ads</button>
+    </nav>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-5 py-8">
+
+    <!-- ---------------------------- LEADS ---------------------------- -->
+    <section data-panel="leads" class="panel hidden">
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-700 text-noche">Leads de la campana</h2>
+          <p id="leadsResumen" class="mt-1 text-[13px] text-humo"></p>
+        </div>
+        <a href="/admin/api/leads.csv" class="rounded-full border border-tinta/20 px-4 py-2 text-[12px] font-600 transition hover:border-tinta">Descargar CSV</a>
+      </div>
+      <div id="listaLeads" class="grid gap-3"></div>
+    </section>
+
+    <!-- -------------------------- CONTENIDO -------------------------- -->
+    <section data-panel="contenido" class="panel hidden">
+      <h2 class="text-xl font-700 text-noche">Contenido de la landing</h2>
+      <p class="mt-1 text-[13px] text-humo">Todo lo que se ve en la pagina. Se publica al guardar, sin volver a desplegar.</p>
+      <form id="formContenido" class="mt-6 grid gap-6"></form>
+
+      <div class="mt-8 rounded-2xl border border-tinta/10 bg-white p-6">
+        <h3 class="text-[13px] font-700 uppercase tracking-wider text-noche">Imagen principal</h3>
+        <p class="mt-1 text-[13px] text-humo">La que acompana al titulo. Se recomienda vertical (4:5), la misma del anuncio.</p>
+        <form id="formHeroImagen" class="mt-4 flex flex-wrap items-center gap-3">
+          <input type="file" name="imagen" accept="image/*" required class="text-[13px]">
+          <button type="submit" class="rounded-full bg-noche px-5 py-2.5 text-[12px] font-700 uppercase tracking-wider text-nieve">Subir</button>
+        </form>
+        <img id="vistaHeroImagen" class="mt-4 hidden max-h-56 rounded-xl" alt="">
+      </div>
+    </section>
+
+    <!-- ---------------------------- OFERTA ---------------------------- -->
+    <section data-panel="oferta" class="panel hidden">
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-700 text-noche">Oferta</h2>
+          <p class="mt-1 text-[13px] text-humo">Con precio mayor a 0 el boton cobra con Mercado Pago; en 0 lleva al formulario.</p>
+        </div>
+        <button id="btnNuevaOferta" class="rounded-full bg-noche px-5 py-2.5 text-[12px] font-700 uppercase tracking-wider text-nieve">Agregar</button>
+      </div>
+      <div id="listaOfertas" class="grid gap-4"></div>
+    </section>
+
+    <!-- ---------------------------- VENTAS ---------------------------- -->
+    <section data-panel="ventas" class="panel hidden">
+      <h2 class="text-xl font-700 text-noche">Ventas</h2>
+      <div id="listaVentas" class="mt-5 grid gap-3"></div>
+    </section>
+
+    <!-- --------------------------- META ADS --------------------------- -->
+    <section data-panel="meta" class="panel hidden">
+      <h2 class="text-xl font-700 text-noche">Medicion de Meta Ads</h2>
+      <p class="mt-1 text-[13px] text-humo">Responde la pregunta de siempre: la campana esta midiendo o no.</p>
+      <div id="metaEstado" class="mt-6 grid gap-4"></div>
+      <button id="btnProbarMeta" class="mt-6 rounded-full bg-noche px-5 py-2.5 text-[12px] font-700 uppercase tracking-wider text-nieve">Mandar evento de prueba</button>
+      <p id="metaPruebaResultado" class="mt-3 text-[13px]"></p>
+
+      <h3 class="mt-10 text-[13px] font-700 uppercase tracking-wider text-noche">Ultimos eventos enviados</h3>
+      <div id="metaEventos" class="mt-3 grid gap-2"></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (s) { return document.querySelector(s); };
+  var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  function escapar(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function api(ruta, opciones) {
+    opciones = opciones || {};
+    if (opciones.body && !(opciones.body instanceof FormData)) {
+      opciones.headers = { 'Content-Type': 'application/json' };
+      opciones.body = JSON.stringify(opciones.body);
+    }
+    return fetch('/admin/api' + ruta, opciones).then(function (r) {
+      if (r.status === 401) { mostrarLogin(); throw new Error('Sesion terminada'); }
+      return r.json().then(function (j) {
+        if (!r.ok) throw new Error(j.error || 'Error inesperado');
+        return j;
+      });
+    });
+  }
+
+  function fecha(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function dinero(valor) {
+    var n = parseFloat(String(valor).replace(/,/g, ''));
+    return isFinite(n) ? '$' + n.toLocaleString('es-MX') : '';
+  }
+
+  // ---- Sesion -----------------------------------------------------------
+
+  function mostrarLogin() {
+    $('#pantallaPanel').classList.add('hidden');
+    $('#pantallaLogin').classList.remove('hidden');
+    $('#pantallaLogin').classList.add('flex');
+  }
+
+  function mostrarPanel() {
+    $('#pantallaLogin').classList.add('hidden');
+    $('#pantallaLogin').classList.remove('flex');
+    $('#pantallaPanel').classList.remove('hidden');
+    abrirTab('leads');
+  }
+
+  $('#formLogin').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var password = e.target.password.value;
+    fetch('/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: password }),
+    })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error); return j; }); })
+      .then(mostrarPanel)
+      .catch(function (err) {
+        $('#loginError').textContent = err.message;
+        $('#loginError').classList.remove('hidden');
+      });
+  });
+
+  $('#btnSalir').addEventListener('click', function () {
+    fetch('/admin/logout', { method: 'POST' }).then(mostrarLogin);
+  });
+
+  // ---- Pestanas ---------------------------------------------------------
+
+  var cargadores = {
+    leads: cargarLeads,
+    contenido: cargarContenido,
+    oferta: cargarOfertas,
+    ventas: cargarVentas,
+    meta: cargarMeta,
+  };
+
+  function abrirTab(nombre) {
+    $$('.panel').forEach(function (p) { p.classList.toggle('hidden', p.dataset.panel !== nombre); });
+    $$('.tab').forEach(function (t) {
+      var activa = t.dataset.tab === nombre;
+      t.classList.toggle('bg-noche', activa);
+      t.classList.toggle('text-nieve', activa);
+      t.classList.toggle('text-humo', !activa);
+    });
+    cargadores[nombre]();
+  }
+
+  $$('.tab').forEach(function (t) {
+    t.addEventListener('click', function () { abrirTab(t.dataset.tab); });
+  });
+
+  // ---- Leads ------------------------------------------------------------
+
+  function cargarLeads() {
+    api('/leads').then(function (leads) {
+      var sinAtender = leads.filter(function (l) { return !l.atendido; }).length;
+      $('#leadsResumen').textContent = leads.length + ' en total · ' + sinAtender + ' sin atender';
+
+      if (!leads.length) {
+        $('#listaLeads').innerHTML = '<p class="text-[14px] text-humo">Todavia no llega ningun lead.</p>';
+        return;
+      }
+
+      $('#listaLeads').innerHTML = leads.map(function (l) {
+        var wa = String(l.telefono || '').replace(/\D/g, '');
+        // La campana y el anuncio son lo que permite decidir que anuncio
+        // apagar: un lead sin origen no dice nada sobre donde invertir.
+        var origen = [l.utm_campaign, l.utm_content, l.utm_source].filter(Boolean).join(' · ');
+        return '<article class="rounded-2xl border border-tinta/10 bg-white p-5">' +
+          '<div class="flex flex-wrap items-start justify-between gap-3">' +
+            '<div>' +
+              '<p class="font-700 text-noche">' + escapar(l.nombre || 'Sin nombre') + '</p>' +
+              '<p class="mt-0.5 text-[13px] text-humo">' + escapar([l.telefono, l.email].filter(Boolean).join(' · ')) + '</p>' +
+            '</div>' +
+            '<div class="flex items-center gap-2">' +
+              (l.metaEnviado ? '<span class="rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-600 text-green-700">En Meta</span>'
+                             : '<span class="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-600 text-amber-700">No llego a Meta</span>') +
+              '<span class="text-[12px] text-humo">' + fecha(l.creadoEn) + '</span>' +
+            '</div>' +
+          '</div>' +
+          (l.mensaje ? '<p class="mt-3 text-[14px] text-tinta/80">' + escapar(l.mensaje) + '</p>' : '') +
+          (origen ? '<p class="mt-3 text-[12px] text-humo">Vino de: <strong>' + escapar(origen) + '</strong></p>' : '') +
+          '<div class="mt-4 flex flex-wrap gap-2">' +
+            (wa ? '<a href="https://wa.me/' + wa + '" target="_blank" rel="noopener" class="rounded-full bg-[#25D366] px-4 py-2 text-[12px] font-700 text-white">WhatsApp</a>' : '') +
+            '<button data-atender="' + l.id + '" class="rounded-full border border-tinta/20 px-4 py-2 text-[12px] font-600">' +
+              (l.atendido ? 'Marcar sin atender' : 'Marcar atendido') + '</button>' +
+            '<button data-borrar-lead="' + l.id + '" class="rounded-full border border-red-200 px-4 py-2 text-[12px] font-600 text-red-600">Borrar</button>' +
+          '</div>' +
+          '</article>';
+      }).join('');
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var atender = e.target.closest('[data-atender]');
+    if (atender) {
+      var id = atender.dataset.atender;
+      var nuevoEstado = atender.textContent.indexOf('sin atender') === -1;
+      api('/leads/' + id, { method: 'PUT', body: { atendido: nuevoEstado } }).then(cargarLeads);
+    }
+
+    var borrar = e.target.closest('[data-borrar-lead]');
+    if (borrar && confirm('Borrar este lead? No se puede deshacer.')) {
+      api('/leads/' + borrar.dataset.borrarLead, { method: 'DELETE' }).then(cargarLeads);
+    }
+  });
+
+  // ---- Contenido --------------------------------------------------------
+
+  // Como se agrupan y se muestran los campos del contenido. Lo que no aparece
+  // aqui se pinta igual al final, para que agregar una clave nueva en el store
+  // no obligue a tocar este archivo.
+  var GRUPOS = [
+    ['Encabezado principal', ['hero_badge', 'hero_titulo_1', 'hero_titulo_2', 'hero_parrafo', 'hero_cta_primario', 'hero_cta_secundario']],
+    ['Cifras de credibilidad', ['prueba_1_valor', 'prueba_1_etiqueta', 'prueba_2_valor', 'prueba_2_etiqueta', 'prueba_3_valor', 'prueba_3_etiqueta']],
+    ['Beneficios', ['beneficios_titulo', 'beneficio_1_titulo', 'beneficio_1_texto', 'beneficio_2_titulo', 'beneficio_2_texto', 'beneficio_3_titulo', 'beneficio_3_texto']],
+    ['Formulario', ['form_titulo', 'form_texto', 'form_boton']],
+    ['WhatsApp', ['whatsapp_numero', 'whatsapp_mensaje']],
+    ['Pagina de gracias', ['gracias_titulo', 'gracias_texto']],
+    ['Pie de pagina y legales', ['footer_descripcion', 'legal_privacidad', 'legal_terminos']],
+  ];
+
+  var ETIQUETAS = {
+    hero_badge: 'Etiqueta pequena', hero_titulo_1: 'Titulo linea 1', hero_titulo_2: 'Titulo linea 2 (en dorado)',
+    hero_parrafo: 'Parrafo', hero_cta_primario: 'Boton principal', hero_cta_secundario: 'Boton secundario',
+    whatsapp_numero: 'Numero con lada de pais (ej. 5215512345678)', whatsapp_mensaje: 'Mensaje con el que abre el chat',
+    form_titulo: 'Titulo', form_texto: 'Texto', form_boton: 'Texto del boton',
+    gracias_titulo: 'Titulo', gracias_texto: 'Texto',
+    footer_descripcion: 'Descripcion del pie', legal_privacidad: 'Aviso de privacidad', legal_terminos: 'Terminos y condiciones',
+    beneficios_titulo: 'Titulo de la seccion',
+  };
+
+  var LARGOS = ['hero_parrafo', 'beneficio_1_texto', 'beneficio_2_texto', 'beneficio_3_texto', 'form_texto',
+                'gracias_texto', 'footer_descripcion', 'legal_privacidad', 'legal_terminos', 'whatsapp_mensaje'];
+
+  function etiquetaDe(clave) {
+    return ETIQUETAS[clave] || clave.replace(/_/g, ' ').replace(/^\w/, function (c) { return c.toUpperCase(); });
+  }
+
+  function cargarContenido() {
+    api('/content').then(function (c) {
+      var usadas = {};
+      var html = GRUPOS.map(function (grupo) {
+        return bloqueGrupo(grupo[0], grupo[1].filter(function (k) {
+          usadas[k] = true;
+          return Object.prototype.hasOwnProperty.call(c, k);
+        }), c);
+      }).join('');
+
+      var sobrantes = Object.keys(c).filter(function (k) { return !usadas[k] && k !== 'hero_imagen'; });
+      if (sobrantes.length) html += bloqueGrupo('Otros', sobrantes, c);
+
+      $('#formContenido').innerHTML = html +
+        '<div><button type="submit" class="rounded-full bg-noche px-8 py-3.5 text-[13px] font-700 uppercase tracking-wider text-nieve">Guardar contenido</button></div>';
+
+      var img = $('#vistaHeroImagen');
+      if (c.hero_imagen) { img.src = c.hero_imagen; img.classList.remove('hidden'); }
+      else img.classList.add('hidden');
+    });
+  }
+
+  function bloqueGrupo(titulo, claves, valores) {
+    if (!claves.length) return '';
+    return '<div class="rounded-2xl border border-tinta/10 bg-white p-6">' +
+      '<h3 class="text-[13px] font-700 uppercase tracking-wider text-noche">' + escapar(titulo) + '</h3>' +
+      '<div class="mt-4 grid gap-4 md:grid-cols-2">' +
+      claves.map(function (k) {
+        var largo = LARGOS.indexOf(k) !== -1;
+        var control = largo
+          ? '<textarea name="' + k + '" rows="' + (k.indexOf('legal_') === 0 ? 8 : 3) + '" class="campo">' + escapar(valores[k]) + '</textarea>'
+          : '<input name="' + k + '" value="' + escapar(valores[k]) + '" class="campo">';
+        return '<label class="block' + (largo ? ' md:col-span-2' : '') + '">' +
+               '<span class="etiqueta">' + escapar(etiquetaDe(k)) + '</span>' + control + '</label>';
+      }).join('') +
+      '</div></div>';
+  }
+
+  $('#formContenido').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var datos = Object.fromEntries(new FormData(e.target).entries());
+    api('/content', { method: 'PUT', body: datos }).then(function () {
+      alert('Contenido guardado. Ya se ve en la landing.');
+    });
+  });
+
+  $('#formHeroImagen').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var fd = new FormData(e.target);
+    fetch('/admin/api/content/imagen', { method: 'POST', body: fd })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j.error) return alert(j.error);
+        e.target.reset();
+        cargarContenido();
+      });
+  });
+
+  // ---- Oferta -----------------------------------------------------------
+
+  function cargarOfertas() {
+    api('/ofertas').then(function (lista) {
+      $('#listaOfertas').innerHTML = lista.map(function (o) {
+        return '<form data-oferta="' + o.id + '" class="rounded-2xl border border-tinta/10 bg-white p-6">' +
+          '<div class="grid gap-4 md:grid-cols-2">' +
+            campo('etiqueta', 'Etiqueta pequena', o.etiqueta) +
+            campo('titulo', 'Titulo', o.titulo) +
+            campo('subtitulo', 'Subtitulo', o.subtitulo) +
+            campo('boton', 'Texto del boton', o.boton) +
+            campo('precio', 'Precio (0 = solo formulario)', o.precio) +
+            campo('precioAnterior', 'Precio anterior (tachado)', o.precioAnterior) +
+            '<label class="block md:col-span-2"><span class="etiqueta">Descripcion</span>' +
+              '<textarea name="descripcion" rows="3" class="campo">' + escapar(o.descripcion) + '</textarea></label>' +
+            '<label class="block md:col-span-2"><span class="etiqueta">Vinetas (una por linea)</span>' +
+              '<textarea name="bullets" rows="4" class="campo">' + escapar((o.bullets || []).join('\n')) + '</textarea></label>' +
+          '</div>' +
+          '<div class="mt-4 flex flex-wrap items-center gap-3">' +
+            '<label class="flex items-center gap-2 text-[13px]"><input type="checkbox" name="activo"' + (o.activo !== false ? ' checked' : '') + '> Visible en la landing</label>' +
+            '<button type="submit" class="ml-auto rounded-full bg-noche px-6 py-2.5 text-[12px] font-700 uppercase tracking-wider text-nieve">Guardar</button>' +
+            '<button type="button" data-borrar-oferta="' + o.id + '" class="rounded-full border border-red-200 px-4 py-2.5 text-[12px] font-600 text-red-600">Borrar</button>' +
+          '</div>' +
+          '<div class="mt-4 flex flex-wrap items-center gap-3 border-t border-tinta/10 pt-4">' +
+            '<input type="file" data-imagen-oferta="' + o.id + '" accept="image/*" class="text-[13px]">' +
+            (o.imagen ? '<img src="' + escapar(o.imagen) + '" class="h-16 rounded-lg" alt="">' : '') +
+          '</div>' +
+          '</form>';
+      }).join('');
+    });
+  }
+
+  function campo(nombre, etiqueta, valor) {
+    return '<label class="block"><span class="etiqueta">' + escapar(etiqueta) + '</span>' +
+           '<input name="' + nombre + '" value="' + escapar(valor) + '" class="campo"></label>';
+  }
+
+  $('#btnNuevaOferta').addEventListener('click', function () {
+    api('/ofertas', { method: 'POST', body: { titulo: 'Nueva oferta', boton: 'Quiero informacion', precio: '0' } }).then(cargarOfertas);
+  });
+
+  document.addEventListener('submit', function (e) {
+    var form = e.target.closest('[data-oferta]');
+    if (!form) return;
+    e.preventDefault();
+    var datos = Object.fromEntries(new FormData(form).entries());
+    datos.bullets = String(datos.bullets || '').split('\n').map(function (b) { return b.trim(); }).filter(Boolean);
+    datos.activo = form.querySelector('[name=activo]').checked;
+    api('/ofertas/' + form.dataset.oferta, { method: 'PUT', body: datos }).then(function () {
+      alert('Oferta guardada.');
+      cargarOfertas();
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    var borrar = e.target.closest('[data-borrar-oferta]');
+    if (borrar && confirm('Borrar esta oferta?')) {
+      api('/ofertas/' + borrar.dataset.borrarOferta, { method: 'DELETE' }).then(cargarOfertas);
+    }
+  });
+
+  document.addEventListener('change', function (e) {
+    var input = e.target.closest('[data-imagen-oferta]');
+    if (!input || !input.files.length) return;
+    var fd = new FormData();
+    fd.append('imagen', input.files[0]);
+    fetch('/admin/api/ofertas/' + input.dataset.imagenOferta + '/imagen', { method: 'POST', body: fd })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j.error) return alert(j.error);
+        cargarOfertas();
+      });
+  });
+
+  // ---- Ventas -----------------------------------------------------------
+
+  function cargarVentas() {
+    api('/ventas').then(function (ventas) {
+      if (!ventas.length) {
+        $('#listaVentas').innerHTML = '<p class="text-[14px] text-humo">Todavia no hay ventas.</p>';
+        return;
+      }
+      $('#listaVentas').innerHTML = ventas.map(function (v) {
+        var colores = { aprobado: 'bg-green-100 text-green-700', pendiente: 'bg-amber-100 text-amber-700', rechazado: 'bg-red-100 text-red-700' };
+        return '<article class="rounded-2xl border border-tinta/10 bg-white p-5">' +
+          '<div class="flex flex-wrap items-center justify-between gap-3">' +
+            '<div><p class="font-700 text-noche">Pedido #' + v.id + ' · ' + dinero(v.total) + '</p>' +
+            '<p class="mt-0.5 text-[13px] text-humo">' + escapar([v.nombre, v.email, v.telefono].filter(Boolean).join(' · ') || 'Sin datos de contacto') + '</p></div>' +
+            '<div class="flex items-center gap-2">' +
+              '<span class="rounded-full px-2.5 py-1 text-[11px] font-600 ' + (colores[v.estado] || 'bg-gray-100 text-gray-600') + '">' + escapar(v.estado) + '</span>' +
+              (v.metaPurchaseEnviado ? '<span class="rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-600 text-green-700">Purchase en Meta</span>' : '') +
+              '<span class="text-[12px] text-humo">' + fecha(v.creadoEn) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<p class="mt-3 text-[13px] text-tinta/80">' + escapar((v.items || []).map(function (i) { return i.cantidad + '× ' + i.titulo; }).join(', ')) + '</p>' +
+          '</article>';
+      }).join('');
+    });
+  }
+
+  // ---- Meta -------------------------------------------------------------
+
+  function cargarMeta() {
+    api('/meta/estado').then(function (e) {
+      var tarjetas = [
+        ['Meta Pixel', e.pixelConfigurado, e.pixelConfigurado ? 'Configurado (' + e.pixelId + ')' : 'Falta META_PIXEL_ID'],
+        ['Conversions API', e.capiConfigurada, e.capiConfigurada ? 'Enviando eventos desde el servidor' : 'Falta META_ACCESS_TOKEN'],
+        ['Modo de prueba', !e.modoPrueba, e.modoPrueba
+          ? 'ACTIVO: los eventos no cuentan para la campana. Quita META_TEST_EVENT_CODE al salir a produccion.'
+          : 'Apagado, los eventos cuentan de verdad'],
+      ];
+
+      var resumen = Object.keys(e.porEvento).map(function (nombre) {
+        var d = e.porEvento[nombre];
+        return '<li class="flex justify-between border-b border-tinta/10 py-2 text-[13px]">' +
+               '<span class="font-600">' + escapar(nombre) + '</span>' +
+               '<span>' + d.ok + ' enviados' + (d.error ? ' · <span class="text-red-600">' + d.error + ' fallidos</span>' : '') + '</span></li>';
+      }).join('');
+
+      $('#metaEstado').innerHTML = tarjetas.map(function (t) {
+        return '<div class="flex items-start gap-3 rounded-2xl border border-tinta/10 bg-white p-5">' +
+          '<span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full ' + (t[1] ? 'bg-green-500' : 'bg-amber-500') + '"></span>' +
+          '<div><p class="font-700 text-noche">' + escapar(t[0]) + '</p>' +
+          '<p class="mt-0.5 text-[13px] text-humo">' + escapar(t[2]) + '</p></div></div>';
+      }).join('') +
+      (resumen ? '<div class="rounded-2xl border border-tinta/10 bg-white p-5"><p class="text-[13px] font-700 uppercase tracking-wider text-noche">Ultimas 24 horas</p><ul class="mt-2">' + resumen + '</ul></div>' : '');
+
+      $('#metaEventos').innerHTML = (e.ultimos || []).map(function (ev) {
+        return '<div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-tinta/10 bg-white px-4 py-2.5 text-[13px]">' +
+          '<span class="font-600">' + escapar(ev.eventName) + '</span>' +
+          '<span class="' + (ev.ok ? 'text-green-600' : 'text-red-600') + '">' + (ev.ok ? 'enviado' : escapar(ev.motivo || 'fallo')) + '</span>' +
+          '<span class="text-humo">' + fecha(ev.enviadoEn) + '</span></div>';
+      }).join('') || '<p class="text-[13px] text-humo">Todavia no se ha enviado ningun evento.</p>';
+    });
+  }
+
+  $('#btnProbarMeta').addEventListener('click', function () {
+    var salida = $('#metaPruebaResultado');
+    salida.textContent = 'Enviando...';
+    api('/meta/probar', { method: 'POST' })
+      .then(function (r) {
+        salida.textContent = r.ok
+          ? 'Meta acepto el evento. Si tienes activo el modo de prueba, aparece en Administrador de eventos > Probar eventos.'
+          : 'Meta lo rechazo: ' + r.motivo;
+        salida.className = 'mt-3 text-[13px] ' + (r.ok ? 'text-green-600' : 'text-red-600');
+        cargarMeta();
+      })
+      .catch(function (err) {
+        salida.textContent = err.message;
+        salida.className = 'mt-3 text-[13px] text-red-600';
+      });
+  });
+
+  // ---- Arranque ---------------------------------------------------------
+
+  fetch('/admin/api/session')
+    .then(function (r) { return r.json(); })
+    .then(function (s) { if (s.isAdmin) mostrarPanel(); else mostrarLogin(); })
+    .catch(mostrarLogin);
+})();
+</script>
+</body>
+</html>
