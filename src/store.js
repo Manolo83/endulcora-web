@@ -219,6 +219,10 @@ function datosPorDefecto() {
       // vive en otro numero: cuando canaliza, le pasa este al cliente para que
       // la conversacion continue contigo, en persona.
       whatsappAtencion: '5215665271901',
+      // Id de la cuenta de WhatsApp Business (Meta > WhatsApp > el numero). Se
+      // usa para suscribir la app a la cuenta; sin eso Meta no entrega los
+      // mensajes reales aunque el webhook este dado de alta.
+      wabaId: '',
     },
   };
 }
@@ -677,6 +681,7 @@ module.exports = {
     if (typeof patch.correoNotificaciones === 'string') c.correoNotificaciones = patch.correoNotificaciones.trim();
     // Se guarda solo con digitos: es lo que pide la liga wa.me.
     if (typeof patch.whatsappAtencion === 'string') c.whatsappAtencion = patch.whatsappAtencion.replace(/\D/g, '');
+    if (typeof patch.wabaId === 'string') c.wabaId = patch.wabaId.replace(/\D/g, '');
     save(data);
     return c;
   },

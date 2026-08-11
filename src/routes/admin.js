@@ -545,6 +545,37 @@ router.get('/api/bot/diagnostico', requireAdmin, async (req, res) => {
   });
 });
 
+// Suscribir la app a la cuenta de WhatsApp Business. Es el enganche que no
+// tiene boton en el panel de Meta y sin el cual los mensajes reales no llegan,
+// aunque el webhook este dado de alta y el boton "Probar" funcione.
+router.post('/api/bot/conectar-whatsapp', requireAdmin, async (req, res) => {
+  const wabaId = String((req.body && req.body.wabaId) || store.getBotConfig().wabaId || '').replace(/\D/g, '');
+  if (!wabaId) {
+    return res.status(400).json({ error: 'Falta el identificador de la cuenta de WhatsApp Business.' });
+  }
+  if (!canales.configurado('whatsapp')) {
+    return res.status(400).json({ error: 'Faltan WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID en el servidor.' });
+  }
+
+  try {
+    store.updateBotConfig({ wabaId });
+    const apps = await canales.suscribirApp(wabaId);
+    res.json({ ok: true, apps });
+  } catch (e) {
+    res.status(502).json({ error: `Meta no aceptó la conexión: ${e.message}` });
+  }
+});
+
+router.get('/api/bot/conexion-whatsapp', requireAdmin, async (req, res) => {
+  const wabaId = String(store.getBotConfig().wabaId || '').replace(/\D/g, '');
+  if (!wabaId || !canales.configurado('whatsapp')) return res.json({ wabaId, apps: null });
+  try {
+    res.json({ wabaId, apps: await canales.appsSuscritas(wabaId) });
+  } catch (e) {
+    res.json({ wabaId, apps: null, error: e.message });
+  }
+});
+
 router.get('/api/bot/conversaciones', requireAdmin, async (req, res) => {
   try {
     res.json(await botAlmacen.listarConversaciones());

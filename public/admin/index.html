@@ -456,6 +456,17 @@
           </label>
           <p id="botEstadoTexto" class="font-ui text-[11px] uppercase tracking-widest text-carbon/50"></p>
           <div id="botDiagnostico" class="mt-4 rounded-xl bg-crema/70 p-4 text-[12px] leading-relaxed"></div>
+          <div class="mt-4 rounded-xl border border-vino/15 p-4">
+            <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-vino">Conexión con WhatsApp</p>
+            <p class="mt-1 text-[12px] text-carbon/60">Dar de alta el webhook en Meta no basta: además hay que suscribir esta app a tu cuenta de WhatsApp Business. Sin eso el botón "Probar" de Meta llega, pero los mensajes de verdad no.</p>
+            <label class="mt-3 block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Id de la cuenta de WhatsApp Business</span>
+              <span class="mt-0.5 block text-[11px] text-carbon/45">Meta → WhatsApp → junto al número, dice "Identificador de la cuenta de WhatsApp Business".</span>
+              <input id="botWabaId" type="text" placeholder="2610114199426655" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 font-mono text-[13px]">
+            </label>
+            <button id="btnConectarWhatsapp" class="mt-3 rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Conectar</button>
+            <p id="botConexionEstado" class="mt-3 text-[12px]"></p>
+          </div>
         </div>
         <div class="mt-5 grid gap-4 sm:grid-cols-3">
           <label class="block">
@@ -1666,6 +1677,43 @@ async function cargarDiagnosticoBot(){
   }
 }
 
+async function cargarConexionWhatsapp(){
+  const caja = $('botConexionEstado');
+  if(!caja) return;
+  try{
+    const d = await api('/admin/api/bot/conexion-whatsapp');
+    if(d.wabaId) $('botWabaId').value = d.wabaId;
+    if(d.apps === null){
+      caja.innerHTML = d.error
+        ? `<span class="text-red-600">No se pudo consultar: ${escapeHtml(d.error)}</span>`
+        : '<span class="text-carbon/50">Sin conectar. Pon el identificador y pica Conectar.</span>';
+    } else if(d.apps.length){
+      caja.innerHTML = `<span class="text-[#3F8F5F] font-600">✅ Conectada</span> <span class="text-carbon/60">· ${d.apps.map(a => escapeHtml(a.nombre || a.id)).join(', ')}</span>`;
+    } else {
+      caja.innerHTML = '<span class="text-red-600 font-600">❌ La cuenta existe pero ninguna app está suscrita. Pica Conectar.</span>';
+    }
+  }catch(e){
+    caja.innerHTML = `<span class="text-red-600">${escapeHtml(e.message)}</span>`;
+  }
+}
+
+$('btnConectarWhatsapp').addEventListener('click', async () => {
+  const boton = $('btnConectarWhatsapp');
+  boton.disabled = true;
+  $('botConexionEstado').innerHTML = '<span class="text-carbon/50">Conectando…</span>';
+  try{
+    await api('/admin/api/bot/conectar-whatsapp', {
+      method: 'POST',
+      body: JSON.stringify({ wabaId: $('botWabaId').value }),
+    });
+    toast('Cuenta de WhatsApp conectada');
+  }catch(e){
+    toast(e.message);
+  }
+  boton.disabled = false;
+  cargarConexionWhatsapp();
+});
+
 async function cargarBot(){
   try{
     const { config, copys } = await api('/admin/api/bot/config');
@@ -1686,6 +1734,7 @@ async function cargarBot(){
     toast(e.message);
   }
   cargarDiagnosticoBot();
+  cargarConexionWhatsapp();
   cargarTalleresBot();
   cargarPanelBot();
 }

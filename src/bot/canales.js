@@ -145,8 +145,50 @@ async function responderComentarioPrivado({ canal, comentarioId, texto }) {
   await llamarGraph(`${BASE}/${comentarioId}/private_replies`, { message: texto.trim() }, tokenDe(canal));
 }
 
+/* ------------------------ Conexion con la cuenta ----------------------- */
+//
+// Suscribirse al campo `messages` en el panel de Meta no basta: eso dice que la
+// APP quiere enterarse. Ademas hay que suscribir la app a la CUENTA de WhatsApp
+// Business, y eso no tiene boton en el panel con el flujo nuevo. Sin este paso
+// el boton "Probar" de Meta llega (va directo a la URL) pero los mensajes
+// reales no, que es un sintoma dificil de leer.
+
+async function consultarGraph(ruta, token) {
+  const res = await fetch(`${BASE}/${ruta}`, { headers: { Authorization: `Bearer ${token}` } });
+  const datos = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const detalle = (datos.error && datos.error.message) || `HTTP ${res.status}`;
+    throw new Error(detalle);
+  }
+  return datos;
+}
+
+async function appsSuscritas(wabaId) {
+  const datos = await consultarGraph(`${wabaId}/subscribed_apps`, tokenDe('whatsapp'));
+  return (datos.data || []).map((a) => ({
+    id: String((a.whatsapp_business_api_data && a.whatsapp_business_api_data.id) || ''),
+    nombre: (a.whatsapp_business_api_data && a.whatsapp_business_api_data.name) || '',
+  }));
+}
+
+async function suscribirApp(wabaId) {
+  const res = await fetch(`${BASE}/${wabaId}/subscribed_apps`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${tokenDe('whatsapp')}` },
+  });
+  const datos = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    // El motivo de Meta se lee en el panel: conviene que llegue en limpio y no
+    // envuelto en el JSON crudo.
+    throw new Error((datos.error && datos.error.message) || `HTTP ${res.status}`);
+  }
+  return appsSuscritas(wabaId);
+}
+
 module.exports = {
   enviarTexto,
+  appsSuscritas,
+  suscribirApp,
   marcarLeido,
   configurado,
   responderComentarioPublico,
