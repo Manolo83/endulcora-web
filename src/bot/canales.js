@@ -43,6 +43,42 @@ function tokenDe(canal) {
   return process.env.META_PAGE_TOKEN || '';
 }
 
+// Escribir debajo de un comentario y suscribir la app a la pagina exigen un
+// token DE LA PAGINA. El de usuario del sistema no sirve para eso aunque tenga
+// todos los permisos: Meta responde "(#210) A page access token is required".
+//
+// Con el del usuario del sistema si se puede PEDIR el de la pagina, y ese
+// hereda su caducidad: si el de origen no caduca, este tampoco. Se pide una
+// sola vez y se guarda en memoria; si Meta lo rechaza, se vuelve a pedir.
+let tokenPaginaEnMemoria = '';
+
+async function tokenPagina() {
+  if (tokenPaginaEnMemoria) return tokenPaginaEnMemoria;
+
+  const origen = process.env.META_PAGE_TOKEN || '';
+  const paginaId = process.env.META_PAGE_ID || '';
+  if (!origen || !paginaId) return origen;
+
+  const res = await fetch(`${BASE}/${paginaId}?fields=access_token`, {
+    headers: { Authorization: `Bearer ${origen}` },
+  });
+  const datos = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(
+      `No se pudo obtener el token de la página: ${(datos.error && datos.error.message) || `HTTP ${res.status}`}`
+    );
+  }
+  // Si META_PAGE_TOKEN ya era de la pagina, Meta devuelve el mismo y no pasa
+  // nada; si era del usuario del sistema, devuelve el que si sirve.
+  tokenPaginaEnMemoria = datos.access_token || origen;
+  return tokenPaginaEnMemoria;
+}
+
+function olvidarTokenPagina() {
+  tokenPaginaEnMemoria = '';
+}
+
 // Messenger e Instagram publican bajo la pagina de Facebook. Con un token de
 // pagina, "me" ya apunta ahi; pero con un token de usuario del sistema (el
 // permanente, el que no caduca) "me" seria el usuario del sistema y el envio
@@ -81,7 +117,7 @@ async function enviarTexto({ canal, destino, texto }) {
     console.warn(`[bot] No se envio nada por ${canal}: faltan las variables de entorno.`);
     return;
   }
-  const token = tokenDe(canal);
+  const token = canal === 'whatsapp' ? tokenDe('whatsapp') : await tokenPagina();
   const para = normalizarDestino(canal, destino);
 
   for (const parte of trozos(texto)) {
@@ -140,7 +176,7 @@ async function responderComentarioPublico({ canal, comentarioId, texto }) {
   if (!configurado(canal) || !texto || !texto.trim()) return;
   // Facebook responde al comentario con /comments; Instagram con /replies.
   const ruta = canal === 'instagram' ? 'replies' : 'comments';
-  await llamarGraph(`${BASE}/${comentarioId}/${ruta}`, { message: texto.trim() }, tokenDe(canal));
+  await llamarGraph(`${BASE}/${comentarioId}/${ruta}`, { message: texto.trim() }, await tokenPagina());
 }
 
 async function responderComentarioPrivado({ canal, comentarioId, texto }) {
@@ -152,12 +188,12 @@ async function responderComentarioPrivado({ canal, comentarioId, texto }) {
     await llamarGraph(
       `${BASE}/${nodoPagina()}/messages`,
       { recipient: { comment_id: comentarioId }, message: { text: texto.trim() } },
-      tokenDe(canal)
+      await tokenPagina()
     );
     return;
   }
 
-  await llamarGraph(`${BASE}/${comentarioId}/private_replies`, { message: texto.trim() }, tokenDe(canal));
+  await llamarGraph(`${BASE}/${comentarioId}/private_replies`, { message: texto.trim() }, await tokenPagina());
 }
 
 /* ---------------------- Conexion con la pagina ------------------------ */
@@ -179,7 +215,7 @@ async function consultarGraph(ruta, token) {
 }
 
 async function appsSuscritas(paginaId) {
-  const datos = await consultarGraph(`${paginaId}/subscribed_apps`, tokenDe('messenger'));
+  const datos = await consultarGraph(`${paginaId}/subscribed_apps`, await tokenPagina());
   return (datos.data || []).map((a) => ({
     nombre: a.name || a.id || '',
     campos: a.subscribed_fields || [],
@@ -189,7 +225,7 @@ async function appsSuscritas(paginaId) {
 async function suscribirPagina(paginaId) {
   const res = await fetch(`${BASE}/${paginaId}/subscribed_apps?subscribed_fields=${CAMPOS_PAGINA}`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${tokenDe('messenger')}` },
+    headers: { Authorization: `Bearer ${await tokenPagina()}` },
   });
   const datos = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -204,6 +240,7 @@ module.exports = {
   enviarTexto,
   appsSuscritas,
   suscribirPagina,
+  olvidarTokenPagina,
   marcarLeido,
   configurado,
   responderComentarioPublico,

@@ -554,6 +554,9 @@ router.post('/api/bot/conectar-pagina', requireAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Falta META_PAGE_TOKEN en el servidor.' });
   }
   try {
+    // Se tira el token guardado en memoria: si acabas de corregir la variable,
+    // el boton debe usar el nuevo sin esperar a un redespliegue.
+    canales.olvidarTokenPagina();
     res.json({ ok: true, apps: await canales.suscribirPagina(paginaId) });
   } catch (e) {
     res.status(502).json({ error: `Meta no aceptó la conexión: ${e.message}` });
