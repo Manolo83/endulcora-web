@@ -340,7 +340,7 @@ async function procesarMensaje(entrante) {
       estado: 'humano',
       motivoEscalado: `El cliente mandó un ${entrante.tipo} (posible comprobante)`,
     });
-    await enviar(store.getBotCopys().redireccion);
+    await enviar(copysBot.copyRedireccion());
     const mensajes = await almacen.historial(contacto.id, 40);
     notificaciones.avisarEscalado({
       contacto,

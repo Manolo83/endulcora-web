@@ -285,7 +285,7 @@ async function ejecutarHerramienta(nombre, entrada, ctx) {
 
     case 'canalizar': {
       const motivo = String(entrada.motivo || 'Consulta fuera del bot de ventas').slice(0, 300);
-      await ctx.enviar(copys.redireccion);
+      await ctx.enviar(copysBot.copyRedireccion());
       await almacen.actualizarContacto(ctx.contacto.id, { estado: 'humano', motivoEscalado: motivo });
       ctx.entregado = true;
 

@@ -187,10 +187,59 @@ function copyAvisoUrgente({ taller, personas, desde }) {
   };
 }
 
+/* ---- Canalizar con una persona ---- */
+//
+// El bot atiende en su propio numero; lo que se sale de la venta lo ve una
+// persona desde el WhatsApp de siempre. Por eso el mensaje de canalizacion
+// lleva la liga: el cliente pasa de un chat al otro con un toque, en vez de
+// quedarse esperando a que alguien lo busque.
+
+// "5215665271901" -> "56 6527 1901": como lo escribiria cualquiera en Mexico.
+function telefonoLegible(digitos) {
+  const limpio = String(digitos || '').replace(/\D/g, '');
+  const nacional = limpio.replace(/^52(1)?/, '');
+  if (nacional.length !== 10) return limpio;
+  return `${nacional.slice(0, 2)} ${nacional.slice(2, 6)} ${nacional.slice(6)}`;
+}
+
+function copyRedireccion() {
+  const config = store.getBotConfig();
+  const copy = store.getBotCopys().redireccion || '';
+  const digitos = String(config.whatsappAtencion || '').replace(/\D/g, '');
+
+  // Sin numero configurado, la liga sobra: se quitan esas lineas en vez de
+  // mandarle al cliente un "https://wa.me/" roto. Y con ellas se va la linea
+  // que las presentaba ("Escríbele por aquí:"), que sola no dice nada.
+  if (!digitos) {
+    const lineas = copy.split('\n');
+    const fuera = new Set();
+    lineas.forEach((linea, i) => {
+      if (!/\{\{(LIGA_WHATSAPP|WHATSAPP_ATENCION)\}\}/.test(linea)) return;
+      fuera.add(i);
+      for (let j = i - 1; j >= 0 && !fuera.has(j); j--) {
+        if (!lineas[j].trim()) continue;
+        if (lineas[j].trim().endsWith(':')) fuera.add(j);
+        break;
+      }
+    });
+    return lineas
+      .filter((_, i) => !fuera.has(i))
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  return copy
+    .replace(/\{\{LIGA_WHATSAPP\}\}/g, `https://wa.me/${digitos}`)
+    .replace(/\{\{WHATSAPP_ATENCION\}\}/g, telefonoLegible(digitos));
+}
+
 module.exports = {
   copyTaller,
   copyPromo,
   copyAvisoUrgente,
+  copyRedireccion,
+  telefonoLegible,
   bloqueFechas,
   fechasDeTaller,
   horaLimite,

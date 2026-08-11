@@ -73,8 +73,11 @@ const DEFAULT_BOT_COPYS = {
   instrucciones_pago:
     '✨ *Instrucciones de Pago* ✨\n\n(Pega aquí tus instrucciones de pago desde /admin > Bot de ventas: cuentas, OXXO, Mercado Pago y PayPal.)',
   espera_apartado: 'Quedamos a la espera de su apartado ✨',
+  // El bot vive en su propio numero; ese tema lo atiende una persona desde el
+  // WhatsApp de siempre. Por eso aqui va la liga: para que el cliente no tenga
+  // que esperar a que alguien lo busque.
   redireccion:
-    'Déjame te canalizo con la persona encargada de ese tema para darte una atención personalizada. En un momento te contactan por aquí ✨',
+    'Ese tema lo ve directamente una persona del equipo, para darte una atención como se debe 💬\n\nEscríbele por aquí y te atiende personalmente:\n{{LIGA_WHATSAPP}}\n\nO guarda el número: *{{WHATSAPP_ATENCION}}*\n\nYa le pasé tu conversación para que no tengas que repetir nada ✨',
   sin_fechas:
     'Ahorita no tengo fechas abiertas de ese taller. ¿Quieres que te avisemos en cuanto se publiquen?',
   // Lo que Endulcorito deja escrito EN PÚBLICO debajo del comentario. Lo lee
@@ -84,6 +87,16 @@ const DEFAULT_BOT_COPYS = {
   // Y lo que le llega a esa persona al privado, para abrir la conversación.
   comentario_privado:
     '¡Hola! Soy Endulcorito, el asistente de Endulcora 🧁 Vi tu comentario y te escribo por aquí para pasarte la información. Te aviso que soy un asistente automático; si no quieres recibir más mensajes escribe BAJA.',
+};
+
+// Textos que ya no describen como opera el bot. Al arrancar se cambian por el
+// nuevo, pero solo si nadie los edito desde /admin (ver init).
+const COPYS_REEMPLAZADOS = {
+  // El bot dejo de vivir en el numero de atencion: ahora tiene el suyo, y al
+  // canalizar tiene que pasarle al cliente el WhatsApp de la persona. Decirle
+  // "en un momento te contactan por aquí" ya seria mentira.
+  redireccion:
+    'Déjame te canalizo con la persona encargada de ese tema para darte una atención personalizada. En un momento te contactan por aquí ✨',
 };
 
 const DEFAULT_PRODUCTS = [
@@ -202,6 +215,10 @@ function datosPorDefecto() {
       // el bot manda el aviso.
       horasParaPagar: 24,
       correoNotificaciones: 'endulcora@gmail.com',
+      // El WhatsApp de siempre, el que sigue en el telefono con la app. El bot
+      // vive en otro numero: cuando canaliza, le pasa este al cliente para que
+      // la conversacion continue contigo, en persona.
+      whatsappAtencion: '5215665271901',
     },
   };
 }
@@ -246,6 +263,15 @@ async function init() {
     for (const key of Object.keys(defaults.botConfig)) {
       if (!Object.prototype.hasOwnProperty.call(data.botConfig, key)) {
         data.botConfig[key] = defaults.botConfig[key];
+        changed = true;
+      }
+    }
+    // Copys que quedaron obsoletos por un cambio de como opera el bot. Solo se
+    // reemplazan si siguen palabra por palabra como venian de fabrica: si el
+    // admin los edito, se respeta lo que escribio.
+    for (const [key, textoViejo] of Object.entries(COPYS_REEMPLAZADOS)) {
+      if (data.botCopys[key] === textoViejo) {
+        data.botCopys[key] = DEFAULT_BOT_COPYS[key];
         changed = true;
       }
     }
@@ -649,6 +675,8 @@ module.exports = {
     if (patch.anticipoRegular !== undefined) c.anticipoRegular = Math.max(0, parseInt(patch.anticipoRegular, 10) || 0);
     if (patch.horasParaPagar !== undefined) c.horasParaPagar = Math.max(1, Math.min(48, parseInt(patch.horasParaPagar, 10) || 2));
     if (typeof patch.correoNotificaciones === 'string') c.correoNotificaciones = patch.correoNotificaciones.trim();
+    // Se guarda solo con digitos: es lo que pide la liga wa.me.
+    if (typeof patch.whatsappAtencion === 'string') c.whatsappAtencion = patch.whatsappAtencion.replace(/\D/g, '');
     save(data);
     return c;
   },

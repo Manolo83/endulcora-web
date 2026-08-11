@@ -470,6 +470,11 @@
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo de avisos</span>
             <input id="botCorreo" type="email" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">WhatsApp de atención personal</span>
+            <span class="mt-0.5 block text-[11px] text-carbon/45">Tu número de siempre, el del teléfono. Cuando el bot canaliza, le pasa esta liga al cliente para que te escriba directo. Con lada del país: 52.</span>
+            <input id="botWhatsapp" type="tel" placeholder="5215665271901" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
         </div>
       </div>
 
@@ -1620,6 +1625,7 @@ async function cargarBot(){
     $('botAnticipo').value = config.anticipoPorPersona;
     $('botHoras').value = config.horasParaPagar;
     $('botCorreo').value = config.correoNotificaciones || '';
+    $('botWhatsapp').value = config.whatsappAtencion || '';
     $('botEstadoTexto').textContent = config.activo ? 'Respondiendo mensajes' : 'Apagado · no contesta nada';
 
     $('botCopysCampos').innerHTML = CAMPOS_COPY.map(([clave, titulo, ayuda]) => `
@@ -1647,6 +1653,7 @@ $('btnGuardarBot').addEventListener('click', async () => {
           anticipoPorPersona: $('botAnticipo').value,
           horasParaPagar: $('botHoras').value,
           correoNotificaciones: $('botCorreo').value,
+          whatsappAtencion: $('botWhatsapp').value,
         },
         copys,
       }),
