@@ -240,7 +240,22 @@ siempre desde aistudio.google.com.
 Si `GEMINI_API_KEY` no está configurada, la burbuja del asistente sigue
 apareciendo, pero responde que todavía no está activado.
 
-## 12. Notas técnicas y mejoras futuras (opcionales)
+## 12. Campañas de Meta Ads (Facebook e Instagram)
+
+La carpeta `ads/` tiene un script que crea las campañas de anuncios sin entrar
+al Administrador de Anuncios a llenar formularios uno por uno. Usa la misma
+estructura que ya funciona para Endulcora (objetivo Interacción → conversaciones
+de WhatsApp, presupuesto diario por taller, público por radio alrededor de la
+sede) y sirve para varias cuentas: hoy están `endulcora` e `instituto-justo`.
+
+```bash
+node ads/publicar.js instituto-justo              # muestra el plan, no crea nada
+node ads/publicar.js instituto-justo --publicar   # las crea en pausa en Meta
+```
+
+Las instrucciones completas están en [`ads/README.md`](ads/README.md).
+
+## 13. Notas técnicas y mejoras futuras (opcionales)
 
 - El sitio usa Tailwind CSS por CDN para mantener el HTML original tal cual
   — funciona perfecto para el tráfico de un sitio personal/pequeño negocio.

@@ -1,0 +1,2 @@
+Pon aquí las imágenes de los anuncios de Endulcora, con el nombre que pide
+cada oferta en ads/cuentas/endulcora.js.
