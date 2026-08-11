@@ -240,7 +240,60 @@ siempre desde aistudio.google.com.
 Si `GEMINI_API_KEY` no está configurada, la burbuja del asistente sigue
 apareciendo, pero responde que todavía no está activado.
 
-## 12. Notas técnicas y mejoras futuras (opcionales)
+## 12. Campañas de Meta Ads para Crenef
+
+En `src/ads/` está el código que crea en Meta Ads las campañas de **Crenef**
+copiando exactamente la receta con la que hoy corren las de Endulcora. En vez
+de armar cada campaña a mano en el Administrador de anuncios, llenas un archivo
+con los talleres y las sedes, y el script hace el resto.
+
+### Qué receta copia (el "machote" de Endulcora)
+
+| Nivel | Cómo queda |
+|---|---|
+| **Campaña** | Una por cada taller y cada sede. Nombre `AGO26 · Taller · Sede`, objetivo Interacción, subasta, presupuesto en el conjunto (no en la campaña) |
+| **Conjunto** | $150 MXN al día, máximo volumen, optimizado a conversaciones, destino WhatsApp, 25 a 55 años, radio de 7 km alrededor de la sede y solo gente que vive ahí |
+| **Anuncio** | Imagen única, botón "Enviar mensaje por WhatsApp", copy en 4 bloques: gancho, qué te llevas, formato del taller, y el cierre con el anticipo |
+
+### Cómo lanzarlas
+
+1. **Consigue el token.** En [developers.facebook.com](https://developers.facebook.com)
+   > Herramientas > Explorador de la API Graph: elige tu app, pide el permiso
+   `ads_management` y genera el token. Pégalo en tu `.env` como `META_ADS_TOKEN`.
+   Solo vive en tu máquina; el sitio en Railway no lo necesita.
+
+2. **Llena `src/ads/crenef.config.js`.** Es el único archivo que se edita. Todo
+   lo que dice `PENDIENTE` es un dato del negocio que hay que poner: la cuenta
+   publicitaria, el WhatsApp que recibe los mensajes, las sedes con su dirección
+   y coordenadas, y cada taller con su copy, su imagen y sus fechas.
+
+3. **Mira qué se va a crear**, sin tocar Meta todavía:
+
+   ```bash
+   npm run ads:crenef
+   ```
+
+   Te enseña la lista de campañas, el gasto diario total y las fechas. Si falta
+   algún dato, te dice cuál en vez de mandar la campaña incompleta a Meta.
+
+4. **Créalas de verdad:**
+
+   ```bash
+   npm run ads:crenef -- --crear
+   ```
+
+   Todo nace **en pausa**: campañas, conjuntos y anuncios. Las revisas en el
+   Administrador de anuncios y las prendes tú. Nada empieza a gastar solo.
+
+### Antes de la primera corrida
+
+La página de Facebook de Crenef (`112678221416248`) todavía no está ligada a
+ninguna cuenta publicitaria, y la cuenta vacía `376340486445864` no tiene
+método de pago. Las dos cosas se arreglan en Business Manager (**Configuración
+del negocio > Cuentas publicitarias > Agregar activos**); si no, Meta acepta
+crear las campañas pero no las entrega.
+
+## 13. Notas técnicas y mejoras futuras (opcionales)
 
 - El sitio usa Tailwind CSS por CDN para mantener el HTML original tal cual
   — funciona perfecto para el tráfico de un sitio personal/pequeño negocio.
