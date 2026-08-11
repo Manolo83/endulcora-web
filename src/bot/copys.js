@@ -141,15 +141,40 @@ function conNumero(copy) {
     .replace(/\{\{WHATSAPP_ATENCION\}\}/g, telefonoLegible(digitos));
 }
 
-// Lo que se deja debajo del comentario, a la vista de todos. Cambia segun si el
-// mensaje privado si salio: prometer en publico un privado que nunca llego es
-// peor que no prometer nada.
-function copyComentarioPublico(privadoEnviado = true) {
+// Un comentario de Facebook aguanta mucho texto, pero nadie lee un parrafo
+// enorme colgado de un comentario. La respuesta se recorta en el ultimo punto
+// que quepa, para no cortar a media palabra.
+const LARGO_RESPUESTA_PUBLICA = 420;
+
+function recortar(texto, largo) {
+  const limpio = String(texto || '').trim();
+  if (limpio.length <= largo) return limpio;
+  const corte = limpio.slice(0, largo);
+  const punto = Math.max(corte.lastIndexOf('. '), corte.lastIndexOf('! '), corte.lastIndexOf('? '));
+  return punto > largo * 0.5 ? corte.slice(0, punto + 1) : `${corte.trimEnd()}…`;
+}
+
+// Lo que se deja debajo del comentario, a la vista de todos. Lleva la respuesta
+// a la duda: es el unico canal que funciona con cualquier persona sin permisos
+// especiales de Meta, asi que no puede limitarse a "te escribo por privado".
+//
+// Cambia segun si el mensaje privado si salio: prometer en publico un privado
+// que nunca llego es peor que no prometer nada.
+function copyComentarioPublico(privadoEnviado = true, respuesta = '') {
   const copys = store.getBotCopys();
   const texto = privadoEnviado
     ? copys.comentario_publico
     : copys.comentario_publico_sin_privado || copys.comentario_publico;
-  return conNumero(texto);
+
+  const limpia = recortar(respuesta, LARGO_RESPUESTA_PUBLICA);
+  return conNumero(
+    texto
+      .split('\n')
+      // Sin respuesta del modelo, el renglon del marcador sobra entero.
+      .filter((linea) => limpia || !linea.includes('{{RESPUESTA}}'))
+      .join('\n')
+      .replace(/\{\{RESPUESTA\}\}/g, limpia)
+  ).replace(/\n{3,}/g, '\n\n').trim();
 }
 
 // El mensaje privado completo: saludo de la marca, la respuesta que redacto el

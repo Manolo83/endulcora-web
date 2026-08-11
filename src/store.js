@@ -64,13 +64,16 @@ const DEFAULT_BOT_COPYS = {
   // Lo que Endulcorito deja EN PÚBLICO debajo del comentario. Lo lee cualquiera
   // que pase por la publicación, asi que va corto, amable y con la liga: mucha
   // gente no abre los mensajes privados pero si toca un enlace.
+  // {{RESPUESTA}} es lo que redacto el modelo para esa duda en particular. Va
+  // en publico a proposito: lo lee todo el que pase por la publicacion, no solo
+  // quien pregunto, y no depende de ningun permiso especial de Meta.
   comentario_publico:
-    '¡Hola! Soy Endulcorito 🧁 Te acabo de mandar la información por privado ✨\nY si prefieres, escríbenos por WhatsApp: {{LIGA_WHATSAPP}}',
+    '¡Hola! Soy Endulcorito 🧁\n{{RESPUESTA}}\nTe mando más detalles por privado ✨ Y si prefieres, escríbenos por WhatsApp: {{LIGA_WHATSAPP}}',
   // Cuando el privado no se pudo mandar (la persona tiene los mensajes
-  // cerrados, o Meta lo rechaza), prometerle un privado que nunca llega seria
-  // mentirle en publico. Este texto no promete nada y deja la liga a la vista.
+  // cerrados, o Meta todavia no aprueba ese permiso), prometerle un privado que
+  // nunca llega seria mentirle en publico. Este no promete nada.
   comentario_publico_sin_privado:
-    '¡Hola! Soy Endulcorito 🧁 Con gusto te paso toda la información por WhatsApp:\n{{LIGA_WHATSAPP}}',
+    '¡Hola! Soy Endulcorito 🧁\n{{RESPUESTA}}\nEscríbenos por WhatsApp y te atendemos personalmente: {{LIGA_WHATSAPP}}',
   // El saludo del mensaje privado. Después de esto va la respuesta a su duda.
   comentario_privado:
     '¡Hola! Soy Endulcorito, el asistente de Endulcora 🧁 Vi tu comentario y te escribo por aquí para ayudarte.',
@@ -81,14 +84,23 @@ const DEFAULT_BOT_COPYS = {
 };
 
 // Textos que ya no describen como opera el bot. Al arrancar se cambian por el
-// nuevo, pero solo si nadie los edito desde /admin (ver init).
+// nuevo, pero solo si siguen palabra por palabra como venian de fabrica: si el
+// admin los edito, se respeta lo que escribio (ver init).
 const COPYS_REEMPLAZADOS = {
-  // El bot dejo de llevar el embudo de venta: ahora solo contesta comentarios y
-  // manda a WhatsApp. Prometer que "te mandé toda la información" ya no aplica,
-  // porque el privado lleva una respuesta a la duda, no el copy completo.
-  comentario_publico: '¡Hola! Soy Endulcorito 🧁 Te acabo de mandar toda la información por privado ✨',
-  comentario_privado:
+  comentario_publico: [
+    // Cuando el bot todavia llevaba el embudo de venta.
+    '¡Hola! Soy Endulcorito 🧁 Te acabo de mandar toda la información por privado ✨',
+    // Cuando la respuesta a la duda solo iba en el privado. Meta reserva ese
+    // envio para apps con acceso avanzado, asi que la respuesta se mudo al
+    // comentario publico, que funciona con cualquiera.
+    '¡Hola! Soy Endulcorito 🧁 Te acabo de mandar la información por privado ✨\nY si prefieres, escríbenos por WhatsApp: {{LIGA_WHATSAPP}}',
+  ],
+  comentario_publico_sin_privado: [
+    '¡Hola! Soy Endulcorito 🧁 Con gusto te paso toda la información por WhatsApp:\n{{LIGA_WHATSAPP}}',
+  ],
+  comentario_privado: [
     '¡Hola! Soy Endulcorito, el asistente de Endulcora 🧁 Vi tu comentario y te escribo por aquí para pasarte la información. Te aviso que soy un asistente automático; si no quieres recibir más mensajes escribe BAJA.',
+  ],
 };
 
 const DEFAULT_PRODUCTS = [
@@ -258,8 +270,8 @@ async function init() {
     // Copys que quedaron obsoletos por un cambio de como opera el bot. Solo se
     // reemplazan si siguen palabra por palabra como venian de fabrica: si el
     // admin los edito, se respeta lo que escribio.
-    for (const [key, textoViejo] of Object.entries(COPYS_REEMPLAZADOS)) {
-      if (data.botCopys[key] === textoViejo) {
+    for (const [key, viejos] of Object.entries(COPYS_REEMPLAZADOS)) {
+      if (viejos.includes(data.botCopys[key])) {
         data.botCopys[key] = DEFAULT_BOT_COPYS[key];
         changed = true;
       }

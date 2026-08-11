@@ -296,7 +296,7 @@ async function procesarComentario(evento) {
 
   // 3. Y en publico, corto y amable: lo lee cualquiera que pase por ahi. Si el
   // privado no salio, no se le promete uno que nunca va a llegar.
-  const publico = copysBot.copyComentarioPublico(privadoEnviado);
+  const publico = copysBot.copyComentarioPublico(privadoEnviado, respuesta);
   try {
     await canales.responderComentarioPublico({
       canal: evento.canal,
