@@ -38,6 +38,11 @@ const DEFAULT_CONTENT = {
   clase_titulo: 'Vela de mantequilla\ntrufada, paso a paso',
   clase_descripcion:
     'Dos horas por videollamada con el Chef Luis Alfonso: temperatura de la mezcla, montaje del pabilo, desmolde y costeo en vivo de la pieza que armes. Queda grabada.',
+  clase_mostrar: 'false',
+  clase_dia_semana: '4',
+  clase_hora: '19:00',
+  clase_cupos_totales: '25',
+  clase_cupos_apartados: '0',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',

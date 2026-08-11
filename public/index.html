@@ -404,7 +404,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 </section>
 
 <!-- ══════════════ CLASE EN VIVO · TEMPORIZADOR ══════════════ -->
-<section id="clase" class="scroll-mt-24 bg-crema py-20 lg:py-24">
+<section id="clase" class="hidden scroll-mt-24 bg-crema py-20 lg:py-24">
   <div class="mx-auto max-w-6xl px-5 lg:px-8">
     <div class="reveal overflow-hidden rounded-[32px] bg-vino ring-1 ring-flama/25 shadow-[0_16px_50px_rgba(78,20,84,.15)]">
       <div class="grid lg:grid-cols-[1fr_.85fr]">
@@ -476,7 +476,7 @@ trufada, paso a paso</h2>
           </div>
           <div class="absolute bottom-10 left-1/2 w-full max-w-[240px] -translate-x-1/2 text-center">
             <p class="font-firma text-3xl text-flama">en vivo</p>
-            <p class="mt-2 font-ui text-[11px] uppercase tracking-[.25em] text-crema/60">Jueves · 19:00 h · CDMX</p>
+            <p id="claseDiaHora" class="mt-2 font-ui text-[11px] uppercase tracking-[.25em] text-crema/60">Jueves · 19:00 h · CDMX</p>
             <p class="mt-4 text-sm text-crema/60">Grabación disponible 30 días</p>
           </div>
         </div>
@@ -1307,17 +1307,21 @@ async function suscribir(){
 }
 
 /* ---------- Temporizador de la clase en vivo ---------- */
+const DIAS_SEMANA = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+let CLASE_DIA = 4, CLASE_HH = 19, CLASE_MM = 0;
+
 function proximaClase(){
   const ahora = new Date();
   const d = new Date(ahora);
-  d.setHours(19,0,0,0);
-  const diasAlJueves = (4 - d.getDay() + 7) % 7; // 4 = jueves
-  d.setDate(d.getDate() + diasAlJueves);
+  d.setHours(CLASE_HH, CLASE_MM, 0, 0);
+  const diasAlObjetivo = (CLASE_DIA - d.getDay() + 7) % 7;
+  d.setDate(d.getDate() + diasAlObjetivo);
   if(d <= ahora) d.setDate(d.getDate() + 7);
   return d;
 }
 function formatoFechaClase(d){
-  return d.toLocaleDateString('es-MX',{weekday:'long', day:'numeric', month:'long'}).replace(/^\w/, c=>c.toUpperCase()) + ' · 19:00 h';
+  const hora = `${String(CLASE_HH).padStart(2,'0')}:${String(CLASE_MM).padStart(2,'0')}`;
+  return d.toLocaleDateString('es-MX',{weekday:'long', day:'numeric', month:'long'}).replace(/^\w/, c=>c.toUpperCase()) + ` · ${hora} h`;
 }
 let fechaClase = proximaClase();
 document.getElementById('fechaClase').textContent = formatoFechaClase(fechaClase);
@@ -1334,13 +1338,37 @@ function tick(){
   document.getElementById('cdHoras').textContent = dosDig(Math.floor(s%86400/3600));
   document.getElementById('cdMin').textContent = dosDig(Math.floor(s%3600/60));
   document.getElementById('cdSeg').textContent = dosDig(s%60);
-  const faltanDias = resta/86400000;
-  const apartados = Math.min(24, Math.round(25 - faltanDias*1.1));
-  document.getElementById('cuposTexto').textContent = apartados + ' de 25';
-  document.getElementById('barraCupos').style.width = (apartados/25*100) + '%';
 }
 tick();
 setInterval(tick, 1000);
+
+function aplicarClaseEnVivo(c){
+  const seccion = document.getElementById('clase');
+  const mostrar = c.clase_mostrar !== 'false';
+  if(seccion) seccion.classList.toggle('hidden', !mostrar);
+  document.querySelectorAll('a[href="#clase"]').forEach(a => {
+    const li = a.closest('li');
+    (li || a).classList.toggle('hidden', !mostrar);
+  });
+  if(!mostrar) return;
+
+  CLASE_DIA = Math.min(6, Math.max(0, parseInt(c.clase_dia_semana, 10) || 0));
+  const [hh, mm] = String(c.clase_hora || '19:00').split(':').map(n => parseInt(n, 10) || 0);
+  CLASE_HH = hh; CLASE_MM = mm;
+  fechaClase = proximaClase();
+  document.getElementById('fechaClase').textContent = formatoFechaClase(fechaClase);
+  tick();
+
+  const totales = Math.max(0, parseInt(c.clase_cupos_totales, 10) || 0);
+  const apartados = Math.max(0, Math.min(totales, parseInt(c.clase_cupos_apartados, 10) || 0));
+  const cuposTexto = document.getElementById('cuposTexto');
+  const barraCupos = document.getElementById('barraCupos');
+  if(cuposTexto) cuposTexto.textContent = `${apartados} de ${totales}`;
+  if(barraCupos) barraCupos.style.width = (totales ? (apartados/totales*100) : 0) + '%';
+
+  const diaHora = document.getElementById('claseDiaHora');
+  if(diaHora) diaHora.textContent = `${DIAS_SEMANA[CLASE_DIA]} · ${String(CLASE_HH).padStart(2,'0')}:${String(CLASE_MM).padStart(2,'0')} h · CDMX`;
+}
 
 /* ---------- Burbuja de próximos talleres (toma la promo destacada de la semana) ---------- */
 function pintarBurbujaTaller(){
@@ -1570,6 +1598,8 @@ async function cargarContenido(){
     const wrapChef = document.getElementById('chefImagenWrap');
     if(wrapChef) wrapChef.innerHTML = `<img src="${c.chef_imagen}" alt="${escapeHtml(c.chef_nombre || 'Chef de Endulcora')}" class="h-full w-full object-cover">`;
   }
+
+  aplicarClaseEnVivo(c);
 
   if(c.asistente_icono){
     const imgAsistente = document.getElementById('iconoAsistenteImg');
