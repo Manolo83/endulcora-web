@@ -7,7 +7,3 @@ data/
 
 # Salidas de las corridas de ads/publicar.js (IDs de campañas creadas)
 ads/salidas/
-# Imágenes de los anuncios (pesan y no son código)
-ads/creativos/**/*.jpg
-ads/creativos/**/*.jpeg
-ads/creativos/**/*.png

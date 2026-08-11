@@ -31,6 +31,8 @@ archivo de configuración.
 | `creativos/<cuenta>/` | Las imágenes de los anuncios (1080×1080 o 1080×1350). |
 | `salidas/` | Los IDs de lo que se creó, por si hay que borrarlo o revisarlo. |
 
+> ¿Primera vez? Sigue [`PASO-A-PASO.md`](PASO-A-PASO.md), que va desde cero.
+
 ## Antes de la primera vez
 
 1. En `.env`, agrega el token de Meta:

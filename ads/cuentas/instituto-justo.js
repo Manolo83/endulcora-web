@@ -10,6 +10,10 @@
 //   - el número de WhatsApp (o cambia `destino` a 'messenger')
 //   - las fechas de cada oferta
 //   - las imágenes en ads/creativos/instituto-justo/
+//
+// Si todavía no hay imágenes nuevas, cada oferta trae comentado el `imageHash`
+// de una imagen que YA está subida en la cuenta: descomenta esa línea y el
+// script no necesita archivo local.
 
 module.exports = {
   clave: 'instituto-justo',
@@ -56,6 +60,8 @@ module.exports = {
       presupuestoDiarioCentavos: 20000,
       creativo: {
         imagen: 'regularizacion.jpg',
+        // Imagen ya subida en la cuenta (Instituto_Justo_Canva_Set 1080x1080):
+        // imageHash: 'de3d7f4aa2124ee5dae08438436c69b2',
         encabezado: 'Regularización en Coyoacán',
         texto: [
           'Un niño no reprueba matemáticas por flojo. Reprueba porque se quedó atorado en un tema de hace dos años y nadie se dio cuenta.',
@@ -79,6 +85,8 @@ module.exports = {
       presupuestoDiarioCentavos: 15000,
       creativo: {
         imagen: 'matematicas.jpg',
+        // Imagen ya subida en la cuenta ("Curso de Matemáticas Secundaria y Prepa"):
+        // imageHash: '62616f2146a6426b9063ad6ef5d60fea',
         encabezado: 'Clases de matemáticas',
         texto: [
           'No se te dan las matemáticas. Eso te dijeron en la secundaria y te lo creíste.',
@@ -101,6 +109,8 @@ module.exports = {
       presupuestoDiarioCentavos: 15000,
       creativo: {
         imagen: 'admision.jpg',
+        // Imagen ya subida en la cuenta (Instituto_Justo_Canva_Set 1080x1080):
+        // imageHash: 'f3dc5cd685b5963d9b8e408ab4a648d2',
         encabezado: 'Preparación COMIPEMS',
         texto: [
           'El examen de COMIPEMS no mide qué tanto sabe tu hijo. Mide qué tan rápido resuelve bajo presión.',
