@@ -544,6 +544,32 @@ router.get('/api/bot/diagnostico', requireAdmin, async (req, res) => {
   });
 });
 
+// Suscribir la app a la pagina de Facebook. Es el enganche que no tiene boton
+// en el panel de Meta y sin el cual los comentarios reales no llegan, aunque el
+// webhook este dado de alta y el boton "Probar" funcione.
+router.post('/api/bot/conectar-pagina', requireAdmin, async (req, res) => {
+  const paginaId = String(process.env.META_PAGE_ID || '').replace(/\D/g, '');
+  if (!paginaId) return res.status(400).json({ error: 'Falta META_PAGE_ID en el servidor.' });
+  if (!canales.configurado('messenger')) {
+    return res.status(400).json({ error: 'Falta META_PAGE_TOKEN en el servidor.' });
+  }
+  try {
+    res.json({ ok: true, apps: await canales.suscribirPagina(paginaId) });
+  } catch (e) {
+    res.status(502).json({ error: `Meta no aceptó la conexión: ${e.message}` });
+  }
+});
+
+router.get('/api/bot/conexion-pagina', requireAdmin, async (req, res) => {
+  const paginaId = String(process.env.META_PAGE_ID || '').replace(/\D/g, '');
+  if (!paginaId || !canales.configurado('messenger')) return res.json({ paginaId, apps: null });
+  try {
+    res.json({ paginaId, apps: await canales.appsSuscritas(paginaId) });
+  } catch (e) {
+    res.json({ paginaId, apps: null, error: e.message });
+  }
+});
+
 router.get('/api/bot/conversaciones', requireAdmin, async (req, res) => {
   try {
     res.json(await botAlmacen.listarConversaciones());

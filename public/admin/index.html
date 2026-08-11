@@ -457,6 +457,12 @@
           <p id="botEstadoTexto" class="font-ui text-[11px] uppercase tracking-widest text-carbon/50"></p>
         </div>
         <div id="botDiagnostico" class="mt-4 rounded-xl bg-crema/70 p-4 text-[12px] leading-relaxed"></div>
+        <div class="mt-4 rounded-xl border border-vino/15 p-4">
+          <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-vino">Conexión con la página</p>
+          <p class="mt-1 text-[12px] text-carbon/60">Dar de alta el webhook en Meta no basta: además hay que suscribir esta app a tu página de Facebook. Sin eso el botón "Probar" de Meta llega, pero los comentarios de verdad no.</p>
+          <button id="btnConectarPagina" class="mt-3 rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Conectar</button>
+          <p id="botConexionEstado" class="mt-3 text-[12px]"></p>
+        </div>
         <div class="mt-5 grid gap-4 sm:grid-cols-2">
           <label class="block">
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo de avisos</span>
@@ -1642,6 +1648,43 @@ async function cargarDiagnosticoBot(){
   }
 }
 
+async function cargarConexionPagina(){
+  const caja = $('botConexionEstado');
+  if(!caja) return;
+  try{
+    const d = await api('/admin/api/bot/conexion-pagina');
+    if(d.apps === null){
+      caja.innerHTML = d.error
+        ? `<span class="text-red-600">No se pudo consultar: ${escapeHtml(d.error)}</span>`
+        : '<span class="text-carbon/50">Faltan las variables de la página en el servidor.</span>';
+    } else if(d.apps.length){
+      const campos = d.apps.flatMap(a => a.campos);
+      caja.innerHTML = `<span class="text-[#3F8F5F] font-600">✅ Conectada</span> <span class="text-carbon/60">· ${escapeHtml(d.apps.map(a => a.nombre).join(', '))}${campos.length ? ' · campos: ' + escapeHtml(campos.join(', ')) : ''}</span>`;
+      if(!campos.includes('feed')){
+        caja.innerHTML += '<br><span class="text-red-600 font-600">Falta el campo <code>feed</code>: vuelve a picar Conectar.</span>';
+      }
+    } else {
+      caja.innerHTML = '<span class="text-red-600 font-600">❌ La página existe pero ninguna app está suscrita. Pica Conectar.</span>';
+    }
+  }catch(e){
+    caja.innerHTML = `<span class="text-red-600">${escapeHtml(e.message)}</span>`;
+  }
+}
+
+$('btnConectarPagina').addEventListener('click', async () => {
+  const boton = $('btnConectarPagina');
+  boton.disabled = true;
+  $('botConexionEstado').innerHTML = '<span class="text-carbon/50">Conectando…</span>';
+  try{
+    await api('/admin/api/bot/conectar-pagina', { method: 'POST' });
+    toast('Página conectada');
+  }catch(e){
+    toast(e.message);
+  }
+  boton.disabled = false;
+  cargarConexionPagina();
+});
+
 async function cargarBot(){
   try{
     const { config, copys } = await api('/admin/api/bot/config');
@@ -1661,6 +1704,7 @@ async function cargarBot(){
     toast(e.message);
   }
   cargarDiagnosticoBot();
+  cargarConexionPagina();
   cargarTalleresBot();
   cargarPanelBot();
 }

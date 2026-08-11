@@ -160,8 +160,50 @@ async function responderComentarioPrivado({ canal, comentarioId, texto }) {
   await llamarGraph(`${BASE}/${comentarioId}/private_replies`, { message: texto.trim() }, tokenDe(canal));
 }
 
+/* ---------------------- Conexion con la pagina ------------------------ */
+//
+// Dar de alta el webhook y suscribirse al campo `feed` solo dice que la APP
+// quiere enterarse. Ademas hay que suscribir la app a la PAGINA, y eso no
+// tiene boton en el panel de Meta. Sin ese paso el sintoma es engañoso: el
+// boton "Probar" de Meta llega y los comentarios reales no.
+//
+// `feed` trae los comentarios de Facebook. Los de Instagram viajan por la
+// misma suscripcion de la pagina, porque la cuenta de IG cuelga de ella.
+const CAMPOS_PAGINA = 'feed';
+
+async function consultarGraph(ruta, token) {
+  const res = await fetch(`${BASE}/${ruta}`, { headers: { Authorization: `Bearer ${token}` } });
+  const datos = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((datos.error && datos.error.message) || `HTTP ${res.status}`);
+  return datos;
+}
+
+async function appsSuscritas(paginaId) {
+  const datos = await consultarGraph(`${paginaId}/subscribed_apps`, tokenDe('messenger'));
+  return (datos.data || []).map((a) => ({
+    nombre: a.name || a.id || '',
+    campos: a.subscribed_fields || [],
+  }));
+}
+
+async function suscribirPagina(paginaId) {
+  const res = await fetch(`${BASE}/${paginaId}/subscribed_apps?subscribed_fields=${CAMPOS_PAGINA}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${tokenDe('messenger')}` },
+  });
+  const datos = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    // El motivo de Meta se lee en el panel: conviene que llegue en limpio y no
+    // envuelto en el JSON crudo.
+    throw new Error((datos.error && datos.error.message) || `HTTP ${res.status}`);
+  }
+  return appsSuscritas(paginaId);
+}
+
 module.exports = {
   enviarTexto,
+  appsSuscritas,
+  suscribirPagina,
   marcarLeido,
   configurado,
   responderComentarioPublico,
