@@ -1,29 +1,39 @@
-// El "machote" de Endulcora: la receta exacta con la que están armadas las
-// campañas que hoy corren en la cuenta de Endulcora (act_75151654), sacada de
-// las campañas reales y convertida en funciones para poder repetirla con otra
-// marca sin volver a decidir nada.
+// El machote de campañas, adaptado de Endulcora a una clínica.
 //
-// Resumen de la receta, por si algún día hay que revisarla en el Administrador
-// de anuncios:
+// La mecánica viene de las campañas que hoy corren en Endulcora (act_75151654)
+// y que ya están probadas: campaña por servicio y sucursal, presupuesto en el
+// conjunto, optimizar a conversaciones y mandar la gente a WhatsApp. Eso se
+// queda igual porque funciona.
 //
-//   Campaña   1 por taller y por sede · objetivo Interacción (OUTCOME_ENGAGEMENT)
-//             · subasta · presupuesto en el conjunto, no en la campaña (ABO)
-//   Conjunto  $150 MXN al día · máximo volumen · optimizar por CONVERSATIONS
-//             · destino WhatsApp · 25 a 55 años · radio de 7 km alrededor de la
-//             sede, solo gente que vive ahí · termina el día del taller
-//   Anuncio   imagen única · botón "Enviar mensaje por WhatsApp" · el copy sigue
-//             la fórmula de 4 bloques de abajo
+// Lo que cambia para Crenef, por ser clínica y no escuela de talleres:
 //
-// La fórmula del copy (así están escritos todos los anuncios de Endulcora):
-//   1. Un gancho de una línea, casi siempre un contraste o una tensión.
-//   2. Qué se lleva la persona, concreto y en nombres propios.
-//   3. Formato: "Taller presencial de 4 horas. Para principiantes."
-//   4. Cierre con la acción y el anticipo: "Escríbenos y aparta tu lugar con $400."
+//   Talleres (Endulcora)              Terapias (Crenef)
+//   ─────────────────────────────     ──────────────────────────────────────
+//   Evento con fecha; el anuncio      Servicio permanente; el anuncio corre
+//   muere el día del taller           sin fecha de fin
+//   Nombre "AGO26 · X · Sede"         Nombre "PERMANENTE · X · Sucursal"
+//   25-55 años para todos             Edad por terapia: la de niños le habla
+//                                     a los papás, la de adultos mayores no
+//   Radio de 7 km                     Radio de 10 km: por una terapia la
+//                                     gente sí se traslada más lejos
+//   Copy: gancho, qué te llevas,      Copy: qué atiende la clínica, cómo es
+//   duración, anticipo                la sesión, quién la da, agenda cita
+//   Sin restricción de contenido      Política de salud de Meta: prohibido
+//                                     hablarle a la persona de su condición
+//                                     (ver politicas-salud.js)
+//
+// La fórmula de copy para clínica, en 4 bloques y siempre en tercera persona:
+//   1. Qué atiende la clínica. "Terapia de lenguaje para niños de 3 a 12 años."
+//   2. Cómo es la terapia, concreto. Sesiones, duración, en qué consiste.
+//   3. Quién la da. Cédula, especialidad, años de experiencia: esto es lo que
+//      da confianza en salud, más que cualquier adjetivo.
+//   4. El siguiente paso, chico y sin compromiso. "Escríbenos y agenda tu
+//      valoración." Nunca prometas el resultado del tratamiento.
 
 const MESES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
 
-// Valores del machote que no cambian entre marcas. Si quieres desviarte de la
-// receta, hazlo en la config de la marca, no aquí.
+// Valores del machote. Si te quieres desviar, hazlo en crenef.config.js
+// (por sucursal o por terapia), no aquí.
 const MACHOTE = {
   objetivo: 'OUTCOME_ENGAGEMENT',
   tipoDeCompra: 'AUCTION',
@@ -31,16 +41,16 @@ const MACHOTE = {
   eventoDeFacturacion: 'IMPRESSIONS',
   estrategiaDePuja: 'LOWEST_COST_WITHOUT_CAP', // "Máximo volumen" en la interfaz
   destino: 'WHATSAPP',
-  edadMin: 25,
-  edadMax: 55,
-  radioKm: 7,
-  presupuestoDiarioMxn: 150,
   botonCta: 'WHATSAPP_MESSAGE',
+  // Rango amplio a propósito: cada terapia debería acotarlo en la config.
+  edadMin: 25,
+  edadMax: 65,
+  radioKm: 10,
+  presupuestoDiarioMxn: 150,
 };
 
-// Los dos juegos de ubicaciones que usa Endulcora. "automaticas" es Advantage+
-// (Meta reparte donde quiera); "verticales" es solo formatos de pantalla
-// completa, para creativos 9:16.
+// Los dos juegos de ubicaciones. "automaticas" es Advantage+ (Meta reparte
+// donde quiera); "verticales" es solo pantalla completa, para creativos 9:16.
 const UBICACIONES = {
   automaticas: null, // omitir publisher_platforms = Advantage+
   verticales: {
@@ -51,7 +61,7 @@ const UBICACIONES = {
   },
 };
 
-// "AGO26" a partir de una fecha ISO. Es el prefijo del nombre de la campaña.
+// "AGO26" a partir de una fecha ISO.
 function etiquetaDeMes(fechaIso) {
   const [anio, mes] = fechaIso.slice(0, 10).split('-');
   return `${MESES[Number(mes) - 1]}${anio.slice(2)}`;
@@ -68,44 +78,64 @@ function fecha(textoLocal, desfase = '-06:00') {
   return `${dia}T${conSegundos}${desfase}`;
 }
 
-function nombreDeCampana({ taller, sede, inicio }) {
-  return `${etiquetaDeMes(inicio)} · ${taller} · ${sede}`;
+// Las terapias son servicio permanente, así que por omisión la campaña se llama
+// "PERMANENTE". Si le pones `fin` (una promo o una temporada), se nombra con el
+// mes, igual que las de Endulcora.
+function nombreDeCampana({ terapia, sucursal, fin }) {
+  const periodo = fin ? etiquetaDeMes(fin) : 'PERMANENTE';
+  return `${periodo} · ${terapia} · ${sucursal}`;
 }
 
-function payloadDeCampana({ taller, sede, inicio }) {
+function payloadDeCampana({ terapia, sucursal, fin }) {
   return {
-    name: nombreDeCampana({ taller, sede, inicio }),
+    name: nombreDeCampana({ terapia, sucursal, fin }),
     objective: MACHOTE.objetivo,
     buying_type: MACHOTE.tipoDeCompra,
-    // Siempre nace en pausa: las campañas se revisan y se prenden a mano.
+    // Siempre nace en pausa: se revisa y se prende a mano.
     status: 'PAUSED',
+    // Salud NO es categoría especial en Meta (a diferencia de crédito, empleo o
+    // vivienda). Las reglas de salud son de contenido, no de segmentación, y se
+    // revisan en politicas-salud.js.
     special_ad_categories: [],
   };
 }
 
-function payloadDeConjunto({ campanaId, taller, sede, inicio, fin, ubicaciones, presupuestoDiarioMxn }) {
+function payloadDeConjunto({
+  campanaId,
+  terapia,
+  sucursal,
+  inicio,
+  fin,
+  ubicaciones,
+  presupuestoDiarioMxn,
+  edadMin,
+  edadMax,
+  radioKm,
+}) {
   const juego = UBICACIONES[ubicaciones || 'automaticas'];
   if (juego === undefined) {
     throw new Error(`Ubicaciones desconocidas: "${ubicaciones}". Usa "automaticas" o "verticales".`);
   }
 
   const targeting = {
-    age_min: MACHOTE.edadMin,
-    age_max: MACHOTE.edadMax,
+    age_min: edadMin || MACHOTE.edadMin,
+    age_max: edadMax || MACHOTE.edadMax,
     geo_locations: {
       custom_locations: [
         {
-          latitude: sede.latitud,
-          longitude: sede.longitud,
-          radius: MACHOTE.radioKm,
+          latitude: sucursal.latitud,
+          longitude: sucursal.longitud,
+          radius: radioKm || sucursal.radioKm || MACHOTE.radioKm,
           distance_unit: 'kilometer',
-          address_string: sede.direccion,
+          address_string: sucursal.direccion,
         },
       ],
       // Solo quien vive en el radio, no quien anda de paso.
       location_types: ['home'],
     },
-    // Sin públicos Advantage: el radio de 7 km es la segmentación.
+    // Sin públicos Advantage: el radio alrededor de la sucursal es la
+    // segmentación. En salud tampoco hay intereses que se puedan usar sin
+    // caer en segmentación por condición médica, que Meta ya no permite.
     targeting_automation: { advantage_audience: 0 },
     ...(juego || {}),
   };
@@ -113,7 +143,7 @@ function payloadDeConjunto({ campanaId, taller, sede, inicio, fin, ubicaciones, 
   const pesos = presupuestoDiarioMxn || MACHOTE.presupuestoDiarioMxn;
 
   return {
-    name: `${taller} · ${sede.nombre}`,
+    name: `${terapia} · ${sucursal.nombre}`,
     campaign_id: campanaId,
     // Meta pide el presupuesto en centavos.
     daily_budget: Math.round(pesos * 100),
@@ -122,22 +152,28 @@ function payloadDeConjunto({ campanaId, taller, sede, inicio, fin, ubicaciones, 
     bid_strategy: MACHOTE.estrategiaDePuja,
     destination_type: MACHOTE.destino,
     // Para anuncios de "click a WhatsApp" el objeto promocionado es la página.
-    promoted_object: { page_id: sede.paginaId },
+    promoted_object: { page_id: sucursal.paginaId },
     start_time: inicio,
-    end_time: fin,
+    // Sin `fin`, el anuncio corre indefinidamente: es un servicio permanente.
+    ...(fin ? { end_time: fin } : {}),
     targeting,
     status: 'PAUSED',
   };
 }
 
-function payloadDeCreativo({ nombre, copy, imagenHash, sede, whatsapp }) {
-  const enlace = `https://wa.me/${String(whatsapp).replace(/\D/g, '')}`;
+function payloadDeCreativo({ nombre, copy, imagenHash, sucursal, whatsapp, mensajeInicial }) {
+  const numero = String(whatsapp).replace(/\D/g, '');
+  // El texto con el que arranca la conversación. En una clínica ayuda mucho:
+  // la recepción sabe de qué terapia llega el paciente sin tener que preguntar.
+  const enlace = mensajeInicial
+    ? `https://wa.me/${numero}?text=${encodeURIComponent(mensajeInicial)}`
+    : `https://wa.me/${numero}`;
 
   return {
     name: nombre,
     object_story_spec: {
-      page_id: sede.paginaId,
-      ...(sede.instagramId ? { instagram_user_id: sede.instagramId } : {}),
+      page_id: sucursal.paginaId,
+      ...(sucursal.instagramId ? { instagram_user_id: sucursal.instagramId } : {}),
       link_data: {
         image_hash: imagenHash,
         message: copy,
@@ -160,14 +196,21 @@ function payloadDeAnuncio({ nombre, conjuntoId, creativoId }) {
   };
 }
 
-// El nombre del creativo/anuncio en Endulcora es "AAAAMMDD_TallerSinEspacios_SEDE".
-function nombreDeCreativo({ taller, sede, fin }) {
-  const dia = fin.slice(0, 10).replace(/-/g, '');
-  const tallerPlano = taller
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '') // quita los acentos
-    .replace(/[^A-Za-z0-9]/g, '');
-  return `${dia}_${tallerPlano}_${sede.nombre.toUpperCase()}`;
+// Nombre del creativo: "Terapia_SUCURSAL" para lo permanente, o con la fecha
+// de cierre adelante cuando es una campaña con temporada.
+function nombreDeCreativo({ terapia, sucursal, fin }) {
+  // Meta acepta acentos, pero los nombres sin ellos son más fáciles de buscar
+  // y de exportar a hoja de cálculo.
+  const sinAcentos = (texto) =>
+    texto
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^A-Za-z0-9]/g, '');
+
+  const plano = sinAcentos(terapia);
+  const sufijo = sinAcentos(sucursal.nombre).toUpperCase();
+  if (!fin) return `${plano}_${sufijo}`;
+  return `${fin.slice(0, 10).replace(/-/g, '')}_${plano}_${sufijo}`;
 }
 
 module.exports = {

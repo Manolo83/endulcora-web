@@ -240,20 +240,60 @@ siempre desde aistudio.google.com.
 Si `GEMINI_API_KEY` no está configurada, la burbuja del asistente sigue
 apareciendo, pero responde que todavía no está activado.
 
-## 12. Campañas de Meta Ads para Crenef
+## 12. Campañas de Meta Ads para Crenef (clínica)
 
-En `src/ads/` está el código que crea en Meta Ads las campañas de **Crenef**
-copiando exactamente la receta con la que hoy corren las de Endulcora. En vez
-de armar cada campaña a mano en el Administrador de anuncios, llenas un archivo
-con los talleres y las sedes, y el script hace el resto.
+En `src/ads/` está el código que crea en Meta Ads las campañas de las **terapias
+de Crenef**. La mecánica está tomada de las campañas de Endulcora, que ya están
+probadas, pero adaptada a una clínica. En vez de armar cada campaña a mano en el
+Administrador de anuncios, llenas un archivo con las terapias y las sucursales,
+y el script hace el resto.
 
-### Qué receta copia (el "machote" de Endulcora)
+### Cómo queda cada campaña
 
 | Nivel | Cómo queda |
 |---|---|
-| **Campaña** | Una por cada taller y cada sede. Nombre `AGO26 · Taller · Sede`, objetivo Interacción, subasta, presupuesto en el conjunto (no en la campaña) |
-| **Conjunto** | $150 MXN al día, máximo volumen, optimizado a conversaciones, destino WhatsApp, 25 a 55 años, radio de 7 km alrededor de la sede y solo gente que vive ahí |
-| **Anuncio** | Imagen única, botón "Enviar mensaje por WhatsApp", copy en 4 bloques: gancho, qué te llevas, formato del taller, y el cierre con el anticipo |
+| **Campaña** | Una por cada terapia y cada sucursal. Nombre `PERMANENTE · Terapia · Sucursal`, objetivo Interacción, subasta, presupuesto en el conjunto |
+| **Conjunto** | $150 MXN al día, máximo volumen, optimizado a conversaciones, destino WhatsApp, radio de 10 km alrededor de la sucursal y solo gente que vive ahí. La edad se define por terapia |
+| **Anuncio** | Imagen única, botón "Enviar mensaje por WhatsApp" con el mensaje ya escrito, copy en 4 bloques: qué atiende, cómo es la sesión, quién la da, y agendar la valoración |
+
+### Qué cambió respecto al machote de talleres de Endulcora
+
+Una clínica no se anuncia como una escuela de talleres, así que:
+
+- **Las terapias no tienen fecha de fin.** Un taller se acaba el día que se da;
+  una terapia es un servicio permanente. Por eso las campañas se llaman
+  `PERMANENTE` y el anuncio corre sin `end_time`. Solo le pones fecha si es una
+  promoción de temporada, y entonces se nombra con el mes (`OCT26 · ...`).
+- **La edad se define por terapia, no una sola para todo.** Una terapia infantil
+  le habla a los papás (28 a 50), no a los niños; una de adultos mayores le habla
+  a los hijos o al paciente (45 a 65). Poner 25-55 para todo, como en Endulcora,
+  desperdicia presupuesto.
+- **El radio pasó de 7 a 10 km**, y se puede subir por sucursal. Por un taller de
+  4 horas la gente no cruza la ciudad; por una terapia sí se traslada más.
+- **El copy cambia de fórmula.** En un taller el gancho es el contraste y el
+  cierre es el anticipo. En salud lo que convence es quién da la terapia
+  (cédula, especialidad, años de experiencia) y que el primer paso sea chico:
+  una valoración, no un tratamiento.
+
+### La política de salud de Meta (lee esto antes de escribir los copys)
+
+Es la razón número uno por la que rechazan anuncios de clínica. La regla: **el
+anuncio no puede dar a entender que ya sabes algo de la salud de quien lo ve.**
+
+| Lo rechazan | Pasa sin problema |
+|---|---|
+| "¿Sufres de ansiedad?" | "Atendemos ansiedad" |
+| "Si tu hijo tiene autismo..." | "Terapia de lenguaje para niños con autismo" |
+| "¿Te duele la espalda?" | "Fisioterapia para dolor de espalda" |
+| "Resultados garantizados" | "Sesiones de 45 minutos, una vez por semana" |
+| "Mira el antes y después" | (prohibido, también en la imagen) |
+
+El truco que siempre funciona: habla de lo que la clínica hace y a quién atiende,
+en tercera persona. Nunca de lo que la persona "tiene" o "sufre".
+
+`src/ads/politicas-salud.js` revisa esto solo cada vez que corres el script, te
+dice qué frase está mal y cómo reescribirla, y **se niega a crear las campañas**
+hasta que lo arregles (o uses `--forzar`).
 
 ### Cómo lanzarlas
 
@@ -263,9 +303,10 @@ con los talleres y las sedes, y el script hace el resto.
    Solo vive en tu máquina; el sitio en Railway no lo necesita.
 
 2. **Llena `src/ads/crenef.config.js`.** Es el único archivo que se edita. Todo
-   lo que dice `PENDIENTE` es un dato del negocio que hay que poner: la cuenta
-   publicitaria, el WhatsApp que recibe los mensajes, las sedes con su dirección
-   y coordenadas, y cada taller con su copy, su imagen y sus fechas.
+   lo que dice `PENDIENTE` es un dato de la clínica que hay que poner: la cuenta
+   publicitaria, el WhatsApp que recibe los mensajes, las sucursales con su
+   dirección y coordenadas, y cada terapia con su copy, su imagen y su rango de
+   edad.
 
 3. **Mira qué se va a crear**, sin tocar Meta todavía:
 
@@ -273,8 +314,9 @@ con los talleres y las sedes, y el script hace el resto.
    npm run ads:crenef
    ```
 
-   Te enseña la lista de campañas, el gasto diario total y las fechas. Si falta
-   algún dato, te dice cuál en vez de mandar la campaña incompleta a Meta.
+   Te enseña la lista de campañas, el gasto diario total, las edades y los radios,
+   y la revisión de política de salud. Si falta algún dato, te dice cuál en vez
+   de mandar la campaña incompleta a Meta.
 
 4. **Créalas de verdad:**
 

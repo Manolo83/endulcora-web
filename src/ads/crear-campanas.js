@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// Crea en Meta Ads las campañas de Crenef siguiendo el machote de Endulcora.
+// Crea en Meta Ads las campañas de terapias de Crenef.
 //
 //   npm run ads:crenef              enseña qué se va a crear, sin tocar Meta
 //   npm run ads:crenef -- --crear   lo crea de verdad, todo EN PAUSA
+//   npm run ads:crenef -- --crear --forzar   crea aunque el copy tenga avisos
 //
 // Nada se prende solo: campañas, conjuntos y anuncios nacen en PAUSED para que
 // los revises en el Administrador de anuncios antes de gastar un peso.
@@ -11,24 +12,36 @@ const fs = require('fs');
 const path = require('path');
 
 const { CRENEF, revisarConfig } = require('./crenef.config');
+const { revisarCopy } = require('./politicas-salud');
 const machote = require('./machote');
 const api = require('./meta-api');
 
 function plan(config) {
   const tareas = [];
-  for (const taller of config.talleres) {
-    for (const claveSede of taller.sedes) {
-      const sede = config.sedes[claveSede];
+  for (const terapia of config.terapias) {
+    for (const claveSucursal of terapia.sucursales) {
+      const sucursal = config.sucursales[claveSucursal];
       tareas.push({
-        taller: taller.nombre,
-        sede,
-        inicio: taller.inicio,
-        fin: taller.fin,
-        imagen: taller.imagen,
-        copy: taller.copy,
-        ubicaciones: taller.ubicaciones || 'automaticas',
-        campana: machote.nombreDeCampana({ taller: taller.nombre, sede: sede.nombre, inicio: taller.inicio }),
-        creativo: machote.nombreDeCreativo({ taller: taller.nombre, sede, fin: taller.fin }),
+        terapia: terapia.nombre,
+        sucursal,
+        inicio: terapia.inicio,
+        fin: terapia.fin || null,
+        imagen: terapia.imagen,
+        copy: terapia.copy,
+        mensajeInicial: terapia.mensajeInicial,
+        edadMin: terapia.edadMin,
+        edadMax: terapia.edadMax,
+        ubicaciones: terapia.ubicaciones || 'automaticas',
+        campana: machote.nombreDeCampana({
+          terapia: terapia.nombre,
+          sucursal: sucursal.nombre,
+          fin: terapia.fin,
+        }),
+        creativo: machote.nombreDeCreativo({
+          terapia: terapia.nombre,
+          sucursal,
+          fin: terapia.fin,
+        }),
       });
     }
   }
@@ -38,15 +51,44 @@ function plan(config) {
 function mostrarPlan(config, tareas) {
   const gastoDiario = tareas.length * (config.presupuestoDiarioMxn || machote.MACHOTE.presupuestoDiarioMxn);
   console.log(`\nPlan para ${config.marca} — ${tareas.length} campaña(s), $${gastoDiario} MXN al día en total:\n`);
+
   for (const t of tareas) {
+    const radio = t.sucursal.radioKm || machote.MACHOTE.radioKm;
+    const edades = `${t.edadMin || machote.MACHOTE.edadMin}-${t.edadMax || machote.MACHOTE.edadMax} años`;
+    const vigencia = t.fin ? `${t.inicio.slice(0, 16)} → ${t.fin.slice(0, 16)}` : `${t.inicio.slice(0, 16)} → sin fecha de fin`;
+
     console.log(`  ${t.campana}`);
-    console.log(`    conjunto  ${t.taller} · ${t.sede.nombre} · radio ${machote.MACHOTE.radioKm} km · ${t.ubicaciones}`);
-    console.log(`    corre     ${t.inicio.slice(0, 16)} → ${t.fin.slice(0, 16)}`);
+    console.log(`    conjunto  ${t.terapia} · ${t.sucursal.nombre} · radio ${radio} km · ${edades} · ${t.ubicaciones}`);
+    console.log(`    corre     ${vigencia}`);
     console.log(`    anuncio   ${t.creativo} · imagen ${path.basename(t.imagen)}\n`);
   }
 }
 
-// Sube cada imagen una sola vez aunque la usen varios talleres.
+// Revisa los copys contra la política de salud de Meta. Devuelve true si todo
+// está limpio.
+function mostrarRevisionDeCopys(tareas) {
+  const conProblemas = tareas
+    .map((t) => ({ tarea: t, hallazgos: revisarCopy(t.copy) }))
+    .filter((r) => r.hallazgos.length);
+
+  if (!conProblemas.length) {
+    console.log('Revisión de política de salud de Meta: los copys están limpios.\n');
+    return true;
+  }
+
+  console.log('AVISOS de política de salud de Meta (esto es lo que hace que rechacen anuncios de clínica):\n');
+  for (const { tarea, hallazgos } of conProblemas) {
+    console.log(`  ${tarea.campana}`);
+    for (const h of hallazgos) {
+      console.log(`    · "${h.fragmento}"`);
+      console.log(`      ${h.mensaje}`);
+    }
+    console.log('');
+  }
+  return false;
+}
+
+// Sube cada imagen una sola vez aunque la usen varias terapias.
 async function hashDeImagen(cacheHashes, cuentaId, rutaImagen) {
   if (cacheHashes.has(rutaImagen)) return cacheHashes.get(rutaImagen);
 
@@ -68,19 +110,21 @@ async function crearTodo(config, tareas) {
 
     const campana = await api.crearCampana(
       cuentaId,
-      machote.payloadDeCampana({ taller: t.taller, sede: t.sede.nombre, inicio: t.inicio })
+      machote.payloadDeCampana({ terapia: t.terapia, sucursal: t.sucursal.nombre, fin: t.fin })
     );
 
     const conjunto = await api.crearConjunto(
       cuentaId,
       machote.payloadDeConjunto({
         campanaId: campana.id,
-        taller: t.taller,
-        sede: t.sede,
+        terapia: t.terapia,
+        sucursal: t.sucursal,
         inicio: t.inicio,
         fin: t.fin,
         ubicaciones: t.ubicaciones,
         presupuestoDiarioMxn: config.presupuestoDiarioMxn,
+        edadMin: t.edadMin,
+        edadMax: t.edadMax,
       })
     );
 
@@ -92,8 +136,9 @@ async function crearTodo(config, tareas) {
         nombre: t.creativo,
         copy: t.copy,
         imagenHash,
-        sede: t.sede,
+        sucursal: t.sucursal,
         whatsapp: config.whatsapp,
+        mensajeInicial: t.mensajeInicial,
       })
     );
 
@@ -110,6 +155,7 @@ async function crearTodo(config, tareas) {
 
 async function main() {
   const crearDeVerdad = process.argv.includes('--crear');
+  const forzar = process.argv.includes('--forzar');
 
   const problemas = revisarConfig(CRENEF);
   if (problemas.length) {
@@ -123,9 +169,18 @@ async function main() {
   const tareas = plan(CRENEF);
   mostrarPlan(CRENEF, tareas);
 
+  const copysLimpios = mostrarRevisionDeCopys(tareas);
+
   if (!crearDeVerdad) {
     console.log('Esto fue solo una vista previa. Para crearlas en Meta:\n');
     console.log('  npm run ads:crenef -- --crear\n');
+    return;
+  }
+
+  if (!copysLimpios && !forzar) {
+    console.error('No creé nada: arregla los copys de arriba primero.');
+    console.error('Si de plano quieres mandarlos así, corre el comando con --forzar.\n');
+    process.exitCode = 1;
     return;
   }
 
