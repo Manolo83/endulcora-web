@@ -66,6 +66,11 @@ const DEFAULT_BOT_COPYS = {
   // gente no abre los mensajes privados pero si toca un enlace.
   comentario_publico:
     '¡Hola! Soy Endulcorito 🧁 Te acabo de mandar la información por privado ✨\nY si prefieres, escríbenos por WhatsApp: {{LIGA_WHATSAPP}}',
+  // Cuando el privado no se pudo mandar (la persona tiene los mensajes
+  // cerrados, o Meta lo rechaza), prometerle un privado que nunca llega seria
+  // mentirle en publico. Este texto no promete nada y deja la liga a la vista.
+  comentario_publico_sin_privado:
+    '¡Hola! Soy Endulcorito 🧁 Con gusto te paso toda la información por WhatsApp:\n{{LIGA_WHATSAPP}}',
   // El saludo del mensaje privado. Después de esto va la respuesta a su duda.
   comentario_privado:
     '¡Hola! Soy Endulcorito, el asistente de Endulcora 🧁 Vi tu comentario y te escribo por aquí para ayudarte.',

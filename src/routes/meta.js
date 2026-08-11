@@ -276,8 +276,27 @@ async function procesarComentario(evento) {
     console.warn('[bot] Falta GEMINI_API_KEY: el comentario se contesta solo con los copys.');
   }
 
-  // 2. En publico, corto y amable: lo lee cualquiera que pase por ahi.
-  const publico = copysBot.copyComentarioPublico();
+  // 2. El privado va PRIMERO, aunque en el chat se vea despues: lo que se diga
+  // en publico depende de si este salio. Meta solo permite UNO por comentario,
+  // asi que es la unica oportunidad; por eso lleva siempre la liga de WhatsApp,
+  // aunque el modelo no haya logrado contestar.
+  const privado = copysBot.copyComentarioPrivado(respuesta);
+  let privadoEnviado = false;
+  try {
+    await canales.responderComentarioPrivado({
+      canal: evento.canal,
+      comentarioId: evento.comentarioId,
+      texto: privado,
+    });
+    await almacen.guardarMensaje(contacto.id, 'bot', privado);
+    privadoEnviado = true;
+  } catch (e) {
+    console.error('[bot] No se pudo mandar el privado del comentario:', e.message);
+  }
+
+  // 3. Y en publico, corto y amable: lo lee cualquiera que pase por ahi. Si el
+  // privado no salio, no se le promete uno que nunca va a llegar.
+  const publico = copysBot.copyComentarioPublico(privadoEnviado);
   try {
     await canales.responderComentarioPublico({
       canal: evento.canal,
@@ -287,21 +306,6 @@ async function procesarComentario(evento) {
     await almacen.guardarMensaje(contacto.id, 'bot', `(respuesta pública) ${publico}`);
   } catch (e) {
     console.error('[bot] No se pudo responder el comentario en público:', e.message);
-  }
-
-  // 3. En privado va la respuesta de verdad. Meta solo permite UNO por
-  // comentario, asi que este mensaje es la unica oportunidad: por eso lleva
-  // siempre la liga de WhatsApp, aunque el modelo no haya logrado contestar.
-  const privado = copysBot.copyComentarioPrivado(respuesta);
-  try {
-    await canales.responderComentarioPrivado({
-      canal: evento.canal,
-      comentarioId: evento.comentarioId,
-      texto: privado,
-    });
-    await almacen.guardarMensaje(contacto.id, 'bot', privado);
-  } catch (e) {
-    console.error('[bot] No se pudo mandar el privado del comentario:', e.message);
   }
 
   // 4. Lo que el bot no supo contestar lo ve una persona.

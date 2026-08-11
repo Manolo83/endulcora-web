@@ -141,9 +141,15 @@ function conNumero(copy) {
     .replace(/\{\{WHATSAPP_ATENCION\}\}/g, telefonoLegible(digitos));
 }
 
-// Lo que se deja debajo del comentario, a la vista de todos.
-function copyComentarioPublico() {
-  return conNumero(store.getBotCopys().comentario_publico);
+// Lo que se deja debajo del comentario, a la vista de todos. Cambia segun si el
+// mensaje privado si salio: prometer en publico un privado que nunca llego es
+// peor que no prometer nada.
+function copyComentarioPublico(privadoEnviado = true) {
+  const copys = store.getBotCopys();
+  const texto = privadoEnviado
+    ? copys.comentario_publico
+    : copys.comentario_publico_sin_privado || copys.comentario_publico;
+  return conNumero(texto);
 }
 
 // El mensaje privado completo: saludo de la marca, la respuesta que redacto el
