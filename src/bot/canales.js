@@ -27,6 +27,14 @@ function tokenDe(canal) {
   return process.env.META_PAGE_TOKEN || '';
 }
 
+// Messenger e Instagram publican bajo la pagina de Facebook. Con un token de
+// pagina, "me" ya apunta ahi; pero con un token de usuario del sistema (el
+// permanente, el que no caduca) "me" seria el usuario del sistema y el envio
+// falla. Nombrar la pagina explicitamente funciona con los dos.
+function nodoPagina() {
+  return process.env.META_PAGE_ID || 'me';
+}
+
 function configurado(canal) {
   if (canal === 'whatsapp') {
     return !!(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
@@ -75,7 +83,7 @@ async function enviarTexto({ canal, destino, texto }) {
     } else {
       // Messenger e Instagram comparten endpoint y formato.
       await llamarGraph(
-        `${BASE}/me/messages`,
+        `${BASE}/${nodoPagina()}/messages`,
         {
           recipient: { id: destino },
           messaging_type: 'RESPONSE',
@@ -125,7 +133,7 @@ async function responderComentarioPrivado({ canal, comentarioId, texto }) {
     // En Instagram el privado se manda por la API de mensajes, apuntando al
     // comentario como destinatario.
     await llamarGraph(
-      `${BASE}/me/messages`,
+      `${BASE}/${nodoPagina()}/messages`,
       { recipient: { comment_id: comentarioId }, message: { text: texto.trim() } },
       tokenDe(canal)
     );
