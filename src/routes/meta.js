@@ -190,8 +190,29 @@ function extraerEventos(cuerpo) {
 
 /* ------------------------------ Recepcion ----------------------------- */
 
+// Un webhook rechazado en silencio es indistinguible de uno que nunca llego:
+// desde el panel de Meta todo se ve bien y aqui no aparece nada. Por eso se
+// deja constancia en el log, con la causa concreta y sin inundarlo (Meta
+// reintenta muy seguido).
+let ultimoAvisoFirma = 0;
+function avisarFirmaInvalida(req) {
+  if (Date.now() - ultimoAvisoFirma < 60000) return;
+  ultimoAvisoFirma = Date.now();
+
+  if (!process.env.META_APP_SECRET) {
+    console.error('[bot] Webhook rechazado: falta la variable META_APP_SECRET. Meta si esta tocando, pero no hay con que verificar la firma.');
+  } else if (!req.get('x-hub-signature-256')) {
+    console.error('[bot] Webhook rechazado: la peticion no trae firma. No viene de Meta.');
+  } else {
+    console.error('[bot] Webhook rechazado: la firma no coincide. META_APP_SECRET no es la clave secreta de esta app de Meta.');
+  }
+}
+
 router.post('/webhook', (req, res) => {
-  if (!firmaValida(req)) return res.sendStatus(403);
+  if (!firmaValida(req)) {
+    avisarFirmaInvalida(req);
+    return res.sendStatus(403);
+  }
 
   // Meta exige un 200 rapido: si tarda, reintenta y degrada la calidad del
   // numero. Se responde de inmediato y se procesa despues.
@@ -204,7 +225,12 @@ router.post('/webhook', (req, res) => {
 });
 
 async function procesarLote(cuerpo) {
-  for (const evento of extraerEventos(cuerpo)) {
+  const eventos = extraerEventos(cuerpo);
+  // Una linea por lote: con esto se distingue "Meta no manda nada" de "manda
+  // algo que no sabemos leer", que se ven igual desde el panel.
+  console.log(`[bot] Webhook de ${cuerpo.object || 'origen desconocido'}: ${eventos.length} evento(s).`);
+
+  for (const evento of eventos) {
     try {
       if (evento.clase === 'comentario') await procesarComentario(evento);
       else await procesarMensaje(evento);

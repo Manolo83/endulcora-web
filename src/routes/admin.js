@@ -516,6 +516,35 @@ router.post('/api/bot/importar-semilla', requireAdmin, (req, res) => {
   res.json(store.importarSemilla(semilla));
 });
 
+// Que le falta al bot para funcionar. Devuelve si cada llave esta puesta,
+// nunca su valor: sirve para diagnosticar sin exponer nada.
+router.get('/api/bot/diagnostico', requireAdmin, async (req, res) => {
+  const hay = (n) => !!(process.env[n] && process.env[n].trim());
+  let ultimoEvento = null;
+  try {
+    const r = await store.pool.query('SELECT max(ultimo_mensaje_at) AS ultimo FROM bot_contactos');
+    ultimoEvento = r.rows[0] && r.rows[0].ultimo;
+  } catch (e) {
+    // Si la tabla aun no existe, el diagnostico igual debe responder.
+  }
+
+  res.json({
+    botEncendido: store.getBotConfig().activo,
+    talleres: store.getTalleresBot().filter((t) => t.activo !== false).length,
+    llaves: {
+      META_APP_SECRET: hay('META_APP_SECRET'),
+      META_VERIFY_TOKEN: hay('META_VERIFY_TOKEN'),
+      WHATSAPP_TOKEN: hay('WHATSAPP_TOKEN'),
+      WHATSAPP_PHONE_NUMBER_ID: hay('WHATSAPP_PHONE_NUMBER_ID'),
+      GEMINI_API_KEY: hay('GEMINI_API_KEY'),
+      META_PAGE_TOKEN: hay('META_PAGE_TOKEN'),
+      META_PAGE_ID: hay('META_PAGE_ID'),
+      RESEND_API_KEY: hay('RESEND_API_KEY'),
+    },
+    ultimoEvento,
+  });
+});
+
 router.get('/api/bot/conversaciones', requireAdmin, async (req, res) => {
   try {
     res.json(await botAlmacen.listarConversaciones());

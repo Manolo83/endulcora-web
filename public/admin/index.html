@@ -455,6 +455,7 @@
             <span class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Bot encendido</span>
           </label>
           <p id="botEstadoTexto" class="font-ui text-[11px] uppercase tracking-widest text-carbon/50"></p>
+          <div id="botDiagnostico" class="mt-4 rounded-xl bg-crema/70 p-4 text-[12px] leading-relaxed"></div>
         </div>
         <div class="mt-5 grid gap-4 sm:grid-cols-3">
           <label class="block">
@@ -1618,6 +1619,53 @@ const ETAPA_TEXTO = {
   instrucciones_enviadas: { texto: 'Esperando pago', clase: 'text-[#3F8F5F]' },
 };
 
+/* Qué le falta al bot para funcionar. Sin esto, un mensaje que no llega se ve
+   igual que uno que llegó y falló: en los dos casos el panel está vacío. */
+const LLAVES_BOT = {
+  META_APP_SECRET: ['Clave secreta de la app', 'Sin ella el servidor rechaza todo lo que manda Meta, en silencio.'],
+  META_VERIFY_TOKEN: ['Token de verificación', 'Solo se usa al dar de alta el webhook.'],
+  WHATSAPP_TOKEN: ['Token de WhatsApp', 'Sin él el bot recibe, pero no puede contestar.'],
+  WHATSAPP_PHONE_NUMBER_ID: ['Id del número de WhatsApp', 'De qué número salen las respuestas.'],
+  GEMINI_API_KEY: ['Clave de Gemini', 'El cerebro del bot. Sin ella guarda los mensajes y no contesta.'],
+  META_PAGE_TOKEN: ['Token de la página', 'Solo para Messenger e Instagram.'],
+  META_PAGE_ID: ['Id de la página', 'Solo para Messenger e Instagram.'],
+  RESEND_API_KEY: ['Clave de correo', 'Solo para los avisos por correo.'],
+};
+const LLAVES_OPCIONALES = ['META_PAGE_TOKEN', 'META_PAGE_ID', 'RESEND_API_KEY'];
+
+async function cargarDiagnosticoBot(){
+  const caja = $('botDiagnostico');
+  if(!caja) return;
+  try{
+    const d = await api('/admin/api/bot/diagnostico');
+    const filas = Object.entries(d.llaves).map(([clave, puesta]) => {
+      const [titulo, ayuda] = LLAVES_BOT[clave] || [clave, ''];
+      const opcional = LLAVES_OPCIONALES.includes(clave);
+      const icono = puesta ? '✅' : (opcional ? '⚪' : '❌');
+      return `<li class="${puesta || opcional ? 'text-carbon/70' : 'text-red-700 font-600'}">
+        ${icono} <strong>${escapeHtml(titulo)}</strong>${puesta ? '' : ` — ${escapeHtml(ayuda)}`}
+      </li>`;
+    }).join('');
+
+    const faltan = Object.entries(d.llaves).filter(([c, v]) => !v && !LLAVES_OPCIONALES.includes(c)).length;
+    const ultimo = d.ultimoEvento
+      ? `Último mensaje recibido de Meta: <strong>${new Date(d.ultimoEvento).toLocaleString('es-MX')}</strong>.`
+      : 'Meta <strong>todavía no ha entregado ningún mensaje</strong> a este servidor.';
+
+    caja.innerHTML = `
+      <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-vino">Diagnóstico</p>
+      <ul class="mt-2 space-y-1">${filas}</ul>
+      <p class="mt-3 text-carbon/70">
+        ${d.botEncendido ? '✅ El bot está encendido' : '⚪ El bot está apagado'} ·
+        ${d.talleres} taller${d.talleres === 1 ? '' : 'es'} activo${d.talleres === 1 ? '' : 's'}
+      </p>
+      <p class="mt-1 text-carbon/70">${ultimo}</p>
+      ${faltan ? `<p class="mt-2 rounded-lg bg-red-50 px-3 py-2 text-red-700">Falta${faltan === 1 ? '' : 'n'} ${faltan} variable${faltan === 1 ? '' : 's'} en el servidor. Se agregan en Railway → Variables, y hay que volver a desplegar.</p>` : ''}`;
+  }catch(e){
+    caja.innerHTML = `<p class="text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
 async function cargarBot(){
   try{
     const { config, copys } = await api('/admin/api/bot/config');
@@ -1637,6 +1685,7 @@ async function cargarBot(){
   }catch(e){
     toast(e.message);
   }
+  cargarDiagnosticoBot();
   cargarTalleresBot();
   cargarPanelBot();
 }
