@@ -1,12 +1,11 @@
-// Webhook unico de Meta Business para WhatsApp, Messenger e Instagram.
+// Webhook de Meta Business para los comentarios de Facebook e Instagram.
 //
-// Los tres canales cuelgan de la misma app de Meta, asi que llegan aqui con la
-// misma firma y se distinguen por el campo `object` del cuerpo. Ademas de los
-// mensajes, se atienden dos cosas que traen mucha gente:
-//   - los anuncios (Meta manda un `referral` con el id y el titular del
-//     anuncio, que dice de que taller preguntan sin tener que adivinarlo);
-//   - los comentarios en las publicaciones, que se contestan en publico y en
-//     privado para abrir la conversacion.
+// El bot contesta comentarios y nada mas: responde la duda con datos reales y
+// manda a la persona al WhatsApp de Endulcora, donde la atiende alguien de
+// verdad. Los mensajes directos no se tocan; se quedan en la bandeja de Meta.
+//
+// Los dos canales cuelgan de la misma app, asi que llegan aqui con la misma
+// firma y se distinguen por el campo `object` del cuerpo.
 
 const express = require('express');
 const crypto = require('crypto');
@@ -18,20 +17,6 @@ const copysBot = require('../bot/copys');
 const notificaciones = require('../bot/notificaciones');
 
 const router = express.Router();
-
-// Palabras con las que el cliente se da de baja. Se atienden en codigo, antes
-// de gastar un token: es un derecho, no una conversacion.
-const PALABRAS_BAJA = ['baja', 'stop', 'darme de baja', 'no quiero mas mensajes'];
-
-// Meta solo deja mandar UN mensaje privado por comentario. Si el saludo mas el
-// copy del taller no caben en uno, se manda solo el saludo y el copy sale en
-// cuanto la persona conteste.
-const LARGO_MAXIMO_PRIVADO = 1900;
-
-function esBaja(texto) {
-  const limpio = String(texto || '').trim().toLowerCase();
-  return PALABRAS_BAJA.includes(limpio);
-}
 
 /* ---------------------------- Verificacion ---------------------------- */
 
@@ -231,14 +216,17 @@ async function procesarLote(cuerpo) {
   console.log(`[bot] Webhook de ${cuerpo.object || 'origen desconocido'}: ${eventos.length} evento(s).`);
 
   for (const evento of eventos) {
+    // El bot solo contesta comentarios. Los mensajes directos de Messenger e
+    // Instagram siguen llegando a la bandeja de Meta y los contesta una
+    // persona: aqui no se guardan ni se responden, a proposito.
+    if (evento.clase !== 'comentario') continue;
     try {
-      if (evento.clase === 'comentario') await procesarComentario(evento);
-      else await procesarMensaje(evento);
+      await procesarComentario(evento);
     } catch (e) {
       // Se nombra a quien iba dirigido: casi todos los fallos de envio son por
       // el numero (formato, lista de permitidos), y sin verlo no se distingue
       // cual de todos fallo.
-      console.error(`[bot] Error con un ${evento.clase} de ${evento.canal}/${evento.externoId}:`, e.message);
+      console.error(`[bot] Error con un comentario de ${evento.canal}/${evento.externoId}:`, e.message);
     }
   }
 }
@@ -259,10 +247,8 @@ async function procesarComentario(evento) {
   if (esComentarioPropio(evento)) return;
   if (!(await almacen.esEventoNuevo(`comentario:${evento.idEvento}`))) return;
 
-  const config = store.getBotConfig();
-  if (!config.activo) return;
+  if (!store.getBotConfig().activo) return;
 
-  const copys = store.getBotCopys();
   const contacto = await almacen.obtenerOCrearContacto({
     canal: evento.canal,
     externoId: evento.externoId,
@@ -270,40 +256,43 @@ async function procesarComentario(evento) {
     telefono: '',
   });
 
-  await almacen.guardarMensaje(contacto.id, 'cliente', `(comentario público) ${evento.texto}`);
+  await almacen.guardarMensaje(contacto.id, 'cliente', `(comentario) ${evento.texto}`);
 
   // Quien pidio no recibir mensajes no recibe mensajes, ni siquiera por un
   // comentario suyo.
   if (contacto.estado === 'baja') return;
 
-  // El comentario suele decir de que taller preguntan ("info de tamales").
-  const taller = store.buscarTallerPorAnuncio({ adId: '', titulo: evento.texto, texto: '' });
+  // 1. El modelo redacta SOLO la respuesta a la duda, con los datos reales de
+  // los talleres. El saludo, el cierre y la liga los pone el codigo.
+  // Si el modelo falla o no esta configurado se sigue de largo con la respuesta
+  // vacia: el saludo y el cierre solos ya son un mensaje util, y dejar un
+  // comentario sin contestar es peor que contestarlo corto.
+  const { respuesta, motivoEscalado, sinConfigurar } = await agente.responderComentario({
+    canal: evento.canal,
+    nombre: evento.nombre,
+    comentario: evento.texto,
+  });
+  if (sinConfigurar) {
+    console.warn('[bot] Falta GEMINI_API_KEY: el comentario se contesta solo con los copys.');
+  }
 
-  // 1. En publico, corto y amable: lo lee cualquiera que pase por ahi.
+  // 2. En publico, corto y amable: lo lee cualquiera que pase por ahi.
+  const publico = copysBot.copyComentarioPublico();
   try {
     await canales.responderComentarioPublico({
       canal: evento.canal,
       comentarioId: evento.comentarioId,
-      texto: copys.comentario_publico,
+      texto: publico,
     });
-    await almacen.guardarMensaje(contacto.id, 'bot', `(respuesta pública) ${copys.comentario_publico}`);
+    await almacen.guardarMensaje(contacto.id, 'bot', `(respuesta pública) ${publico}`);
   } catch (e) {
     console.error('[bot] No se pudo responder el comentario en público:', e.message);
   }
 
-  // 2. En privado, que es lo que abre la conversacion. Meta solo permite uno,
-  // asi que se manda el saludo con el copy del taller si caben juntos.
-  let privado = copys.comentario_privado;
-  let copyEnviado = false;
-  if (taller) {
-    const { texto, hayFechas } = copysBot.copyTaller(taller);
-    const junto = `${privado}\n\n${texto}`;
-    if (hayFechas && junto.length <= LARGO_MAXIMO_PRIVADO) {
-      privado = junto;
-      copyEnviado = true;
-    }
-  }
-
+  // 3. En privado va la respuesta de verdad. Meta solo permite UNO por
+  // comentario, asi que este mensaje es la unica oportunidad: por eso lleva
+  // siempre la liga de WhatsApp, aunque el modelo no haya logrado contestar.
+  const privado = copysBot.copyComentarioPrivado(respuesta);
   try {
     await canales.responderComentarioPrivado({
       canal: evento.canal,
@@ -311,110 +300,16 @@ async function procesarComentario(evento) {
       texto: privado,
     });
     await almacen.guardarMensaje(contacto.id, 'bot', privado);
-
-    if (copyEnviado) {
-      await almacen.crearSolicitud({ contactoId: contacto.id, tallerBotId: taller.id, taller: taller.nombre });
-      // El gancho va aparte, en cuanto la persona conteste: aqui ya se gasto
-      // el unico mensaje privado que Meta permite por comentario.
-    }
   } catch (e) {
     console.error('[bot] No se pudo mandar el privado del comentario:', e.message);
   }
-}
 
-/* ------------------------------- Mensajes ----------------------------- */
-
-async function procesarMensaje(entrante) {
-  if (!(await almacen.esEventoNuevo(entrante.idEvento))) return;
-
-  const config = store.getBotConfig();
-  const contacto = await almacen.obtenerOCrearContacto({
-    canal: entrante.canal,
-    externoId: entrante.externoId,
-    nombre: entrante.nombre,
-    telefono: entrante.telefono,
-  });
-
-  const enviar = async (texto) => {
-    if (!texto || !texto.trim()) return;
-    await canales.enviarTexto({ canal: entrante.canal, destino: entrante.externoId, texto });
-    await almacen.guardarMensaje(contacto.id, 'bot', texto);
-  };
-
-  // 1. Guardar siempre lo que escribio el cliente, aunque el bot este apagado
-  // o la conversacion ya sea de una persona: es el historial que se ve en el
-  // panel y el contexto de quien la atienda.
-  const textoGuardado =
-    entrante.texto ||
-    (entrante.tipo === 'arranque'
-      ? '(entró desde un anuncio)'
-      : `(el cliente envió un ${entrante.tipo})`);
-  await almacen.guardarMensaje(contacto.id, 'cliente', textoGuardado);
-
-  // 2. Baja: se atiende siempre, incluso con el bot apagado. Es un derecho.
-  if (esBaja(entrante.texto)) {
-    await almacen.actualizarContacto(contacto.id, { estado: 'baja', motivoEscalado: 'El cliente pidió no recibir mensajes' });
-    await enviar('Listo, no volveré a escribirte por aquí. Si algún día quieres información de nuestros talleres, solo mándanos un mensaje ✨');
-    return;
-  }
-
-  // 3. Conversaciones que ya son de una persona: el bot no se mete.
-  if (contacto.estado !== 'bot') return;
-
-  if (!config.activo) return;
-
-  // 4. Adjuntos: el bot no lee comprobantes ni imagenes, lo dice y entrega.
-  if (!entrante.texto && entrante.tipo !== 'arranque') {
-    await almacen.actualizarContacto(contacto.id, {
-      estado: 'humano',
-      motivoEscalado: `El cliente mandó un ${entrante.tipo} (posible comprobante)`,
-    });
-    await enviar(copysBot.copyRedireccion());
+  // 4. Lo que el bot no supo contestar lo ve una persona.
+  if (motivoEscalado) {
+    await almacen.actualizarContacto(contacto.id, { estado: 'humano', motivoEscalado });
     const mensajes = await almacen.historial(contacto.id, 40);
-    notificaciones.avisarEscalado({
-      contacto,
-      motivo: `Mandó un ${entrante.tipo}. Si es un comprobante, hay que validarlo a mano.`,
-      mensajes,
-    });
-    return;
+    notificaciones.avisarEscalado({ contacto, motivo: motivoEscalado, mensajes });
   }
-
-  await canales.marcarLeido({ canal: entrante.canal, idMensaje: entrante.idEvento });
-
-  // 5. Primer contacto: la bienvenida (con el aviso de privacidad) sale del
-  // panel y va antes de cualquier otra cosa que diga el bot.
-  if (!(await almacen.yaSaludo(contacto.id))) {
-    await enviar(store.getBotCopys().bienvenida);
-  }
-
-  // 6. De donde viene: si llego por un anuncio, Meta dice cual. Eso pesa mas
-  // que adivinar por el texto, sobre todo cuando no escribio nada.
-  const desdeAnuncio = entrante.referral ? store.buscarTallerPorAnuncio(entrante.referral) : null;
-  const porPalabra = entrante.texto ? store.buscarTalleresPorPalabra(entrante.texto) : [];
-
-  const pistas = [];
-  // Hay claves a proposito repetidas (COCTELES sirve para Cocteleria Basica y
-  // para Cocteleria Mexicana). Cuando pasa, el bot pregunta en vez de adivinar.
-  if (!desdeAnuncio && porPalabra.length > 1) {
-    const opciones = porPalabra.map((t) => `"${t.nombre}" (id ${t.id})`).join(' y ');
-    pistas.push(`(Esa palabra clave sirve para dos talleres distintos: ${opciones}. Pregúntale cuál quiere antes de mandar nada.)`);
-  }
-  if (desdeAnuncio) {
-    pistas.push(`(Llegó desde el anuncio "${entrante.referral.titulo || entrante.referral.adId}", que es del taller "${desdeAnuncio.nombre}", id ${desdeAnuncio.id}.)`);
-  } else if (entrante.referral) {
-    pistas.push('(Llegó desde un anuncio, pero no se pudo identificar de qué taller. Pregúntaselo.)');
-  }
-  if (porPalabra.length === 1 && !desdeAnuncio) {
-    pistas.push(`(El sistema detectó la palabra clave del taller "${porPalabra[0].nombre}", id ${porPalabra[0].id}.)`);
-  }
-  if (entrante.tipo === 'arranque') {
-    pistas.push('(Abrió el chat desde el anuncio sin escribir nada. Salúdalo y mándale la información del taller.)');
-  }
-
-  const mensajeCliente = [entrante.texto || '(abrió el chat sin escribir)', ...pistas].join('\n\n');
-
-  const { texto } = await agente.responder({ contacto, mensajeCliente, enviar });
-  await enviar(texto);
 }
 
 module.exports = router;

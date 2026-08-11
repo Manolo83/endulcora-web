@@ -1,8 +1,8 @@
-// Armado de los mensajes del embudo.
+// Armado de los mensajes que manda el bot al contestar comentarios.
 //
-// Los textos los escribe el admin en /admin > Bot de ventas. Aqui solo se
+// Los textos los escribe el admin en /admin > Bot de comentarios. Aqui solo se
 // rellenan los {{MARCADORES}} con datos que salen de la base: las fechas del
-// calendario y los montos calculados. Esa es toda la diferencia entre un copy
+// calendario y el WhatsApp de atencion. Esa es toda la diferencia entre un copy
 // pegado a mano (que anuncia fechas ya pasadas) y uno que siempre esta al dia.
 
 const store = require('./../store');
@@ -75,7 +75,8 @@ function pesos(n) {
 
 /* ---------------------------------------------------------------- */
 
-// Paso 2: el copy del taller, con las fechas reales inyectadas.
+// El copy del taller, con las fechas reales inyectadas. El bot lo lee para
+// contestar dudas concretas; nunca lo pega completo en un comentario.
 function copyTaller(taller) {
   const fechas = bloqueFechas(taller.id);
   return {
@@ -84,8 +85,8 @@ function copyTaller(taller) {
       PRECIO: pesos(taller.precioRegular),
       PRECIO_REGULAR: pesos(taller.precioRegular),
       PRECIO_PROMO: pesos(taller.precioPromo),
-      ANTICIPO_POR_PERSONA: pesos(store.getBotConfig().anticipoPorPersona),
-      // El anticipo que se anuncia antes de desbloquear la promo.
+      // Con cuanto se reserva. El bot solo lo informa: el apartado lo cobra
+      // una persona por WhatsApp.
       ANTICIPO_REGULAR: pesos(store.getBotConfig().anticipoRegular),
       TALLER: taller.nombre,
     }),
@@ -93,106 +94,12 @@ function copyTaller(taller) {
   };
 }
 
-// Paso 5: la promo. Los precios son por persona; el multiplicado viene despues.
-function copyPromo(taller) {
-  const copys = store.getBotCopys();
-  const config = store.getBotConfig();
-  const anticipo = config.anticipoPorPersona;
-  const saldo = Math.max(0, taller.precioPromo - anticipo);
-  return reemplazar(copys.promo, {
-    TALLER: taller.nombre,
-    PRECIO_REGULAR: pesos(taller.precioRegular),
-    PRECIO_PROMO: pesos(taller.precioPromo),
-    AHORRO: pesos(Math.max(0, taller.precioRegular - taller.precioPromo)),
-    ANTICIPO_POR_PERSONA: pesos(anticipo),
-    ANTICIPO_REGULAR: pesos(config.anticipoRegular),
-    SALDO_POR_PERSONA: pesos(saldo),
-  });
-}
-
-// La hora limite: tantas horas despues del primer contacto, redondeada a la
-// media hora siguiente para que suene a hora y no a cronometro.
-function calcularLimite(horas, desde) {
-  const arranque = desde ? new Date(desde) : new Date();
-  const limite = new Date(arranque.getTime() + horas * 60 * 60 * 1000);
-  limite.setMinutes(limite.getMinutes() > 30 ? 60 : 30, 0, 0);
-  return limite;
-}
-
-// Como se le dice al cliente. Si el plazo cae en otro dia, hay que decirlo:
-// "mañana a las 10:30 AM" no es lo mismo que "a las 10:30 AM".
-function horaLimite(horas, desde) {
-  const limite = calcularLimite(horas, desde);
-  const hoy = new Date().toDateString();
-  const manana = new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString();
-  const dia = limite.toDateString();
-  // Se devuelve con su preposicion incluida ("las 5:00 PM", "mañana a las
-  // 5:00 PM") para que el copy diga "antes de {{HORA_LIMITE}}" y no quede
-  // "antes de las mañana a...".
-  const prefijo =
-    dia === hoy
-      ? 'las '
-      : dia === manana
-        ? 'mañana a las '
-        : `el ${limite.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Mexico_City' })} a las `;
-
-  const hora = limite
-    .toLocaleTimeString('es-MX', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: 'America/Mexico_City',
-    })
-    .toUpperCase()
-    // El formato de es-MX devuelve "7:30 P.M." y el copy ya cierra con punto,
-    // asi que quedarian dos seguidos.
-    .replace(/\./g, '')
-    .replace(/\s+/g, ' ');
-
-  return `${prefijo}${hora}`;
-}
-
-// Paso 7: el aviso urgente, con el anticipo ya multiplicado por personas y el
-// plazo contado desde el primer mensaje del cliente (`desde`), no desde ahora.
-function copyAvisoUrgente({ taller, personas, desde }) {
-  const copys = store.getBotCopys();
-  const config = store.getBotConfig();
-  const anticipo = config.anticipoPorPersona * personas;
-  const total = taller.precioPromo * personas;
-  const limite = calcularLimite(config.horasParaPagar, desde);
-
-  // Si el cliente vuelve dias despues, la promo ya no esta viva y no le toca
-  // al bot decidir si se le extiende.
-  if (limite.getTime() <= Date.now()) {
-    return { vencida: true, limite };
-  }
-
-  return {
-    texto: reemplazar(copys.aviso_urgente, {
-      TALLER: taller.nombre,
-      PERSONAS: personas,
-      DETALLE_PERSONAS: personas > 1 ? ` por las ${personas} personas` : '',
-      ANTICIPO: pesos(anticipo),
-      PRECIO_REGULAR: pesos(taller.precioRegular),
-      PRECIO_PROMO: pesos(taller.precioPromo),
-      TOTAL: pesos(total),
-      SALDO: pesos(Math.max(0, total - anticipo)),
-      HORAS_PROMO: config.horasParaPagar,
-      HORA_LIMITE: horaLimite(config.horasParaPagar, desde),
-    }),
-    anticipo,
-    total,
-    saldo: Math.max(0, total - anticipo),
-    limite,
-  };
-}
-
-/* ---- Canalizar con una persona ---- */
+/* ---- Los mensajes del comentario ---- */
 //
-// El bot atiende en su propio numero; lo que se sale de la venta lo ve una
-// persona desde el WhatsApp de siempre. Por eso el mensaje de canalizacion
-// lleva la liga: el cliente pasa de un chat al otro con un toque, en vez de
-// quedarse esperando a que alguien lo busque.
+// El bot no atiende WhatsApp: lo reparte. Cada respuesta a un comentario
+// termina mandando a la persona al numero de siempre, donde la atiende alguien
+// de Endulcora. Por eso la liga la pone el codigo y no el modelo: asi nunca
+// sale mal escrita ni apunta a un numero viejo.
 
 // "5215665271901" -> "56 6527 1901": como lo escribiria cualquiera en Mexico.
 function telefonoLegible(digitos) {
@@ -202,16 +109,16 @@ function telefonoLegible(digitos) {
   return `${nacional.slice(0, 2)} ${nacional.slice(2, 6)} ${nacional.slice(6)}`;
 }
 
-function copyRedireccion() {
-  const config = store.getBotConfig();
-  const copy = store.getBotCopys().redireccion || '';
-  const digitos = String(config.whatsappAtencion || '').replace(/\D/g, '');
+// Rellena la liga y el numero legible. Sin numero configurado se quitan las
+// lineas que los mencionan, en vez de mandar un "https://wa.me/" roto; y con
+// ellas se va la linea que las presentaba ("Escríbenos por WhatsApp:"), que
+// sola no dice nada.
+function conNumero(copy) {
+  const digitos = String(store.getBotConfig().whatsappAtencion || '').replace(/\D/g, '');
+  const texto = String(copy || '');
 
-  // Sin numero configurado, la liga sobra: se quitan esas lineas en vez de
-  // mandarle al cliente un "https://wa.me/" roto. Y con ellas se va la linea
-  // que las presentaba ("Escríbele por aquí:"), que sola no dice nada.
   if (!digitos) {
-    const lineas = copy.split('\n');
+    const lineas = texto.split('\n');
     const fuera = new Set();
     lineas.forEach((linea, i) => {
       if (!/\{\{(LIGA_WHATSAPP|WHATSAPP_ATENCION)\}\}/.test(linea)) return;
@@ -229,18 +136,32 @@ function copyRedireccion() {
       .trim();
   }
 
-  return copy
+  return texto
     .replace(/\{\{LIGA_WHATSAPP\}\}/g, `https://wa.me/${digitos}`)
     .replace(/\{\{WHATSAPP_ATENCION\}\}/g, telefonoLegible(digitos));
 }
 
+// Lo que se deja debajo del comentario, a la vista de todos.
+function copyComentarioPublico() {
+  return conNumero(store.getBotCopys().comentario_publico);
+}
+
+// El mensaje privado completo: saludo de la marca, la respuesta que redacto el
+// modelo, y el cierre con la liga. Si el modelo no logro contestar, el saludo y
+// el cierre solos siguen siendo un mensaje util.
+function copyComentarioPrivado(respuesta) {
+  const copys = store.getBotCopys();
+  return [conNumero(copys.comentario_privado), String(respuesta || '').trim(), conNumero(copys.comentario_cierre)]
+    .filter((p) => p)
+    .join('\n\n');
+}
+
 module.exports = {
   copyTaller,
-  copyPromo,
-  copyAvisoUrgente,
-  copyRedireccion,
+  copyComentarioPublico,
+  copyComentarioPrivado,
   telefonoLegible,
   bloqueFechas,
   fechasDeTaller,
-  horaLimite,
+  hoyISO,
 };

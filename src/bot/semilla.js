@@ -5,7 +5,7 @@
 // anuncie las del calendario y nunca una ya pasada), y el precio y el anticipo
 // se volvieron marcadores para poder cambiarlos en un solo lugar.
 //
-// Despues de importar, la fuente de verdad es /admin > Bot de ventas. Volver a
+// Despues de importar, la fuente de verdad es /admin > Bot de comentarios. Volver a
 // importar solo agrega lo que falte; no pisa lo que ya hayas editado ahi.
 
 const NATIVITAS = 'Nativitas';

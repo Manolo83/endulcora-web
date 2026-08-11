@@ -475,7 +475,7 @@ router.delete('/api/resenas/:id', requireAdmin, (req, res) => {
 });
 
 // ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----
-/* ---------- Bot de ventas de Meta ---------- */
+/* ---------- Bot de comentarios de Meta ---------- */
 
 router.get('/api/bot/config', requireAdmin, (req, res) => {
   res.json({ config: store.getBotConfig(), copys: store.getBotCopys() });
@@ -534,46 +534,14 @@ router.get('/api/bot/diagnostico', requireAdmin, async (req, res) => {
     llaves: {
       META_APP_SECRET: hay('META_APP_SECRET'),
       META_VERIFY_TOKEN: hay('META_VERIFY_TOKEN'),
-      WHATSAPP_TOKEN: hay('WHATSAPP_TOKEN'),
-      WHATSAPP_PHONE_NUMBER_ID: hay('WHATSAPP_PHONE_NUMBER_ID'),
-      GEMINI_API_KEY: hay('GEMINI_API_KEY'),
       META_PAGE_TOKEN: hay('META_PAGE_TOKEN'),
       META_PAGE_ID: hay('META_PAGE_ID'),
+      GEMINI_API_KEY: hay('GEMINI_API_KEY'),
+      META_IG_ID: hay('META_IG_ID'),
       RESEND_API_KEY: hay('RESEND_API_KEY'),
     },
     ultimoEvento,
   });
-});
-
-// Suscribir la app a la cuenta de WhatsApp Business. Es el enganche que no
-// tiene boton en el panel de Meta y sin el cual los mensajes reales no llegan,
-// aunque el webhook este dado de alta y el boton "Probar" funcione.
-router.post('/api/bot/conectar-whatsapp', requireAdmin, async (req, res) => {
-  const wabaId = String((req.body && req.body.wabaId) || store.getBotConfig().wabaId || '').replace(/\D/g, '');
-  if (!wabaId) {
-    return res.status(400).json({ error: 'Falta el identificador de la cuenta de WhatsApp Business.' });
-  }
-  if (!canales.configurado('whatsapp')) {
-    return res.status(400).json({ error: 'Faltan WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID en el servidor.' });
-  }
-
-  try {
-    store.updateBotConfig({ wabaId });
-    const apps = await canales.suscribirApp(wabaId);
-    res.json({ ok: true, apps });
-  } catch (e) {
-    res.status(502).json({ error: `Meta no aceptó la conexión: ${e.message}` });
-  }
-});
-
-router.get('/api/bot/conexion-whatsapp', requireAdmin, async (req, res) => {
-  const wabaId = String(store.getBotConfig().wabaId || '').replace(/\D/g, '');
-  if (!wabaId || !canales.configurado('whatsapp')) return res.json({ wabaId, apps: null });
-  try {
-    res.json({ wabaId, apps: await canales.appsSuscritas(wabaId) });
-  } catch (e) {
-    res.json({ wabaId, apps: null, error: e.message });
-  }
 });
 
 router.get('/api/bot/conversaciones', requireAdmin, async (req, res) => {
@@ -670,14 +638,6 @@ router.post('/api/bot/conversaciones/:id/reactivar', requireAdmin, async (req, r
     res.json(contacto);
   } catch (e) {
     res.status(500).json({ error: 'No se pudo reactivar.' });
-  }
-});
-
-router.get('/api/bot/solicitudes', requireAdmin, async (req, res) => {
-  try {
-    res.json(await botAlmacen.listarSolicitudes());
-  } catch (e) {
-    res.status(500).json({ error: 'No se pudieron cargar las solicitudes.' });
   }
 });
 

@@ -21,10 +21,10 @@ página pública, sin tocar código.
 - **Carrito y pagos**: los visitantes agregan productos/cursos a un carrito
   (guardado en su navegador) y pagan todo junto con **Mercado Pago**
   (tarjeta, OXXO, transferencia) vía Checkout Pro.
-- **Bot de ventas** en WhatsApp, Messenger e Instagram (`/admin` → Bot de
-  ventas): manda la información del taller con las fechas reales, la promo y
-  las instrucciones de pago, y te avisa por correo cuando toca que sigas tú.
-  No cobra ni confirma lugares. Ver la sección 12.
+- **Bot de comentarios** en Facebook e Instagram (`/admin` → Bot de
+  comentarios): contesta lo que preguntan en tus publicaciones con las fechas
+  y precios reales, y manda a esa persona a tu WhatsApp. No vende, no aparta
+  lugares y no cobra. Ver la sección 12.
 - **Backend** en Node.js + Express (`server.js`, `src/`): sirve el sitio,
   guarda los datos en un archivo JSON y los archivos subidos en disco.
 - **SEO básico**: `robots.txt`, `sitemap.xml`, metadatos Open Graph/Twitter,
@@ -244,127 +244,110 @@ siempre desde aistudio.google.com.
 Si `GEMINI_API_KEY` no está configurada, la burbuja del asistente sigue
 apareciendo, pero responde que todavía no está activado.
 
-## 12. Bot de ventas en WhatsApp, Messenger e Instagram
+## 12. Bot de comentarios en Facebook e Instagram
 
-Atiende los tres canales de Meta Business y lleva a quien pide informes por
-el mismo embudo que usas hoy a mano.
+Contesta los comentarios que la gente deja en tus publicaciones y la manda a
+tu WhatsApp de siempre, donde la atiende una persona.
 
-### Hasta dónde llega
+### Qué hace
 
-1. Detecta de qué taller preguntan (por la palabra clave o porque el cliente
-   lo dice).
-2. Manda el copy del taller, **con las fechas de tu calendario inyectadas**.
-   Nunca anuncia una fecha ya pasada ni un taller agotado.
-3. Manda el gancho del regalo y espera la confirmación de lectura.
-4. Manda la promo con el precio exclusivo.
-5. Pregunta para cuántas personas y manda el aviso urgente con el anticipo
-   **multiplicado por persona** y la hora límite calculada. La promo dura 24
-   horas **contadas desde el primer mensaje del cliente**, no desde que el bot
-   manda el aviso; si alguien vuelve después de ese plazo, el bot no se la
-   extiende: canaliza para que una persona decida.
-6. Si el cliente acepta, manda las instrucciones de pago y **ahí se detiene**.
+1. Le llega el comentario por el webhook de Meta.
+2. Lee la duda y busca la respuesta en los talleres que tienes cargados: qué
+   incluye, cuánto cuesta, qué fechas hay. **Nunca anuncia una fecha ya pasada
+   ni un taller agotado**, porque las fechas salen de tu calendario.
+3. Deja una **respuesta pública** debajo del comentario, corta y amable,
+   firmada como Endulcorito.
+4. Manda un **mensaje privado** a esa persona con la respuesta a su duda y la
+   liga a tu WhatsApp.
 
-De ahí en adelante todo es manual, igual que hoy: tú recibes el comprobante,
-lo validas contra tu banco y haces el registro. El bot nunca cobra, nunca
-genera links de pago y nunca confirma un lugar.
+Y ahí termina. No vende, no aparta lugares, no cobra y no pide datos. Todo
+eso lo sigues haciendo tú por WhatsApp, igual que hoy.
 
-Te avisa por correo (el que configures en el panel) cuando:
-- un cliente llega al final del embudo y toca esperar su comprobante;
-- el bot canaliza a alguien porque la pregunta no le toca;
-- alguien manda una foto (probablemente un comprobante).
+> Meta permite **un solo mensaje privado por comentario**. Por eso ese mensaje
+> lleva siempre la liga de WhatsApp, incluso si el modelo no logró contestar:
+> es la única oportunidad de mandar a esa persona contigo.
 
-Cada correo lleva la conversación completa, así que no tienes que abrir el
-panel para saber de qué se trata.
+### Qué NO hace
 
-### De dónde le llega la gente
+**No toca los mensajes directos.** Los DM de Messenger e Instagram siguen
+llegando a tu bandeja de Meta y los contestas tú, como siempre. El bot ni los
+guarda ni los responde.
 
-**Anuncios.** Todos tus conjuntos de anuncios están optimizados a
-conversaciones, así que quien toca el anuncio cae directo en el chat. Meta
-manda además el id del anuncio; si lo registras en el taller (campo *Ids de
-anuncios*), el bot sabe de qué taller preguntan sin adivinar, incluso cuando
-la persona abre el chat y no escribe nada.
-
-**Comentarios.** El bot atiende los comentarios de todas tus publicaciones,
-no solo de los anuncios. Deja una respuesta pública corta y amable firmada
-como Endulcorito, y manda a esa persona un privado para abrir la
-conversación. Si el comentario deja claro de qué taller preguntan y el copy
-cabe, se lo manda de una vez.
-
-> Meta permite **un solo mensaje privado por comentario**. Por eso el bot no
-> reintenta ese envío, y por eso el privado lleva lo más útil que quepa.
-
-Para que el bot no conteste sus propios comentarios (y se quede en un bucle),
-configura `META_PAGE_ID` y `META_IG_ID`.
+**No atiende WhatsApp.** Tu número se queda en la app de WhatsApp Business de
+tu celular, sin tocarlo. El bot solo reparte gente hacia allá.
 
 ### Qué hace siempre, sin excepción
 
-- Se presenta como asistente automático y da el aviso de privacidad en el
-  primer mensaje.
-- Respeta **BAJA**: deja de escribir y lo registra.
-- Canaliza contigo ante alergias, reclamos, devoluciones, mayoreo, temas
-  ajenos a talleres, cliente molesto o si le piden hablar con una persona.
+- Respeta **BAJA**: a quien pidió no recibir mensajes no le escribe, ni
+  siquiera por un comentario suyo.
+- No contesta sus propios comentarios (por eso hay que configurar
+  `META_PAGE_ID` y `META_IG_ID`), así no se queda en un bucle.
+- Nunca inventa precios, fechas, cupos ni promociones. Si no lo tiene
+  cargado, no lo dice.
 - Nunca pide datos de tarjeta, CVV, NIP ni identificaciones.
-- Nunca negocia precio ni inventa fechas, montos o promociones.
+- No negocia precio.
+- Si Meta reintenta el mismo comentario, no lo contesta dos veces.
+
+Te avisa por correo (el que configures en el panel) cuando canaliza a alguien:
+quejas, facturación, alergias, colaboraciones o algo que no supo contestar.
+El correo lleva la conversación completa.
 
 ### Configurar Meta (una sola vez)
 
 1. En [developers.facebook.com](https://developers.facebook.com) crea una app
-   de tipo **Empresa** y agrégale los productos **WhatsApp** y **Messenger**.
-2. En **Configuración → Básica**, copia la *Clave secreta de la app* a la
-   variable `META_APP_SECRET` de Railway.
+   de tipo **Negocios** y agrégale los productos **Messenger** e
+   **Instagram**.
+2. En **Configuración de la app → Básica**, copia la *Clave secreta de la app*
+   a la variable `META_APP_SECRET` de Railway.
 3. Inventa un texto cualquiera y ponlo en `META_VERIFY_TOKEN`.
-4. En **WhatsApp → Configuración**, da de alta el webhook con la URL
-   `https://www.endulcora.com/api/meta/webhook` y ese mismo token. Suscríbete
-   al campo `messages`.
-5. Repite el alta del webhook en **Messenger → Configuración** y en
-   **Instagram**, con la misma URL y el mismo token.
-6. Copia el token permanente y el id del número a `WHATSAPP_TOKEN` y
-   `WHATSAPP_PHONE_NUMBER_ID`; el token de la página a `META_PAGE_TOKEN`.
+4. En **Webhooks**, da de alta la URL `https://www.endulcora.com/api/meta/webhook`
+   con ese mismo token, y suscríbete a los campos **`feed`** (comentarios de
+   Facebook) y **`comments`** (comentarios de Instagram).
+5. Copia el token de la página a `META_PAGE_TOKEN`, y los identificadores a
+   `META_PAGE_ID` y `META_IG_ID`.
+6. Pasa la app a modo **Activo**. En modo Desarrollo, Meta solo entrega
+   webhooks de prueba: no llega ni un comentario real.
 7. No necesitas ninguna clave nueva de inteligencia artificial: el bot usa la
    misma `GEMINI_API_KEY` que ya mueve al asistente del sitio.
 
-> **Ojo con el número.** Un número de WhatsApp solo puede estar en un lado: si
-> migras el que usas hoy a la API, dejas de poder abrirlo en la app de
-> WhatsApp de tu celular. Todo pasaría por el sistema.
+> Si la clave secreta no coincide, el servidor rechaza todo lo que manda Meta.
+> Desde el panel de Meta se ve entregado y en `/admin` no aparece nada. El log
+> lo dice con todas sus letras: busca `[bot] Webhook rechazado` en Railway.
 
-### Configurar el bot (en `/admin` → Bot de ventas)
+### Configurar el bot (en `/admin` → Bot de comentarios)
 
-- **Enciéndelo.** Llega apagado: mientras esté apagado recibe y guarda los
-  mensajes, pero no contesta nada.
-- **Anticipo por persona, horas para pagar y correo de avisos.**
-- **Los mensajes del embudo.** Se mandan tal cual los escribas. Aquí es donde
-  pegas tus cuentas bancarias, en *Instrucciones de pago* — no viven en el
-  código.
-- **Los talleres.** Hay un botón que carga de golpe los 18 talleres de
-  agosto-septiembre con sus copys y sus 37 fechas. Se puede repetir sin miedo:
-  solo agrega lo que falte, nunca pisa lo que ya editaste. Para uno nuevo,
-  ponle su palabra clave, su precio regular y el de promo, y escribe
-  `{{FECHAS}}` en el copy donde van las fechas.
+- **Enciéndelo.** Llega apagado: mientras esté apagado no contesta nada.
+- **El diagnóstico** de arriba te dice qué llave falta en el servidor (nunca
+  su valor), si el bot está encendido, cuántos talleres tiene y cuándo fue la
+  última vez que Meta le entregó algo.
+- **WhatsApp de atención personal.** Tu número de siempre, con lada del país
+  (52). Es a donde manda a toda la gente.
+- **Los mensajes del bot.** Tres textos: la respuesta pública, el saludo del
+  privado y su cierre. Se mandan tal cual los escribas; el bot solo redacta la
+  respuesta a la duda, que va en medio.
+- **Los talleres.** Hay un botón que carga de golpe los 17 talleres con sus
+  copys y sus 37 fechas. Se puede repetir sin miedo: solo agrega lo que falte,
+  nunca pisa lo que ya editaste. Para uno nuevo, ponle su palabra clave, su
+  precio y escribe `{{FECHAS}}` en el copy donde van las fechas.
 - **El aviso interno de cada taller.** Es una nota que el bot obedece pero
-  nunca le repite al cliente: "solo mayores de 18", "no prometas control de
-  glucosa", etc.
-- **Ojo con las palabras clave repetidas.** COCTELES sirve para Coctelería
-  Básica y para Coctelería Mexicana. El bot detecta la ambigüedad y pregunta
-  cuál en vez de adivinar, así que no es un error tenerlas repetidas.
-- **Liga las fechas.** En *Calendario*, cada día tiene ahora un selector
-  **Taller del bot**, un **horario** y un **cupo**. Las fechas que ligues ahí
-  son las que anuncia el copy. Si no ligas ninguna, el bot dice que no hay
-  fechas abiertas en vez de inventarlas.
+  nunca repite: "solo mayores de 18", "no prometas control de glucosa", etc.
+- **Liga las fechas.** En *Calendario*, cada día tiene un selector **Taller
+  del bot**, un **horario** y un **cupo**. Las fechas que ligues ahí son las
+  que anuncia el bot. Si no ligas ninguna, dice que no hay fechas abiertas en
+  vez de inventarlas.
 
 ### Costo
 
 El bot corre sobre el mismo modelo de Gemini que el asistente del sitio y con
 la misma clave, así que no agrega ninguna cuenta ni ningún cobro nuevo.
 
-Eso alcanza porque el trabajo del modelo aquí es chico: los copys los manda el
-código palabra por palabra, y los montos y las fechas los calcula el sistema.
-Lo único que decide el modelo es cuándo avanzar de paso y qué contestar a lo
-que se sale del guion.
+Alcanza porque el trabajo del modelo aquí es chico: un comentario, una
+respuesta corta. El saludo, el cierre y la liga los pone el código.
 
 Ten en cuenta que el nivel gratuito de Google tiene límites de peticiones por
 minuto y que Google puede usar esas conversaciones para mejorar sus modelos.
-Como por aquí pasan nombres y teléfonos de clientes, conviene saberlo; el
-nivel de pago de Google no usa los datos así.
+Como por aquí pasan nombres de clientes, conviene saberlo; el nivel de pago de
+Google no usa los datos así.
 
 ## 13. Notas técnicas y mejoras futuras (opcionales)
 

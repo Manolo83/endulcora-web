@@ -69,7 +69,7 @@ async function enviar({ asunto, encabezado, color, cuerpo }) {
       subject: asunto,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1B0720;">
-          <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcorito · Bot de ventas</p>
+          <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcorito · Bot de comentarios</p>
           <h1 style="font-size:19px;color:${color};margin:4px 0 16px;">${encabezado}</h1>
           ${cuerpo}
           <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">
@@ -83,29 +83,6 @@ async function enviar({ asunto, encabezado, color, cuerpo }) {
   }
 }
 
-// El cliente llego al final del embudo: ya tiene las instrucciones de pago y
-// toca esperar su comprobante.
-function avisarSolicitud({ contacto, solicitud, mensajes }) {
-  const personas = solicitud.personas;
-  return enviar({
-    asunto: `Apartado pendiente · ${solicitud.taller} · $${Number(solicitud.anticipo).toLocaleString('es-MX')}`,
-    encabezado: 'Ya mandé las instrucciones de pago',
-    color: '#3F8F5F',
-    cuerpo: `
-      ${contactoHtml(contacto)}
-      <table style="width:100%;border-collapse:collapse;margin-top:16px;font-size:14px;">
-        <tr><td style="padding:6px 0;color:#9C9C9C;">Taller</td><td style="padding:6px 0;text-align:right;"><strong>${escapar(solicitud.taller)}</strong></td></tr>
-        <tr><td style="padding:6px 0;color:#9C9C9C;">Fecha y horario</td><td style="padding:6px 0;text-align:right;">${escapar(solicitud.fecha_texto || 'por definir')}</td></tr>
-        <tr><td style="padding:6px 0;color:#9C9C9C;">Personas</td><td style="padding:6px 0;text-align:right;">${personas}</td></tr>
-        <tr><td style="padding:6px 0;color:#9C9C9C;">Anticipo esperado</td><td style="padding:6px 0;text-align:right;"><strong>$${Number(solicitud.anticipo).toLocaleString('es-MX')} MXN</strong></td></tr>
-        <tr><td style="padding:6px 0;color:#9C9C9C;">Saldo el día del taller</td><td style="padding:6px 0;text-align:right;">$${Number(solicitud.saldo).toLocaleString('es-MX')} MXN</td></tr>
-      </table>
-      <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#7A2E7E;margin:22px 0 6px;">La conversación</h2>
-      ${hiloHtml(mensajes)}`,
-  });
-}
-
-// El bot se topo con algo que no le toca: lo canalizo y avisa.
 function avisarEscalado({ contacto, motivo, mensajes }) {
   return enviar({
     asunto: `Atención personalizada · ${contacto.nombre || contacto.telefono || contacto.externo_id}`,
@@ -122,4 +99,4 @@ function avisarEscalado({ contacto, motivo, mensajes }) {
   });
 }
 
-module.exports = { avisarSolicitud, avisarEscalado };
+module.exports = { avisarEscalado };

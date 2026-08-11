@@ -53,50 +53,37 @@ const DEFAULT_CONTENT = {
     'Las velas comestibles combinan alimento y fuego. Nunca las dejes encendidas sin vigilancia, cerca de niños, corrientes de aire o materiales inflamables.\n\nSe encienden por minutos, con fines sensoriales, y se apagan para consumir la grasa fundida tibia.\n\nVarias fórmulas contienen lácteos, frutos secos, ajonjolí y gluten: declara siempre los alérgenos y respeta la cadena de frío.',
 };
 
-// Textos que manda el bot de ventas de Meta. Se editan desde /admin, nunca en
-// codigo: son de marketing y cambian seguido. Los {{MARCADORES}} los rellena el
-// sistema con datos reales (fechas del calendario, montos calculados), para que
-// nunca se anuncie una fecha ya pasada ni un anticipo equivocado.
+// Textos que manda el bot al contestar comentarios. Se editan desde /admin,
+// nunca en codigo: son de marketing y cambian seguido. {{LIGA_WHATSAPP}} y
+// {{WHATSAPP_ATENCION}} los rellena el sistema con el numero configurado, para
+// que la liga nunca quede rota ni apunte a un numero viejo.
+//
+// El modelo redacta unicamente la respuesta a la duda; el saludo y el cierre
+// salen de aqui, palabra por palabra.
 const DEFAULT_BOT_COPYS = {
-  bienvenida:
-    '¡Hola! Soy Endulcorito, el asistente de Endulcora. Te aviso que soy un asistente automático y que guardo tu mensaje solo para atenderte; si no quieres recibir más mensajes escribe BAJA.',
-  gancho:
-    '*¡DESBLOQUEA TU REGALO!*🎁 \n\nConfirma de LECTURA COMPLETA y recibe un descuento VIP exclusivo en tu próximo taller.',
-  // El desbloqueo va en DOS mensajes, nunca juntos: primero la buena noticia,
-  // luego el reloj. Asi lo pide el manual de ventas.
-  promo:
-    '¡Perfecto! 🔓 Aquí va tu promoción:\n\n💰 Precio normal: ~${{PRECIO_REGULAR}}~\n🎉 Tu precio hoy: *${{PRECIO_PROMO}}*\n\nY apartas con solo *${{ANTICIPO_POR_PERSONA}}* en lugar de ${{ANTICIPO_REGULAR}}.\nEl resto lo liquidas el día del taller.',
-  aviso_urgente:
-    '⏰ *Esta promo es exprés.* Solo dura *{{HORAS_PROMO}} horas.*\nDespués el taller regresa a ${{PRECIO_REGULAR}}.\n\nSon *${{ANTICIPO}}* de apartado{{DETALLE_PERSONAS}}, antes de {{HORA_LIMITE}}.\n\n¿Te aparto tu lugar? 😊',
-  // Las cuentas bancarias NO viven en el repositorio. Pegalas desde
-  // /admin > Bot de ventas para que no queden en el historial de codigo.
-  instrucciones_pago:
-    '✨ *Instrucciones de Pago* ✨\n\n(Pega aquí tus instrucciones de pago desde /admin > Bot de ventas: cuentas, OXXO, Mercado Pago y PayPal.)',
-  espera_apartado: 'Quedamos a la espera de su apartado ✨',
-  // El bot vive en su propio numero; ese tema lo atiende una persona desde el
-  // WhatsApp de siempre. Por eso aqui va la liga: para que el cliente no tenga
-  // que esperar a que alguien lo busque.
-  redireccion:
-    'Ese tema lo ve directamente una persona del equipo, para darte una atención como se debe 💬\n\nEscríbele por aquí y te atiende personalmente:\n{{LIGA_WHATSAPP}}\n\nO guarda el número: *{{WHATSAPP_ATENCION}}*\n\nYa le pasé tu conversación para que no tengas que repetir nada ✨',
-  sin_fechas:
-    'Ahorita no tengo fechas abiertas de ese taller. ¿Quieres que te avisemos en cuanto se publiquen?',
-  // Lo que Endulcorito deja escrito EN PÚBLICO debajo del comentario. Lo lee
-  // cualquiera que pase por la publicación, asi que va corto y amable.
+  // Lo que Endulcorito deja EN PÚBLICO debajo del comentario. Lo lee cualquiera
+  // que pase por la publicación, asi que va corto, amable y con la liga: mucha
+  // gente no abre los mensajes privados pero si toca un enlace.
   comentario_publico:
-    '¡Hola! Soy Endulcorito 🧁 Te acabo de mandar toda la información por privado ✨',
-  // Y lo que le llega a esa persona al privado, para abrir la conversación.
+    '¡Hola! Soy Endulcorito 🧁 Te acabo de mandar la información por privado ✨\nY si prefieres, escríbenos por WhatsApp: {{LIGA_WHATSAPP}}',
+  // El saludo del mensaje privado. Después de esto va la respuesta a su duda.
   comentario_privado:
-    '¡Hola! Soy Endulcorito, el asistente de Endulcora 🧁 Vi tu comentario y te escribo por aquí para pasarte la información. Te aviso que soy un asistente automático; si no quieres recibir más mensajes escribe BAJA.',
+    '¡Hola! Soy Endulcorito, el asistente de Endulcora 🧁 Vi tu comentario y te escribo por aquí para ayudarte.',
+  // El cierre del privado: siempre lleva la liga, que es a donde queremos que
+  // llegue la conversación.
+  comentario_cierre:
+    '¿Quieres apartar tu lugar o tienes otra duda? Escríbenos por WhatsApp y te atendemos personalmente:\n{{LIGA_WHATSAPP}}',
 };
 
 // Textos que ya no describen como opera el bot. Al arrancar se cambian por el
 // nuevo, pero solo si nadie los edito desde /admin (ver init).
 const COPYS_REEMPLAZADOS = {
-  // El bot dejo de vivir en el numero de atencion: ahora tiene el suyo, y al
-  // canalizar tiene que pasarle al cliente el WhatsApp de la persona. Decirle
-  // "en un momento te contactan por aquí" ya seria mentira.
-  redireccion:
-    'Déjame te canalizo con la persona encargada de ese tema para darte una atención personalizada. En un momento te contactan por aquí ✨',
+  // El bot dejo de llevar el embudo de venta: ahora solo contesta comentarios y
+  // manda a WhatsApp. Prometer que "te mandé toda la información" ya no aplica,
+  // porque el privado lleva una respuesta a la duda, no el copy completo.
+  comentario_publico: '¡Hola! Soy Endulcorito 🧁 Te acabo de mandar toda la información por privado ✨',
+  comentario_privado:
+    '¡Hola! Soy Endulcorito, el asistente de Endulcora 🧁 Vi tu comentario y te escribo por aquí para pasarte la información. Te aviso que soy un asistente automático; si no quieres recibir más mensajes escribe BAJA.',
 };
 
 const DEFAULT_PRODUCTS = [
@@ -207,22 +194,15 @@ function datosPorDefecto() {
     talleresBot: [],
     botConfig: {
       activo: false,
-      // El de la promo: con el que el bot aparta. El regular ($400) solo
-      // aparece en el copy informativo, antes de desbloquear el descuento.
-      anticipoPorPersona: 200,
-      anticipoRegular: 400,
-      // La promo dura esto desde el PRIMER mensaje del cliente, no desde que
-      // el bot manda el aviso.
-      horasParaPagar: 24,
       correoNotificaciones: 'endulcora@gmail.com',
-      // El WhatsApp de siempre, el que sigue en el telefono con la app. El bot
-      // vive en otro numero: cuando canaliza, le pasa este al cliente para que
-      // la conversacion continue contigo, en persona.
+      // Lo unico que queda del embudo viejo: el copy de cada taller anuncia con
+      // cuanto se reserva ({{ANTICIPO_REGULAR}}). El bot solo lo informa; el
+      // apartado lo cobra una persona por WhatsApp.
+      anticipoRegular: 400,
+      // El WhatsApp de siempre, el que sigue en el telefono con la app de
+      // WhatsApp Business. El bot no atiende ese numero: lo reparte. Cada
+      // respuesta a un comentario termina mandando a la gente ahi.
       whatsappAtencion: '5215665271901',
-      // Id de la cuenta de WhatsApp Business (Meta > WhatsApp > el numero). Se
-      // usa para suscribir la app a la cuenta; sin eso Meta no entrega los
-      // mensajes reales aunque el webhook este dado de alta.
-      wabaId: '',
     },
   };
 }
@@ -653,7 +633,7 @@ module.exports = {
     return item;
   },
 
-  // ---- Bot de ventas de Meta: copys, talleres y ajustes ----
+  // ---- Bot de comentarios de Meta: copys, talleres y ajustes ----
   getBotCopys() {
     return load().botCopys;
   },
@@ -675,13 +655,10 @@ module.exports = {
     const data = load();
     const c = data.botConfig;
     if (typeof patch.activo === 'boolean') c.activo = patch.activo;
-    if (patch.anticipoPorPersona !== undefined) c.anticipoPorPersona = Math.max(0, parseInt(patch.anticipoPorPersona, 10) || 0);
-    if (patch.anticipoRegular !== undefined) c.anticipoRegular = Math.max(0, parseInt(patch.anticipoRegular, 10) || 0);
-    if (patch.horasParaPagar !== undefined) c.horasParaPagar = Math.max(1, Math.min(48, parseInt(patch.horasParaPagar, 10) || 2));
     if (typeof patch.correoNotificaciones === 'string') c.correoNotificaciones = patch.correoNotificaciones.trim();
+    if (patch.anticipoRegular !== undefined) c.anticipoRegular = Math.max(0, parseInt(patch.anticipoRegular, 10) || 0);
     // Se guarda solo con digitos: es lo que pide la liga wa.me.
     if (typeof patch.whatsappAtencion === 'string') c.whatsappAtencion = patch.whatsappAtencion.replace(/\D/g, '');
-    if (typeof patch.wabaId === 'string') c.wabaId = patch.wabaId.replace(/\D/g, '');
     save(data);
     return c;
   },

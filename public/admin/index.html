@@ -64,7 +64,7 @@
       <a href="#seccionProductos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Productos</a>
       <a href="#seccionCalendario" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Calendario</a>
       <a href="#seccionLegales" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Legales</a>
-      <a href="#seccionBot" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Bot de ventas</a>
+      <a href="#seccionBot" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Bot de comentarios</a>
       <a href="#seccionVentas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Ventas</a>
       <a href="#seccionClientes" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clientes</a>
       <a href="#seccionSuscriptores" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Suscriptores</a>
@@ -137,7 +137,7 @@
               <input data-content-key="hero_cta_secundario" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
             </label>
           </div>
-          <div class="mt-5 grid gap-4 sm:grid-cols-3">
+          <div class="mt-5 grid gap-4 sm:grid-cols-2">
             <div class="rounded-xl border border-vino/10 p-3">
               <span class="font-ui text-[10px] font-600 uppercase tracking-widest text-carbon/50">Cifra 1</span>
               <input data-content-key="hero_stat1_valor" type="text" placeholder="Valor" class="mt-1.5 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm">
@@ -443,10 +443,10 @@
     </section>
 
     <!-- VENTAS -->
-    <!-- BOT DE VENTAS -->
+    <!-- BOT DE COMENTARIOS -->
     <section id="seccionBot" class="scroll-mt-32 mb-14">
-      <h2 class="font-titulo text-2xl tracking-wide text-vino">Bot de ventas</h2>
-      <p class="mt-1 text-sm text-carbon/60">Atiende WhatsApp, Messenger e Instagram. Manda la información del taller, la promo y las instrucciones de pago; ahí se detiene y te avisa por correo. Nunca cobra ni confirma lugares.</p>
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Bot de comentarios</h2>
+      <p class="mt-1 text-sm text-carbon/60">Contesta los comentarios de Facebook e Instagram: responde la duda con los datos reales de tus talleres y manda a la persona a tu WhatsApp. No vende, no aparta lugares y no cobra. Los mensajes directos no los toca: esos siguen llegando a tu bandeja de Meta.</p>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-4">
@@ -455,43 +455,28 @@
             <span class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Bot encendido</span>
           </label>
           <p id="botEstadoTexto" class="font-ui text-[11px] uppercase tracking-widest text-carbon/50"></p>
-          <div id="botDiagnostico" class="mt-4 rounded-xl bg-crema/70 p-4 text-[12px] leading-relaxed"></div>
-          <div class="mt-4 rounded-xl border border-vino/15 p-4">
-            <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-vino">Conexión con WhatsApp</p>
-            <p class="mt-1 text-[12px] text-carbon/60">Dar de alta el webhook en Meta no basta: además hay que suscribir esta app a tu cuenta de WhatsApp Business. Sin eso el botón "Probar" de Meta llega, pero los mensajes de verdad no.</p>
-            <label class="mt-3 block">
-              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Id de la cuenta de WhatsApp Business</span>
-              <span class="mt-0.5 block text-[11px] text-carbon/45">Meta → WhatsApp → junto al número, dice "Identificador de la cuenta de WhatsApp Business".</span>
-              <input id="botWabaId" type="text" placeholder="2610114199426655" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 font-mono text-[13px]">
-            </label>
-            <button id="btnConectarWhatsapp" class="mt-3 rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Conectar</button>
-            <p id="botConexionEstado" class="mt-3 text-[12px]"></p>
-          </div>
         </div>
-        <div class="mt-5 grid gap-4 sm:grid-cols-3">
-          <label class="block">
-            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Anticipo por persona ($)</span>
-            <input id="botAnticipo" type="number" min="0" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
-          </label>
-          <label class="block">
-            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Horas que dura la promo</span>
-            <span class="mt-0.5 block text-[11px] text-carbon/45">Se cuentan desde el primer mensaje del cliente.</span>
-            <input id="botHoras" type="number" min="1" max="48" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
-          </label>
+        <div id="botDiagnostico" class="mt-4 rounded-xl bg-crema/70 p-4 text-[12px] leading-relaxed"></div>
+        <div class="mt-5 grid gap-4 sm:grid-cols-2">
           <label class="block">
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo de avisos</span>
             <input id="botCorreo" type="email" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           </label>
           <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Anticipo que anuncian los copys ($)</span>
+            <span class="mt-0.5 block text-[11px] text-carbon/45">Es el <code class="rounded bg-crema px-1">{{ANTICIPO_REGULAR}}</code> que aparece en el copy de cada taller. El bot solo lo informa; el apartado lo cobras tú por WhatsApp.</span>
+            <input id="botAnticipo" type="number" min="0" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">WhatsApp de atención personal</span>
-            <span class="mt-0.5 block text-[11px] text-carbon/45">Tu número de siempre, el del teléfono. Cuando el bot canaliza, le pasa esta liga al cliente para que te escriba directo. Con lada del país: 52.</span>
+            <span class="mt-0.5 block text-[11px] text-carbon/45">Tu número de siempre, el del teléfono. Cada respuesta del bot termina mandando a la gente aquí. Con lada del país: 52.</span>
             <input id="botWhatsapp" type="tel" placeholder="5215665271901" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           </label>
         </div>
       </div>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
-        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Mensajes del embudo</h3>
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Mensajes del bot</h3>
         <p class="mt-1 text-sm text-carbon/60">Se mandan tal cual los escribas. Los <code class="rounded bg-crema px-1">{{MARCADORES}}</code> los rellena el sistema con datos reales.</p>
         <div id="botCopysCampos" class="mt-5 space-y-5"></div>
         <button id="btnGuardarBot" class="mt-6 rounded-full bg-vino px-7 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar ajustes y mensajes</button>
@@ -508,18 +493,13 @@
         <p class="mt-2 text-[11px] text-carbon/45">La carga trae los copys y las fechas del documento de ventas. Se puede repetir sin miedo: solo agrega lo que falte, nunca pisa lo que ya editaste aquí.</p>
       </div>
 
-      <div class="mt-6 grid gap-6 lg:grid-cols-2">
-        <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
-          <div class="flex items-center justify-between gap-3">
-            <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Apartados pendientes</h3>
-            <button id="btnRefrescarBot" class="rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Actualizar</button>
-          </div>
-          <div id="listaSolicitudesBot" class="mt-4 space-y-3"></div>
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Comentarios atendidos</h3>
+          <button id="btnRefrescarBot" class="rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Actualizar</button>
         </div>
-        <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
-          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Conversaciones</h3>
-          <div id="listaConversacionesBot" class="mt-4 space-y-2"></div>
-        </div>
+        <p class="mt-1 text-sm text-carbon/60">Cada comentario que contestó el bot. Los marcados en naranja son los que te dejó a ti.</p>
+        <div id="listaConversacionesBot" class="mt-4 space-y-2"></div>
       </div>
     </section>
 
@@ -1607,42 +1587,27 @@ async function cargarVentas(){
 
 $('btnRefrescarVentas').addEventListener('click', cargarVentas);
 
-/* ---------- Bot de ventas ---------- */
+/* ---------- Bot de comentarios ---------- */
 let TALLERES_BOT = [];
 
 const CAMPOS_COPY = [
-  ['bienvenida', 'Bienvenida (solo el primer mensaje)', 'Se manda una sola vez, antes de todo.'],
-  ['gancho', 'Gancho del regalo', 'Va justo después del copy del taller.'],
-  ['promo', 'Promo exclusiva', 'Marcadores: {{PRECIO_REGULAR}} {{PRECIO_PROMO}} {{AHORRO}} {{ANTICIPO_POR_PERSONA}} {{SALDO_POR_PERSONA}}'],
-  ['aviso_urgente', 'Aviso urgente', 'Marcadores: {{ANTICIPO}} {{DETALLE_PERSONAS}} {{HORA_LIMITE}} {{TOTAL}} {{SALDO}} — el anticipo ya viene multiplicado por personas.'],
-  ['instrucciones_pago', 'Instrucciones de pago', 'Aquí van tus cuentas. Es el último mensaje que manda el bot.'],
-  ['espera_apartado', 'Cierre tras las instrucciones', ''],
-  ['redireccion', 'Canalización a una persona', 'Se manda cuando el bot no puede seguir y te avisa por correo.'],
-  ['sin_fechas', 'Taller sin fechas abiertas', ''],
-  ['comentario_publico', 'Respuesta pública a un comentario', 'Lo ve cualquiera que pase por la publicación. Córtalo y que sea amable.'],
-  ['comentario_privado', 'Privado tras un comentario', 'Meta solo permite UN privado por comentario. Si el copy del taller cabe junto con este saludo, se manda todo de una vez.'],
+  ['comentario_publico', 'Respuesta pública debajo del comentario', 'Lo lee cualquiera que pase por la publicación. Corto y amable. Marcador: {{LIGA_WHATSAPP}}'],
+  ['comentario_privado', 'Saludo del mensaje privado', 'Va antes de la respuesta que redacta el bot.'],
+  ['comentario_cierre', 'Cierre del mensaje privado', 'Va después de la respuesta. Aquí vive la liga a tu WhatsApp. Marcadores: {{LIGA_WHATSAPP}} {{WHATSAPP_ATENCION}}'],
 ];
-
-const ETAPA_TEXTO = {
-  copy_enviado: { texto: 'Leyendo info', clase: 'text-humo' },
-  promo_enviada: { texto: 'Vio la promo', clase: 'text-flama' },
-  personas_confirmadas: { texto: 'Definió personas', clase: 'text-flama' },
-  instrucciones_enviadas: { texto: 'Esperando pago', clase: 'text-[#3F8F5F]' },
-};
 
 /* Qué le falta al bot para funcionar. Sin esto, un mensaje que no llega se ve
    igual que uno que llegó y falló: en los dos casos el panel está vacío. */
 const LLAVES_BOT = {
   META_APP_SECRET: ['Clave secreta de la app', 'Sin ella el servidor rechaza todo lo que manda Meta, en silencio.'],
   META_VERIFY_TOKEN: ['Token de verificación', 'Solo se usa al dar de alta el webhook.'],
-  WHATSAPP_TOKEN: ['Token de WhatsApp', 'Sin él el bot recibe, pero no puede contestar.'],
-  WHATSAPP_PHONE_NUMBER_ID: ['Id del número de WhatsApp', 'De qué número salen las respuestas.'],
-  GEMINI_API_KEY: ['Clave de Gemini', 'El cerebro del bot. Sin ella guarda los mensajes y no contesta.'],
-  META_PAGE_TOKEN: ['Token de la página', 'Solo para Messenger e Instagram.'],
-  META_PAGE_ID: ['Id de la página', 'Solo para Messenger e Instagram.'],
+  META_PAGE_TOKEN: ['Token de la página', 'Con él se contestan los comentarios. Sin él el bot los ve y no puede responder.'],
+  META_PAGE_ID: ['Id de la página de Facebook', 'También evita que el bot se conteste a sí mismo.'],
+  GEMINI_API_KEY: ['Clave de Gemini', 'El cerebro del bot. Sin ella guarda los comentarios y no contesta.'],
+  META_IG_ID: ['Id de la cuenta de Instagram', 'Solo evita que el bot se conteste a sí mismo en Instagram.'],
   RESEND_API_KEY: ['Clave de correo', 'Solo para los avisos por correo.'],
 };
-const LLAVES_OPCIONALES = ['META_PAGE_TOKEN', 'META_PAGE_ID', 'RESEND_API_KEY'];
+const LLAVES_OPCIONALES = ['META_IG_ID', 'RESEND_API_KEY'];
 
 async function cargarDiagnosticoBot(){
   const caja = $('botDiagnostico');
@@ -1677,50 +1642,12 @@ async function cargarDiagnosticoBot(){
   }
 }
 
-async function cargarConexionWhatsapp(){
-  const caja = $('botConexionEstado');
-  if(!caja) return;
-  try{
-    const d = await api('/admin/api/bot/conexion-whatsapp');
-    if(d.wabaId) $('botWabaId').value = d.wabaId;
-    if(d.apps === null){
-      caja.innerHTML = d.error
-        ? `<span class="text-red-600">No se pudo consultar: ${escapeHtml(d.error)}</span>`
-        : '<span class="text-carbon/50">Sin conectar. Pon el identificador y pica Conectar.</span>';
-    } else if(d.apps.length){
-      caja.innerHTML = `<span class="text-[#3F8F5F] font-600">✅ Conectada</span> <span class="text-carbon/60">· ${d.apps.map(a => escapeHtml(a.nombre || a.id)).join(', ')}</span>`;
-    } else {
-      caja.innerHTML = '<span class="text-red-600 font-600">❌ La cuenta existe pero ninguna app está suscrita. Pica Conectar.</span>';
-    }
-  }catch(e){
-    caja.innerHTML = `<span class="text-red-600">${escapeHtml(e.message)}</span>`;
-  }
-}
-
-$('btnConectarWhatsapp').addEventListener('click', async () => {
-  const boton = $('btnConectarWhatsapp');
-  boton.disabled = true;
-  $('botConexionEstado').innerHTML = '<span class="text-carbon/50">Conectando…</span>';
-  try{
-    await api('/admin/api/bot/conectar-whatsapp', {
-      method: 'POST',
-      body: JSON.stringify({ wabaId: $('botWabaId').value }),
-    });
-    toast('Cuenta de WhatsApp conectada');
-  }catch(e){
-    toast(e.message);
-  }
-  boton.disabled = false;
-  cargarConexionWhatsapp();
-});
-
 async function cargarBot(){
   try{
     const { config, copys } = await api('/admin/api/bot/config');
     $('botActivo').checked = !!config.activo;
-    $('botAnticipo').value = config.anticipoPorPersona;
-    $('botHoras').value = config.horasParaPagar;
     $('botCorreo').value = config.correoNotificaciones || '';
+    $('botAnticipo').value = config.anticipoRegular;
     $('botWhatsapp').value = config.whatsappAtencion || '';
     $('botEstadoTexto').textContent = config.activo ? 'Respondiendo mensajes' : 'Apagado · no contesta nada';
 
@@ -1734,7 +1661,6 @@ async function cargarBot(){
     toast(e.message);
   }
   cargarDiagnosticoBot();
-  cargarConexionWhatsapp();
   cargarTalleresBot();
   cargarPanelBot();
 }
@@ -1748,9 +1674,8 @@ $('btnGuardarBot').addEventListener('click', async () => {
       body: JSON.stringify({
         config: {
           activo: $('botActivo').checked,
-          anticipoPorPersona: $('botAnticipo').value,
-          horasParaPagar: $('botHoras').value,
           correoNotificaciones: $('botCorreo').value,
+          anticipoRegular: $('botAnticipo').value,
           whatsappAtencion: $('botWhatsapp').value,
         },
         copys,
@@ -1849,31 +1774,12 @@ $('btnNuevoTallerBot').addEventListener('click', async () => {
 
 async function cargarPanelBot(){
   try{
-    const solicitudes = await api('/admin/api/bot/solicitudes');
-    const cont = $('listaSolicitudesBot');
-    const vivas = solicitudes.filter(s => s.etapa !== 'copy_enviado');
-    cont.innerHTML = vivas.length ? vivas.slice(0, 25).map(s => {
-      const etapa = ETAPA_TEXTO[s.etapa] || { texto: s.etapa, clase: 'text-humo' };
-      return `
-      <article class="rounded-xl border border-vino/10 p-4">
-        <p class="font-ui text-[10px] uppercase tracking-widest ${etapa.clase}">${escapeHtml(etapa.texto)} · ${escapeHtml(s.canal)}</p>
-        <p class="mt-1 font-700 text-vino">${escapeHtml(s.taller)}</p>
-        <p class="text-sm text-carbon/70">${escapeHtml(s.contacto_nombre || s.telefono || s.externo_id)} · ${s.personas} ${s.personas === 1 ? 'persona' : 'personas'}</p>
-        ${s.anticipo ? `<p class="mt-1 text-sm text-carbon/70">Anticipo esperado <strong>$${Number(s.anticipo).toLocaleString('es-MX')}</strong> · saldo $${Number(s.saldo).toLocaleString('es-MX')}</p>` : ''}
-        ${s.fecha_texto ? `<p class="text-sm text-carbon/50">${escapeHtml(s.fecha_texto)}</p>` : ''}
-      </article>`;
-    }).join('') : '<p class="text-sm text-carbon/50">Nada pendiente por ahora.</p>';
-  }catch(e){
-    $('listaSolicitudesBot').innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
-  }
-
-  try{
     const convs = await api('/admin/api/bot/conversaciones');
     const cont = $('listaConversacionesBot');
     cont.innerHTML = convs.length ? convs.slice(0, 30).map(c => `
       <button data-conv="${c.id}" class="block w-full rounded-xl border border-vino/10 p-3 text-left hover:border-vino/30 transition">
         <p class="font-ui text-[10px] uppercase tracking-widest ${c.estado === 'bot' ? 'text-[#3F8F5F]' : c.estado === 'baja' ? 'text-humo' : 'text-flama'}">
-          ${c.estado === 'bot' ? 'con el bot' : c.estado === 'baja' ? 'dado de baja' : 'te toca a ti'} · ${escapeHtml(c.canal)}
+          ${c.estado === 'bot' ? 'contestado' : c.estado === 'baja' ? 'dado de baja' : 'te toca a ti'} · ${escapeHtml(c.canal)}
         </p>
         <p class="mt-0.5 text-sm font-700 text-vino">${escapeHtml(c.nombre || c.telefono || c.externo_id)}</p>
         <p class="truncate text-sm text-carbon/60">${escapeHtml(c.ultimo_texto || '')}</p>
