@@ -224,6 +224,17 @@ async function mensajesDeContacto(contactoId) {
   return res.rows;
 }
 
+// WhatsApp solo entrega texto libre dentro de las 24 h siguientes al ultimo
+// mensaje del cliente; despues exige una plantilla aprobada. El panel lo
+// consulta para avisarte antes de que escribas, en vez de fallar al enviar.
+async function ultimoMensajeCliente(contactoId) {
+  const res = await pool.query(
+    "SELECT creado_at FROM bot_mensajes WHERE contacto_id = $1 AND rol = 'cliente' ORDER BY id DESC LIMIT 1",
+    [contactoId]
+  );
+  return res.rows[0] ? res.rows[0].creado_at : null;
+}
+
 async function contactoPorId(id) {
   const res = await pool.query('SELECT * FROM bot_contactos WHERE id = $1', [id]);
   return res.rows[0] || null;
@@ -239,6 +250,7 @@ module.exports = {
   contactoPorId,
   yaSaludo,
   guardarMensaje,
+  ultimoMensajeCliente,
   historial,
   solicitudAbierta,
   crearSolicitud,

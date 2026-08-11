@@ -5,7 +5,9 @@
 // app de Meta, por eso comparten webhook y firma.
 
 const GRAPH = process.env.META_GRAPH_VERSION || 'v21.0';
-const BASE = `https://graph.facebook.com/${GRAPH}`;
+// META_GRAPH_BASE existe para poder probar el envio contra un servidor de
+// mentiras. En produccion se deja sin definir y apunta a Meta.
+const BASE = process.env.META_GRAPH_BASE || `https://graph.facebook.com/${GRAPH}`;
 
 // WhatsApp corta los mensajes largos; ademas un parrafo enorme en el celular no
 // se lee. Se parte en trozos por si el modelo se extiende.

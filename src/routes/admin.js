@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const sharp = require('sharp');
 const store = require('../store');
 const botAlmacen = require('../bot/almacen');
+const canales = require('../bot/canales');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
@@ -523,13 +524,81 @@ router.get('/api/bot/conversaciones', requireAdmin, async (req, res) => {
   }
 });
 
+// WhatsApp solo entrega texto libre dentro de las 24 h siguientes al ultimo
+// mensaje del cliente. Messenger e Instagram tienen la misma regla, pero con
+// mas holgura en la practica; aqui se aplica el limite estricto de WhatsApp
+// solo a WhatsApp para no bloquear de mas.
+const HORAS_VENTANA_WHATSAPP = 24;
+
+function ventanaDe(contacto, ultimoCliente) {
+  if (contacto.canal !== 'whatsapp') return { abierta: true, ultimoCliente };
+  if (!ultimoCliente) return { abierta: false, ultimoCliente: null };
+  const horas = (Date.now() - new Date(ultimoCliente).getTime()) / 3600000;
+  return { abierta: horas <= HORAS_VENTANA_WHATSAPP, ultimoCliente, horasRestantes: Math.max(0, HORAS_VENTANA_WHATSAPP - horas) };
+}
+
 router.get('/api/bot/conversaciones/:id', requireAdmin, async (req, res) => {
   try {
     const contacto = await botAlmacen.contactoPorId(req.params.id);
     if (!contacto) return res.status(404).json({ error: 'Esa conversación no existe.' });
-    res.json({ contacto, mensajes: await botAlmacen.mensajesDeContacto(req.params.id) });
+    const ultimoCliente = await botAlmacen.ultimoMensajeCliente(contacto.id);
+    res.json({
+      contacto,
+      mensajes: await botAlmacen.mensajesDeContacto(contacto.id),
+      ventana: ventanaDe(contacto, ultimoCliente),
+      puedeEnviar: canales.configurado(contacto.canal),
+    });
   } catch (e) {
     res.status(500).json({ error: 'No se pudo cargar la conversación.' });
+  }
+});
+
+// Contestar tu mismo, por el mismo numero y dentro del mismo chat. El cliente
+// no ve ningun cambio: para el es la misma conversacion de siempre.
+router.post('/api/bot/conversaciones/:id/responder', requireAdmin, async (req, res) => {
+  const texto = String((req.body && req.body.texto) || '').trim();
+  if (!texto) return res.status(400).json({ error: 'Escribe algo antes de enviarlo.' });
+  if (texto.length > 3500) return res.status(400).json({ error: 'El mensaje es muy largo: máximo 3500 caracteres.' });
+
+  try {
+    const contacto = await botAlmacen.contactoPorId(req.params.id);
+    if (!contacto) return res.status(404).json({ error: 'Esa conversación no existe.' });
+    if (contacto.estado === 'baja') {
+      return res.status(400).json({ error: 'Esta persona pidió BAJA. No se le puede escribir.' });
+    }
+    if (!canales.configurado(contacto.canal)) {
+      return res.status(400).json({ error: `Faltan las llaves de ${contacto.canal} en las variables del servidor.` });
+    }
+
+    const ventana = ventanaDe(contacto, await botAlmacen.ultimoMensajeCliente(contacto.id));
+    if (!ventana.abierta) {
+      return res.status(409).json({
+        error:
+          'Pasaron más de 24 horas desde el último mensaje de esta persona. WhatsApp ya no permite mandarle texto libre: hay que esperar a que escriba de nuevo.',
+      });
+    }
+
+    await canales.enviarTexto({ canal: contacto.canal, destino: contacto.externo_id, texto });
+    await botAlmacen.guardarMensaje(contacto.id, 'humano', texto);
+
+    // Si contestas tu, la conversacion es tuya: el bot se calla hasta que se la
+    // devuelvas. Asi no se atraviesa a media negociacion.
+    const actualizado =
+      contacto.estado === 'bot'
+        ? await botAlmacen.actualizarContacto(contacto.id, {
+            estado: 'humano',
+            motivoEscalado: contacto.motivo_escalado || 'La estás atendiendo tú',
+          })
+        : contacto;
+
+    res.json({
+      contacto: actualizado,
+      mensajes: await botAlmacen.mensajesDeContacto(contacto.id),
+      ventana: ventanaDe(contacto, await botAlmacen.ultimoMensajeCliente(contacto.id)),
+      puedeEnviar: true,
+    });
+  } catch (e) {
+    res.status(502).json({ error: `No se pudo enviar: ${e.message}` });
   }
 });
 
