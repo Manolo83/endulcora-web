@@ -17,6 +17,13 @@ const authRoutes = require('./src/routes/auth');
 const asistenteRoutes = require('./src/routes/asistente');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+console.log(`[uploads] Los archivos subidos se guardan en: ${UPLOAD_DIR}`);
+if (process.env.NODE_ENV === 'production' && !UPLOAD_DIR.startsWith('/data')) {
+  console.error(
+    `[uploads] AVISO: en produccion, UPLOAD_DIR deberia vivir dentro de /data (el Volume de Railway) para sobrevivir a cada despliegue. ` +
+    `Ruta actual: ${UPLOAD_DIR}. Revisa la variable DATA_DIR en Railway (debe ser "/data", sin ruta relativa) o las imagenes que se suban se perderan en el proximo deploy.`
+  );
+}
 
 const app = express();
 app.set('trust proxy', 1);
