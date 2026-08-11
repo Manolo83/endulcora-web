@@ -235,7 +235,10 @@ async function procesarLote(cuerpo) {
       if (evento.clase === 'comentario') await procesarComentario(evento);
       else await procesarMensaje(evento);
     } catch (e) {
-      console.error(`[bot] Error con un ${evento.clase} entrante:`, e.message);
+      // Se nombra a quien iba dirigido: casi todos los fallos de envio son por
+      // el numero (formato, lista de permitidos), y sin verlo no se distingue
+      // cual de todos fallo.
+      console.error(`[bot] Error con un ${evento.clase} de ${evento.canal}/${evento.externoId}:`, e.message);
     }
   }
 }

@@ -24,6 +24,20 @@ function trozos(texto) {
   return partes;
 }
 
+// Herencia de cuando los celulares mexicanos llevaban un 1 despues de la lada.
+// WhatsApp todavia REPORTA los numeros de Mexico como 521 + 10 digitos cuando
+// entra un mensaje, pero al ENVIAR solo acepta 52 + 10. Si se contesta al
+// numero tal como llego, Meta responde que el destinatario no existe.
+//
+// Argentina arrastra lo mismo con el 9 (549 + 10). Se corrigen los dos.
+function normalizarDestino(canal, destino) {
+  if (canal !== 'whatsapp') return destino;
+  const digitos = String(destino || '').replace(/\D/g, '');
+  if (/^521\d{10}$/.test(digitos)) return '52' + digitos.slice(3);
+  if (/^549\d{10}$/.test(digitos)) return '54' + digitos.slice(3);
+  return digitos;
+}
+
 function tokenDe(canal) {
   if (canal === 'whatsapp') return process.env.WHATSAPP_TOKEN || '';
   return process.env.META_PAGE_TOKEN || '';
@@ -68,6 +82,7 @@ async function enviarTexto({ canal, destino, texto }) {
     return;
   }
   const token = tokenDe(canal);
+  const para = normalizarDestino(canal, destino);
 
   for (const parte of trozos(texto)) {
     if (canal === 'whatsapp') {
@@ -76,7 +91,7 @@ async function enviarTexto({ canal, destino, texto }) {
         {
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
-          to: destino,
+          to: para,
           type: 'text',
           text: { preview_url: true, body: parte },
         },
