@@ -452,6 +452,8 @@ module.exports = {
     if (!item) return null;
     if (typeof patch.titulo === 'string') item.titulo = patch.titulo;
     if (typeof patch.descripcion === 'string') item.descripcion = patch.descripcion;
+    if (typeof patch.url === 'string') item.url = patch.url;
+    if (typeof patch.filename === 'string' || patch.filename === null) item.filename = patch.filename;
     save(data);
     return item;
   },

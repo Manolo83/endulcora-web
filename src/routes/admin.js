@@ -269,6 +269,19 @@ router.patch('/api/promos-taller/:id', requireAdmin, (req, res) => {
   res.json(item);
 });
 
+router.post('/api/promos-taller/:id/imagen', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
+  const promo = store.getPromosTaller().find((p) => p.id === Number(req.params.id));
+  if (!promo) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    return res.status(404).json({ error: 'No encontrado' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
+  const anteriorFilename = promo.filename;
+  const item = store.updatePromoTaller(req.params.id, { url: `/uploads/${req.file.filename}`, filename: req.file.filename });
+  if (anteriorFilename) fs.unlink(path.join(UPLOAD_DIR, anteriorFilename), () => {});
+  res.status(201).json(item);
+});
+
 router.delete('/api/promos-taller/:id', requireAdmin, (req, res) => {
   const item = store.deletePromoTaller(req.params.id);
   if (item && item.filename) {
