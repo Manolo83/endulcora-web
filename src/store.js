@@ -194,6 +194,14 @@ async function init() {
         changed = true;
       }
     }
+    (data.products || []).forEach((p) => {
+      if (typeof p.descripcionLarga !== 'string') { p.descripcionLarga = ''; changed = true; }
+      if (!Array.isArray(p.galeria)) { p.galeria = []; changed = true; }
+      if (!p.slug) {
+        p.slug = slugUnico(p.titulo, data.products, p.id);
+        changed = true;
+      }
+    });
     if (changed) await persistirAhora();
   } else {
     data = datosPorDefecto();
@@ -221,6 +229,27 @@ function flush() {
 
 function nextId(list) {
   return list.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+}
+
+function slugify(texto) {
+  return String(texto || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
+function slugUnico(base, productos, excludeId) {
+  let slug = slugify(base) || 'producto';
+  let intento = slug;
+  let n = 2;
+  while (productos.some((p) => p.slug === intento && p.id !== excludeId)) {
+    intento = `${slug}-${n}`;
+    n += 1;
+  }
+  return intento;
 }
 
 module.exports = {
@@ -312,6 +341,9 @@ module.exports = {
   getProduct(id) {
     return load().products.find((p) => p.id === Number(id)) || null;
   },
+  getProductBySlug(slug) {
+    return load().products.find((p) => p.slug === slug) || null;
+  },
   addProduct(fields) {
     const data = load();
     const item = {
@@ -323,15 +355,19 @@ module.exports = {
       titulo: '',
       subtitulo: '',
       descripcionCorta: '',
+      descripcionLarga: '',
       bullets: [],
       precio: '',
       precioAnterior: '',
       boton: 'Comprar',
       imagen: '',
+      galeria: [],
       archivo: '',
       archivoNombre: '',
+      slug: '',
       ...fields,
     };
+    item.slug = slugUnico(item.slug || item.titulo, data.products, item.id);
     data.products.push(item);
     save(data);
     return item;
@@ -340,6 +376,13 @@ module.exports = {
     const data = load();
     const item = data.products.find((p) => p.id === Number(id));
     if (!item) return null;
+    if (typeof patch.slug === 'string' && patch.slug.trim()) {
+      patch = { ...patch, slug: slugUnico(patch.slug, data.products, item.id) };
+    } else if (Object.prototype.hasOwnProperty.call(patch, 'slug')) {
+      // vacío: no se toca el slug existente para no romper ligas ya publicadas
+      patch = { ...patch };
+      delete patch.slug;
+    }
     Object.assign(item, patch);
     save(data);
     return item;
@@ -350,6 +393,24 @@ module.exports = {
     data.products = data.products.filter((p) => p.id !== Number(id));
     save(data);
     return item;
+  },
+  addProductoGaleriaImagen(id, { url, filename }) {
+    const data = load();
+    const item = data.products.find((p) => p.id === Number(id));
+    if (!item) return null;
+    if (!Array.isArray(item.galeria)) item.galeria = [];
+    item.galeria.push({ id: nextId(item.galeria), url, filename: filename || null });
+    save(data);
+    return item;
+  },
+  deleteProductoGaleriaImagen(id, imagenId) {
+    const data = load();
+    const item = data.products.find((p) => p.id === Number(id));
+    if (!item) return null;
+    const eliminada = (item.galeria || []).find((g) => g.id === Number(imagenId));
+    item.galeria = (item.galeria || []).filter((g) => g.id !== Number(imagenId));
+    save(data);
+    return eliminada || null;
   },
 
   // ---- Cursos y talleres ----

@@ -2236,6 +2236,7 @@ cargarGaleria();
 cargarResenasPublico();
 actualizarBadgeCarrito();
 manejarRegresoDePago();
+abrirCarritoSiSeSolicito();
 cargarSesion();
 cargarHeroCarrusel();
 cargarPromosTaller();
@@ -2259,6 +2260,15 @@ function manejarRegresoDePago(){
   params.delete('pago');
   const query = params.toString();
   history.replaceState({}, '', window.location.pathname + (query ? `?${query}` : ''));
+}
+
+function abrirCarritoSiSeSolicito(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('verCarrito') !== '1') return;
+  params.delete('verCarrito');
+  const query = params.toString();
+  history.replaceState({}, '', window.location.pathname + (query ? `?${query}` : '') + window.location.hash);
+  abrirModal('carrito');
 }
 </script>
 </body>

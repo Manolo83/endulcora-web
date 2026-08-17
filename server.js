@@ -8,7 +8,7 @@ const compression = require('compression');
 const cookieSession = require('cookie-session');
 const rateLimit = require('express-rate-limit');
 
-const { UPLOAD_DIR } = require('./src/config');
+const { UPLOAD_DIR, SITE_URL } = require('./src/config');
 const store = require('./src/store');
 const apiRoutes = require('./src/routes/api');
 const adminRoutes = require('./src/routes/admin');
@@ -101,6 +101,39 @@ app.use('/api/auth', authRoutes);
 app.use('/api/asistente', asistenteRoutes);
 app.use('/api', apiRoutes);
 app.use('/admin', adminRoutes);
+
+// Pagina propia por eBook (ej. /ebooks/velas-comestibles): se sirve la misma
+// plantilla para cualquier slug, pero se inyectan las etiquetas de meta/Open
+// Graph en el servidor (con los datos reales del producto) para que se vean
+// bien las vistas previas al compartir o anunciar el enlace.
+const escaparHtml = (s) =>
+  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+app.get('/ebooks/:slug', (req, res) => {
+  const producto = store.getProductBySlug(req.params.slug);
+  if (!producto || producto.categoria !== 'ebook') {
+    return res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+  }
+  let html;
+  try {
+    html = fs.readFileSync(path.join(__dirname, 'public', 'producto.html'), 'utf8');
+  } catch (e) {
+    return res.status(500).send('No se pudo cargar la pagina del producto.');
+  }
+  const titulo = producto.titulo || 'eBook';
+  const descripcion = (producto.descripcionCorta || producto.subtitulo || 'eBook de Endulcora, Estudio Gastronómico.').slice(0, 300);
+  const imagen = producto.imagen
+    ? (producto.imagen.startsWith('http') ? producto.imagen : `${SITE_URL}${producto.imagen}`)
+    : `${SITE_URL}/og-image.png`;
+  const url = `${SITE_URL}/ebooks/${producto.slug}`;
+  html = html
+    .replace(/__TITULO__/g, escaparHtml(titulo))
+    .replace(/__DESCRIPCION__/g, escaparHtml(descripcion))
+    .replace(/__IMAGEN__/g, escaparHtml(imagen))
+    .replace(/__URL__/g, escaparHtml(url));
+  res.send(html);
+});
+
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 app.get('/healthz', (req, res) => res.status(200).send('ok'));

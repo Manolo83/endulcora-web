@@ -21,6 +21,12 @@ router.get('/products', (req, res) => {
   res.json(store.getProducts());
 });
 
+router.get('/productos/:slug', (req, res) => {
+  const producto = store.getProductBySlug(req.params.slug);
+  if (!producto) return res.status(404).json({ error: 'No encontrado' });
+  res.json(producto);
+});
+
 router.get('/hero-carrusel', (req, res) => {
   res.json(store.getHeroCarrusel());
 });

@@ -358,6 +358,29 @@ router.delete('/api/products/:id/archivo', requireAdmin, (req, res) => {
   res.json(item);
 });
 
+// ---- Galería de fotos extra por producto (para su página propia /ebooks/slug) ----
+router.post('/api/products/:id/galeria', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
+  const producto = store.getProduct(req.params.id);
+  if (!producto) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    return res.status(404).json({ error: 'No encontrado' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
+  const item = store.addProductoGaleriaImagen(req.params.id, {
+    url: `/uploads/${req.file.filename}`,
+    filename: req.file.filename,
+  });
+  res.status(201).json(item);
+});
+
+router.delete('/api/products/:id/galeria/:imagenId', requireAdmin, (req, res) => {
+  const eliminada = store.deleteProductoGaleriaImagen(req.params.id, req.params.imagenId);
+  if (eliminada && eliminada.filename) {
+    fs.unlink(path.join(UPLOAD_DIR, eliminada.filename), () => {});
+  }
+  res.json({ ok: true });
+});
+
 // Carga masiva: varios archivos a la vez, cada uno con su propio nombre y
 // precio. Crea un producto por archivo; si es PDF, genera su carátula sola.
 router.post('/api/products/subir-lote', requireAdmin, uploadDocumento.array('archivos', 20), async (req, res) => {

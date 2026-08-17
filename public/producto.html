@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__TITULO__ · Endulcora</title>
+<meta name="description" content="__DESCRIPCION__">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="__URL__">
+<meta name="theme-color" content="#1B0720">
+
+<!-- Open Graph / Facebook / WhatsApp / Meta Ads -->
+<meta property="og:type" content="product">
+<meta property="og:url" content="__URL__">
+<meta property="og:site_name" content="Endulcora · Estudio Gastronómico">
+<meta property="og:title" content="__TITULO__">
+<meta property="og:description" content="__DESCRIPCION__">
+<meta property="og:image" content="__IMAGEN__">
+<meta property="og:locale" content="es_MX">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="__TITULO__">
+<meta name="twitter:description" content="__DESCRIPCION__">
+<meta name="twitter:image" content="__IMAGEN__">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          firma: ['"Great Vibes"', 'cursive'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+.boton-vivo { transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease; }
+.boton-vivo:hover { transform: translateY(-2px) scale(1.03); }
+.boton-vivo:active { transform: scale(.95); }
+.tarjeta-viva { transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .28s ease; }
+.tarjeta-viva:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -12px rgba(78,20,84,.28); }
+@keyframes flotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.flotar { animation: flotar 3.4s ease-in-out infinite; }
+@keyframes entradaRebote { 0% { opacity:0; transform: translateY(24px) scale(.85); } 60% { opacity:1; transform: translateY(-6px) scale(1.03); } 100% { opacity:1; transform: translateY(0) scale(1); } }
+.entrada-rebote { animation: entradaRebote .55s cubic-bezier(.34,1.56,.64,1) both; }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .flotar, .entrada-rebote { animation: none !important; }
+  .tarjeta-viva:hover { transform:none; }
+  .boton-vivo:hover, .boton-vivo:active { transform:none; }
+}
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header class="sticky top-0 z-50 bg-crema/95 backdrop-blur border-b border-vino/10">
+  <div class="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-5 lg:px-8">
+    <a href="/" class="flex items-center gap-3 shrink-0">
+      <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+    </a>
+    <div class="flex items-center gap-3">
+      <a href="/#tienda" class="hidden sm:inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/25 px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+        Ver toda la tienda
+      </a>
+      <a id="linkCarrito" href="/?verCarrito=1#tienda" aria-label="Ver carrito"
+        class="relative grid h-11 w-11 shrink-0 place-items-center rounded-full boton-vivo border border-vino/25 text-vino hover:border-vino transition">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span id="carritoBadge" class="absolute -right-1 -top-1 hidden h-5 min-w-[20px] place-items-center rounded-full bg-flama px-1 font-ui text-[10px] font-700 text-carbon">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="mx-auto max-w-6xl px-5 py-10 lg:px-8 lg:py-14">
+  <a href="/#tienda" class="inline-flex items-center gap-1.5 font-ui text-[12px] font-600 uppercase tracking-wider text-vino/70 hover:text-vino transition">
+    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+    Volver a la tienda
+  </a>
+
+  <div id="estadoCargando" class="mt-16 text-center text-carbon/50">Cargando…</div>
+
+  <div id="estadoNoEncontrado" class="mt-16 hidden text-center">
+    <p class="font-titulo text-2xl text-vino">Este eBook ya no está disponible</p>
+    <p class="mt-2 text-sm text-carbon/60">Puede que se haya movido o retirado de la tienda.</p>
+    <a href="/#tienda" class="mt-6 inline-flex rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Ver la tienda</a>
+  </div>
+
+  <div id="contenidoProducto" class="hidden">
+    <!-- Hero del producto -->
+    <div class="mt-8 grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-start">
+      <div id="pImagen" class="reveal visible tarjeta-viva aspect-[4/3] w-full overflow-hidden rounded-3xl bg-gradient-to-br from-vino to-uva bg-cover bg-center ring-1 ring-vino/10"></div>
+
+      <div>
+        <p id="pEtiqueta" class="font-titulo text-[11px] tracking-[.3em] text-flama"></p>
+        <h1 id="pTitulo" class="mt-2 font-display text-3xl leading-tight text-vino sm:text-4xl"></h1>
+        <p id="pSubtitulo" class="mt-2 hidden font-firma text-2xl text-flama"></p>
+        <p id="pDescripcionCorta" class="mt-4 text-[15px] leading-relaxed text-carbon/70"></p>
+
+        <ul id="pBullets" class="mt-6 space-y-2.5 text-sm text-carbon/75"></ul>
+
+        <div class="mt-7 flex items-end gap-3">
+          <span id="pPrecio" class="font-display text-4xl text-vino"></span>
+          <span id="pPrecioAnterior" class="hidden pb-1.5 text-base text-humo line-through"></span>
+          <span class="pb-1.5 font-ui text-[11px] uppercase tracking-wider text-humo">MXN</span>
+        </div>
+
+        <div class="mt-7 flex flex-wrap gap-3">
+          <button type="button" id="btnComprarProducto" class="rounded-full boton-vivo bg-vino px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+            Agregar al carrito
+          </button>
+          <a id="linkWhatsappProducto" href="#" target="_blank" rel="noopener"
+            class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/25 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+            Preguntar por WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Descripción larga -->
+    <div id="bloqueDescripcionLarga" class="mt-16 hidden max-w-3xl">
+      <h2 class="font-titulo text-xl tracking-wide text-vino">Sobre este eBook</h2>
+      <p id="pDescripcionLarga" class="mt-4 whitespace-pre-line text-[15px] leading-relaxed text-carbon/75"></p>
+    </div>
+
+    <!-- Galería -->
+    <div id="bloqueGaleria" class="mt-16 hidden">
+      <h2 class="font-titulo text-xl tracking-wide text-vino">Galería</h2>
+      <div id="pGaleria" class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"></div>
+    </div>
+
+    <!-- CTA final -->
+    <div class="mt-16 rounded-3xl bg-vino p-8 text-center text-crema sm:p-12">
+      <p class="font-display text-2xl sm:text-3xl">¿Listo para empezar?</p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <button type="button" onclick="document.getElementById('btnComprarProducto').click(); window.scrollTo({top:0,behavior:'smooth'});"
+          class="rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
+          Agregar al carrito
+        </button>
+        <a href="/#tienda" class="rounded-full boton-vivo border border-crema/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">
+          Ver más eBooks
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
+  <div class="mx-auto max-w-6xl px-5 pb-10 lg:px-8">
+    <div class="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
+      <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-10 w-auto">
+      <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/40">© <span id="anioFooter"></span> Endulcora · Ciudad de México</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════ BOTÓN FLOTANTE · WHATSAPP ══════════════ -->
+<a id="whatsappFlotante" href="https://wa.me/525665271901" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"
+  class="entrada-rebote flotar fixed bottom-4 left-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl transition hover:scale-110 sm:bottom-6 sm:left-6">
+  <span class="absolute inset-0 rounded-full bg-[#25D366] opacity-60 motion-reduce:animate-none animate-ping"></span>
+  <svg viewBox="0 0 24 24" class="relative h-7 w-7" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
+</a>
+
+<script>
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatoMonto(n){
+  return Number(String(n).replace(/,/g,'')).toLocaleString('es-MX');
+}
+document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+function numeroWhatsapp(c){
+  return (c && c.whatsapp_numero) || '5665271901';
+}
+
+function actualizarBadgeCarrito(){
+  let carrito = [];
+  try{ carrito = JSON.parse(localStorage.getItem('endulcora_carrito') || '[]'); }catch(e){ carrito = []; }
+  const total = carrito.reduce((a, i) => a + i.cantidad, 0);
+  const badge = document.getElementById('carritoBadge');
+  if(!badge) return;
+  badge.textContent = total;
+  badge.classList.toggle('hidden', !total);
+}
+actualizarBadgeCarrito();
+
+function agregarAlCarritoLocal(item){
+  let carrito = [];
+  try{ carrito = JSON.parse(localStorage.getItem('endulcora_carrito') || '[]'); }catch(e){ carrito = []; }
+  const existente = carrito.find(i => i.tipo === item.tipo && i.id === item.id);
+  if(existente) existente.cantidad += 1;
+  else carrito.push({ tipo: item.tipo, id: item.id, titulo: item.titulo, precio: item.precio, cantidad: 1 });
+  localStorage.setItem('endulcora_carrito', JSON.stringify(carrito));
+  actualizarBadgeCarrito();
+}
+
+const slug = decodeURIComponent(window.location.pathname.replace(/^\/ebooks\//, '').replace(/\/$/, ''));
+
+async function cargarProducto(){
+  let contenido = {};
+  try{ contenido = await (await fetch('/api/content')).json(); }catch(e){}
+  const numero = numeroWhatsapp(contenido);
+
+  let p;
+  try{
+    const res = await fetch(`/api/productos/${encodeURIComponent(slug)}`);
+    if(!res.ok) throw new Error('no encontrado');
+    p = await res.json();
+  }catch(e){
+    document.getElementById('estadoCargando').classList.add('hidden');
+    document.getElementById('estadoNoEncontrado').classList.remove('hidden');
+    return;
+  }
+
+  document.getElementById('estadoCargando').classList.add('hidden');
+  document.getElementById('contenidoProducto').classList.remove('hidden');
+
+  const imagenWrap = document.getElementById('pImagen');
+  if(p.imagen) imagenWrap.style.backgroundImage = `url('${p.imagen}')`;
+
+  document.getElementById('pEtiqueta').textContent = p.etiqueta || '';
+  document.getElementById('pTitulo').textContent = p.titulo || '';
+  if(p.subtitulo){
+    const el = document.getElementById('pSubtitulo');
+    el.textContent = p.subtitulo;
+    el.classList.remove('hidden');
+  }
+  document.getElementById('pDescripcionCorta').textContent = p.descripcionCorta || '';
+
+  const bullets = document.getElementById('pBullets');
+  bullets.innerHTML = (p.bullets || []).map(b => `<li class="flex gap-2.5"><span class="text-flama">▸</span> ${escapeHtml(b)}</li>`).join('');
+
+  document.getElementById('pPrecio').textContent = `$${formatoMonto(p.precio || '0')}`;
+  if(p.precioAnterior){
+    const el = document.getElementById('pPrecioAnterior');
+    el.textContent = `$${formatoMonto(p.precioAnterior)}`;
+    el.classList.remove('hidden');
+  }
+
+  if(p.descripcionLarga){
+    document.getElementById('pDescripcionLarga').textContent = p.descripcionLarga;
+    document.getElementById('bloqueDescripcionLarga').classList.remove('hidden');
+  }
+
+  if(Array.isArray(p.galeria) && p.galeria.length){
+    document.getElementById('pGaleria').innerHTML = p.galeria.map(g => `
+      <a href="${g.url}" target="_blank" rel="noopener" class="tarjeta-viva block overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+        <img src="${g.url}" alt="${escapeHtml(p.titulo || '')}" loading="lazy" class="aspect-square w-full object-cover">
+      </a>
+    `).join('');
+    document.getElementById('bloqueGaleria').classList.remove('hidden');
+  }
+
+  document.getElementById('linkWhatsappProducto').href = `https://wa.me/52${numero}?text=${encodeURIComponent(`Hola, tengo una duda sobre "${p.titulo}"`)}`;
+
+  document.getElementById('btnComprarProducto').addEventListener('click', () => {
+    agregarAlCarritoLocal({
+      tipo: 'producto',
+      id: p.id,
+      titulo: p.titulo || '',
+      precio: parseFloat(String(p.precio || '0').replace(/,/g,'')) || 0,
+    });
+    window.location.href = '/?verCarrito=1#tienda';
+  });
+}
+cargarProducto();
+</script>
+</body>
+</html>
