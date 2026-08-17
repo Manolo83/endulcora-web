@@ -134,6 +134,16 @@ app.get('/ebooks/:slug', (req, res) => {
   res.send(html);
 });
 
+// Secciones del sitio con URL propia (ej. /calendario), ademas de las anclas
+// #calendario dentro de la pagina principal. Sirven la misma index.html; el
+// script del cliente hace scroll a la seccion segun la ruta.
+app.get(
+  ['/tienda', '/ebooks', '/anexos', '/recetarios', '/clases-en-vivo', '/calculadora', '/calendario', '/galeria', '/resenas', '/anuncios'],
+  (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  }
+);
+
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
