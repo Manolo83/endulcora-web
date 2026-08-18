@@ -138,14 +138,14 @@ body { background: #FBF4E9; }
     <!-- Descripción larga -->
     <div id="bloqueDescripcionLarga" class="mt-16 hidden max-w-3xl">
       <h2 class="font-titulo text-xl tracking-wide text-vino">Sobre este eBook</h2>
-      <p id="pDescripcionLarga" class="mt-4 whitespace-pre-line text-[15px] leading-relaxed text-carbon/75"></p>
+      <div id="pDescripcionLarga" class="mt-4 text-[15px] leading-relaxed text-carbon/75"></div>
     </div>
 
-    <!-- Anexos incluidos -->
-    <div id="bloqueAnexos" class="mt-16 hidden">
-      <h2 class="font-titulo text-xl tracking-wide text-vino">Anexos incluidos</h2>
-      <p class="mt-2 text-sm text-carbon/60">Hojas de trabajo que acompañan a este eBook.</p>
-      <div id="pAnexos" class="mt-5 grid gap-4 sm:grid-cols-2"></div>
+    <!-- Productos relacionados (anexos, paquetes completos, etc.) -->
+    <div id="bloqueRelacionados" class="mt-16 hidden">
+      <h2 class="font-titulo text-xl tracking-wide text-vino">También te puede interesar</h2>
+      <p class="mt-2 text-sm text-carbon/60">Anexos y paquetes que acompañan a este eBook. Puedes agregarlos al carrito junto con tu compra.</p>
+      <div id="pRelacionados" class="mt-5 grid gap-4 sm:grid-cols-2"></div>
     </div>
 
     <!-- Galería -->
@@ -198,6 +198,65 @@ document.getElementById('anioFooter').textContent = new Date().getFullYear();
 
 function numeroWhatsapp(c){
   return (c && c.whatsapp_numero) || '5665271901';
+}
+
+function formatoLineaMarkdown(texto){
+  let t = escapeHtml(texto);
+  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/(^|[^*])\*(?!\*)(.+?)\*(?!\*)/g, '$1<em>$2</em>');
+  return t;
+}
+
+function renderDescripcionLarga(md){
+  const lineas = String(md || '').replace(/\r\n/g, '\n').split('\n');
+  let html = '';
+  let listaAbierta = null;
+  let parrafo = [];
+
+  const cerrarParrafo = () => {
+    if(parrafo.length){
+      html += `<p class="mb-4">${parrafo.map(formatoLineaMarkdown).join('<br>')}</p>`;
+      parrafo = [];
+    }
+  };
+  const cerrarLista = () => {
+    if(listaAbierta){ html += `</${listaAbierta}>`; listaAbierta = null; }
+  };
+
+  lineas.forEach(linea => {
+    const l = linea.trim();
+    if(!l){ cerrarParrafo(); cerrarLista(); return; }
+
+    const encabezado = l.match(/^(#{1,3})\s+(.*)$/);
+    if(encabezado){
+      cerrarParrafo(); cerrarLista();
+      const nivel = encabezado[1].length;
+      const clase = nivel === 1 ? 'font-titulo text-2xl text-vino mt-6 mb-3'
+        : nivel === 2 ? 'font-titulo text-xl text-vino mt-5 mb-2.5'
+        : 'font-titulo text-lg text-vino mt-4 mb-2';
+      html += `<h${nivel + 1} class="${clase}">${formatoLineaMarkdown(encabezado[2])}</h${nivel + 1}>`;
+      return;
+    }
+    const item = l.match(/^[-*]\s+(.*)$/);
+    if(item){
+      cerrarParrafo();
+      if(listaAbierta !== 'ul'){ cerrarLista(); html += '<ul class="mb-4 list-disc space-y-1.5 pl-5">'; listaAbierta = 'ul'; }
+      html += `<li>${formatoLineaMarkdown(item[1])}</li>`;
+      return;
+    }
+    const itemNum = l.match(/^\d+\.\s+(.*)$/);
+    if(itemNum){
+      cerrarParrafo();
+      if(listaAbierta !== 'ol'){ cerrarLista(); html += '<ol class="mb-4 list-decimal space-y-1.5 pl-5">'; listaAbierta = 'ol'; }
+      html += `<li>${formatoLineaMarkdown(itemNum[1])}</li>`;
+      return;
+    }
+    cerrarLista();
+    parrafo.push(l);
+  });
+  cerrarParrafo();
+  cerrarLista();
+  return html;
 }
 
 function actualizarBadgeCarrito(){
@@ -265,26 +324,26 @@ async function cargarProducto(){
   }
 
   if(p.descripcionLarga){
-    document.getElementById('pDescripcionLarga').textContent = p.descripcionLarga;
+    document.getElementById('pDescripcionLarga').innerHTML = renderDescripcionLarga(p.descripcionLarga);
     document.getElementById('bloqueDescripcionLarga').classList.remove('hidden');
   }
 
-  if(Array.isArray(p.anexosInfo) && p.anexosInfo.length){
-    document.getElementById('pAnexos').innerHTML = p.anexosInfo.map(a => `
+  if(Array.isArray(p.productosRelacionadosInfo) && p.productosRelacionadosInfo.length){
+    document.getElementById('pRelacionados').innerHTML = p.productosRelacionadosInfo.map(r => `
       <div class="tarjeta-viva flex items-center justify-between gap-3 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
         <div class="min-w-0">
-          <a href="/anexos/${a.slug}" class="font-titulo text-base text-vino hover:underline">${escapeHtml(a.titulo || '')}</a>
-          <p class="mt-1 truncate text-xs text-carbon/60">${escapeHtml(a.descripcionCorta || '')}</p>
-          <p class="mt-1.5 font-ui text-sm font-700 text-vino">$${formatoMonto(a.precio || '0')} MXN</p>
+          <a href="/${r.prefijo}/${r.slug}" class="font-titulo text-base text-vino hover:underline">${escapeHtml(r.titulo || '')}</a>
+          <p class="mt-1 truncate text-xs text-carbon/60">${escapeHtml(r.descripcionCorta || '')}</p>
+          <p class="mt-1.5 font-ui text-sm font-700 text-vino">$${formatoMonto(r.precio || '0')} MXN</p>
         </div>
-        <button type="button" data-id="${a.id}" data-titulo="${escapeHtml(a.titulo || '')}" data-precio="${a.precio || '0'}"
-          class="btnAgregarAnexo shrink-0 rounded-full boton-vivo border border-vino/25 px-4 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+        <button type="button" data-id="${r.id}" data-titulo="${escapeHtml(r.titulo || '')}" data-precio="${r.precio || '0'}"
+          class="btnAgregarRelacionado shrink-0 rounded-full boton-vivo border border-vino/25 px-4 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
           Agregar
         </button>
       </div>
     `).join('');
-    document.getElementById('bloqueAnexos').classList.remove('hidden');
-    document.querySelectorAll('.btnAgregarAnexo').forEach(btn => {
+    document.getElementById('bloqueRelacionados').classList.remove('hidden');
+    document.querySelectorAll('.btnAgregarRelacionado').forEach(btn => {
       btn.addEventListener('click', () => {
         agregarAlCarritoLocal({
           tipo: 'producto',

@@ -306,12 +306,21 @@
         </label>
         <label class="block sm:col-span-2">
           <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción larga (para su página propia, opcional)</span>
-          <textarea id="prodDescripcionLarga" rows="5" placeholder="Cuenta la historia, para quién es, qué incluye…" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+          <div class="mt-1.5 flex flex-wrap gap-1.5">
+            <button type="button" data-md="bold" title="Negrita" class="rounded-lg border border-vino/15 bg-white px-3 py-1.5 font-700 text-vino hover:bg-vino/5">N</button>
+            <button type="button" data-md="italic" title="Cursiva" class="rounded-lg border border-vino/15 bg-white px-3 py-1.5 italic text-vino hover:bg-vino/5">K</button>
+            <button type="button" data-md="h2" title="Título" class="rounded-lg border border-vino/15 bg-white px-3 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5">Título</button>
+            <button type="button" data-md="h3" title="Subtítulo" class="rounded-lg border border-vino/15 bg-white px-3 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5">Subtítulo</button>
+            <button type="button" data-md="ul" title="Lista con viñetas" class="rounded-lg border border-vino/15 bg-white px-3 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5">• Lista</button>
+            <button type="button" data-md="ol" title="Lista numerada" class="rounded-lg border border-vino/15 bg-white px-3 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5">1. Lista</button>
+          </div>
+          <textarea id="prodDescripcionLarga" rows="8" placeholder="Cuenta la historia, para quién es, qué incluye…" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+          <p class="mt-1 text-xs text-carbon/40">Selecciona un texto y usa los botones para darle formato. También puedes escribir a mano: **negrita**, *cursiva*, # Título, - viñeta.</p>
         </label>
-        <div id="bloqueAnexosRelacionados" class="hidden block sm:col-span-2">
-          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Anexos incluidos (se muestran dentro de esta página, no como categoría aparte)</span>
-          <div id="listaAnexosRelacionados" class="mt-1.5 grid gap-2 rounded-xl border border-vino/15 bg-crema/60 p-4 sm:grid-cols-2"></div>
-          <p id="listaAnexosRelacionadosVacio" class="mt-1.5 hidden text-xs text-carbon/50">Aún no tienes productos de categoría "Anexo" para elegir.</p>
+        <div class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Productos relacionados (anexos, paquetes completos, etc. — se muestran dentro de esta página, con botón para agregarlos al carrito)</span>
+          <div id="listaProductosRelacionados" class="mt-1.5 grid gap-2 rounded-xl border border-vino/15 bg-crema/60 p-4 sm:grid-cols-2"></div>
+          <p id="listaProductosRelacionadosVacio" class="mt-1.5 hidden text-xs text-carbon/50">Aún no tienes otros productos para elegir.</p>
         </div>
         <label class="block">
           <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio (MXN)</span>
@@ -1126,23 +1135,53 @@ const ETIQUETA_CATEGORIA = { ebook: 'eBook', anexo: 'Anexo', recetario: 'Recetar
 const PREFIJO_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
 let PRODUCTOS_ADMIN_CACHE = [];
 
-function pintarListaAnexosRelacionados(seleccionados){
+function pintarListaProductosRelacionados(seleccionados){
   const seleccionadosSet = new Set((seleccionados || []).map(Number));
-  const anexos = PRODUCTOS_ADMIN_CACHE.filter(p => p.categoria === 'anexo');
-  $('listaAnexosRelacionadosVacio').classList.toggle('hidden', anexos.length > 0);
-  $('listaAnexosRelacionados').innerHTML = anexos.map(a => `
+  const editandoId = Number($('productoEditandoId').value) || null;
+  const otros = PRODUCTOS_ADMIN_CACHE.filter(p => p.id !== editandoId);
+  $('listaProductosRelacionadosVacio').classList.toggle('hidden', otros.length > 0);
+  $('listaProductosRelacionados').innerHTML = otros.map(p => `
     <label class="flex items-center gap-2 text-sm text-carbon/80">
-      <input type="checkbox" class="chkAnexoRelacionado" value="${a.id}" ${seleccionadosSet.has(a.id) ? 'checked' : ''}>
-      ${escapeHtml(a.titulo || '')}
+      <input type="checkbox" class="chkProductoRelacionado" value="${p.id}" ${seleccionadosSet.has(p.id) ? 'checked' : ''}>
+      ${escapeHtml(ETIQUETA_CATEGORIA[p.categoria] || 'eBook')} · ${escapeHtml(p.titulo || '')}
     </label>
   `).join('');
 }
 
-function actualizarVisibilidadAnexosRelacionados(){
-  $('bloqueAnexosRelacionados').classList.toggle('hidden', $('prodCategoria').value !== 'ebook');
+function envolverSeleccionTextarea(textarea, prefijo, sufijo){
+  const inicio = textarea.selectionStart;
+  const fin = textarea.selectionEnd;
+  const valor = textarea.value;
+  const seleccionado = valor.slice(inicio, fin) || 'texto';
+  textarea.value = valor.slice(0, inicio) + prefijo + seleccionado + sufijo + valor.slice(fin);
+  const nuevaPos = inicio + prefijo.length + seleccionado.length + sufijo.length;
+  textarea.focus();
+  textarea.setSelectionRange(nuevaPos, nuevaPos);
 }
-$('prodCategoria').addEventListener('change', actualizarVisibilidadAnexosRelacionados);
-actualizarVisibilidadAnexosRelacionados();
+
+function insertarPrefijoDeLinea(textarea, prefijo){
+  const inicio = textarea.selectionStart;
+  const valor = textarea.value;
+  const inicioLinea = valor.lastIndexOf('\n', inicio - 1) + 1;
+  textarea.value = valor.slice(0, inicioLinea) + prefijo + valor.slice(inicioLinea);
+  const nuevaPos = inicio + prefijo.length;
+  textarea.focus();
+  textarea.setSelectionRange(nuevaPos, nuevaPos);
+}
+
+document.querySelectorAll('[data-md]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const textarea = $('prodDescripcionLarga');
+    switch(btn.dataset.md){
+      case 'bold': envolverSeleccionTextarea(textarea, '**', '**'); break;
+      case 'italic': envolverSeleccionTextarea(textarea, '*', '*'); break;
+      case 'h2': insertarPrefijoDeLinea(textarea, '## '); break;
+      case 'h3': insertarPrefijoDeLinea(textarea, '### '); break;
+      case 'ul': insertarPrefijoDeLinea(textarea, '- '); break;
+      case 'ol': insertarPrefijoDeLinea(textarea, '1. '); break;
+    }
+  });
+});
 
 function resetFormProducto(){
   $('formProducto').reset();
@@ -1151,8 +1190,7 @@ function resetFormProducto(){
   $('btnCancelarProducto').classList.add('hidden');
   $('prodArchivoEstado').textContent = '';
   $('prodSlugLink').classList.add('hidden');
-  pintarListaAnexosRelacionados([]);
-  actualizarVisibilidadAnexosRelacionados();
+  pintarListaProductosRelacionados([]);
 }
 
 async function cargarProductosAdmin(){
@@ -1162,7 +1200,7 @@ async function cargarProductosAdmin(){
     const items = await api('/admin/api/products');
     PRODUCTOS_ADMIN_CACHE = items;
     if(!$('productoEditandoId').value){
-      pintarListaAnexosRelacionados([]);
+      pintarListaProductosRelacionados([]);
     }
     if(!items.length){
       cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay productos.</p>';
@@ -1233,8 +1271,7 @@ async function cargarProductosAdmin(){
         }else{
           $('prodSlugLink').classList.add('hidden');
         }
-        pintarListaAnexosRelacionados(p.anexosRelacionados || []);
-        actualizarVisibilidadAnexosRelacionados();
+        pintarListaProductosRelacionados(p.productosRelacionados || []);
         document.getElementById('seccionProductos').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
@@ -1306,7 +1343,7 @@ $('formProducto').addEventListener('submit', async (e) => {
     precio: $('prodPrecio').value.trim(),
     precioAnterior: $('prodPrecioAnterior').value.trim(),
     boton: $('prodBoton').value.trim() || 'Comprar',
-    anexosRelacionados: [...document.querySelectorAll('.chkAnexoRelacionado:checked')].map(chk => Number(chk.value)),
+    productosRelacionados: [...document.querySelectorAll('.chkProductoRelacionado:checked')].map(chk => Number(chk.value)),
   };
   try{
     let productoId = id;

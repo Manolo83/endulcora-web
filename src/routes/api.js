@@ -22,21 +22,25 @@ router.get('/products', (req, res) => {
   res.json(store.getProducts());
 });
 
+const PREFIJO_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
+
 router.get('/productos/:slug', (req, res) => {
   const producto = store.getProductBySlug(req.params.slug);
   if (!producto) return res.status(404).json({ error: 'No encontrado' });
-  const anexos = (producto.anexosRelacionados || [])
+  const relacionados = (producto.productosRelacionados || [])
     .map((id) => store.getProduct(id))
-    .filter((a) => a && a.categoria === 'anexo')
-    .map((a) => ({
-      id: a.id,
-      slug: a.slug,
-      titulo: a.titulo,
-      descripcionCorta: a.descripcionCorta,
-      precio: a.precio,
-      imagen: a.imagen,
+    .filter(Boolean)
+    .map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      categoria: r.categoria,
+      prefijo: PREFIJO_POR_CATEGORIA[r.categoria] || 'ebooks',
+      titulo: r.titulo,
+      descripcionCorta: r.descripcionCorta,
+      precio: r.precio,
+      imagen: r.imagen,
     }));
-  res.json({ ...producto, anexosInfo: anexos });
+  res.json({ ...producto, productosRelacionadosInfo: relacionados });
 });
 
 router.get('/hero-carrusel', (req, res) => {
