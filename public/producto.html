@@ -9,6 +9,24 @@
 <link rel="canonical" href="__URL__">
 <meta name="theme-color" content="#1B0720">
 
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '849684379588689');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=849684379588689&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
 <!-- Open Graph / Facebook / WhatsApp / Meta Ads -->
 <meta property="og:type" content="product">
 <meta property="og:url" content="__URL__">
@@ -284,6 +302,15 @@ function agregarAlCarritoLocal(item){
   else carrito.push({ tipo: item.tipo, id: item.id, titulo: item.titulo, precio: item.precio, cantidad: 1 });
   localStorage.setItem('endulcora_carrito', JSON.stringify(carrito));
   actualizarBadgeCarrito();
+  if(typeof fbq === 'function'){
+    fbq('track', 'AddToCart', {
+      content_ids: [String(item.id)],
+      content_name: item.titulo || '',
+      content_type: 'product',
+      value: item.precio || 0,
+      currency: 'MXN',
+    });
+  }
 }
 
 const slug = decodeURIComponent(window.location.pathname.replace(/^\/(ebooks|anexos|recetarios)\//, '').replace(/\/$/, ''));
@@ -306,6 +333,16 @@ async function cargarProducto(){
 
   document.getElementById('estadoCargando').classList.add('hidden');
   document.getElementById('contenidoProducto').classList.remove('hidden');
+
+  if(typeof fbq === 'function'){
+    fbq('track', 'ViewContent', {
+      content_ids: [String(p.id)],
+      content_name: p.titulo || '',
+      content_type: 'product',
+      value: parseFloat(String(p.precio || '0').replace(/,/g,'')) || 0,
+      currency: 'MXN',
+    });
+  }
 
   const imagenWrap = document.getElementById('pImagen');
   if(p.imagen) imagenWrap.style.backgroundImage = `url('${p.imagen}')`;

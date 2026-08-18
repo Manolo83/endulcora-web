@@ -9,6 +9,24 @@
 <link rel="canonical" href="https://endulcora.com/">
 <meta name="theme-color" content="#1B0720">
 
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '849684379588689');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=849684379588689&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
 <!-- Open Graph / Facebook / WhatsApp -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://endulcora.com/">
@@ -1146,6 +1164,14 @@ function iniciarModalCarrito(){
     error.classList.add('hidden');
     boton.disabled = true;
     spinner.classList.remove('hidden');
+    if(typeof fbq === 'function'){
+      fbq('track', 'InitiateCheckout', {
+        value: totalCarrito(),
+        currency: 'MXN',
+        num_items: CARRITO.reduce((a, i) => a + i.cantidad, 0),
+        content_ids: CARRITO.map(i => String(i.id)),
+      });
+    }
     try{
       const res = await fetch('/api/checkout/preference', {
         method: 'POST',

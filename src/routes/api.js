@@ -95,6 +95,33 @@ router.post('/newsletter/suscribir', (req, res) => {
   res.status(201).json({ ok: true });
 });
 
+// Estado de un pedido para la pagina de gracias: requiere el viewToken que
+// Mercado Pago devuelve en la URL (no es adivinable, a diferencia del id).
+router.get('/pedidos/:orderId/estado', (req, res) => {
+  const order = store.getOrder(req.params.orderId);
+  if (!order || !order.viewToken || req.query.token !== order.viewToken) {
+    return res.status(404).json({ error: 'Pedido no encontrado.' });
+  }
+  const aprobado = order.estado === 'aprobado';
+  res.json({
+    estado: order.estado,
+    total: order.total,
+    moneda: 'MXN',
+    items: (order.items || []).map((item, i) => {
+      const producto = item.tipo === 'producto' ? store.getProduct(item.itemId) : null;
+      return {
+        index: i,
+        itemId: item.itemId,
+        titulo: item.titulo,
+        cantidad: item.cantidad,
+        precio: item.precio,
+        descargaDisponible: aprobado && !!(producto && producto.archivo),
+      };
+    }),
+    descargaToken: aprobado ? order.descargaToken : null,
+  });
+});
+
 router.get('/pedidos/:orderId/descarga/:itemIndex', (req, res) => {
   const order = store.getOrder(req.params.orderId);
   if (!order || order.estado !== 'aprobado') {

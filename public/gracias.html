@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¡Gracias por tu compra! · Endulcora</title>
+<meta name="description" content="Confirmación de tu compra en Endulcora, Estudio Gastronómico.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1B0720">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          firma: ['"Great Vibes"', 'cursive'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+.boton-vivo { transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease; }
+.boton-vivo:hover { transform: translateY(-2px) scale(1.03); }
+.boton-vivo:active { transform: scale(.95); }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+.spinner { display:inline-block; width:18px; height:18px; border:3px solid rgba(78,20,84,.2); border-top-color:#4E1454; border-radius:50%; animation: girar .8s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .boton-vivo:hover, .boton-vivo:active { transform:none; }
+  .spinner { animation: none; }
+}
+</style>
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '849684379588689');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=849684379588689&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<header class="sticky top-0 z-50 bg-crema/95 backdrop-blur border-b border-vino/10">
+  <div class="mx-auto flex h-20 max-w-3xl items-center justify-between gap-4 px-5 lg:px-8">
+    <a href="/" class="flex items-center gap-3 shrink-0">
+      <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+    </a>
+  </div>
+</header>
+
+<main class="mx-auto max-w-2xl px-5 py-14 lg:px-8 lg:py-20">
+
+  <!-- Confirmando -->
+  <div id="estadoConfirmando" class="rounded-3xl bg-white p-8 text-center ring-1 ring-vino/10 sm:p-12">
+    <div class="spinner mx-auto"></div>
+    <p class="mt-5 font-titulo text-xl text-vino">Confirmando tu pago…</p>
+    <p class="mt-2 text-sm text-carbon/60">Esto normalmente toma unos segundos. No cierres esta página.</p>
+  </div>
+
+  <!-- Aprobado -->
+  <div id="estadoAprobado" class="hidden rounded-3xl bg-white p-8 text-center ring-1 ring-vino/10 sm:p-12">
+    <div class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-vino/10 text-3xl">🎉</div>
+    <h1 class="mt-5 font-display text-2xl text-vino sm:text-3xl">¡Gracias por tu compra!</h1>
+    <p class="mt-2 text-[15px] text-carbon/70">Tu pago fue confirmado. Ya puedes descargar tu material desde aquí abajo.</p>
+
+    <div id="listaDescargas" class="mt-8 space-y-3 text-left"></div>
+
+    <p class="mt-8 rounded-xl bg-crema px-5 py-4 text-sm text-carbon/70">
+      También te lo enviamos a tu correo por si prefieres guardarlo ahí.
+    </p>
+
+    <a href="https://wa.me/525665271901" target="_blank" rel="noopener"
+      class="mt-6 inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/25 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+      ¿Algún problema? Escríbenos por WhatsApp
+    </a>
+  </div>
+
+  <!-- Pago no aprobado -->
+  <div id="estadoRechazado" class="hidden rounded-3xl bg-white p-8 text-center ring-1 ring-vino/10 sm:p-12">
+    <p class="font-titulo text-xl text-vino">Tu pago no se completó</p>
+    <p class="mt-2 text-sm text-carbon/60">No te preocupes, no se hizo ningún cargo. Puedes intentarlo de nuevo cuando quieras.</p>
+    <div class="mt-6 flex flex-wrap justify-center gap-3">
+      <a href="/tienda" class="rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Volver a la tienda</a>
+      <a href="https://wa.me/525665271901" target="_blank" rel="noopener" class="rounded-full boton-vivo border border-vino/25 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Escríbenos por WhatsApp</a>
+    </div>
+  </div>
+
+  <!-- Sigue pendiente después de esperar -->
+  <div id="estadoTardado" class="hidden rounded-3xl bg-white p-8 text-center ring-1 ring-vino/10 sm:p-12">
+    <p class="font-titulo text-xl text-vino">Tu pago sigue en revisión</p>
+    <p class="mt-2 text-sm text-carbon/60">Algunos métodos de pago tardan más en confirmarse. En cuanto se apruebe, te llegará un correo con tu material. Si pasan más de unas horas, escríbenos.</p>
+    <a href="https://wa.me/525665271901" target="_blank" rel="noopener" class="mt-6 inline-flex rounded-full boton-vivo border border-vino/25 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Escríbenos por WhatsApp</a>
+  </div>
+
+  <!-- No encontrado -->
+  <div id="estadoNoEncontrado" class="hidden rounded-3xl bg-white p-8 text-center ring-1 ring-vino/10 sm:p-12">
+    <p class="font-titulo text-xl text-vino">No encontramos este pedido</p>
+    <p class="mt-2 text-sm text-carbon/60">Si acabas de pagar, revisa tu correo: ahí también te llega la confirmación.</p>
+    <a href="https://wa.me/525665271901" target="_blank" rel="noopener" class="mt-6 inline-flex rounded-full boton-vivo border border-vino/25 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Escríbenos por WhatsApp</a>
+  </div>
+
+</main>
+
+<footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
+  <div class="mx-auto flex max-w-2xl flex-col items-center gap-4 px-5 pb-10 text-center lg:px-8">
+    <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-10 w-auto">
+    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/40">© <span id="anioFooter"></span> Endulcora · Ciudad de México</p>
+  </div>
+</footer>
+
+<script>
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatoMonto(n){
+  return Number(String(n).replace(/,/g,'')).toLocaleString('es-MX');
+}
+document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+const params = new URLSearchParams(window.location.search);
+const ordenId = params.get('orden');
+const token = params.get('token');
+
+const ESTADOS = ['estadoConfirmando','estadoAprobado','estadoRechazado','estadoTardado','estadoNoEncontrado'];
+function mostrarEstado(id){
+  ESTADOS.forEach(e => document.getElementById(e).classList.toggle('hidden', e !== id));
+}
+
+let comprasDisparada = false;
+function dispararPurchase(pedido){
+  if(comprasDisparada) return;
+  comprasDisparada = true;
+  if(typeof fbq !== 'function') return;
+  fbq('track', 'Purchase', {
+    value: parseFloat(String(pedido.total).replace(/,/g,'')) || 0,
+    currency: 'MXN',
+    content_ids: pedido.items.map(i => String(i.itemId)),
+    content_type: 'product',
+  }, { eventID: `orden-${ordenId}` });
+}
+
+function pintarDescargas(pedido){
+  const disponibles = pedido.items.filter(i => i.descargaDisponible);
+  const cont = document.getElementById('listaDescargas');
+  if(!disponibles.length){
+    cont.innerHTML = '<p class="text-center text-sm text-carbon/50">Tu material se está preparando y te llegará por correo en breve.</p>';
+    return;
+  }
+  cont.innerHTML = disponibles.map(i => `
+    <a href="/api/pedidos/${ordenId}/descarga/${i.index}?token=${encodeURIComponent(pedido.descargaToken)}"
+      class="flex items-center justify-between gap-3 rounded-2xl border border-vino/15 bg-crema/60 px-5 py-4 hover:border-vino/40 transition">
+      <span class="font-ui text-sm font-600 text-vino">${escapeHtml(i.titulo || 'Descargar')}</span>
+      <span class="shrink-0 rounded-full bg-vino px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-crema">Descargar</span>
+    </a>
+  `).join('');
+}
+
+let intentos = 0;
+const MAX_INTENTOS = 20;
+let temporizador = null;
+
+async function consultarPedido(){
+  intentos++;
+  try{
+    const res = await fetch(`/api/pedidos/${encodeURIComponent(ordenId)}/estado?token=${encodeURIComponent(token)}`);
+    if(!res.ok){
+      clearInterval(temporizador);
+      mostrarEstado('estadoNoEncontrado');
+      return;
+    }
+    const pedido = await res.json();
+    if(pedido.estado === 'aprobado'){
+      clearInterval(temporizador);
+      pintarDescargas(pedido);
+      mostrarEstado('estadoAprobado');
+      dispararPurchase(pedido);
+      return;
+    }
+    if(['rechazado','cancelado'].includes(pedido.estado)){
+      clearInterval(temporizador);
+      mostrarEstado('estadoRechazado');
+      return;
+    }
+    // pendiente / en_proceso: seguir esperando, salvo que ya se agotaron los intentos
+    if(intentos >= MAX_INTENTOS){
+      clearInterval(temporizador);
+      mostrarEstado('estadoTardado');
+    }
+  }catch(e){
+    if(intentos >= MAX_INTENTOS){
+      clearInterval(temporizador);
+      mostrarEstado('estadoTardado');
+    }
+  }
+}
+
+if(!ordenId || !token){
+  mostrarEstado('estadoNoEncontrado');
+}else{
+  consultarPedido();
+  temporizador = setInterval(consultarPedido, 3000);
+}
+</script>
+</body>
+</html>

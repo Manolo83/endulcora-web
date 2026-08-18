@@ -55,7 +55,8 @@ router.post('/preference', async (req, res) => {
   const total = resueltos.reduce((acc, r) => acc + r.precio * r.cantidad, 0);
   const userId = req.session && req.session.userId ? req.session.userId : null;
   const usuario = userId ? store.getUserById(userId) : null;
-  const order = store.addOrder({ items: resueltos, total, email: email || (usuario ? usuario.email : ''), userId });
+  const viewToken = crypto.randomBytes(24).toString('hex');
+  const order = store.addOrder({ items: resueltos, total, email: email || (usuario ? usuario.email : ''), userId, viewToken });
 
   try {
     const preference = new Preference(client);
@@ -71,9 +72,9 @@ router.post('/preference', async (req, res) => {
         payer: email ? { email } : undefined,
         external_reference: String(order.id),
         back_urls: {
-          success: `${SITE_URL}/?pago=exito`,
+          success: `${SITE_URL}/gracias?orden=${order.id}&token=${viewToken}`,
           failure: `${SITE_URL}/?pago=error`,
-          pending: `${SITE_URL}/?pago=pendiente`,
+          pending: `${SITE_URL}/gracias?orden=${order.id}&token=${viewToken}`,
         },
         auto_return: 'approved',
         notification_url: `${SITE_URL}/api/checkout/webhook`,
