@@ -295,13 +295,24 @@ router.get('/api/products', requireAdmin, (req, res) => {
   res.json(store.getProducts());
 });
 
+function sanearAnexosRelacionados(body) {
+  if (!Array.isArray(body.anexosRelacionados)) return body;
+  const anexosValidos = new Set(
+    store.getProducts().filter((p) => p.categoria === 'anexo').map((p) => p.id)
+  );
+  return {
+    ...body,
+    anexosRelacionados: [...new Set(body.anexosRelacionados.map(Number))].filter((id) => anexosValidos.has(id)),
+  };
+}
+
 router.post('/api/products', requireAdmin, (req, res) => {
-  const item = store.addProduct(req.body || {});
+  const item = store.addProduct(sanearAnexosRelacionados(req.body || {}));
   res.status(201).json(item);
 });
 
 router.patch('/api/products/:id', requireAdmin, (req, res) => {
-  const item = store.updateProduct(req.params.id, req.body || {});
+  const item = store.updateProduct(req.params.id, sanearAnexosRelacionados(req.body || {}));
   if (!item) return res.status(404).json({ error: 'No encontrado' });
   res.json(item);
 });

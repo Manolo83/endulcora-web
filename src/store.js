@@ -198,6 +198,7 @@ async function init() {
     (data.products || []).forEach((p) => {
       if (typeof p.descripcionLarga !== 'string') { p.descripcionLarga = ''; changed = true; }
       if (!Array.isArray(p.galeria)) { p.galeria = []; changed = true; }
+      if (!Array.isArray(p.anexosRelacionados)) { p.anexosRelacionados = []; changed = true; }
       if (!p.slug) {
         p.slug = slugUnico(p.titulo, data.products, p.id);
         changed = true;
@@ -366,6 +367,7 @@ module.exports = {
       archivo: '',
       archivoNombre: '',
       slug: '',
+      anexosRelacionados: [],
       ...fields,
     };
     item.slug = slugUnico(item.slug || item.titulo, data.products, item.id);

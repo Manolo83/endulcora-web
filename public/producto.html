@@ -141,6 +141,13 @@ body { background: #FBF4E9; }
       <p id="pDescripcionLarga" class="mt-4 whitespace-pre-line text-[15px] leading-relaxed text-carbon/75"></p>
     </div>
 
+    <!-- Anexos incluidos -->
+    <div id="bloqueAnexos" class="mt-16 hidden">
+      <h2 class="font-titulo text-xl tracking-wide text-vino">Anexos incluidos</h2>
+      <p class="mt-2 text-sm text-carbon/60">Hojas de trabajo que acompañan a este eBook.</p>
+      <div id="pAnexos" class="mt-5 grid gap-4 sm:grid-cols-2"></div>
+    </div>
+
     <!-- Galería -->
     <div id="bloqueGaleria" class="mt-16 hidden">
       <h2 class="font-titulo text-xl tracking-wide text-vino">Galería</h2>
@@ -214,7 +221,7 @@ function agregarAlCarritoLocal(item){
   actualizarBadgeCarrito();
 }
 
-const slug = decodeURIComponent(window.location.pathname.replace(/^\/ebooks\//, '').replace(/\/$/, ''));
+const slug = decodeURIComponent(window.location.pathname.replace(/^\/(ebooks|anexos|recetarios)\//, '').replace(/\/$/, ''));
 
 async function cargarProducto(){
   let contenido = {};
@@ -260,6 +267,35 @@ async function cargarProducto(){
   if(p.descripcionLarga){
     document.getElementById('pDescripcionLarga').textContent = p.descripcionLarga;
     document.getElementById('bloqueDescripcionLarga').classList.remove('hidden');
+  }
+
+  if(Array.isArray(p.anexosInfo) && p.anexosInfo.length){
+    document.getElementById('pAnexos').innerHTML = p.anexosInfo.map(a => `
+      <div class="tarjeta-viva flex items-center justify-between gap-3 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+        <div class="min-w-0">
+          <a href="/anexos/${a.slug}" class="font-titulo text-base text-vino hover:underline">${escapeHtml(a.titulo || '')}</a>
+          <p class="mt-1 truncate text-xs text-carbon/60">${escapeHtml(a.descripcionCorta || '')}</p>
+          <p class="mt-1.5 font-ui text-sm font-700 text-vino">$${formatoMonto(a.precio || '0')} MXN</p>
+        </div>
+        <button type="button" data-id="${a.id}" data-titulo="${escapeHtml(a.titulo || '')}" data-precio="${a.precio || '0'}"
+          class="btnAgregarAnexo shrink-0 rounded-full boton-vivo border border-vino/25 px-4 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+          Agregar
+        </button>
+      </div>
+    `).join('');
+    document.getElementById('bloqueAnexos').classList.remove('hidden');
+    document.querySelectorAll('.btnAgregarAnexo').forEach(btn => {
+      btn.addEventListener('click', () => {
+        agregarAlCarritoLocal({
+          tipo: 'producto',
+          id: Number(btn.dataset.id),
+          titulo: btn.dataset.titulo,
+          precio: parseFloat(String(btn.dataset.precio).replace(/,/g,'')) || 0,
+        });
+        btn.textContent = 'Agregado ✓';
+        setTimeout(() => { btn.textContent = 'Agregar'; }, 1500);
+      });
+    });
   }
 
   if(Array.isArray(p.galeria) && p.galeria.length){

@@ -25,7 +25,18 @@ router.get('/products', (req, res) => {
 router.get('/productos/:slug', (req, res) => {
   const producto = store.getProductBySlug(req.params.slug);
   if (!producto) return res.status(404).json({ error: 'No encontrado' });
-  res.json(producto);
+  const anexos = (producto.anexosRelacionados || [])
+    .map((id) => store.getProduct(id))
+    .filter((a) => a && a.categoria === 'anexo')
+    .map((a) => ({
+      id: a.id,
+      slug: a.slug,
+      titulo: a.titulo,
+      descripcionCorta: a.descripcionCorta,
+      precio: a.precio,
+      imagen: a.imagen,
+    }));
+  res.json({ ...producto, anexosInfo: anexos });
 });
 
 router.get('/hero-carrusel', (req, res) => {
