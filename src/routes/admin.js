@@ -296,14 +296,20 @@ router.get('/api/products', requireAdmin, (req, res) => {
 });
 
 function sanearProductosRelacionados(body, excludeId) {
-  if (!Array.isArray(body.productosRelacionados)) return body;
-  const idsValidos = new Set(
-    store.getProducts().filter((p) => p.id !== Number(excludeId)).map((p) => p.id)
-  );
-  return {
-    ...body,
-    productosRelacionados: [...new Set(body.productosRelacionados.map(Number))].filter((id) => idsValidos.has(id)),
-  };
+  let saneado = body;
+  if (Array.isArray(body.productosRelacionados)) {
+    const idsValidos = new Set(
+      store.getProducts().filter((p) => p.id !== Number(excludeId)).map((p) => p.id)
+    );
+    saneado = {
+      ...saneado,
+      productosRelacionados: [...new Set(body.productosRelacionados.map(Number))].filter((id) => idsValidos.has(id)),
+    };
+  }
+  if ('esPaquete' in body) {
+    saneado = { ...saneado, esPaquete: body.esPaquete === true };
+  }
+  return saneado;
 }
 
 router.post('/api/products', requireAdmin, (req, res) => {

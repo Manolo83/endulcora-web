@@ -181,7 +181,15 @@ let TODOS = [];
 
 function pintar(){
   const q = document.getElementById('buscador').value.trim().toLowerCase();
-  let items = info.filtro ? TODOS.filter(p => (p.categoria || 'ebook') === info.filtro) : TODOS;
+  // Los productos que forman parte de algún paquete no se muestran como
+  // tarjetas propias en el catálogo: solo se compran dentro de la página
+  // del paquete, al final, como opción individual.
+  const componentesDePaquete = new Set();
+  TODOS.forEach(p => {
+    if(p.esPaquete) (p.productosRelacionados || []).forEach(id => componentesDePaquete.add(id));
+  });
+  let items = TODOS.filter(p => !componentesDePaquete.has(p.id));
+  if(info.filtro) items = items.filter(p => (p.categoria || 'ebook') === info.filtro);
   if(q){
     items = items.filter(p => `${p.titulo || ''} ${p.subtitulo || ''} ${p.etiqueta || ''} ${p.descripcionCorta || ''}`.toLowerCase().includes(q));
   }

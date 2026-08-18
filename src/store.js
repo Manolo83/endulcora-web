@@ -204,6 +204,7 @@ async function init() {
         delete p.anexosRelacionados;
         changed = true;
       }
+      if (typeof p.esPaquete !== 'boolean') { p.esPaquete = false; changed = true; }
       if (!p.slug) {
         p.slug = slugUnico(p.titulo, data.products, p.id);
         changed = true;
@@ -373,6 +374,7 @@ module.exports = {
       archivoNombre: '',
       slug: '',
       productosRelacionados: [],
+      esPaquete: false,
       ...fields,
     };
     item.slug = slugUnico(item.slug || item.titulo, data.products, item.id);

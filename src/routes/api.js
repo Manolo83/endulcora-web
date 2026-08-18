@@ -24,23 +24,33 @@ router.get('/products', (req, res) => {
 
 const PREFIJO_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
 
+function resumenProducto(r) {
+  return {
+    id: r.id,
+    slug: r.slug,
+    categoria: r.categoria,
+    prefijo: PREFIJO_POR_CATEGORIA[r.categoria] || 'ebooks',
+    titulo: r.titulo,
+    descripcionCorta: r.descripcionCorta,
+    precio: r.precio,
+    imagen: r.imagen,
+    esPaquete: !!r.esPaquete,
+  };
+}
+
 router.get('/productos/:slug', (req, res) => {
   const producto = store.getProductBySlug(req.params.slug);
   if (!producto) return res.status(404).json({ error: 'No encontrado' });
   const relacionados = (producto.productosRelacionados || [])
     .map((id) => store.getProduct(id))
     .filter(Boolean)
-    .map((r) => ({
-      id: r.id,
-      slug: r.slug,
-      categoria: r.categoria,
-      prefijo: PREFIJO_POR_CATEGORIA[r.categoria] || 'ebooks',
-      titulo: r.titulo,
-      descripcionCorta: r.descripcionCorta,
-      precio: r.precio,
-      imagen: r.imagen,
-    }));
-  res.json({ ...producto, productosRelacionadosInfo: relacionados });
+    .map(resumenProducto);
+  // Paquetes que incluyen este producto como componente, aunque el paquete
+  // no lo tenga ligado desde este lado (se liga una sola vez, del paquete al componente).
+  const paquetesQueLoIncluyen = store.getProducts()
+    .filter((x) => x.esPaquete && x.id !== producto.id && (x.productosRelacionados || []).includes(producto.id))
+    .map(resumenProducto);
+  res.json({ ...producto, productosRelacionadosInfo: relacionados, paquetesQueLoIncluyen });
 });
 
 router.get('/hero-carrusel', (req, res) => {
