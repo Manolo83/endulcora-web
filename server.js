@@ -95,6 +95,15 @@ const asistenteLimiter = rateLimit({
 });
 app.use('/api/asistente/chat', asistenteLimiter);
 
+const comunidadLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Escribiste muchos mensajes muy rápido. Espera unos minutos.' },
+});
+app.use('/api/comunidad/mensajes', (req, res, next) => (req.method === 'POST' ? comunidadLimiter(req, res, next) : next()));
+
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/auth', authRoutes);

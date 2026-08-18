@@ -162,6 +162,7 @@ function datosPorDefecto() {
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
     sesionesTaller: [],
     resenas: [],
+    mensajesComunidad: [],
   };
 }
 
@@ -714,6 +715,30 @@ module.exports = {
   deleteResena(id) {
     const data = load();
     data.resenas = data.resenas.filter((r) => r.id !== Number(id));
+    save(data);
+  },
+
+  // ---- Comunidad: muro de mensajes entre clientes con cuenta ----
+  getMensajesComunidad() {
+    const data = load();
+    return [...data.mensajesComunidad].sort((a, b) => a.id - b.id);
+  },
+  addMensajeComunidad({ userId, nombre, texto }) {
+    const data = load();
+    const item = {
+      id: nextId(data.mensajesComunidad),
+      userId,
+      nombre: String(nombre || '').trim(),
+      texto: String(texto || '').trim(),
+      createdAt: new Date().toISOString(),
+    };
+    data.mensajesComunidad.push(item);
+    save(data);
+    return item;
+  },
+  deleteMensajeComunidad(id) {
+    const data = load();
+    data.mensajesComunidad = data.mensajesComunidad.filter((m) => m.id !== Number(id));
     save(data);
   },
 };

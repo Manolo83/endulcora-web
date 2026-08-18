@@ -508,6 +508,16 @@ router.delete('/api/resenas/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- Comunidad (moderación) ----
+router.get('/api/comunidad/mensajes', requireAdmin, (req, res) => {
+  res.json(store.getMensajesComunidad());
+});
+
+router.delete('/api/comunidad/mensajes/:id', requireAdmin, (req, res) => {
+  store.deleteMensajeComunidad(req.params.id);
+  res.json({ ok: true });
+});
+
 // ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----
 router.get('/api/users/buscar', requireAdmin, (req, res) => {
   const user = store.getUserByEmail(req.query.email || '');

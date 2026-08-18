@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comunidad · Endulcora</title>
+<meta name="description" content="El muro de la comunidad Endulcora: platica con otros alumnos y con el equipo de Endulcora.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://www.endulcora.com/comunidad">
+<meta name="theme-color" content="#1B0720">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          firma: ['"Great Vibes"', 'cursive'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+.boton-vivo { transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease; }
+.boton-vivo:hover { transform: translateY(-2px) scale(1.03); }
+.boton-vivo:active { transform: scale(.95); }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+.spinner { border: 3px solid rgba(78,20,84,.2); border-top-color: #4E1454; border-radius: 50%; width: 16px; height: 16px; animation: girar .7s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .boton-vivo:hover, .boton-vivo:active { transform:none; }
+}
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<header class="sticky top-0 z-50 bg-crema/95 backdrop-blur border-b border-vino/10">
+  <div class="mx-auto flex h-20 max-w-3xl items-center justify-between gap-4 px-5">
+    <a href="/" class="flex items-center gap-3 shrink-0">
+      <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+    </a>
+    <a href="/" class="font-ui text-[12px] font-700 uppercase tracking-wider text-vino/70 hover:text-vino transition">Inicio</a>
+  </div>
+</header>
+
+<main class="mx-auto max-w-3xl px-5 py-10">
+  <p class="font-titulo text-[11px] tracking-[.3em] text-flama">MURO DE LA COMUNIDAD</p>
+  <h1 class="mt-2 font-display text-3xl text-vino sm:text-4xl">Habla con otros alumnos de Endulcora</h1>
+  <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-carbon/70">Comparte tus dudas, tus resultados o simplemente saluda. Solo clientes con cuenta pueden escribir; cualquiera puede leer.</p>
+
+  <div id="mensajesComunidad" class="mt-8 flex flex-col gap-3"></div>
+
+  <div id="bloqueInvitado" class="mt-8 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+    <div class="flex gap-2 border-b border-vino/10">
+      <button type="button" id="tabLogin" class="border-b-2 border-vino px-1 pb-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino">Iniciar sesión</button>
+      <button type="button" id="tabRegistro" class="border-b-2 border-transparent px-1 pb-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon/50">Crear cuenta</button>
+    </div>
+
+    <form id="formLoginComunidad" class="mt-5 grid gap-3">
+      <input id="loginEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <input id="loginPassword" type="password" required placeholder="Contraseña" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <p id="loginError" class="hidden text-xs text-red-600"></p>
+      <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        <span id="loginSpinner" class="spinner hidden"></span> Entrar
+      </button>
+    </form>
+
+    <form id="formRegistroComunidad" class="mt-5 hidden grid gap-3">
+      <input id="registroNombre" type="text" required placeholder="Tu nombre" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <input id="registroEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <input id="registroPassword" type="password" required minlength="6" placeholder="Contraseña (mínimo 6 caracteres)" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <p id="registroError" class="hidden text-xs text-red-600"></p>
+      <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        <span id="registroSpinner" class="spinner hidden"></span> Crear cuenta y entrar
+      </button>
+    </form>
+  </div>
+
+  <form id="formMensajeComunidad" class="mt-8 hidden rounded-3xl bg-white p-5 ring-1 ring-vino/10">
+    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/50">Escribiendo como <span id="nombreUsuarioComunidad" class="text-vino"></span></p>
+    <textarea id="textoMensajeComunidad" rows="3" required maxlength="1000" placeholder="Escribe algo para la comunidad…" class="mt-2 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm"></textarea>
+    <div class="mt-3 flex items-center justify-between">
+      <button type="button" id="btnCerrarSesionComunidad" class="font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cerrar sesión</button>
+      <button type="submit" class="inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
+        <span id="publicarSpinner" class="spinner hidden"></span> Publicar
+      </button>
+    </div>
+  </form>
+</main>
+
+<footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
+  <div class="mx-auto max-w-3xl px-5 pb-10 text-center">
+    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/40">© <span id="anioFooter"></span> Endulcora · Ciudad de México</p>
+  </div>
+</footer>
+
+<a href="https://wa.me/525665271901" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"
+  class="fixed bottom-4 left-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl transition hover:scale-110 sm:bottom-6 sm:left-6">
+  <svg viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
+</a>
+
+<script>
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+let SESION = { isLoggedIn: false, user: null };
+
+function formatoFecha(iso){
+  return new Date(iso).toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+function pintarMensajes(items){
+  const cont = document.getElementById('mensajesComunidad');
+  if(!items.length){
+    cont.innerHTML = '<p class="rounded-2xl bg-white p-6 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Todavía no hay mensajes. ¡Sé el primero en escribir!</p>';
+    return;
+  }
+  cont.innerHTML = items.map(m => `
+    <div class="rounded-2xl bg-white p-4 ring-1 ring-vino/10">
+      <p class="font-ui text-[11px] uppercase tracking-widest text-humo">${escapeHtml(m.nombre)} · ${formatoFecha(m.createdAt)}</p>
+      <p class="mt-1 whitespace-pre-line text-[15px] text-carbon/85">${escapeHtml(m.texto)}</p>
+    </div>
+  `).join('');
+}
+
+async function cargarMensajes(){
+  try{
+    const res = await fetch('/api/comunidad/mensajes');
+    const items = await res.json();
+    pintarMensajes(items);
+  }catch(e){
+    pintarMensajes([]);
+  }
+}
+
+function actualizarVistaSesion(){
+  const bloqueInvitado = document.getElementById('bloqueInvitado');
+  const formMensaje = document.getElementById('formMensajeComunidad');
+  if(SESION.isLoggedIn){
+    bloqueInvitado.classList.add('hidden');
+    formMensaje.classList.remove('hidden');
+    document.getElementById('nombreUsuarioComunidad').textContent = SESION.user.nombre;
+  }else{
+    bloqueInvitado.classList.remove('hidden');
+    formMensaje.classList.add('hidden');
+  }
+}
+
+async function cargarSesion(){
+  try{
+    const res = await fetch('/api/auth/session');
+    const data = await res.json();
+    SESION = { isLoggedIn: !!data.isLoggedIn, user: data.user || null };
+  }catch(e){
+    SESION = { isLoggedIn: false, user: null };
+  }
+  actualizarVistaSesion();
+}
+
+document.getElementById('tabLogin').addEventListener('click', () => {
+  document.getElementById('tabLogin').classList.add('border-vino', 'text-vino');
+  document.getElementById('tabLogin').classList.remove('border-transparent', 'text-carbon/50');
+  document.getElementById('tabRegistro').classList.remove('border-vino', 'text-vino');
+  document.getElementById('tabRegistro').classList.add('border-transparent', 'text-carbon/50');
+  document.getElementById('formLoginComunidad').classList.remove('hidden');
+  document.getElementById('formRegistroComunidad').classList.add('hidden');
+});
+document.getElementById('tabRegistro').addEventListener('click', () => {
+  document.getElementById('tabRegistro').classList.add('border-vino', 'text-vino');
+  document.getElementById('tabRegistro').classList.remove('border-transparent', 'text-carbon/50');
+  document.getElementById('tabLogin').classList.remove('border-vino', 'text-vino');
+  document.getElementById('tabLogin').classList.add('border-transparent', 'text-carbon/50');
+  document.getElementById('formRegistroComunidad').classList.remove('hidden');
+  document.getElementById('formLoginComunidad').classList.add('hidden');
+});
+
+document.getElementById('formLoginComunidad').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('loginError');
+  const spinner = document.getElementById('loginSpinner');
+  err.classList.add('hidden');
+  spinner.classList.remove('hidden');
+  try{
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('loginEmail').value.trim(),
+        password: document.getElementById('loginPassword').value,
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar sesión');
+    SESION = { isLoggedIn: true, user: data.user };
+    actualizarVistaSesion();
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }finally{
+    spinner.classList.add('hidden');
+  }
+});
+
+document.getElementById('formRegistroComunidad').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('registroError');
+  const spinner = document.getElementById('registroSpinner');
+  err.classList.add('hidden');
+  spinner.classList.remove('hidden');
+  try{
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: document.getElementById('registroNombre').value.trim(),
+        email: document.getElementById('registroEmail').value.trim(),
+        password: document.getElementById('registroPassword').value,
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo crear la cuenta');
+    SESION = { isLoggedIn: true, user: data.user };
+    actualizarVistaSesion();
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }finally{
+    spinner.classList.add('hidden');
+  }
+});
+
+document.getElementById('btnCerrarSesionComunidad').addEventListener('click', async () => {
+  try{ await fetch('/api/auth/logout', { method: 'POST' }); }catch(e){}
+  SESION = { isLoggedIn: false, user: null };
+  actualizarVistaSesion();
+});
+
+document.getElementById('formMensajeComunidad').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const campo = document.getElementById('textoMensajeComunidad');
+  const spinner = document.getElementById('publicarSpinner');
+  const texto = campo.value.trim();
+  if(!texto) return;
+  spinner.classList.remove('hidden');
+  try{
+    const res = await fetch('/api/comunidad/mensajes', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texto }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo publicar tu mensaje');
+    campo.value = '';
+    await cargarMensajes();
+  }catch(err){
+    alert(err.message);
+  }finally{
+    spinner.classList.add('hidden');
+  }
+});
+
+cargarMensajes();
+cargarSesion();
+setInterval(cargarMensajes, 10000);
+</script>
+</body>
+</html>

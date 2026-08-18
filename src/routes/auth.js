@@ -97,3 +97,4 @@ router.post('/resenas', requireCliente, (req, res) => {
 });
 
 module.exports = router;
+module.exports.requireCliente = requireCliente;

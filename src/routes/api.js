@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const store = require('../store');
 const { UPLOAD_DIR } = require('../config');
+const { requireCliente } = require('./auth');
 
 const router = express.Router();
 
@@ -45,6 +46,20 @@ router.get('/sesiones-taller', (req, res) => {
 
 router.get('/resenas', (req, res) => {
   res.json(store.getResenas(true));
+});
+
+router.get('/comunidad/mensajes', (req, res) => {
+  res.json(store.getMensajesComunidad());
+});
+
+router.post('/comunidad/mensajes', requireCliente, (req, res) => {
+  const user = store.getUserById(req.session.userId);
+  if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
+  const texto = String((req.body && req.body.texto) || '').trim();
+  if (!texto) return res.status(400).json({ error: 'Escribe un mensaje.' });
+  if (texto.length > 1000) return res.status(400).json({ error: 'Tu mensaje es muy largo (máximo 1000 caracteres).' });
+  const item = store.addMensajeComunidad({ userId: user.id, nombre: user.nombre, texto });
+  res.status(201).json(item);
 });
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
