@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="tituloPagina">Tienda · Endulcora</title>
+<meta id="metaDescripcion" name="description" content="eBooks, hojas de costeo y recetarios de Endulcora, Estudio Gastronómico.">
+<meta name="robots" content="index, follow">
+<link id="linkCanonico" rel="canonical" href="https://www.endulcora.com/tienda">
+<meta name="theme-color" content="#1B0720">
+
+<meta property="og:type" content="website">
+<meta id="ogUrl" property="og:url" content="https://www.endulcora.com/tienda">
+<meta property="og:site_name" content="Endulcora · Estudio Gastronómico">
+<meta id="ogTitulo" property="og:title" content="Tienda · Endulcora">
+<meta id="ogDescripcion" property="og:description" content="eBooks, hojas de costeo y recetarios de Endulcora, Estudio Gastronómico.">
+<meta property="og:image" content="https://www.endulcora.com/og-image.png">
+<meta property="og:locale" content="es_MX">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          firma: ['"Great Vibes"', 'cursive'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+.boton-vivo { transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease; }
+.boton-vivo:hover { transform: translateY(-2px) scale(1.03); }
+.boton-vivo:active { transform: scale(.95); }
+.tarjeta-viva { transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .28s ease; }
+.tarjeta-viva:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(78,20,84,.28); }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .tarjeta-viva:hover { transform:none; }
+  .boton-vivo:hover, .boton-vivo:active { transform:none; }
+}
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<header class="sticky top-0 z-50 bg-crema/95 backdrop-blur border-b border-vino/10">
+  <div class="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-5 lg:px-8">
+    <a href="/" class="flex items-center gap-3 shrink-0">
+      <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+    </a>
+    <nav class="hidden items-center gap-5 font-ui text-[12px] font-600 uppercase tracking-wide text-carbon/70 md:flex">
+      <a href="/tienda" class="hover:text-vino transition">Todo</a>
+      <a href="/ebooks" class="hover:text-vino transition">eBooks</a>
+      <a href="/anexos" class="hover:text-vino transition">Anexos</a>
+      <a href="/recetarios" class="hover:text-vino transition">Recetarios</a>
+    </nav>
+    <a id="linkCarrito" href="/?verCarrito=1#tienda" aria-label="Ver carrito"
+      class="relative grid h-11 w-11 shrink-0 place-items-center rounded-full boton-vivo border border-vino/25 text-vino hover:border-vino transition">
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span id="carritoBadge" class="absolute -right-1 -top-1 hidden h-5 min-w-[20px] place-items-center rounded-full bg-flama px-1 font-ui text-[10px] font-700 text-carbon">0</span>
+    </a>
+  </div>
+  <nav class="flex items-center gap-4 overflow-x-auto border-t border-vino/10 px-5 py-3 font-ui text-[11px] font-600 uppercase tracking-wide text-carbon/70 md:hidden">
+    <a href="/tienda" class="shrink-0 hover:text-vino transition">Todo</a>
+    <a href="/ebooks" class="shrink-0 hover:text-vino transition">eBooks</a>
+    <a href="/anexos" class="shrink-0 hover:text-vino transition">Anexos</a>
+    <a href="/recetarios" class="shrink-0 hover:text-vino transition">Recetarios</a>
+  </nav>
+</header>
+
+<main class="mx-auto max-w-6xl px-5 py-10 lg:px-8 lg:py-14">
+  <h1 id="h1Categoria" class="font-display text-3xl text-vino sm:text-4xl">Tienda</h1>
+  <p id="descripcionCategoria" class="mt-2 max-w-xl text-[15px] leading-relaxed text-carbon/70">Manuales, hojas de costeo y recetarios listos para usar.</p>
+
+  <div class="relative mt-6 max-w-md">
+    <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-carbon/40" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="buscador" type="text" placeholder="Buscar…" class="w-full rounded-full border border-vino/15 bg-white py-3 pl-11 pr-4 text-sm text-carbon placeholder:text-carbon/40 focus:border-vino/40 focus:outline-none">
+  </div>
+
+  <div id="listaProductos" class="mt-8 grid gap-7 sm:grid-cols-2 lg:grid-cols-3"></div>
+</main>
+
+<footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
+  <div class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 pb-10 text-center sm:flex-row sm:justify-between sm:text-left lg:px-8">
+    <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-10 w-auto">
+    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/40">© <span id="anioFooter"></span> Endulcora · Ciudad de México</p>
+  </div>
+</footer>
+
+<a href="https://wa.me/525665271901" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"
+  class="fixed bottom-4 left-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl transition hover:scale-110 sm:bottom-6 sm:left-6">
+  <svg viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
+</a>
+
+<script>
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatoMonto(n){
+  return Number(String(n).replace(/,/g,'')).toLocaleString('es-MX');
+}
+document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+const PREFIJO_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
+const INFO_CATEGORIA = {
+  tienda: { titulo: 'Tienda', desc: 'Todo lo que tenemos para vender: eBooks, anexos y recetarios.', filtro: null },
+  ebooks: { titulo: 'eBooks', desc: 'Manuales técnicos completos, listos para descargar.', filtro: 'ebook' },
+  anexos: { titulo: 'Anexos', desc: 'Hojas de cálculo de costeo, listas para usar.', filtro: 'anexo' },
+  recetarios: { titulo: 'Recetarios', desc: 'Colecciones de recetas para tu estudio o negocio.', filtro: 'recetario' },
+};
+
+const seg = window.location.pathname.replace(/^\/|\/$/g, '') || 'tienda';
+const info = INFO_CATEGORIA[seg] || INFO_CATEGORIA.tienda;
+
+document.getElementById('tituloPagina').textContent = `${info.titulo} · Endulcora`;
+document.getElementById('metaDescripcion').setAttribute('content', info.desc);
+document.getElementById('linkCanonico').setAttribute('href', `https://www.endulcora.com/${seg}`);
+document.getElementById('ogUrl').setAttribute('content', `https://www.endulcora.com/${seg}`);
+document.getElementById('ogTitulo').setAttribute('content', `${info.titulo} · Endulcora`);
+document.getElementById('ogDescripcion').setAttribute('content', info.desc);
+document.getElementById('h1Categoria').textContent = info.titulo;
+document.getElementById('descripcionCategoria').textContent = info.desc;
+
+function actualizarBadgeCarrito(){
+  let carrito = [];
+  try{ carrito = JSON.parse(localStorage.getItem('endulcora_carrito') || '[]'); }catch(e){ carrito = []; }
+  const total = carrito.reduce((a, i) => a + i.cantidad, 0);
+  const badge = document.getElementById('carritoBadge');
+  badge.textContent = total;
+  badge.classList.toggle('hidden', !total);
+}
+actualizarBadgeCarrito();
+
+function tarjetaProducto(p){
+  const imagenEstilo = p.imagen ? `background-image:url('${p.imagen}');background-size:cover;background-position:center;` : '';
+  const anteriorPrecio = p.precioAnterior ? `<span class="pb-1 text-sm text-humo line-through">$${formatoMonto(p.precioAnterior)}</span>` : '';
+  const destacado = p.destacado ? `<span class="absolute right-5 top-5 rounded-full bg-flama px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-widest text-carbon">${escapeHtml(p.destacado)}</span>` : '';
+  const subtitulo = p.subtitulo ? `<p class="relative mt-2 font-firma text-xl text-flama">${escapeHtml(p.subtitulo)}</p>` : '';
+  const prefijo = PREFIJO_POR_CATEGORIA[p.categoria] || 'tienda';
+  const href = p.slug ? `/${prefijo}/${p.slug}` : '/tienda';
+  return `
+    <a href="${href}" class="reveal visible tarjeta-viva group flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_2px_0_rgba(78,20,84,.08)] ring-1 ring-vino/10">
+      <div class="relative aspect-[4/3] bg-gradient-to-br from-vino to-uva p-7" style="${imagenEstilo}">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/30"></div>
+        ${destacado}
+        <p class="relative font-titulo text-[11px] tracking-[.3em] text-flama">${escapeHtml(p.etiqueta || '')}</p>
+        <h3 class="relative mt-2 font-display text-2xl leading-tight text-crema">${escapeHtml(p.titulo || '')}</h3>
+        ${subtitulo}
+        <p class="absolute bottom-6 left-7 right-7 font-ui text-[10px] uppercase tracking-[.2em] text-crema/80">${escapeHtml(p.descripcionCorta || '')}</p>
+      </div>
+      <div class="flex flex-1 flex-col p-7">
+        <div class="flex items-end gap-3">
+          <span class="font-display text-3xl text-vino">$${formatoMonto(p.precio || '0')}</span>
+          ${anteriorPrecio}
+          <span class="pb-1 font-ui text-[11px] uppercase tracking-wider text-humo">MXN</span>
+        </div>
+        <span class="mt-5 inline-flex w-full items-center justify-center rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema transition group-hover:bg-morado">
+          Ver detalles
+        </span>
+      </div>
+    </a>`;
+}
+
+let TODOS = [];
+
+function pintar(){
+  const q = document.getElementById('buscador').value.trim().toLowerCase();
+  let items = info.filtro ? TODOS.filter(p => (p.categoria || 'ebook') === info.filtro) : TODOS;
+  if(q){
+    items = items.filter(p => `${p.titulo || ''} ${p.subtitulo || ''} ${p.etiqueta || ''} ${p.descripcionCorta || ''}`.toLowerCase().includes(q));
+  }
+  const cont = document.getElementById('listaProductos');
+  if(!items.length){
+    cont.innerHTML = `<p class="text-sm text-carbon/50">${q ? `Sin resultados para "${escapeHtml(q)}".` : 'Todavía no hay productos publicados.'}</p>`;
+    return;
+  }
+  cont.innerHTML = items.map(tarjetaProducto).join('');
+}
+
+async function cargar(){
+  try{
+    const res = await fetch('/api/products');
+    TODOS = await res.json();
+  }catch(e){
+    TODOS = [];
+  }
+  pintar();
+}
+document.getElementById('buscador').addEventListener('input', pintar);
+cargar();
+</script>
+</body>
+</html>

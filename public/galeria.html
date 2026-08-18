@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galería · Endulcora</title>
+<meta name="description" content="Fotos y video de piezas, clases y proceso de Endulcora, Estudio Gastronómico.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.endulcora.com/galeria">
+<meta name="theme-color" content="#1B0720">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.endulcora.com/galeria">
+<meta property="og:site_name" content="Endulcora · Estudio Gastronómico">
+<meta property="og:title" content="Galería · Endulcora">
+<meta property="og:description" content="Fotos y video de piezas, clases y proceso de Endulcora, Estudio Gastronómico.">
+<meta property="og:image" content="https://www.endulcora.com/og-image.png">
+<meta property="og:locale" content="es_MX">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          firma: ['"Great Vibes"', 'cursive'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+.rule-flama { background-image: linear-gradient(90deg,#F5A623 0 22px,transparent 22px); height: 3px; }
+.tarjeta-viva { transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .28s ease; }
+.tarjeta-viva:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(78,20,84,.28); }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta-viva:hover { transform:none; }
+}
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<header class="sticky top-0 z-50 bg-crema/95 backdrop-blur border-b border-vino/10">
+  <div class="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-5 lg:px-8">
+    <a href="/" class="flex items-center gap-3 shrink-0">
+      <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+    </a>
+    <a href="/" class="font-ui text-[12px] font-700 uppercase tracking-wider text-vino/70 hover:text-vino transition">Inicio</a>
+  </div>
+</header>
+
+<main class="mx-auto max-w-6xl px-5 py-10 lg:px-8 lg:py-14">
+  <div class="mb-12 flex flex-wrap items-end justify-between gap-6">
+    <div>
+      <div class="rule-flama mb-5 w-24"></div>
+      <h1 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Galería</h1>
+    </div>
+    <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">Fotos y video de piezas, clases y proceso, subidos directamente desde el panel de administración.</p>
+  </div>
+  <div id="listaGaleria" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <p class="text-sm text-carbon/50">Cargando galería…</p>
+  </div>
+</main>
+
+<footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
+  <div class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 pb-10 text-center sm:flex-row sm:justify-between sm:text-left lg:px-8">
+    <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-10 w-auto">
+    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/40">© <span id="anioFooter"></span> Endulcora · Ciudad de México</p>
+  </div>
+</footer>
+
+<a href="https://wa.me/525665271901" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"
+  class="fixed bottom-4 left-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl transition hover:scale-110 sm:bottom-6 sm:left-6">
+  <svg viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
+</a>
+
+<script>
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+function toEmbedUrl(url){
+  try{
+    const u = new URL(url);
+    if(u.hostname.includes('youtube.com') || u.hostname === 'youtu.be'){
+      let id = u.searchParams.get('v');
+      if(!id && u.hostname === 'youtu.be') id = u.pathname.slice(1);
+      if(id) return `https://www.youtube.com/embed/${id}`;
+    }
+    if(u.hostname.includes('vimeo.com')){
+      const id = u.pathname.split('/').filter(Boolean).pop();
+      if(id) return `https://player.vimeo.com/video/${id}`;
+    }
+  }catch(e){}
+  return url;
+}
+
+function tarjetaMedia(m){
+  const titulo = m.title ? `<p class="p-4 font-ui text-sm text-vino">${escapeHtml(m.title)}</p>` : '';
+  if(m.kind === 'photo'){
+    return `<figure class="tarjeta-viva overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+      <img src="${m.url}" alt="${escapeHtml(m.title || 'Foto de Endulcora')}" loading="lazy" class="aspect-[4/3] w-full object-cover">
+      ${titulo}
+    </figure>`;
+  }
+  if(m.source === 'embed'){
+    const embedUrl = toEmbedUrl(m.url);
+    return `<figure class="tarjeta-viva overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+      <div class="aspect-video w-full"><iframe class="h-full w-full" src="${embedUrl}" title="${escapeHtml(m.title || 'Video de Endulcora')}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      ${titulo}
+    </figure>`;
+  }
+  return `<figure class="tarjeta-viva overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+    <video class="aspect-video w-full bg-black" src="${m.url}" controls preload="metadata"></video>
+    ${titulo}
+  </figure>`;
+}
+
+async function cargarGaleria(){
+  const cont = document.getElementById('listaGaleria');
+  try{
+    const res = await fetch('/api/media');
+    const items = await res.json();
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Aún no hay fotos ni videos en la galería.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(tarjetaMedia).join('');
+  }catch(e){
+    cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudo cargar la galería.</p>';
+  }
+}
+cargarGaleria();
+</script>
+</body>
+</html>

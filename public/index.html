@@ -172,6 +172,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <a href="/galeria" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Galería</a>
     <a href="/resenas" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Reseñas</a>
     <a href="/anuncios" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anuncios</a>
+    <a href="/comunidad" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Comunidad</a>
     <button type="button" onclick="toggleMenu();abrirModal('carrito')" class="mt-5 w-full rounded-full boton-vivo border border-vino/25 py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-vino">Ver carrito</button>
     <button type="button" id="btnAccesoMovil" onclick="toggleMenu();abrirCuenta()" class="mt-3 w-full rounded-full boton-vivo bg-flama py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-carbon"><span id="btnAccesoMovilTexto">Acceso clientes</span></button>
   </div>
@@ -199,11 +200,11 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       </p>
 
       <div class="mt-9 flex flex-wrap gap-4">
-        <a href="#tienda" class="inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
+        <a href="/tienda" class="inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>
           <span id="heroCtaPrimario">Ir a la tienda</span>
         </a>
-        <a href="#calendario" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 bg-morado/10 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
+        <a href="/calendario" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 bg-morado/10 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.6V16c0 1.1 2.7 3 6 3s6-1.9 6-3v-5.4"/></svg>
           <span id="heroCtaSecundario">Ver calendario de talleres</span>
         </a>
@@ -320,7 +321,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
           </li>
         </ul>
 
-        <a href="#tienda" class="mt-8 inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
+        <a href="/tienda" class="mt-8 inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
           Conoce sus manuales
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
         </a>
@@ -346,57 +347,6 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 </section>
 
 <svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-flama/10" aria-hidden="true"><path d="M0,20 C240,40 480,0 720,14 C960,28 1200,40 1440,18 L1440,40 L0,40 Z" fill="#FBF4E9"/></svg>
-
-<!-- ══════════════ PRODUCTOS DESTACADOS ══════════════ -->
-<section id="tienda" class="scroll-mt-24 relative overflow-hidden bg-crema py-20 lg:py-28">
-  <div class="pointer-events-none absolute -right-32 top-10 h-72 w-72 rounded-full bg-morado/10 blur-[110px]"></div>
-  <div class="pointer-events-none absolute -left-24 bottom-0 h-56 w-56 rounded-full bg-flama/10 blur-[100px]"></div>
-  <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
-
-    <div class="reveal mb-14 flex flex-wrap items-end justify-between gap-6">
-      <div>
-        <div class="rule-flama mb-5 w-24"></div>
-        <h2 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Lo que se llevan<br>los que ya venden</h2>
-      </div>
-      <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">
-        Cada manual viene con su anexo de costeo. El libro te enseña la técnica; la hoja de cálculo
-        te dice cuánto cuesta hacerla y a cuánto tienes que venderla.
-      </p>
-    </div>
-
-    <div class="reveal relative mb-12 max-w-md">
-      <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-vino/40" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="buscadorTienda" type="text" placeholder="Buscar eBooks, anexos o recetarios…"
-        class="w-full rounded-full border border-vino/15 bg-white py-3.5 pl-12 pr-11 text-sm text-carbon placeholder:text-carbon/40 focus:border-vino/40 focus:outline-none">
-      <button type="button" id="btnLimpiarBusquedaTienda" onclick="limpiarBusquedaTienda()" aria-label="Limpiar búsqueda"
-        class="hidden absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-carbon/40 hover:bg-vino/10 hover:text-vino transition">
-        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-
-    <div id="productos" class="scroll-mt-24">
-      <h3 class="font-titulo text-xl tracking-wide text-vino">eBooks</h3>
-      <div id="listaEbooks" class="mt-6 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-        <p class="text-sm text-carbon/50">Cargando productos…</p>
-      </div>
-    </div>
-
-    <div id="anexos" class="scroll-mt-24 mt-16">
-      <h3 class="font-titulo text-xl tracking-wide text-vino">Anexos</h3>
-      <div id="listaAnexos" class="mt-6 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-        <p class="text-sm text-carbon/50">Cargando anexos…</p>
-      </div>
-    </div>
-
-    <div id="recetarios" class="scroll-mt-24 mt-16">
-      <h3 class="font-titulo text-xl tracking-wide text-vino">Recetarios</h3>
-      <div id="listaRecetarios" class="mt-6 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-        <p class="text-sm text-carbon/50">Cargando recetarios…</p>
-      </div>
-    </div>
-
-  </div>
-</section>
 
 <!-- ══════════════ CLASE EN VIVO · TEMPORIZADOR ══════════════ -->
 <section id="clase" class="hidden scroll-mt-24 bg-crema py-20 lg:py-24">
@@ -450,7 +400,7 @@ trufada, paso a paso</h2>
 
           <div class="mt-8 flex flex-wrap gap-4">
             <button type="button" onclick="abrirModal('clase')" class="rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">Apartar mi lugar</button>
-            <a href="#calendario" class="rounded-full boton-vivo border border-crema/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">Ver calendario</a>
+            <a href="/calendario" class="rounded-full boton-vivo border border-crema/30 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">Ver calendario</a>
           </div>
         </div>
 
@@ -581,7 +531,7 @@ trufada, paso a paso</h2>
           <h3 class="font-titulo text-xl tracking-wide text-vino">De qué está hecho tu costo</h3>
           <div id="desglose" class="mt-5 space-y-3.5"></div>
           <p id="alerta" class="mt-6 hidden rounded-xl bg-flama/15 px-4 py-3 text-sm text-vino"></p>
-          <a href="#anexos"
+          <a href="/anexos"
             class="mt-6 block w-full rounded-full boton-vivo bg-vino py-3.5 text-center font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
             Quiero la hoja completa con mis 50 recetas
           </a>
@@ -591,62 +541,6 @@ trufada, paso a paso</h2>
 
   </div>
 </section>
-
-<!-- ══════════════ CALENDARIO DE TALLERES (dinámico) ══════════════ -->
-<section id="calendario" class="scroll-mt-24 bg-crema py-20 lg:py-24">
-  <div class="mx-auto max-w-7xl px-5 lg:px-8">
-    <div class="reveal mb-10 flex flex-wrap items-end justify-between gap-6">
-      <div>
-        <div class="rule-flama mb-5 w-24"></div>
-        <h2 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Calendario de talleres</h2>
-      </div>
-      <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">Elige tu sede, revisa la disponibilidad y aparta tu lugar directo por WhatsApp.</p>
-    </div>
-
-    <div id="sedeTabsCalendario" class="reveal mb-6 flex flex-wrap gap-2"></div>
-
-    <div id="calendarioTarjeta" class="reveal relative overflow-hidden rounded-3xl bg-white bg-cover bg-center p-5 shadow-[0_2px_0_rgba(78,20,84,.06)] ring-1 ring-vino/10 sm:p-8">
-      <div id="calendarioTarjetaOverlay" class="pointer-events-none absolute inset-0 bg-crema/55"></div>
-      <div class="relative">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <button type="button" onclick="cambiarMesCalendario(-1)" aria-label="Mes anterior" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-vino/20 bg-white text-vino hover:border-vino transition">‹</button>
-            <p id="calendarioPublicoMesTexto" class="min-w-[150px] text-center font-titulo text-lg text-vino"></p>
-            <button type="button" onclick="cambiarMesCalendario(1)" aria-label="Mes siguiente" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-vino/20 bg-white text-vino hover:border-vino transition">›</button>
-          </div>
-          <div class="flex flex-wrap gap-4 font-ui text-[11px] uppercase tracking-wider text-carbon/60">
-            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-[#3F8F5F]"></span> Disponible</span>
-            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-flama"></span> Casi lleno</span>
-            <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-humo"></span> Agotado</span>
-          </div>
-        </div>
-        <div id="calendarioPublicoGrid" class="mt-6 grid grid-cols-7 gap-1.5 sm:gap-2">
-          <p class="col-span-7 text-sm text-carbon/50">Cargando calendario…</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-crema" aria-hidden="true"><path d="M0,18 C240,40 480,0 720,16 C960,32 1200,4 1440,20 L1440,40 L0,40 Z" fill="#ffffff"/></svg>
-
-<!-- ══════════════ GALERÍA (dinámica, desde el panel de administración) ══════════════ -->
-<section id="galeria" class="scroll-mt-24 bg-crema py-20 lg:py-24">
-  <div class="mx-auto max-w-7xl px-5 lg:px-8">
-    <div class="reveal mb-12 flex flex-wrap items-end justify-between gap-6">
-      <div>
-        <div class="rule-flama mb-5 w-24"></div>
-        <h2 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Galería</h2>
-      </div>
-      <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">Fotos y video de piezas, clases y proceso, subidos directamente desde el panel de administración.</p>
-    </div>
-    <div id="listaGaleria" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      <p class="text-sm text-carbon/50">Cargando galería…</p>
-    </div>
-  </div>
-</section>
-
-<svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-crema" aria-hidden="true"><path d="M0,18 C240,40 480,0 720,16 C960,32 1200,4 1440,20 L1440,40 L0,40 Z" fill="#ffffff"/></svg>
 
 <!-- ══════════════ RESEÑAS ══════════════ -->
 <section id="resenas" class="scroll-mt-24 bg-white py-20 lg:py-24">
@@ -709,12 +603,12 @@ trufada, paso a paso</h2>
       <div>
         <p class="font-ui text-[11px] font-700 uppercase tracking-[.22em] text-vino">Catálogo</p>
         <ul class="mt-5 space-y-3 text-sm text-carbon/65">
-          <li><a href="#productos" class="hover:text-vino transition">eBooks y manuales</a></li>
-          <li><a href="#anexos"    class="hover:text-vino transition">Anexos en hoja de cálculo</a></li>
+          <li><a href="/ebooks" class="hover:text-vino transition">eBooks y manuales</a></li>
+          <li><a href="/anexos"    class="hover:text-vino transition">Anexos en hoja de cálculo</a></li>
           <li><a href="#simulador" class="hover:text-vino transition">Apps y calculadoras</a></li>
-          <li><a href="#calendario" class="hover:text-vino transition">Calendario de talleres</a></li>
-          <li><a href="#clase"     class="hover:text-vino transition">Clases en vivo</a></li>
-          <li><a href="#galeria"   class="hover:text-vino transition">Galería</a></li>
+          <li><a href="/calendario" class="hover:text-vino transition">Calendario de talleres</a></li>
+          <li><a href="/clases-en-vivo" class="hover:text-vino transition">Clases en vivo</a></li>
+          <li><a href="/galeria"   class="hover:text-vino transition">Galería</a></li>
         </ul>
       </div>
 
@@ -1768,7 +1662,7 @@ function renderPromoTallerSlide(){
       ${item.titulo ? `<h3 class="mt-1 font-display text-2xl text-crema sm:text-3xl">${escapeHtml(item.titulo)}</h3>` : ''}
       ${item.descripcion ? `<p class="mt-2 max-w-xl text-sm text-crema/80 sm:text-base">${escapeHtml(item.descripcion)}</p>` : ''}
       <div class="mt-5 flex flex-wrap justify-center gap-3 md:justify-start">
-        <a href="#calendario" class="rounded-full boton-vivo border border-crema/40 bg-white/10 px-6 py-3 font-ui text-xs font-700 uppercase tracking-wider text-crema hover:bg-white/20 transition">Ver calendario</a>
+        <a href="/calendario" class="rounded-full boton-vivo border border-crema/40 bg-white/10 px-6 py-3 font-ui text-xs font-700 uppercase tracking-wider text-crema hover:bg-white/20 transition">Ver calendario</a>
         <button type="button" onclick="agendarPromoTaller(${item.id})" class="rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-xs font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">Agenda tu taller</button>
       </div>
     </div>
@@ -2230,9 +2124,7 @@ if(formAsistente) formAsistente.addEventListener('submit', async (e) => {
 
 /* ---------- URL propia por sección (ej. /calendario) ---------- */
 const MAPA_SECCIONES_URL = {
-  tienda: 'tienda', ebooks: 'productos', anexos: 'anexos', recetarios: 'recetarios',
-  'clases-en-vivo': 'clase', calculadora: 'simulador', calendario: 'calendario',
-  galeria: 'galeria', resenas: 'resenas', anuncios: 'anuncios',
+  'clases-en-vivo': 'clase', calculadora: 'simulador', resenas: 'resenas', anuncios: 'anuncios',
 };
 (function(){
   const seg = window.location.pathname.replace(/^\/|\/$/g, '');
@@ -2249,10 +2141,7 @@ const MAPA_SECCIONES_URL = {
 })();
 
 cargarContenido();
-cargarProductos();
-cargarCalendario();
 cargarAnuncios();
-cargarGaleria();
 cargarResenasPublico();
 actualizarBadgeCarrito();
 manejarRegresoDePago();
@@ -2260,9 +2149,6 @@ abrirCarritoSiSeSolicito();
 cargarSesion();
 cargarHeroCarrusel();
 cargarPromosTaller();
-
-const campoBuscadorTienda = document.getElementById('buscadorTienda');
-if(campoBuscadorTienda) campoBuscadorTienda.addEventListener('input', pintarProductosFiltrados);
 
 function manejarRegresoDePago(){
   const params = new URLSearchParams(window.location.search);

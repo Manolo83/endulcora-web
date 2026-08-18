@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario de talleres · Endulcora</title>
+<meta name="description" content="Calendario de talleres presenciales de Endulcora: elige tu sede, revisa la disponibilidad y aparta tu lugar por WhatsApp.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.endulcora.com/calendario">
+<meta name="theme-color" content="#1B0720">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.endulcora.com/calendario">
+<meta property="og:site_name" content="Endulcora · Estudio Gastronómico">
+<meta property="og:title" content="Calendario de talleres · Endulcora">
+<meta property="og:description" content="Elige tu sede, revisa la disponibilidad y aparta tu lugar por WhatsApp.">
+<meta property="og:image" content="https://www.endulcora.com/og-image.png">
+<meta property="og:locale" content="es_MX">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          firma: ['"Great Vibes"', 'cursive'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+.rule-flama { background-image: linear-gradient(90deg,#F5A623 0 22px,transparent 22px); height: 3px; }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<header class="sticky top-0 z-50 bg-crema/95 backdrop-blur border-b border-vino/10">
+  <div class="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-5 lg:px-8">
+    <a href="/" class="flex items-center gap-3 shrink-0">
+      <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+    </a>
+    <a href="/" class="font-ui text-[12px] font-700 uppercase tracking-wider text-vino/70 hover:text-vino transition">Inicio</a>
+  </div>
+</header>
+
+<main class="mx-auto max-w-6xl px-5 py-10 lg:px-8 lg:py-14">
+  <div class="mb-10 flex flex-wrap items-end justify-between gap-6">
+    <div>
+      <div class="rule-flama mb-5 w-24"></div>
+      <h1 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Calendario de talleres</h1>
+    </div>
+    <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">Elige tu sede, revisa la disponibilidad y aparta tu lugar directo por WhatsApp.</p>
+  </div>
+
+  <div id="sedeTabsCalendario" class="mb-6 flex flex-wrap gap-2"></div>
+
+  <div id="calendarioTarjeta" class="relative overflow-hidden rounded-3xl bg-white bg-cover bg-center p-5 shadow-[0_2px_0_rgba(78,20,84,.06)] ring-1 ring-vino/10 sm:p-8">
+    <div class="pointer-events-none absolute inset-0 bg-crema/55"></div>
+    <div class="relative">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <button type="button" id="btnMesAnterior" aria-label="Mes anterior" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-vino/20 bg-white text-vino hover:border-vino transition">‹</button>
+          <p id="calendarioMesTexto" class="min-w-[150px] text-center font-titulo text-lg text-vino"></p>
+          <button type="button" id="btnMesSiguiente" aria-label="Mes siguiente" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-vino/20 bg-white text-vino hover:border-vino transition">›</button>
+        </div>
+        <div class="flex flex-wrap gap-4 font-ui text-[11px] uppercase tracking-wider text-carbon/60">
+          <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-[#3F8F5F]"></span> Disponible</span>
+          <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-flama"></span> Casi lleno</span>
+          <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-humo"></span> Agotado</span>
+        </div>
+      </div>
+      <div id="calendarioGrid" class="mt-6 grid grid-cols-7 gap-1.5 sm:gap-2">
+        <p class="col-span-7 text-sm text-carbon/50">Cargando calendario…</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
+  <div class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 pb-10 text-center sm:flex-row sm:justify-between sm:text-left lg:px-8">
+    <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-10 w-auto">
+    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/40">© <span id="anioFooter"></span> Endulcora · Ciudad de México</p>
+  </div>
+</footer>
+
+<a href="https://wa.me/525665271901" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"
+  class="fixed bottom-4 left-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl transition hover:scale-110 sm:bottom-6 sm:left-6">
+  <svg viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
+</a>
+
+<script>
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+let NUMERO_WHATSAPP = '5665271901';
+fetch('/api/content').then(r => r.json()).then(c => { if(c.whatsapp_numero) NUMERO_WHATSAPP = c.whatsapp_numero; }).catch(()=>{});
+
+let SEDES = [];
+let SESIONES = [];
+let sedeId = null;
+let mesActual = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+const NOMBRES_MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const NOMBRES_DIA = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const ESTADO_INFO = {
+  disponible: { texto: 'Disponible', clase: 'bg-[#3F8F5F] hover:brightness-110 cursor-pointer' },
+  casi_lleno: { texto: 'Casi lleno', clase: 'bg-flama hover:brightness-110 cursor-pointer' },
+  agotado: { texto: 'Agotado', clase: 'bg-humo/70 cursor-not-allowed' },
+};
+
+async function cargarCalendario(){
+  const cont = document.getElementById('calendarioGrid');
+  try{
+    const res = await fetch('/api/sedes');
+    SEDES = await res.json();
+    if(!SEDES.length){
+      document.getElementById('sedeTabsCalendario').innerHTML = '';
+      cont.innerHTML = '<p class="col-span-7 text-sm text-carbon/50">Todavía no hay talleres programados.</p>';
+      return;
+    }
+    sedeId = SEDES[0].id;
+    pintarTabsSede();
+    await cargarSesiones();
+  }catch(e){
+    cont.innerHTML = '<p class="col-span-7 text-sm text-carbon/50">No se pudo cargar el calendario.</p>';
+  }
+}
+
+function pintarTabsSede(){
+  document.getElementById('sedeTabsCalendario').innerHTML = SEDES.map(s => `
+    <button type="button" data-id="${s.id}" class="btnSede rounded-full px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider transition ${s.id === sedeId ? 'bg-vino text-crema' : 'border border-vino/20 text-vino hover:border-vino'}">
+      ${escapeHtml(s.nombre)}
+    </button>`).join('');
+  document.querySelectorAll('.btnSede').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      sedeId = Number(btn.dataset.id);
+      pintarTabsSede();
+      await cargarSesiones();
+    });
+  });
+  const sedeActual = SEDES.find(s => s.id === sedeId);
+  document.getElementById('calendarioTarjeta').style.backgroundImage = sedeActual && sedeActual.imagenFondo ? `url('${sedeActual.imagenFondo}')` : '';
+}
+
+async function cargarSesiones(){
+  const res = await fetch(`/api/sesiones-taller?sedeId=${sedeId}`);
+  SESIONES = await res.json();
+  pintarCalendario();
+}
+
+document.getElementById('btnMesAnterior').addEventListener('click', () => { mesActual = new Date(mesActual.getFullYear(), mesActual.getMonth() - 1, 1); pintarCalendario(); });
+document.getElementById('btnMesSiguiente').addEventListener('click', () => { mesActual = new Date(mesActual.getFullYear(), mesActual.getMonth() + 1, 1); pintarCalendario(); });
+
+function fechaISO(date){
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function pintarCalendario(){
+  document.getElementById('calendarioMesTexto').textContent = `${NOMBRES_MES[mesActual.getMonth()]} ${mesActual.getFullYear()}`;
+  const anio = mesActual.getFullYear();
+  const mes = mesActual.getMonth();
+  const primerDia = new Date(anio, mes, 1);
+  const diasEnMes = new Date(anio, mes + 1, 0).getDate();
+  const offset = (primerDia.getDay() + 6) % 7;
+
+  const sesionesPorFecha = {};
+  SESIONES.forEach(s => { (sesionesPorFecha[s.fecha] = sesionesPorFecha[s.fecha] || []).push(s); });
+
+  let celdas = NOMBRES_DIA.map(d => `<div class="pb-1 text-center font-ui text-[10px] font-700 uppercase tracking-wider text-carbon/40">${d}</div>`).join('');
+  for(let i = 0; i < offset; i++) celdas += '<div></div>';
+
+  const hoy = new Date();
+  const esMismoMes = hoy.getFullYear() === anio && hoy.getMonth() === mes;
+  const fechaISOHoy = fechaISO(hoy);
+
+  for(let dia = 1; dia <= diasEnMes; dia++){
+    const fecha = `${anio}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+    const sesiones = (sesionesPorFecha[fecha] || []).sort((a,b) => (a.orden ?? 0) - (b.orden ?? 0));
+    const esHoy = esMismoMes && hoy.getDate() === dia;
+    const esPasado = fecha < fechaISOHoy;
+    const chips = sesiones.map(s => {
+      const info = esPasado ? ESTADO_INFO.agotado : (ESTADO_INFO[s.estado] || ESTADO_INFO.disponible);
+      const accion = (esPasado || s.estado === 'agotado') ? '' : `data-sesion="${s.id}"`;
+      const etiqueta = esPasado ? 'No disponible' : info.texto;
+      return `<button type="button" ${accion} class="chipSesion w-full truncate rounded-md px-1.5 py-1 text-left text-[10px] leading-tight text-crema transition ${info.clase}" title="${escapeHtml(s.titulo)} · ${etiqueta}">${escapeHtml(s.titulo)}</button>`;
+    }).join('');
+    celdas += `
+      <div class="min-h-[64px] rounded-lg border p-1.5 sm:min-h-[84px] ${esHoy ? 'border-flama bg-[#FDF1D8]' : 'border-vino/10 bg-white/90'}">
+        <span class="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-flama/25 px-1 font-ui text-[10px] font-700 text-vino">${dia}</span>
+        <div class="mt-1 space-y-1">${chips}</div>
+      </div>`;
+  }
+
+  document.getElementById('calendarioGrid').innerHTML = celdas;
+  document.querySelectorAll('.chipSesion[data-sesion]').forEach(btn => {
+    btn.addEventListener('click', () => registrarTallerWhatsApp(Number(btn.dataset.sesion)));
+  });
+}
+
+function registrarTallerWhatsApp(sesionId){
+  const sesion = SESIONES.find(s => s.id === sesionId);
+  const sede = SEDES.find(s => s.id === sedeId);
+  if(!sesion) return;
+  const fechaLegible = new Date(sesion.fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+  const mensaje = `Hola, quiero apartar mi lugar en el taller "${sesion.titulo}" del ${fechaLegible}${sede ? ` en la sede ${sede.nombre}` : ''}.`;
+  window.open(`https://wa.me/52${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`, '_blank');
+}
+
+cargarCalendario();
+</script>
+</body>
+</html>

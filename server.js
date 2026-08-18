@@ -111,43 +111,65 @@ app.use('/api/asistente', asistenteRoutes);
 app.use('/api', apiRoutes);
 app.use('/admin', adminRoutes);
 
-// Pagina propia por eBook (ej. /ebooks/velas-comestibles): se sirve la misma
-// plantilla para cualquier slug, pero se inyectan las etiquetas de meta/Open
-// Graph en el servidor (con los datos reales del producto) para que se vean
-// bien las vistas previas al compartir o anunciar el enlace.
+// Pagina propia por producto (ej. /ebooks/velas-comestibles, /anexos/costeo):
+// se sirve la misma plantilla para cualquier slug, pero se inyectan las
+// etiquetas de meta/Open Graph en el servidor (con los datos reales del
+// producto) para que se vean bien las vistas previas al compartir o anunciar.
 const escaparHtml = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-app.get('/ebooks/:slug', (req, res) => {
-  const producto = store.getProductBySlug(req.params.slug);
-  if (!producto || producto.categoria !== 'ebook') {
-    return res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
-  }
-  let html;
-  try {
-    html = fs.readFileSync(path.join(__dirname, 'public', 'producto.html'), 'utf8');
-  } catch (e) {
-    return res.status(500).send('No se pudo cargar la pagina del producto.');
-  }
-  const titulo = producto.titulo || 'eBook';
-  const descripcion = (producto.descripcionCorta || producto.subtitulo || 'eBook de Endulcora, Estudio Gastronómico.').slice(0, 300);
-  const imagen = producto.imagen
-    ? (producto.imagen.startsWith('http') ? producto.imagen : `${SITE_URL}${producto.imagen}`)
-    : `${SITE_URL}/og-image.png`;
-  const url = `${SITE_URL}/ebooks/${producto.slug}`;
-  html = html
-    .replace(/__TITULO__/g, escaparHtml(titulo))
-    .replace(/__DESCRIPCION__/g, escaparHtml(descripcion))
-    .replace(/__IMAGEN__/g, escaparHtml(imagen))
-    .replace(/__URL__/g, escaparHtml(url));
-  res.send(html);
+const CATEGORIA_POR_PREFIJO = { ebooks: 'ebook', anexos: 'anexo', recetarios: 'recetario' };
+
+function servirPaginaProducto(prefijo) {
+  return (req, res) => {
+    const producto = store.getProductBySlug(req.params.slug);
+    if (!producto || producto.categoria !== CATEGORIA_POR_PREFIJO[prefijo]) {
+      return res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+    }
+    let html;
+    try {
+      html = fs.readFileSync(path.join(__dirname, 'public', 'producto.html'), 'utf8');
+    } catch (e) {
+      return res.status(500).send('No se pudo cargar la pagina del producto.');
+    }
+    const titulo = producto.titulo || 'Producto';
+    const descripcion = (producto.descripcionCorta || producto.subtitulo || 'Producto de Endulcora, Estudio Gastronómico.').slice(0, 300);
+    const imagen = producto.imagen
+      ? (producto.imagen.startsWith('http') ? producto.imagen : `${SITE_URL}${producto.imagen}`)
+      : `${SITE_URL}/og-image.png`;
+    const url = `${SITE_URL}/${prefijo}/${producto.slug}`;
+    html = html
+      .replace(/__TITULO__/g, escaparHtml(titulo))
+      .replace(/__DESCRIPCION__/g, escaparHtml(descripcion))
+      .replace(/__IMAGEN__/g, escaparHtml(imagen))
+      .replace(/__URL__/g, escaparHtml(url));
+    res.send(html);
+  };
+}
+
+app.get('/ebooks/:slug', servirPaginaProducto('ebooks'));
+app.get('/anexos/:slug', servirPaginaProducto('anexos'));
+app.get('/recetarios/:slug', servirPaginaProducto('recetarios'));
+
+// Paginas de catalogo, propias y separadas de la pagina principal (para
+// anunciar sin que la gente tenga que bajar por todo el sitio).
+app.get(['/tienda', '/ebooks', '/anexos', '/recetarios'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'categoria.html'));
 });
 
-// Secciones del sitio con URL propia (ej. /calendario), ademas de las anclas
-// #calendario dentro de la pagina principal. Sirven la misma index.html; el
-// script del cliente hace scroll a la seccion segun la ruta.
+app.get('/calendario', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'calendario.html'));
+});
+
+app.get('/galeria', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'galeria.html'));
+});
+
+// Secciones que se quedan dentro de la pagina principal, pero con URL propia
+// ademas de las anclas #seccion. Sirven la misma index.html; el script del
+// cliente hace scroll a la seccion segun la ruta.
 app.get(
-  ['/tienda', '/ebooks', '/anexos', '/recetarios', '/clases-en-vivo', '/calculadora', '/calendario', '/galeria', '/resenas', '/anuncios'],
+  ['/clases-en-vivo', '/calculadora', '/resenas', '/anuncios'],
   (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
   }
