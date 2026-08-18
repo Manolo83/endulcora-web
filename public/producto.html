@@ -105,6 +105,12 @@ body { background: #FBF4E9; }
   </div>
 
   <div id="contenidoProducto" class="hidden">
+    <!-- Paquete completo (arriba, como opción destacada) -->
+    <div id="bloquePaquete" class="mt-8 hidden rounded-3xl bg-vino p-6 text-crema sm:p-8">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">¿Prefieres llevar todo junto?</p>
+      <div id="pPaquete" class="mt-4 space-y-3"></div>
+    </div>
+
     <!-- Hero del producto -->
     <div class="mt-8 grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-start">
       <div id="pImagen" class="reveal visible tarjeta-viva aspect-[4/3] w-full overflow-hidden rounded-3xl bg-gradient-to-br from-vino to-uva bg-cover bg-center ring-1 ring-vino/10"></div>
@@ -141,10 +147,10 @@ body { background: #FBF4E9; }
       <div id="pDescripcionLarga" class="mt-4 text-[15px] leading-relaxed text-carbon/75"></div>
     </div>
 
-    <!-- Productos relacionados (anexos, paquetes completos, etc.) -->
+    <!-- Anexos: opción de compra individual (abajo) -->
     <div id="bloqueRelacionados" class="mt-16 hidden">
-      <h2 class="font-titulo text-xl tracking-wide text-vino">También te puede interesar</h2>
-      <p class="mt-2 text-sm text-carbon/60">Anexos y paquetes que acompañan a este eBook. Puedes agregarlos al carrito junto con tu compra.</p>
+      <h2 class="font-titulo text-xl tracking-wide text-vino">También puedes comprar por separado</h2>
+      <p class="mt-2 text-sm text-carbon/60">Anexos que puedes agregar a tu compra de forma individual.</p>
       <div id="pRelacionados" class="mt-5 grid gap-4 sm:grid-cols-2"></div>
     </div>
 
@@ -329,20 +335,43 @@ async function cargarProducto(){
   }
 
   if(Array.isArray(p.productosRelacionadosInfo) && p.productosRelacionadosInfo.length){
-    document.getElementById('pRelacionados').innerHTML = p.productosRelacionadosInfo.map(r => `
-      <div class="tarjeta-viva flex items-center justify-between gap-3 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
-        <div class="min-w-0">
-          <a href="/${r.prefijo}/${r.slug}" class="font-titulo text-base text-vino hover:underline">${escapeHtml(r.titulo || '')}</a>
-          <p class="mt-1 truncate text-xs text-carbon/60">${escapeHtml(r.descripcionCorta || '')}</p>
-          <p class="mt-1.5 font-ui text-sm font-700 text-vino">$${formatoMonto(r.precio || '0')} MXN</p>
+    const paquetes = p.productosRelacionadosInfo.filter(r => r.categoria === 'ebook');
+    const individuales = p.productosRelacionadosInfo.filter(r => r.categoria !== 'ebook');
+
+    if(paquetes.length){
+      document.getElementById('pPaquete').innerHTML = paquetes.map(r => `
+        <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white/10 p-5 ring-1 ring-white/15">
+          <div class="min-w-0">
+            <a href="/${r.prefijo}/${r.slug}" class="font-titulo text-lg text-crema hover:underline">${escapeHtml(r.titulo || '')}</a>
+            <p class="mt-1 text-sm text-crema/70">${escapeHtml(r.descripcionCorta || '')}</p>
+            <p class="mt-1.5 font-ui text-base font-700 text-flama">$${formatoMonto(r.precio || '0')} MXN</p>
+          </div>
+          <button type="button" data-id="${r.id}" data-titulo="${escapeHtml(r.titulo || '')}" data-precio="${r.precio || '0'}"
+            class="btnAgregarRelacionado shrink-0 rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
+            Agregar paquete
+          </button>
         </div>
-        <button type="button" data-id="${r.id}" data-titulo="${escapeHtml(r.titulo || '')}" data-precio="${r.precio || '0'}"
-          class="btnAgregarRelacionado shrink-0 rounded-full boton-vivo border border-vino/25 px-4 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
-          Agregar
-        </button>
-      </div>
-    `).join('');
-    document.getElementById('bloqueRelacionados').classList.remove('hidden');
+      `).join('');
+      document.getElementById('bloquePaquete').classList.remove('hidden');
+    }
+
+    if(individuales.length){
+      document.getElementById('pRelacionados').innerHTML = individuales.map(r => `
+        <div class="tarjeta-viva flex items-center justify-between gap-3 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+          <div class="min-w-0">
+            <a href="/${r.prefijo}/${r.slug}" class="font-titulo text-base text-vino hover:underline">${escapeHtml(r.titulo || '')}</a>
+            <p class="mt-1 truncate text-xs text-carbon/60">${escapeHtml(r.descripcionCorta || '')}</p>
+            <p class="mt-1.5 font-ui text-sm font-700 text-vino">$${formatoMonto(r.precio || '0')} MXN</p>
+          </div>
+          <button type="button" data-id="${r.id}" data-titulo="${escapeHtml(r.titulo || '')}" data-precio="${r.precio || '0'}"
+            class="btnAgregarRelacionado shrink-0 rounded-full boton-vivo border border-vino/25 px-4 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+            Agregar
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('bloqueRelacionados').classList.remove('hidden');
+    }
+
     document.querySelectorAll('.btnAgregarRelacionado').forEach(btn => {
       btn.addEventListener('click', () => {
         agregarAlCarritoLocal({
