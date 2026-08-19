@@ -240,7 +240,40 @@ siempre desde aistudio.google.com.
 Si `GEMINI_API_KEY` no está configurada, la burbuja del asistente sigue
 apareciendo, pero responde que todavía no está activado.
 
-## 12. Notas técnicas y mejoras futuras (opcionales)
+## 12. Meta Pixel y API de Conversiones (medición para anuncios)
+
+El sitio tiene instalado el Meta Pixel (`849684379588689`) en todas sus
+páginas públicas (no en `/admin`), y manda automáticamente los eventos
+`PageView`, `ViewContent`, `AddToCart`, `InitiateCheckout` y `Purchase`
+mientras alguien navega y compra.
+
+Además, cuando el webhook de Mercado Pago confirma un pago aprobado, el
+servidor manda ese mismo `Purchase` **también** por la API de Conversiones
+de Meta — un respaldo para cuando el comprador tiene un bloqueador de
+anuncios o cierra la pestaña justo al terminar de pagar, casos en los que el
+`Purchase` del navegador nunca llega. Los dos usan el mismo identificador
+(`orden-<id del pedido>`) para que Meta los cuente como una sola venta, no
+dos.
+
+1. En [Meta Events Manager](https://business.facebook.com/events_manager2/list/dataset/849684379588689)
+   → **Configuración** → **API de conversiones** → **Generar token de
+   acceso**.
+2. En Railway, agrega `META_PIXEL_ID` (`849684379588689`) y
+   `META_CAPI_TOKEN` con ese token.
+
+Si falta cualquiera de las dos variables, el envío del lado del servidor se
+salta en silencio (con un aviso en los logs) — el sitio nunca deja de
+vender por un problema de medición; el Pixel del navegador sigue
+funcionando igual.
+
+Para probar sin ensuciar los datos reales: copia el "código de prueba" que
+aparece en Events Manager → **Probar eventos** → el acordeón de servidor, ponlo
+en Railway como `META_CAPI_TEST_CODE`, haz una compra (o vuelve a abrir el
+link `/gracias?orden=<id>&token=<token>` de un pedido ya aprobado) y
+confirma que el `Purchase` aparece marcado como recibido por **servidor**
+en esa pantalla. Borra `META_CAPI_TEST_CODE` de Railway cuando termines.
+
+## 13. Notas técnicas y mejoras futuras (opcionales)
 
 - El sitio usa Tailwind CSS por CDN para mantener el HTML original tal cual
   — funciona perfecto para el tráfico de un sitio personal/pequeño negocio.

@@ -1149,6 +1149,14 @@ function formatoMonto(n){
   return Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
+// Cookies que pone el pixel de Meta (_fbp) y los clics desde anuncios (_fbc);
+// se mandan al servidor al comprar para mejorar la calidad de coincidencia
+// del Purchase enviado por la API de Conversiones.
+function leerCookie(nombre){
+  const match = document.cookie.match(new RegExp(`(?:^|; )${nombre}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 function iniciarModalCarrito(){
   const form = document.getElementById('formCarrito');
   if(!form) return;
@@ -1179,6 +1187,8 @@ function iniciarModalCarrito(){
         body: JSON.stringify({
           items: CARRITO.map(i => ({ tipo: i.tipo, id: i.id, titulo: i.titulo, cantidad: i.cantidad })),
           email: document.getElementById('carritoEmail').value.trim(),
+          fbp: leerCookie('_fbp'),
+          fbc: leerCookie('_fbc'),
         }),
       });
       const data = await res.json();

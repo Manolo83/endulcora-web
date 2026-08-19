@@ -6,6 +6,7 @@ const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const store = require('../store');
 const { SITE_URL, UPLOAD_DIR } = require('../config');
 const { enviarCorreoConfirmacionCompra } = require('../email');
+const { enviarPurchaseCAPI } = require('../metaConversions');
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.post('/preference', async (req, res) => {
   const client = mpClient();
   if (!client) return res.status(503).json({ error: 'Los pagos todavia no estan configurados.' });
 
-  const { items: pedido, email } = req.body || {};
+  const { items: pedido, email, fbp, fbc } = req.body || {};
   if (!Array.isArray(pedido) || pedido.length === 0) {
     return res.status(400).json({ error: 'Tu carrito esta vacio.' });
   }
@@ -58,7 +59,15 @@ router.post('/preference', async (req, res) => {
   const userId = req.session && req.session.userId ? req.session.userId : null;
   const usuario = userId ? store.getUserById(userId) : null;
   const viewToken = crypto.randomBytes(24).toString('hex');
-  const order = store.addOrder({ items: resueltos, total, email: email || (usuario ? usuario.email : ''), userId, viewToken });
+  const order = store.addOrder({
+    items: resueltos,
+    total,
+    email: email || (usuario ? usuario.email : ''),
+    userId,
+    viewToken,
+    fbp: typeof fbp === 'string' ? fbp.slice(0, 200) : null,
+    fbc: typeof fbc === 'string' ? fbc.slice(0, 200) : null,
+  });
 
   try {
     const preference = new Preference(client);
@@ -132,6 +141,11 @@ router.post('/webhook', async (req, res) => {
       patch.descargaToken = crypto.randomBytes(24).toString('hex');
     }
     const actualizado = store.updateOrder(order.id, patch);
+
+    if (nuevoEstado === 'aprobado' && !order.capiPurchaseEnviado) {
+      await enviarPurchaseCAPI({ order: actualizado, siteUrl: SITE_URL });
+      store.updateOrder(order.id, { capiPurchaseEnviado: true });
+    }
 
     if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado && !order.correoEnviado && actualizado.email) {
       const itemsConArchivo = actualizado.items.map((item) => {
