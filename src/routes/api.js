@@ -74,17 +74,25 @@ router.get('/resenas', (req, res) => {
   res.json(store.getResenas(true));
 });
 
-router.get('/comunidad/mensajes', (req, res) => {
-  res.json(store.getMensajesComunidad());
+router.get('/comunidad/publicaciones', (req, res) => {
+  res.json(store.getPublicacionesComunidad());
 });
 
-router.post('/comunidad/mensajes', requireCliente, (req, res) => {
+router.get('/comunidad/publicaciones/:id/mensajes', (req, res) => {
+  const publicacion = store.getPublicacionComunidad(req.params.id);
+  if (!publicacion) return res.status(404).json({ error: 'Publicación no encontrada.' });
+  res.json(store.getMensajesComunidad(req.params.id));
+});
+
+router.post('/comunidad/publicaciones/:id/mensajes', requireCliente, (req, res) => {
+  const publicacion = store.getPublicacionComunidad(req.params.id);
+  if (!publicacion) return res.status(404).json({ error: 'Publicación no encontrada.' });
   const user = store.getUserById(req.session.userId);
   if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
   const texto = String((req.body && req.body.texto) || '').trim();
-  if (!texto) return res.status(400).json({ error: 'Escribe un mensaje.' });
-  if (texto.length > 1000) return res.status(400).json({ error: 'Tu mensaje es muy largo (máximo 1000 caracteres).' });
-  const item = store.addMensajeComunidad({ userId: user.id, nombre: user.nombre, texto });
+  if (!texto) return res.status(400).json({ error: 'Escribe un comentario.' });
+  if (texto.length > 1000) return res.status(400).json({ error: 'Tu comentario es muy largo (máximo 1000 caracteres).' });
+  const item = store.addMensajeComunidad({ publicacionId: publicacion.id, userId: user.id, nombre: user.nombre, texto });
   res.status(201).json(item);
 });
 

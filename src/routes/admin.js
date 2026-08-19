@@ -546,9 +546,41 @@ router.delete('/api/resenas/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- Comunidad (moderación) ----
-router.get('/api/comunidad/mensajes', requireAdmin, (req, res) => {
-  res.json(store.getMensajesComunidad());
+// ---- Comunidad: publicaciones del admin, con comentarios de clientes ----
+router.get('/api/comunidad/publicaciones', requireAdmin, (req, res) => {
+  res.json(store.getPublicacionesComunidad());
+});
+
+router.post('/api/comunidad/publicaciones', requireAdmin, (req, res) => {
+  const titulo = String((req.body && req.body.titulo) || '').trim();
+  const texto = String((req.body && req.body.texto) || '').trim();
+  if (!titulo) return res.status(400).json({ error: 'Ponle un título a la publicación.' });
+  const item = store.addPublicacionComunidad({ titulo, texto });
+  res.status(201).json(item);
+});
+
+router.post('/api/comunidad/publicaciones/:id/imagen', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
+  const publicacion = store.getPublicacionComunidad(req.params.id);
+  if (!publicacion) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    return res.status(404).json({ error: 'No encontrada' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
+  const url = `/uploads/${req.file.filename}`;
+  const anterior = publicacion.imagen;
+  const item = store.updatePublicacionComunidad(req.params.id, { imagen: url, imagenNombre: req.file.originalname });
+  borrarSiEsSubida(anterior);
+  res.status(201).json(item);
+});
+
+router.delete('/api/comunidad/publicaciones/:id', requireAdmin, (req, res) => {
+  const item = store.deletePublicacionComunidad(req.params.id);
+  if (item) borrarSiEsSubida(item.imagen);
+  res.json({ ok: true });
+});
+
+router.get('/api/comunidad/publicaciones/:id/mensajes', requireAdmin, (req, res) => {
+  res.json(store.getMensajesComunidad(req.params.id));
 });
 
 router.delete('/api/comunidad/mensajes/:id', requireAdmin, (req, res) => {

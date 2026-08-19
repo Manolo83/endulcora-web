@@ -524,9 +524,26 @@
 
     <!-- COMUNIDAD -->
     <section id="seccionComunidad" class="scroll-mt-32 mb-14">
-      <h2 class="font-titulo text-2xl tracking-wide text-vino">Comunidad (moderación)</h2>
-      <p class="mt-1 text-sm text-carbon/60">Muro donde tus clientes con cuenta se escriben entre ellos, en <a href="/comunidad" target="_blank" class="text-vino hover:underline">/comunidad</a>. Borra lo que no aplique.</p>
-      <div id="listaComunidadAdmin" class="mt-6 grid gap-3"></div>
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Comunidad</h2>
+      <p class="mt-1 text-sm text-carbon/60">Crea publicaciones (con foto opcional) para que tus clientes con cuenta las comenten, como una publicación de Facebook. Se ven en <a href="/comunidad" target="_blank" class="text-vino hover:underline">/comunidad</a>.</p>
+
+      <form id="formPublicacionComunidad" class="mt-6 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
+          <input id="publicacionTitulo" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Texto (opcional)</span>
+          <textarea id="publicacionTexto" rows="3" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Foto (opcional)</span>
+          <input id="publicacionImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="mt-1.5 w-full text-sm">
+        </label>
+        <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition sm:justify-self-start">Publicar</button>
+      </form>
+
+      <div id="listaComunidadAdmin" class="mt-6 grid gap-4"></div>
     </section>
 
     <!-- ANUNCIOS -->
@@ -1823,24 +1840,39 @@ async function cargarComunidadAdmin(){
   const cont = $('listaComunidadAdmin');
   cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
   try{
-    const items = (await api('/admin/api/comunidad/mensajes')).slice().reverse();
-    if(!items.length){
-      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay mensajes.</p>';
+    const publicaciones = await api('/admin/api/comunidad/publicaciones');
+    if(!publicaciones.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay publicaciones.</p>';
       return;
     }
-    cont.innerHTML = items.map(m => `
-      <article class="flex items-start justify-between gap-4 rounded-2xl bg-white p-4 ring-1 ring-vino/10">
-        <div class="min-w-0">
-          <p class="font-ui text-[11px] uppercase tracking-widest text-humo">${escapeHtml(m.nombre)} · ${new Date(m.createdAt).toLocaleString('es-MX')}</p>
-          <p class="mt-1 whitespace-pre-line text-sm text-carbon/80">${escapeHtml(m.texto)}</p>
+    cont.innerHTML = publicaciones.map(p => `
+      <article class="overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10" data-publicacion-id="${p.id}">
+        ${p.imagen ? `<img src="${p.imagen}" alt="" class="aspect-video w-full object-cover">` : ''}
+        <div class="p-4">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0">
+              <p class="font-ui text-[11px] uppercase tracking-widest text-humo">${new Date(p.createdAt).toLocaleString('es-MX')}</p>
+              <p class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(p.titulo || '')}</p>
+              ${p.texto ? `<p class="mt-1 whitespace-pre-line text-sm text-carbon/80">${escapeHtml(p.texto)}</p>` : ''}
+            </div>
+            <button data-id="${p.id}" class="btnBorrarPublicacionComunidad shrink-0 rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+          </div>
+          <div class="mt-3 border-t border-vino/10 pt-3">
+            <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-carbon/50">Comentarios</p>
+            <div class="comentariosPublicacionAdmin mt-2 space-y-2"></div>
+          </div>
         </div>
-        <button data-id="${m.id}" class="btnBorrarMensajeComunidad shrink-0 rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
       </article>
     `).join('');
-    cont.querySelectorAll('.btnBorrarMensajeComunidad').forEach(btn => {
+
+    cont.querySelectorAll('[data-publicacion-id]').forEach(art => {
+      const publicacionId = art.dataset.publicacionId;
+      cargarComentariosComunidadAdmin(publicacionId, art.querySelector('.comentariosPublicacionAdmin'));
+    });
+    cont.querySelectorAll('.btnBorrarPublicacionComunidad').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if(!confirm('¿Borrar este mensaje?')) return;
-        await api(`/admin/api/comunidad/mensajes/${btn.dataset.id}`, { method: 'DELETE' });
+        if(!confirm('¿Borrar esta publicación y todos sus comentarios?')) return;
+        await api(`/admin/api/comunidad/publicaciones/${btn.dataset.id}`, { method: 'DELETE' });
         cargarComunidadAdmin();
       });
     });
@@ -1848,6 +1880,59 @@ async function cargarComunidadAdmin(){
     cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
   }
 }
+
+async function cargarComentariosComunidadAdmin(publicacionId, cont){
+  try{
+    const items = await api(`/admin/api/comunidad/publicaciones/${publicacionId}/mensajes`);
+    if(!items.length){
+      cont.innerHTML = '<p class="text-xs text-carbon/40">Sin comentarios todavía.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(m => `
+      <div class="flex items-start justify-between gap-3 rounded-xl bg-crema/60 px-3 py-2">
+        <div class="min-w-0">
+          <p class="font-ui text-[10px] uppercase tracking-widest text-humo">${escapeHtml(m.nombre)} · ${new Date(m.createdAt).toLocaleString('es-MX')}</p>
+          <p class="mt-0.5 whitespace-pre-line text-sm text-carbon/80">${escapeHtml(m.texto)}</p>
+        </div>
+        <button data-id="${m.id}" class="btnBorrarMensajeComunidad shrink-0 rounded-full border border-red-200 px-2.5 py-1 font-ui text-[10px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+      </div>
+    `).join('');
+    cont.querySelectorAll('.btnBorrarMensajeComunidad').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar este comentario?')) return;
+        await api(`/admin/api/comunidad/mensajes/${btn.dataset.id}`, { method: 'DELETE' });
+        cargarComentariosComunidadAdmin(publicacionId, cont);
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-xs text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('formPublicacionComunidad').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try{
+    const creada = await api('/admin/api/comunidad/publicaciones', {
+      method: 'POST',
+      body: JSON.stringify({
+        titulo: $('publicacionTitulo').value.trim(),
+        texto: $('publicacionTexto').value.trim(),
+      }),
+    });
+    const file = $('publicacionImagenInput').files[0];
+    if(file){
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`/admin/api/comunidad/publicaciones/${creada.id}/imagen`, { method: 'POST', body: fd });
+      if(!res.ok){ const d = await res.json().catch(()=>({})); throw new Error(d.error || 'No se pudo subir la foto'); }
+    }
+    $('formPublicacionComunidad').reset();
+    toast('Publicación creada');
+    cargarComunidadAdmin();
+  }catch(err){
+    toast(err.message);
+  }
+});
 
 /* ---------- Clientes: restablecer contraseña ---------- */
 $('formBuscarCliente').addEventListener('submit', async (e) => {

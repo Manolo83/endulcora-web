@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Comunidad · Endulcora</title>
-<meta name="description" content="El muro de la comunidad Endulcora: platica con otros alumnos y con el equipo de Endulcora.">
+<meta name="description" content="Publicaciones de Endulcora: comenta y platica con el equipo y otros clientes.">
 <meta name="robots" content="noindex, follow">
 <link rel="canonical" href="https://www.endulcora.com/comunidad">
 <meta name="theme-color" content="#1B0720">
@@ -78,13 +78,12 @@ body { background: #FBF4E9; }
 </header>
 
 <main class="mx-auto max-w-3xl px-5 py-10">
-  <p class="font-titulo text-[11px] tracking-[.3em] text-flama">MURO DE LA COMUNIDAD</p>
-  <h1 class="mt-2 font-display text-3xl text-vino sm:text-4xl">Habla con otros alumnos de Endulcora</h1>
-  <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-carbon/70">Comparte tus dudas, tus resultados o simplemente saluda. Solo clientes con cuenta pueden escribir; cualquiera puede leer.</p>
-
-  <div id="mensajesComunidad" class="mt-8 flex flex-col gap-3"></div>
+  <p class="font-titulo text-[11px] tracking-[.3em] text-flama">COMUNIDAD</p>
+  <h1 class="mt-2 font-display text-3xl text-vino sm:text-4xl">Publicaciones de Endulcora</h1>
+  <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-carbon/70">Comenta las publicaciones del equipo, comparte tus dudas o tus resultados. Solo clientes con cuenta pueden comentar; cualquiera puede leer.</p>
 
   <div id="bloqueInvitado" class="mt-8 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+    <p class="mb-4 text-sm text-carbon/70">Inicia sesión o crea tu cuenta para poder comentar.</p>
     <div class="flex gap-2 border-b border-vino/10">
       <button type="button" id="tabLogin" class="border-b-2 border-vino px-1 pb-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino">Iniciar sesión</button>
       <button type="button" id="tabRegistro" class="border-b-2 border-transparent px-1 pb-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon/50">Crear cuenta</button>
@@ -110,16 +109,12 @@ body { background: #FBF4E9; }
     </form>
   </div>
 
-  <form id="formMensajeComunidad" class="mt-8 hidden rounded-3xl bg-white p-5 ring-1 ring-vino/10">
-    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/50">Escribiendo como <span id="nombreUsuarioComunidad" class="text-vino"></span></p>
-    <textarea id="textoMensajeComunidad" rows="3" required maxlength="1000" placeholder="Escribe algo para la comunidad…" class="mt-2 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm"></textarea>
-    <div class="mt-3 flex items-center justify-between">
-      <button type="button" id="btnCerrarSesionComunidad" class="font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cerrar sesión</button>
-      <button type="submit" class="inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
-        <span id="publicarSpinner" class="spinner hidden"></span> Publicar
-      </button>
-    </div>
-  </form>
+  <div id="bloqueSesion" class="mt-8 hidden items-center justify-between rounded-2xl bg-white px-5 py-3 ring-1 ring-vino/10">
+    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/50">Sesión iniciada como <span id="nombreUsuarioComunidad" class="text-vino"></span></p>
+    <button type="button" id="btnCerrarSesionComunidad" class="font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cerrar sesión</button>
+  </div>
+
+  <div id="publicacionesComunidad" class="mt-8 flex flex-col gap-6"></div>
 </main>
 
 <footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
@@ -145,41 +140,106 @@ function formatoFecha(iso){
   return new Date(iso).toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
-function pintarMensajes(items){
-  const cont = document.getElementById('mensajesComunidad');
+function tarjetaPublicacion(p){
+  const imagenHtml = p.imagen ? `<img src="${p.imagen}" alt="${escapeHtml(p.titulo || '')}" loading="lazy" class="aspect-video w-full object-cover">` : '';
+  return `
+    <article class="overflow-hidden rounded-3xl bg-white ring-1 ring-vino/10" data-publicacion-id="${p.id}">
+      ${imagenHtml}
+      <div class="p-5">
+        <p class="font-ui text-[11px] uppercase tracking-widest text-humo">${formatoFecha(p.createdAt)}</p>
+        <h2 class="mt-1 font-titulo text-xl text-vino">${escapeHtml(p.titulo || '')}</h2>
+        ${p.texto ? `<p class="mt-2 whitespace-pre-line text-[15px] text-carbon/80">${escapeHtml(p.texto)}</p>` : ''}
+
+        <div class="mt-5 border-t border-vino/10 pt-4">
+          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Comentarios</p>
+          <div class="comentariosPublicacion mt-3 flex flex-col gap-2.5"></div>
+          <form class="formComentario mt-3 hidden gap-2 sm:flex">
+            <input type="text" maxlength="1000" placeholder="Escribe un comentario…" class="campoComentario w-full rounded-full border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+            <button type="submit" class="shrink-0 rounded-full boton-vivo bg-vino px-5 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Comentar</button>
+          </form>
+        </div>
+      </div>
+    </article>`;
+}
+
+function pintarComentarios(cont, items){
   if(!items.length){
-    cont.innerHTML = '<p class="rounded-2xl bg-white p-6 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Todavía no hay mensajes. ¡Sé el primero en escribir!</p>';
+    cont.innerHTML = '<p class="text-xs text-carbon/40">Todavía no hay comentarios.</p>';
     return;
   }
   cont.innerHTML = items.map(m => `
-    <div class="rounded-2xl bg-white p-4 ring-1 ring-vino/10">
-      <p class="font-ui text-[11px] uppercase tracking-widest text-humo">${escapeHtml(m.nombre)} · ${formatoFecha(m.createdAt)}</p>
-      <p class="mt-1 whitespace-pre-line text-[15px] text-carbon/85">${escapeHtml(m.texto)}</p>
+    <div class="rounded-xl bg-crema/60 px-4 py-2.5">
+      <p class="font-ui text-[10px] uppercase tracking-widest text-humo">${escapeHtml(m.nombre)} · ${formatoFecha(m.createdAt)}</p>
+      <p class="mt-0.5 whitespace-pre-line text-sm text-carbon/85">${escapeHtml(m.texto)}</p>
     </div>
   `).join('');
 }
 
-async function cargarMensajes(){
+async function cargarComentarios(publicacionId, cont){
   try{
-    const res = await fetch('/api/comunidad/mensajes');
+    const res = await fetch(`/api/comunidad/publicaciones/${publicacionId}/mensajes`);
     const items = await res.json();
-    pintarMensajes(items);
+    pintarComentarios(cont, items);
   }catch(e){
-    pintarMensajes([]);
+    cont.innerHTML = '<p class="text-xs text-carbon/40">No se pudieron cargar los comentarios.</p>';
+  }
+}
+
+async function cargarPublicaciones(){
+  const cont = document.getElementById('publicacionesComunidad');
+  try{
+    const res = await fetch('/api/comunidad/publicaciones');
+    const items = await res.json();
+    if(!items.length){
+      cont.innerHTML = '<p class="rounded-2xl bg-white p-6 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Todavía no hay publicaciones.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(tarjetaPublicacion).join('');
+    cont.querySelectorAll('[data-publicacion-id]').forEach(art => {
+      const publicacionId = art.dataset.publicacionId;
+      const comentariosCont = art.querySelector('.comentariosPublicacion');
+      cargarComentarios(publicacionId, comentariosCont);
+
+      const form = art.querySelector('.formComentario');
+      form.classList.toggle('hidden', !SESION.isLoggedIn);
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const campo = form.querySelector('.campoComentario');
+        const texto = campo.value.trim();
+        if(!texto) return;
+        try{
+          const res = await fetch(`/api/comunidad/publicaciones/${publicacionId}/mensajes`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texto }),
+          });
+          const data = await res.json();
+          if(!res.ok) throw new Error(data.error || 'No se pudo publicar tu comentario');
+          campo.value = '';
+          await cargarComentarios(publicacionId, comentariosCont);
+        }catch(err){
+          alert(err.message);
+        }
+      });
+    });
+  }catch(e){
+    cont.innerHTML = '<p class="rounded-2xl bg-white p-6 text-center text-sm text-red-600 ring-1 ring-vino/10">No se pudieron cargar las publicaciones.</p>';
   }
 }
 
 function actualizarVistaSesion(){
   const bloqueInvitado = document.getElementById('bloqueInvitado');
-  const formMensaje = document.getElementById('formMensajeComunidad');
+  const bloqueSesion = document.getElementById('bloqueSesion');
   if(SESION.isLoggedIn){
     bloqueInvitado.classList.add('hidden');
-    formMensaje.classList.remove('hidden');
+    bloqueSesion.classList.remove('hidden');
+    bloqueSesion.classList.add('flex');
     document.getElementById('nombreUsuarioComunidad').textContent = SESION.user.nombre;
   }else{
     bloqueInvitado.classList.remove('hidden');
-    formMensaje.classList.add('hidden');
+    bloqueSesion.classList.add('hidden');
+    bloqueSesion.classList.remove('flex');
   }
+  document.querySelectorAll('.formComentario').forEach(f => f.classList.toggle('hidden', !SESION.isLoggedIn));
 }
 
 async function cargarSesion(){
@@ -269,32 +329,8 @@ document.getElementById('btnCerrarSesionComunidad').addEventListener('click', as
   actualizarVistaSesion();
 });
 
-document.getElementById('formMensajeComunidad').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const campo = document.getElementById('textoMensajeComunidad');
-  const spinner = document.getElementById('publicarSpinner');
-  const texto = campo.value.trim();
-  if(!texto) return;
-  spinner.classList.remove('hidden');
-  try{
-    const res = await fetch('/api/comunidad/mensajes', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ texto }),
-    });
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error || 'No se pudo publicar tu mensaje');
-    campo.value = '';
-    await cargarMensajes();
-  }catch(err){
-    alert(err.message);
-  }finally{
-    spinner.classList.add('hidden');
-  }
-});
-
-cargarMensajes();
+cargarPublicaciones();
 cargarSesion();
-setInterval(cargarMensajes, 10000);
 </script>
 </body>
 </html>

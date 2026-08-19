@@ -102,7 +102,7 @@ const comunidadLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Escribiste muchos mensajes muy rápido. Espera unos minutos.' },
 });
-app.use('/api/comunidad/mensajes', (req, res, next) => (req.method === 'POST' ? comunidadLimiter(req, res, next) : next()));
+app.use('/api/comunidad/publicaciones', (req, res, next) => (req.method === 'POST' && req.path.endsWith('/mensajes') ? comunidadLimiter(req, res, next) : next()));
 
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
 app.use('/api/checkout', checkoutRoutes);

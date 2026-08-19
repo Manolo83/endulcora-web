@@ -162,6 +162,7 @@ function datosPorDefecto() {
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
     sesionesTaller: [],
     resenas: [],
+    publicacionesComunidad: [],
     mensajesComunidad: [],
   };
 }
@@ -210,6 +211,22 @@ async function init() {
         changed = true;
       }
     });
+    // Migra el antiguo muro unico de comunidad (sin publicacion) a una
+    // publicacion "General" para no perder los mensajes ya escritos.
+    const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
+    if (mensajesSinPublicacion.length) {
+      const publicacionGeneral = {
+        id: nextId(data.publicacionesComunidad),
+        titulo: 'General',
+        texto: 'Publicación general de la comunidad.',
+        imagen: '',
+        imagenNombre: null,
+        createdAt: new Date().toISOString(),
+      };
+      data.publicacionesComunidad.push(publicacionGeneral);
+      mensajesSinPublicacion.forEach((m) => { m.publicacionId = publicacionGeneral.id; });
+      changed = true;
+    }
     if (changed) await persistirAhora();
   } else {
     data = datosPorDefecto();
@@ -728,15 +745,59 @@ module.exports = {
     save(data);
   },
 
-  // ---- Comunidad: muro de mensajes entre clientes con cuenta ----
-  getMensajesComunidad() {
+  // ---- Comunidad: publicaciones del admin, con comentarios de clientes ----
+  getPublicacionesComunidad() {
     const data = load();
-    return [...data.mensajesComunidad].sort((a, b) => a.id - b.id);
+    return [...data.publicacionesComunidad].sort((a, b) => b.id - a.id);
   },
-  addMensajeComunidad({ userId, nombre, texto }) {
+  getPublicacionComunidad(id) {
+    return load().publicacionesComunidad.find((p) => p.id === Number(id)) || null;
+  },
+  addPublicacionComunidad({ titulo, texto }) {
+    const data = load();
+    const item = {
+      id: nextId(data.publicacionesComunidad),
+      titulo: String(titulo || '').trim(),
+      texto: String(texto || '').trim(),
+      imagen: '',
+      imagenNombre: null,
+      createdAt: new Date().toISOString(),
+    };
+    data.publicacionesComunidad.push(item);
+    save(data);
+    return item;
+  },
+  updatePublicacionComunidad(id, patch) {
+    const data = load();
+    const item = data.publicacionesComunidad.find((p) => p.id === Number(id));
+    if (!item) return null;
+    if (typeof patch.titulo === 'string') item.titulo = patch.titulo;
+    if (typeof patch.texto === 'string') item.texto = patch.texto;
+    if (typeof patch.imagen === 'string') item.imagen = patch.imagen;
+    if (typeof patch.imagenNombre === 'string' || patch.imagenNombre === null) item.imagenNombre = patch.imagenNombre;
+    save(data);
+    return item;
+  },
+  deletePublicacionComunidad(id) {
+    const data = load();
+    const item = data.publicacionesComunidad.find((p) => p.id === Number(id));
+    data.publicacionesComunidad = data.publicacionesComunidad.filter((p) => p.id !== Number(id));
+    data.mensajesComunidad = data.mensajesComunidad.filter((m) => m.publicacionId !== Number(id));
+    save(data);
+    return item || null;
+  },
+
+  getMensajesComunidad(publicacionId) {
+    const data = load();
+    let items = [...data.mensajesComunidad];
+    if (publicacionId) items = items.filter((m) => m.publicacionId === Number(publicacionId));
+    return items.sort((a, b) => a.id - b.id);
+  },
+  addMensajeComunidad({ publicacionId, userId, nombre, texto }) {
     const data = load();
     const item = {
       id: nextId(data.mensajesComunidad),
+      publicacionId: Number(publicacionId),
       userId,
       nombre: String(nombre || '').trim(),
       texto: String(texto || '').trim(),
