@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const store = require('../store');
 const { UPLOAD_DIR } = require('../config');
 const { requireCliente } = require('./auth');
@@ -109,13 +110,14 @@ router.get('/pedidos/:orderId/estado', (req, res) => {
     moneda: 'MXN',
     items: (order.items || []).map((item, i) => {
       const producto = item.tipo === 'producto' ? store.getProduct(item.itemId) : null;
+      const archivoExiste = !!(producto && producto.archivo && fs.existsSync(path.join(UPLOAD_DIR, path.basename(producto.archivo))));
       return {
         index: i,
         itemId: item.itemId,
         titulo: item.titulo,
         cantidad: item.cantidad,
         precio: item.precio,
-        descargaDisponible: aprobado && !!(producto && producto.archivo),
+        descargaDisponible: aprobado && archivoExiste,
       };
     }),
     descargaToken: aprobado ? order.descargaToken : null,
@@ -136,11 +138,21 @@ router.get('/pedidos/:orderId/descarga/:itemIndex', (req, res) => {
   }
   const producto = store.getProduct(item.itemId);
   if (!producto || !producto.archivo) {
-    return res.status(404).send('Este artículo todavía no tiene un archivo disponible. Escríbenos por WhatsApp.');
+    return res.status(404).send('Este artículo todavía no tiene un archivo disponible. Escríbenos por WhatsApp al 5665271901.');
   }
   const filename = path.basename(producto.archivo);
+  const rutaCompleta = path.join(UPLOAD_DIR, filename);
+  if (!fs.existsSync(rutaCompleta)) {
+    console.error(`[descarga] Falta el archivo de "${producto.titulo}" (producto ${producto.id}) en ${rutaCompleta}. Hay que volver a subirlo en /admin.`);
+    return res.status(404).send('No pudimos encontrar tu archivo en este momento. Escríbenos por WhatsApp al 5665271901 y te lo mandamos directo.');
+  }
   const nombreDescarga = producto.archivoNombre || `${producto.titulo || 'archivo'}${path.extname(filename)}`;
-  res.download(path.join(UPLOAD_DIR, filename), nombreDescarga);
+  res.download(rutaCompleta, nombreDescarga, (err) => {
+    if (err && !res.headersSent) {
+      console.error(`[descarga] Error al enviar el archivo de "${producto.titulo}":`, err.message);
+      res.status(500).send('Ocurrió un error al preparar tu descarga. Escríbenos por WhatsApp al 5665271901.');
+    }
+  });
 });
 
 module.exports = router;

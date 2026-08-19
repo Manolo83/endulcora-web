@@ -1,8 +1,10 @@
 const express = require('express');
 const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs');
 const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const store = require('../store');
-const { SITE_URL } = require('../config');
+const { SITE_URL, UPLOAD_DIR } = require('../config');
 const { enviarCorreoConfirmacionCompra } = require('../email');
 
 const router = express.Router();
@@ -135,7 +137,8 @@ router.post('/webhook', async (req, res) => {
       const itemsConArchivo = actualizado.items.map((item) => {
         if (item.tipo !== 'producto') return item;
         const producto = store.getProduct(item.itemId);
-        return { ...item, archivoDisponible: !!(producto && producto.archivo) };
+        const archivoExiste = !!(producto && producto.archivo && fs.existsSync(path.join(UPLOAD_DIR, path.basename(producto.archivo))));
+        return { ...item, archivoDisponible: archivoExiste };
       });
       const contenido = store.getContent();
       enviarCorreoConfirmacionCompra({
