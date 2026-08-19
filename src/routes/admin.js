@@ -295,6 +295,27 @@ router.get('/api/products', requireAdmin, (req, res) => {
   res.json(store.getProducts());
 });
 
+// Revisa que el archivo que se entrega al comprar cada producto exista de
+// verdad en el volumen (y no solo que el producto tenga algo guardado en el
+// campo "archivo") — util para detectar archivos perdidos de antes de que se
+// corrigiera DATA_DIR, sin tener que volver a subir todo por si acaso.
+router.get('/api/products/verificar-archivos', requireAdmin, (req, res) => {
+  const resultado = store.getProducts().map((p) => {
+    if (!p.archivo) {
+      return { id: p.id, titulo: p.titulo, categoria: p.categoria, estado: 'sin_archivo' };
+    }
+    const existe = fs.existsSync(path.join(UPLOAD_DIR, path.basename(p.archivo)));
+    return {
+      id: p.id,
+      titulo: p.titulo,
+      categoria: p.categoria,
+      archivoNombre: p.archivoNombre,
+      estado: existe ? 'ok' : 'faltante',
+    };
+  });
+  res.json(resultado);
+});
+
 function sanearProductosRelacionados(body, excludeId) {
   let saneado = body;
   if (Array.isArray(body.productosRelacionados)) {

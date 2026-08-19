@@ -261,6 +261,17 @@
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Productos de la tienda</h2>
       <p class="mt-1 text-sm text-carbon/60">Agrega, edita o borra los productos que se muestran en la sección "Tienda". Puedes subir una foto para cada uno; si no subes nada, se usa un fondo morado de marca.</p>
 
+      <div class="mt-4 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Verificar archivos</h3>
+            <p class="mt-1 text-xs text-carbon/50">Revisa que el archivo que se entrega al comprar cada producto realmente exista en el servidor (por si alguno se perdió antes de una corrección técnica).</p>
+          </div>
+          <button type="button" id="btnVerificarArchivos" class="shrink-0 rounded-full border border-vino/20 px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Verificar ahora</button>
+        </div>
+        <div id="resultadoVerificarArchivos" class="mt-4"></div>
+      </div>
+
       <form id="formProducto" class="mt-6 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10 sm:grid-cols-2">
         <input type="hidden" id="productoEditandoId" value="">
         <p id="productoModoTexto" class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado sm:col-span-2">Nuevo producto</p>
@@ -1332,6 +1343,43 @@ async function cargarProductosAdmin(){
 }
 
 $('btnCancelarProducto').addEventListener('click', resetFormProducto);
+
+$('btnVerificarArchivos').addEventListener('click', async () => {
+  const btn = $('btnVerificarArchivos');
+  const cont = $('resultadoVerificarArchivos');
+  btn.disabled = true;
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Revisando…</p>';
+  try{
+    const items = await api('/admin/api/products/verificar-archivos');
+    const faltantes = items.filter(i => i.estado === 'faltante');
+    const sinArchivo = items.filter(i => i.estado === 'sin_archivo');
+    const ok = items.filter(i => i.estado === 'ok');
+    let html = '';
+    if(faltantes.length){
+      html += `<div class="rounded-xl bg-red-50 p-4">
+        <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-red-700">Archivo perdido, hay que volver a subirlo (${faltantes.length})</p>
+        <ul class="mt-2 space-y-1 text-sm text-red-700">${faltantes.map(i => `<li>• ${escapeHtml(i.titulo || 'Sin título')} (${escapeHtml(ETIQUETA_CATEGORIA[i.categoria] || i.categoria)})</li>`).join('')}</ul>
+      </div>`;
+    }
+    if(sinArchivo.length){
+      html += `<div class="mt-3 rounded-xl bg-crema/60 p-4">
+        <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-carbon/50">Todavía sin archivo cargado (${sinArchivo.length})</p>
+        <ul class="mt-2 space-y-1 text-sm text-carbon/60">${sinArchivo.map(i => `<li>• ${escapeHtml(i.titulo || 'Sin título')} (${escapeHtml(ETIQUETA_CATEGORIA[i.categoria] || i.categoria)})</li>`).join('')}</ul>
+      </div>`;
+    }
+    if(ok.length){
+      html += `<p class="mt-3 text-sm text-green-700">✓ ${ok.length} producto(s) con su archivo correcto en el servidor.</p>`;
+    }
+    if(!faltantes.length && !sinArchivo.length && !ok.length){
+      html = '<p class="text-sm text-carbon/50">Todavía no tienes productos.</p>';
+    }
+    cont.innerHTML = html;
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }finally{
+    btn.disabled = false;
+  }
+});
 
 $('formProducto').addEventListener('submit', async (e) => {
   e.preventDefault();
