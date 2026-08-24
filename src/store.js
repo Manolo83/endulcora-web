@@ -211,6 +211,53 @@ async function init() {
         changed = true;
       }
     });
+    // Divide "Velas Comestibles - Paquete completo" en sus componentes
+    // vendibles por separado (eBook, Anexo Excel, App), con los precios
+    // que definio el negocio: eBook $99, Anexo $50, App $50, paquete $149.
+    // Solo corre una vez (se detecta porque el paquete todavia no tiene
+    // productos relacionados); si ya se corrio, o si el producto no existe
+    // o ya fue editado a mano, no hace nada.
+    const paqueteVelas = (data.products || []).find(
+      (p) => p.esPaquete && (p.slug === 'velas-comestibles-paquete-completo' || /velas comestibles/i.test(p.titulo || ''))
+    );
+    if (paqueteVelas && !(paqueteVelas.productosRelacionados || []).length) {
+      const nuevosComponentes = [
+        { titulo: 'Velas Comestibles (eBook)', precio: '99', boton: 'Añadir eBook al carrito', categoria: 'ebook' },
+        { titulo: 'Anexo Excel · Velas Comestibles', precio: '50', boton: 'Añadir anexo Excel al carrito', categoria: 'anexo' },
+        { titulo: 'App · Velas Comestibles', precio: '50', boton: 'Añadir app al carrito', categoria: 'ebook' },
+      ].map((base) => {
+        const item = {
+          id: nextId(data.products),
+          orden: data.products.length,
+          categoria: base.categoria,
+          etiqueta: '',
+          destacado: '',
+          titulo: base.titulo,
+          subtitulo: '',
+          descripcionCorta: '',
+          descripcionLarga: '',
+          bullets: [],
+          precio: base.precio,
+          precioAnterior: '',
+          boton: base.boton,
+          imagen: '',
+          galeria: [],
+          archivo: '',
+          archivoNombre: '',
+          slug: '',
+          productosRelacionados: [],
+          esPaquete: false,
+        };
+        item.slug = slugUnico(item.titulo, data.products, item.id);
+        data.products.push(item);
+        return item;
+      });
+      paqueteVelas.titulo = 'Velas Comestibles';
+      paqueteVelas.precio = '149';
+      paqueteVelas.boton = 'Comprar paquete completo';
+      paqueteVelas.productosRelacionados = nuevosComponentes.map((c) => c.id);
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
