@@ -342,6 +342,22 @@ async function init() {
       paquete.archivoNombre = familia.archivos.paquete;
       changed = true;
     }
+    // Corrige el enlace del "paquete completo" en la pagina del eBook de
+    // Velas Comestibles: por un producto duplicado que ya existia de antes
+    // (mismo nombre, distinto id), la migracion original engancho el
+    // paquete equivocado (uno que solo entrega el PDF del eBook) en vez
+    // del paquete real (el que entrega los 3 archivos en un ZIP).
+    if (!data._fixVelasComestiblesPaqueteLink) {
+      const ebookVelas = data.products.find((p) => p.slug === 'velas-comestibles');
+      const paqueteReal = data.products.find((p) => p.slug === 'velas-comestibles-paquete-completo');
+      if (ebookVelas && paqueteReal) {
+        const limpios = ebookVelas.productosRelacionados.filter((id) => id !== 1);
+        if (!limpios.includes(paqueteReal.id)) limpios.push(paqueteReal.id);
+        ebookVelas.productosRelacionados = limpios;
+        data._fixVelasComestiblesPaqueteLink = true;
+        changed = true;
+      }
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
