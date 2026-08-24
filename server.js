@@ -105,6 +105,13 @@ const comunidadLimiter = rateLimit({
 app.use('/api/comunidad/publicaciones', (req, res, next) => (req.method === 'POST' && req.path.endsWith('/mensajes') ? comunidadLimiter(req, res, next) : next()));
 
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
+// El contenido de /api cambia en cualquier momento desde /admin (precios,
+// productos, disponibilidad...), asi que nunca debe quedar en cache de
+// navegador, proxy o CDN intermedio.
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/asistente', asistenteRoutes);
