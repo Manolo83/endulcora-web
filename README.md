@@ -242,7 +242,7 @@ apareciendo, pero responde que todavía no está activado.
 
 ## 12. Meta Pixel y API de Conversiones (medición para anuncios)
 
-El sitio tiene instalado el Meta Pixel (`849684379588689`) en todas sus
+El sitio tiene instalado el Meta Pixel (`1302735011542499`) en todas sus
 páginas públicas (no en `/admin`), y manda automáticamente los eventos
 `PageView`, `ViewContent`, `AddToCart`, `InitiateCheckout` y `Purchase`
 mientras alguien navega y compra.
@@ -255,10 +255,10 @@ anuncios o cierra la pestaña justo al terminar de pagar, casos en los que el
 (`orden-<id del pedido>`) para que Meta los cuente como una sola venta, no
 dos.
 
-1. En [Meta Events Manager](https://business.facebook.com/events_manager2/list/dataset/849684379588689)
+1. En [Meta Events Manager](https://business.facebook.com/events_manager2/list/dataset/1302735011542499)
    → **Configuración** → **API de conversiones** → **Generar token de
    acceso**.
-2. En Railway, agrega `META_PIXEL_ID` (`849684379588689`) y
+2. En Railway, agrega `META_PIXEL_ID` (`1302735011542499`) y
    `META_CAPI_TOKEN` con ese token.
 
 Si falta cualquiera de las dos variables, el envío del lado del servidor se
