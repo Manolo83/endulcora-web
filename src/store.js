@@ -214,13 +214,12 @@ async function init() {
     // Divide "Velas Comestibles - Paquete completo" en sus componentes
     // vendibles por separado (eBook, Anexo Excel, App), con los precios
     // que definio el negocio: eBook $99, Anexo $50, App $50, paquete $149.
-    // Solo corre una vez (se detecta porque el paquete todavia no tiene
-    // productos relacionados); si ya se corrio, o si el producto no existe
-    // o ya fue editado a mano, no hace nada.
+    // Solo corre una vez (bandera dedicada, no se infiere del estado de
+    // productosRelacionados porque ese campo podia tener datos viejos).
     const paqueteVelas = (data.products || []).find(
       (p) => p.slug === 'velas-comestibles-paquete-completo' || /velas comestibles/i.test(p.titulo || '')
     );
-    if (paqueteVelas && !(paqueteVelas.productosRelacionados || []).length) {
+    if (paqueteVelas && !data._migVelasComestibles) {
       const nuevosComponentes = [
         { titulo: 'Velas Comestibles (eBook)', precio: '99', boton: 'Añadir eBook al carrito', categoria: 'ebook' },
         { titulo: 'Anexo Excel · Velas Comestibles', precio: '50', boton: 'Añadir anexo Excel al carrito', categoria: 'anexo' },
@@ -257,6 +256,7 @@ async function init() {
       paqueteVelas.boton = 'Comprar paquete completo';
       paqueteVelas.esPaquete = true;
       paqueteVelas.productosRelacionados = nuevosComponentes.map((c) => c.id);
+      data._migVelasComestibles = true;
       changed = true;
     }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
