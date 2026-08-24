@@ -167,7 +167,8 @@ actualizarBadgeCarrito();
 
 function tarjetaProducto(p){
   const imagenEstilo = p.imagen ? `background-image:url('${p.imagen}');background-size:cover;background-position:center;` : '';
-  const anteriorPrecio = p.precioAnterior ? `<span class="pb-1 text-sm text-humo line-through">$${formatoMonto(p.precioAnterior)}</span>` : '';
+  const anteriorNum = parseFloat(String(p.precioAnterior || '').replace(/,/g, ''));
+  const anteriorPrecio = Number.isFinite(anteriorNum) && anteriorNum > 0 ? `<span class="pb-1 text-sm text-humo line-through">$${formatoMonto(anteriorNum)}</span>` : '';
   const destacado = p.destacado ? `<span class="absolute right-5 top-5 rounded-full bg-flama px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-widest text-carbon">${escapeHtml(p.destacado)}</span>` : '';
   const subtitulo = p.subtitulo ? `<p class="relative mt-2 font-firma text-xl text-flama">${escapeHtml(p.subtitulo)}</p>` : '';
   const prefijo = PREFIJO_POR_CATEGORIA[p.categoria] || 'tienda';

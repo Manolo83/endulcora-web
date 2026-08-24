@@ -360,9 +360,10 @@ async function cargarProducto(){
   bullets.innerHTML = (p.bullets || []).map(b => `<li class="flex gap-2.5"><span class="text-flama">▸</span> ${escapeHtml(b)}</li>`).join('');
 
   document.getElementById('pPrecio').textContent = `$${formatoMonto(p.precio || '0')}`;
-  if(p.precioAnterior){
+  const anteriorNum = parseFloat(String(p.precioAnterior || '').replace(/,/g, ''));
+  if(Number.isFinite(anteriorNum) && anteriorNum > 0){
     const el = document.getElementById('pPrecioAnterior');
-    el.textContent = `$${formatoMonto(p.precioAnterior)}`;
+    el.textContent = `$${formatoMonto(anteriorNum)}`;
     el.classList.remove('hidden');
   }
 
@@ -437,7 +438,7 @@ async function cargarProducto(){
     document.getElementById('bloqueGaleria').classList.remove('hidden');
   }
 
-  document.getElementById('linkWhatsappProducto').href = `https://wa.me/52${numero}?text=${encodeURIComponent(`Hola, tengo una duda sobre "${p.titulo}"`)}`;
+  document.getElementById('linkWhatsappProducto').href = `https://wa.me/52${numero}?text=${encodeURIComponent(`Ponte en contacto con nosotros para saber más información acerca de ${p.titulo} y agendar tu taller.`)}`;
 
   document.getElementById('btnComprarProducto').addEventListener('click', () => {
     agregarAlCarritoLocal({
