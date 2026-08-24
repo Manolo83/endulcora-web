@@ -266,7 +266,7 @@ async function init() {
       const app = nuevoProducto(`App · ${tituloBase}`, categoria, PRECIOS_LINEA_EBOOKS.app, 'Añadir app al carrito', archivos.app);
       anexo.ocultoEnCatalogo = true;
       app.ocultoEnCatalogo = true;
-      const paquete = nuevoProducto(`${tituloBase} · Paquete completo`, categoria, PRECIOS_LINEA_EBOOKS.paquete, 'Comprar paquete completo', null);
+      const paquete = nuevoProducto(`${tituloBase} · Paquete completo`, categoria, PRECIOS_LINEA_EBOOKS.paquete, 'Comprar paquete completo', archivos.paquete || null);
       paquete.esPaquete = true;
       paquete.ocultoEnCatalogo = true;
       const ebook = nuevoProducto(tituloBase, categoria, PRECIOS_LINEA_EBOOKS.ebook, 'Agregar al carrito', archivos.ebook);
@@ -278,34 +278,34 @@ async function init() {
         tituloBase: 'Galletas Tipo New York',
         categoria: 'ebook',
         carpetaSeed: 'galletas-tipo-new-york',
-        archivos: { ebook: 'Endulcora_Galletas_NY_eBook.pdf', anexo: 'Endulcora_Galletas_NY_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Galletas_NY_APP.html' },
+        archivos: { ebook: 'Endulcora_Galletas_NY_eBook.pdf', anexo: 'Endulcora_Galletas_NY_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Galletas_NY_APP.html', paquete: 'Paquete_Completo.zip' },
       },
       {
         tituloViejo: 'Repostería para Diabéticos · Paquete completo',
         tituloBase: 'Repostería para Diabéticos',
         categoria: 'ebook',
         carpetaSeed: 'reposteria-para-diabeticos',
-        archivos: { ebook: 'Endulcora_Reposteria_Diabeticos_eBook.pdf', anexo: 'Endulcora_Reposteria_Diabeticos_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Reposteria_Diabeticos_APP.html' },
+        archivos: { ebook: 'Endulcora_Reposteria_Diabeticos_eBook.pdf', anexo: 'Endulcora_Reposteria_Diabeticos_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Reposteria_Diabeticos_APP.html', paquete: 'Paquete_Completo.zip' },
       },
       {
         tituloViejo: 'PAQUETE MAESTRO DE ROLES GOURMET',
         tituloBase: 'Roles Gourmet',
         categoria: 'ebook',
         carpetaSeed: 'roles-gourmet',
-        archivos: { ebook: 'Endulcora_Roles_Gourmet_eBook.pdf', anexo: 'Endulcora_Roles_Gourmet_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Roles_Gourmet_APP.html' },
+        archivos: { ebook: 'Endulcora_Roles_Gourmet_eBook.pdf', anexo: 'Endulcora_Roles_Gourmet_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Roles_Gourmet_APP.html', paquete: 'Paquete_Completo.zip' },
       },
       {
         // Productos nuevos, sin producto viejo que borrar.
         tituloBase: 'Tamales Oaxaqueños',
         categoria: 'ebook',
         carpetaSeed: 'tamales-oaxaquenos',
-        archivos: { ebook: 'Endulcora_Tamales_Oaxaquenos_eBook.pdf', anexo: 'Endulcora_Tamales_Oaxaquenos_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tamales_Oaxaquenos_APP.html' },
+        archivos: { ebook: 'Endulcora_Tamales_Oaxaquenos_eBook.pdf', anexo: 'Endulcora_Tamales_Oaxaquenos_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tamales_Oaxaquenos_APP.html', paquete: 'Paquete_Completo.zip' },
       },
       {
         tituloBase: 'Tamales Regionales',
         categoria: 'ebook',
         carpetaSeed: 'tamales-regionales',
-        archivos: { ebook: 'Endulcora_Tamales_Regionales_eBook.pdf', anexo: 'Endulcora_Tamales_Regionales_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tamales_Regionales_APP.html' },
+        archivos: { ebook: 'Endulcora_Tamales_Regionales_eBook.pdf', anexo: 'Endulcora_Tamales_Regionales_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tamales_Regionales_APP.html', paquete: 'Paquete_Completo.zip' },
       },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
@@ -324,6 +324,22 @@ async function init() {
       }
       crearFamiliaEbookDesglosada(familia);
       data[flag] = true;
+      changed = true;
+    }
+    // Completa el archivo del "paquete completo" de familias que ya se
+    // crearon antes de que existiera archivos.paquete en la config de
+    // arriba (para no dejarlo sin descarga). Si el producto ya tiene un
+    // archivo, no lo pisa.
+    for (const familia of FAMILIAS_A_DESGLOSAR) {
+      if (!familia.archivos.paquete) continue;
+      const paquete = data.products.find((p) => p.titulo === `${familia.tituloBase} · Paquete completo`);
+      if (!paquete || paquete.archivo) continue;
+      const origen = path.join(__dirname, '..', 'seed-archivos', familia.carpetaSeed, familia.archivos.paquete);
+      if (!fs.existsSync(origen)) continue;
+      const destino = `${crypto.randomUUID()}${path.extname(familia.archivos.paquete)}`;
+      fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+      paquete.archivo = `/uploads/${destino}`;
+      paquete.archivoNombre = familia.archivos.paquete;
       changed = true;
     }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
