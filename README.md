@@ -296,6 +296,12 @@ cuando el webhook de Mercado Pago confirma el pago, el servidor sube esa misma
 compra a Google Ads — el mismo respaldo que ya existe para Meta. Las dos llevan
 el identificador `orden-<id>`, así que Google cuenta una sola venta.
 
+Para pedirle cosas al servidor desde fuera (desde un chat, desde el celular)
+existe además el panel `/api/google-ads`, protegido con tu propio token
+(`GOOGLE_ADS_ADMIN_TOKEN`): consultar estado, crear cuentas, dar de alta
+conversiones y sacar reportes, sin que las credenciales de Google salgan nunca
+de Railway.
+
 El paso a paso completo (crear el MCC, pedir el token de desarrollador, sacar
 el permiso OAuth y qué variables poner en Railway) está en
 **[docs/google-ads.md](docs/google-ads.md)**.

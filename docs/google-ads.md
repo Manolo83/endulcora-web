@@ -148,6 +148,73 @@ cuentas; cuando tengan sitio propio, se les pone su etiqueta ahi.
 
 ---
 
+---
+
+## Operar las cuentas desde Claude (panel /api/google-ads)
+
+La herramienta de linea de comandos sirve cuando se corre dentro del servidor.
+Para poder pedir las cosas desde fuera — desde un chat, desde el celular — el
+servidor expone el mismo control por HTTP, protegido con un token **propio**
+(nada de Google viaja fuera de Railway; el token se cambia cuando quieras sin
+tocar la configuracion de Google).
+
+Actívalo con una variable mas:
+
+```
+GOOGLE_ADS_ADMIN_TOKEN=<algo largo y aleatorio>
+```
+
+Genera uno con:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Sin esa variable, el panel contesta 503 y queda apagado.
+
+### Lo que se puede pedir
+
+Todas las llamadas llevan el encabezado `Authorization: Bearer <token>`:
+
+```bash
+BASE=https://www.endulcora.com/api/google-ads
+TOKEN=<el token>
+
+# Que cuenta existe y cual falta
+curl -s -H "Authorization: Bearer $TOKEN" $BASE/estado
+
+# Todo lo que cuelga de la cuenta administradora
+curl -s -H "Authorization: Bearer $TOKEN" $BASE/cuentas
+
+# Crear la cuenta de un negocio
+curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"negocio":"crenef"}' $BASE/cuentas
+
+# Conversiones de una cuenta (ver / dar de alta las estandar)
+curl -s -H "Authorization: Bearer $TOKEN" $BASE/conversiones/endulcora
+curl -s -X POST -H "Authorization: Bearer $TOKEN" $BASE/conversiones/endulcora
+
+# Gasto y resultados
+curl -s -H "Authorization: Bearer $TOKEN" "$BASE/reporte?dias=30"
+curl -s -H "Authorization: Bearer $TOKEN" "$BASE/reporte?negocio=endulcora&dias=7"
+
+# Cualquier otra pregunta, en el lenguaje de consultas de Google (solo lectura)
+curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"negocio":"endulcora","query":"SELECT campaign.name, metrics.clicks FROM campaign WHERE segments.date DURING LAST_7_DAYS"}' \
+  $BASE/consulta
+```
+
+`/consulta` rechaza cualquier cosa que no empiece con `SELECT`: desde ahi no se
+puede borrar ni modificar nada.
+
+### Cuidados
+
+- El token da control sobre las cuatro cuentas: guardalo como una contrasena y
+  cambialo si alguna vez se comparte de mas.
+- El panel esta limitado a 60 peticiones cada 5 minutos.
+- Las respuestas nunca incluyen credenciales de Google, solo cuales estan
+  configuradas y cuales faltan.
+
 ## El dia a dia
 
 ```bash
