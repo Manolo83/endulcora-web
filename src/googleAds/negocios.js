@@ -5,8 +5,11 @@
 // cuenta administradora (MCC) para poder verlas y moverlas desde un solo
 // lugar: este servidor.
 //
-// El ID de cada cuenta (10 digitos, sin guiones) se guarda en una variable de
-// entorno para no tener que tocar el codigo cada vez que se crea una cuenta.
+// El ID de cada cuenta (10 digitos, sin guiones) viene aqui de fabrica, con el
+// valor real de la cuenta que ya existe dentro del MCC. No es un secreto: es
+// el numero que se ve en la interfaz. La variable de entorno correspondiente,
+// si se define, tiene prioridad (util para apuntar a otra cuenta sin tocar el
+// codigo).
 
 function soloDigitos(valor) {
   return String(valor || '').replace(/\D/g, '');
@@ -20,6 +23,8 @@ const NEGOCIOS = [
     sitio: process.env.GOOGLE_ADS_SITIO_ENDULCORA || 'https://www.endulcora.com',
     moneda: process.env.GOOGLE_ADS_MONEDA_ENDULCORA || 'MXN',
     zona: process.env.GOOGLE_ADS_ZONA_ENDULCORA || 'America/Mexico_City',
+    // 718-083-5807
+    idPorDefecto: '7180835807',
     envCuenta: 'GOOGLE_ADS_CUSTOMER_ENDULCORA',
   },
   {
@@ -29,6 +34,8 @@ const NEGOCIOS = [
     sitio: process.env.GOOGLE_ADS_SITIO_CRENEF || '',
     moneda: process.env.GOOGLE_ADS_MONEDA_CRENEF || 'MXN',
     zona: process.env.GOOGLE_ADS_ZONA_CRENEF || 'America/Mexico_City',
+    // 905-783-5688
+    idPorDefecto: '9057835688',
     envCuenta: 'GOOGLE_ADS_CUSTOMER_CRENEF',
   },
   {
@@ -38,6 +45,8 @@ const NEGOCIOS = [
     sitio: process.env.GOOGLE_ADS_SITIO_LEVENT || '',
     moneda: process.env.GOOGLE_ADS_MONEDA_LEVENT || 'MXN',
     zona: process.env.GOOGLE_ADS_ZONA_LEVENT || 'America/Mexico_City',
+    // 699-233-5000
+    idPorDefecto: '6992335000',
     envCuenta: 'GOOGLE_ADS_CUSTOMER_LEVENT',
   },
   {
@@ -47,6 +56,8 @@ const NEGOCIOS = [
     sitio: process.env.GOOGLE_ADS_SITIO_INSTITUTO_JUSTO || '',
     moneda: process.env.GOOGLE_ADS_MONEDA_INSTITUTO_JUSTO || 'MXN',
     zona: process.env.GOOGLE_ADS_ZONA_INSTITUTO_JUSTO || 'America/Mexico_City',
+    // 291-986-6811
+    idPorDefecto: '2919866811',
     envCuenta: 'GOOGLE_ADS_CUSTOMER_INSTITUTO_JUSTO',
   },
 ];
@@ -65,12 +76,12 @@ function obtener(clave) {
   return { ...negocio, customerId: customerId(negocio.clave) };
 }
 
-// ID de la cuenta de Google Ads del negocio (10 digitos sin guiones), o cadena
-// vacia si todavia no se ha creado / configurado.
+// ID de la cuenta de Google Ads del negocio (10 digitos sin guiones). Manda la
+// variable de entorno; si no esta, se usa el ID real que ya trae el registro.
 function customerId(clave) {
   const negocio = NEGOCIOS.find((n) => n.clave === clave);
   if (!negocio) return '';
-  return soloDigitos(process.env[negocio.envCuenta]);
+  return soloDigitos(process.env[negocio.envCuenta]) || soloDigitos(negocio.idPorDefecto);
 }
 
 module.exports = { NEGOCIOS, listar, obtener, customerId, soloDigitos };

@@ -111,10 +111,24 @@ node scripts/google-ads.js estado
 
 ---
 
-## Crear las cuatro cuentas
+## Las cuatro cuentas
 
-Una por negocio (todas en MXN y zona horaria de Ciudad de Mexico; la moneda y
-la zona **no se pueden cambiar despues**):
+HECHO. Ya existen dentro del MCC, con sus IDs puestos en
+`src/googleAds/negocios.js`:
+
+| Negocio | Cuenta |
+|---|---|
+| Endulcora | 718-083-5807 |
+| CRENEF | 905-783-5688 |
+| LEVENT | 699-233-5000 |
+| Instituto Justo | 291-986-6811 |
+
+Falta lo que solo se hace desde la interfaz: **la forma de pago de cada una**
+(Facturacion > Configuracion). Sin eso la cuenta existe pero no publica nada, y
+es por cuenta: no se hereda de la administradora.
+
+Para crear una cuenta mas adelante (todas en MXN y zona horaria de Ciudad de
+Mexico; la moneda y la zona **no se pueden cambiar despues**):
 
 ```bash
 node scripts/google-ads.js crear-cuenta endulcora
