@@ -435,6 +435,26 @@ async function init() {
         changed = true;
       }
     }
+    // El negocio dejo de vender recetarios: de ahora en adelante todo se
+    // vende como eBooks con anexos. Borra todos los productos de categoria
+    // "recetario" (confirmado que ninguno tenia ventas previas). Corre una
+    // sola vez.
+    if (!data._migBorraRecetarios) {
+      const recetarios = data.products.filter((p) => p.categoria === 'recetario');
+      recetarios.forEach((p) => {
+        if (typeof p.imagen === 'string' && p.imagen.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(p.imagen)), () => {});
+        }
+        if (typeof p.archivo === 'string' && p.archivo.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(p.archivo)), () => {});
+        }
+      });
+      if (recetarios.length) {
+        data.products = data.products.filter((p) => p.categoria !== 'recetario');
+      }
+      data._migBorraRecetarios = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
