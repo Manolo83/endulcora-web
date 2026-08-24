@@ -561,7 +561,7 @@ module.exports = {
   getOrder(id) {
     return load().orders.find((o) => o.id === Number(id)) || null;
   },
-  addOrder({ items, total, email, userId, viewToken, fbp, fbc }) {
+  addOrder({ items, total, email, userId, viewToken, fbp, fbc, gclid, gbraid, wbraid }) {
     const data = load();
     const item = {
       id: nextId(data.orders),
@@ -576,7 +576,11 @@ module.exports = {
       viewToken: viewToken || null,
       fbp: fbp || null,
       fbc: fbc || null,
+      gclid: gclid || null,
+      gbraid: gbraid || null,
+      wbraid: wbraid || null,
       capiPurchaseEnviado: false,
+      googleAdsEnviado: false,
       correoEnviado: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

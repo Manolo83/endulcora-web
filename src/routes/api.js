@@ -2,10 +2,21 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const store = require('../store');
-const { UPLOAD_DIR } = require('../config');
+const { UPLOAD_DIR, GOOGLE_ADS } = require('../config');
 const { requireCliente } = require('./auth');
 
 const router = express.Router();
+
+// El sitio pregunta aqui que etiquetas de medicion debe cargar, para no tener
+// que tocar el HTML cada vez que cambia un ID. Si GOOGLE_ADS_ID esta vacio, el
+// sitio simplemente no carga nada de Google.
+router.get('/medicion', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=300');
+  res.json({
+    googleAdsId: GOOGLE_ADS.medicionId,
+    conversionCompra: GOOGLE_ADS.conversionCompra,
+  });
+});
 
 router.get('/announcements', (req, res) => {
   res.json(store.getAnnouncements(true));

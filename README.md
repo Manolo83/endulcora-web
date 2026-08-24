@@ -273,7 +273,37 @@ link `/gracias?orden=<id>&token=<token>` de un pedido ya aprobado) y
 confirma que el `Purchase` aparece marcado como recibido por **servidor**
 en esa pantalla. Borra `META_CAPI_TEST_CODE` de Railway cuando termines.
 
-## 13. Notas técnicas y mejoras futuras (opcionales)
+## 13. Google Ads (los cuatro negocios desde un solo lugar)
+
+Endulcora, CRENEF, LEVENT e Instituto Justo tienen **cada uno su propia cuenta
+de Google Ads** — presupuesto, facturación y datos separados — pero las cuatro
+cuelgan de una misma **cuenta administradora (MCC)**. Ese es el truco: con un
+solo permiso, este servidor puede crear cuentas, dar de alta conversiones y
+sacar reportes de las cuatro sin entrar a la interfaz de Google.
+
+```bash
+node scripts/google-ads.js estado                 # qué cuenta existe y cuál falta
+node scripts/google-ads.js crear-cuenta crenef    # crea la cuenta de un negocio
+node scripts/google-ads.js crear-conversiones endulcora
+node scripts/google-ads.js reporte                # gasto y resultados de los cuatro
+node scripts/google-ads.js reporte endulcora 7    # un negocio, últimos 7 días
+```
+
+En el sitio de Endulcora, la etiqueta de Google se carga sola en todas las
+páginas públicas (el ID vive en Railway, no en el HTML), guarda el `gclid` del
+anuncio en una cookie de 90 días y cuenta la compra en `/gracias`. Además,
+cuando el webhook de Mercado Pago confirma el pago, el servidor sube esa misma
+compra a Google Ads — el mismo respaldo que ya existe para Meta. Las dos llevan
+el identificador `orden-<id>`, así que Google cuenta una sola venta.
+
+El paso a paso completo (crear el MCC, pedir el token de desarrollador, sacar
+el permiso OAuth y qué variables poner en Railway) está en
+**[docs/google-ads.md](docs/google-ads.md)**.
+
+Lo único que sigue siendo manual, porque Google no lo permite por API: crear el
+MCC, meter la forma de pago de cada cuenta y la verificación del anunciante.
+
+## 14. Notas técnicas y mejoras futuras (opcionales)
 
 - El sitio usa Tailwind CSS por CDN para mantener el HTML original tal cual
   — funciona perfecto para el tráfico de un sitio personal/pequeño negocio.
