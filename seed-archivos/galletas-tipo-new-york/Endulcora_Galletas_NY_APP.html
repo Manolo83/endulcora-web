@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>App Galletas NY · Endulcora</title>
+<meta name="description" content="Costos, precios, producción y ventas para el eBook «Galletas Estilo Nueva York». Endulcora · Estudio Gastronómico.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --purple:#7A2E7E; --deep:#4E1454; --deep2:#5C2360; --plum:#A25AA6; --lilac:#C98BCB;
+  --yellow:#F8B818; --amber:#E39B0C; --gray:#9C9C9C; --cream:#FBF4E9; --cream2:#FBF5EC;
+  --ink:#2A1330; --ink-soft:#6B5470; --line:rgba(78,20,84,.13); --card:#FFFFFF;
+  --danger:#C0392B; --ember:#E4572E; --good:#2E7D57; --cocoa:#6B3A17; --dough:#E7B980;
+  --r:18px; --r-sm:12px;
+  --sh:0 1px 2px rgba(78,20,84,.06), 0 8px 24px -12px rgba(78,20,84,.28);
+  --sh-lg:0 24px 60px -28px rgba(78,20,84,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:var(--ink); background:var(--cream);
+  background-image:radial-gradient(1100px 520px at 85% -10%, rgba(248,184,24,.16), transparent 60%),
+                   radial-gradient(900px 520px at -10% 0%, rgba(122,46,126,.10), transparent 55%);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased; font-size:15px; line-height:1.5;
+}
+h1,h2,h3,h4{margin:0}
+button{font-family:inherit}
+a{color:var(--purple)}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+@media(min-width:901px){.shell{background:linear-gradient(90deg,#6A2570 0 250px,transparent 250px)}}
+.shell>*{min-width:0}
+.rail{
+  background:linear-gradient(180deg,var(--deep) 0%, var(--deep2) 55%, #6A2570 100%);
+  color:#fff;padding:20px 14px 26px;position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.brand{display:flex;flex-direction:column;gap:10px;padding:6px 8px 18px}
+.brand img{width:152px;height:auto;opacity:.97}
+.brand .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--yellow);box-shadow:0 0 10px var(--yellow)}
+.brand small{font-family:'Montserrat',sans-serif;font-weight:600;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+.navlist{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.navbtn{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;cursor:pointer;
+  background:transparent;border:0;color:rgba(255,255,255,.78);padding:10px 12px;border-radius:11px;
+  font-size:13.5px;font-weight:400;transition:background .18s,color .18s;
+}
+.navbtn svg{width:17px;height:17px;flex:none;opacity:.85}
+.navbtn:hover{background:rgba(255,255,255,.09);color:#fff}
+.navbtn.on{background:rgba(255,255,255,.13);color:#fff;font-weight:500}
+.navbtn.on svg{opacity:1;color:var(--yellow)}
+.rail-foot{margin-top:22px;padding:12px;border-top:1px solid rgba(255,255,255,.14);font-size:10.5px;color:rgba(255,255,255,.5);line-height:1.6}
+.rail-foot b{color:rgba(255,255,255,.78);font-weight:500}
+
+main{padding:26px 30px 90px;max-width:1180px;width:100%;min-width:0}
+.page-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:20px}
+.eyebrow{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--plum);margin-bottom:5px}
+h1.title{font-family:'Bebas Neue',Impact,sans-serif;font-size:38px;line-height:1;letter-spacing:.01em;color:var(--deep)}
+.sub{color:var(--ink-soft);font-size:13px;max-width:64ch;margin-top:6px;font-weight:300}
+
+/* ---------- cards ---------- */
+.card{min-width:0;background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:20px;border:1px solid rgba(78,20,84,.06)}
+.card + .card{margin-top:16px}
+.card h3{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--purple);margin-bottom:14px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* ---------- kpi ---------- */
+.kpi{background:var(--card);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);border:1px solid rgba(78,20,84,.06);position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--yellow)}
+.kpi .k-l{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gray)}
+.kpi .k-v{font-family:'Bebas Neue',Impact,sans-serif;font-size:33px;line-height:1.05;color:var(--deep);margin-top:5px;letter-spacing:.01em}
+.kpi .k-n{font-size:11px;color:var(--ink-soft);margin-top:2px;font-weight:300}
+.kpi.dark{background:linear-gradient(135deg,var(--deep),var(--purple));color:#fff}
+.kpi.dark .k-l{color:rgba(255,255,255,.6)} .kpi.dark .k-v{color:#fff} .kpi.dark .k-n{color:rgba(255,255,255,.7)}
+
+/* ---------- form ---------- */
+label.f{display:block;font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gray);margin-bottom:5px}
+input,select,textarea{
+  width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:var(--cream2);
+  font-family:'Poppins',sans-serif;font-size:14px;color:var(--deep);transition:border-color .15s,background .15s;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple);background:#fff;box-shadow:0 0 0 3px rgba(122,46,126,.10)}
+input[type=range]{padding:0;border:0;background:transparent;accent-color:var(--purple);height:26px}
+.field{margin-bottom:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.field{flex:1;min-width:120px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;border:0;border-radius:11px;
+  padding:10px 16px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--purple);color:#fff;transition:transform .12s, box-shadow .18s, background .18s;
+  box-shadow:0 6px 16px -8px rgba(122,46,126,.8);
+}
+.btn:hover{background:var(--deep);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:transparent;color:var(--purple);border:1.5px solid var(--line);box-shadow:none}
+.btn.ghost:hover{background:rgba(122,46,126,.07);color:var(--deep)}
+.btn.gold{background:var(--yellow);color:var(--deep);box-shadow:0 6px 16px -8px rgba(248,184,24,.9)}
+.btn.gold:hover{background:var(--amber)}
+.btn.sm{padding:7px 11px;font-size:10px;border-radius:9px}
+.btn.danger{background:transparent;color:var(--danger);border:1.5px solid rgba(192,57,43,.3);box-shadow:none}
+.btn.danger:hover{background:rgba(192,57,43,.08)}
+:focus-visible{outline:2.5px solid var(--yellow);outline-offset:2px}
+
+/* ---------- table ---------- */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -6px;padding:0 6px;max-width:100%}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+table.slim{min-width:300px}
+th{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gray);text-align:left;padding:8px 10px;border-bottom:1.5px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid rgba(78,20,84,.07);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:rgba(251,244,233,.75)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.mini{font-size:11.5px;color:var(--ink-soft)}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:10.5px;font-weight:500;background:rgba(122,46,126,.10);color:var(--purple);white-space:nowrap}
+.pill.g{background:rgba(46,125,87,.12);color:var(--good)}
+.pill.r{background:rgba(228,87,46,.13);color:var(--ember)}
+.pill.y{background:rgba(248,184,24,.20);color:#8a6200}
+.pill.c{background:rgba(107,58,23,.12);color:var(--cocoa)}
+.x{background:none;border:0;color:var(--gray);cursor:pointer;font-size:16px;line-height:1;padding:4px 6px;border-radius:6px}
+.x:hover{color:var(--danger);background:rgba(192,57,43,.08)}
+.empty{text-align:center;padding:32px 16px;color:var(--gray);font-size:13px;font-weight:300}
+.empty b{display:block;color:var(--ink-soft);font-weight:500;margin-bottom:4px;font-size:14px}
+
+/* ---------- cookie (signature) ---------- */
+.cookie-wrap{display:grid;grid-template-columns:200px 1fr;gap:22px;align-items:center}
+@media(max-width:640px){.cookie-wrap{grid-template-columns:1fr;gap:8px}}
+.legend{display:flex;flex-direction:column;gap:1px}
+.lg{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:9px;transition:background .15s}
+.lg:hover{background:var(--cream2)}
+.lg .sw{width:11px;height:11px;border-radius:3px;flex:none}
+.lg .nm{flex:1;font-size:12.5px}
+.lg .vl{font-variant-numeric:tabular-nums;font-size:13px;font-weight:500}
+.lg .pc{width:44px;text-align:right;font-size:11px;color:var(--gray);font-variant-numeric:tabular-nums}
+.lg.tot{border-top:1.5px solid var(--line);margin-top:5px;padding-top:11px;font-weight:600}
+.lg.tot .nm,.lg.tot .vl{font-size:14px;color:var(--deep)}
+@keyframes steam{0%,100%{transform:translateY(0);opacity:.28}50%{transform:translateY(-7px);opacity:.62}}
+.steam{transform-origin:center bottom;animation:steam 3.2s ease-in-out infinite}
+.steam.b{animation-delay:.9s} .steam.c{animation-delay:1.7s}
+@media (prefers-reduced-motion:reduce){.steam{animation:none}}
+
+/* ---------- price cards ---------- */
+.price{border:1.5px solid var(--line);border-radius:var(--r-sm);padding:14px;background:var(--cream2);position:relative;transition:border-color .18s,transform .18s}
+.price:hover{border-color:var(--plum);transform:translateY(-2px)}
+.price .ch{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);min-height:24px}
+.price .pv{font-family:'Bebas Neue',Impact,sans-serif;font-size:36px;line-height:1;color:var(--deep);margin:4px 0 2px}
+.price .ut{font-size:11.5px;color:var(--ink-soft)}
+.price .ut b{color:var(--good);font-weight:600}
+
+.note{background:rgba(248,184,24,.13);border-left:3px solid var(--yellow);border-radius:0 10px 10px 0;padding:11px 14px;font-size:12.5px;color:#6b4c00;margin-top:14px;font-weight:300}
+.note b{font-weight:600;color:#573d00}
+.bar{height:9px;border-radius:99px;background:rgba(78,20,84,.10);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--purple),var(--yellow));transition:width .5s ease}
+.search{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.search input,.search select{max-width:280px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:99px;padding:5px 12px;font-size:11.5px;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--plum)}
+.chip.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+.ficha{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.ficha .fi{background:var(--cream2);border-radius:var(--r-sm);padding:11px 13px;border:1px solid var(--line)}
+.ficha .fi .l{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gray);margin-bottom:4px}
+.ficha .fi .v{font-size:12.5px;color:var(--deep);line-height:1.45}
+
+/* ---------- toast / modal ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,24px);background:var(--deep);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;box-shadow:var(--sh-lg);opacity:0;pointer-events:none;transition:.28s;z-index:90;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:rgba(42,19,48,.55);display:none;align-items:center;justify-content:center;padding:18px;z-index:80;backdrop-filter:blur(3px)}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:20px;padding:24px;max-width:520px;width:100%;box-shadow:var(--sh-lg);max-height:88vh;overflow:auto}
+
+/* ---------- mobile ---------- */
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:sticky;top:0;height:auto;padding:12px 12px 0;z-index:50}
+  .brand{flex-direction:row;align-items:center;justify-content:space-between;padding:2px 4px 12px}
+  .brand img{width:108px}
+  .brand small{display:none}
+  .navlist{flex-direction:row;overflow-x:auto;gap:5px;padding-bottom:10px;scrollbar-width:none}
+  .navlist::-webkit-scrollbar{display:none}
+  .navbtn{flex:none;width:auto;padding:8px 13px;font-size:12.5px;border-radius:99px;background:rgba(255,255,255,.09)}
+  .navbtn span{white-space:nowrap}
+  .rail-foot{display:none}
+  main{padding:18px 16px 70px}
+  h1.title{font-size:30px}
+  .card{padding:16px}
+}
+@media print{
+  .rail,.btn,.search,.chips{display:none!important}
+  body{background:#fff}.card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+  .shell{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="brand">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAADuCAMAAAC09MpMAAAAYFBMVEUAAADq4uv9/P34txbz8PTz7u/+1Fz84p7+xiqxqLL//LK7rN3xr/L//wB+fn774qL/fwD//Xn/srL/AAD/f///AP//qgD/q1gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACf7PnmAAAAGHRSTlMAJPz+Ypz85/4GAwoGAQKmAgIDAQIBAwMG+UmtAAASK0lEQVR42u2dh5rjKAyAkRdcMimTmczN+7/p0S3RjH05pyz+tqRgA38ESEIAg3ZVX6whaLAarAarwWqwGqyGoMFqsBqsBqvBarAaggarwWqwGqwGq8FqCBqsBqvBarAarAarXbVXg9VgNVgNVoPVYLWrwWqwGqwGq8H662A167Ma1vmeVYT3hgX3lCx4F1ppWLJ6orvfxdntfWFJYejuevH3kK00LMbvC6t7j24+A0vcGxZrsFbBWlYkInVjmy5SSHgOv1ql4OwvWStEDEo0tigqEL6EVfrNnpIl1JVvkC4FSsXjy3PK8wKfNsgLwq/IB08FyzxTZCsJSF0RWjnLDTNCmMqlnoTvCvIig7ztGFaN2LvBYpOrAcvpwUBuuMG0oI9Aqvik7FS0yFeKDfk5xDPCyv2EISxgx6WnCtWa4K1hZWjFsKbl5wrOon7pvWClaW2Cpfol+rC3gyXfThWwPrYovO8HK2X+bIZFBfUNYSUUiO2wCK03hJWg9R9gYVrvCCsu23+Bhai8JaxoSCzD0kZQjQ/oPWGFtMqwXNJJUuGJ0gk3vr4prKgqRViBZ4XnHvausGhdliTLJP1xzMJJAvHusEhl6mChYkOyVb8+LJ4xXsQEsAmWLjikROvlYclynNOWnpgLsBJWeINL8kywBF9/Gb/TlOO4FZYc/yBuh88Ei2+aFfnJ+xC8ArEeFjuScorng7UxMiTvcOF+GFsN6wZH2g7PzyZZ2yYAC94p66/ZACsoqC7bm8PyPfMGWCTO4K+AZQy7LbAYaYdCdmJvCCuw7oQJS9oCC5dUvKdkcYgViI2weDiV+36wErZKg5WVrJRltwHWFN30lpIVzs2r6dItkvVXwErRarBykhVlAtPbNcON4e8xrCgX8YaStS2oMAULAm+neLvR8H6StWgCvbxSusblR53GMazQIbUBFnnAK8PCbtA0rAKttzCkV7vei7DyoZBbXDTw0rDEkmQpZyffDitYCaLTTCGRl5mwwCEIU0Ugx1pYCbcyq4QFrwgrk1kNrKANuyGWk7Gb+Oy7l4cFk9gCC3JTYTkAoQLLXhBWOix5CRbkJ1l5dso71sleDlaSVh6WD3bgyaAjCFQv5hdkEIr8VWFFc8uFKBofhsVzs7V0hJSaMTtaul0Z1vJSqqeAlVAgcvFZRrQSEVoomo0HBlqKLiQki72EZLGkLzCO/BP5+D+eCQNwIQfJACWaK8oitwjkOWBFWa6MKRWLukhKDvNLqXLW1ZPACvJcB0t8oHqcGVSyzcPiTw2L3eAsNsMKbUBeJVivCytIsQpWpIT9iKr0rwuL9swrYIlEVGBxW4pln8fzwyLerXpYPNEZn9kkKhxHzwsLlueIUOFrl9AJyCz+LQx003I9Hw3rWDGhNtOqlCyeWzUPmR1ixBHdMD0TLLyaKXAmTbnpRTFPUE/LUlXYYUAJl0jcATXD5gNgUbeVNFK8gnzOV1F4WAUNQD4DiqhcrDziJaIV6Pk9dwB2h7VhBxo3kFnnVHpjh49zvuzE5ARnS8q7puQdx1x89d7mTuhb8NdUqODNdG5TWW7qN0SB5GvUVnNt+B6wRO3FN27WozcOsfemZ2/PqwS2vOEZHFfsdvN/xsFv3NjoefdD+j/j4LeX6Ul329or5OgtrgbrlWAt96ooTf7eLU1/dWt/JCxZ2N9P9P50Te2NAXDyb65BzFd8/R6qCSwptc8ECw5++gHvIfYFcfF8ElJgiHRW59OrKuIkb1+p3TwKFnxpBpeu693lbBisR2olXtgEQ3fhs3F3YHzow0tNTtQJDFxh6Fdu3PgYWPCrKMi6juOf+RpHWVuEAz5tIpRgkN9/6+9/mcA3z0kU0cPyJorq9lHA08PSi+eH/k/ikji8+s6U7IQJJC5D85SERZKU7YRBJh1WidYDYMFVouozFdV1tYFWEmjye0MzD+vPOIglCGDuHsVzw9ICk0elayB5HuRP3+dYyHbGPvOwNNBvWBYsJVorGuLusCAnMOjSogWFVL0sxqkES9E6FDcs5b1/0tPCUr748c8SLHYtstJ1PBRhSVplD0/nf5h60doZVhUrCesXRDlZB99lWH+GQlEPTrAs9qeEVcdKwmKiLydRg34ZluzZCtsNz8VYIVq7woJTqoKjuQgs6OM0UUNcAJrvjr5mwVrVa+0JS/nX+0it6q1nVb4a/Y9NmCrdS14DVTc6ULra4C+t4/dE+CSVnPI+BsPJ88HCP6ihgOKJpfEjTR/TgEi6XnBr8hHUPU+4HXgNhQMtR71o7Qgr0gaMbaNq/HWQmtWMo8Md28Bn5ynHD7hAomfGWQzZie9LKKPwdLCCDkuZeQx5VJRtbXB0tMYnZyueIhaxPwsJzciT7RBOgYAPtZXaDxZQuVAWf5j7ScqXaosd7X4h3ZCTzefAZqmUndYhXbs+thieDRYWrL7LRXQon8yI+p0rZKRzvLDvVH+EYV2TQ/JQPW4+CNaBNKExv4BQ/p27lFBlJKI1JNc+zQlGkV7EEqkcsjS3J4Ml6oZr2W0PYy4dGSSGeNmFFCUxFnWHhGDJ36ROe9hv9T0uY0nulZaf5/HNhhJxks2YsmQgpctWemr2g4W79wG+NsJicEFf/nP9x19qLPwk5lRqlMt4M+p6rb1g4Y63XLQyrE92KfVZHA2kybYeKcZrRGs3ycJKVlc+NqcoWbgZigu6jEVEAVwTFteQcaFVKKY7wQJsGsta/Fb2bmFLgm/8nH70l3zT9/1i06KChfW5GtF6BKyeF12+/5ABjTo8YdF3UxQWuCGpleUY1pnTD4FVLhfVpYJ1nDDUsloULCngfJ1o7QaLr4AFmV5avkQmcN+VvYMJVlfccw78CutE6wGwxqViAXGnDmpWVXkmlC2J3QVDCZZUyr8XBKuTlrtY5QR8BKylSb1geB+4X72KvVUjL7iV0z9IIFhBqx7gBM8HS002LHifh2CGWTv2up7233lYY2ZrA8pGBehQ0fq6M6y1WwVPk9mEFAnLYjgG0WB1PcZhGKlXWXbIOVi5CWkylA48chZ2S6K1z0bUq0bDqNfKKAbfGVh9sI4iI1g2SmnBPPpPsARftcm5MCH4ZwJr2TN5iKZ3EopBRrLUN0nL80q8yS5IaSSNF+CesDavd0ITKhXzmoFbdc2MtOzbkxP3Sd9M/bzsbrDkL3agfqbFUeKrSKvXDuNMM8w8vkL5H8V9O/jtC1OIi3PZai3JlmT1CySKhoTlJDWma43y35e7+P1gobLWWa25yKRRtpYr9YmS+aCcI6vCqlyQ+YfAqpsE/krHvKnB7qQjLXHDJmrsGCsBWd9M7F8+Px4W6Y9lbT5hsUgmTrIPpvtdCOQn7QVF4Mr6hdIsdEm04BlgYW1A9dCZ2Z2vWUlScbpc6DCGUfurBjWTb4WGwvqk+nwfL9+rc1cUdcD9muGVzhsKdk1nTYqkDCO1T49QnlATF3HwDmYiWScodfJQJ1iFaJJ9YYXhGMKgCDfKlakGrIfBF52zBpaGdQhGO9ItAjUJlPE0oPibsTKmZj9YoQ1jrBI63fzN4NIrtfJEt4CSFu8pXJoTwjoE3RZWx8kPNQ6xoTH+qdGY94QV2DCj9r18epP70zthhuJCVoAkrDD6C+knKIR0NqGzsTdQiBjcDVas6ugFAihb54RZ9A6mm+E3dGltK3T6yetA6dd5anaFBRCqmf1wEXqBkmwKFx/aZ0K7AXLmuX5aBCvy0PdgV8mRsSXS79UCdypan/B4WHRKMDT/kf45KK0zuZDJXPpxMaxozOvg+yPp9EsEYtT4l3eFtehMwLDw3HPKKEnAChv6KMxuDosoQpxf8ASwKvUdCyvLVcWHJGFNv1HcKQS+mXTA96HYUB8ESzeu5RUWqs8qwmJpWFG3pUMpK9oYnTHPOQH3hlW1bmCAb7YNVtTQdYBhhQlPgnKHh+wmmZoTOjBYcpYMaln0aROs2FCggiWyAYc0GONJYGUWXUZ2XR7WeFG7JGVgxeHyVXODcCOiBek45/1hsdtBL+fNOIX7C1g96jKWvL9ZWN+BtoVafd7rCKFoXeth8f8Tll0oLgJflQKldHr7qxb6rIt6wCEDK+zkRxw3U1qyiZ08qUDoHCyA+8KKRhez64DR2p1OOihtft5sQSmKyWsc3C7S7t6xD846lyOuTz6I+c1CxOFAc6iDpTaRvWNDTEdY4y0b7K4MJh5hHjiz5o4LisxsDnZgZOMwdOOpPBVMDapKWGRPk/985ffuCpwhp8pFNDYRqvkpmcDN6+SSscJdK2Cxe27KVHqW9gAczN/U1irFvaZm50HpzkKyzF2H1VBud5SsN7ngL97hqcFqsBqsBuuvhYWGsx8/CpMhecIa5mTjIoFonfNjMk9nQXJ/sg7ZmtS8m+Y4hAnffZv3iZ38OTvk5Jkgnw9auLke59LwvUoL3PIDoGqk05wzmUGpJHh/tmRyBI8kgEy9IPnQalh6J1q7b7TZRFpZDniHW3C7QctvObPfcbNbmLrb7htmNqDmZKdu/LFzrEgT+mfOd87evOP22W5rLfMtn9jR5CX/t0XRu6Ojx5u81GfMFUu/P6st57kvMyrTcY1bOXA9CGcpCkasY+73i9ZH/BBbUG+1bpil3aX040llpit8c9mSU4WEcxrp1Nh0lRXWebl53PCQagH2BANz7Jx9pTM7BicbkIdugGUli+vI264z0mN3WA5hCfOxj/TTeYJNbT61RYAfsMG8whzrYtwc4gvsV+pzDigvbp5uamXPirFPdQf8cgfDH39ub3dHsAF8GG9KKhVn5KFrvA4elv1W6MOhrLkPLsDbwzpaWMLOK6uC2buF2+OeI1pHcB8rQ1+1BlNuBdfeBwJQzvpFZ38VSxZQXsLfbQrHO3vslc7Icbj5hFb+fCrVKidS1MxJnWVYdnbbuVn0W7t0YIYFwsIyAwvXBeTuhHYzrpmXZ2C2zQm8h7I9H0HYBsTnvMxDbauemBFEc7se0bgTatt4DAbTLH2utrlx2zgdUmEECj7cTy/MIGtewnbJ0rRsF2lEJAXLhlfp7orbf/xstJjPa3QvQe0w7p6pbvgxFVN1+LEp5wOPmauFcNjhyHTlZSotDmcLC53Z5D5QvYj6w2fJ8ucR+1+D2R32Reaozqo+S/c8HHAfmoWld+BxsFSuutryJ+OuHZ5ZdKalTjeLlhdkAsv1WTMLx113p+bMDCtA/Aze5yt0kQGPSo7gbS6FadDMSf4GWHYoYvNZCethsR/8G+uX9iBgM/yDrZEh5kYyfyg0PUrbFkB41XPORjgsqK7APCzbIiksNECrdEf80PWSZRyztvELJefLsBiF5X5jpxxoWB24Qa2zZ+S4UcgdAqN7ICpZbsxLSZY5/IJ7ybJe6/MsWfJjziANC+DkzoJguGZb+iynGTlsMywVCA0f3dzBS3Pn2AV9FtCO4Oh1MH3uID32CtwJQ1qlwLCEKwLzJTEDo4OlezvSG/nxwmsWLOqzXFySeyhzD90wGh5vsl1z3/wmD+vDlmNifnCZR3lORkOmWiI3g7eGBf4IHIdUi7AZxLhnA1Sy7ONMeuvZF25cAzYPevZT27ocHGlYwoRguVTW0gGnzZjxzDbJ1aqDGnJMvTiWLKen3CwRK1mmDX1YuTQazxGI8mIalem1fJfjlCmuRxIFKWyGzMqJVdN8XkjUXFO2JyRZ7W4ewDEsl+qmkhl2pqgidwpOXQfvhyLUwTtN0irAU3j8N5+V6zjwyAwYVgV3ituH7lBc/8XDZtipnsViMbd3SIMHr9t63bzzdgO4gZjAspLoO8vgodtgdd5cw6MhTsGtMTifC+dgIeRkGf0HnxEK2/cZpcDZoRCNhk521H+cHKwm7LBvRW9Cdt7cGEJYHyiVfMyRJYta7XWYpzDBjor243lg5u4Lnxzmr0z57db3wSld7lb9Cj/PfOP0LJhz9bkoh4HP2X5onzD5dLbIkzsZan4g91UA9BhG3q31OtS4mFwn+FF4pvcnndOuJEDvfubX53JJjqG7KswNgiKWHXUAOO2WyVQ8paz6eZ8/8pJNs280PBbbuf0W5kGpJ9CZH0A+QL5O91icc+BmxRkE/lN3v39/JjUD03U2H3ybsGiwGqwGq8FqV4PVYDVYDVaD1WC1q8FqsBqsBqvBarDaVYAF7apfWdMQNFgNVoPVYDVYDVZD0GA1WA1Wg9VgNVgNQYPVYDVYDVaD1WA1BA1Wg9VgNVgN1l9//QsFLDeuUr1KggAAAABJRU5ErkJggg==" alt="Endulcora">
+      <small><span class="dot"></span> Galletas NY · Costos y ventas</small>
+    </div>
+    <div class="navlist" id="nav"></div>
+    <div class="rail-foot">
+      <b>App Galletas NY Endulcora</b><br>
+      Herramienta del eBook «Galletas Estilo Nueva York» · Colección Oficios Dulces, Volumen II.<br>
+      Recetas: Chef Luis Alfonso Jiménez Cárdenas · Edición: Manuel Ramiro Justo Guzmán · WhatsApp 5665271901
+    </div>
+  </aside>
+  <main id="view"></main>
+</div>
+<div id="toast"></div>
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+<script>const SEED = {"insumos":[{"nom":"Mantequilla sin sal","cat":"Lácteos y grasas","u":"g","presTxt":"Barra/bloque 1 kg","pres":1000.0,"precio":210.0,"prov":""},{"nom":"Queso crema (bloque firme)","cat":"Lácteos y grasas","u":"g","presTxt":"Bloque 1 kg","pres":1000.0,"precio":185.0,"prov":""},{"nom":"Queso mascarpone","cat":"Lácteos y grasas","u":"g","presTxt":"Tarro 500 g","pres":500.0,"precio":180.0,"prov":""},{"nom":"Queso azul","cat":"Lácteos y grasas","u":"g","presTxt":"Cuña 250 g","pres":250.0,"precio":145.0,"prov":""},{"nom":"Leche condensada","cat":"Lácteos y grasas","u":"g","presTxt":"Lata 397 g","pres":397.0,"precio":34.0,"prov":""},{"nom":"Aceite de oliva extra virgen","cat":"Lácteos y grasas","u":"ml","presTxt":"Botella 500 ml","pres":500.0,"precio":150.0,"prov":""},{"nom":"Aceite de trufa negra","cat":"Lácteos y grasas","u":"ml","presTxt":"Botella 50 ml","pres":50.0,"precio":260.0,"prov":""},{"nom":"Azúcar refinada","cat":"Azúcares","u":"g","presTxt":"Bolsa 1 kg","pres":1000.0,"precio":30.0,"prov":""},{"nom":"Azúcar mascabado","cat":"Azúcares","u":"g","presTxt":"Bolsa 1 kg","pres":1000.0,"precio":52.0,"prov":""},{"nom":"Azúcar mascabado oscuro","cat":"Azúcares","u":"g","presTxt":"Bolsa 1 kg","pres":1000.0,"precio":58.0,"prov":""},{"nom":"Azúcar glass","cat":"Azúcares","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":32.0,"prov":""},{"nom":"Piloncillo","cat":"Azúcares","u":"g","presTxt":"Conos 1 kg","pres":1000.0,"precio":48.0,"prov":""},{"nom":"Melaza","cat":"Azúcares","u":"g","presTxt":"Botella 500 g","pres":500.0,"precio":72.0,"prov":""},{"nom":"Cajeta horneable / dulce de leche","cat":"Azúcares","u":"g","presTxt":"Frasco 640 g","pres":640.0,"precio":98.0,"prov":""},{"nom":"Chunks de caramelo firme","cat":"Azúcares","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":125.0,"prov":""},{"nom":"Caramelos de menta","cat":"Azúcares","u":"g","presTxt":"Bolsa 200 g","pres":200.0,"precio":50.0,"prov":""},{"nom":"Mini malvaviscos","cat":"Azúcares","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":48.0,"prov":""},{"nom":"Chamoy espeso","cat":"Azúcares","u":"g","presTxt":"Botella 500 g","pres":500.0,"precio":68.0,"prov":""},{"nom":"Mermelada de frambuesa","cat":"Azúcares","u":"g","presTxt":"Frasco 300 g","pres":300.0,"precio":88.0,"prov":""},{"nom":"Harina de trigo","cat":"Harinas y secos","u":"g","presTxt":"Bolsa 1 kg","pres":1000.0,"precio":30.0,"prov":""},{"nom":"Harina de maíz nixtamalizada","cat":"Harinas y secos","u":"g","presTxt":"Bolsa 1 kg","pres":1000.0,"precio":26.0,"prov":""},{"nom":"Harina de avellana","cat":"Harinas y secos","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":155.0,"prov":""},{"nom":"Fécula de maíz (maicena)","cat":"Harinas y secos","u":"g","presTxt":"Caja 400 g","pres":400.0,"precio":36.0,"prov":""},{"nom":"Avena en hojuelas","cat":"Harinas y secos","u":"g","presTxt":"Bolsa 1 kg","pres":1000.0,"precio":48.0,"prov":""},{"nom":"Bicarbonato de sodio","cat":"Harinas y secos","u":"g","presTxt":"Bote 200 g","pres":200.0,"precio":26.0,"prov":""},{"nom":"Cremor tártaro","cat":"Harinas y secos","u":"g","presTxt":"Frasco 50 g","pres":50.0,"precio":45.0,"prov":""},{"nom":"Galletas Lotus Biscoff","cat":"Harinas y secos","u":"g","presTxt":"Paquete 250 g","pres":250.0,"precio":78.0,"prov":""},{"nom":"Galletas María / Graham","cat":"Harinas y secos","u":"g","presTxt":"Paquete 170 g","pres":170.0,"precio":28.0,"prov":""},{"nom":"Pretzels salados","cat":"Harinas y secos","u":"g","presTxt":"Bolsa 200 g","pres":200.0,"precio":52.0,"prov":""},{"nom":"Huevo entero (aprox. 50 g)","cat":"Huevo","u":"pza","presTxt":"Cartón 30 pzas","pres":30.0,"precio":96.0,"prov":""},{"nom":"Chocolate semiamargo 54% (chunks)","cat":"Chocolatería","u":"g","presTxt":"Bloque 1 kg","pres":1000.0,"precio":210.0,"prov":""},{"nom":"Chocolate amargo 70% (chunks)","cat":"Chocolatería","u":"g","presTxt":"Bloque 1 kg","pres":1000.0,"precio":265.0,"prov":""},{"nom":"Chocolate blanco (chunks)","cat":"Chocolatería","u":"g","presTxt":"Bloque 1 kg","pres":1000.0,"precio":235.0,"prov":""},{"nom":"Chocolate con leche (chunks)","cat":"Chocolatería","u":"g","presTxt":"Bloque 1 kg","pres":1000.0,"precio":220.0,"prov":""},{"nom":"Chocolate rubí (chunks)","cat":"Chocolatería","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":320.0,"prov":""},{"nom":"Chocolate blanco caramelizado (Gold)","cat":"Chocolatería","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":340.0,"prov":""},{"nom":"Chocolate con leche y avellana (Kinder)","cat":"Chocolatería","u":"g","presTxt":"Barras 200 g","pres":200.0,"precio":110.0,"prov":""},{"nom":"Chispas de chocolate semiamargo","cat":"Chocolatería","u":"g","presTxt":"Bolsa 1 kg","pres":1000.0,"precio":155.0,"prov":""},{"nom":"Chispas de chocolate blanco","cat":"Chocolatería","u":"g","presTxt":"Bolsa 1 kg","pres":1000.0,"precio":175.0,"prov":""},{"nom":"Chispas de chocolate con leche","cat":"Chocolatería","u":"g","presTxt":"Bolsa 1 kg","pres":1000.0,"precio":165.0,"prov":""},{"nom":"Chispas de colores","cat":"Chocolatería","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":62.0,"prov":""},{"nom":"Cacao en polvo alcalino","cat":"Chocolatería","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":138.0,"prov":""},{"nom":"Cacao en polvo natural","cat":"Chocolatería","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":122.0,"prov":""},{"nom":"Crema de cacao y avellana (tipo Nutella)","cat":"Chocolatería","u":"g","presTxt":"Frasco 780 g","pres":780.0,"precio":185.0,"prov":""},{"nom":"Crema de avellana blanca","cat":"Chocolatería","u":"g","presTxt":"Frasco 350 g","pres":350.0,"precio":145.0,"prov":""},{"nom":"Crema de galleta Biscoff","cat":"Chocolatería","u":"g","presTxt":"Frasco 400 g","pres":400.0,"precio":135.0,"prov":""},{"nom":"Crema de cacahuate","cat":"Chocolatería","u":"g","presTxt":"Frasco 500 g","pres":500.0,"precio":82.0,"prov":""},{"nom":"Nuez pecana","cat":"Frutos secos","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":225.0,"prov":""},{"nom":"Nuez pecana caramelizada","cat":"Frutos secos","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":135.0,"prov":""},{"nom":"Nuez de Castilla","cat":"Frutos secos","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":195.0,"prov":""},{"nom":"Nuez macadamia","cat":"Frutos secos","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":195.0,"prov":""},{"nom":"Almendra Marcona","cat":"Frutos secos","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":185.0,"prov":""},{"nom":"Avellana tostada","cat":"Frutos secos","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":265.0,"prov":""},{"nom":"Pistache pelado","cat":"Frutos secos","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":195.0,"prov":""},{"nom":"Cacahuate tostado","cat":"Frutos secos","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":62.0,"prov":""},{"nom":"Ajonjolí (blanco y negro)","cat":"Frutos secos","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":48.0,"prov":""},{"nom":"Coco rallado seco","cat":"Frutos secos","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":68.0,"prov":""},{"nom":"Pasta pura de pistache","cat":"Frutos secos","u":"g","presTxt":"Frasco 200 g","pres":200.0,"precio":425.0,"prov":""},{"nom":"Pasas rubias","cat":"Frutas","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":72.0,"prov":""},{"nom":"Pasas negras","cat":"Frutas","u":"g","presTxt":"Bolsa 500 g","pres":500.0,"precio":62.0,"prov":""},{"nom":"Frambuesa liofilizada","cat":"Frutas","u":"g","presTxt":"Bolsa 100 g","pres":100.0,"precio":195.0,"prov":""},{"nom":"Fresa liofilizada","cat":"Frutas","u":"g","presTxt":"Bolsa 100 g","pres":100.0,"precio":175.0,"prov":""},{"nom":"Mango deshidratado","cat":"Frutas","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":98.0,"prov":""},{"nom":"Piña deshidratada","cat":"Frutas","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":88.0,"prov":""},{"nom":"Manzana deshidratada","cat":"Frutas","u":"g","presTxt":"Bolsa 200 g","pres":200.0,"precio":82.0,"prov":""},{"nom":"Higo deshidratado","cat":"Frutas","u":"g","presTxt":"Bolsa 250 g","pres":250.0,"precio":125.0,"prov":""},{"nom":"Plátano maduro","cat":"Frutas","u":"g","presTxt":"1 kg","pres":1000.0,"precio":32.0,"prov":""},{"nom":"Zanahoria","cat":"Frutas","u":"g","presTxt":"1 kg","pres":1000.0,"precio":26.0,"prov":""},{"nom":"Sal fina","cat":"Especias y aromas","u":"g","presTxt":"Bolsa 1 kg","pres":1000.0,"precio":20.0,"prov":""},{"nom":"Sal de mar en escamas","cat":"Especias y aromas","u":"g","presTxt":"Frasco 250 g","pres":250.0,"precio":125.0,"prov":""},{"nom":"Sal ahumada","cat":"Especias y aromas","u":"g","presTxt":"Frasco 100 g","pres":100.0,"precio":95.0,"prov":""},{"nom":"Canela en polvo","cat":"Especias y aromas","u":"g","presTxt":"Frasco 100 g","pres":100.0,"precio":46.0,"prov":""},{"nom":"Jengibre en polvo","cat":"Especias y aromas","u":"g","presTxt":"Frasco 100 g","pres":100.0,"precio":56.0,"prov":""},{"nom":"Clavo molido","cat":"Especias y aromas","u":"g","presTxt":"Frasco 100 g","pres":100.0,"precio":72.0,"prov":""},{"nom":"Nuez moscada","cat":"Especias y aromas","u":"g","presTxt":"Frasco 50 g","pres":50.0,"precio":62.0,"prov":""},{"nom":"Anís estrella en polvo","cat":"Especias y aromas","u":"g","presTxt":"Frasco 50 g","pres":50.0,"precio":68.0,"prov":""},{"nom":"Chile ancho seco","cat":"Especias y aromas","u":"g","presTxt":"Bolsa 100 g","pres":100.0,"precio":42.0,"prov":""},{"nom":"Chile de árbol molido","cat":"Especias y aromas","u":"g","presTxt":"Frasco 100 g","pres":100.0,"precio":46.0,"prov":""},{"nom":"Lavanda culinaria","cat":"Especias y aromas","u":"g","presTxt":"Bolsa 50 g","pres":50.0,"precio":125.0,"prov":""},{"nom":"Té matcha culinario","cat":"Especias y aromas","u":"g","presTxt":"Lata 100 g","pres":100.0,"precio":265.0,"prov":""},{"nom":"Té Earl Grey en hojas","cat":"Especias y aromas","u":"g","presTxt":"Lata 100 g","pres":100.0,"precio":135.0,"prov":""},{"nom":"Romero fresco","cat":"Especias y aromas","u":"g","presTxt":"Manojo 50 g","pres":50.0,"precio":25.0,"prov":""},{"nom":"Puré de ajo negro","cat":"Especias y aromas","u":"g","presTxt":"Frasco 100 g","pres":100.0,"precio":185.0,"prov":""},{"nom":"Pasta de miso blanco","cat":"Especias y aromas","u":"g","presTxt":"Frasco 400 g","pres":400.0,"precio":155.0,"prov":""},{"nom":"Extracto de vainilla","cat":"Especias y aromas","u":"ml","presTxt":"Botella 250 ml","pres":250.0,"precio":185.0,"prov":""},{"nom":"Extracto de café","cat":"Especias y aromas","u":"ml","presTxt":"Botella 120 ml","pres":120.0,"precio":98.0,"prov":""},{"nom":"Extracto de coco","cat":"Especias y aromas","u":"ml","presTxt":"Botella 120 ml","pres":120.0,"precio":72.0,"prov":""},{"nom":"Esencia de azahar","cat":"Especias y aromas","u":"ml","presTxt":"Botella 120 ml","pres":120.0,"precio":74.0,"prov":""},{"nom":"Colorante en gel","cat":"Especias y aromas","u":"ml","presTxt":"Frasco 30 ml","pres":30.0,"precio":72.0,"prov":""},{"nom":"Vinagre blanco","cat":"Especias y aromas","u":"ml","presTxt":"Botella 500 ml","pres":500.0,"precio":20.0,"prov":""},{"nom":"Jugo de yuzu","cat":"Especias y aromas","u":"ml","presTxt":"Botella 100 ml","pres":100.0,"precio":195.0,"prov":""}],"lineas":[{"n":1,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría, cortada en cubos)"},{"n":1,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":150.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":1,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada (blanca)"},{"n":1,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos (aprox. 100 g totales)"},{"n":1,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo (mitad uso múltiple, mitad harina de fuerza/panadera)"},{"n":1,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz (maicena)"},{"n":1,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":1,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":1,"comp":"Masa","ins":"Chocolate semiamargo 54% (chunks)","cant":250.0,"u":"g","desc":"Chunks (trozos irregulares) de chocolate semiamargo (mínimo 54% cacao)"},{"n":1,"comp":"Decoración","ins":"Sal de mar en escamas","cant":2.0,"u":"g","desc":"C/S en el libro — cantidad estimada, ajústala: Sal de mar en escamas (para decorar)"},{"n":2,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":2,"comp":"Masa","ins":"Azúcar mascabado","cant":180.0,"u":"g","desc":"Azúcar mascabado"},{"n":2,"comp":"Masa","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"Azúcar refinada"},{"n":2,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":2,"comp":"Masa","ins":"Harina de trigo","cant":240.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":2,"comp":"Masa","ins":"Cacao en polvo alcalino","cant":60.0,"u":"g","desc":"Cacao en polvo alcalino (tipo Dutch-processed)"},{"n":2,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":2,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":2,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":2,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":200.0,"u":"g","desc":"Chunks de chocolate blanco de alta calidad"},{"n":2,"comp":"Masa","ins":"Chispas de chocolate semiamargo","cant":50.0,"u":"g","desc":"Chispas de chocolate semiamargo"},{"n":3,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":3,"comp":"Masa","ins":"Azúcar mascabado","cant":120.0,"u":"g","desc":"Azúcar mascabado"},{"n":3,"comp":"Masa","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"Azúcar refinada"},{"n":3,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":3,"comp":"Masa","ins":"Colorante en gel","cant":15.0,"u":"ml","desc":"Colorante en gel rojo brillante"},{"n":3,"comp":"Masa","ins":"Vinagre blanco","cant":5.0,"u":"ml","desc":"Vinagre blanco"},{"n":3,"comp":"Masa","ins":"Harina de trigo","cant":280.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":3,"comp":"Masa","ins":"Cacao en polvo natural","cant":20.0,"u":"g","desc":"Cacao en polvo natural (no alcalino, para no oscurecer el rojo)"},{"n":3,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":3,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":3,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":3,"comp":"Masa","ins":"Chispas de chocolate blanco","cant":180.0,"u":"g","desc":"Chispas o trozos de chocolate blanco"},{"n":3,"comp":"Masa","ins":"Nuez pecana","cant":70.0,"u":"g","desc":"Nuez pecana (tostada y troceada rústicamente)"},{"n":4,"comp":"Masa","ins":"Mantequilla sin sal","cant":170.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":4,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":160.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":4,"comp":"Masa","ins":"Azúcar refinada","cant":50.0,"u":"g","desc":"Azúcar refinada"},{"n":4,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":4,"comp":"Masa","ins":"Harina de trigo","cant":180.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":4,"comp":"Masa","ins":"Avena en hojuelas","cant":150.0,"u":"g","desc":"Hojuelas de avena entera (tradicional, no instantánea)"},{"n":4,"comp":"Masa","ins":"Canela en polvo","cant":5.0,"u":"g","desc":"Canela en polvo"},{"n":4,"comp":"Masa","ins":"Bicarbonato de sodio","cant":4.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":4,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":4,"comp":"Masa","ins":"Pasas rubias","cant":180.0,"u":"g","desc":"Pasas rubias (previamente hidratadas en agua caliente por 10 min y escurridas)"},{"n":4,"comp":"Masa","ins":"Nuez de Castilla","cant":50.0,"u":"g","desc":"Nuez de Castilla (troceada grande)"},{"n":5,"comp":"Masa","ins":"Mantequilla sin sal","cant":220.0,"u":"g","desc":"Mantequilla sin sal (para obtener aprox. 180 g de mantequilla avellanada)"},{"n":5,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":180.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":5,"comp":"Masa","ins":"Azúcar refinada","cant":60.0,"u":"g","desc":"Azúcar refinada"},{"n":5,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos enteros (fríos) + 1 yema (para reponer la humedad perdida)"},{"n":5,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":5,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":5,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":5,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":5,"comp":"Masa","ins":"Nuez pecana","cant":200.0,"u":"g","desc":"Nuez pecana (tostada al horno y troceada gruesa)"},{"n":5,"comp":"Masa","ins":"Chispas de chocolate con leche","cant":100.0,"u":"g","desc":"Chispas de chocolate con leche (opcional)"},{"n":6,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":6,"comp":"Masa","ins":"Azúcar mascabado","cant":140.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":6,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":6,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":6,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":6,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":6,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":6,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":6,"comp":"Masa","ins":"Nuez macadamia","cant":150.0,"u":"g","desc":"Nuez macadamia (tostada ligeramente al horno y troceada a la mitad)"},{"n":6,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":150.0,"u":"g","desc":"Chunks de chocolate blanco"},{"n":7,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":7,"comp":"Masa","ins":"Azúcar refinada","cant":200.0,"u":"g","desc":"Azúcar refinada"},{"n":7,"comp":"Masa","ins":"Azúcar mascabado","cant":50.0,"u":"g","desc":"Azúcar mascabado"},{"n":7,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":7,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":7,"comp":"Masa","ins":"Cremor tártaro","cant":8.0,"u":"g","desc":"Cremor tártaro"},{"n":7,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":7,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":8,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":8,"comp":"Masa","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"Azúcar refinada"},{"n":8,"comp":"Masa","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":8,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":8,"comp":"Masa","ins":"Extracto de vainilla","cant":10.0,"u":"ml","desc":"Extracto de vainilla transparente (para no manchar la masa) o emulsión sabor"},{"n":8,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":8,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":8,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":8,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":8,"comp":"Masa","ins":"Chispas de colores","cant":80.0,"u":"g","desc":"Chispas de colores (grageas tipo jimmies, no nonpareils porque sangran el color)"},{"n":8,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":150.0,"u":"g","desc":"Chunks de chocolate blanco o trozos de galleta dorada (tipo Oreo Golden)"},{"n":9,"comp":"Masa","ins":"Mantequilla sin sal","cant":120.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":9,"comp":"Masa","ins":"Crema de cacahuate","cant":150.0,"u":"g","desc":"Crema de cacahuate comercial (tipo Jif o Skippy)"},{"n":9,"comp":"Masa","ins":"Azúcar mascabado","cant":150.0,"u":"g","desc":"Azúcar mascabado"},{"n":9,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":9,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":9,"comp":"Masa","ins":"Harina de trigo","cant":280.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":9,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":9,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":9,"comp":"Masa","ins":"Cacahuate tostado","cant":100.0,"u":"g","desc":"Cacahuates tostados (sin sal, picados en trozos rústicos)"},{"n":9,"comp":"Masa","ins":"Chispas de chocolate con leche","cant":100.0,"u":"g","desc":"Chispas de chocolate con leche o semiamargo (opcional)"},{"n":10,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":10,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":180.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":10,"comp":"Masa","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"Azúcar refinada"},{"n":10,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":10,"comp":"Masa","ins":"Harina de trigo","cant":240.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":10,"comp":"Masa","ins":"Cacao en polvo alcalino","cant":60.0,"u":"g","desc":"Cacao en polvo alcalino oscuro"},{"n":10,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":10,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":10,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":10,"comp":"Masa","ins":"Chocolate semiamargo 54% (chunks)","cant":80.0,"u":"g","desc":"Chunks de chocolate semiamargo"},{"n":10,"comp":"Masa","ins":"Chocolate con leche (chunks)","cant":80.0,"u":"g","desc":"Chunks de chocolate con leche"},{"n":10,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":80.0,"u":"g","desc":"Chunks de chocolate blanco"},{"n":11,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla fría + Mantequilla fría"},{"n":11,"comp":"Masa","ins":"Azúcar mascabado","cant":160.0,"u":"g","desc":"Azúcar mascabado + Azúcar mascabado"},{"n":11,"comp":"Masa","ins":"Azúcar refinada","cant":90.0,"u":"g","desc":"Azúcar refinada + Azúcar refinada"},{"n":11,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevo frío + Huevo frío"},{"n":11,"comp":"Masa","ins":"Harina de trigo","cant":270.0,"u":"g","desc":"Harina de trigo + Harina de trigo"},{"n":11,"comp":"Masa","ins":"Cacao en polvo alcalino","cant":35.0,"u":"g","desc":"Cacao en polvo alcalino"},{"n":11,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz + Fécula de maíz"},{"n":11,"comp":"Masa","ins":"Bicarbonato de sodio","cant":4.0,"u":"g","desc":"Bicarbonato + Bicarbonato"},{"n":11,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal + Sal"},{"n":11,"comp":"Masa","ins":"Chocolate amargo 70% (chunks)","cant":50.0,"u":"g","desc":"Chunks de chocolate oscuro ▮ Mitad Cookie (Chispas):"},{"n":11,"comp":"Masa","ins":"Chocolate semiamargo 54% (chunks)","cant":75.0,"u":"g","desc":"Chunks de chocolate semiamargo"},{"n":12,"comp":"Masa","ins":"Mantequilla sin sal","cant":170.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":12,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":120.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":12,"comp":"Masa","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"Azúcar refinada"},{"n":12,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":1.0,"u":"pza","desc":"Huevo frío + 1 yema"},{"n":12,"comp":"Masa","ins":"Zanahoria","cant":120.0,"u":"g","desc":"Zanahoria rallada finamente (exprimida fuertemente en una manta de cielo para"},{"n":12,"comp":"Masa","ins":"Harina de trigo","cant":320.0,"u":"g","desc":"Harina de trigo"},{"n":12,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":12,"comp":"Masa","ins":"Canela en polvo","cant":4.0,"u":"g","desc":"Canela en polvo"},{"n":12,"comp":"Masa","ins":"Nuez moscada","cant":2.0,"u":"g","desc":"Nuez moscada y 2 g de jengibre en polvo"},{"n":12,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":12,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":12,"comp":"Masa","ins":"Nuez pecana","cant":80.0,"u":"g","desc":"Nuez pecana (troceada)"},{"n":13,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":13,"comp":"Masa","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"Azúcar refinada"},{"n":13,"comp":"Masa","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"Azúcar mascabado"},{"n":13,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":13,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":13,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":13,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":13,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":14,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":14,"comp":"Masa","ins":"Azúcar mascabado","cant":150.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":14,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":14,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":14,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo"},{"n":14,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":14,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":14,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":14,"comp":"Masa","ins":"Manzana deshidratada","cant":80.0,"u":"g","desc":"Manzana deshidratada (en cubos pequeños)"},{"n":14,"comp":"Masa","ins":"Canela en polvo","cant":2.0,"u":"g","desc":"Canela"},{"n":14,"comp":"Masa","ins":"Nuez moscada","cant":1.0,"u":"g","desc":"Nuez moscada"},{"n":15,"comp":"Masa","ins":"Mantequilla sin sal","cant":160.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":15,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":150.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":15,"comp":"Masa","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"Azúcar refinada"},{"n":15,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":1.0,"u":"pza","desc":"Huevo frío (solo uno)"},{"n":15,"comp":"Masa","ins":"Plátano maduro","cant":80.0,"u":"g","desc":"Puré de plátano muy maduro (pisado con tenedor)"},{"n":15,"comp":"Masa","ins":"Harina de trigo","cant":320.0,"u":"g","desc":"Harina de trigo (aumentada para absorber el puré)"},{"n":15,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":15,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":15,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":15,"comp":"Masa","ins":"Chunks de caramelo firme","cant":120.0,"u":"g","desc":"Chunks de caramelo firme (tipo toffee inglés o caramelos suaves picados)"},{"n":15,"comp":"Masa","ins":"Chocolate amargo 70% (chunks)","cant":100.0,"u":"g","desc":"Chunks de chocolate oscuro"},{"n":16,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":16,"comp":"Masa","ins":"Azúcar mascabado","cant":150.0,"u":"g","desc":"Azúcar mascabado"},{"n":16,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":16,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos + 1 cucharada de leche fría"},{"n":16,"comp":"Masa","ins":"Harina de trigo","cant":320.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":16,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":16,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":16,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":16,"comp":"Masa","ins":"Chispas de chocolate semiamargo","cant":150.0,"u":"g","desc":"Chispas de chocolate semiamargo"},{"n":16,"comp":"Núcleo / relleno","ins":"Crema de cacao y avellana (tipo Nutella)","cant":120.0,"u":"g","desc":"NÚCLEO: crema de cacao y avellana (tipo Nutella)"},{"n":17,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":17,"comp":"Masa","ins":"Azúcar mascabado","cant":140.0,"u":"g","desc":"Azúcar mascabado"},{"n":17,"comp":"Masa","ins":"Azúcar refinada","cant":110.0,"u":"g","desc":"Azúcar refinada"},{"n":17,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":17,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":17,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":17,"comp":"Masa","ins":"Canela en polvo","cant":5.0,"u":"g","desc":"Canela en polvo"},{"n":17,"comp":"Masa","ins":"Jengibre en polvo","cant":2.0,"u":"g","desc":"Jengibre en polvo"},{"n":17,"comp":"Masa","ins":"Clavo molido","cant":1.0,"u":"g","desc":"Clavo molido"},{"n":17,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":17,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":17,"comp":"Masa","ins":"Galletas Lotus Biscoff","cant":80.0,"u":"g","desc":"Galletas Lotus Biscoff (troceadas gruesas)"},{"n":17,"comp":"Masa","ins":"Chispas de chocolate blanco","cant":80.0,"u":"g","desc":"Chispas de chocolate blanco"},{"n":17,"comp":"Núcleo / relleno","ins":"Crema de galleta Biscoff","cant":120.0,"u":"g","desc":"NÚCLEO: crema de galleta Biscoff Lotus"},{"n":18,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":18,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":130.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":18,"comp":"Masa","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"Azúcar refinada"},{"n":18,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":18,"comp":"Masa","ins":"Harina de trigo","cant":250.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":18,"comp":"Masa","ins":"Galletas María / Graham","cant":60.0,"u":"g","desc":"Galletas Graham o María (trituradas en polvo fino)"},{"n":18,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":18,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":18,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":18,"comp":"Masa","ins":"Chocolate semiamargo 54% (chunks)","cant":150.0,"u":"g","desc":"Chunks de chocolate semiamargo"},{"n":19,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":19,"comp":"Masa","ins":"Azúcar mascabado","cant":150.0,"u":"g","desc":"Azúcar mascabado"},{"n":19,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":19,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":19,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":19,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":19,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":19,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":19,"comp":"Masa","ins":"Nuez pecana","cant":120.0,"u":"g","desc":"Nuez pecana (troceada rústicamente)"},{"n":19,"comp":"Masa","ins":"Chispas de chocolate con leche","cant":50.0,"u":"g","desc":"Chispas de chocolate con leche"},{"n":19,"comp":"Núcleo / relleno","ins":"Cajeta horneable / dulce de leche","cant":120.0,"u":"g","desc":"NÚCLEO: cajeta horneable o dulce de leche repostero"},{"n":20,"comp":"Masa","ins":"Mantequilla sin sal","cant":160.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":20,"comp":"Masa","ins":"Pasta pura de pistache","cant":50.0,"u":"g","desc":"Pasta pura de pistache (100% pistache, sin azúcar)"},{"n":20,"comp":"Masa","ins":"Azúcar mascabado","cant":120.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":20,"comp":"Masa","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"Azúcar refinada"},{"n":20,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":20,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo"},{"n":20,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":20,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":20,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":20,"comp":"Masa","ins":"Pistache pelado","cant":80.0,"u":"g","desc":"Pistaches pelados y troceados gruesos"},{"n":20,"comp":"Núcleo / relleno","ins":"Chocolate blanco (chunks)","cant":100.0,"u":"g","desc":"NÚCLEO: chocolate blanco fundido mezclado"},{"n":21,"comp":"Masa","ins":"Azúcar glass","cant":30.0,"u":"g","desc":"de azúcar glass, 2 ml de vainilla. Mezclado pero sin sobrebatir para mantenerlo"},{"n":21,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":21,"comp":"Masa","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"Azúcar refinada"},{"n":21,"comp":"Masa","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":21,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":21,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":21,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":21,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":21,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":21,"comp":"Masa","ins":"Frambuesa liofilizada","cant":20.0,"u":"g","desc":"Frambuesa liofilizada (trozos medianos, no polvo fino)"},{"n":21,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":100.0,"u":"g","desc":"Chunks de chocolate blanco"},{"n":21,"comp":"Núcleo / relleno","ins":"Queso crema (bloque firme)","cant":120.0,"u":"g","desc":"NÚCLEO: queso crema (bloque firme, no untable),"},{"n":22,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":22,"comp":"Masa","ins":"Azúcar mascabado","cant":140.0,"u":"g","desc":"Azúcar mascabado"},{"n":22,"comp":"Masa","ins":"Azúcar refinada","cant":110.0,"u":"g","desc":"Azúcar refinada"},{"n":22,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":22,"comp":"Masa","ins":"Harina de trigo","cant":290.0,"u":"g","desc":"Harina de trigo"},{"n":22,"comp":"Masa","ins":"Cacao en polvo natural","cant":20.0,"u":"g","desc":"Cacao en polvo natural (no alcalino, para mantener el color marrón claro)"},{"n":22,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":22,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":22,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":22,"comp":"Masa","ins":"Chocolate con leche y avellana (Kinder)","cant":150.0,"u":"g","desc":"Barras de Kinder Bueno (troceadas) o trozos de chocolate con leche y avellana"},{"n":22,"comp":"Núcleo / relleno","ins":"Crema de avellana blanca","cant":120.0,"u":"g","desc":"NÚCLEO: crema de avellana blanca (crema láctea de avellana)."},{"n":23,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":23,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":160.0,"u":"g","desc":"Azúcar mascabado oscuro (vital para potenciar el sabor a caramelo de la masa)"},{"n":23,"comp":"Masa","ins":"Azúcar refinada","cant":90.0,"u":"g","desc":"Azúcar refinada"},{"n":23,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":23,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":23,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":23,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":23,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":23,"comp":"Masa","ins":"Pretzels salados","cant":80.0,"u":"g","desc":"Pretzels salados (troceados gruesos, no polvo)"},{"n":23,"comp":"Masa","ins":"Chispas de chocolate semiamargo","cant":100.0,"u":"g","desc":"Chispas de chocolate semiamargo"},{"n":23,"comp":"Núcleo / relleno","ins":"Cajeta horneable / dulce de leche","cant":120.0,"u":"g","desc":"NÚCLEO: caramelo suave (cortado en 6 cubos de 20 g) o pasta de"},{"n":23,"comp":"Decoración","ins":"Sal de mar en escamas","cant":2.0,"u":"g","desc":"C/S en el libro — cantidad estimada, ajústala: Sal en escamas para decorar"},{"n":24,"comp":"Masa","ins":"Mantequilla sin sal","cant":170.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":24,"comp":"Masa","ins":"Azúcar mascabado","cant":150.0,"u":"g","desc":"Azúcar mascabado"},{"n":24,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":24,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":24,"comp":"Masa","ins":"Harina de trigo","cant":250.0,"u":"g","desc":"Harina de trigo"},{"n":24,"comp":"Masa","ins":"Harina de avellana","cant":50.0,"u":"g","desc":"Harina/Polvo de avellana tostada"},{"n":24,"comp":"Masa","ins":"Cacao en polvo alcalino","cant":20.0,"u":"g","desc":"Cacao en polvo alcalino"},{"n":24,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":24,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":24,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":24,"comp":"Masa","ins":"Avellana tostada","cant":100.0,"u":"g","desc":"Avellanas tostadas (troceadas rústicamente)"},{"n":24,"comp":"Núcleo / relleno","ins":"Chocolate semiamargo 54% (chunks)","cant":90.0,"u":"g","desc":"NÚCLEO: chocolate semiamargo (54%) + 30"},{"n":25,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":25,"comp":"Masa","ins":"Azúcar mascabado","cant":120.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":25,"comp":"Masa","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"Azúcar refinada"},{"n":25,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":25,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo"},{"n":25,"comp":"Masa","ins":"Té matcha culinario","cant":20.0,"u":"g","desc":"Té Matcha grado culinario de alta calidad"},{"n":25,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":25,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":25,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":25,"comp":"Masa","ins":"Chispas de chocolate blanco","cant":100.0,"u":"g","desc":"Chispas de chocolate blanco (opcional)"},{"n":25,"comp":"Núcleo / relleno","ins":"Chocolate blanco (chunks)","cant":120.0,"u":"g","desc":"NÚCLEO: ganache de chocolate blanco firme (como el de la receta 15)."},{"n":26,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":26,"comp":"Masa","ins":"Azúcar mascabado","cant":140.0,"u":"g","desc":"Azúcar mascabado"},{"n":26,"comp":"Masa","ins":"Azúcar refinada","cant":110.0,"u":"g","desc":"Azúcar refinada"},{"n":26,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":26,"comp":"Masa","ins":"Extracto de café","cant":15.0,"u":"ml","desc":"Extracto de café puro (o café soluble intenso disuelto en 5 ml de agua caliente y"},{"n":26,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo"},{"n":26,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":26,"comp":"Masa","ins":"Cacao en polvo alcalino","cant":15.0,"u":"g","desc":"Cacao en polvo (para la masa)"},{"n":26,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":26,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":26,"comp":"Núcleo / relleno","ins":"Queso mascarpone","cant":120.0,"u":"g","desc":"NÚCLEO: queso mascarpone mezclado suavemente con 15 g de azúcar"},{"n":26,"comp":"Decoración","ins":"Cacao en polvo alcalino","cant":5.0,"u":"g","desc":"C/S en el libro — cantidad estimada, ajústala: Cacao alcalino extra (para espolvorear al final)"},{"n":27,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":27,"comp":"Masa","ins":"Azúcar refinada","cant":140.0,"u":"g","desc":"Azúcar refinada"},{"n":27,"comp":"Masa","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"Azúcar mascabado"},{"n":27,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":27,"comp":"Masa","ins":"Harina de trigo","cant":250.0,"u":"g","desc":"Harina de trigo"},{"n":27,"comp":"Masa","ins":"Galletas María / Graham","cant":70.0,"u":"g","desc":"Galletas María (trituradas finamente en polvo)"},{"n":27,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":27,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":27,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":27,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":100.0,"u":"g","desc":"Chunks de chocolate blanco (para balancear la acidez)"},{"n":27,"comp":"Núcleo / relleno","ins":"Leche condensada","cant":100.0,"u":"g","desc":"NÚCLEO: leche condensada mezclada con 30"},{"n":28,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":28,"comp":"Masa","ins":"Azúcar refinada","cant":200.0,"u":"g","desc":"Azúcar refinada"},{"n":28,"comp":"Masa","ins":"Azúcar mascabado","cant":50.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":28,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":28,"comp":"Masa","ins":"Harina de trigo","cant":320.0,"u":"g","desc":"Harina de trigo"},{"n":28,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":28,"comp":"Masa","ins":"Canela en polvo","cant":8.0,"u":"g","desc":"Canela en polvo"},{"n":28,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":28,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":28,"comp":"Núcleo / relleno","ins":"Cajeta horneable / dulce de leche","cant":120.0,"u":"g","desc":"NÚCLEO: cajeta horneable, dulce de leche repostero o ganache de"},{"n":29,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":29,"comp":"Masa","ins":"Azúcar refinada","cant":160.0,"u":"g","desc":"Azúcar refinada"},{"n":29,"comp":"Masa","ins":"Azúcar mascabado","cant":80.0,"u":"g","desc":"Azúcar mascabado"},{"n":29,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":29,"comp":"Masa","ins":"Extracto de vainilla","cant":10.0,"u":"ml","desc":"Extracto de vainilla transparente"},{"n":29,"comp":"Masa","ins":"Harina de trigo","cant":320.0,"u":"g","desc":"Harina de trigo (mitad panadera, mitad uso múltiple para mayor soporte)"},{"n":29,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":15.0,"u":"g","desc":"Fécula de maíz (aporta la esponjosidad necesaria para absorber)"},{"n":29,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":29,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":29,"comp":"Masa","ins":"Chispas de chocolate blanco","cant":100.0,"u":"g","desc":"Chispas de chocolate blanco (opcional, para dar textura interna)"},{"n":30,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":30,"comp":"Masa","ins":"Azúcar mascabado","cant":160.0,"u":"g","desc":"Azúcar mascabado"},{"n":30,"comp":"Masa","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"Azúcar refinada"},{"n":30,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":30,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":30,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":30,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":30,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":31,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":31,"comp":"Masa","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"Azúcar refinada"},{"n":31,"comp":"Masa","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":31,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":31,"comp":"Masa","ins":"Extracto de vainilla","cant":5.0,"u":"ml","desc":"Extracto de vainilla transparente"},{"n":31,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":31,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":31,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":31,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":31,"comp":"Masa","ins":"Chocolate rubí (chunks)","cant":120.0,"u":"g","desc":"Chunks de chocolate Rubí (o callets enteros)"},{"n":31,"comp":"Masa","ins":"Fresa liofilizada","cant":30.0,"u":"g","desc":"Fresa liofilizada (troceada en pedazos medianos)"},{"n":31,"comp":"Masa","ins":"Chispas de chocolate blanco","cant":50.0,"u":"g","desc":"Chispas de chocolate blanco (para dar contraste visual)"},{"n":32,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":32,"comp":"Masa","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"Azúcar refinada"},{"n":32,"comp":"Masa","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"Azúcar mascabado"},{"n":32,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":32,"comp":"Masa","ins":"Colorante en gel","cant":5.0,"u":"ml","desc":"Colorante en gel color rosa brillante"},{"n":32,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo"},{"n":32,"comp":"Masa","ins":"Cacao en polvo natural","cant":15.0,"u":"g","desc":"Cacao en polvo natural (aporta sabor sin oscurecer tanto como el alcalino)"},{"n":32,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":32,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":32,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":32,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":120.0,"u":"g","desc":"Chunks de chocolate blanco"},{"n":32,"comp":"Núcleo / relleno","ins":"Mermelada de frambuesa","cant":120.0,"u":"g","desc":"NÚCLEO: mermelada de frambuesa de alta calidad (reducida a fuego"},{"n":33,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":33,"comp":"Masa","ins":"Azúcar mascabado","cant":150.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":33,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":33,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":33,"comp":"Masa","ins":"Extracto de coco","cant":5.0,"u":"ml","desc":"Extracto de coco (esencial para potenciar el perfil)"},{"n":33,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo"},{"n":33,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":33,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":33,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":33,"comp":"Masa","ins":"Coco rallado seco","cant":60.0,"u":"g","desc":"Coco rallado seco (previamente tostado al horno sin azúcar)"},{"n":33,"comp":"Masa","ins":"Piña deshidratada","cant":80.0,"u":"g","desc":"Piña deshidratada (cortada en dados muy pequeños)"},{"n":33,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":100.0,"u":"g","desc":"Chunks de chocolate blanco"},{"n":34,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":34,"comp":"Masa","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"Azúcar refinada"},{"n":34,"comp":"Masa","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"Azúcar mascabado"},{"n":34,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":34,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":34,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":34,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":34,"comp":"Masa","ins":"Sal fina","cant":2.0,"u":"g","desc":"Sal fina"},{"n":34,"comp":"Masa","ins":"Mango deshidratado","cant":80.0,"u":"g","desc":"Mango deshidratado (picado finamente)"},{"n":34,"comp":"Núcleo / relleno","ins":"Chamoy espeso","cant":120.0,"u":"g","desc":"NÚCLEO: pasta de chamoy (mezcla chamoy espeso con un poco de azú‐"},{"n":35,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":35,"comp":"Masa","ins":"Azúcar refinada","cant":160.0,"u":"g","desc":"Azúcar refinada"},{"n":35,"comp":"Masa","ins":"Azúcar mascabado","cant":90.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":35,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":35,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":35,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":35,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":35,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":35,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":80.0,"u":"g","desc":"Chunks de chocolate blanco"},{"n":35,"comp":"Núcleo / relleno","ins":"Chocolate blanco (chunks)","cant":90.0,"u":"g","desc":"NÚCLEO: chocolate blanco, 30 g de puré de"},{"n":36,"comp":"Masa","ins":"Mantequilla sin sal","cant":170.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":36,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":120.0,"u":"g","desc":"Azúcar mascabado oscuro ( )"},{"n":36,"comp":"Masa","ins":"Melaza","cant":60.0,"u":"g","desc":"Melaza pura (no jarabe de maíz)"},{"n":36,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":1.0,"u":"pza","desc":"Huevo frío (grande)"},{"n":36,"comp":"Masa","ins":"Harina de trigo","cant":320.0,"u":"g","desc":"Harina de trigo"},{"n":36,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":36,"comp":"Masa","ins":"Jengibre en polvo","cant":6.0,"u":"g","desc":"Jengibre en polvo"},{"n":36,"comp":"Masa","ins":"Canela en polvo","cant":4.0,"u":"g","desc":"Canela en polvo"},{"n":36,"comp":"Masa","ins":"Clavo molido","cant":1.0,"u":"g","desc":"Clavo molido"},{"n":36,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio (crucial para neutralizar la acidez de la melaza)"},{"n":36,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":36,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":120.0,"u":"g","desc":"Chunks de chocolate blanco (aporta el dulzor lácteo que equilibra las especias)"},{"n":37,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":37,"comp":"Masa","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"Azúcar refinada"},{"n":37,"comp":"Masa","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"Azúcar mascabado"},{"n":37,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":37,"comp":"Masa","ins":"Harina de trigo","cant":260.0,"u":"g","desc":"Harina de trigo"},{"n":37,"comp":"Masa","ins":"Cacao en polvo alcalino","cant":40.0,"u":"g","desc":"Cacao alcalino en polvo"},{"n":37,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":37,"comp":"Masa","ins":"Canela en polvo","cant":6.0,"u":"g","desc":"Canela en polvo"},{"n":37,"comp":"Masa","ins":"Chile de árbol molido","cant":1.0,"u":"g","desc":"Chile de árbol molido o cayena (opcional, para el picor cálido)"},{"n":37,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":37,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":37,"comp":"Masa","ins":"Chocolate semiamargo 54% (chunks)","cant":80.0,"u":"g","desc":"Chunks de chocolate semiamargo"},{"n":37,"comp":"Masa","ins":"Mini malvaviscos","cant":50.0,"u":"g","desc":"Mini malvaviscos (preferentemente deshidratados, o normales congelados previa‐"},{"n":38,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":38,"comp":"Masa","ins":"Azúcar mascabado","cant":160.0,"u":"g","desc":"Azúcar mascabado"},{"n":38,"comp":"Masa","ins":"Azúcar refinada","cant":90.0,"u":"g","desc":"Azúcar refinada"},{"n":38,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":38,"comp":"Masa","ins":"Extracto de café","cant":5.0,"u":"ml","desc":"Extracto de café puro (o café soluble extra fuerte diluido y frío)"},{"n":38,"comp":"Masa","ins":"Harina de trigo","cant":260.0,"u":"g","desc":"Harina de trigo"},{"n":38,"comp":"Masa","ins":"Cacao en polvo alcalino","cant":40.0,"u":"g","desc":"Cacao alcalino"},{"n":38,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":38,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":38,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":38,"comp":"Masa","ins":"Chocolate amargo 70% (chunks)","cant":80.0,"u":"g","desc":"Chunks de chocolate oscuro"},{"n":38,"comp":"Masa","ins":"Caramelos de menta","cant":60.0,"u":"g","desc":"Caramelos de menta (candy canes) triturados toscamente"},{"n":39,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":39,"comp":"Masa","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"Azúcar refinada"},{"n":39,"comp":"Masa","ins":"Azúcar mascabado","cant":70.0,"u":"g","desc":"Azúcar mascabado"},{"n":39,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":39,"comp":"Masa","ins":"Harina de trigo","cant":220.0,"u":"g","desc":"Harina de trigo (uso múltiple)"},{"n":39,"comp":"Masa","ins":"Harina de maíz nixtamalizada","cant":80.0,"u":"g","desc":"Harina de maíz nixtamalizado (tipo Maseca, preferentemente de maíz"},{"n":39,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":39,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":39,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":39,"comp":"Masa","ins":"Pasas negras","cant":100.0,"u":"g","desc":"Pasitas negras (hidratadas en agua tibia 10 min y escurridas)"},{"n":39,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":80.0,"u":"g","desc":"Chunks de chocolate blanco (opcional, para dar más untuosidad)"},{"n":40,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":40,"comp":"Masa","ins":"Azúcar refinada","cant":160.0,"u":"g","desc":"Azúcar refinada"},{"n":40,"comp":"Masa","ins":"Azúcar mascabado","cant":80.0,"u":"g","desc":"Azúcar mascabado"},{"n":40,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":40,"comp":"Masa","ins":"Esencia de azahar","cant":4.0,"u":"ml","desc":"Esencia pura de flor de azahar (ser precisos, el exceso amarga)"},{"n":40,"comp":"Masa","ins":"Harina de trigo","cant":320.0,"u":"g","desc":"Harina de trigo"},{"n":40,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":40,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":40,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":40,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":100.0,"u":"g","desc":"Chunks de chocolate blanco"},{"n":41,"comp":"Masa","ins":"Mantequilla sin sal","cant":170.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":41,"comp":"Masa","ins":"Pasta de miso blanco","cant":40.0,"u":"g","desc":"Pasta de miso blanco (Shiro Miso)"},{"n":41,"comp":"Masa","ins":"Azúcar mascabado","cant":120.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":41,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":41,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":41,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":41,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":41,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":41,"comp":"Masa","ins":"Sal fina","cant":2.0,"u":"g","desc":"Sal fina (el miso ya aporta salinidad)"},{"n":41,"comp":"Masa","ins":"Chocolate blanco caramelizado (Gold)","cant":120.0,"u":"g","desc":"Chunks de chocolate rubio (tipo Gold o Dulcey)"},{"n":41,"comp":"Masa","ins":"Ajonjolí (blanco y negro)","cant":15.0,"u":"g","desc":"Semillas de sésamo blanco y negro (ligeramente tostadas)"},{"n":42,"comp":"Masa","ins":"Mantequilla sin sal","cant":120.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":42,"comp":"Masa","ins":"Aceite de oliva extra virgen","cant":60.0,"u":"ml","desc":"Aceite de oliva extra virgen (de alta calidad)"},{"n":42,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":150.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":42,"comp":"Masa","ins":"Azúcar refinada","cant":90.0,"u":"g","desc":"Azúcar refinada"},{"n":42,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":42,"comp":"Masa","ins":"Romero fresco","cant":4.0,"u":"g","desc":"Romero fresco (picado finísimamente, sin tallos)"},{"n":42,"comp":"Masa","ins":"Harina de trigo","cant":320.0,"u":"g","desc":"Harina de trigo (aumentada ligeramente para absorber el aceite)"},{"n":42,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":42,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":42,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":42,"comp":"Masa","ins":"Chocolate amargo 70% (chunks)","cant":150.0,"u":"g","desc":"Chunks de chocolate oscuro (mínimo 70% cacao)"},{"n":42,"comp":"Decoración","ins":"Sal de mar en escamas","cant":2.0,"u":"g","desc":"C/S en el libro — cantidad estimada, ajústala: Sal de mar en escamas"},{"n":43,"comp":"Masa","ins":"Mantequilla sin sal","cant":170.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":43,"comp":"Masa","ins":"Azúcar mascabado","cant":140.0,"u":"g","desc":"Azúcar mascabado"},{"n":43,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":43,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":43,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":43,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":43,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":43,"comp":"Masa","ins":"Sal fina","cant":3.0,"u":"g","desc":"Sal fina"},{"n":43,"comp":"Masa","ins":"Queso azul","cant":40.0,"u":"g","desc":"Queso azul (tipo Gorgonzola o Roquefort, en trozos grandes, súper frío)"},{"n":43,"comp":"Masa","ins":"Higo deshidratado","cant":70.0,"u":"g","desc":"Higo deshidratado (picado en dados y rehidratado 5 min en agua caliente, secado"},{"n":43,"comp":"Masa","ins":"Nuez pecana caramelizada","cant":60.0,"u":"g","desc":"Nuez pecana caramelizada (garapiñada) troceada"},{"n":44,"comp":"Masa","ins":"Mantequilla sin sal","cant":170.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":44,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":160.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":44,"comp":"Masa","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"Azúcar refinada"},{"n":44,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":44,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":44,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":44,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":44,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":44,"comp":"Masa","ins":"Chocolate con leche (chunks)","cant":120.0,"u":"g","desc":"Chunks de chocolate con leche"},{"n":45,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":45,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":150.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":45,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":45,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":45,"comp":"Masa","ins":"Aceite de trufa negra","cant":10.0,"u":"ml","desc":"Aceite de trufa negra (infusionado de alta calidad, ajustar según intensidad)"},{"n":45,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo"},{"n":45,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":45,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":45,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":45,"comp":"Masa","ins":"Chocolate semiamargo 54% (chunks)","cant":150.0,"u":"g","desc":"Chunks de chocolate semiamargo (54% a 60% cacao)"},{"n":45,"comp":"Decoración","ins":"Sal de mar en escamas","cant":2.0,"u":"g","desc":"C/S en el libro — cantidad estimada, ajústala: Sal de mar en escamas y/o polvo de trufa seca para decorar"},{"n":46,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":46,"comp":"Masa","ins":"Azúcar mascabado","cant":120.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":46,"comp":"Masa","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"Azúcar refinada"},{"n":46,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":46,"comp":"Masa","ins":"Jugo de yuzu","cant":10.0,"u":"ml","desc":"Jugo de Yuzu puro (o mezcla de jugo de mandarina y limón amarillo)"},{"n":46,"comp":"Masa","ins":"Harina de trigo","cant":300.0,"u":"g","desc":"Harina de trigo"},{"n":46,"comp":"Masa","ins":"Té matcha culinario","cant":20.0,"u":"g","desc":"Té Matcha de grado culinario premium"},{"n":46,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":46,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":46,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":46,"comp":"Masa","ins":"Chocolate blanco caramelizado (Gold)","cant":120.0,"u":"g","desc":"Chunks de chocolate blanco caramelizado (tipo Gold o Dulcey)"},{"n":47,"comp":"Masa","ins":"Mantequilla sin sal","cant":190.0,"u":"g","desc":"Mantequilla sin sal (se pesará un extra para compensar la que absorba el té) ( )"},{"n":47,"comp":"Masa","ins":"Té Earl Grey en hojas","cant":10.0,"u":"g","desc":"Hojas de té Earl Grey de alta calidad (sueltas, no en polvo)"},{"n":47,"comp":"Masa","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"Azúcar refinada"},{"n":47,"comp":"Masa","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"Azúcar mascabado claro"},{"n":47,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":47,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":47,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":47,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":47,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":47,"comp":"Masa","ins":"Lavanda culinaria","cant":2.0,"u":"g","desc":"Flores de lavanda culinaria (trituradas en polvo)"},{"n":47,"comp":"Masa","ins":"Chocolate blanco (chunks)","cant":100.0,"u":"g","desc":"Chunks de chocolate blanco"},{"n":48,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":48,"comp":"Masa","ins":"Piloncillo","cant":120.0,"u":"g","desc":"Piloncillo rallado muy finamente (o mascabado ultra oscuro)"},{"n":48,"comp":"Masa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"Azúcar refinada"},{"n":48,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":48,"comp":"Masa","ins":"Extracto de café","cant":15.0,"u":"ml","desc":"Extracto de café puro (o espresso muy concentrado y frío)"},{"n":48,"comp":"Masa","ins":"Harina de trigo","cant":320.0,"u":"g","desc":"Harina de trigo"},{"n":48,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":48,"comp":"Masa","ins":"Canela en polvo","cant":4.0,"u":"g","desc":"Canela en polvo"},{"n":48,"comp":"Masa","ins":"Clavo molido","cant":1.0,"u":"g","desc":"Clavo molido"},{"n":48,"comp":"Masa","ins":"Anís estrella en polvo","cant":1.0,"u":"g","desc":"Anís estrella en polvo"},{"n":48,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":48,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":48,"comp":"Masa","ins":"Chocolate semiamargo 54% (chunks)","cant":100.0,"u":"g","desc":"Chunks de chocolate semiamargo"},{"n":49,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":49,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":170.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":49,"comp":"Masa","ins":"Azúcar refinada","cant":90.0,"u":"g","desc":"Azúcar refinada"},{"n":49,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":49,"comp":"Masa","ins":"Harina de trigo","cant":250.0,"u":"g","desc":"Harina de trigo"},{"n":49,"comp":"Masa","ins":"Cacao en polvo alcalino","cant":50.0,"u":"g","desc":"Cacao en polvo alcalino oscuro"},{"n":49,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":49,"comp":"Masa","ins":"Chile ancho seco","cant":8.0,"u":"g","desc":"Chile ancho seco (pulverizado y sin semillas)"},{"n":49,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":49,"comp":"Masa","ins":"Sal fina","cant":4.0,"u":"g","desc":"Sal fina"},{"n":49,"comp":"Masa","ins":"Almendra Marcona","cant":100.0,"u":"g","desc":"Almendra Marcona (entera o troceada gruesa)"},{"n":49,"comp":"Masa","ins":"Chocolate amargo 70% (chunks)","cant":80.0,"u":"g","desc":"Chunks de chocolate oscuro"},{"n":50,"comp":"Masa","ins":"Mantequilla sin sal","cant":180.0,"u":"g","desc":"Mantequilla sin sal (fría en cubos)"},{"n":50,"comp":"Masa","ins":"Azúcar mascabado oscuro","cant":160.0,"u":"g","desc":"Azúcar mascabado oscuro"},{"n":50,"comp":"Masa","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"Azúcar refinada"},{"n":50,"comp":"Masa","ins":"Huevo entero (aprox. 50 g)","cant":2.0,"u":"pza","desc":"Huevos fríos"},{"n":50,"comp":"Masa","ins":"Puré de ajo negro","cant":20.0,"u":"g","desc":"Puré de ajo negro (dientes de ajo negro triturados hasta formar una pasta lisa)"},{"n":50,"comp":"Masa","ins":"Harina de trigo","cant":310.0,"u":"g","desc":"Harina de trigo"},{"n":50,"comp":"Masa","ins":"Fécula de maíz (maicena)","cant":10.0,"u":"g","desc":"Fécula de maíz"},{"n":50,"comp":"Masa","ins":"Bicarbonato de sodio","cant":5.0,"u":"g","desc":"Bicarbonato de sodio"},{"n":50,"comp":"Masa","ins":"Sal fina","cant":2.0,"u":"g","desc":"Sal fina"},{"n":50,"comp":"Masa","ins":"Chocolate amargo 70% (chunks)","cant":150.0,"u":"g","desc":"Chunks de chocolate amargo (mínimo 70% cacao)"},{"n":50,"comp":"Decoración","ins":"Sal ahumada","cant":2.0,"u":"g","desc":"C/S en el libro — cantidad estimada, ajústala: Sal ahumada (para decorar)"}],"recetas":[{"n":1,"nom":"Galleta de Chispas de Chocolate Semiamargo con Sal de Mar","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Básico (receta de entrada al oficio)","temp":"200 °C (alta temperatura para sellar el exterior rocoso rápidamente).","tiempo":"12 a 14 minutos.","reposo":"4 a 12 horas en refrigeración (4 °C).","empaque":null,"energia":null,"merma":null},{"n":2,"nom":"Doble Chocolate Oscuro con Chunks de Chocolate Blanco","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Básico–Intermedio (ajuste de hidratación por el cacao)","temp":"200 °C","tiempo":"11 a 13 minutos (el chocolate oscuro se quema más rápido, vigilar de cer‐","reposo":"4 a 12 horas a 4 °C.","empaque":null,"energia":null,"merma":null},{"n":3,"nom":"Red Velvet Clásica con Chispas Blancas y Nuez","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Intermedio (control de color y acidez)","temp":"190 °C (un poco más baja para proteger el color rojo).","tiempo":"13 a 15 minutos.","reposo":"4 a 12 horas a 4 °C.","empaque":null,"energia":null,"merma":null},{"n":4,"nom":"Avena Rústica, Pasas Rubias y Canela","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Básico (masa indulgente y tolerante)","temp":"190 °C","tiempo":"14 a 16 minutos.","reposo":"4 horas mínimo (crítico para que la avena absorba la humedad de la","empaque":null,"energia":null,"merma":null},{"n":5,"nom":"Mantequilla Avellanada (Brown Butter) y Nuez Pecana Tostada","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Intermedio (requiere avellanar mantequilla sin quemarla)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"4 a 12 horas.","empaque":null,"energia":null,"merma":null},{"n":6,"nom":"Macadamia Dorada y Chocolate Blanco","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Básico–Intermedio (cuidar que el blanco no se queme)","temp":"195 °C","tiempo":"12 a 14 minutos.","reposo":"4 a 12 horas en refrigeración.","empaque":null,"energia":null,"merma":null},{"n":7,"nom":"Snickerdoodle Gruesa (Rebozada en Canela y Azúcar)","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Básico (clásico de rebozado)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"4 a 12 horas.","empaque":null,"energia":null,"merma":null},{"n":8,"nom":"Confetti Vanilla (Masa de vainilla con chispas)","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Básico (ideal para talleres infantiles)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"4 horas en frío.","empaque":null,"energia":null,"merma":null},{"n":9,"nom":"Peanut Butter Clásica Gruesa","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Básico (masa densa y noble)","temp":"190 °C","tiempo":"14 a 16 minutos.","reposo":"4 horas mínimo.","empaque":null,"energia":null,"merma":null},{"n":10,"nom":"Triple Chocolate (Masa oscura, chispas de leche, semiamargas","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Intermedio (tres chocolates con puntos de fusión distintos)","temp":"195 °C","tiempo":"12 a 14 minutos.","reposo":"4 a 12 horas.","empaque":null,"energia":null,"merma":null},{"n":11,"nom":"Brookie Gigante (El choque de dos mundos)","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Intermedio (dos masas en una sola pieza)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":12,"nom":"Galleta Carrot Cake con Costra de Queso Crema","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Intermedio (control de humedad de la zanahoria)","temp":"190 °C","tiempo":"14 a 16 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":13,"nom":"Galleta Rollo de Canela (Marmoleada y Glaseada)","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Intermedio (marmoleado y glaseado)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":14,"nom":"Tarta de Manzana (Con Streusel y Manzana Especiada)","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Intermedio (streusel y manzana rehidratada)","temp":"190 °C","tiempo":"14 a 16 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":15,"nom":"Galleta Banoffee (Plátano, Toffee y Chocolate)","cap":"Cap. 5 · Clásicos de Nueva York","lote":6.0,"dif":"Intermedio (puré de plátano y toffee)","temp":"190 °C","tiempo":"14 a 16 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":16,"nom":"Volcán de Crema de Avellana (Estilo Nutella)","cap":"Cap. 6 · Volcanes y rellenos","lote":6.0,"dif":"Intermedio (encapsulado de núcleo congelado)","temp":"200 °C","tiempo":"13 a 15 minutos. Reposo de núcleos Mínimo 6 horas en el congelador.","reposo":"◆ FÓRMULA ESTANDARIZADA","empaque":null,"energia":null,"merma":null},{"n":17,"nom":"Biscoff Lotus (Masa especiada con centro de crema de galleta)","cap":"Cap. 6 · Volcanes y rellenos","lote":6.0,"dif":"Intermedio (masa especiada + núcleo blando)","temp":"195 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":18,"nom":"S'mores de Campamento (Centro fundido de malvavisco)","cap":"Cap. 6 · Volcanes y rellenos","lote":6.0,"dif":"Intermedio (el malvavisco exige control de horneado)","temp":"200 °C","tiempo":"11 a 13 minutos (el malvavisco derretirá rápido).","reposo":"4 horas.","empaque":null,"energia":null,"merma":null},{"n":19,"nom":"Cajeta y Nuez (Inspiración Dulce de Leche)","cap":"Cap. 6 · Volcanes y rellenos","lote":6.0,"dif":"Intermedio (la cajeta tiende a escurrir si no se congela bien)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":20,"nom":"Pistache Intenso con Núcleo de Chocolate Blanco","cap":"Cap. 6 · Volcanes y rellenos","lote":6.0,"dif":"Intermedio–Avanzado (ganache blanco 5:1 y núcleo congelado)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":21,"nom":"Frambuesa y Centro de Pay de Queso","cap":"Cap. 6 · Volcanes y rellenos","lote":6.0,"dif":"Intermedio–Avanzado (núcleo lácteo fresco)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":22,"nom":"Kinder Bueno (Masa de cacao ligero y núcleo de avellana","cap":"Cap. 6 · Volcanes y rellenos","lote":6.0,"dif":"Intermedio (masa de cacao ligero, no alcalino)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":23,"nom":"Caramelo Salado y Pretzels","cap":"Cap. 6 · Volcanes y rellenos","lote":6.0,"dif":"Intermedio (equilibrio dulce–salado)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":24,"nom":"Ferrero Rocher (Masa de avellana y corazón de ganache","cap":"Cap. 6 · Volcanes y rellenos","lote":6.0,"dif":"Avanzado (masa de avellana + ganache oscuro)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":25,"nom":"Volcán de Matcha (Núcleo de ganache blanco fluido)","cap":"Cap. 6 · Volcanes y rellenos","lote":6.0,"dif":"Intermedio–Avanzado (ganache blanco fluido con matcha)","temp":"185 °C (temperatura ligeramente menor para preservar el verde).","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":26,"nom":"Galleta Tiramisú (Centro de Mascarpone y Masa de Café)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Avanzado (mascarpone congelado + masa de café)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":27,"nom":"Galleta de Pay de Limón (Masa de Galleta María y Centro","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio–Avanzado (curd cítrico congelado)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":28,"nom":"Churro Relleno (Masa Estriada de Canela con Centro Dulce)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (estriado de canela + núcleo dulce)","temp":"195 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":29,"nom":"Galleta Tres Leches (Base Avainillada y Glaseado Lechoso)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio–Avanzado (glaseado lechoso sin encharcar la miga)","temp":"190 °C","tiempo":"14 a 16 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":30,"nom":"Tarta de Pecanas (Masa Mantequilluda y Nido Caramelizado)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (nido caramelizado de pecana)","temp":"190 °C","tiempo":"14 a 16 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":31,"nom":"Fresa Natural y Trozos de Chocolate Rubí (San Valentín)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (fruta natural en masa)","temp":"185 °C (el chocolate Rubí es delicado y se oxida si el horno está muy fuer‐","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":32,"nom":"Terciopelo Rosa (Masa teñida con centro de mermelada)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (masa teñida + núcleo de mermelada)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":33,"nom":"Piña Colada (Verano Intenso)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (piña y coco aportan humedad)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":34,"nom":"Mango, Chamoy y Tajín (Street Food CDMX)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (núcleo de chamoy con acidez alta)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":35,"nom":"Limón Eureka y Sorbete de Frambuesa (Verano)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio–Avanzado (núcleo tipo sorbete estabilizado)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":36,"nom":"Invierno: Gingerbread (Melaza y Especias Cálidas)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (melaza y especias cálidas)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":37,"nom":"Invierno: Chocolate Caliente Mexicano","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (picante suave y cacao)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":38,"nom":"Invierno: Peppermint Mocha (Café, Chocolate y Menta)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (café, chocolate y menta en equilibrio)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":39,"nom":"Tamal de Dulce (Masa de Cacahuazintle, Pasitas y Toque Rosa)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (harina de cacahuazintle en masa)","temp":"185 °C (temperatura más baja para que el rosa no se ponga marrón).","tiempo":"14 a 16 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":40,"nom":"Pan de Muerto (Azahar, Naranja y Costra de Azúcar)","cap":"Cap. 7 · Postres reinventados y festivos","lote":6.0,"dif":"Intermedio (azahar volátil + costra de azúcar)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":41,"nom":"Miso Blanco, Chocolate Rubio (Gold) y Sésamo Tostado","cap":"Cap. 8 · Alta gama y autor","lote":6.0,"dif":"Avanzado (umami láctico con miso)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":42,"nom":"Aceite de Oliva Extra Virgen, Romero y Chocolate Oscuro 70%","cap":"Cap. 8 · Alta gama y autor","lote":6.0,"dif":"Intermedio–Avanzado (grasa vegetal y herbal en masa)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"6 horas mínimo (crucial por el aceite líquido).","empaque":null,"energia":null,"merma":null},{"n":43,"nom":"Queso Azul, Compota de Higo y Nuez Caramelizada","cap":"Cap. 8 · Alta gama y autor","lote":6.0,"dif":"Avanzado (queso azul con alta humedad y sal)","temp":"190 °C","tiempo":"14 a 16 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":44,"nom":"Tocino Glaseado en Maple y Chunks de Chocolate con Leche","cap":"Cap. 8 · Alta gama y autor","lote":6.0,"dif":"Avanzado (tocino glaseado que debe quedar crujiente)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":45,"nom":"Trufa Negra y Chocolate Semiamargo con Sal en Escamas","cap":"Cap. 8 · Alta gama y autor","lote":6.0,"dif":"Avanzado (trufa negra, ingrediente volátil y costoso)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":46,"nom":"Matcha, Yuzu y Chocolate Blanco Caramelizado (Gold)","cap":"Cap. 8 · Alta gama y autor","lote":6.0,"dif":"Avanzado (matcha + yuzu, dos ácidos delicados)","temp":"185 °C (temperatura cuidada para no oxidar el verde del té).","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":47,"nom":"Té Earl Grey, Lavanda y Ralladura de Limón","cap":"Cap. 8 · Alta gama y autor","lote":6.0,"dif":"Intermedio–Avanzado (infusión floral que amarga si se excede)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":48,"nom":"Café de Olla, Piloncillo y Anís Estrella","cap":"Cap. 8 · Alta gama y autor","lote":6.0,"dif":"Intermedio (piloncillo y anís de aroma dominante)","temp":"190 °C","tiempo":"14 a 16 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":49,"nom":"Cacao Alcalino, Chile Ancho y Almendra Marcona","cap":"Cap. 8 · Alta gama y autor","lote":6.0,"dif":"Intermedio–Avanzado (chile ancho con calor residual)","temp":"190 °C","tiempo":"12 a 14 minutos.","reposo":"","empaque":null,"energia":null,"merma":null},{"n":50,"nom":"Ajo Negro y Chocolate Amargo con Sal Ahumada","cap":"Cap. 8 · Alta gama y autor","lote":6.0,"dif":"Avanzado (ajo negro, ingrediente de nicho y alto umami)","temp":"190 °C","tiempo":"13 a 15 minutos.","reposo":"","empaque":null,"energia":null,"merma":null}],"params":{"empaque":6,"energia":2,"costoHora":80,"piezasHora":20,"merma":0.08,"gastosFijos":4000,"piezasMes":400,"mMenudeo":0.6,"mMayoreo":0.35,"redondeo":5,"iva":0.16},"gf":[{"nom":"Renta del espacio de producción","monto":1800},{"nom":"Luz y gas del horno","monto":700},{"nom":"Agua y limpieza","monto":200},{"nom":"Internet y telefonía","monto":300},{"nom":"Publicidad y anuncios pagados","monto":500},{"nom":"Empaque genérico y papelería","monto":200},{"nom":"Depreciación de equipo","monto":100},{"nom":"Otros gastos fijos","monto":200}],"canales":["Menudeo","Mayoreo","Evento / banquete","Taller","Otro"],"causas":["Se extendieron demasiado (spread)","Horneado de más / quemadas","Centro crudo","Relleno derramado","Masa sin reposo suficiente","Peso desigual de las bolas","Error de temperatura del horno","Rotura al enfriar","Devolución de cliente","Otro"]};</script>
+<script>
+/* =========================================================
+   App Galletas NY · Endulcora · Estudio Gastronómico
+   Motor de cálculo espejo del sistema de costeo en Excel.
+   ========================================================= */
+const KEY='endulcora_galletas_ny_v1';
+let mem=null, canPersist=true;
+const store={
+  read(){ try{ const s=localStorage.getItem(KEY); return s?JSON.parse(s):null }catch(e){ canPersist=false; return mem } },
+  write(o){ try{ localStorage.setItem(KEY,JSON.stringify(o)) }catch(e){ canPersist=false; mem=o } }
+};
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+function freshDB(){
+  return {
+    v:1,
+    insumos: clone(SEED.insumos),
+    recetas: clone(SEED.recetas),
+    params: clone(SEED.params),
+    gf: clone(SEED.gf),
+    plan: {}, prod: [], ventas: [],
+    mes: new Date().toISOString().slice(0,7)
+  };
+}
+let DB = store.read() || freshDB();
+if(!DB.recetas || DB.recetas.length!==50 || !DB.params || DB.params.mMenudeo===undefined){
+  const d=freshDB(); d.prod=DB.prod||[]; d.ventas=DB.ventas||[]; d.plan=DB.plan||{}; DB=d;
+}
+if(!DB.plan) DB.plan={};
+const save=()=>store.write(DB);
+
+/* ---------- índices ---------- */
+const LIN = SEED.lineas;
+const insByName = {}; const linByRec = {}; const recByN = {};
+LIN.forEach(l=>{ (linByRec[l.n]=linByRec[l.n]||[]).push(l) });
+function reindex(){
+  Object.keys(insByName).forEach(k=>delete insByName[k]); DB.insumos.forEach(i=>insByName[i.nom]=i);
+  Object.keys(recByN).forEach(k=>delete recByN[k]);  DB.recetas.forEach(r=>recByN[r.n]=r);
+}
+reindex();
+
+/* ---------- formato ---------- */
+const nf = new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:2});
+const nf0= new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0});
+const money=v=>nf.format(isFinite(v)?v:0);
+const money0=v=>nf0.format(isFinite(v)?v:0);
+const pct=v=>((isFinite(v)?v:0)*100).toFixed(1).replace('.0','')+'%';
+const num=v=>new Intl.NumberFormat('es-MX').format(isFinite(v)?Math.round(v*100)/100:0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayISO=()=>new Date().toISOString().slice(0,10);
+
+/* ---------- motor de cálculo (espejo del Excel) ---------- */
+const costoUnidad = ins => (ins && ins.pres>0) ? ins.precio/ins.pres : 0;
+function costoLote(n){ return (linByRec[n]||[]).reduce((s,l)=> s + (+l.cant||0)*costoUnidad(insByName[l.ins]), 0); }
+const gastosTotales = () => DB.gf.reduce((s,l)=>s+(+l.monto||0),0);
+const overhead = () => DB.params.piezasMes>0 ? DB.params.gastosFijos/DB.params.piezasMes : 0;
+const manoObra = () => DB.params.piezasHora>0 ? DB.params.costoHora/DB.params.piezasHora : 0;
+const ceilTo=(v,m)=> m>0 ? Math.ceil(v/m)*m : v;
+
+function calc(n){
+  const r = recByN[n]; if(!r) return null;
+  const P = DB.params;
+  const lote = +r.lote||0;
+  const insLote = costoLote(n);
+  const ins = lote>0 ? insLote/lote : 0;
+  const emp = r.empaque==null ? +P.empaque||0 : +r.empaque||0;
+  const ene = r.energia==null ? +P.energia||0 : +r.energia||0;
+  const mo  = manoObra();
+  const sub = ins+emp+ene+mo;
+  const mermaPct = r.merma==null ? +P.merma||0 : +r.merma||0;
+  const mermaCosto = sub*mermaPct;
+  const oh = overhead();
+  const total = sub+mermaCosto+oh;
+  const pvpMen = P.mMenudeo>=1 ? 0 : ceilTo(total/(1-P.mMenudeo), P.redondeo);
+  const pvpMay = P.mMayoreo>=1 ? 0 : ceilTo(total/(1-P.mMayoreo), P.redondeo);
+  return {n, nom:r.nom, lote, insLote, ins, emp, ene, mo, sub, mermaPct, mermaCosto, oh, total,
+    menudeo:{pvp:pvpMen, util:pvpMen-total, margen:pvpMen>0?(pvpMen-total)/pvpMen:0},
+    mayoreo:{pvp:pvpMay, util:pvpMay-total, margen:pvpMay>0?(pvpMay-total)/pvpMay:0},
+    iva: pvpMen*(1+(+DB.params.iva||0))};
+}
+const costoTotalDe = n => (calc(n)||{total:0}).total;
+const precioCanal = (n,canal) => { const c=calc(n); if(!c) return 0; return canal==='Mayoreo' ? c.mayoreo.pvp : c.menudeo.pvp; };
+
+function equilibrio(){
+  const cs = DB.recetas.map(r=>calc(r.n));
+  const avgP = cs.reduce((s,c)=>s+c.menudeo.pvp,0)/cs.length;
+  const avgC = cs.reduce((s,c)=>s+c.total,0)/cs.length;
+  const varC = avgC - overhead();
+  const mc = avgP-varC;
+  const gf = +DB.params.gastosFijos||0;
+  return {avgP, avgC, varC, mc, gf, contrib: avgP>0?mc/avgP:0, piezas: mc>0?Math.ceil(gf/mc):0, ingreso: mc>0?Math.ceil(gf/mc)*avgP:0};
+}
+
+/* ---------- helpers UI ---------- */
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),2300); }
+function openModal(html){ document.getElementById('modalBox').innerHTML=html; document.getElementById('modal').classList.add('on'); }
+function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+/* ---------- navegación ---------- */
+const ICONS={
+  tablero:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>',
+  calc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><circle cx="9.3" cy="10" r="1.15" fill="currentColor" stroke="none"/><circle cx="14.6" cy="9.2" r="1" fill="currentColor" stroke="none"/><circle cx="12.4" cy="14.6" r="1.15" fill="currentColor" stroke="none"/><circle cx="8.6" cy="14.8" r=".85" fill="currentColor" stroke="none"/></svg>',
+  recetas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5.5 3.5h13v17l-6.5-3-6.5 3v-17z"/><path d="M9 8.5h6M9 12.5h6"/></svg>',
+  insumos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 8h16l-1.3 12.2a2 2 0 0 1-2 1.8H7.3a2 2 0 0 1-2-1.8L4 8z"/><path d="M8.5 8V6a3.5 3.5 0 1 1 7 0v2"/></svg>',
+  plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M3.5 10h17M8 3.5v3M16 3.5v3"/><path d="M8 14.5h8"/></svg>',
+  prod:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="M3 9h18"/><circle cx="9" cy="14" r="2.2"/><path d="M14.5 12.5h4M14.5 15.5h4"/></svg>',
+  ventas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3.5 12.5 12 4h7.5v7.5L11 20a2 2 0 0 1-2.8 0l-4.7-4.7a2 2 0 0 1 0-2.8z"/><circle cx="16" cy="8" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  negocio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="3.6" height="8.5" rx="1"/><rect x="10.2" y="7" width="3.6" height="13.5" rx="1"/><rect x="15.4" y="3.5" width="3.6" height="17" rx="1"/></svg>',
+  datos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></svg>'
+};
+const VIEWS=[
+  ['tablero','Tablero','tablero'],
+  ['calc','Calculadora','calc'],
+  ['recetas','Las 50 galletas','recetas'],
+  ['insumos','Insumos','insumos'],
+  ['plan','Plan y compras','plan'],
+  ['prod','Producción','prod'],
+  ['ventas','Ventas','ventas'],
+  ['negocio','Mi negocio','negocio'],
+  ['datos','Mis datos','datos']
+];
+let current='tablero';
+function buildNav(){
+  document.getElementById('nav').innerHTML = VIEWS.map(([id,lbl,ic])=>
+    `<button class="navbtn${id===current?' on':''}" data-go="${id}">${ICONS[ic]}<span>${lbl}</span></button>`).join('');
+}
+function go(id){ current=id; buildNav(); render(); window.scrollTo({top:0,behavior:'instant'}); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-go]'); if(b){ e.preventDefault(); go(b.dataset.go); } });
+
+/* =========================================================
+   VISTA · TABLERO
+   ========================================================= */
+function vTablero(){
+  const mes = DB.mes || todayISO().slice(0,7);
+  const ven = DB.ventas.filter(v=>v.fecha.slice(0,7)===mes);
+  const pro = DB.prod.filter(p=>p.fecha.slice(0,7)===mes);
+  const ingreso = ven.reduce((s,v)=>s+v.piezas*v.precio,0);
+  const piezas  = ven.reduce((s,v)=>s+(+v.piezas||0),0);
+  const costo   = ven.reduce((s,v)=>s+v.piezas*costoTotalDe(v.n),0);
+  const utilidad= ingreso-costo;
+  const buenas  = pro.reduce((s,p)=>s+(+p.buenas||0),0);
+  const fallas  = pro.reduce((s,p)=>s+(+p.fallas||0),0);
+  const mermaPct= (buenas+fallas)>0 ? fallas/(buenas+fallas) : 0;
+  const mermaMXN= pro.reduce((s,p)=>s+(+p.fallas||0)*costoTotalDe(p.n),0);
+  const eq = equilibrio();
+  const avance = eq.piezas>0 ? piezas/eq.piezas : 0;
+
+  const porCanal = SEED.canales.map(c=>{
+    const f=ven.filter(v=>v.canal===c);
+    return {c, piezas:f.reduce((s,v)=>s+v.piezas,0), ingreso:f.reduce((s,v)=>s+v.piezas*v.precio,0)};
+  }).filter(x=>x.piezas>0).sort((a,b)=>b.ingreso-a.ingreso);
+  const maxCanal = Math.max(1,...porCanal.map(x=>x.ingreso));
+
+  const porRec={};
+  ven.forEach(v=>{ const o=porRec[v.n]=porRec[v.n]||{n:v.n,piezas:0,ingreso:0,util:0};
+    o.piezas+=v.piezas; o.ingreso+=v.piezas*v.precio;
+    o.util+=v.piezas*(v.precio-costoTotalDe(v.n)); });
+  const top = Object.values(porRec).sort((a,b)=>b.util-a.util).slice(0,6);
+
+  const mesNom = new Date(mes+'-02').toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+
+  return `
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Endulcora · Estudio Gastronómico</div>
+      <h1 class="title">Tablero de ${esc(mesNom)}</h1>
+      <p class="sub">Todo lo que registres en Producción y Ventas se resume aquí. Cambia el mes para ver otro periodo.</p>
+    </div>
+    <div style="min-width:170px"><label class="f">Mes que analizas</label><input type="month" id="mesSel" value="${mes}"></div>
+  </div>
+
+  <div class="grid g4">
+    <div class="kpi dark"><div class="k-l">Ingreso del mes</div><div class="k-v">${money0(ingreso)}</div><div class="k-n">${num(piezas)} galletas vendidas</div></div>
+    <div class="kpi"><div class="k-l">Utilidad bruta</div><div class="k-v" style="color:${utilidad>=0?'var(--good)':'var(--danger)'}">${money0(utilidad)}</div><div class="k-n">Margen ${pct(ingreso>0?utilidad/ingreso:0)}</div></div>
+    <div class="kpi"><div class="k-l">Precio promedio</div><div class="k-v">${money0(piezas>0?ingreso/piezas:0)}</div><div class="k-n">por galleta vendida</div></div>
+    <div class="kpi"><div class="k-l">Merma del mes</div><div class="k-v" style="color:${mermaPct>DB.params.merma?'var(--ember)':'var(--deep)'}">${pct(mermaPct)}</div><div class="k-n">${money0(mermaMXN)} perdidos · ${num(fallas)} piezas</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Punto de equilibrio del mes</h3>
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:9px">
+      <div><span style="font-family:'Bebas Neue';font-size:30px;color:var(--deep)">${num(piezas)}</span>
+        <span class="mini"> de ${num(eq.piezas)} galletas necesarias este mes</span></div>
+      <div class="mini">Gastos fijos ${money0(eq.gf)} · margen de contribución ${money(eq.mc)}/pieza</div>
+    </div>
+    <div class="bar"><i style="width:${Math.min(100,avance*100).toFixed(1)}%"></i></div>
+    <p class="mini" style="margin:9px 0 0">${
+      avance>=1 ? '✔ Ya cubriste tus gastos fijos. Cada galleta extra es ganancia real.'
+                : 'Te faltan <b>'+num(Math.max(0,eq.piezas-piezas))+'</b> galletas para cubrir los gastos fijos del mes.'}</p>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h3>Ventas por canal</h3>
+      ${porCanal.length? porCanal.map(x=>`
+        <div style="margin-bottom:11px">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
+            <span>${esc(x.c)}</span><span style="font-variant-numeric:tabular-nums">${money0(x.ingreso)} <span class="mini">· ${num(x.piezas)} pz</span></span>
+          </div>
+          <div class="bar"><i style="width:${(x.ingreso/maxCanal*100).toFixed(1)}%"></i></div>
+        </div>`).join('')
+      : `<div class="empty"><b>Aún no hay ventas de este mes</b>Registra tu primera venta y este bloque cobra vida.<br><br><button class="btn sm" data-go="ventas">Registrar una venta</button></div>`}
+    </div>
+    <div class="card">
+      <h3>Galletas más rentables del mes</h3>
+      ${top.length? `<div class="tw"><table class="slim"><thead><tr><th>Receta</th><th class="num">Pz</th><th class="num">Utilidad</th></tr></thead><tbody>
+        ${top.map(t=>`<tr><td style="font-size:12.5px">${esc((recByN[t.n]||{}).nom||'')}<div class="mini">${money0(t.ingreso)} de ingreso</div></td><td class="num">${num(t.piezas)}</td><td class="num" style="color:${t.util>=0?'var(--good)':'var(--danger)'}">${money0(t.util)}</td></tr>`).join('')}
+      </tbody></table></div>`
+      : `<div class="empty"><b>Sin datos todavía</b>Aquí verás qué galletas te dejan más dinero, no solo cuáles vendes más.</div>`}
+    </div>
+  </div>
+
+  <div class="note"><b>Cómo se usa:</b> 1) Pon tus precios reales en <b>Insumos</b> → 2) Ajusta el <b>Mi negocio</b> (tu hora, tus gastos, tus márgenes) → 3) Revisa la <b>Calculadora</b> y fija tu precio → 4) Arma tu <b>Plan y compras</b> antes de hornear → 5) Registra lotes y ventas y vuelve aquí a fin de mes.</div>`;
+}
+function hookTablero(){
+  const m=document.getElementById('mesSel');
+  if(m) m.onchange=e=>{ DB.mes=e.target.value||todayISO().slice(0,7); save(); render(); };
+}
+
+/* =========================================================
+   VISTA · CALCULADORA (elemento firma: la galleta de costos)
+   ========================================================= */
+let calcN = 1, precioManual = null;
+function cookieSVG(c){
+  const segs=[
+    ['Insumos', c.ins, '#7A2E7E'],
+    ['Empaque', c.emp, '#A25AA6'],
+    ['Energía', c.ene, '#C98BCB'],
+    ['Mano de obra', c.mo, '#4E1454'],
+    ['Merma', c.mermaCosto, '#E4572E'],
+    ['Overhead', c.oh, '#9C9C9C']
+  ].filter(s=>s[1]>0.0001);
+  const tot=segs.reduce((s,x)=>s+x[1],0)||1;
+  const CX=95, CY=112, R=74, TOP=CY-R, H=R*2;
+  let y=CY+R, out='';
+  segs.forEach(([nm,v,col])=>{
+    const h=v/tot*H; y-=h;
+    out+=`<rect x="${CX-R}" y="${y.toFixed(2)}" width="${R*2}" height="${Math.max(h,1).toFixed(2)}" fill="${col}"/>`;
+  });
+  const chunks=[[76,88,9],[112,80,7],[120,110,10],[70,124,8],[96,140,7],[132,136,6]];
+  return `<svg viewBox="0 0 190 210" width="100%" style="max-width:190px;display:block;margin:0 auto" role="img" aria-label="Composición del costo de la galleta">
+    <defs><clipPath id="ck"><circle cx="${CX}" cy="${CY}" r="${R}"/></clipPath></defs>
+    <g class="steam" opacity=".45"><path d="M72 30c6-7 0-11 4-17" stroke="#A25AA6" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+    <g class="steam b" opacity=".45"><path d="M95 24c6-7 0-11 4-17" stroke="#A25AA6" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+    <g class="steam c" opacity=".45"><path d="M118 30c6-7 0-11 4-17" stroke="#A25AA6" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+    <ellipse cx="${CX}" cy="${CY+R+6}" rx="${R*.82}" ry="7" fill="rgba(78,20,84,.10)"/>
+    <g clip-path="url(#ck)">${out}
+      ${chunks.map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="rgba(255,255,255,.20)"/>`).join('')}
+    </g>
+    <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="rgba(78,20,84,.28)" stroke-width="2" stroke-dasharray="1 0"/>
+    ${chunks.slice(0,4).map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r*.45}" fill="#F8B818" opacity=".85"/>`).join('')}
+  </svg>`;
+}
+function vCalc(){
+  const c = calc(calcN); const r = recByN[calcN];
+  const segs=[
+    ['Insumos por pieza', c.ins, '#7A2E7E'],['Empaque', c.emp, '#A25AA6'],['Energía (horno)', c.ene, '#C98BCB'],
+    ['Mano de obra', c.mo, '#4E1454'],['Costo de la merma', c.mermaCosto, '#E4572E'],['Gastos fijos (overhead)', c.oh, '#9C9C9C']
+  ];
+  const pm = precioManual;
+  const utilPM = pm!=null ? pm - c.total : null;
+  const comps = [...new Set((linByRec[calcN]||[]).map(l=>l.comp))];
+
+  return `
+  <div class="page-head">
+    <div><div class="eyebrow">Paso 3 · el corazón del sistema</div>
+      <h1 class="title">Calculadora de precio</h1>
+      <p class="sub">Elige una galleta, ajusta lo que cambia en tu obrador y mira cuánto te cuesta de verdad y a cuánto deberías venderla.</p></div>
+  </div>
+
+  <div class="card">
+    <div class="field"><label class="f">Receta</label>
+      <select id="recSel">${DB.recetas.map(x=>`<option value="${x.n}"${x.n===calcN?' selected':''}>${x.n}. ${esc(x.nom)}</option>`).join('')}</select></div>
+    <div class="row">
+      <div class="field"><label class="f">Piezas por lote</label><input type="number" step="1" min="1" id="fLote" value="${r.lote}"></div>
+      <div class="field"><label class="f">Empaque por pieza</label><input type="number" step="0.5" min="0" id="fEmp" value="${c.emp}"></div>
+      <div class="field"><label class="f">Energía por pieza</label><input type="number" step="0.5" min="0" id="fEne" value="${c.ene}"></div>
+      <div class="field"><label class="f">% de merma <span id="mermaVal" style="color:var(--purple)">${pct(c.mermaPct)}</span></label>
+        <input type="range" min="0" max="30" step="1" id="fMer" value="${Math.round(c.mermaPct*100)}"></div>
+    </div>
+    <p class="mini" style="margin:0">Mano de obra ${money(c.mo)}/pieza (${money(DB.params.costoHora)}/hora ÷ ${num(DB.params.piezasHora)} piezas) y overhead ${money(c.oh)}/pieza salen de <a href="#" data-go="negocio">Mi negocio</a>. Merma sugerida: principiante 10–15 % · intermedio 6–10 % · avanzado 3–6 %.</p>
+  </div>
+
+  <div class="card">
+    <h3>De qué está hecha tu galleta (costo por pieza)</h3>
+    <div class="cookie-wrap">
+      <div>${cookieSVG(c)}</div>
+      <div class="legend">
+        ${segs.map(([nm,v,col])=>`<div class="lg"><span class="sw" style="background:${col}"></span><span class="nm">${nm}</span><span class="vl">${money(v)}</span><span class="pc">${pct(c.total>0?v/c.total:0)}</span></div>`).join('')}
+        <div class="lg tot"><span class="sw" style="background:var(--yellow)"></span><span class="nm">Costo total por galleta</span><span class="vl">${money(c.total)}</span><span class="pc">100%</span></div>
+      </div>
+    </div>
+    <div class="note"><b>El lote completo cuesta ${money(c.insLote)} de insumos</b> y rinde ${num(c.lote)} piezas, o sea ${money(c.ins)} de ingrediente por galleta. Si cambias el gramaje o el rendimiento, este número se mueve y todo el precio con él.</div>
+  </div>
+
+  <div class="card">
+    <h3>Precio sugerido</h3>
+    <div class="grid g4">
+      <div class="price">
+        <div class="ch">Menudeo</div>
+        <div class="pv">${money0(c.menudeo.pvp)}</div>
+        <div class="ut">Ganas <b>${money(c.menudeo.util)}</b> por pieza</div>
+        <div class="ut mini" style="margin-top:3px">Margen real ${pct(c.menudeo.margen)} · objetivo ${pct(DB.params.mMenudeo)}</div>
+        <button class="btn sm ghost" style="margin-top:10px;width:100%" data-vender="Menudeo">Vender a este precio</button>
+      </div>
+      <div class="price">
+        <div class="ch">Mayoreo</div>
+        <div class="pv">${money0(c.mayoreo.pvp)}</div>
+        <div class="ut">Ganas <b>${money(c.mayoreo.util)}</b> por pieza</div>
+        <div class="ut mini" style="margin-top:3px">Margen real ${pct(c.mayoreo.margen)} · objetivo ${pct(DB.params.mMayoreo)}</div>
+        <button class="btn sm ghost" style="margin-top:10px;width:100%" data-vender="Mayoreo">Vender a este precio</button>
+      </div>
+      <div class="price">
+        <div class="ch">Menudeo con IVA</div>
+        <div class="pv">${money0(c.iva)}</div>
+        <div class="ut">Solo si facturas (${pct(DB.params.iva)})</div>
+      </div>
+      <div class="price">
+        <div class="ch">Caja de 6</div>
+        <div class="pv">${money0(c.menudeo.pvp*6)}</div>
+        <div class="ut">Cuesta producirla <b style="color:var(--ink-soft)">${money(c.total*6)}</b></div>
+        <div class="ut mini" style="margin-top:3px">Ganancia por caja ${money(c.menudeo.util*6)}</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:16px;align-items:flex-end">
+      <div class="field" style="max-width:200px"><label class="f">¿Y si cobro otro precio?</label>
+        <input type="number" step="5" min="0" id="fPM" placeholder="Escribe tu precio" value="${pm??''}"></div>
+      <div class="field" style="flex:2">
+        ${pm!=null && pm>0 ? `<div style="padding:9px 0">
+            <span class="pill ${utilPM>0?'g':'r'}">${utilPM>0?'Ganas':'Pierdes'} ${money(Math.abs(utilPM))} por pieza</span>
+            <span class="pill" style="margin-left:6px">Margen ${pct(utilPM/pm)}</span>
+            ${utilPM<=0?'<span class="pill r" style="margin-left:6px">Estás vendiendo por debajo del costo</span>':''}
+          </div>` : `<p class="mini" style="margin:0 0 12px">Escribe un precio y te digo si ganas o pierdes con él.</p>`}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Ficha técnica</h3>
+    <div class="ficha">
+      <div class="fi"><div class="l">Línea del recetario</div><div class="v">${esc(r.cap)}</div></div>
+      <div class="fi"><div class="l">Dificultad</div><div class="v">${esc(r.dif)}</div></div>
+      <div class="fi"><div class="l">Temperatura</div><div class="v">${esc(r.temp)}</div></div>
+      <div class="fi"><div class="l">Tiempo de horneado</div><div class="v">${esc(r.tiempo)}</div></div>
+      <div class="fi"><div class="l">Reposo de masa</div><div class="v">${esc(r.reposo)}</div></div>
+      <div class="fi"><div class="l">Rendimiento</div><div class="v">${num(r.lote)} piezas por lote</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Fórmula de esta galleta (lote de ${num(c.lote)} piezas)</h3>
+    ${comps.map(comp=>`
+      <h4 style="font-family:'Montserrat';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--plum);margin:14px 0 6px">${esc(comp)}</h4>
+      <div class="tw"><table>
+        <thead><tr><th>Insumo</th><th class="num">Cantidad</th><th class="num">Costo unitario</th><th class="num">Costo en el lote</th></tr></thead>
+        <tbody>${(linByRec[calcN]||[]).filter(l=>l.comp===comp).map(l=>{const i=insByName[l.ins];const cu=costoUnidad(i);return `
+          <tr><td>${esc(l.ins)}<div class="mini">${esc(l.desc)}</div></td>
+          <td class="num">${num(l.cant)} ${esc(l.u)}</td>
+          <td class="num">${money(cu)}<div class="mini">por ${esc(l.u)}</div></td>
+          <td class="num">${money(l.cant*cu)}</td></tr>`}).join('')}
+        </tbody>
+      </table></div>`).join('')}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1.5px solid var(--line)">
+      <span class="mini">Costo de insumos del lote completo</span>
+      <b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${money(c.insLote)}</b>
+    </div>
+  </div>`;
+}
+function hookCalc(){
+  const S=id=>document.getElementById(id);
+  S('recSel').onchange=e=>{ calcN=+e.target.value; precioManual=null; render(); };
+  const r=recByN[calcN];
+  S('fLote').oninput=e=>{ r.lote=Math.max(1,+e.target.value||1); save(); softCalc(); };
+  S('fEmp').oninput=e=>{ r.empaque=+e.target.value||0; save(); softCalc(); };
+  S('fEne').oninput=e=>{ r.energia=+e.target.value||0; save(); softCalc(); };
+  S('fMer').oninput=e=>{ r.merma=(+e.target.value||0)/100; save(); softCalc(); };
+  S('fPM').oninput=e=>{ precioManual = e.target.value===''?null:(+e.target.value||0); softCalc(); };
+  document.querySelectorAll('[data-vender]').forEach(b=>b.onclick=()=>{
+    const canal=b.dataset.vender;
+    nuevaVenta({n:calcN, canal, precio:precioCanal(calcN,canal)});
+  });
+}
+let softTimer=null;
+function softCalc(){
+  clearTimeout(softTimer);
+  softTimer=setTimeout(()=>{
+    const act=document.activeElement; const id=act?act.id:null; const pos=act&&act.selectionStart;
+    render();
+    if(id){ const el=document.getElementById(id); if(el){ el.focus(); try{el.setSelectionRange(pos,pos)}catch(e){} } }
+  },170);
+}
+
+/* =========================================================
+   VISTA · LAS 50 GALLETAS
+   ========================================================= */
+let recQ='', recSort='n', recCap='';
+function vRecetas(){
+  const caps=[...new Set(DB.recetas.map(r=>r.cap))];
+  let list=DB.recetas.map(r=>({...r, c:calc(r.n)}));
+  if(recCap) list=list.filter(r=>r.cap===recCap);
+  if(recQ) list=list.filter(r=>r.nom.toLowerCase().includes(recQ.toLowerCase()));
+  if(recSort==='costo') list.sort((a,b)=>b.c.total-a.c.total);
+  if(recSort==='barata') list.sort((a,b)=>a.c.total-b.c.total);
+  if(recSort==='util') list.sort((a,b)=>b.c.menudeo.util-a.c.menudeo.util);
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Catálogo del eBook</div>
+    <h1 class="title">Las 50 galletas</h1>
+    <p class="sub">Costo y precio sugerido de cada receta con tus precios de insumos actuales. Toca una para abrirla en la calculadora.</p>
+  </div></div>
+  <div class="search">
+    <input id="recQ" placeholder="Buscar galleta…" value="${esc(recQ)}">
+    <select id="recSort">
+      <option value="n"${recSort==='n'?' selected':''}>Orden del libro</option>
+      <option value="costo"${recSort==='costo'?' selected':''}>Más cara primero</option>
+      <option value="barata"${recSort==='barata'?' selected':''}>Más barata primero</option>
+      <option value="util"${recSort==='util'?' selected':''}>Más ganancia primero</option>
+    </select>
+  </div>
+  <div class="chips">
+    <button class="chip${recCap===''?' on':''}" data-cap="">Todas (50)</button>
+    ${caps.map(c=>`<button class="chip${recCap===c?' on':''}" data-cap="${esc(c)}">${esc(c)}</button>`).join('')}
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>#</th><th>Galleta</th><th class="num">Lote</th><th class="num">Insumos/pz</th><th class="num">Costo total</th><th class="num">Menudeo</th><th class="num">Ganancia</th><th class="num">Mayoreo</th><th></th></tr></thead>
+    <tbody>${list.map(r=>`<tr>
+      <td class="mini">${r.n}</td>
+      <td style="max-width:320px">${esc(r.nom)}<div class="mini">${esc(r.cap)}</div></td>
+      <td class="num mini">${num(r.lote)} pz</td>
+      <td class="num">${money(r.c.ins)}</td>
+      <td class="num"><b>${money(r.c.total)}</b></td>
+      <td class="num">${money0(r.c.menudeo.pvp)}</td>
+      <td class="num" style="color:var(--good)">${money(r.c.menudeo.util)}</td>
+      <td class="num mini">${money0(r.c.mayoreo.pvp)}</td>
+      <td><button class="btn sm ghost" data-abrir="${r.n}">Abrir</button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>${list.length?'':'<div class="empty"><b>Sin resultados</b>Prueba con otra palabra o quita el filtro de capítulo.</div>'}</div>`;
+}
+function hookRecetas(){
+  document.getElementById('recQ').oninput=e=>{ recQ=e.target.value; softCalc(); };
+  document.getElementById('recSort').onchange=e=>{ recSort=e.target.value; render(); };
+  document.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>{ recCap=b.dataset.cap; render(); });
+  document.querySelectorAll('[data-abrir]').forEach(b=>b.onclick=()=>{ calcN=+b.dataset.abrir; precioManual=null; go('calc'); });
+}
+
+/* =========================================================
+   VISTA · INSUMOS
+   ========================================================= */
+let insQ='', insCat='';
+function vInsumos(){
+  const cats=[...new Set(DB.insumos.map(i=>i.cat))].filter(Boolean).sort();
+  let list=DB.insumos.map((i,idx)=>({...i,idx}));
+  if(insCat) list=list.filter(i=>i.cat===insCat);
+  if(insQ) list=list.filter(i=>i.nom.toLowerCase().includes(insQ.toLowerCase()));
+  const usos={}; LIN.forEach(l=>{ (usos[l.ins]=usos[l.ins]||new Set()).add(l.n) });
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Paso 1 · lo primero que debes hacer</div>
+    <h1 class="title">Mis insumos</h1>
+    <p class="sub">Escribe el precio y el tamaño de la presentación que tú compras. Las 50 recetas se recalculan al instante.</p>
+  </div></div>
+  <div class="note" style="margin:0 0 16px"><b>Los precios cargados son de referencia</b> (mercado CDMX), no cotizaciones. Cámbialos por los de tus tickets reales antes de fijar cualquier precio de venta.</div>
+  <div class="search"><input id="insQ" placeholder="Buscar insumo…" value="${esc(insQ)}"></div>
+  <div class="chips">
+    <button class="chip${insCat===''?' on':''}" data-cat="">Todos (${DB.insumos.length})</button>
+    ${cats.map(c=>`<button class="chip${insCat===c?' on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Insumo</th><th class="num" style="width:120px">Trae</th><th class="num" style="width:120px">Precio pagado</th><th class="num">Costo por unidad</th><th class="num">Recetas</th></tr></thead>
+    <tbody>${list.map(i=>`<tr>
+      <td>${esc(i.nom)}<div class="mini">${esc(i.cat)}${i.presTxt?' · '+esc(i.presTxt):''}</div></td>
+      <td class="num"><div style="display:flex;gap:4px;align-items:center;justify-content:flex-end">
+        <input type="number" step="1" min="0" value="${i.pres}" data-pres="${i.idx}" style="width:80px;text-align:right;padding:6px 8px;font-size:13px">
+        <span class="mini">${esc(i.u)}</span></div></td>
+      <td class="num"><input type="number" step="1" min="0" value="${i.precio}" data-precio="${i.idx}" style="width:92px;text-align:right;padding:6px 8px;font-size:13px"></td>
+      <td class="num"><b>${money(costoUnidad(i))}</b><div class="mini">por ${esc(i.u)}</div></td>
+      <td class="num"><span class="pill">${(usos[i.nom]||{size:0}).size}</span></td>
+    </tr>`).join('')}</tbody>
+  </table></div>${list.length?'':'<div class="empty"><b>Sin resultados</b>Cambia la búsqueda o la categoría.</div>'}</div>`;
+}
+function hookInsumos(){
+  document.getElementById('insQ').oninput=e=>{ insQ=e.target.value; softCalc(); };
+  document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{ insCat=b.dataset.cat; render(); });
+  document.querySelectorAll('[data-pres]').forEach(el=>el.oninput=e=>{ DB.insumos[+el.dataset.pres].pres=+e.target.value||0; reindex(); save(); softCalc(); });
+  document.querySelectorAll('[data-precio]').forEach(el=>el.oninput=e=>{ DB.insumos[+el.dataset.precio].precio=+e.target.value||0; reindex(); save(); softCalc(); });
+}
+/* =========================================================
+   VISTA · PLAN Y COMPRAS
+   ========================================================= */
+function planRows(){
+  return DB.recetas.filter(r=>(+DB.plan[r.n]||0)>0).map(r=>{
+    const c=calc(r.n), lotes=+DB.plan[r.n]||0, pz=lotes*(+r.lote||0);
+    return {n:r.n, nom:r.nom, lotes, pz, costo:pz*c.total, ingreso:pz*c.menudeo.pvp, util:pz*c.menudeo.util};
+  });
+}
+function listaCompras(){
+  const req={};
+  Object.keys(DB.plan).forEach(n=>{
+    const lotes=+DB.plan[n]||0; if(lotes<=0) return;
+    (linByRec[n]||[]).forEach(l=>{ req[l.ins]=(req[l.ins]||0)+(+l.cant||0)*lotes; });
+  });
+  return Object.keys(req).map(nom=>{
+    const i=insByName[nom]||{pres:0,precio:0,u:'',cat:'',presTxt:''};
+    const cantidad=req[nom];
+    const paquetes=(i.pres>0)?Math.ceil(cantidad/i.pres):0;
+    return {nom, cat:i.cat, u:i.u, presTxt:i.presTxt, pres:i.pres, cantidad, paquetes,
+      inversion:paquetes*i.precio, consumido:cantidad*costoUnidad(i)};
+  }).sort((a,b)=>b.inversion-a.inversion);
+}
+let planQ='';
+function vPlan(){
+  const rows=planRows();
+  const compras=listaCompras();
+  const totPz=rows.reduce((s,x)=>s+x.pz,0);
+  const totCosto=rows.reduce((s,x)=>s+x.costo,0);
+  const totIng=rows.reduce((s,x)=>s+x.ingreso,0);
+  const inversion=compras.reduce((s,x)=>s+x.inversion,0);
+  const consumido=compras.reduce((s,x)=>s+x.consumido,0);
+  let list=compras; if(planQ) list=list.filter(x=>x.nom.toLowerCase().includes(planQ.toLowerCase()));
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Paso 4 · antes de encender el horno</div><h1 class="title">Plan y lista de compras</h1>
+    <p class="sub">Marca cuántos lotes vas a hornear de cada galleta y la lista del mercado se arma sola, con cantidades exactas y cuánto vas a gastar.</p>
+  </div></div>
+
+  <div class="grid g4">
+    <div class="kpi dark"><div class="k-l">Galletas del plan</div><div class="k-v">${num(totPz)}</div><div class="k-n">${rows.length} recetas · ${num(rows.reduce((s,x)=>s+x.lotes,0))} lotes</div></div>
+    <div class="kpi"><div class="k-l">Inversión en mercado</div><div class="k-v">${money0(inversion)}</div><div class="k-n">comprando paquetes completos</div></div>
+    <div class="kpi"><div class="k-l">Ingrediente consumido</div><div class="k-v">${money0(consumido)}</div><div class="k-n">${money0(inversion-consumido)} te queda en despensa</div></div>
+    <div class="kpi"><div class="k-l">Ingreso estimado</div><div class="k-v" style="color:var(--good)">${money0(totIng)}</div><div class="k-n">a precio de menudeo</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>¿Qué vas a hornear?</h3>
+    <div class="row" style="align-items:flex-end">
+      <div class="field" style="min-width:250px;flex:2"><label class="f">Agregar receta al plan</label>
+        <select id="plSel">${DB.recetas.map(r=>`<option value="${r.n}">${r.n}. ${esc(r.nom)}</option>`).join('')}</select></div>
+      <div class="field" style="max-width:120px"><label class="f">Lotes</label><input type="number" min="1" step="1" id="plLotes" value="1"></div>
+      <div class="field" style="max-width:170px"><button class="btn" id="plAdd" style="width:100%">Agregar al plan</button></div>
+    </div>
+    ${rows.length?`<div class="tw"><table>
+      <thead><tr><th>Galleta</th><th class="num">Lotes</th><th class="num">Piezas</th><th class="num">Costo</th><th class="num">Ingreso</th><th class="num">Utilidad</th><th></th></tr></thead>
+      <tbody>${rows.map(x=>`<tr>
+        <td style="max-width:300px;font-size:12.5px">${esc(x.nom)}</td>
+        <td class="num"><input type="number" min="0" step="1" value="${x.lotes}" data-pl="${x.n}" style="width:70px;text-align:right;padding:6px 8px;font-size:13px"></td>
+        <td class="num">${num(x.pz)}</td><td class="num">${money0(x.costo)}</td><td class="num">${money0(x.ingreso)}</td>
+        <td class="num" style="color:var(--good)">${money0(x.util)}</td>
+        <td><button class="x" data-plq="${x.n}" title="Quitar">✕</button></td></tr>`).join('')}</tbody>
+      <tfoot><tr><td style="font-weight:600;padding-top:10px">Total</td><td class="num" style="padding-top:10px">${num(rows.reduce((s,x)=>s+x.lotes,0))}</td>
+        <td class="num" style="padding-top:10px"><b>${num(totPz)}</b></td><td class="num" style="padding-top:10px">${money0(totCosto)}</td>
+        <td class="num" style="padding-top:10px">${money0(totIng)}</td><td class="num" style="padding-top:10px;color:var(--good)"><b>${money0(totIng-totCosto)}</b></td><td></td></tr></tfoot>
+    </table></div>`:`<div class="empty"><b>Tu plan está vacío</b>Elige una galleta arriba, di cuántos lotes y aparecerá aquí con su lista de compras.</div>`}
+    ${rows.length?`<button class="btn ghost sm" id="plClear" style="margin-top:12px">Vaciar el plan</button>`:''}
+  </div>
+
+  <div class="card">
+    <h3>Lista de mercado (${compras.length} insumos)</h3>
+    ${compras.length?`
+    <div class="search"><input id="plQ" placeholder="Buscar en la lista…" value="${esc(planQ)}">
+      <button class="btn ghost sm" id="plCsv">Descargar lista en CSV</button>
+      <button class="btn ghost sm" id="plPrint">Imprimir</button></div>
+    <div class="tw"><table>
+      <thead><tr><th>Insumo</th><th class="num">Necesitas</th><th>Presentación</th><th class="num">Paquetes</th><th class="num">Inversión</th><th class="num">Se consume</th></tr></thead>
+      <tbody>${list.map(x=>`<tr>
+        <td>${esc(x.nom)}<div class="mini">${esc(x.cat)}</div></td>
+        <td class="num"><b>${num(x.cantidad)}</b> ${esc(x.u)}</td>
+        <td class="mini">${esc(x.presTxt||(x.pres+' '+x.u))}</td>
+        <td class="num"><span class="pill c">${num(x.paquetes)}</span></td>
+        <td class="num">${money(x.inversion)}</td>
+        <td class="num mini">${money(x.consumido)}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td colspan="4" style="text-align:right;font-weight:600;padding-top:10px">Inversión total del mercado</td>
+        <td class="num" style="font-weight:600;padding-top:10px">${money(inversion)}</td>
+        <td class="num mini" style="padding-top:10px">${money(consumido)}</td></tr></tfoot>
+    </table></div>
+    <div class="note"><b>Diferencia de ${money(inversion-consumido)}:</b> es lo que compras de más porque los paquetes vienen en tamaños fijos. No es pérdida — se queda en tu despensa para el siguiente lote.</div>`
+    :`<div class="empty"><b>Sin lista todavía</b>Agrega recetas al plan y aquí aparecerá tu mercado exacto.</div>`}
+  </div>`;
+}
+function hookPlan(){
+  const S=id=>document.getElementById(id);
+  S('plAdd').onclick=()=>{
+    const n=+S('plSel').value, l=Math.max(1,+S('plLotes').value||1);
+    DB.plan[n]=(+DB.plan[n]||0)+l; save(); toast('Agregado al plan'); render();
+  };
+  document.querySelectorAll('[data-pl]').forEach(el=>el.oninput=e=>{ DB.plan[el.dataset.pl]=Math.max(0,+e.target.value||0); save(); softCalc(); });
+  document.querySelectorAll('[data-plq]').forEach(b=>b.onclick=()=>{ delete DB.plan[b.dataset.plq]; save(); render(); });
+  const cl=S('plClear'); if(cl) cl.onclick=()=>{ DB.plan={}; save(); toast('Plan vaciado'); render(); };
+  const q=S('plQ'); if(q) q.oninput=e=>{ planQ=e.target.value; softCalc(); };
+  const pr=S('plPrint'); if(pr) pr.onclick=()=>window.print();
+  const cs=S('plCsv'); if(cs) cs.onclick=()=>{
+    const h=['Insumo','Categoria','Necesitas','Unidad','Presentacion','Paquetes a comprar','Inversion','Costo consumido'];
+    const rows=listaCompras().map(x=>[x.nom,x.cat,x.cantidad,x.u,x.presTxt,x.paquetes,x.inversion.toFixed(2),x.consumido.toFixed(2)].map(csvCell).join(','));
+    download(`Endulcora_GalletasNY_Compras_${todayISO()}.csv`,[h.map(csvCell).join(','),...rows].join('\n'),'csv'); toast('Lista descargada');
+  };
+}
+
+/* =========================================================
+   VISTA · PRODUCCIÓN
+   ========================================================= */
+function vProd(){
+  const rows=[...DB.prod].sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const buenas=DB.prod.reduce((s,p)=>s+(+p.buenas||0),0);
+  const fallas=DB.prod.reduce((s,p)=>s+(+p.fallas||0),0);
+  const mermaReal=(buenas+fallas)>0?fallas/(buenas+fallas):0;
+  const costoMerma=DB.prod.reduce((s,p)=>s+(+p.fallas||0)*costoTotalDe(p.n),0);
+  const supuesta=DB.params.merma;
+  const porCausa={}; DB.prod.forEach(p=>{ if(p.fallas>0&&p.causa) porCausa[p.causa]=(porCausa[p.causa]||0)+p.fallas; });
+  const causas=Object.entries(porCausa).sort((a,b)=>b[1]-a[1]);
+  const maxC=Math.max(1,...causas.map(c=>c[1]));
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Bitácora del obrador</div><h1 class="title">Producción y merma</h1>
+    <p class="sub">Anota cada horneada: cuántas salieron buenas y cuántas se echaron a perder. Así sabrás si tu % de merma supuesto es el verdadero.</p>
+  </div></div>
+
+  <div class="grid g4">
+    <div class="kpi"><div class="k-l">Galletas buenas</div><div class="k-v">${num(buenas)}</div><div class="k-n">acumuladas</div></div>
+    <div class="kpi"><div class="k-l">Galletas falladas</div><div class="k-v">${num(fallas)}</div><div class="k-n">acumuladas</div></div>
+    <div class="kpi"><div class="k-l">Merma real</div><div class="k-v" style="color:${mermaReal>supuesta?'var(--ember)':'var(--good)'}">${pct(mermaReal)}</div><div class="k-n">supones ${pct(supuesta)}</div></div>
+    <div class="kpi"><div class="k-l">Dinero perdido</div><div class="k-v" style="color:var(--ember)">${money0(costoMerma)}</div><div class="k-n">en piezas falladas</div></div>
+  </div>
+
+  ${(buenas+fallas)>0 && Math.abs(mermaReal-supuesta)>0.02 ? `<div class="note" style="margin-top:16px"><b>Tu merma real es ${pct(mermaReal)}, no ${pct(supuesta)}.</b> ${mermaReal>supuesta?'Estás costeando de menos: sube el % de merma o tus precios se quedan cortos.':'Estás costeando de más: puedes bajar el % de merma y mejorar tu margen.'} <button class="btn sm gold" id="ajustarMerma" style="margin-left:6px">Usar ${pct(mermaReal)} en las 50 recetas</button></div>`:''}
+
+  <div class="card" style="margin-top:16px">
+    <h3>Registrar una horneada</h3>
+    <div class="row">
+      <div class="field" style="max-width:150px"><label class="f">Fecha</label><input type="date" id="pFecha" value="${todayISO()}"></div>
+      <div class="field" style="max-width:140px"><label class="f">Lote</label><input id="pLote" value="${sugerirLote()}"></div>
+      <div class="field" style="min-width:220px;flex:2"><label class="f">Galleta</label>
+        <select id="pRec">${DB.recetas.map(r=>`<option value="${r.n}">${r.n}. ${esc(r.nom)}</option>`).join('')}</select></div>
+    </div>
+    <div class="row">
+      <div class="field" style="max-width:120px"><label class="f">Planeadas</label><input type="number" min="0" id="pPlan" placeholder="12"></div>
+      <div class="field" style="max-width:120px"><label class="f">Buenas</label><input type="number" min="0" id="pBuen" placeholder="11"></div>
+      <div class="field" style="max-width:120px"><label class="f">Falladas</label><input type="number" min="0" id="pFall" placeholder="1"></div>
+      <div class="field" style="min-width:190px"><label class="f">Causa principal</label>
+        <select id="pCausa">${SEED.causas.map(c=>`<option>${esc(c)}</option>`).join('')}</select></div>
+      <div class="field" style="min-width:160px;flex:1"><label class="f">Notas</label><input id="pNota" placeholder="Opcional"></div>
+    </div>
+    <button class="btn" id="pAdd">Guardar horneada</button>
+  </div>
+
+  ${causas.length?`<div class="card">
+    <h3>¿Por qué se te echan a perder?</h3>
+    ${causas.map(([c,v])=>`<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>${esc(c)}</span><span>${num(v)} pz</span></div>
+      <div class="bar"><i style="width:${(v/maxC*100).toFixed(1)}%"></i></div></div>`).join('')}
+    <p class="mini" style="margin:10px 0 0">Ataca primero la causa de arriba: normalmente una sola corrección (reposo, peso o temperatura) elimina la mitad de tu merma.</p>
+  </div>`:''}
+
+  <div class="card">
+    <h3>Horneadas registradas (${DB.prod.length})</h3>
+    ${rows.length?`<div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Lote</th><th>Galleta</th><th class="num">Buenas</th><th class="num">Fallas</th><th class="num">Merma</th><th class="num">Costo perdido</th><th>Causa</th><th></th></tr></thead>
+      <tbody>${rows.map(p=>{const m=(p.buenas+p.fallas)>0?p.fallas/(p.buenas+p.fallas):0;return `<tr>
+        <td class="mini">${esc(p.fecha)}</td><td class="mini">${esc(p.lote||'')}</td>
+        <td style="max-width:230px;font-size:12.5px">${esc((recByN[p.n]||{}).nom||'')}</td>
+        <td class="num">${num(p.buenas)}</td><td class="num">${num(p.fallas)}</td>
+        <td class="num"><span class="pill ${m>DB.params.merma?'r':'g'}">${pct(m)}</span></td>
+        <td class="num">${money(p.fallas*costoTotalDe(p.n))}</td>
+        <td class="mini">${esc(p.causa||'')}</td>
+        <td><button class="x" data-delp="${p.id}" title="Eliminar">✕</button></td></tr>`}).join('')}</tbody>
+    </table></div>`:`<div class="empty"><b>Todavía no hay horneadas</b>Registra la primera arriba y empieza a ver tu merma real.</div>`}
+  </div>`;
+}
+function sugerirLote(){
+  const d=new Date(); const p='G-'+String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+'-';
+  const n=DB.prod.filter(x=>(x.lote||'').startsWith(p)).length+1;
+  return p+String(n).padStart(2,'0');
+}
+function hookProd(){
+  const S=id=>document.getElementById(id);
+  S('pAdd').onclick=()=>{
+    const buenas=+S('pBuen').value||0, fallas=+S('pFall').value||0;
+    if(buenas+fallas<=0){ toast('Escribe cuántas galletas salieron buenas o falladas.'); S('pBuen').focus(); return; }
+    DB.prod.push({id:Date.now(), fecha:S('pFecha').value||todayISO(), lote:S('pLote').value, n:+S('pRec').value,
+      plan:+S('pPlan').value||0, buenas, fallas, causa:fallas>0?S('pCausa').value:'', nota:S('pNota').value});
+    save(); toast('Horneada guardada'); render();
+  };
+  document.querySelectorAll('[data-delp]').forEach(b=>b.onclick=()=>{ DB.prod=DB.prod.filter(x=>x.id!=b.dataset.delp); save(); toast('Registro eliminado'); render(); });
+  const aj=S('ajustarMerma');
+  if(aj) aj.onclick=()=>{ const b=DB.prod.reduce((s,p)=>s+p.buenas,0), f=DB.prod.reduce((s,p)=>s+p.fallas,0);
+    DB.params.merma=Math.round(f/(b+f)*1000)/1000; DB.recetas.forEach(r=>r.merma=null); save(); toast('Merma actualizada en las 50 recetas'); render(); };
+}
+
+/* =========================================================
+   VISTA · VENTAS
+   ========================================================= */
+let preVenta=null;
+function nuevaVenta(v){ preVenta=v; go('ventas'); }
+function vVentas(){
+  const rows=[...DB.ventas].sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const ingreso=DB.ventas.reduce((s,v)=>s+v.piezas*v.precio,0);
+  const costo=DB.ventas.reduce((s,v)=>s+v.piezas*costoTotalDe(v.n),0);
+  const util=ingreso-costo;
+  const piezas=DB.ventas.reduce((s,v)=>s+v.piezas,0);
+  const pv=preVenta||{}; preVenta=null;
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Bitácora</div><h1 class="title">Ventas</h1>
+    <p class="sub">Una línea por venta. Se descuenta el costo real de producción para darte la utilidad de verdad, no la que crees que ganas.</p>
+  </div></div>
+
+  <div class="grid g4">
+    <div class="kpi dark"><div class="k-l">Ingreso acumulado</div><div class="k-v">${money0(ingreso)}</div><div class="k-n">${num(piezas)} galletas</div></div>
+    <div class="kpi"><div class="k-l">Costo de lo vendido</div><div class="k-v">${money0(costo)}</div><div class="k-n">insumos, mano de obra y overhead</div></div>
+    <div class="kpi"><div class="k-l">Utilidad</div><div class="k-v" style="color:${util>=0?'var(--good)':'var(--danger)'}">${money0(util)}</div><div class="k-n">antes de impuestos</div></div>
+    <div class="kpi"><div class="k-l">Margen promedio</div><div class="k-v">${pct(ingreso>0?util/ingreso:0)}</div><div class="k-n">de todas tus ventas</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Registrar una venta</h3>
+    <div class="row">
+      <div class="field" style="max-width:150px"><label class="f">Fecha</label><input type="date" id="vFecha" value="${todayISO()}"></div>
+      <div class="field" style="min-width:220px;flex:2"><label class="f">Galleta</label>
+        <select id="vRec">${DB.recetas.map(r=>`<option value="${r.n}"${pv.n===r.n?' selected':''}>${r.n}. ${esc(r.nom)}</option>`).join('')}</select></div>
+      <div class="field" style="min-width:170px"><label class="f">Canal</label>
+        <select id="vCanal">${SEED.canales.map(c=>`<option${pv.canal===c?' selected':''}>${esc(c)}</option>`).join('')}</select></div>
+    </div>
+    <div class="row">
+      <div class="field" style="max-width:110px"><label class="f">Piezas</label><input type="number" min="1" id="vPz" value="1"></div>
+      <div class="field" style="max-width:150px"><label class="f">Precio unitario</label><input type="number" min="0" step="5" id="vPrecio" value="${pv.precio??''}"></div>
+      <div class="field" style="min-width:170px;flex:1"><label class="f">Cliente o nota</label><input id="vNota" placeholder="Opcional"></div>
+    </div>
+    <div id="vPrev" class="mini" style="margin-bottom:12px"></div>
+    <button class="btn" id="vAdd">Guardar venta</button>
+    <button class="btn ghost" id="vSug">Usar precio sugerido</button>
+  </div>
+
+  <div class="card">
+    <h3>Ventas registradas (${DB.ventas.length})</h3>
+    ${rows.length?`<div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Galleta</th><th>Canal</th><th class="num">Pz</th><th class="num">Precio</th><th class="num">Ingreso</th><th class="num">Utilidad</th><th class="num">Margen</th><th></th></tr></thead>
+      <tbody>${rows.map(v=>{const ing=v.piezas*v.precio, cst=v.piezas*costoTotalDe(v.n), ut=ing-cst;return `<tr>
+        <td class="mini">${esc(v.fecha)}</td>
+        <td style="max-width:230px;font-size:12.5px">${esc((recByN[v.n]||{}).nom||'')}${v.nota?`<div class="mini">${esc(v.nota)}</div>`:''}</td>
+        <td><span class="pill">${esc(v.canal)}</span></td>
+        <td class="num">${num(v.piezas)}</td><td class="num">${money0(v.precio)}</td><td class="num">${money0(ing)}</td>
+        <td class="num" style="color:${ut>=0?'var(--good)':'var(--danger)'}">${money(ut)}</td>
+        <td class="num"><span class="pill ${ing>0&&ut/ing>=0.4?'g':(ut<=0?'r':'y')}">${pct(ing>0?ut/ing:0)}</span></td>
+        <td><button class="x" data-delv="${v.id}" title="Eliminar">✕</button></td></tr>`}).join('')}</tbody>
+    </table></div>`:`<div class="empty"><b>Todavía no hay ventas</b>Regístrala arriba, o entra a la calculadora y usa «Vender a este precio».</div>`}
+  </div>`;
+}
+function hookVentas(){
+  const S=id=>document.getElementById(id);
+  function prev(){
+    const n=+S('vRec').value, pz=+S('vPz').value||0, pr=+S('vPrecio').value||0;
+    const ing=pz*pr, cst=pz*costoTotalDe(n), ut=ing-cst;
+    S('vPrev').innerHTML = pr>0 ? `Ingreso ${money(ing)} − costo ${money(cst)} = <b style="color:${ut>=0?'var(--good)':'var(--danger)'}">utilidad ${money(ut)}</b> (${pct(ing>0?ut/ing:0)})`:'';
+  }
+  ['vRec','vPz','vPrecio','vCanal'].forEach(id=>S(id).oninput=prev);
+  S('vSug').onclick=()=>{ S('vPrecio').value=precioCanal(+S('vRec').value, S('vCanal').value); prev(); };
+  S('vAdd').onclick=()=>{
+    const pz=+S('vPz').value||0, pr=+S('vPrecio').value||0;
+    if(pz<=0||pr<=0){ toast('Escribe cuántas galletas vendiste y a qué precio.'); S('vPrecio').focus(); return; }
+    DB.ventas.push({id:Date.now(), fecha:S('vFecha').value||todayISO(), n:+S('vRec').value, canal:S('vCanal').value,
+      piezas:pz, precio:pr, nota:S('vNota').value});
+    save(); toast('Venta guardada'); render();
+  };
+  document.querySelectorAll('[data-delv]').forEach(b=>b.onclick=()=>{ DB.ventas=DB.ventas.filter(x=>x.id!=b.dataset.delv); save(); toast('Venta eliminada'); render(); });
+  prev();
+}
+/* =========================================================
+   VISTA · MI NEGOCIO
+   ========================================================= */
+function vNegocio(){
+  const eq=equilibrio();
+  const P=DB.params;
+  const sug=gastosTotales();
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Paso 2 · los supuestos que mueven todo</div><h1 class="title">Mi negocio</h1>
+    <p class="sub">De aquí salen tu costo por hora, el overhead por pieza y los márgenes. Si estos números están mal, las 50 recetas están mal costeadas.</p>
+  </div></div>
+
+  <div class="grid g4">
+    <div class="kpi"><div class="k-l">Gastos fijos al mes</div><div class="k-v">${money0(P.gastosFijos)}</div></div>
+    <div class="kpi"><div class="k-l">Overhead por pieza</div><div class="k-v">${money(overhead())}</div><div class="k-n">${num(P.piezasMes)} galletas al mes</div></div>
+    <div class="kpi"><div class="k-l">Mano de obra por pieza</div><div class="k-v">${money(manoObra())}</div><div class="k-n">${money0(P.costoHora)}/h ÷ ${num(P.piezasHora)} pz/h</div></div>
+    <div class="kpi"><div class="k-l">Costo promedio</div><div class="k-v">${money(eq.avgC)}</div><div class="k-n">de las 50 galletas</div></div>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h3>Parámetros de producción</h3>
+      <div class="row">
+        <div class="field"><label class="f">Empaque por pieza</label><input type="number" min="0" step="0.5" id="nEmp" value="${P.empaque}"></div>
+        <div class="field"><label class="f">Energía por pieza</label><input type="number" min="0" step="0.5" id="nEne" value="${P.energia}"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label class="f">Tu costo por hora</label><input type="number" min="0" step="10" id="nHora" value="${P.costoHora}"></div>
+        <div class="field"><label class="f">Galletas que haces por hora</label><input type="number" min="1" step="1" id="nPzH" value="${P.piezasHora}"></div>
+      </div>
+      <div class="field"><label class="f">% de merma general <span style="color:var(--purple)">${pct(P.merma)}</span></label>
+        <input type="range" min="0" max="30" step="1" id="nMer" value="${Math.round(P.merma*100)}"></div>
+      <div class="row">
+        <div class="field"><label class="f">Gastos fijos del mes</label><input type="number" min="0" step="100" id="nGF" value="${P.gastosFijos}"></div>
+        <div class="field"><label class="f">Galletas que produces al mes</label><input type="number" min="1" step="10" id="nPzM" value="${P.piezasMes}"></div>
+      </div>
+      <p class="mini" style="margin:0">Estos valores aplican a las 50 recetas. En la calculadora puedes sobreescribir empaque, energía y merma de una receta en particular.</p>
+    </div>
+
+    <div class="card">
+      <h3>Precios y márgenes</h3>
+      <div class="field"><label class="f">Margen deseado en MENUDEO · <span style="color:var(--purple)">${pct(P.mMenudeo)}</span></label>
+        <input type="range" min="10" max="85" step="1" id="nMMen" value="${Math.round(P.mMenudeo*100)}"></div>
+      <div class="field"><label class="f">Margen deseado en MAYOREO · <span style="color:var(--purple)">${pct(P.mMayoreo)}</span></label>
+        <input type="range" min="5" max="70" step="1" id="nMMay" value="${Math.round(P.mMayoreo*100)}"></div>
+      <div class="row">
+        <div class="field"><label class="f">Redondear precios al múltiplo de</label><input type="number" min="0" step="1" id="nRed" value="${P.redondeo}"></div>
+        <div class="field"><label class="f">IVA (solo si facturas) %</label><input type="number" min="0" max="100" step="1" id="nIVA" value="${Math.round(P.iva*100)}"></div>
+      </div>
+      <div class="note" style="margin-top:6px"><b>Ojo:</b> el margen no es lo mismo que el sobreprecio. Un margen de ${pct(P.mMenudeo)} significa que de cada peso que cobras, ${pct(P.mMenudeo)} es utilidad — el precio sale de dividir el costo entre (1 − margen), no de multiplicarlo.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Desglose de tus gastos fijos</h3>
+    ${DB.gf.map((l,i)=>`<div class="row" style="margin-bottom:7px;align-items:center">
+      <input value="${esc(l.nom)}" data-gfn="${i}" style="flex:2;min-width:150px;font-size:13px;padding:7px 9px">
+      <input type="number" min="0" step="50" value="${l.monto}" data-gfm="${i}" style="max-width:110px;text-align:right;font-size:13px;padding:7px 9px">
+      <button class="x" data-gfd="${i}" title="Quitar">✕</button></div>`).join('')}
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:12px;padding-top:12px;border-top:1.5px solid var(--line)">
+      <button class="btn sm ghost" id="gfAdd">+ Agregar gasto</button>
+      <div><span class="mini">Suma del desglose</span> <b style="font-family:'Bebas Neue';font-size:24px;color:var(--deep);margin-left:6px">${money0(sug)}</b>
+      ${Math.abs(sug-P.gastosFijos)>1?`<button class="btn sm gold" id="gfUse" style="margin-left:10px">Usar ${money0(sug)} como gasto fijo</button>`:''}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Punto de equilibrio</h3>
+    <div class="grid g4">
+      <div><div class="mini">Precio menudeo promedio</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${money0(eq.avgP)}</b></div>
+      <div><div class="mini">Costo variable por pieza</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${money(eq.varC)}</b></div>
+      <div><div class="mini">Margen de contribución</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--good)">${money(eq.mc)}</b></div>
+      <div><div class="mini">Galletas al mes para no perder</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--purple)">${num(eq.piezas)}</b></div>
+    </div>
+    <div class="note">Con ${money0(eq.gf)} de gastos fijos necesitas vender <b>${num(eq.piezas)} galletas al mes</b> (${money0(eq.ingreso)} de ingreso) solo para quedar en ceros. A partir de la galleta ${num(eq.piezas+1)} empiezas a ganar. Eso son <b>${num(Math.ceil(eq.piezas/26))} galletas al día</b> trabajando 26 días.</div>
+  </div>`;
+}
+function hookNegocio(){
+  const S=id=>document.getElementById(id);
+  const P=DB.params;
+  const bind=(id,fn)=>{ const el=S(id); if(el) el.oninput=e=>{ fn(e.target.value); save(); softCalc(); }; };
+  bind('nEmp',v=>P.empaque=+v||0); bind('nEne',v=>P.energia=+v||0);
+  bind('nHora',v=>P.costoHora=+v||0); bind('nPzH',v=>P.piezasHora=Math.max(1,+v||1));
+  bind('nMer',v=>P.merma=(+v||0)/100);
+  bind('nGF',v=>P.gastosFijos=+v||0); bind('nPzM',v=>P.piezasMes=Math.max(1,+v||1));
+  bind('nMMen',v=>P.mMenudeo=(+v||0)/100); bind('nMMay',v=>P.mMayoreo=(+v||0)/100);
+  bind('nRed',v=>P.redondeo=+v||0); bind('nIVA',v=>P.iva=(+v||0)/100);
+  document.querySelectorAll('[data-gfn]').forEach(el=>el.oninput=e=>{ DB.gf[+el.dataset.gfn].nom=e.target.value; save(); });
+  document.querySelectorAll('[data-gfm]').forEach(el=>el.oninput=e=>{ DB.gf[+el.dataset.gfm].monto=+e.target.value||0; save(); softCalc(); });
+  document.querySelectorAll('[data-gfd]').forEach(el=>el.onclick=()=>{ DB.gf.splice(+el.dataset.gfd,1); save(); render(); });
+  S('gfAdd').onclick=()=>{ DB.gf.push({nom:'Nuevo gasto',monto:0}); save(); render(); };
+  const u=S('gfUse'); if(u) u.onclick=()=>{ P.gastosFijos=gastosTotales(); save(); toast('Gastos fijos actualizados'); render(); };
+}
+
+/* =========================================================
+   VISTA · MIS DATOS
+   ========================================================= */
+function vDatos(){
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Respaldo y privacidad</div><h1 class="title">Mis datos</h1>
+    <p class="sub">Todo lo que escribes se guarda solo en este dispositivo, dentro de tu navegador. Nada viaja a internet.</p>
+  </div></div>
+
+  ${!canPersist?`<div class="note" style="margin:0 0 16px"><b>Estás viendo una vista previa.</b> Para que tus datos se guarden, descarga este archivo a tu computadora o celular y ábrelo desde ahí.</div>`:''}
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Respaldar</h3>
+      <p class="mini">Descarga un archivo con tus precios, horneadas y ventas. Guárdalo en tu nube o mándatelo por correo: es tu seguro contra borrar el historial del navegador.</p>
+      <button class="btn" id="dExp">Descargar respaldo</button>
+      <button class="btn ghost" id="dImp">Restaurar respaldo</button>
+      <input type="file" id="dFile" accept="application/json" style="display:none">
+    </div>
+    <div class="card">
+      <h3>Exportar a Excel</h3>
+      <p class="mini">Baja tus bitácoras en CSV para abrirlas en Excel, Google Sheets o mandárselas a tu contador.</p>
+      <button class="btn ghost" id="dCsvV">Ventas (${DB.ventas.length})</button>
+      <button class="btn ghost" id="dCsvP">Producción (${DB.prod.length})</button>
+      <button class="btn ghost" id="dCsvC">Costos de las 50 galletas</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Resumen de lo que tienes cargado</h3>
+    <div class="grid g4">
+      <div><div class="mini">Insumos</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.insumos.length}</b></div>
+      <div><div class="mini">Recetas</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.recetas.length}</b></div>
+      <div><div class="mini">Horneadas</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.prod.length}</b></div>
+      <div><div class="mini">Ventas</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.ventas.length}</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Empezar de nuevo</h3>
+    <p class="mini">Vuelve a los precios de referencia y borra tus bitácoras. Esto no se puede deshacer, así que descarga antes un respaldo.</p>
+    <button class="btn danger" id="dReset">Restablecer todo</button>
+  </div>
+
+  <div class="note"><b>Endulcora · Estudio Gastronómico.</b> Herramienta complementaria del eBook «Galletas Estilo Nueva York» · Colección Oficios Dulces de Endulcora, Volumen II. Recetas: Chef Luis Alfonso Jiménez Cárdenas · Edición: Manuel Ramiro Justo Guzmán · WhatsApp 5665271901. Uso personal del comprador; no se autoriza su reventa ni redistribución.</div>`;
+}
+function download(name, text, type){
+  const b=new Blob([type==='csv'?'\ufeff'+text:text],{type:(type==='csv'?'text/csv':'application/json')+';charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+const csvCell=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+function hookDatos(){
+  const S=id=>document.getElementById(id);
+  S('dExp').onclick=()=>{ download(`Endulcora_GalletasNY_respaldo_${todayISO()}.json`, JSON.stringify(DB), 'json'); toast('Respaldo descargado'); };
+  S('dImp').onclick=()=>S('dFile').click();
+  S('dFile').onchange=e=>{
+    const f=e.target.files[0]; if(!f) return; const rd=new FileReader();
+    rd.onload=()=>{ try{ const o=JSON.parse(rd.result); if(!o.insumos||!o.recetas) throw 0;
+      DB=o; if(!DB.plan) DB.plan={}; reindex(); save(); toast('Respaldo restaurado'); render(); }catch(err){ toast('Ese archivo no es un respaldo válido.'); } };
+    rd.readAsText(f);
+  };
+  S('dCsvV').onclick=()=>{
+    const h=['Fecha','Galleta','Canal','Piezas','Precio unitario','Ingreso','Costo total','Utilidad','Margen','Cliente/Nota'];
+    const rows=DB.ventas.map(v=>{const ing=v.piezas*v.precio,cst=v.piezas*costoTotalDe(v.n);
+      return [v.fecha,(recByN[v.n]||{}).nom,v.canal,v.piezas,v.precio,ing.toFixed(2),cst.toFixed(2),(ing-cst).toFixed(2),ing>0?((ing-cst)/ing).toFixed(4):0,v.nota].map(csvCell).join(',');});
+    download(`Endulcora_GalletasNY_Ventas_${todayISO()}.csv`,[h.map(csvCell).join(','),...rows].join('\n'),'csv'); toast('CSV de ventas descargado');
+  };
+  S('dCsvP').onclick=()=>{
+    const h=['Fecha','Lote','Galleta','Planeadas','Buenas','Falladas','% merma','Costo merma','Causa','Notas'];
+    const rows=DB.prod.map(p=>{const m=(p.buenas+p.fallas)>0?p.fallas/(p.buenas+p.fallas):0;
+      return [p.fecha,p.lote,(recByN[p.n]||{}).nom,p.plan,p.buenas,p.fallas,m.toFixed(4),(p.fallas*costoTotalDe(p.n)).toFixed(2),p.causa,p.nota].map(csvCell).join(',');});
+    download(`Endulcora_GalletasNY_Produccion_${todayISO()}.csv`,[h.map(csvCell).join(','),...rows].join('\n'),'csv'); toast('CSV de producción descargado');
+  };
+  S('dCsvC').onclick=()=>{
+    const h=['No','Galleta','Linea','Piezas por lote','Insumos lote','Insumos por pieza','Empaque','Energia','Mano de obra','Subtotal','% merma','Costo merma','Overhead','COSTO TOTAL','PRECIO MENUDEO','Utilidad menudeo','Margen real','PRECIO MAYOREO','Utilidad mayoreo','Precio con IVA'];
+    const rows=DB.recetas.map(r=>{const c=calc(r.n);
+      return [String(r.n), r.nom, r.cap, c.lote, ...[c.insLote,c.ins,c.emp,c.ene,c.mo,c.sub].map(x=>x.toFixed(2)), c.mermaPct.toFixed(3),
+        c.mermaCosto.toFixed(2), c.oh.toFixed(2), c.total.toFixed(2), c.menudeo.pvp, c.menudeo.util.toFixed(2), c.menudeo.margen.toFixed(4),
+        c.mayoreo.pvp, c.mayoreo.util.toFixed(2), c.iva.toFixed(2)].map(csvCell).join(',');});
+    download(`Endulcora_GalletasNY_Costos_${todayISO()}.csv`,[h.map(csvCell).join(','),...rows].join('\n'),'csv'); toast('CSV de costos descargado');
+  };
+  S('dReset').onclick=()=>{
+    openModal(`<h2 style="font-family:'Bebas Neue';font-size:28px;color:var(--deep);margin-bottom:8px">¿Restablecer todo?</h2>
+      <p class="mini">Se borrarán tus ${DB.ventas.length} ventas, ${DB.prod.length} horneadas y los precios que hayas cambiado. Volverás a los valores de referencia del libro.</p>
+      <div style="display:flex;gap:8px;margin-top:16px"><button class="btn ghost" id="noReset">Cancelar</button>
+      <button class="btn danger" id="okReset">Sí, borrar todo</button></div>`);
+    document.getElementById('noReset').onclick=closeModal;
+    document.getElementById('okReset').onclick=()=>{ DB=freshDB(); reindex(); save(); closeModal(); toast('Todo restablecido'); go('tablero'); };
+  };
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function render(){
+  const v=document.getElementById('view');
+  const map={tablero:vTablero,calc:vCalc,recetas:vRecetas,insumos:vInsumos,plan:vPlan,prod:vProd,ventas:vVentas,negocio:vNegocio,datos:vDatos};
+  const hooks={tablero:hookTablero,calc:hookCalc,recetas:hookRecetas,insumos:hookInsumos,plan:hookPlan,prod:hookProd,ventas:hookVentas,negocio:hookNegocio,datos:hookDatos};
+  reindex();
+  v.innerHTML=map[current]();
+  hooks[current]();
+}
+buildNav(); render();
+</script>
+</body>
+</html>

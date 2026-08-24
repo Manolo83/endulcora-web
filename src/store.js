@@ -273,19 +273,54 @@ async function init() {
       ebook.productosRelacionados = [anexo.id, app.id, paquete.id];
     }
     const FAMILIAS_A_DESGLOSAR = [
-      // { tituloViejo: 'Galletas Tipo New York · Paquete completo', tituloBase: 'Galletas Tipo New York', categoria: 'ebook', carpetaSeed: 'galletas-tipo-new-york', archivos: { ebook: '...', anexo: '...', app: '...' } },
+      {
+        tituloViejo: 'Galletas Tipo New York · Paquete completo',
+        tituloBase: 'Galletas Tipo New York',
+        categoria: 'ebook',
+        carpetaSeed: 'galletas-tipo-new-york',
+        archivos: { ebook: 'Endulcora_Galletas_NY_eBook.pdf', anexo: 'Endulcora_Galletas_NY_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Galletas_NY_APP.html' },
+      },
+      {
+        tituloViejo: 'Repostería para Diabéticos · Paquete completo',
+        tituloBase: 'Repostería para Diabéticos',
+        categoria: 'ebook',
+        carpetaSeed: 'reposteria-para-diabeticos',
+        archivos: { ebook: 'Endulcora_Reposteria_Diabeticos_eBook.pdf', anexo: 'Endulcora_Reposteria_Diabeticos_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Reposteria_Diabeticos_APP.html' },
+      },
+      {
+        tituloViejo: 'PAQUETE MAESTRO DE ROLES GOURMET',
+        tituloBase: 'Roles Gourmet',
+        categoria: 'ebook',
+        carpetaSeed: 'roles-gourmet',
+        archivos: { ebook: 'Endulcora_Roles_Gourmet_eBook.pdf', anexo: 'Endulcora_Roles_Gourmet_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Roles_Gourmet_APP.html' },
+      },
+      {
+        // Productos nuevos, sin producto viejo que borrar.
+        tituloBase: 'Tamales Oaxaqueños',
+        categoria: 'ebook',
+        carpetaSeed: 'tamales-oaxaquenos',
+        archivos: { ebook: 'Endulcora_Tamales_Oaxaquenos_eBook.pdf', anexo: 'Endulcora_Tamales_Oaxaquenos_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tamales_Oaxaquenos_APP.html' },
+      },
+      {
+        tituloBase: 'Tamales Regionales',
+        categoria: 'ebook',
+        carpetaSeed: 'tamales-regionales',
+        archivos: { ebook: 'Endulcora_Tamales_Regionales_eBook.pdf', anexo: 'Endulcora_Tamales_Regionales_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tamales_Regionales_APP.html' },
+      },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
       const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
       if (data[flag]) continue;
-      const viejo = data.products.find((p) => p.titulo === familia.tituloViejo);
-      if (!viejo) continue;
-      data.products = data.products.filter((p) => p.id !== viejo.id);
-      if (typeof viejo.imagen === 'string' && viejo.imagen.startsWith('/uploads/')) {
-        fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.imagen)), () => {});
-      }
-      if (typeof viejo.archivo === 'string' && viejo.archivo.startsWith('/uploads/')) {
-        fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.archivo)), () => {});
+      if (familia.tituloViejo) {
+        const viejo = data.products.find((p) => (p.titulo || '').toLowerCase() === familia.tituloViejo.toLowerCase());
+        if (!viejo) continue;
+        data.products = data.products.filter((p) => p.id !== viejo.id);
+        if (typeof viejo.imagen === 'string' && viejo.imagen.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.imagen)), () => {});
+        }
+        if (typeof viejo.archivo === 'string' && viejo.archivo.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.archivo)), () => {});
+        }
       }
       crearFamiliaEbookDesglosada(familia);
       data[flag] = true;
