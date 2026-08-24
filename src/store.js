@@ -358,6 +358,83 @@ async function init() {
         changed = true;
       }
     }
+    // Consolida los duplicados: Velas Comestibles, Galletas Tipo New York,
+    // Reposteria para Diabeticos y Roles Gourmet ya tenian, desde antes de
+    // este trabajo, su propio eBook/Anexo/App con foto y contenido real.
+    // Se copia ese contenido (foto, textos, bullets) a los productos nuevos
+    // y se borran los viejos, incluyendo el slug (para no perder el enlace
+    // publico que ya existia). No se toca el archivo descargable del
+    // producto nuevo (ya tiene el suyo propio) ni se borra la foto (ahora
+    // la usa el producto nuevo).
+    const CONSOLIDACIONES = [
+      {
+        pares: [
+          { viejoSlug: 'velas-comestibles-paquete', nuevoSlug: 'velas-comestibles' },
+          { viejoSlug: 'costeo-de-velas-comestibles-excel', nuevoSlug: 'anexo-excel-velas-comestibles' },
+          { viejoSlug: 'calculadora-velas-comestibles-app', nuevoSlug: 'app-velas-comestibles' },
+        ],
+        paquete: { slug: 'velas-comestibles-paquete-completo', precio: '149', boton: 'Comprar paquete completo' },
+      },
+      {
+        pares: [
+          { viejoSlug: 'galletas-tipo-new-york', nuevoSlug: 'galletas-tipo-new-york-2' },
+          { viejoSlug: 'costeo-de-galletas-tipo-new-york-excel', nuevoSlug: 'anexo-excel-galletas-tipo-new-york' },
+          { viejoSlug: 'calculadora-galletas-tipo-new-york-app', nuevoSlug: 'app-galletas-tipo-new-york' },
+        ],
+      },
+      {
+        pares: [
+          { viejoSlug: 'reposteria-para-diabeticos', nuevoSlug: 'reposteria-para-diabeticos-2' },
+          { viejoSlug: 'costeo-de-reposteria-para-diabeticos-excel', nuevoSlug: 'anexo-excel-reposteria-para-diabeticos' },
+          { viejoSlug: 'calculadora-reposteria-para-diabeticos-app', nuevoSlug: 'app-reposteria-para-diabeticos' },
+        ],
+      },
+      {
+        pares: [
+          { viejoSlug: 'roles-gourmet', nuevoSlug: 'roles-gourmet-3' },
+          { viejoSlug: 'roles-gourmet-2', nuevoSlug: 'anexo-excel-roles-gourmet' },
+          { viejoSlug: 'roles-gourmet-app', nuevoSlug: 'app-roles-gourmet' },
+        ],
+      },
+    ];
+    if (!data._migConsolidaDuplicados) {
+      let algoCambio = false;
+      for (const c of CONSOLIDACIONES) {
+        for (const par of c.pares) {
+          const viejo = data.products.find((p) => p.slug === par.viejoSlug);
+          const nuevo = data.products.find((p) => p.slug === par.nuevoSlug);
+          if (!viejo || !nuevo) continue;
+          nuevo.etiqueta = viejo.etiqueta || nuevo.etiqueta;
+          nuevo.destacado = viejo.destacado || nuevo.destacado;
+          nuevo.subtitulo = viejo.subtitulo || nuevo.subtitulo;
+          nuevo.bullets = viejo.bullets && viejo.bullets.length ? viejo.bullets : nuevo.bullets;
+          nuevo.descripcionCorta = viejo.descripcionCorta || nuevo.descripcionCorta;
+          nuevo.descripcionLarga = viejo.descripcionLarga || nuevo.descripcionLarga;
+          nuevo.imagen = viejo.imagen || nuevo.imagen;
+          if (typeof viejo.archivo === 'string' && viejo.archivo.startsWith('/uploads/')) {
+            fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.archivo)), () => {});
+          }
+          nuevo.slug = par.viejoSlug;
+          data.products = data.products.filter((p) => p.id !== viejo.id);
+          algoCambio = true;
+        }
+        if (c.paquete) {
+          const paquete = data.products.find((p) => p.slug === c.paquete.slug);
+          if (paquete) {
+            paquete.precio = c.paquete.precio;
+            paquete.boton = c.paquete.boton;
+            paquete.ocultoEnCatalogo = true;
+            paquete.productosRelacionados = [];
+            paquete.precioAnterior = '';
+            algoCambio = true;
+          }
+        }
+      }
+      if (algoCambio) {
+        data._migConsolidaDuplicados = true;
+        changed = true;
+      }
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
