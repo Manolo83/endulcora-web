@@ -391,7 +391,7 @@ async function cargarProducto(){
           </div>
           <button type="button" data-id="${r.id}" data-titulo="${escapeHtml(r.titulo || '')}" data-precio="${r.precio || '0'}"
             class="btnAgregarRelacionado shrink-0 rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
-            Agregar paquete
+            ${escapeHtml(r.boton || 'Agregar paquete')}
           </button>
         </div>
       `).join('');
@@ -408,7 +408,7 @@ async function cargarProducto(){
           </div>
           <button type="button" data-id="${r.id}" data-titulo="${escapeHtml(r.titulo || '')}" data-precio="${r.precio || '0'}"
             class="btnAgregarRelacionado shrink-0 rounded-full boton-vivo border border-vino/25 px-4 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
-            Agregar
+            ${escapeHtml(r.boton || 'Agregar')}
           </button>
         </div>
       `).join('');
@@ -440,6 +440,7 @@ async function cargarProducto(){
 
   document.getElementById('linkWhatsappProducto').href = `https://wa.me/52${numero}?text=${encodeURIComponent(`Ponte en contacto con nosotros para saber más información acerca de ${p.titulo} y agendar tu taller.`)}`;
 
+  document.getElementById('btnComprarProducto').textContent = p.boton || 'Agregar al carrito';
   document.getElementById('btnComprarProducto').addEventListener('click', () => {
     agregarAlCarritoLocal({
       tipo: 'producto',

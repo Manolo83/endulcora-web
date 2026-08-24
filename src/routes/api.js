@@ -36,6 +36,7 @@ function resumenProducto(r) {
     precio: r.precio,
     imagen: r.imagen,
     esPaquete: !!r.esPaquete,
+    boton: r.boton || '',
   };
 }
 
