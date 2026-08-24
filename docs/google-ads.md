@@ -23,11 +23,10 @@ conversiones y sacar reportes de las cuatro sin entrar a la interfaz de Google.
 
 Estas cosas Google no las deja hacer por API, hay que hacerlas a mano una vez:
 
-1. **Crear la cuenta administradora (MCC).**
-   Entra a <https://ads.google.com/home/tools/manager-accounts/>, con la cuenta
-   de Google que quieras que sea la duena de todo, y crea una cuenta
-   administradora ("para administrar otras cuentas"). Anota su ID de 10 digitos
-   (aparece arriba a la derecha, con guiones: 123-456-7890).
+1. **Crear la cuenta administradora (MCC).** HECHO: es la **894-945-9356**
+   (`8949459356` sin guiones), la que muestra la seccion "Cuentas" en el menu
+   de la izquierda. Ahi mismo, con el boton **+**, se crean las subcuentas de
+   cada negocio (y tambien se pueden crear desde aqui, ver mas abajo).
 
 2. **Pedir el token de desarrollador.**
    Dentro del MCC: Herramientas y configuracion > Configuracion > **Centro de
@@ -65,7 +64,7 @@ Con los datos de arriba, guarda estas variables en Railway (Variables) y en tu
 GOOGLE_ADS_CLIENT_ID=...           # del cliente OAuth
 GOOGLE_ADS_CLIENT_SECRET=...       # del cliente OAuth
 GOOGLE_ADS_DEVELOPER_TOKEN=...     # del Centro de API del MCC
-GOOGLE_ADS_MANAGER_ID=1234567890   # ID del MCC, sin guiones
+GOOGLE_ADS_MANAGER_ID=8949459356   # ID del MCC, sin guiones
 ```
 
 Luego consigue el permiso permanente (refresh token):
