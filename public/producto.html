@@ -79,6 +79,8 @@ body { background: #FBF4E9; }
 @keyframes entradaRebote { 0% { opacity:0; transform: translateY(24px) scale(.85); } 60% { opacity:1; transform: translateY(-6px) scale(1.03); } 100% { opacity:1; transform: translateY(0) scale(1); } }
 .entrada-rebote { animation: entradaRebote .55s cubic-bezier(.34,1.56,.64,1) both; }
 :focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+@keyframes girar { to { transform: rotate(360deg); } }
+.spinner { border: 3px solid rgba(255,255,255,.35); border-top-color: #FBF4E9; border-radius: 50%; width: 16px; height: 16px; animation: girar .7s linear infinite; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .flotar, .entrada-rebote { animation: none !important; }
@@ -149,13 +151,36 @@ body { background: #FBF4E9; }
 
         <div class="mt-7 flex flex-wrap gap-3">
           <button type="button" id="btnComprarProducto" class="rounded-full boton-vivo bg-vino px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
-            Agregar al carrito
+            Comprar ahora
           </button>
           <a id="linkWhatsappProducto" href="#" target="_blank" rel="noopener"
             class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/25 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
             Preguntar por WhatsApp
           </a>
         </div>
+
+        <!-- Pago sin salir de esta pagina. Antes el boton mandaba al inicio
+             con el carrito abierto: la gente perdia el hilo y no llegaba al
+             pago (5 dias de anuncios, 6 clics en comprar, cero pagos). -->
+        <form id="formCompraDirecta" class="mt-5 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-carbon/50">Tu compra</p>
+          <div class="mt-3 flex items-baseline justify-between gap-3 border-b border-vino/10 pb-3">
+            <span id="resumenTitulo" class="text-sm font-600 text-carbon"></span>
+            <span id="resumenPrecio" class="shrink-0 font-ui text-sm font-700 text-vino"></span>
+          </div>
+          <label class="mt-4 block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo para la entrega</span>
+            <input id="compraEmail" type="email" required autocomplete="email" placeholder="tu@correo.com"
+              class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3">
+            <span class="mt-1.5 block text-xs text-carbon/50">Ahí te llega la descarga, en cuanto se confirme el pago.</span>
+          </label>
+          <button type="submit" id="btnPagarDirecto"
+            class="mt-4 flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+            <span id="spinnerPagarDirecto" class="spinner hidden"></span>
+            Ir a pagar con Mercado Pago
+          </button>
+          <p id="errorCompraDirecta" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+        </form>
       </div>
     </div>
 
@@ -182,7 +207,7 @@ body { background: #FBF4E9; }
     <div class="mt-16 rounded-3xl bg-vino p-8 text-center text-crema sm:p-12">
       <p class="font-display text-2xl sm:text-3xl">¿Listo para empezar?</p>
       <div class="mt-6 flex flex-wrap justify-center gap-3">
-        <button type="button" onclick="document.getElementById('btnComprarProducto').click(); window.scrollTo({top:0,behavior:'smooth'});"
+        <button type="button" onclick="document.getElementById('btnComprarProducto').click();"
           class="rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
           Agregar al carrito
         </button>
@@ -219,6 +244,11 @@ function formatoMonto(n){
   return Number(String(n).replace(/,/g,'')).toLocaleString('es-MX');
 }
 document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+function leerCookie(nombre){
+  const m = document.cookie.match(new RegExp('(^| )' + nombre + '=([^;]+)'));
+  return m ? decodeURIComponent(m[2]) : null;
+}
 
 function numeroWhatsapp(c){
   return (c && c.whatsapp_numero) || '5665271901';
@@ -439,14 +469,65 @@ async function cargarProducto(){
 
   document.getElementById('linkWhatsappProducto').href = `https://wa.me/52${numero}?text=${encodeURIComponent(`Hola, tengo una duda sobre "${p.titulo}"`)}`;
 
+  const precioProducto = parseFloat(String(p.precio || '0').replace(/,/g,'')) || 0;
+  const form = document.getElementById('formCompraDirecta');
+
   document.getElementById('btnComprarProducto').addEventListener('click', () => {
-    agregarAlCarritoLocal({
-      tipo: 'producto',
-      id: p.id,
-      titulo: p.titulo || '',
-      precio: parseFloat(String(p.precio || '0').replace(/,/g,'')) || 0,
-    });
-    window.location.href = '/?verCarrito=1#tienda';
+    document.getElementById('resumenTitulo').textContent = p.titulo || '';
+    document.getElementById('resumenPrecio').textContent = `$${formatoMonto(precioProducto)} MXN`;
+    form.classList.remove('hidden');
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('compraEmail').focus({ preventScroll: true });
+
+    if(typeof fbq === 'function'){
+      fbq('track', 'AddToCart', {
+        content_ids: [String(p.id)],
+        content_name: p.titulo || '',
+        content_type: 'product',
+        value: precioProducto,
+        currency: 'MXN',
+      });
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const boton = document.getElementById('btnPagarDirecto');
+    const spinner = document.getElementById('spinnerPagarDirecto');
+    const error = document.getElementById('errorCompraDirecta');
+    error.classList.add('hidden');
+    boton.disabled = true;
+    spinner.classList.remove('hidden');
+
+    if(typeof fbq === 'function'){
+      fbq('track', 'InitiateCheckout', {
+        value: precioProducto,
+        currency: 'MXN',
+        num_items: 1,
+        content_ids: [String(p.id)],
+      });
+    }
+
+    try{
+      const res = await fetch('/api/checkout/preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{ tipo: 'producto', id: p.id, titulo: p.titulo || '', cantidad: 1 }],
+          email: document.getElementById('compraEmail').value.trim(),
+          fbp: leerCookie('_fbp'),
+          fbc: leerCookie('_fbc'),
+        }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
+      window.location.href = data.url;
+    }catch(err){
+      error.textContent = err.message;
+      error.classList.remove('hidden');
+      boton.disabled = false;
+      spinner.classList.add('hidden');
+    }
   });
 }
 cargarProducto();
