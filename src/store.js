@@ -214,34 +214,32 @@ async function init() {
         changed = true;
       }
     });
-    // Divide "Velas Comestibles - Paquete completo" en sus componentes
-    // vendibles por separado (eBook, Anexo Excel, App), con los precios
-    // que definio el negocio: eBook $99, Anexo $50, App $50, paquete $149.
-    // Solo corre una vez (bandera dedicada, no se infiere del estado de
-    // productosRelacionados porque ese campo podia tener datos viejos).
-    const paqueteVelas = (data.products || []).find(
-      (p) => p.slug === 'velas-comestibles-paquete-completo' || /velas comestibles/i.test(p.titulo || '')
-    );
-    if (paqueteVelas && !data._migVelasComestibles) {
-      const nuevosComponentes = [
-        { titulo: 'Velas Comestibles (eBook)', precio: '99', boton: 'Añadir eBook al carrito', categoria: 'ebook' },
-        { titulo: 'Anexo Excel · Velas Comestibles', precio: '50', boton: 'Añadir anexo Excel al carrito', categoria: 'anexo' },
-        { titulo: 'App · Velas Comestibles', precio: '50', boton: 'Añadir app al carrito', categoria: 'ebook' },
-      ].map((base) => {
+    // Reemplaza un producto "paquete completo" antiguo (un solo articulo)
+    // por una familia de 4: eBook (principal, visible en el catalogo) +
+    // Anexo Excel + App + Paquete completo (estos 3 ocultos del catalogo,
+    // solo se compran desde la pagina del eBook). Precios estandar de la
+    // linea de eBooks: eBook $99, Anexo $50, App $50, Paquete $149.
+    // Para agregar un producto nuevo a esta lista: sube sus 3 archivos a
+    // seed-archivos/<carpetaSeed>/ y agrega una entrada a
+    // FAMILIAS_A_DESGLOSAR. Cada entrada corre una sola vez.
+    const PRECIOS_LINEA_EBOOKS = { ebook: '99', anexo: '50', app: '50', paquete: '149' };
+    function crearFamiliaEbookDesglosada({ tituloBase, categoria, carpetaSeed, archivos }) {
+      const SEED_DIR = path.join(__dirname, '..', 'seed-archivos', carpetaSeed);
+      const nuevoProducto = (titulo, categoriaItem, precio, boton, nombreArchivo) => {
         const item = {
           id: nextId(data.products),
           orden: data.products.length,
-          categoria: base.categoria,
+          categoria: categoriaItem,
           etiqueta: '',
           destacado: '',
-          titulo: base.titulo,
+          titulo,
           subtitulo: '',
           descripcionCorta: '',
           descripcionLarga: '',
           bullets: [],
-          precio: base.precio,
+          precio,
           precioAnterior: '',
-          boton: base.boton,
+          boton,
           imagen: '',
           galeria: [],
           archivo: '',
@@ -249,71 +247,49 @@ async function init() {
           slug: '',
           productosRelacionados: [],
           esPaquete: false,
+          ocultoEnCatalogo: false,
         };
-        item.slug = slugUnico(item.titulo, data.products, item.id);
+        item.slug = slugUnico(titulo, data.products, item.id);
         data.products.push(item);
-        return item;
-      });
-      paqueteVelas.titulo = 'Velas Comestibles';
-      paqueteVelas.precio = '149';
-      paqueteVelas.boton = 'Comprar paquete completo';
-      paqueteVelas.esPaquete = true;
-      paqueteVelas.productosRelacionados = nuevosComponentes.map((c) => c.id);
-      data._migVelasComestibles = true;
-      changed = true;
-    }
-    // Instala los archivos de los 3 componentes de Velas Comestibles desde
-    // seed-archivos/ (equivalente a subirlos a mano desde /admin, pero
-    // automatico). Corre una sola vez; si el producto ya tiene un archivo
-    // (p. ej. porque el admin ya lo subio a mano), no lo pisa.
-    if (!data._migVelasComestiblesArchivos) {
-      const SEED_DIR = path.join(__dirname, '..', 'seed-archivos', 'velas-comestibles');
-      const archivosPorTitulo = {
-        'Velas Comestibles (eBook)': 'Endulcora_Velas_Comestibles_eBook.pdf',
-        'Anexo Excel · Velas Comestibles': 'Endulcora_Velas_Comestibles_Calculadora_Costos_Merma_Precios.xlsx',
-        'App · Velas Comestibles': 'Endulcora_Velas_Comestibles_APP.html',
-      };
-      let instalado = false;
-      for (const [titulo, nombreArchivo] of Object.entries(archivosPorTitulo)) {
-        const producto = data.products.find((p) => p.titulo === titulo);
-        const origen = path.join(SEED_DIR, nombreArchivo);
-        if (producto && !producto.archivo && fs.existsSync(origen)) {
-          const nombreDestino = `${crypto.randomUUID()}${path.extname(nombreArchivo)}`;
-          fs.copyFileSync(origen, path.join(UPLOAD_DIR, nombreDestino));
-          producto.archivo = `/uploads/${nombreDestino}`;
-          producto.archivoNombre = nombreArchivo;
-          instalado = true;
+        if (nombreArchivo) {
+          const origen = path.join(SEED_DIR, nombreArchivo);
+          if (fs.existsSync(origen)) {
+            const destino = `${crypto.randomUUID()}${path.extname(nombreArchivo)}`;
+            fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+            item.archivo = `/uploads/${destino}`;
+            item.archivoNombre = nombreArchivo;
+          }
         }
-      }
-      if (instalado) {
-        data._migVelasComestiblesArchivos = true;
-        changed = true;
-      }
+        return item;
+      };
+      const anexo = nuevoProducto(`Anexo Excel · ${tituloBase}`, 'anexo', PRECIOS_LINEA_EBOOKS.anexo, 'Añadir anexo Excel al carrito', archivos.anexo);
+      const app = nuevoProducto(`App · ${tituloBase}`, categoria, PRECIOS_LINEA_EBOOKS.app, 'Añadir app al carrito', archivos.app);
+      anexo.ocultoEnCatalogo = true;
+      app.ocultoEnCatalogo = true;
+      const paquete = nuevoProducto(`${tituloBase} · Paquete completo`, categoria, PRECIOS_LINEA_EBOOKS.paquete, 'Comprar paquete completo', null);
+      paquete.esPaquete = true;
+      paquete.ocultoEnCatalogo = true;
+      const ebook = nuevoProducto(tituloBase, categoria, PRECIOS_LINEA_EBOOKS.ebook, 'Agregar al carrito', archivos.ebook);
+      ebook.productosRelacionados = [anexo.id, app.id, paquete.id];
     }
-    // Reordena Velas Comestibles: ahora el eBook ($99) es el producto
-    // principal que se ve en /ebooks, con el anexo, la app y el paquete
-    // completo como opciones debajo, en su propia pagina. El paquete deja
-    // de tener su propia tarjeta en el catalogo (se compra desde ahi).
-    if (!data._migVelasComestiblesReestructura) {
-      const ebook = data.products.find((p) => p.titulo === 'Velas Comestibles (eBook)');
-      const anexo = data.products.find((p) => p.titulo === 'Anexo Excel · Velas Comestibles');
-      const app = data.products.find((p) => p.titulo === 'App · Velas Comestibles');
-      const paquete = data.products.find((p) => p.esPaquete && /velas comestibles/i.test(p.titulo || ''));
-      if (ebook && anexo && app && paquete) {
-        const slugPublico = paquete.slug;
-        paquete.slug = slugUnico(`${paquete.titulo}-paquete`, data.products, paquete.id);
-        paquete.titulo = 'Velas Comestibles · Paquete completo';
-        paquete.productosRelacionados = [];
-        paquete.ocultoEnCatalogo = true;
-        anexo.ocultoEnCatalogo = true;
-        app.ocultoEnCatalogo = true;
-        ebook.titulo = 'Velas Comestibles';
-        ebook.slug = slugPublico;
-        ebook.productosRelacionados = [anexo.id, app.id, paquete.id];
-        ebook.ocultoEnCatalogo = false;
-        data._migVelasComestiblesReestructura = true;
-        changed = true;
+    const FAMILIAS_A_DESGLOSAR = [
+      // { tituloViejo: 'Galletas Tipo New York · Paquete completo', tituloBase: 'Galletas Tipo New York', categoria: 'ebook', carpetaSeed: 'galletas-tipo-new-york', archivos: { ebook: '...', anexo: '...', app: '...' } },
+    ];
+    for (const familia of FAMILIAS_A_DESGLOSAR) {
+      const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
+      if (data[flag]) continue;
+      const viejo = data.products.find((p) => p.titulo === familia.tituloViejo);
+      if (!viejo) continue;
+      data.products = data.products.filter((p) => p.id !== viejo.id);
+      if (typeof viejo.imagen === 'string' && viejo.imagen.startsWith('/uploads/')) {
+        fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.imagen)), () => {});
       }
+      if (typeof viejo.archivo === 'string' && viejo.archivo.startsWith('/uploads/')) {
+        fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.archivo)), () => {});
+      }
+      crearFamiliaEbookDesglosada(familia);
+      data[flag] = true;
+      changed = true;
     }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
