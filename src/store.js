@@ -218,7 +218,7 @@ async function init() {
     // productos relacionados); si ya se corrio, o si el producto no existe
     // o ya fue editado a mano, no hace nada.
     const paqueteVelas = (data.products || []).find(
-      (p) => p.esPaquete && (p.slug === 'velas-comestibles-paquete-completo' || /velas comestibles/i.test(p.titulo || ''))
+      (p) => p.slug === 'velas-comestibles-paquete-completo' || /velas comestibles/i.test(p.titulo || '')
     );
     if (paqueteVelas && !(paqueteVelas.productosRelacionados || []).length) {
       const nuevosComponentes = [
@@ -255,6 +255,7 @@ async function init() {
       paqueteVelas.titulo = 'Velas Comestibles';
       paqueteVelas.precio = '149';
       paqueteVelas.boton = 'Comprar paquete completo';
+      paqueteVelas.esPaquete = true;
       paqueteVelas.productosRelacionados = nuevosComponentes.map((c) => c.id);
       changed = true;
     }
