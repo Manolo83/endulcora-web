@@ -41,7 +41,15 @@ Estas cosas Google no las deja hacer por API, hay que hacerlas a mano una vez:
    - Pantalla de consentimiento: tipo **Externo**, con tu correo como usuario de
      prueba. No hace falta publicarla ni verificarla.
    - Credenciales > Crear credenciales > **ID de cliente de OAuth** > tipo
-     **Aplicacion de escritorio**.
+     **Aplicacion web**, y en "URI de redireccionamiento autorizados" pega:
+
+     ```
+     https://www.endulcora.com/api/google-ads/oauth/callback
+     ```
+
+     (Con el tipo **Aplicacion de escritorio** tambien funciona, pero entonces
+     el permiso se consigue con los comandos de consola en vez del enlace de un
+     clic.)
    - Copia el **ID de cliente** y el **secreto**.
 
 4. **Facturacion de cada cuenta.** Cuando una cuenta ya exista, hay que meterle
@@ -67,15 +75,33 @@ GOOGLE_ADS_DEVELOPER_TOKEN=...     # del Centro de API del MCC
 GOOGLE_ADS_MANAGER_ID=8949459356   # ID del MCC, sin guiones
 ```
 
-Luego consigue el permiso permanente (refresh token):
+Luego el permiso permanente. Hay dos formas; la primera no exige copiar nada:
+
+**A. Un clic (recomendada).** Con `GOOGLE_ADS_ADMIN_TOKEN` ya puesto:
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" $BASE/oauth/inicio
+```
+
+Devuelve un enlace de Google. Lo abre el duenio de la cuenta administradora,
+acepta, y el servidor guarda el permiso solo, en la base de datos. El enlace
+dura 15 minutos y sirve una sola vez. Para comprobar o revocar:
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" $BASE/oauth/estado
+curl -s -X DELETE -H "Authorization: Bearer $TOKEN" $BASE/oauth
+```
+
+**B. Por consola**, si el cliente OAuth es de tipo escritorio:
 
 ```bash
 node scripts/google-ads.js url-permiso     # abre el enlace que imprime
 node scripts/google-ads.js refresh-token <el-codigo-de-la-url>
 ```
 
-Guarda el resultado como `GOOGLE_ADS_REFRESH_TOKEN`. No caduca: tratalo como
-una contrasena.
+Aqui si hay que guardar el resultado como `GOOGLE_ADS_REFRESH_TOKEN`. En
+cualquiera de las dos formas, el permiso no caduca: tratalo como una contrasena.
+Si la variable de entorno existe, manda sobre lo guardado en la base de datos.
 
 Comprueba que todo quedo bien:
 

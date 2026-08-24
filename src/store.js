@@ -343,6 +343,22 @@ module.exports = {
     return item;
   },
 
+  // ---- Secretos que el propio servidor consigue y guarda ----
+  // (por ejemplo el permiso permanente de Google Ads, que se obtiene con un
+  // clic del duenio de la cuenta y no se puede escribir a mano en Railway).
+  getSecreto(clave) {
+    const data = load();
+    return (data.secretos && data.secretos[clave]) || null;
+  },
+  setSecreto(clave, valor) {
+    const data = load();
+    if (!data.secretos) data.secretos = {};
+    if (valor === null || valor === undefined) delete data.secretos[clave];
+    else data.secretos[clave] = valor;
+    save(data);
+    return valor;
+  },
+
   // ---- Contenido general del sitio (clave/valor) ----
   getContent() {
     return load().content;

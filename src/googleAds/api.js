@@ -10,11 +10,27 @@ const BASE = 'https://googleads.googleapis.com';
 
 let tokenEnCache = { valor: '', expiraEn: 0 };
 
+// El permiso permanente puede venir de dos lados: de una variable de entorno
+// (si se pego a mano) o de la base de datos, cuando lo consiguio el propio
+// servidor con el flujo de un clic de /api/google-ads/oauth. La variable manda.
+function refreshToken() {
+  if (GOOGLE_ADS.refreshToken) return GOOGLE_ADS.refreshToken;
+  try {
+    return require('../store').getSecreto(SECRETO_REFRESH) || '';
+  } catch {
+    // Sin base de datos (por ejemplo al correr la herramienta de consola
+    // fuera del servidor) solo queda la variable de entorno.
+    return '';
+  }
+}
+
+const SECRETO_REFRESH = 'googleAdsRefreshToken';
+
 function configurado() {
   return Boolean(
     GOOGLE_ADS.clientId &&
     GOOGLE_ADS.clientSecret &&
-    GOOGLE_ADS.refreshToken &&
+    refreshToken() &&
     GOOGLE_ADS.developerToken
   );
 }
@@ -23,7 +39,7 @@ function faltantes() {
   const falta = [];
   if (!GOOGLE_ADS.clientId) falta.push('GOOGLE_ADS_CLIENT_ID');
   if (!GOOGLE_ADS.clientSecret) falta.push('GOOGLE_ADS_CLIENT_SECRET');
-  if (!GOOGLE_ADS.refreshToken) falta.push('GOOGLE_ADS_REFRESH_TOKEN');
+  if (!refreshToken()) falta.push('GOOGLE_ADS_REFRESH_TOKEN (o el permiso de un clic en /api/google-ads/oauth)');
   if (!GOOGLE_ADS.developerToken) falta.push('GOOGLE_ADS_DEVELOPER_TOKEN');
   if (!GOOGLE_ADS.managerId) falta.push('GOOGLE_ADS_MANAGER_ID');
   return falta;
@@ -45,7 +61,7 @@ async function accessToken() {
     body: new URLSearchParams({
       client_id: GOOGLE_ADS.clientId,
       client_secret: GOOGLE_ADS.clientSecret,
-      refresh_token: GOOGLE_ADS.refreshToken,
+      refresh_token: refreshToken(),
       grant_type: 'refresh_token',
     }),
   });
@@ -124,4 +140,4 @@ async function buscar(customerId, query, { pageSize = 1000 } = {}) {
   return filas;
 }
 
-module.exports = { configurado, faltantes, accessToken, llamar, buscar, resumirError, BASE };
+module.exports = { configurado, faltantes, accessToken, llamar, buscar, resumirError, refreshToken, SECRETO_REFRESH, BASE };

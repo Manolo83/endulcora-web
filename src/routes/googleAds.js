@@ -16,9 +16,81 @@ const negocios = require('../googleAds/negocios');
 const cuentas = require('../googleAds/cuentas');
 const conversiones = require('../googleAds/conversiones');
 const reportes = require('../googleAds/reportes');
-const { GOOGLE_ADS } = require('../config');
+const store = require('../store');
+const { GOOGLE_ADS, SITE_URL } = require('../config');
 
 const router = express.Router();
+
+// Permiso de Google en un clic: el duenio de la cuenta abre el enlace, acepta,
+// y Google regresa aqui con un codigo que el servidor cambia por el permiso
+// permanente y guarda en la base de datos. Sin copiar ni pegar nada.
+const REDIRECT_URI = `${SITE_URL}/api/google-ads/oauth/callback`;
+const SCOPE = 'https://www.googleapis.com/auth/adwords';
+const SECRETO_ESTADO = 'googleAdsOauthEstado';
+const VIGENCIA_ESTADO_MS = 15 * 60 * 1000;
+
+function pagina(titulo, mensaje, tono = 'ok') {
+  const color = tono === 'ok' ? '#2E7D6B' : '#B3261E';
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${titulo}</title></head>
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#F7F4F8;color:#241A28;font-family:system-ui,-apple-system,'Segoe UI',sans-serif">
+<main style="max-width:34rem;padding:2.5rem;background:#fff;border-radius:16px;box-shadow:0 8px 30px -20px rgba(36,26,40,.5);text-align:center">
+<h1 style="margin:0 0 .75rem;font-size:1.5rem;color:${color}">${titulo}</h1>
+<p style="margin:0;line-height:1.6;color:#6B5F70">${mensaje}</p>
+</main></body></html>`;
+}
+
+// Esta ruta la abre el navegador de vuelta desde Google, sin el token del
+// panel: por eso va ANTES del filtro de abajo y se valida con el parametro
+// "state", que este mismo servidor genero minutos antes.
+router.get('/oauth/callback', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+
+  if (req.query.error) {
+    return res.status(400).send(pagina('No se concedio el permiso', 'Cerraste la pantalla de Google o rechazaste el acceso. Puedes intentarlo de nuevo con un enlace nuevo.', 'error'));
+  }
+
+  const guardado = store.getSecreto(SECRETO_ESTADO);
+  store.setSecreto(SECRETO_ESTADO, null); // de un solo uso, se gaste bien o mal
+
+  if (!guardado || !req.query.state || guardado.valor !== req.query.state) {
+    return res.status(400).send(pagina('Enlace no valido', 'Este enlace no lo genero el servidor, o ya se uso. Pide uno nuevo.', 'error'));
+  }
+  if (Date.now() - Number(guardado.creadoEn || 0) > VIGENCIA_ESTADO_MS) {
+    return res.status(400).send(pagina('El enlace expiro', 'Los enlaces de permiso duran 15 minutos. Pide uno nuevo e intentalo otra vez.', 'error'));
+  }
+  if (!req.query.code) {
+    return res.status(400).send(pagina('Falta el codigo', 'Google no devolvio el codigo de autorizacion. Intentalo de nuevo.', 'error'));
+  }
+
+  try {
+    const respuesta = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code: String(req.query.code),
+        client_id: GOOGLE_ADS.clientId,
+        client_secret: GOOGLE_ADS.clientSecret,
+        redirect_uri: REDIRECT_URI,
+        grant_type: 'authorization_code',
+      }),
+    });
+    const datos = await respuesta.json().catch(() => ({}));
+
+    if (!respuesta.ok || !datos.refresh_token) {
+      console.error('[google-ads] Google no devolvio permiso permanente:', JSON.stringify(datos).slice(0, 400));
+      return res.status(502).send(pagina('Google no devolvio el permiso', 'Revisa que el ID y el secreto del cliente OAuth sean los correctos y que la URL de redireccion registrada sea exactamente la de este servidor.', 'error'));
+    }
+
+    store.setSecreto(api.SECRETO_REFRESH, datos.refresh_token);
+    console.log('[google-ads] Permiso permanente guardado. El servidor ya puede operar las cuentas.');
+    res.send(pagina('Listo, permiso concedido', 'Ya puedes cerrar esta pestana. El servidor guardo el permiso y desde ahora puede administrar las cuentas de Google Ads.'));
+  } catch (err) {
+    console.error('[google-ads] Error al canjear el codigo:', err.message);
+    res.status(502).send(pagina('Algo fallo al guardar el permiso', 'Intentalo de nuevo con un enlace nuevo.', 'error'));
+  }
+});
 
 const ADMIN_TOKEN = process.env.GOOGLE_ADS_ADMIN_TOKEN || '';
 
@@ -59,6 +131,49 @@ function ruta(manejador) {
     });
   };
 }
+
+// Genera el enlace que el duenio de la cuenta tiene que abrir una sola vez.
+router.get('/oauth/inicio', ruta(async (req, res) => {
+  if (!GOOGLE_ADS.clientId || !GOOGLE_ADS.clientSecret) {
+    return res.status(400).json({
+      error: 'Faltan GOOGLE_ADS_CLIENT_ID y GOOGLE_ADS_CLIENT_SECRET (el cliente OAuth de Google Cloud).',
+    });
+  }
+
+  const estado = crypto.randomBytes(24).toString('hex');
+  store.setSecreto(SECRETO_ESTADO, { valor: estado, creadoEn: Date.now() });
+
+  const url = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+    client_id: GOOGLE_ADS.clientId,
+    redirect_uri: REDIRECT_URI,
+    response_type: 'code',
+    scope: SCOPE,
+    access_type: 'offline',
+    prompt: 'consent',
+    state: estado,
+  });
+
+  res.json({
+    url,
+    redirectUriRegistrada: REDIRECT_URI,
+    vigencia: '15 minutos',
+    instrucciones: 'Abre esta URL con la cuenta de Google duenia de la administradora y acepta. El servidor guarda el permiso solo; no hay que copiar nada.',
+  });
+}));
+
+// Si el permiso ya esta guardado, y como quitarlo.
+router.get('/oauth/estado', ruta(async (req, res) => {
+  res.json({
+    permisoGuardado: Boolean(store.getSecreto(api.SECRETO_REFRESH)),
+    origen: GOOGLE_ADS.refreshToken ? 'variable de entorno' : (store.getSecreto(api.SECRETO_REFRESH) ? 'base de datos' : null),
+    redirectUriRegistrada: REDIRECT_URI,
+  });
+}));
+
+router.delete('/oauth', ruta(async (req, res) => {
+  store.setSecreto(api.SECRETO_REFRESH, null);
+  res.json({ ok: true, mensaje: 'Permiso borrado. Habra que volver a concederlo para operar las cuentas.' });
+}));
 
 // Que hay configurado y que falta. Nunca devuelve credenciales, solo cuales
 // estan puestas.
