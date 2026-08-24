@@ -208,6 +208,7 @@ async function init() {
         changed = true;
       }
       if (typeof p.esPaquete !== 'boolean') { p.esPaquete = false; changed = true; }
+      if (typeof p.ocultoEnCatalogo !== 'boolean') { p.ocultoEnCatalogo = false; changed = true; }
       if (!p.slug) {
         p.slug = slugUnico(p.titulo, data.products, p.id);
         changed = true;
@@ -286,6 +287,31 @@ async function init() {
       }
       if (instalado) {
         data._migVelasComestiblesArchivos = true;
+        changed = true;
+      }
+    }
+    // Reordena Velas Comestibles: ahora el eBook ($99) es el producto
+    // principal que se ve en /ebooks, con el anexo, la app y el paquete
+    // completo como opciones debajo, en su propia pagina. El paquete deja
+    // de tener su propia tarjeta en el catalogo (se compra desde ahi).
+    if (!data._migVelasComestiblesReestructura) {
+      const ebook = data.products.find((p) => p.titulo === 'Velas Comestibles (eBook)');
+      const anexo = data.products.find((p) => p.titulo === 'Anexo Excel · Velas Comestibles');
+      const app = data.products.find((p) => p.titulo === 'App · Velas Comestibles');
+      const paquete = data.products.find((p) => p.esPaquete && /velas comestibles/i.test(p.titulo || ''));
+      if (ebook && anexo && app && paquete) {
+        const slugPublico = paquete.slug;
+        paquete.slug = slugUnico(`${paquete.titulo}-paquete`, data.products, paquete.id);
+        paquete.titulo = 'Velas Comestibles · Paquete completo';
+        paquete.productosRelacionados = [];
+        paquete.ocultoEnCatalogo = true;
+        anexo.ocultoEnCatalogo = true;
+        app.ocultoEnCatalogo = true;
+        ebook.titulo = 'Velas Comestibles';
+        ebook.slug = slugPublico;
+        ebook.productosRelacionados = [anexo.id, app.id, paquete.id];
+        ebook.ocultoEnCatalogo = false;
+        data._migVelasComestiblesReestructura = true;
         changed = true;
       }
     }
@@ -470,6 +496,7 @@ module.exports = {
       slug: '',
       productosRelacionados: [],
       esPaquete: false,
+      ocultoEnCatalogo: false,
       ...fields,
     };
     item.slug = slugUnico(item.slug || item.titulo, data.products, item.id);

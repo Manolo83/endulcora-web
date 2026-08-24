@@ -207,7 +207,7 @@ function pintar(){
   TODOS.forEach(p => {
     if(p.esPaquete) (p.productosRelacionados || []).forEach(id => componentesDePaquete.add(id));
   });
-  let items = TODOS.filter(p => !componentesDePaquete.has(p.id));
+  let items = TODOS.filter(p => !componentesDePaquete.has(p.id) && !p.ocultoEnCatalogo);
   if(info.filtro) items = items.filter(p => (p.categoria || 'ebook') === info.filtro);
   if(q){
     items = items.filter(p => `${p.titulo || ''} ${p.subtitulo || ''} ${p.etiqueta || ''} ${p.descripcionCorta || ''}`.toLowerCase().includes(q));
