@@ -1,4 +1,6 @@
 const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 const { Pool } = require('pg');
 const { DATA_DIR, UPLOAD_DIR } = require('./config');
 
@@ -258,6 +260,34 @@ async function init() {
       paqueteVelas.productosRelacionados = nuevosComponentes.map((c) => c.id);
       data._migVelasComestibles = true;
       changed = true;
+    }
+    // Instala los archivos de los 3 componentes de Velas Comestibles desde
+    // seed-archivos/ (equivalente a subirlos a mano desde /admin, pero
+    // automatico). Corre una sola vez; si el producto ya tiene un archivo
+    // (p. ej. porque el admin ya lo subio a mano), no lo pisa.
+    if (!data._migVelasComestiblesArchivos) {
+      const SEED_DIR = path.join(__dirname, '..', 'seed-archivos', 'velas-comestibles');
+      const archivosPorTitulo = {
+        'Velas Comestibles (eBook)': 'Endulcora_Velas_Comestibles_eBook.pdf',
+        'Anexo Excel · Velas Comestibles': 'Endulcora_Velas_Comestibles_Calculadora_Costos_Merma_Precios.xlsx',
+        'App · Velas Comestibles': 'Endulcora_Velas_Comestibles_APP.html',
+      };
+      let instalado = false;
+      for (const [titulo, nombreArchivo] of Object.entries(archivosPorTitulo)) {
+        const producto = data.products.find((p) => p.titulo === titulo);
+        const origen = path.join(SEED_DIR, nombreArchivo);
+        if (producto && !producto.archivo && fs.existsSync(origen)) {
+          const nombreDestino = `${crypto.randomUUID()}${path.extname(nombreArchivo)}`;
+          fs.copyFileSync(origen, path.join(UPLOAD_DIR, nombreDestino));
+          producto.archivo = `/uploads/${nombreDestino}`;
+          producto.archivoNombre = nombreArchivo;
+          instalado = true;
+        }
+      }
+      if (instalado) {
+        data._migVelasComestiblesArchivos = true;
+        changed = true;
+      }
     }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
