@@ -52,22 +52,87 @@ router.post('/suscribirse', requireCliente, async (req, res) => {
   }
 });
 
+// Cada cobro recurrente (el primero y cada mes despues) llega como un
+// "authorized_payment" independiente del estado de la suscripcion. Se
+// registra aqui para que aparezca en /admin > Ventas, sin importar si el
+// cobro salio bien o mal (para llevar el registro contable completo).
+const MAPA_ESTADO_PAGO = {
+  processed: 'aprobado',
+  scheduled: 'programado',
+  recycled: 'reintentando',
+  cancelled: 'cancelado',
+  rejected: 'rechazado',
+};
+
+// Devuelve true si guardo un pago nuevo (false si ya estaba registrado).
+function guardarPagoDesdeInfo(info, usuario) {
+  if (store.getMembresiaPagoPorAuthorizedId(info.id)) return false;
+  store.addMembresiaPago({
+    userId: usuario ? usuario.id : null,
+    email: usuario ? usuario.email : '',
+    nombre: usuario ? usuario.nombre : '',
+    monto: info.transaction_amount || PRECIO_MEMBRESIA,
+    estado: MAPA_ESTADO_PAGO[info.status] || info.status || 'desconocido',
+    mpAuthorizedPaymentId: info.id,
+    mpPaymentId: info.payment && info.payment.id ? info.payment.id : '',
+    fecha: info.date_created,
+  });
+  return true;
+}
+
+async function registrarPagoMembresia(authorizedPaymentId) {
+  const accessToken = process.env.MP_ACCESS_TOKEN;
+  const res = await fetch(`https://api.mercadopago.com/authorized_payments/${authorizedPaymentId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) return;
+  const info = await res.json();
+  const usuario = info.preapproval_id ? store.getUserByPreapprovalId(info.preapproval_id) : null;
+  guardarPagoDesdeInfo(info, usuario);
+}
+
+// Trae y guarda los cobros pasados de una suscripcion que no se hayan
+// registrado todavia (por ejemplo, los de antes de que existiera este
+// registro, o si algun aviso de Mercado Pago no llego). Se usa desde
+// /admin para reparar el historial contable sin depender solo del webhook.
+async function sincronizarPagosDePreapproval(preapprovalId, usuario) {
+  const accessToken = process.env.MP_ACCESS_TOKEN;
+  if (!accessToken || !preapprovalId) return 0;
+  const res = await fetch(`https://api.mercadopago.com/authorized_payments/search?preapproval_id=${encodeURIComponent(preapprovalId)}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) return 0;
+  const data = await res.json();
+  const resultados = data.results || [];
+  let agregados = 0;
+  for (const info of resultados) {
+    if (guardarPagoDesdeInfo(info, usuario)) agregados += 1;
+  }
+  return agregados;
+}
+
 // Mercado Pago avisa aqui cuando la suscripcion de un cliente cambia de
 // estado (autorizada, pausada, cancelada...). Con esto se le quita o da
 // acceso al contenido de membresia automaticamente, sin intervencion manual.
 router.post('/webhook', async (req, res) => {
   res.status(200).end();
 
-  const client = mpClient();
-  if (!client) return;
-
   const topic = req.query.topic || req.query.type || (req.body && req.body.type);
-  const preapprovalId = (req.body && req.body.data && req.body.data.id) || req.query.id || req.query['data.id'];
-  if (!preapprovalId || (topic && topic !== 'subscription_preapproval' && topic !== 'preapproval')) return;
+  const dataId = (req.body && req.body.data && req.body.data.id) || req.query.id || req.query['data.id'];
+  if (!dataId) return;
 
   try {
+    if (topic === 'subscription_authorized_payment') {
+      await registrarPagoMembresia(dataId);
+      return;
+    }
+
+    const client = mpClient();
+    if (!client) return;
+    if (topic && topic !== 'subscription_preapproval' && topic !== 'preapproval') return;
+
     const preapproval = new PreApproval(client);
-    const info = await preapproval.get({ id: preapprovalId });
+    const info = await preapproval.get({ id: dataId });
     const usuario = (info.external_reference && store.getUserById(info.external_reference)) || store.getUserByPreapprovalId(String(info.id));
     if (!usuario) return;
 
@@ -148,3 +213,4 @@ router.get('/recetario', (req, res) => {
 });
 
 module.exports = router;
+module.exports.sincronizarPagosDePreapproval = sincronizarPagosDePreapproval;

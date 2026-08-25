@@ -10,6 +10,7 @@ const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
 const { enviarCorreoRevistaMensual } = require('../email');
+const { sincronizarPagosDePreapproval } = require('./membresia');
 
 const router = express.Router();
 
@@ -454,9 +455,32 @@ router.post('/api/products/subir-lote', requireAdmin, uploadDocumento.array('arc
   res.status(201).json(creados);
 });
 
-// ---- Ventas (pedidos de Mercado Pago) ----
+// ---- Ventas (pedidos de Mercado Pago + cobros de membresia) ----
 router.get('/api/orders', requireAdmin, (req, res) => {
-  res.json(store.getOrders());
+  const pedidos = store.getOrders();
+  const pagosMembresia = store.getMembresiaPagos().map((p) => ({
+    id: `membresia-${p.id}`,
+    estado: p.estado,
+    createdAt: p.createdAt,
+    items: [{ cantidad: 1, titulo: 'Membresía Endulcora (mensual)', precio: p.monto }],
+    total: p.monto,
+    email: p.email || 'sin correo',
+  }));
+  const todos = [...pedidos, ...pagosMembresia].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json(todos);
+});
+
+// Trae de Mercado Pago los cobros de membresia que falten por registrar
+// (por ejemplo, los de antes de que existiera este registro, o si algun
+// aviso del webhook no llego). Repara el historial contable sin depender
+// solo del webhook.
+router.post('/api/membresia/sincronizar-pagos', requireAdmin, async (req, res) => {
+  const usuarios = store.getUsers().filter((u) => u.membresiaPreapprovalId);
+  let agregados = 0;
+  for (const usuario of usuarios) {
+    agregados += await sincronizarPagosDePreapproval(usuario.membresiaPreapprovalId, usuario);
+  }
+  res.json({ agregados, usuariosRevisados: usuarios.length });
 });
 
 // ---- Suscriptores del correo (footer) ----

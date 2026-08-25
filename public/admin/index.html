@@ -519,10 +519,14 @@
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="font-titulo text-2xl tracking-wide text-vino">Ventas</h2>
-          <p class="mt-1 text-sm text-carbon/60">Pedidos hechos por Mercado Pago. Cuando uno diga "Aprobado", entrega el archivo o producto al correo del comprador.</p>
+          <p class="mt-1 text-sm text-carbon/60">Pedidos de la tienda y cobros de membresía hechos por Mercado Pago. Cuando uno diga "Aprobado", entrega el archivo o producto al correo del comprador.</p>
         </div>
-        <button id="btnRefrescarVentas" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Actualizar</button>
+        <div class="flex flex-wrap gap-2">
+          <button id="btnSincronizarPagosMembresia" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Traer cobros de membresía</button>
+          <button id="btnRefrescarVentas" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Actualizar</button>
+        </div>
       </div>
+      <p id="sincronizarPagosResultado" class="mt-2 text-sm"></p>
       <div id="listaVentas" class="mt-6 space-y-3"></div>
     </section>
 
@@ -1859,6 +1863,25 @@ async function cargarVentas(){
 }
 
 $('btnRefrescarVentas').addEventListener('click', cargarVentas);
+
+$('btnSincronizarPagosMembresia').addEventListener('click', async () => {
+  const resultado = $('sincronizarPagosResultado');
+  const btn = $('btnSincronizarPagosMembresia');
+  btn.disabled = true;
+  resultado.className = 'mt-2 text-sm text-carbon/50';
+  resultado.textContent = 'Consultando a Mercado Pago…';
+  try{
+    const data = await api('/admin/api/membresia/sincronizar-pagos', { method: 'POST' });
+    resultado.className = 'mt-2 text-sm text-green-700';
+    resultado.textContent = `✓ Se revisaron ${data.usuariosRevisados} suscripciones y se agregaron ${data.agregados} cobros nuevos al registro.`;
+    cargarVentas();
+  }catch(e){
+    resultado.className = 'mt-2 text-sm text-red-600';
+    resultado.textContent = e.message;
+  }finally{
+    btn.disabled = false;
+  }
+});
 
 /* ---------- Suscriptores ---------- */
 let SUSCRIPTORES = [];

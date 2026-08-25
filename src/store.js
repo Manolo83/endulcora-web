@@ -157,6 +157,7 @@ function datosPorDefecto() {
     products: DEFAULT_PRODUCTS.map((p, i) => ({ id: i + 1, orden: i, ...p })),
     cursos: DEFAULT_CURSOS.map((c, i) => ({ id: i + 1, orden: i, ...c })),
     orders: [],
+    membresiaPagos: [],
     users: [],
     heroCarrusel: [],
     promosTaller: [],
@@ -619,6 +620,32 @@ module.exports = {
     save(data);
     return data.contenidoMembresia;
   },
+
+  // ---- Cobros de la membresia (para el registro contable en /admin > Ventas) ----
+  getMembresiaPagos() {
+    return [...load().membresiaPagos].sort((a, b) => b.id - a.id);
+  },
+  getMembresiaPagoPorAuthorizedId(mpAuthorizedPaymentId) {
+    return load().membresiaPagos.find((p) => p.mpAuthorizedPaymentId === String(mpAuthorizedPaymentId)) || null;
+  },
+  addMembresiaPago({ userId, email, nombre, monto, estado, mpAuthorizedPaymentId, mpPaymentId, fecha }) {
+    const data = load();
+    const item = {
+      id: nextId(data.membresiaPagos),
+      userId: userId || null,
+      email: email || '',
+      nombre: nombre || '',
+      monto,
+      estado,
+      mpAuthorizedPaymentId: String(mpAuthorizedPaymentId),
+      mpPaymentId: mpPaymentId ? String(mpPaymentId) : '',
+      createdAt: fecha || new Date().toISOString(),
+    };
+    data.membresiaPagos.push(item);
+    save(data);
+    return item;
+  },
+
   // ---- Contenido general del sitio (clave/valor) ----
   getContent() {
     return load().content;
