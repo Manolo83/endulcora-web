@@ -84,7 +84,10 @@ pestania Console del servicio):
 npm run ads permiso
 ```
 
-Imprime un enlace de Google. Lo abre el duenio de la cuenta administradora,
+Imprime una direccion corta de nuestro propio dominio, del estilo
+`https://www.endulcora.com/api/google-ads/oauth/ir/RTV38B7A`, que se puede
+teclear a mano en el navegador (las consolas web parten el enlace largo de
+Google al copiarlo). Esa direccion redirige al consentimiento de Google. Lo abre el duenio de la cuenta administradora,
 acepta, y el servidor guarda el permiso solo, en la base de datos. El enlace
 dura 15 minutos y sirve una sola vez. Para comprobar o borrar:
 
