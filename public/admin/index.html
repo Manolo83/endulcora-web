@@ -506,6 +506,14 @@
       </div>
 
       <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Audiencia para Meta Ads</h3>
+        <p class="mt-1 text-xs text-carbon/50">Descarga un CSV con el correo, nombre y teléfono de tus clientes con cuenta, listo para subir en Meta Ads Manager (Audiencias → Crear audiencia → Lista de clientes) y anunciarles talleres, eBooks, etc. directamente a ellos.</p>
+        <button id="btnExportarAudienciaMeta" class="mt-4 w-full rounded-full border border-vino/25 px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+          Descargar CSV para Meta Ads
+        </button>
+      </div>
+
+      <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Regalo mensual: recetario del mes</h3>
         <p class="mt-1 text-xs text-carbon/50">Sube el PDF del recetario de este mes y se lo mandamos por correo, automáticamente, a todos los clientes con cuenta (gratis, vía Resend).</p>
         <form id="formRegaloMensual" class="mt-4 space-y-3">
@@ -1992,6 +2000,31 @@ $('formBuscarCliente').addEventListener('submit', async (e) => {
     });
   }catch(e){
     cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+});
+
+$('btnExportarAudienciaMeta').addEventListener('click', async () => {
+  const btn = $('btnExportarAudienciaMeta');
+  btn.disabled = true;
+  try{
+    const usuarios = await api('/admin/api/users');
+    if(!usuarios.length){ toast('No hay clientes registrados todavía'); return; }
+    const celdaSegura = (v) => /^[=+\-@]/.test(v) ? `'${v}` : v;
+    const filas = ['email,phone,fn', ...usuarios.map(u => {
+      const primerNombre = celdaSegura((u.nombre || '').trim().split(/\s+/)[0] || '');
+      return `${u.email},${u.telefono || ''},${primerNombre}`;
+    })];
+    const blob = new Blob([filas.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'audiencia-clientes-endulcora.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }catch(e){
+    toast(e.message);
+  }finally{
+    btn.disabled = false;
   }
 });
 

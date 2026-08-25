@@ -589,6 +589,17 @@ router.delete('/api/comunidad/mensajes/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- Clientes: lista basica para exportar audiencia (Meta Ads, etc.) ----
+router.get('/api/users', requireAdmin, (req, res) => {
+  const usuarios = store.getUsers().map((u) => {
+    const digitos = String(u.telefono || '').replace(/\D/g, '');
+    // Antepone el codigo de pais (52, Mexico) para mejorar el match en Meta.
+    const telefonoConLada = digitos.length === 10 ? `52${digitos}` : digitos;
+    return { email: u.email, nombre: u.nombre || '', telefono: telefonoConLada };
+  });
+  res.json(usuarios);
+});
+
 // ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----
 router.get('/api/users/buscar', requireAdmin, (req, res) => {
   const user = store.getUserByEmail(req.query.email || '');
