@@ -152,8 +152,14 @@ body { background: #FBF4E9; }
     <div id="bloqueVideoMes" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
       <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Taller de <span id="videoMesEtiqueta"></span></p>
       <h3 id="videoTitulo" class="mt-1 font-titulo text-lg text-vino"></h3>
-      <div class="mt-4 aspect-video w-full select-none overflow-hidden rounded-2xl bg-carbon" oncontextmenu="return false" ondragstart="return false">
-        <iframe id="iframeVideoMes" class="h-full w-full" src="" title="Taller mensual" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <div id="videoContenedor" class="relative mt-4 aspect-video w-full select-none overflow-hidden rounded-2xl bg-carbon" oncontextmenu="return false" ondragstart="return false">
+        <div id="iframeVideoMesHost" class="h-full w-full"></div>
+        <button type="button" id="btnPlayPauseVideo" aria-label="Reproducir o pausar el video" class="group absolute inset-0 flex items-center justify-center">
+          <span class="grid h-16 w-16 place-items-center rounded-full bg-white/90 text-vino opacity-80 shadow-xl transition group-hover:opacity-100">
+            <svg id="iconoPlay" viewBox="0 0 24 24" class="h-7 w-7 translate-x-0.5" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="iconoPause" viewBox="0 0 24 24" class="hidden h-7 w-7" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+          </span>
+        </button>
       </div>
     </div>
 
@@ -200,7 +206,7 @@ async function cargarContenidoMembresia(){
       document.getElementById('bloqueVideoMes').classList.remove('hidden');
       document.getElementById('videoMesEtiqueta').textContent = c.videoMes || 'este mes';
       document.getElementById('videoTitulo').textContent = c.videoTitulo || '';
-      document.getElementById('iframeVideoMes').src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(c.videoYoutubeId)}?modestbranding=1&rel=0&disablekb=1`;
+      iniciarReproductorVideo(c.videoYoutubeId);
     }
     if(!c.recetarioDisponible && !c.videoYoutubeId){
       document.getElementById('sinContenidoAviso').classList.remove('hidden');
@@ -353,6 +359,59 @@ document.getElementById('btnCancelarMembresia').addEventListener('click', async 
     mostrarVista('oferta');
   }catch(e){
     alert(e.message);
+  }
+});
+
+// Reproductor sin controles nativos de YouTube (sin logo, sin barra de
+// titulo, sin boton "Ver en YouTube"): usamos la IFrame API para poner
+// nuestro propio boton de play/pausa y quitar cualquier salida clickeable
+// hacia YouTube.
+let reproductorVideo = null;
+let videoIdPendiente = null;
+
+function crearReproductorVideo(videoId){
+  reproductorVideo = new YT.Player('iframeVideoMesHost', {
+    videoId: videoId,
+    host: 'https://www.youtube-nocookie.com',
+    width: '100%',
+    height: '100%',
+    playerVars: {
+      controls: 0, modestbranding: 1, rel: 0, disablekb: 1, fs: 0,
+      iv_load_policy: 3, playsinline: 1,
+    },
+    events: {
+      onStateChange: (e) => {
+        const play = document.getElementById('iconoPlay');
+        const pause = document.getElementById('iconoPause');
+        const reproduciendo = e.data === YT.PlayerState.PLAYING;
+        play.classList.toggle('hidden', reproduciendo);
+        pause.classList.toggle('hidden', !reproduciendo);
+      },
+    },
+  });
+}
+
+function iniciarReproductorVideo(videoId){
+  if(window.YT && window.YT.Player){
+    crearReproductorVideo(videoId);
+  }else{
+    videoIdPendiente = videoId;
+    const script = document.createElement('script');
+    script.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(script);
+  }
+}
+
+window.onYouTubeIframeAPIReady = function(){
+  if(videoIdPendiente) crearReproductorVideo(videoIdPendiente);
+};
+
+document.getElementById('btnPlayPauseVideo').addEventListener('click', () => {
+  if(!reproductorVideo || typeof reproductorVideo.getPlayerState !== 'function') return;
+  if(reproductorVideo.getPlayerState() === YT.PlayerState.PLAYING){
+    reproductorVideo.pauseVideo();
+  }else{
+    reproductorVideo.playVideo();
   }
 });
 
