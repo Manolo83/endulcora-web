@@ -158,7 +158,9 @@ function resumirError(data) {
 }
 
 // Consulta GAQL (el "SQL" de Google Ads). Devuelve todas las filas, paginando.
-async function buscar(customerId, query, { pageSize = 1000 } = {}) {
+// El tamanio de pagina no se manda: desde v23 Google lo rechaza y siempre
+// devuelve paginas de 10,000 filas.
+async function buscar(customerId, query) {
   const cuenta = String(customerId || '').replace(/\D/g, '');
   if (!cuenta) throw new Error('Falta el ID de la cuenta de Google Ads para la consulta.');
 
@@ -166,7 +168,7 @@ async function buscar(customerId, query, { pageSize = 1000 } = {}) {
   let pageToken;
   do {
     const data = await llamar(`customers/${cuenta}/googleAds:search`, {
-      body: { query, pageSize, ...(pageToken ? { pageToken } : {}) },
+      body: { query, ...(pageToken ? { pageToken } : {}) },
     });
     filas.push(...(data.results || []));
     pageToken = data.nextPageToken;
