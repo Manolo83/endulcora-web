@@ -1,7 +1,9 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const { MercadoPagoConfig, PreApproval } = require('mercadopago');
 const store = require('../store');
-const { SITE_URL } = require('../config');
+const { SITE_URL, UPLOAD_DIR } = require('../config');
 const { requireCliente } = require('./auth');
 
 const router = express.Router();
@@ -112,7 +114,25 @@ router.get('/contenido', requireCliente, (req, res) => {
   if (!usuario || usuario.membresiaEstado !== 'activa') {
     return res.status(403).json({ error: 'Necesitas una membresía activa para ver este contenido.' });
   }
-  res.json(store.getContenidoMembresia());
+  const { recetarioUrl, ...resto } = store.getContenidoMembresia();
+  res.json({ ...resto, recetarioDisponible: !!recetarioUrl });
+});
+
+// Descarga del recetario del mes: revisa la membresia en cada solicitud
+// (en vez de exponer el link fijo de /uploads) para que el archivo no se
+// pueda seguir descargando si se comparte el link o si la membresia vence.
+router.get('/recetario', requireCliente, (req, res) => {
+  const usuario = store.getUserById(req.session.userId);
+  if (!usuario || usuario.membresiaEstado !== 'activa') {
+    return res.status(403).send('Necesitas una membresía activa para descargar el recetario.');
+  }
+  const contenido = store.getContenidoMembresia();
+  if (!contenido.recetarioUrl) return res.status(404).send('Todavía no hay recetario publicado este mes.');
+  const filename = path.basename(contenido.recetarioUrl);
+  const rutaCompleta = path.join(UPLOAD_DIR, filename);
+  if (!fs.existsSync(rutaCompleta)) return res.status(404).send('No pudimos encontrar el recetario en este momento.');
+  const nombreDescarga = contenido.recetarioNombre || `Recetario${path.extname(filename)}`;
+  res.download(rutaCompleta, nombreDescarga);
 });
 
 module.exports = router;

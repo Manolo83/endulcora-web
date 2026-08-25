@@ -135,7 +135,7 @@ body { background: #FBF4E9; }
 
     <div id="bloqueRecetarioMes" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
       <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Recetario de <span id="recetarioMesEtiqueta"></span></p>
-      <a id="linkRecetarioMes" href="#" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+      <a id="linkRecetarioMes" href="/api/membresia/recetario" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
         Descargar recetario
       </a>
     </div>
@@ -143,8 +143,8 @@ body { background: #FBF4E9; }
     <div id="bloqueVideoMes" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
       <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Taller de <span id="videoMesEtiqueta"></span></p>
       <h3 id="videoTitulo" class="mt-1 font-titulo text-lg text-vino"></h3>
-      <div class="mt-4 aspect-video w-full overflow-hidden rounded-2xl bg-carbon" oncontextmenu="return false">
-        <iframe id="iframeVideoMes" class="h-full w-full" src="" title="Taller mensual" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <div class="mt-4 aspect-video w-full select-none overflow-hidden rounded-2xl bg-carbon" oncontextmenu="return false" ondragstart="return false">
+        <iframe id="iframeVideoMes" class="h-full w-full" src="" title="Taller mensual" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
     </div>
 
@@ -183,18 +183,17 @@ async function cargarContenidoMembresia(){
     if(!res.ok) throw new Error('No se pudo cargar el contenido');
     const c = await res.json();
 
-    if(c.recetarioUrl){
+    if(c.recetarioDisponible){
       document.getElementById('bloqueRecetarioMes').classList.remove('hidden');
       document.getElementById('recetarioMesEtiqueta').textContent = c.recetarioMes || 'este mes';
-      document.getElementById('linkRecetarioMes').href = c.recetarioUrl;
     }
     if(c.videoYoutubeId){
       document.getElementById('bloqueVideoMes').classList.remove('hidden');
       document.getElementById('videoMesEtiqueta').textContent = c.videoMes || 'este mes';
       document.getElementById('videoTitulo').textContent = c.videoTitulo || '';
-      document.getElementById('iframeVideoMes').src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(c.videoYoutubeId)}?modestbranding=1&rel=0`;
+      document.getElementById('iframeVideoMes').src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(c.videoYoutubeId)}?modestbranding=1&rel=0&disablekb=1`;
     }
-    if(!c.recetarioUrl && !c.videoYoutubeId){
+    if(!c.recetarioDisponible && !c.videoYoutubeId){
       document.getElementById('sinContenidoAviso').classList.remove('hidden');
     }
   }catch(e){
