@@ -22,7 +22,9 @@ const GOOGLE_ADS = {
   // cuentas en src/googleAds/negocios.js: no es un secreto, es el numero que
   // se ve en la interfaz. La variable de entorno, si existe, manda.
   managerId: String(process.env.GOOGLE_ADS_MANAGER_ID || '8949459356').replace(/\D/g, ''),
-  apiVersion: process.env.GOOGLE_ADS_API_VERSION || 'v21',
+  // Vacia = el cliente averigua sola cual version esta viva (ver
+  // src/googleAds/api.js). Solo se fija a mano para clavar una en concreto.
+  apiVersion: process.env.GOOGLE_ADS_API_VERSION || '',
   // Etiqueta de Google (AW-XXXXXXXXXX) que carga el sitio de Endulcora.
   medicionId: process.env.GOOGLE_ADS_ID || '',
   // Etiqueta completa de la conversion de compra para el navegador:
