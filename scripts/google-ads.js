@@ -237,14 +237,30 @@ async function comandoEstado() {
 
 async function comandoCuentas() {
   const accesibles = await cuentas.listarAccesibles();
-  console.log('\nCuentas a las que llega este acceso:');
-  for (const id of accesibles) console.log(`  ${id}`);
-
   const clientes = await cuentas.listarClientesDelMCC();
+  const idsDelMCC = new Set(clientes.map((c) => c.id));
+
   console.log(`\nCuentas dentro del MCC ${GOOGLE_ADS.managerId}:`);
+  if (!clientes.length) {
+    console.log('  (ninguna)');
+  }
   for (const c of clientes) {
     const etiqueta = c.esAdministradora ? '[administradora]' : '';
-    console.log(`  ${c.id.padEnd(12)} ${(c.nombre || '(sin nombre)').padEnd(30)} ${c.moneda} ${c.zona} ${c.estado} ${etiqueta}`);
+    console.log(`  ${c.id.padEnd(12)} ${(c.nombre || '(sin nombre)').padEnd(26)} ${c.moneda.padEnd(4)} ${c.zona.padEnd(20)} ${(c.estado || '-').padEnd(9)} ${etiqueta}`);
+  }
+
+  const sueltas = accesibles.filter((id) => !idsDelMCC.has(id));
+  if (sueltas.length) {
+    console.log('\nCuentas a las que llega el acceso pero que NO cuelgan del MCC:');
+    for (const id of sueltas) {
+      try {
+        const c = await cuentas.detalleDeCuentaSuelta(id);
+        console.log(`  ${c.id.padEnd(12)} ${(c.nombre || '(sin nombre)').padEnd(26)} ${c.moneda.padEnd(4)} ${c.zona.padEnd(20)} ${(c.estado || '-').padEnd(9)} ${c.esAdministradora ? '[administradora]' : ''}`);
+      } catch (err) {
+        console.log(`  ${String(id).padEnd(12)} (no se pudo leer: ${err.message.slice(0, 80)})`);
+      }
+    }
+    console.log('\n  Se pueden vincular al MCC desde la interfaz de Google Ads si te interesa administrarlas aqui.');
   }
   console.log('');
 }

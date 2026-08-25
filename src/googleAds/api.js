@@ -84,9 +84,9 @@ async function accessToken() {
   return tokenEnCache.valor;
 }
 
-async function encabezados(loginCustomerId) {
+async function encabezados(loginCustomerId, omitirLogin = false) {
   const token = await accessToken();
-  const login = String(loginCustomerId || GOOGLE_ADS.managerId || '').replace(/\D/g, '');
+  const login = omitirLogin ? '' : String(loginCustomerId || GOOGLE_ADS.managerId || '').replace(/\D/g, '');
 
   const headers = {
     Authorization: `Bearer ${token}`,
@@ -121,8 +121,8 @@ async function versionApi() {
 
 // Llamada cruda a la API. `ruta` va sin la version: por ejemplo
 // "customers/1234567890/googleAds:search".
-async function llamar(ruta, { method = 'POST', body, loginCustomerId } = {}) {
-  const headers = await encabezados(loginCustomerId);
+async function llamar(ruta, { method = 'POST', body, loginCustomerId, omitirLogin = false } = {}) {
+  const headers = await encabezados(loginCustomerId, omitirLogin);
   const version = await versionApi();
 
   const res = await fetch(`${BASE}/${version}/${ruta}`, {
@@ -160,7 +160,7 @@ function resumirError(data) {
 // Consulta GAQL (el "SQL" de Google Ads). Devuelve todas las filas, paginando.
 // El tamanio de pagina no se manda: desde v23 Google lo rechaza y siempre
 // devuelve paginas de 10,000 filas.
-async function buscar(customerId, query) {
+async function buscar(customerId, query, opciones = {}) {
   const cuenta = String(customerId || '').replace(/\D/g, '');
   if (!cuenta) throw new Error('Falta el ID de la cuenta de Google Ads para la consulta.');
 
@@ -169,6 +169,7 @@ async function buscar(customerId, query) {
   do {
     const data = await llamar(`customers/${cuenta}/googleAds:search`, {
       body: { query, ...(pageToken ? { pageToken } : {}) },
+      ...opciones,
     });
     filas.push(...(data.results || []));
     pageToken = data.nextPageToken;
