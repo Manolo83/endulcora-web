@@ -60,6 +60,7 @@
       </div>
     </div>
     <nav class="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-5 pb-3 font-ui text-[12px] font-600 uppercase tracking-wider text-vino/70">
+      <a href="#seccionVistaPrevia" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Vista previa</a>
       <a href="#seccionContenido" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Contenido general</a>
       <a href="#seccionProductos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Productos</a>
       <a href="#seccionCalendario" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Calendario</a>
@@ -78,6 +79,38 @@
 
   <main class="mx-auto max-w-6xl px-5 py-10">
     <div id="toast" class="fixed bottom-6 left-1/2 z-50 hidden -translate-x-1/2 rounded-full bg-vino px-6 py-3 font-ui text-sm text-crema shadow-xl"></div>
+
+    <!-- VISTA PREVIA -->
+    <section id="seccionVistaPrevia" class="scroll-mt-32 mb-14">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="font-titulo text-2xl tracking-wide text-vino">Vista previa del sitio</h2>
+          <p class="mt-1 text-sm text-carbon/60">Navega el sitio real aquí mismo, sin salir del panel. Como administrador ves todo el contenido —incluyendo el de membresía— sin necesitar una cuenta de cliente ni pagar.</p>
+        </div>
+        <button type="button" id="btnRecargarPreview" class="shrink-0 rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Recargar</button>
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button type="button" data-preview-url="/" class="preview-tab rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Inicio</button>
+        <button type="button" data-preview-url="/tienda" class="preview-tab rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Tienda</button>
+        <button type="button" data-preview-url="/ebooks" class="preview-tab rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">eBooks</button>
+        <button type="button" data-preview-url="/anexos" class="preview-tab rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Anexos</button>
+        <button type="button" data-preview-url="/membresia" class="preview-tab rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Membresía</button>
+        <button type="button" data-preview-url="/comunidad" class="preview-tab rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Comunidad</button>
+        <button type="button" data-preview-url="/calendario" class="preview-tab rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Calendario</button>
+        <button type="button" data-preview-url="/galeria" class="preview-tab rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Galería</button>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <input id="previewUrlInput" type="text" value="/" class="min-w-0 flex-1 rounded-xl border border-vino/15 bg-white px-4 py-2.5 text-sm" placeholder="/ruta-a-visitar">
+        <button type="button" id="btnIrPreview" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Ir</button>
+        <a id="linkAbrirNuevaPestana" href="/" target="_blank" class="rounded-full border border-vino/20 px-4 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Abrir en pestaña nueva</a>
+      </div>
+
+      <div class="mt-4 overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10" style="height:75vh;">
+        <iframe id="iframeVistaPrevia" src="/" class="h-full w-full" title="Vista previa del sitio"></iframe>
+      </div>
+    </section>
 
     <!-- CONTENIDO GENERAL -->
     <section id="seccionContenido" class="scroll-mt-32 mb-14">
@@ -2151,6 +2184,25 @@ $('formVideoMembresia').addEventListener('submit', async (e) => {
     resultado.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(err.message)}</p>`;
   }
 });
+
+(function(){
+  const iframe = $('iframeVistaPrevia');
+  const input = $('previewUrlInput');
+  const linkNueva = $('linkAbrirNuevaPestana');
+  function irA(ruta){
+    let r = String(ruta || '/').trim();
+    if(!r.startsWith('/')) r = '/' + r;
+    iframe.src = r;
+    input.value = r;
+    linkNueva.href = r;
+  }
+  document.querySelectorAll('.preview-tab').forEach(btn => {
+    btn.addEventListener('click', () => irA(btn.dataset.previewUrl));
+  });
+  $('btnIrPreview').addEventListener('click', () => irA(input.value));
+  input.addEventListener('keydown', (e) => { if(e.key === 'Enter') irA(input.value); });
+  $('btnRecargarPreview').addEventListener('click', () => { iframe.src = iframe.src; });
+})();
 
 verificarSesion();
 </script>

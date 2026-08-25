@@ -178,7 +178,7 @@ function escapeHtml(s){
 }
 document.getElementById('anioFooter').textContent = new Date().getFullYear();
 
-let SESION = { isLoggedIn: false, user: null };
+let SESION = { isLoggedIn: false, user: null, esAdmin: false };
 
 function mostrarVista(nombre){
   const bloques = { invitado: 'bloqueInvitado', oferta: 'bloqueOferta', miembro: 'bloqueMiembro' };
@@ -211,6 +211,14 @@ async function cargarContenidoMembresia(){
 }
 
 async function cargarVistaMembresia(){
+  if(SESION.esAdmin){
+    mostrarVista('miembro');
+    document.getElementById('nombreUsuarioMembresia').textContent = 'Administrador (vista previa)';
+    document.getElementById('btnCancelarMembresia').classList.add('hidden');
+    cargarContenidoMembresia();
+    return;
+  }
+  document.getElementById('btnCancelarMembresia').classList.remove('hidden');
   if(!SESION.isLoggedIn){
     mostrarVista('invitado');
     return;
@@ -232,11 +240,15 @@ async function cargarVistaMembresia(){
 
 async function cargarSesion(){
   try{
-    const res = await fetch('/api/auth/session');
-    const data = await res.json();
-    SESION = { isLoggedIn: !!data.isLoggedIn, user: data.user || null };
+    const [resCliente, resAdmin] = await Promise.all([
+      fetch('/api/auth/session'),
+      fetch('/admin/api/session'),
+    ]);
+    const dataCliente = await resCliente.json();
+    const dataAdmin = await resAdmin.json().catch(() => ({ isAdmin: false }));
+    SESION = { isLoggedIn: !!dataCliente.isLoggedIn, user: dataCliente.user || null, esAdmin: !!dataAdmin.isAdmin };
   }catch(e){
-    SESION = { isLoggedIn: false, user: null };
+    SESION = { isLoggedIn: false, user: null, esAdmin: false };
   }
   cargarVistaMembresia();
 }

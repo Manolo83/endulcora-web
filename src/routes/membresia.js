@@ -103,16 +103,26 @@ router.post('/cancelar', requireCliente, async (req, res) => {
   }
 });
 
-router.get('/estado', requireCliente, (req, res) => {
+// El admin (sesion aparte, /admin) siempre puede ver el contenido de
+// membresia para revisarlo sin necesitar una cuenta de cliente ni pagar.
+function esAdmin(req) {
+  return !!(req.session && req.session.isAdmin);
+}
+
+router.get('/estado', (req, res) => {
+  if (esAdmin(req)) return res.json({ activa: true, estado: 'activa', esAdmin: true });
+  if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
   const usuario = store.getUserById(req.session.userId);
   if (!usuario) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
   res.json({ activa: usuario.membresiaEstado === 'activa', estado: usuario.membresiaEstado });
 });
 
-router.get('/contenido', requireCliente, (req, res) => {
-  const usuario = store.getUserById(req.session.userId);
-  if (!usuario || usuario.membresiaEstado !== 'activa') {
-    return res.status(403).json({ error: 'Necesitas una membresía activa para ver este contenido.' });
+router.get('/contenido', (req, res) => {
+  if (!esAdmin(req)) {
+    const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+    if (!usuario || usuario.membresiaEstado !== 'activa') {
+      return res.status(403).json({ error: 'Necesitas una membresía activa para ver este contenido.' });
+    }
   }
   const { recetarioUrl, ...resto } = store.getContenidoMembresia();
   res.json({ ...resto, recetarioDisponible: !!recetarioUrl });
@@ -121,10 +131,12 @@ router.get('/contenido', requireCliente, (req, res) => {
 // Descarga del recetario del mes: revisa la membresia en cada solicitud
 // (en vez de exponer el link fijo de /uploads) para que el archivo no se
 // pueda seguir descargando si se comparte el link o si la membresia vence.
-router.get('/recetario', requireCliente, (req, res) => {
-  const usuario = store.getUserById(req.session.userId);
-  if (!usuario || usuario.membresiaEstado !== 'activa') {
-    return res.status(403).send('Necesitas una membresía activa para descargar el recetario.');
+router.get('/recetario', (req, res) => {
+  if (!esAdmin(req)) {
+    const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+    if (!usuario || usuario.membresiaEstado !== 'activa') {
+      return res.status(403).send('Necesitas una membresía activa para descargar el recetario.');
+    }
   }
   const contenido = store.getContenidoMembresia();
   if (!contenido.recetarioUrl) return res.status(404).send('Todavía no hay recetario publicado este mes.');
