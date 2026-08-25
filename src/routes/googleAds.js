@@ -37,6 +37,18 @@ function pagina(titulo, mensaje, tono = 'ok') {
 </main></body></html>`;
 }
 
+// Atajo tecleable: /api/google-ads/oauth/ir/ABC12XYZ redirige al enlace de
+// Google que se genero minutos antes. Va sin token (lo protege la clave, que
+// es aleatoria, dura 15 minutos y solo sirve mientras el permiso siga pendiente).
+router.get('/oauth/ir/:clave', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const url = permiso.enlaceDeClave(req.params.clave);
+  if (!url) {
+    return res.status(404).send(pagina('Ese enlace ya no sirve', 'Los atajos duran 15 minutos y solo vale el ultimo. Genera uno nuevo con "npm run ads permiso".', 'error'));
+  }
+  res.redirect(url);
+});
+
 // Esta ruta la abre el navegador de vuelta desde Google, sin el token del
 // panel: por eso va ANTES del filtro de abajo y se valida con el parametro
 // "state", que este mismo servidor genero minutos antes.

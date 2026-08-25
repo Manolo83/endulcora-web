@@ -125,17 +125,23 @@ async function comandoPermiso() {
   const store = require('../src/store');
   const permiso = require('../src/googleAds/permiso');
 
-  const { url, redirectUri, vigenciaMinutos } = permiso.generarEnlace();
+  const { url, enlaceCorto, redirectUri, vigenciaMinutos } = permiso.generarEnlace();
   await store.flush(); // que el "state" quede guardado antes de salir
 
   console.log(`
-Abre este enlace con la cuenta de Google duenia de la administradora y dale
-"Permitir". El servidor guarda el permiso solo: no hay que copiar nada de vuelta.
+Escribe esta direccion en el navegador, con la sesion de la cuenta duenia de la
+administradora, y dale "Permitir". El servidor guarda el permiso solo.
+
+   ${enlaceCorto}
+
+Dura ${vigenciaMinutos} minutos y sirve una sola vez.
+
+Si prefieres el enlace largo de Google (por ejemplo para pegarlo en una ventana
+de incognito), es este:
 
 ${url}
 
-Dura ${vigenciaMinutos} minutos y sirve una sola vez.
-Regresa a: ${redirectUri}
+Google regresa a: ${redirectUri}
 `);
 }
 
