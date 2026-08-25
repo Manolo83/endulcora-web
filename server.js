@@ -31,10 +31,16 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Tailwind (CDN) y los scripts inline del sitio original necesitan CSP relajado.
+// referrerPolicy se relaja de "no-referrer" (default de helmet) a
+// "strict-origin-when-cross-origin": sigue sin mandar la URL completa a
+// otros sitios, pero manda el origen (https://www.endulcora.com), que
+// YouTube necesita para autorizar la reproducción de videos no listados
+// incrustados (sin esto tira el Error 153).
 app.use(
   helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   })
 );
 app.use(compression());
