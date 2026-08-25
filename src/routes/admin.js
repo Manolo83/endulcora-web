@@ -666,6 +666,37 @@ router.post('/api/membresia/recetario', requireAdmin, uploadDocumento.single('fi
   res.json(item);
 });
 
+// ---- TEMPORAL: diagnostico de suscripciones con credenciales de prueba ----
+// Usa MP_ACCESS_TOKEN_TEST (variable separada de MP_ACCESS_TOKEN) para no
+// tocar el checkout real. Quitar esta ruta una vez resuelto el diagnostico.
+router.get('/api/membresia/test-sandbox', requireAdmin, async (req, res) => {
+  const accessToken = process.env.MP_ACCESS_TOKEN_TEST;
+  if (!accessToken) return res.status(503).json({ error: 'Falta la variable MP_ACCESS_TOKEN_TEST en Railway.' });
+  try {
+    const { MercadoPagoConfig, PreApproval } = require('mercadopago');
+    const client = new MercadoPagoConfig({ accessToken });
+    const preapproval = new PreApproval(client);
+    const creado = await preapproval.create({
+      body: {
+        reason: 'Membresía Endulcora (prueba sandbox)',
+        auto_recurring: {
+          frequency: 1,
+          frequency_type: 'months',
+          transaction_amount: 50,
+          currency_id: 'MXN',
+        },
+        external_reference: 'test-diagnostico-1',
+        back_url: `${SITE_URL}/membresia`,
+        status: 'pending',
+      },
+    });
+    res.json({ url: creado.init_point, id: creado.id });
+  } catch (err) {
+    const detalle = (err && err.cause && JSON.stringify(err.cause)) || (err && err.message) || String(err);
+    res.status(502).json({ error: detalle });
+  }
+});
+
 // ---- Manejo de errores (ej. archivo demasiado grande, tipo no permitido) ----
 router.use((err, req, res, next) => {
   res.status(400).json({ error: err.message || 'Error al procesar la solicitud' });
