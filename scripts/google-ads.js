@@ -257,7 +257,8 @@ async function comandoCuentas() {
       const d = r.detalle;
       console.log(`  [OK]    ${r.nombre.padEnd(18)} ${r.customerId.padEnd(12)} ${(d.nombre || '(sin nombre)').padEnd(22)} ${d.moneda.padEnd(4)} ${d.zona.padEnd(20)} ${d.estado || '-'}`);
     } else {
-      console.log(`  [FALLA] ${r.nombre.padEnd(18)} ${(r.customerId || '-').padEnd(12)} ${r.error.slice(0, 90)}`);
+      console.log(`  [FALLA] ${r.nombre.padEnd(18)} ${(r.customerId || '-').padEnd(12)}`);
+      console.log(`          ${r.error}`);
     }
   }
 
@@ -269,7 +270,8 @@ async function comandoCuentas() {
         const c = await cuentas.detalleDeCuentaSuelta(id);
         console.log(`  ${c.id.padEnd(12)} ${(c.nombre || '(sin nombre)').padEnd(26)} ${c.moneda.padEnd(4)} ${c.zona.padEnd(20)} ${(c.estado || '-').padEnd(9)} ${c.esAdministradora ? '[administradora]' : ''}`);
       } catch (err) {
-        console.log(`  ${String(id).padEnd(12)} (no se pudo leer: ${err.message.slice(0, 80)})`);
+        console.log(`  ${String(id).padEnd(12)} (no se pudo leer)`);
+        console.log(`          ${err.message}`);
       }
     }
     console.log('\n  Se pueden vincular al MCC desde la interfaz de Google Ads si te interesa administrarlas aqui.');

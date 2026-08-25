@@ -145,16 +145,20 @@ async function llamar(ruta, { method = 'POST', body, loginCustomerId, omitirLogi
   return data;
 }
 
-// Los errores de Google traen mucho ruido; deja a la vista el mensaje util.
+// Los errores de Google traen mucho ruido; deja a la vista el mensaje util y,
+// sobre todo, el nombre del error (AuthorizationErrorEnum.USER_PERMISSION_DENIED,
+// DEVELOPER_TOKEN_NOT_APPROVED, etc.), que es lo que dice que hacer.
 function resumirError(data) {
   const error = data && data.error;
-  if (!error) return JSON.stringify(data).slice(0, 800);
-  const detalles = (error.details || [])
-    .flatMap((d) => d.errors || [])
-    .map((e) => e.message)
-    .filter(Boolean);
+  if (!error) return JSON.stringify(data).slice(0, 1200);
+
+  const detalles = (error.details || []).flatMap((d) => d.errors || []).map((e) => {
+    const codigo = e.errorCode ? Object.entries(e.errorCode).map(([k, v]) => `${k}=${v}`).join(',') : '';
+    return [e.message, codigo].filter(Boolean).join(' ');
+  }).filter(Boolean);
+
   const partes = [error.message, ...detalles].filter(Boolean);
-  return partes.length ? partes.join(' | ') : JSON.stringify(error).slice(0, 800);
+  return partes.length ? partes.join(' | ') : JSON.stringify(error).slice(0, 1200);
 }
 
 // Consulta GAQL (el "SQL" de Google Ads). Devuelve todas las filas, paginando.
