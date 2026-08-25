@@ -249,6 +249,18 @@ async function comandoCuentas() {
     console.log(`  ${c.id.padEnd(12)} ${(c.nombre || '(sin nombre)').padEnd(26)} ${c.moneda.padEnd(4)} ${c.zona.padEnd(20)} ${(c.estado || '-').padEnd(9)} ${etiqueta}`);
   }
 
+  // Las recien creadas pueden tardar en salir en el listado del MCC, asi que
+  // se pregunta por cada una directo.
+  console.log('\nCuentas de los negocios (preguntando una por una):');
+  for (const r of await cuentas.revisarNegocios()) {
+    if (r.ok) {
+      const d = r.detalle;
+      console.log(`  [OK]    ${r.nombre.padEnd(18)} ${r.customerId.padEnd(12)} ${(d.nombre || '(sin nombre)').padEnd(22)} ${d.moneda.padEnd(4)} ${d.zona.padEnd(20)} ${d.estado || '-'}`);
+    } else {
+      console.log(`  [FALLA] ${r.nombre.padEnd(18)} ${(r.customerId || '-').padEnd(12)} ${r.error.slice(0, 90)}`);
+    }
+  }
+
   const sueltas = accesibles.filter((id) => !idsDelMCC.has(id));
   if (sueltas.length) {
     console.log('\nCuentas a las que llega el acceso pero que NO cuelgan del MCC:');
