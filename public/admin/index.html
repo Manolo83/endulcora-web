@@ -280,7 +280,6 @@
           <select id="prodCategoria" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
             <option value="ebook">eBook</option>
             <option value="anexo">Anexo (hoja de cálculo)</option>
-            <option value="recetario">Recetario</option>
           </select>
         </label>
         <label class="flex items-center gap-2 sm:col-span-2">
@@ -288,6 +287,11 @@
           <span class="text-sm text-carbon/80">Este producto es un paquete completo (agrupa varios productos en un solo pago)</span>
         </label>
         <p class="-mt-2 text-xs text-carbon/40 sm:col-span-2">Si lo marcas: en la tienda solo se muestra este paquete (los productos que elijas abajo como "relacionados" se ocultan de las páginas de catálogo) y, dentro de la página de este paquete, esos productos aparecen al final como opción de compra individual. En la página de cada producto individual también se mostrará este paquete arriba, como opción de llevarlo todo junto.</p>
+        <label class="flex items-center gap-2 sm:col-span-2">
+          <input type="checkbox" id="prodOculto" class="h-4 w-4 rounded border-vino/25">
+          <span class="text-sm text-carbon/80">Ocultar de las páginas de catálogo (/ebooks, /anexos, /tienda)</span>
+        </label>
+        <p class="-mt-2 text-xs text-carbon/40 sm:col-span-2">Úsalo cuando este producto solo debe comprarse desde la página de otro producto (como opción "también puedes comprar por separado" o "paquete completo"), sin tener su propia tarjeta en el catálogo.</p>
         <label class="block">
           <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Etiqueta (ej. VOLUMEN I)</span>
           <input id="prodEtiqueta" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
@@ -374,7 +378,6 @@
             <select id="loteCategoria" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
               <option value="ebook">eBook</option>
               <option value="anexo">Anexo (hoja de cálculo)</option>
-              <option value="recetario">Recetario</option>
             </select>
           </label>
           <label class="block">
@@ -1243,7 +1246,7 @@ async function cargarProductosAdmin(){
       <article class="overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
         <div class="aspect-video w-full bg-vino/10" style="${p.imagen ? `background-image:url('${p.imagen}');background-size:cover;background-position:center;` : ''}"></div>
         <div class="p-4">
-          <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${escapeHtml(ETIQUETA_CATEGORIA[p.categoria] || 'eBook')} · ${escapeHtml(p.etiqueta || '')} ${p.esPaquete ? '<span class="ml-1 rounded-full bg-flama px-2 py-0.5 text-[10px] font-700 text-carbon">PAQUETE</span>' : ''}</p>
+          <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${escapeHtml(ETIQUETA_CATEGORIA[p.categoria] || 'eBook')} · ${escapeHtml(p.etiqueta || '')} ${p.esPaquete ? '<span class="ml-1 rounded-full bg-flama px-2 py-0.5 text-[10px] font-700 text-carbon">PAQUETE</span>' : ''} ${p.ocultoEnCatalogo ? '<span class="ml-1 rounded-full bg-carbon/10 px-2 py-0.5 text-[10px] font-700 text-carbon/60">OCULTO</span>' : ''}</p>
           <p class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(p.titulo || '')}</p>
           <p class="mt-1 text-sm text-carbon/70">$${escapeHtml(p.precio || '0')} MXN</p>
           <p class="mt-2 text-xs ${p.archivo ? 'text-green-700' : 'text-humo'}">${p.archivo ? `Archivo: ${escapeHtml(p.archivoNombre || 'adjunto')}` : 'Sin archivo para entregar todavía'}</p>
@@ -1283,6 +1286,7 @@ async function cargarProductosAdmin(){
         $('btnCancelarProducto').classList.remove('hidden');
         $('prodCategoria').value = p.categoria || 'ebook';
         $('prodEsPaquete').checked = !!p.esPaquete;
+        $('prodOculto').checked = !!p.ocultoEnCatalogo;
         $('prodEtiqueta').value = p.etiqueta || '';
         $('prodDestacado').value = p.destacado || '';
         $('prodTitulo').value = p.titulo || '';
@@ -1404,6 +1408,7 @@ $('formProducto').addEventListener('submit', async (e) => {
   const payload = {
     categoria: $('prodCategoria').value,
     esPaquete: $('prodEsPaquete').checked,
+    ocultoEnCatalogo: $('prodOculto').checked,
     etiqueta: $('prodEtiqueta').value.trim(),
     destacado: $('prodDestacado').value.trim(),
     titulo: $('prodTitulo').value.trim(),

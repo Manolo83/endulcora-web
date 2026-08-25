@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Endulcora · Costos de Tamales Regionales de México</title>
+<meta name="description" content="Calculadora de costos, merma y precios para tamales regionales de México. Endulcora · Estudio Gastronómico.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --purple:#7A2E7E; --deep:#4E1454; --deep2:#5C2360; --plum:#A25AA6; --lilac:#C98BCB;
+  --yellow:#F8B818; --amber:#E39B0C; --gray:#9C9C9C; --cream:#FBF4E9; --cream2:#FBF5EC;
+  --ink:#2A1330; --ink-soft:#6B5470; --line:rgba(78,20,84,.13); --card:#FFFFFF;
+  --danger:#C0392B; --ember:#E4572E; --good:#2E7D57;
+  --r:18px; --r-sm:12px;
+  --sh:0 1px 2px rgba(78,20,84,.06), 0 8px 24px -12px rgba(78,20,84,.28);
+  --sh-lg:0 24px 60px -28px rgba(78,20,84,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:var(--ink); background:var(--cream);
+  background-image:radial-gradient(1100px 520px at 85% -10%, rgba(248,184,24,.16), transparent 60%),
+                   radial-gradient(900px 520px at -10% 0%, rgba(122,46,126,.10), transparent 55%);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased; font-size:15px; line-height:1.5;
+}
+h1,h2,h3,h4{margin:0}
+button{font-family:inherit}
+a{color:var(--purple)}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+@media(min-width:901px){.shell{background:linear-gradient(90deg,#6A2570 0 250px,transparent 250px)}}
+.shell>*{min-width:0}
+.rail{
+  background:linear-gradient(180deg,var(--deep) 0%, var(--deep2) 55%, #6A2570 100%);
+  color:#fff;padding:20px 14px 26px;position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.brand{display:flex;flex-direction:column;gap:10px;padding:6px 8px 18px}
+.brand img{width:152px;height:auto;opacity:.97}
+.brand .flame-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--yellow);box-shadow:0 0 10px var(--yellow)}
+.brand small{font-family:'Montserrat',sans-serif;font-weight:600;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+.navlist{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.navbtn{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;cursor:pointer;
+  background:transparent;border:0;color:rgba(255,255,255,.78);padding:10px 12px;border-radius:11px;
+  font-size:13.5px;font-weight:400;transition:background .18s,color .18s;
+}
+.navbtn svg{width:17px;height:17px;flex:none;opacity:.85}
+.navbtn:hover{background:rgba(255,255,255,.09);color:#fff}
+.navbtn.on{background:rgba(255,255,255,.13);color:#fff;font-weight:500}
+.navbtn.on svg{opacity:1;color:var(--yellow)}
+.rail-foot{margin-top:22px;padding:12px;border-top:1px solid rgba(255,255,255,.14);font-size:10.5px;color:rgba(255,255,255,.5);line-height:1.6}
+.rail-foot b{color:rgba(255,255,255,.78);font-weight:500}
+
+main{padding:26px 30px 90px;max-width:1180px;width:100%;min-width:0}
+.page-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:20px}
+.eyebrow{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--plum);margin-bottom:5px}
+h1.title{font-family:'Bebas Neue',Impact,sans-serif;font-size:38px;line-height:1;letter-spacing:.01em;color:var(--deep)}
+.sub{color:var(--ink-soft);font-size:13px;max-width:64ch;margin-top:6px;font-weight:300}
+
+/* ---------- cards ---------- */
+.card{min-width:0;background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:20px;border:1px solid rgba(78,20,84,.06)}
+.card + .card{margin-top:16px}
+.card h3{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--purple);margin-bottom:14px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* ---------- kpi ---------- */
+.kpi{background:var(--card);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);border:1px solid rgba(78,20,84,.06);position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--yellow)}
+.kpi .k-l{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gray)}
+.kpi .k-v{font-family:'Bebas Neue',Impact,sans-serif;font-size:33px;line-height:1.05;color:var(--deep);margin-top:5px;letter-spacing:.01em}
+.kpi .k-n{font-size:11px;color:var(--ink-soft);margin-top:2px;font-weight:300}
+.kpi.dark{background:linear-gradient(135deg,var(--deep),var(--purple));color:#fff}
+.kpi.dark .k-l{color:rgba(255,255,255,.6)} .kpi.dark .k-v{color:#fff} .kpi.dark .k-n{color:rgba(255,255,255,.7)}
+
+/* ---------- form ---------- */
+label.f{display:block;font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gray);margin-bottom:5px}
+input,select,textarea{
+  width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:var(--cream2);
+  font-family:'Poppins',sans-serif;font-size:14px;color:var(--deep);transition:border-color .15s,background .15s;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple);background:#fff;box-shadow:0 0 0 3px rgba(122,46,126,.10)}
+input[type=range]{padding:0;border:0;background:transparent;accent-color:var(--purple);height:26px}
+.field{margin-bottom:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.field{flex:1;min-width:120px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;border:0;border-radius:11px;
+  padding:10px 16px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--purple);color:#fff;transition:transform .12s, box-shadow .18s, background .18s;
+  box-shadow:0 6px 16px -8px rgba(122,46,126,.8);
+}
+.btn:hover{background:var(--deep);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:transparent;color:var(--purple);border:1.5px solid var(--line);box-shadow:none}
+.btn.ghost:hover{background:rgba(122,46,126,.07);color:var(--deep)}
+.btn.gold{background:var(--yellow);color:var(--deep);box-shadow:0 6px 16px -8px rgba(248,184,24,.9)}
+.btn.gold:hover{background:var(--amber)}
+.btn.sm{padding:7px 11px;font-size:10px;border-radius:9px}
+.btn.danger{background:transparent;color:var(--danger);border:1.5px solid rgba(192,57,43,.3);box-shadow:none}
+.btn.danger:hover{background:rgba(192,57,43,.08)}
+:focus-visible{outline:2.5px solid var(--yellow);outline-offset:2px}
+
+/* ---------- table ---------- */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -6px;padding:0 6px;max-width:100%}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+table.slim{min-width:300px}
+th{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gray);text-align:left;padding:8px 10px;border-bottom:1.5px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid rgba(78,20,84,.07);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:rgba(251,244,233,.75)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.mini{font-size:11.5px;color:var(--ink-soft)}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:10.5px;font-weight:500;background:rgba(122,46,126,.10);color:var(--purple);white-space:nowrap}
+.pill.g{background:rgba(46,125,87,.12);color:var(--good)}
+.pill.r{background:rgba(228,87,46,.13);color:var(--ember)}
+.pill.y{background:rgba(248,184,24,.20);color:#8a6200}
+.x{background:none;border:0;color:var(--gray);cursor:pointer;font-size:16px;line-height:1;padding:4px 6px;border-radius:6px}
+.x:hover{color:var(--danger);background:rgba(192,57,43,.08)}
+.empty{text-align:center;padding:32px 16px;color:var(--gray);font-size:13px;font-weight:300}
+.empty b{display:block;color:var(--ink-soft);font-weight:500;margin-bottom:4px;font-size:14px}
+
+/* ---------- candle (signature) ---------- */
+.candle-wrap{display:grid;grid-template-columns:190px 1fr;gap:22px;align-items:center}
+@media(max-width:640px){.candle-wrap{grid-template-columns:1fr;gap:8px}}
+.legend{display:flex;flex-direction:column;gap:1px}
+.lg{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:9px;cursor:default;transition:background .15s}
+.lg:hover{background:var(--cream2)}
+.lg .sw{width:11px;height:11px;border-radius:3px;flex:none}
+.lg .nm{flex:1;font-size:12.5px}
+.lg .vl{font-variant-numeric:tabular-nums;font-size:13px;font-weight:500}
+.lg .pc{width:44px;text-align:right;font-size:11px;color:var(--gray);font-variant-numeric:tabular-nums}
+.lg.tot{border-top:1.5px solid var(--line);margin-top:5px;padding-top:11px;font-weight:600}
+.lg.tot .nm,.lg.tot .vl{font-size:14px;color:var(--deep)}
+@keyframes flicker{0%,100%{transform:scale(1) translateY(0);opacity:.95}50%{transform:scale(1.06) translateY(-1.5px);opacity:1}}
+.flame{transform-origin:center bottom;animation:flicker 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.flame{animation:none}}
+
+/* ---------- price cards ---------- */
+.price{border:1.5px solid var(--line);border-radius:var(--r-sm);padding:14px;background:var(--cream2);position:relative;transition:border-color .18s,transform .18s}
+.price:hover{border-color:var(--plum);transform:translateY(-2px)}
+.price .ch{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);min-height:24px}
+.price .pv{font-family:'Bebas Neue',Impact,sans-serif;font-size:36px;line-height:1;color:var(--deep);margin:4px 0 2px}
+.price .ut{font-size:11.5px;color:var(--ink-soft)}
+.price .ut b{color:var(--good);font-weight:600}
+
+.note{background:rgba(248,184,24,.13);border-left:3px solid var(--yellow);border-radius:0 10px 10px 0;padding:11px 14px;font-size:12.5px;color:#6b4c00;margin-top:14px;font-weight:300}
+.note b{font-weight:600;color:#573d00}
+.bar{height:9px;border-radius:99px;background:rgba(78,20,84,.10);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--purple),var(--yellow));transition:width .5s ease}
+.search{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.search input,.search select{max-width:280px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:99px;padding:5px 12px;font-size:11.5px;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--plum)}
+.chip.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+
+/* ---------- toast / modal ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,24px);background:var(--deep);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;box-shadow:var(--sh-lg);opacity:0;pointer-events:none;transition:.28s;z-index:90;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:rgba(42,19,48,.55);display:none;align-items:center;justify-content:center;padding:18px;z-index:80;backdrop-filter:blur(3px)}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:20px;padding:24px;max-width:520px;width:100%;box-shadow:var(--sh-lg);max-height:88vh;overflow:auto}
+
+/* ---------- mobile ---------- */
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:sticky;top:0;height:auto;padding:12px 12px 0;z-index:50}
+  .brand{flex-direction:row;align-items:center;justify-content:space-between;padding:2px 4px 12px}
+  .brand img{width:108px}
+  .brand small{display:none}
+  .navlist{flex-direction:row;overflow-x:auto;gap:5px;padding-bottom:10px;scrollbar-width:none}
+  .navlist::-webkit-scrollbar{display:none}
+  .navbtn{flex:none;width:auto;padding:8px 13px;font-size:12.5px;border-radius:99px;background:rgba(255,255,255,.09)}
+  .navbtn span{white-space:nowrap}
+  .rail-foot{display:none}
+  main{padding:18px 16px 70px}
+  h1.title{font-size:30px}
+  .card{padding:16px}
+}
+@media print{
+  .rail,.btn,.search,.chips{display:none!important}
+  body{background:#fff}.card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+  .shell{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="brand">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAADuCAMAAAC09MpMAAAAYFBMVEUAAADq4uv9/P34txbz8PTz7u/+1Fz84p7+xiqxqLL//LK7rN3xr/L//wB+fn774qL/fwD//Xn/srL/AAD/f///AP//qgD/q1gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACf7PnmAAAAGHRSTlMAJPz+Ypz85/4GAwoGAQKmAgIDAQIBAwMG+UmtAAASK0lEQVR42u2dh5rjKAyAkRdcMimTmczN+7/p0S3RjH05pyz+tqRgA38ESEIAg3ZVX6whaLAarAarwWqwGqyGoMFqsBqsBqvBarAaggarwWqwGqwGq8FqCBqsBqvBarAarAarXbVXg9VgNVgNVoPVYLWrwWqwGqwGq8H662A167Ma1vmeVYT3hgX3lCx4F1ppWLJ6orvfxdntfWFJYejuevH3kK00LMbvC6t7j24+A0vcGxZrsFbBWlYkInVjmy5SSHgOv1ql4OwvWStEDEo0tigqEL6EVfrNnpIl1JVvkC4FSsXjy3PK8wKfNsgLwq/IB08FyzxTZCsJSF0RWjnLDTNCmMqlnoTvCvIig7ztGFaN2LvBYpOrAcvpwUBuuMG0oI9Aqvik7FS0yFeKDfk5xDPCyv2EISxgx6WnCtWa4K1hZWjFsKbl5wrOon7pvWClaW2Cpfol+rC3gyXfThWwPrYovO8HK2X+bIZFBfUNYSUUiO2wCK03hJWg9R9gYVrvCCsu23+Bhai8JaxoSCzD0kZQjQ/oPWGFtMqwXNJJUuGJ0gk3vr4prKgqRViBZ4XnHvausGhdliTLJP1xzMJJAvHusEhl6mChYkOyVb8+LJ4xXsQEsAmWLjikROvlYclynNOWnpgLsBJWeINL8kywBF9/Gb/TlOO4FZYc/yBuh88Ei2+aFfnJ+xC8ArEeFjuScorng7UxMiTvcOF+GFsN6wZH2g7PzyZZ2yYAC94p66/ZACsoqC7bm8PyPfMGWCTO4K+AZQy7LbAYaYdCdmJvCCuw7oQJS9oCC5dUvKdkcYgViI2weDiV+36wErZKg5WVrJRltwHWFN30lpIVzs2r6dItkvVXwErRarBykhVlAtPbNcON4e8xrCgX8YaStS2oMAULAm+neLvR8H6StWgCvbxSusblR53GMazQIbUBFnnAK8PCbtA0rAKttzCkV7vei7DyoZBbXDTw0rDEkmQpZyffDitYCaLTTCGRl5mwwCEIU0Ugx1pYCbcyq4QFrwgrk1kNrKANuyGWk7Gb+Oy7l4cFk9gCC3JTYTkAoQLLXhBWOix5CRbkJ1l5dso71sleDlaSVh6WD3bgyaAjCFQv5hdkEIr8VWFFc8uFKBofhsVzs7V0hJSaMTtaul0Z1vJSqqeAlVAgcvFZRrQSEVoomo0HBlqKLiQki72EZLGkLzCO/BP5+D+eCQNwIQfJACWaK8oitwjkOWBFWa6MKRWLukhKDvNLqXLW1ZPACvJcB0t8oHqcGVSyzcPiTw2L3eAsNsMKbUBeJVivCytIsQpWpIT9iKr0rwuL9swrYIlEVGBxW4pln8fzwyLerXpYPNEZn9kkKhxHzwsLlueIUOFrl9AJyCz+LQx003I9Hw3rWDGhNtOqlCyeWzUPmR1ixBHdMD0TLLyaKXAmTbnpRTFPUE/LUlXYYUAJl0jcATXD5gNgUbeVNFK8gnzOV1F4WAUNQD4DiqhcrDziJaIV6Pk9dwB2h7VhBxo3kFnnVHpjh49zvuzE5ARnS8q7puQdx1x89d7mTuhb8NdUqODNdG5TWW7qN0SB5GvUVnNt+B6wRO3FN27WozcOsfemZ2/PqwS2vOEZHFfsdvN/xsFv3NjoefdD+j/j4LeX6Ul329or5OgtrgbrlWAt96ooTf7eLU1/dWt/JCxZ2N9P9P50Te2NAXDyb65BzFd8/R6qCSwptc8ECw5++gHvIfYFcfF8ElJgiHRW59OrKuIkb1+p3TwKFnxpBpeu693lbBisR2olXtgEQ3fhs3F3YHzow0tNTtQJDFxh6Fdu3PgYWPCrKMi6juOf+RpHWVuEAz5tIpRgkN9/6+9/mcA3z0kU0cPyJorq9lHA08PSi+eH/k/ikji8+s6U7IQJJC5D85SERZKU7YRBJh1WidYDYMFVouozFdV1tYFWEmjye0MzD+vPOIglCGDuHsVzw9ICk0elayB5HuRP3+dYyHbGPvOwNNBvWBYsJVorGuLusCAnMOjSogWFVL0sxqkES9E6FDcs5b1/0tPCUr748c8SLHYtstJ1PBRhSVplD0/nf5h60doZVhUrCesXRDlZB99lWH+GQlEPTrAs9qeEVcdKwmKiLydRg34ZluzZCtsNz8VYIVq7woJTqoKjuQgs6OM0UUNcAJrvjr5mwVrVa+0JS/nX+0it6q1nVb4a/Y9NmCrdS14DVTc6ULra4C+t4/dE+CSVnPI+BsPJ88HCP6ihgOKJpfEjTR/TgEi6XnBr8hHUPU+4HXgNhQMtR71o7Qgr0gaMbaNq/HWQmtWMo8Md28Bn5ynHD7hAomfGWQzZie9LKKPwdLCCDkuZeQx5VJRtbXB0tMYnZyueIhaxPwsJzciT7RBOgYAPtZXaDxZQuVAWf5j7ScqXaosd7X4h3ZCTzefAZqmUndYhXbs+thieDRYWrL7LRXQon8yI+p0rZKRzvLDvVH+EYV2TQ/JQPW4+CNaBNKExv4BQ/p27lFBlJKI1JNc+zQlGkV7EEqkcsjS3J4Ml6oZr2W0PYy4dGSSGeNmFFCUxFnWHhGDJ36ROe9hv9T0uY0nulZaf5/HNhhJxks2YsmQgpctWemr2g4W79wG+NsJicEFf/nP9x19qLPwk5lRqlMt4M+p6rb1g4Y63XLQyrE92KfVZHA2kybYeKcZrRGs3ycJKVlc+NqcoWbgZigu6jEVEAVwTFteQcaFVKKY7wQJsGsta/Fb2bmFLgm/8nH70l3zT9/1i06KChfW5GtF6BKyeF12+/5ABjTo8YdF3UxQWuCGpleUY1pnTD4FVLhfVpYJ1nDDUsloULCngfJ1o7QaLr4AFmV5avkQmcN+VvYMJVlfccw78CutE6wGwxqViAXGnDmpWVXkmlC2J3QVDCZZUyr8XBKuTlrtY5QR8BKylSb1geB+4X72KvVUjL7iV0z9IIFhBqx7gBM8HS002LHifh2CGWTv2up7233lYY2ZrA8pGBehQ0fq6M6y1WwVPk9mEFAnLYjgG0WB1PcZhGKlXWXbIOVi5CWkylA48chZ2S6K1z0bUq0bDqNfKKAbfGVh9sI4iI1g2SmnBPPpPsARftcm5MCH4ZwJr2TN5iKZ3EopBRrLUN0nL80q8yS5IaSSNF+CesDavd0ITKhXzmoFbdc2MtOzbkxP3Sd9M/bzsbrDkL3agfqbFUeKrSKvXDuNMM8w8vkL5H8V9O/jtC1OIi3PZai3JlmT1CySKhoTlJDWma43y35e7+P1gobLWWa25yKRRtpYr9YmS+aCcI6vCqlyQ+YfAqpsE/krHvKnB7qQjLXHDJmrsGCsBWd9M7F8+Px4W6Y9lbT5hsUgmTrIPpvtdCOQn7QVF4Mr6hdIsdEm04BlgYW1A9dCZ2Z2vWUlScbpc6DCGUfurBjWTb4WGwvqk+nwfL9+rc1cUdcD9muGVzhsKdk1nTYqkDCO1T49QnlATF3HwDmYiWScodfJQJ1iFaJJ9YYXhGMKgCDfKlakGrIfBF52zBpaGdQhGO9ItAjUJlPE0oPibsTKmZj9YoQ1jrBI63fzN4NIrtfJEt4CSFu8pXJoTwjoE3RZWx8kPNQ6xoTH+qdGY94QV2DCj9r18epP70zthhuJCVoAkrDD6C+knKIR0NqGzsTdQiBjcDVas6ugFAihb54RZ9A6mm+E3dGltK3T6yetA6dd5anaFBRCqmf1wEXqBkmwKFx/aZ0K7AXLmuX5aBCvy0PdgV8mRsSXS79UCdypan/B4WHRKMDT/kf45KK0zuZDJXPpxMaxozOvg+yPp9EsEYtT4l3eFtehMwLDw3HPKKEnAChv6KMxuDosoQpxf8ASwKvUdCyvLVcWHJGFNv1HcKQS+mXTA96HYUB8ESzeu5RUWqs8qwmJpWFG3pUMpK9oYnTHPOQH3hlW1bmCAb7YNVtTQdYBhhQlPgnKHh+wmmZoTOjBYcpYMaln0aROs2FCggiWyAYc0GONJYGUWXUZ2XR7WeFG7JGVgxeHyVXODcCOiBek45/1hsdtBL+fNOIX7C1g96jKWvL9ZWN+BtoVafd7rCKFoXeth8f8Tll0oLgJflQKldHr7qxb6rIt6wCEDK+zkRxw3U1qyiZ08qUDoHCyA+8KKRhez64DR2p1OOihtft5sQSmKyWsc3C7S7t6xD846lyOuTz6I+c1CxOFAc6iDpTaRvWNDTEdY4y0b7K4MJh5hHjiz5o4LisxsDnZgZOMwdOOpPBVMDapKWGRPk/985ffuCpwhp8pFNDYRqvkpmcDN6+SSscJdK2Cxe27KVHqW9gAczN/U1irFvaZm50HpzkKyzF2H1VBud5SsN7ngL97hqcFqsBqsBuuvhYWGsx8/CpMhecIa5mTjIoFonfNjMk9nQXJ/sg7ZmtS8m+Y4hAnffZv3iZ38OTvk5Jkgnw9auLke59LwvUoL3PIDoGqk05wzmUGpJHh/tmRyBI8kgEy9IPnQalh6J1q7b7TZRFpZDniHW3C7QctvObPfcbNbmLrb7htmNqDmZKdu/LFzrEgT+mfOd87evOP22W5rLfMtn9jR5CX/t0XRu6Ojx5u81GfMFUu/P6st57kvMyrTcY1bOXA9CGcpCkasY+73i9ZH/BBbUG+1bpil3aX040llpit8c9mSU4WEcxrp1Nh0lRXWebl53PCQagH2BANz7Jx9pTM7BicbkIdugGUli+vI264z0mN3WA5hCfOxj/TTeYJNbT61RYAfsMG8whzrYtwc4gvsV+pzDigvbp5uamXPirFPdQf8cgfDH39ub3dHsAF8GG9KKhVn5KFrvA4elv1W6MOhrLkPLsDbwzpaWMLOK6uC2buF2+OeI1pHcB8rQ1+1BlNuBdfeBwJQzvpFZ38VSxZQXsLfbQrHO3vslc7Icbj5hFb+fCrVKidS1MxJnWVYdnbbuVn0W7t0YIYFwsIyAwvXBeTuhHYzrpmXZ2C2zQm8h7I9H0HYBsTnvMxDbauemBFEc7se0bgTatt4DAbTLH2utrlx2zgdUmEECj7cTy/MIGtewnbJ0rRsF2lEJAXLhlfp7orbf/xstJjPa3QvQe0w7p6pbvgxFVN1+LEp5wOPmauFcNjhyHTlZSotDmcLC53Z5D5QvYj6w2fJ8ucR+1+D2R32Reaozqo+S/c8HHAfmoWld+BxsFSuutryJ+OuHZ5ZdKalTjeLlhdkAsv1WTMLx113p+bMDCtA/Aze5yt0kQGPSo7gbS6FadDMSf4GWHYoYvNZCethsR/8G+uX9iBgM/yDrZEh5kYyfyg0PUrbFkB41XPORjgsqK7APCzbIiksNECrdEf80PWSZRyztvELJefLsBiF5X5jpxxoWB24Qa2zZ+S4UcgdAqN7ICpZbsxLSZY5/IJ7ybJe6/MsWfJjziANC+DkzoJguGZb+iynGTlsMywVCA0f3dzBS3Pn2AV9FtCO4Oh1MH3uID32CtwJQ1qlwLCEKwLzJTEDo4OlezvSG/nxwmsWLOqzXFySeyhzD90wGh5vsl1z3/wmD+vDlmNifnCZR3lORkOmWiI3g7eGBf4IHIdUi7AZxLhnA1Sy7ONMeuvZF25cAzYPevZT27ocHGlYwoRguVTW0gGnzZjxzDbJ1aqDGnJMvTiWLKen3CwRK1mmDX1YuTQazxGI8mIalem1fJfjlCmuRxIFKWyGzMqJVdN8XkjUXFO2JyRZ7W4ewDEsl+qmkhl2pqgidwpOXQfvhyLUwTtN0irAU3j8N5+V6zjwyAwYVgV3ituH7lBc/8XDZtipnsViMbd3SIMHr9t63bzzdgO4gZjAspLoO8vgodtgdd5cw6MhTsGtMTifC+dgIeRkGf0HnxEK2/cZpcDZoRCNhk521H+cHKwm7LBvRW9Cdt7cGEJYHyiVfMyRJYta7XWYpzDBjor243lg5u4Lnxzmr0z57db3wSld7lb9Cj/PfOP0LJhz9bkoh4HP2X5onzD5dLbIkzsZan4g91UA9BhG3q31OtS4mFwn+FF4pvcnndOuJEDvfubX53JJjqG7KswNgiKWHXUAOO2WyVQ8paz6eZ8/8pJNs280PBbbuf0W5kGpJ9CZH0A+QL5O91icc+BmxRkE/lN3v39/JjUD03U2H3ybsGiwGqwGq8FqV4PVYDVYDVaD1WC1q8FqsBqsBqvBarDaVYAF7apfWdMQNFgNVoPVYDVYDVZD0GA1WA1Wg9VgNVgNQYPVYDVYDVaD1WA1BA1Wg9VgNVgN1l9//QsFLDeuUr1KggAAAABJRU5ErkJggg==" alt="Endulcora">
+      <small><span class="flame-dot"></span> Costos · Merma · Precios</small>
+    </div>
+    <div class="navlist" id="nav"></div>
+    <div class="rail-foot">
+      <b>Tamales de México</b><br>
+      Herramienta del eBook «Tamales de México: Ruta Regional».<br>
+      Contenido: Chef Luis Alfonso Jiménez Cárdenas · Edición: Manuel Ramiro Justo Guzmán · WhatsApp 5665271901
+    </div>
+  </aside>
+  <main id="view"></main>
+</div>
+<div id="toast"></div>
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+
+<script>const SEED = {"insumos": [{"cat": "Caldos y fondos", "nom": "Agua", "u": "ml", "pres": 1000.0, "precio": 1.0, "prov": ""}, {"cat": "Caldos y fondos", "nom": "Caldo de cerdo", "u": "ml", "pres": 1000.0, "precio": 32.0, "prov": ""}, {"cat": "Caldos y fondos", "nom": "Caldo de frijol", "u": "ml", "pres": 1000.0, "precio": 18.0, "prov": ""}, {"cat": "Caldos y fondos", "nom": "Caldo de pescado o marisco", "u": "ml", "pres": 1000.0, "precio": 38.0, "prov": ""}, {"cat": "Caldos y fondos", "nom": "Caldo de pollo", "u": "ml", "pres": 1000.0, "precio": 30.0, "prov": ""}, {"cat": "Carnes", "nom": "Barbacoa de borrego", "u": "g", "pres": 1000.0, "precio": 420.0, "prov": ""}, {"cat": "Carnes", "nom": "Carne molida de res", "u": "g", "pres": 1000.0, "precio": 190.0, "prov": ""}, {"cat": "Carnes", "nom": "Conejo", "u": "g", "pres": 1000.0, "precio": 290.0, "prov": ""}, {"cat": "Carnes", "nom": "Costilla de cerdo", "u": "g", "pres": 1000.0, "precio": 175.0, "prov": ""}, {"cat": "Carnes", "nom": "Falda de res", "u": "g", "pres": 1000.0, "precio": 210.0, "prov": ""}, {"cat": "Carnes", "nom": "Pollo de rancho", "u": "g", "pres": 1000.0, "precio": 165.0, "prov": ""}, {"cat": "Carnes", "nom": "Pulpa de cerdo", "u": "g", "pres": 1000.0, "precio": 185.0, "prov": ""}, {"cat": "Chiles secos", "nom": "Chile ancho seco", "u": "pza", "pres": 30.0, "precio": 70.0, "prov": ""}, {"cat": "Chiles secos", "nom": "Chile cascabel seco", "u": "pza", "pres": 40.0, "precio": 65.0, "prov": ""}, {"cat": "Chiles secos", "nom": "Chile chipotle seco", "u": "pza", "pres": 30.0, "precio": 75.0, "prov": ""}, {"cat": "Chiles secos", "nom": "Chile colorado / de la tierra seco (Anaheim)", "u": "pza", "pres": 40.0, "precio": 55.0, "prov": ""}, {"cat": "Chiles secos", "nom": "Chile costeño rojo", "u": "pza", "pres": 50.0, "precio": 70.0, "prov": ""}, {"cat": "Chiles secos", "nom": "Chile guajillo seco", "u": "pza", "pres": 40.0, "precio": 60.0, "prov": ""}, {"cat": "Chiles secos", "nom": "Chile pasado chihuahuense", "u": "pza", "pres": 30.0, "precio": 95.0, "prov": ""}, {"cat": "Chiles secos", "nom": "Chile pasilla oaxaqueño", "u": "pza", "pres": 30.0, "precio": 150.0, "prov": ""}, {"cat": "Chiles secos", "nom": "Chile piquín seco (Simojovel / amashito)", "u": "g", "pres": 100.0, "precio": 120.0, "prov": ""}, {"cat": "Endulzantes", "nom": "Azúcar de caña", "u": "g", "pres": 1000.0, "precio": 32.0, "prov": ""}, {"cat": "Endulzantes", "nom": "Piloncillo", "u": "g", "pres": 1000.0, "precio": 55.0, "prov": ""}, {"cat": "Especias y secos", "nom": "Ajonjolí", "u": "g", "pres": 250.0, "precio": 55.0, "prov": ""}, {"cat": "Especias y secos", "nom": "Canela en polvo", "u": "g", "pres": 100.0, "precio": 45.0, "prov": ""}, {"cat": "Especias y secos", "nom": "Ceniza de olote cernida", "u": "g", "pres": 250.0, "precio": 25.0, "prov": ""}, {"cat": "Especias y secos", "nom": "Clavo de olor", "u": "pza", "pres": 200.0, "precio": 45.0, "prov": ""}, {"cat": "Especias y secos", "nom": "Colorante vegetal comestible", "u": "ml", "pres": 30.0, "precio": 55.0, "prov": ""}, {"cat": "Especias y secos", "nom": "Comino molido", "u": "g", "pres": 100.0, "precio": 40.0, "prov": ""}, {"cat": "Especias y secos", "nom": "Pasta de achiote artesanal", "u": "g", "pres": 200.0, "precio": 55.0, "prov": ""}, {"cat": "Especias y secos", "nom": "Polvo para hornear", "u": "g", "pres": 200.0, "precio": 35.0, "prov": ""}, {"cat": "Especias y secos", "nom": "Sal de grano", "u": "g", "pres": 1000.0, "precio": 25.0, "prov": ""}, {"cat": "Especias y secos", "nom": "Semilla de calabaza (pepita)", "u": "g", "pres": 250.0, "precio": 85.0, "prov": ""}, {"cat": "Frescos", "nom": "Ajo", "u": "pza", "pres": 40.0, "precio": 35.0, "prov": ""}, {"cat": "Frescos", "nom": "Calabacita criolla", "u": "g", "pres": 1000.0, "precio": 30.0, "prov": ""}, {"cat": "Frescos", "nom": "Cebolla blanca", "u": "pza", "pres": 8.0, "precio": 30.0, "prov": ""}, {"cat": "Frescos", "nom": "Chilacayote tierno", "u": "g", "pres": 1000.0, "precio": 28.0, "prov": ""}, {"cat": "Frescos", "nom": "Chile Anaheim fresco", "u": "pza", "pres": 10.0, "precio": 30.0, "prov": ""}, {"cat": "Frescos", "nom": "Chile habanero fresco", "u": "pza", "pres": 25.0, "precio": 25.0, "prov": ""}, {"cat": "Frescos", "nom": "Chile jalapeño fresco", "u": "pza", "pres": 20.0, "precio": 22.0, "prov": ""}, {"cat": "Frescos", "nom": "Chile poblano fresco", "u": "pza", "pres": 10.0, "precio": 35.0, "prov": ""}, {"cat": "Frescos", "nom": "Chile serrano fresco", "u": "pza", "pres": 30.0, "precio": 25.0, "prov": ""}, {"cat": "Frescos", "nom": "Jitomate saladet", "u": "pza", "pres": 12.0, "precio": 35.0, "prov": ""}, {"cat": "Frescos", "nom": "Miltomate (tomate verde)", "u": "g", "pres": 1000.0, "precio": 40.0, "prov": ""}, {"cat": "Frescos", "nom": "Nopal tierno", "u": "g", "pres": 1000.0, "precio": 30.0, "prov": ""}, {"cat": "Frescos", "nom": "Papa", "u": "g", "pres": 1000.0, "precio": 35.0, "prov": ""}, {"cat": "Frescos", "nom": "Pimiento morrón rojo", "u": "pza", "pres": 4.0, "precio": 45.0, "prov": ""}, {"cat": "Frutas y frutos secos", "nom": "Aceituna verde sin hueso", "u": "g", "pres": 250.0, "precio": 75.0, "prov": ""}, {"cat": "Frutas y frutos secos", "nom": "Almendra", "u": "g", "pres": 250.0, "precio": 130.0, "prov": ""}, {"cat": "Frutas y frutos secos", "nom": "Pasitas", "u": "g", "pres": 250.0, "precio": 55.0, "prov": ""}, {"cat": "Frutas y frutos secos", "nom": "Piña miel", "u": "pza", "pres": 1.0, "precio": 45.0, "prov": ""}, {"cat": "Frutas y frutos secos", "nom": "Plátano macho maduro", "u": "pza", "pres": 6.0, "precio": 35.0, "prov": ""}, {"cat": "Grasas", "nom": "Aceite de maíz", "u": "ml", "pres": 1000.0, "precio": 65.0, "prov": ""}, {"cat": "Grasas", "nom": "Manteca de cerdo criollo lavada", "u": "g", "pres": 1000.0, "precio": 145.0, "prov": ""}, {"cat": "Grasas", "nom": "Mantequilla de rancho sin sal", "u": "g", "pres": 1000.0, "precio": 260.0, "prov": ""}, {"cat": "Hierbas", "nom": "Cilantro fresco", "u": "pza", "pres": 10.0, "precio": 18.0, "prov": ""}, {"cat": "Hierbas", "nom": "Epazote fresco", "u": "pza", "pres": 10.0, "precio": 20.0, "prov": ""}, {"cat": "Hierbas", "nom": "Hoja de laurel seca", "u": "pza", "pres": 50.0, "precio": 25.0, "prov": ""}, {"cat": "Hierbas", "nom": "Orégano seco oaxaqueño", "u": "g", "pres": 100.0, "precio": 60.0, "prov": ""}, {"cat": "Hierbas", "nom": "Tomillo fresco", "u": "pza", "pres": 10.0, "precio": 30.0, "prov": ""}, {"cat": "Hojas y envoltura", "nom": "Hoja de acuyo (hoja santa) fresca", "u": "pza", "pres": 20.0, "precio": 40.0, "prov": ""}, {"cat": "Hojas y envoltura", "nom": "Hoja de aguacate criollo", "u": "pza", "pres": 50.0, "precio": 45.0, "prov": ""}, {"cat": "Hojas y envoltura", "nom": "Hoja verde de caña o de elote", "u": "pza", "pres": 50.0, "precio": 40.0, "prov": ""}, {"cat": "Hojas y envoltura", "nom": "Totomoxtle (hoja de maíz seca)", "u": "pza", "pres": 100.0, "precio": 55.0, "prov": ""}, {"cat": "Lácteos", "nom": "Crema de rancho", "u": "ml", "pres": 500.0, "precio": 75.0, "prov": ""}, {"cat": "Lácteos", "nom": "Huevo", "u": "pza", "pres": 12.0, "precio": 45.0, "prov": ""}, {"cat": "Lácteos", "nom": "Leche entera", "u": "ml", "pres": 1000.0, "precio": 28.0, "prov": ""}, {"cat": "Lácteos", "nom": "Quesillo oaxaqueño artesanal", "u": "g", "pres": 1000.0, "precio": 240.0, "prov": ""}, {"cat": "Lácteos", "nom": "Queso Cotija añejo", "u": "g", "pres": 500.0, "precio": 165.0, "prov": ""}, {"cat": "Lácteos", "nom": "Queso de cabra", "u": "g", "pres": 250.0, "precio": 150.0, "prov": ""}, {"cat": "Lácteos", "nom": "Queso fresco de aro oaxaqueño", "u": "g", "pres": 1000.0, "precio": 180.0, "prov": ""}, {"cat": "Lácteos", "nom": "Queso menonita", "u": "g", "pres": 1000.0, "precio": 210.0, "prov": ""}, {"cat": "Líquidos y otros", "nom": "Extracto natural de vainilla", "u": "ml", "pres": 60.0, "precio": 190.0, "prov": ""}, {"cat": "Líquidos y otros", "nom": "Pulque natural", "u": "ml", "pres": 1000.0, "precio": 60.0, "prov": ""}, {"cat": "Mariscos", "nom": "Camarón entero fresco mediano", "u": "g", "pres": 1000.0, "precio": 290.0, "prov": ""}, {"cat": "Mariscos", "nom": "Camarón pacotilla", "u": "g", "pres": 1000.0, "precio": 320.0, "prov": ""}, {"cat": "Mariscos", "nom": "Filete de pescado blanco", "u": "g", "pres": 1000.0, "precio": 260.0, "prov": ""}, {"cat": "Mariscos", "nom": "Pulpo", "u": "g", "pres": 1000.0, "precio": 380.0, "prov": ""}, {"cat": "Mariscos", "nom": "Tichinda (almeja de laguna)", "u": "g", "pres": 1000.0, "precio": 180.0, "prov": ""}, {"cat": "Maíz y masa", "nom": "Granos de elote tierno", "u": "g", "pres": 1000.0, "precio": 45.0, "prov": ""}, {"cat": "Maíz y masa", "nom": "Masa de maíz nixtamalizado fresca de molino", "u": "g", "pres": 1000.0, "precio": 32.0, "prov": ""}, {"cat": "Moles y pastas", "nom": "Chocolate de metate oaxaqueño", "u": "g", "pres": 500.0, "precio": 160.0, "prov": ""}, {"cat": "Moles y pastas", "nom": "Frijol negro", "u": "g", "pres": 1000.0, "precio": 55.0, "prov": ""}, {"cat": "Moles y pastas", "nom": "Pasta de mole negro oaxaqueño", "u": "g", "pres": 500.0, "precio": 220.0, "prov": ""}, {"cat": "Moles y pastas", "nom": "Preparación derivada de la misma receta (sin costo adicional)", "u": "ml", "pres": 1000.0, "precio": 0.0, "prov": ""}, {"cat": "Moles y pastas", "nom": "Salsa concentrada de chile colorado (base)", "u": "ml", "pres": 500.0, "precio": 55.0, "prov": ""}, {"cat": "Quelites y hongos", "nom": "Acelga fresca", "u": "g", "pres": 500.0, "precio": 30.0, "prov": ""}, {"cat": "Quelites y hongos", "nom": "Hoja de chaya fresca", "u": "g", "pres": 250.0, "precio": 45.0, "prov": ""}, {"cat": "Quelites y hongos", "nom": "Hoja de chepil (chipilín) fresca", "u": "g", "pres": 250.0, "precio": 55.0, "prov": ""}], "lineas": [{"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado de molienda media"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Manteca de cerdo criollo lavada", "cant": 270.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Caldo de pollo", "cant": 250.0, "u": "ml", "desc": "Caldo de res concentrado (tibio y desgrasado)"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Preparación derivada de la misma receta (sin costo adicional)", "cant": 50.0, "u": "ml", "desc": "Adobo colado de la carne (para teñir y sazonar la masa)"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Falda de res", "cant": 500.0, "u": "g", "desc": "Falda o pescuezo de res cocido suave con ajo y cebolla, deshebrado fino"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Chile ancho seco", "cant": 5.0, "u": "pza", "desc": "Chiles anchos desvenados y tostados"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Chile guajillo seco", "cant": 3.0, "u": "pza", "desc": "Chiles guajillos tostados"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Ajo", "cant": 3.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Cebolla blanca", "cant": 0.25, "u": "pza", "desc": "Cebolla blanca asada"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Orégano seco oaxaqueño", "cant": 2.0, "u": "g", "desc": "Orégano seco"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Comino molido", "cant": 1.0, "u": "g", "desc": "Pizca de comino molido"}, {"n": 1, "rec": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "ins": "Totomoxtle (hoja de maíz seca)", "cant": 20.0, "u": "pza", "desc": "Hojas de totomoxtle remojadas en agua tibia"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Manteca de cerdo criollo lavada", "cant": 270.0, "u": "g", "desc": "Manteca de cerdo"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Caldo de cerdo", "cant": 260.0, "u": "ml", "desc": "Caldo mixto de res y cerdo tibio"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Falda de res", "cant": 250.0, "u": "g", "desc": "Falda de res cocida y deshebrada"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Pulpa de cerdo", "cant": 250.0, "u": "g", "desc": "Pierna de cerdo cocida y deshebrada"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Chile ancho seco", "cant": 4.0, "u": "pza", "desc": "Chiles anchos y 2 chiles pasilla tostados y licuados con 2 dientes de ajo y 1/4 cebolla"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Aceituna verde sin hueso", "cant": 280.0, "u": "g", "desc": "Aceitunas verdes enteras sin hueso"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Pasitas", "cant": 40.0, "u": "g", "desc": "Pasitas negras"}, {"n": 2, "rec": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "ins": "Papa", "cant": 150.0, "u": "g", "desc": "Papa grande cocida al dente y cortada en 14 bastones"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado de textura fina"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Manteca de cerdo criollo lavada", "cant": 285.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Caldo de cerdo", "cant": 200.0, "u": "ml", "desc": "Caldo de cocción del cerdo tibio"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Preparación derivada de la misma receta (sin costo adicional)", "cant": 80.0, "u": "ml", "desc": "Salsa de chile colorado concentrada"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Pulpa de cerdo", "cant": 500.0, "u": "g", "desc": "Espaldilla o pierna de cerdo cocida con ajo y cebolla, deshebrada"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Chile colorado / de la tierra seco (Anaheim)", "cant": 8.0, "u": "pza", "desc": "Chiles de la tierra (chile colorado de Sonora o chile Anaheim seco) desvenados"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Chile ancho seco", "cant": 2.0, "u": "pza", "desc": "Chiles anchos"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Ajo", "cant": 3.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Orégano seco oaxaqueño", "cant": 2.0, "u": "g", "desc": "Orégano sonorense"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Aceituna verde sin hueso", "cant": 300.0, "u": "g", "desc": "Aceitunas verdes"}, {"n": 3, "rec": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "ins": "Chile Anaheim fresco", "cant": 2.0, "u": "pza", "desc": "Chiles verdes Anaheim tatemados, limpios y cortados en rajas"}, {"n": 4, "rec": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 4, "rec": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "ins": "Manteca de cerdo criollo lavada", "cant": 270.0, "u": "g", "desc": "Manteca de cerdo"}, {"n": 4, "rec": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "ins": "Caldo de pollo", "cant": 260.0, "u": "ml", "desc": "Caldo de res tibio"}, {"n": 4, "rec": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 4, "rec": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 4, "rec": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "ins": "Falda de res", "cant": 400.0, "u": "g", "desc": "Falda de res cocida y deshebrada"}, {"n": 4, "rec": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "ins": "Chile pasado chihuahuense", "cant": 8.0, "u": "pza", "desc": "Chiles pasados chihuahuenses (chiles verdes asados, pelados y deshidratados al sol)"}, {"n": 4, "rec": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 4, "rec": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "ins": "Cebolla blanca", "cant": 0.5, "u": "pza", "desc": "Cebolla y 2 dientes de ajo asados"}, {"n": 4, "rec": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "ins": "Queso menonita", "cant": 350.0, "u": "g", "desc": "Queso menonita artesanal cortado en 14 bastones de 25 g"}, {"n": 5, "rec": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 5, "rec": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "ins": "Manteca de cerdo criollo lavada", "cant": 270.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 5, "rec": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "ins": "Caldo de cerdo", "cant": 250.0, "u": "ml", "desc": "Caldo de costilla de cerdo tibio"}, {"n": 5, "rec": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 5, "rec": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 5, "rec": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "ins": "Costilla de cerdo", "cant": 500.0, "u": "g", "desc": "Costilla de cerdo cocida suave y deshuesada en bocados pequeños"}, {"n": 5, "rec": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "ins": "Miltomate (tomate verde)", "cant": 400.0, "u": "g", "desc": "Tomatillo verde (de cáscara) cocido"}, {"n": 5, "rec": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "ins": "Chile serrano fresco", "cant": 4.0, "u": "pza", "desc": "Chiles serranos verdes cocidos"}, {"n": 5, "rec": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo y 1/4 cebolla"}, {"n": 5, "rec": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "ins": "Cilantro fresco", "cant": 1.0, "u": "pza", "desc": "Rama de cilantro fresco"}, {"n": 6, "rec": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca de textura fina"}, {"n": 6, "rec": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "ins": "Manteca de cerdo criollo lavada", "cant": 280.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 6, "rec": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "ins": "Caldo de pollo", "cant": 220.0, "u": "ml", "desc": "Caldo de res concentrado tibio"}, {"n": 6, "rec": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "ins": "Chile ancho seco", "cant": 7.0, "u": "pza", "desc": "Salsa de chile ancho colada (para teñir la masa)"}, {"n": 6, "rec": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 6, "rec": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 6, "rec": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "ins": "Carne molida de res", "cant": 400.0, "u": "g", "desc": "Carne de res molida o picada finamente a cuchillo"}, {"n": 6, "rec": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo y 1/4 cebolla asados"}, {"n": 6, "rec": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "ins": "Comino molido", "cant": 1.0, "u": "g", "desc": "Pizca de comino molido y 1 pizca de orégano"}, {"n": 6, "rec": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "ins": "Papa", "cant": 150.0, "u": "g", "desc": "Papa pequeña cocida en cubos diminutos (5 mm)"}, {"n": 7, "rec": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 7, "rec": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "ins": "Manteca de cerdo criollo lavada", "cant": 270.0, "u": "g", "desc": "Manteca de cerdo"}, {"n": 7, "rec": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "ins": "Caldo de cerdo", "cant": 250.0, "u": "ml", "desc": "Caldo de cerdo tibio"}, {"n": 7, "rec": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 7, "rec": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 7, "rec": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "ins": "Pulpa de cerdo", "cant": 500.0, "u": "g", "desc": "Pulpa o pierna de cerdo cocida y deshebrada"}, {"n": 7, "rec": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "ins": "Chile cascabel seco", "cant": 8.0, "u": "pza", "desc": "Chiles cascabel tostados y desvenados"}, {"n": 7, "rec": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 7, "rec": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 7, "rec": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "ins": "Comino molido", "cant": 2.0, "u": "g", "desc": "Comino entero tostado y molido en molcajete"}, {"n": 8, "rec": "Sinaloa: Tamal Barbón de Escuinapa (Camarones Enteros con Barbas)", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 8, "rec": "Sinaloa: Tamal Barbón de Escuinapa (Camarones Enteros con Barbas)", "ins": "Manteca de cerdo criollo lavada", "cant": 260.0, "u": "g", "desc": "Manteca de cerdo (o manteca vegetal)"}, {"n": 8, "rec": "Sinaloa: Tamal Barbón de Escuinapa (Camarones Enteros con Barbas)", "ins": "Caldo de pescado o marisco", "cant": 250.0, "u": "ml", "desc": "Caldo concentrado de cabezas de camarón tibio"}, {"n": 8, "rec": "Sinaloa: Tamal Barbón de Escuinapa (Camarones Enteros con Barbas)", "ins": "Chile guajillo seco", "cant": 8.5, "u": "pza", "desc": "Salsa de chile guajillo (para dar color rojizo a la masa)"}, {"n": 8, "rec": "Sinaloa: Tamal Barbón de Escuinapa (Camarones Enteros con Barbas)", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 8, "rec": "Sinaloa: Tamal Barbón de Escuinapa (Camarones Enteros con Barbas)", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 8, "rec": "Sinaloa: Tamal Barbón de Escuinapa (Camarones Enteros con Barbas)", "ins": "Camarón entero fresco mediano", "cant": 600.0, "u": "g", "desc": "Camarones medianos enteros y frescos con cabeza y barbas largas (lavados)"}, {"n": 8, "rec": "Sinaloa: Tamal Barbón de Escuinapa (Camarones Enteros con Barbas)", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo asados y 1/4 cebolla"}, {"n": 8, "rec": "Sinaloa: Tamal Barbón de Escuinapa (Camarones Enteros con Barbas)", "ins": "Orégano seco oaxaqueño", "cant": 20.0, "u": "g", "desc": "Pizca de orégano y comino"}, {"n": 9, "rec": "Sinaloa / Sonora: Tamal Tonto de Masa con Chile Colorado (Para Caldos)", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado de molienda media"}, {"n": 9, "rec": "Sinaloa / Sonora: Tamal Tonto de Masa con Chile Colorado (Para Caldos)", "ins": "Manteca de cerdo criollo lavada", "cant": 280.0, "u": "g", "desc": "Manteca de cerdo criollo de alta calidad"}, {"n": 9, "rec": "Sinaloa / Sonora: Tamal Tonto de Masa con Chile Colorado (Para Caldos)", "ins": "Caldo de pollo", "cant": 220.0, "u": "ml", "desc": "Caldo de res o cerdo concentrado tibio"}, {"n": 9, "rec": "Sinaloa / Sonora: Tamal Tonto de Masa con Chile Colorado (Para Caldos)", "ins": "Salsa concentrada de chile colorado (base)", "cant": 80.0, "u": "ml", "desc": "Salsa concentrada de chile colorado (guajillo/Anaheim seco con ajo y comino)"}, {"n": 9, "rec": "Sinaloa / Sonora: Tamal Tonto de Masa con Chile Colorado (Para Caldos)", "ins": "Sal de grano", "cant": 18.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 9, "rec": "Sinaloa / Sonora: Tamal Tonto de Masa con Chile Colorado (Para Caldos)", "ins": "Polvo para hornear", "cant": 6.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 10, "rec": "Michoacán: Corundas Michoacanas Triangulares en Hoja de Caña", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado con ceniza (molienda quebrada/martajada)"}, {"n": 10, "rec": "Michoacán: Corundas Michoacanas Triangulares en Hoja de Caña", "ins": "Manteca de cerdo criollo lavada", "cant": 250.0, "u": "g", "desc": "Manteca de cerdo (o manteca vegetal de calidad)"}, {"n": 10, "rec": "Michoacán: Corundas Michoacanas Triangulares en Hoja de Caña", "ins": "Caldo de cerdo", "cant": 250.0, "u": "ml", "desc": "Caldo de cerdo o agua tibia"}, {"n": 10, "rec": "Michoacán: Corundas Michoacanas Triangulares en Hoja de Caña", "ins": "Sal de grano", "cant": 18.0, "u": "g", "desc": "Sal fina"}, {"n": 10, "rec": "Michoacán: Corundas Michoacanas Triangulares en Hoja de Caña", "ins": "Polvo para hornear", "cant": 6.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 10, "rec": "Michoacán: Corundas Michoacanas Triangulares en Hoja de Caña", "ins": "Hoja verde de caña o de elote", "cant": 16.0, "u": "pza", "desc": "Hojas verdes largas de caña de maíz (limpias y flexibles)"}, {"n": 10, "rec": "Michoacán: Corundas Michoacanas Triangulares en Hoja de Caña", "ins": "Jitomate saladet", "cant": 3.33, "u": "pza", "desc": "Salsa roja de jitomate cocida con chile perón (o chile manzano) y rajas"}, {"n": 10, "rec": "Michoacán: Corundas Michoacanas Triangulares en Hoja de Caña", "ins": "Crema de rancho", "cant": 200.0, "u": "ml", "desc": "Crema ácida de rancho"}, {"n": 10, "rec": "Michoacán: Corundas Michoacanas Triangulares en Hoja de Caña", "ins": "Queso Cotija añejo", "cant": 150.0, "u": "g", "desc": "Queso Cotija añejo rallado"}, {"n": 11, "rec": "Michoacán: Uchepos Tradicionales de Elote Tierno con Mantequilla", "ins": "Granos de elote tierno", "cant": 1200.0, "u": "g", "desc": "Granos de elote tierno crudo recién desgranado (maíz lechoso criollo)"}, {"n": 11, "rec": "Michoacán: Uchepos Tradicionales de Elote Tierno con Mantequilla", "ins": "Mantequilla de rancho sin sal", "cant": 180.0, "u": "g", "desc": "Mantequilla de rancho sin sal derretida (o manteca de cerdo lavada)"}, {"n": 11, "rec": "Michoacán: Uchepos Tradicionales de Elote Tierno con Mantequilla", "ins": "Azúcar de caña", "cant": 100.0, "u": "g", "desc": "Azúcar de caña o piloncillo claro rallado"}, {"n": 11, "rec": "Michoacán: Uchepos Tradicionales de Elote Tierno con Mantequilla", "ins": "Leche entera", "cant": 80.0, "u": "ml", "desc": "Leche entera fresca o nata de rancho"}, {"n": 11, "rec": "Michoacán: Uchepos Tradicionales de Elote Tierno con Mantequilla", "ins": "Sal de grano", "cant": 6.0, "u": "g", "desc": "Sal fina"}, {"n": 11, "rec": "Michoacán: Uchepos Tradicionales de Elote Tierno con Mantequilla", "ins": "Hoja verde de caña o de elote", "cant": 18.0, "u": "pza", "desc": "Hojas verdes frescas de elote (lavadas y escurridas)"}, {"n": 11, "rec": "Michoacán: Uchepos Tradicionales de Elote Tierno con Mantequilla", "ins": "Crema de rancho", "cant": 200.0, "u": "ml", "desc": "Crema ácida de rancho"}, {"n": 11, "rec": "Michoacán: Uchepos Tradicionales de Elote Tierno con Mantequilla", "ins": "Queso Cotija añejo", "cant": 150.0, "u": "g", "desc": "Queso Cotija añejo de Michoacán rallado fino"}, {"n": 11, "rec": "Michoacán: Uchepos Tradicionales de Elote Tierno con Mantequilla", "ins": "Miltomate (tomate verde)", "cant": 300.0, "u": "g", "desc": "Salsa verde cocida de tomatillo con chile serrano y cilantro"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Manteca de cerdo criollo lavada", "cant": 275.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Caldo de cerdo", "cant": 260.0, "u": "ml", "desc": "Caldo de lomo de cerdo tibio"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Pulpa de cerdo", "cant": 500.0, "u": "g", "desc": "Lomo o pulpa de cerdo cocido con laurel, ajo y sal, deshebrado grueso"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Chile ancho seco", "cant": 6.0, "u": "pza", "desc": "Chiles anchos desvenados y tostados"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Chile pasilla oaxaqueño", "cant": 2.0, "u": "pza", "desc": "Chiles pasilla tostados"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo y 1/4 cebolla asados"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Chocolate de metate oaxaqueño", "cant": 40.0, "u": "g", "desc": "Chocolate de metate oaxaqueño/jalisciense con canela"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Piloncillo", "cant": 25.0, "u": "g", "desc": "Piloncillo rallado"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Ajonjolí", "cant": 20.0, "u": "g", "desc": "Ajonjolí tostado"}, {"n": 12, "rec": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "ins": "Clavo de olor", "cant": 1.0, "u": "pza", "desc": "Pizca de clavo de olor y pimienta gorda"}, {"n": 13, "rec": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 13, "rec": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "ins": "Manteca de cerdo criollo lavada", "cant": 270.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 13, "rec": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "ins": "Caldo de cerdo", "cant": 260.0, "u": "ml", "desc": "Caldo de costilla de cerdo tibio"}, {"n": 13, "rec": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 13, "rec": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 13, "rec": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "ins": "Costilla de cerdo", "cant": 550.0, "u": "g", "desc": "Costilla de cerdo cargada (cocida suave con cebolla y sal, deshuesada y troceada en bocados)"}, {"n": 13, "rec": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "ins": "Chile jalapeño fresco", "cant": 6.0, "u": "pza", "desc": "Chiles jalapeños rojos maduros (asados al comal)"}, {"n": 13, "rec": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "ins": "Jitomate saladet", "cant": 4.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 13, "rec": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "ins": "Ajo", "cant": 3.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 13, "rec": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "ins": "Orégano seco oaxaqueño", "cant": 20.0, "u": "g", "desc": "Pizca de orégano seco de monte"}, {"n": 14, "rec": "Guanajuato: Tamal Muerto de Maíz Azul con Piloncillo, Canela y Ceniza de Olote", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz azul nixtamalizado fresca"}, {"n": 14, "rec": "Guanajuato: Tamal Muerto de Maíz Azul con Piloncillo, Canela y Ceniza de Olote", "ins": "Manteca de cerdo criollo lavada", "cant": 250.0, "u": "g", "desc": "Manteca de cerdo lavada o manteca vegetal"}, {"n": 14, "rec": "Guanajuato: Tamal Muerto de Maíz Azul con Piloncillo, Canela y Ceniza de Olote", "ins": "Ceniza de olote cernida", "cant": 15.0, "u": "g", "desc": "Ceniza cernida de olote de maíz quemado (o cal viva tradicional para fijar color)"}, {"n": 14, "rec": "Guanajuato: Tamal Muerto de Maíz Azul con Piloncillo, Canela y Ceniza de Olote", "ins": "Piloncillo", "cant": 140.0, "u": "g", "desc": "Piloncillo oscuro disuelto en 220 ml de infusión de canela tibia"}, {"n": 14, "rec": "Guanajuato: Tamal Muerto de Maíz Azul con Piloncillo, Canela y Ceniza de Olote", "ins": "Sal de grano", "cant": 4.0, "u": "g", "desc": "Sal fina"}, {"n": 14, "rec": "Guanajuato: Tamal Muerto de Maíz Azul con Piloncillo, Canela y Ceniza de Olote", "ins": "Polvo para hornear", "cant": 6.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 14, "rec": "Guanajuato: Tamal Muerto de Maíz Azul con Piloncillo, Canela y Ceniza de Olote", "ins": "Frijol negro", "cant": 350.0, "u": "g", "desc": "Pasta de frijol negro cocido sin sal, refrito con 60 g de piloncillo rallado y canela en polvo"}, {"n": 15, "rec": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 15, "rec": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "ins": "Manteca de cerdo criollo lavada", "cant": 230.0, "u": "g", "desc": "Manteca de cerdo o mantequilla de rancho"}, {"n": 15, "rec": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "ins": "Caldo de pollo", "cant": 250.0, "u": "ml", "desc": "Caldo de verduras tibio"}, {"n": 15, "rec": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "ins": "Acelga fresca", "cant": 150.0, "u": "g", "desc": "Hojas de acelga fresca limpias, sin tallo grueso y finamente picadas"}, {"n": 15, "rec": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "ins": "Sal de grano", "cant": 15.0, "u": "g", "desc": "Sal fina"}, {"n": 15, "rec": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 15, "rec": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "ins": "Queso fresco de aro oaxaqueño", "cant": 350.0, "u": "g", "desc": "Queso fresco ranchero o queso panela artesanal (en 14 bastones de 25 g)"}, {"n": 15, "rec": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "ins": "Miltomate (tomate verde)", "cant": 350.0, "u": "g", "desc": "Tomatillo verde cocido con 3 chiles verdes serranos, 1 diente de ajo y 1/4 cebolla"}, {"n": 15, "rec": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "ins": "Cilantro fresco", "cant": 1.0, "u": "pza", "desc": "Rama de cilantro fresco picado"}, {"n": 15, "rec": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "ins": "Aceite de maíz", "cant": 15.0, "u": "ml", "desc": "Aceite o manteca"}, {"n": 16, "rec": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado blanca fresca"}, {"n": 16, "rec": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "ins": "Mantequilla de rancho sin sal", "cant": 260.0, "u": "g", "desc": "Mantequilla de rancho o manteca de cerdo"}, {"n": 16, "rec": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "ins": "Caldo de pollo", "cant": 250.0, "u": "ml", "desc": "Caldo de verduras aromático tibio"}, {"n": 16, "rec": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "ins": "Sal de grano", "cant": 17.0, "u": "g", "desc": "Sal fina"}, {"n": 16, "rec": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 16, "rec": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "ins": "Queso de cabra", "cant": 350.0, "u": "g", "desc": "Queso de cabra fresco artesanal desmoronado (o queso fresco de pasta blanda serrano)"}, {"n": 16, "rec": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "ins": "Chile jalapeño fresco", "cant": 5.0, "u": "pza", "desc": "Chiles cuaresmeños (jalapeños) tatemados, desvenados y cortados en rajas"}, {"n": 16, "rec": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "ins": "Cebolla blanca", "cant": 1.0, "u": "pza", "desc": "Cebolla blanca fileteada"}, {"n": 16, "rec": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo picados"}, {"n": 16, "rec": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "ins": "Epazote fresco", "cant": 1.0, "u": "pza", "desc": "Rama de epazote fresco picado"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Manteca de cerdo criollo lavada", "cant": 240.0, "u": "g", "desc": "Manteca de cerdo o mantequilla"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Caldo de pollo", "cant": 250.0, "u": "ml", "desc": "Caldo de verduras o agua tibia"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Sal de grano", "cant": 15.0, "u": "g", "desc": "Sal fina"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Calabacita criolla", "cant": 400.0, "u": "g", "desc": "Calabacitas criollas tiernas cortadas en cubos pequeños (escalfadas 2 min)"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados y picados"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Cebolla blanca", "cant": 0.5, "u": "pza", "desc": "Cebolla y 1 diente de ajo picados"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Queso fresco de aro oaxaqueño", "cant": 350.0, "u": "g", "desc": "Queso fresco de cuadro oaxaqueño/hidrocálido desmoronado"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Crema de rancho", "cant": 80.0, "u": "ml", "desc": "Crema de rancho espesa"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Chile poblano fresco", "cant": 2.0, "u": "pza", "desc": "Chiles poblanos o poblanos verdes en rajas pequeñas"}, {"n": 17, "rec": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "ins": "Mantequilla de rancho sin sal", "cant": 20.0, "u": "g", "desc": "Mantequilla o manteca"}, {"n": 18, "rec": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado de molienda media"}, {"n": 18, "rec": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "ins": "Manteca de cerdo criollo lavada", "cant": 275.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 18, "rec": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "ins": "Caldo de cerdo", "cant": 200.0, "u": "ml", "desc": "Caldo de cocción de cerdo tibio"}, {"n": 18, "rec": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "ins": "Preparación derivada de la misma receta (sin costo adicional)", "cant": 60.0, "u": "ml", "desc": "Salsa concentrada de chile colorado"}, {"n": 18, "rec": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 18, "rec": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 18, "rec": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "ins": "Pulpa de cerdo", "cant": 550.0, "u": "g", "desc": "Pierna o espaldilla de cerdo cocida suave y deshebrada gruesa"}, {"n": 18, "rec": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "ins": "Chile guajillo seco", "cant": 6.0, "u": "pza", "desc": "Chiles guajillos y 3 chiles anchos desvenados y tostados"}, {"n": 18, "rec": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "ins": "Ajo", "cant": 3.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 18, "rec": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "ins": "Comino molido", "cant": 1.0, "u": "g", "desc": "Pizca de comino, 2 clavos de olor y 1 pizca de orégano"}, {"n": 19, "rec": "San Luis Potosí: Zacahuil Huasteco Tradicional de Masa Martajada (Porción Individual Estandarizada)", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 800.0, "u": "g", "desc": "Masa de maíz nixtamalizado martajada gruesa (granos semi-quebrados)"}, {"n": 19, "rec": "San Luis Potosí: Zacahuil Huasteco Tradicional de Masa Martajada (Porción Individual Estandarizada)", "ins": "Manteca de cerdo criollo lavada", "cant": 250.0, "u": "g", "desc": "Manteca de cerdo criollo (sin batir a punto de nieve)"}, {"n": 19, "rec": "San Luis Potosí: Zacahuil Huasteco Tradicional de Masa Martajada (Porción Individual Estandarizada)", "ins": "Caldo de pollo", "cant": 350.0, "u": "ml", "desc": "Caldo de carne concentrado tibio"}, {"n": 19, "rec": "San Luis Potosí: Zacahuil Huasteco Tradicional de Masa Martajada (Porción Individual Estandarizada)", "ins": "Sal de grano", "cant": 18.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 19, "rec": "San Luis Potosí: Zacahuil Huasteco Tradicional de Masa Martajada (Porción Individual Estandarizada)", "ins": "Chile ancho seco", "cant": 8.0, "u": "pza", "desc": "Chiles anchos y 4 chiles guajillos licuados en crudo con 3 dientes de ajo y 1/4 cebolla (adobo de masa)"}, {"n": 19, "rec": "San Luis Potosí: Zacahuil Huasteco Tradicional de Masa Martajada (Porción Individual Estandarizada)", "ins": "Pulpa de cerdo", "cant": 500.0, "u": "g", "desc": "Pulpa de cerdo en trozos medianos crudos"}, {"n": 19, "rec": "San Luis Potosí: Zacahuil Huasteco Tradicional de Masa Martajada (Porción Individual Estandarizada)", "ins": "Pollo de rancho", "cant": 400.0, "u": "g", "desc": "Pollo de rancho en trozos crudos deshuesados"}, {"n": 19, "rec": "San Luis Potosí: Zacahuil Huasteco Tradicional de Masa Martajada (Porción Individual Estandarizada)", "ins": "Papa", "cant": 150.0, "u": "g", "desc": "Hojas de papatla o plátano soasadas y alambre/mecate de henequén para atar"}, {"n": 20, "rec": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz morado o negro nixtamalizado fresca"}, {"n": 20, "rec": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "ins": "Manteca de cerdo criollo lavada", "cant": 260.0, "u": "g", "desc": "Manteca de cerdo"}, {"n": 20, "rec": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "ins": "Caldo de pollo", "cant": 250.0, "u": "ml", "desc": "Caldo de verduras o agua tibia con ceniza de olote cernida (10 g)"}, {"n": 20, "rec": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "ins": "Sal de grano", "cant": 15.0, "u": "g", "desc": "Sal fina"}, {"n": 20, "rec": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 20, "rec": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "ins": "Queso fresco de aro oaxaqueño", "cant": 350.0, "u": "g", "desc": "Queso de rancho potosino (queso fresco de pasta firme) cortado en 14 bastones de 25 g"}, {"n": 20, "rec": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "ins": "Chile cascabel seco", "cant": 8.0, "u": "pza", "desc": "Chiles cascabel tostados y desvenados"}, {"n": 20, "rec": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 20, "rec": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 20, "rec": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "ins": "Comino molido", "cant": 1.0, "u": "g", "desc": "Pizca de comino molido"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Manteca de cerdo criollo lavada", "cant": 265.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Caldo de pollo", "cant": 260.0, "u": "ml", "desc": "Caldo concentrado de pollo tibio"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Sal de grano", "cant": 15.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Pollo de rancho", "cant": 450.0, "u": "g", "desc": "Pechuga de pollo de rancho cocida y deshebrada gruesa"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Chile guajillo seco", "cant": 6.0, "u": "pza", "desc": "Chiles guajillos y 2 chiles anchos tostados y desvenados"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo y 1/4 cebolla asados"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Comino molido", "cant": 1.0, "u": "g", "desc": "Pizca de comino y 2 pimientas gordas"}, {"n": 21, "rec": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "ins": "Hoja de acuyo (hoja santa) fresca", "cant": 6.0, "u": "pza", "desc": "Hojas grandes de acuyo (hoja santa) limpias y partidas a la mitad"}, {"n": 22, "rec": "Veracruz: Tamal de Masa Colada de Sotavento con Cerdo y Salsa de Jitomate", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 600.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 22, "rec": "Veracruz: Tamal de Masa Colada de Sotavento con Cerdo y Salsa de Jitomate", "ins": "Caldo de cerdo", "cant": 1200.0, "u": "ml", "desc": "Caldo de cerdo colado y desgrasado"}, {"n": 22, "rec": "Veracruz: Tamal de Masa Colada de Sotavento con Cerdo y Salsa de Jitomate", "ins": "Manteca de cerdo criollo lavada", "cant": 240.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 22, "rec": "Veracruz: Tamal de Masa Colada de Sotavento con Cerdo y Salsa de Jitomate", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 22, "rec": "Veracruz: Tamal de Masa Colada de Sotavento con Cerdo y Salsa de Jitomate", "ins": "Pulpa de cerdo", "cant": 450.0, "u": "g", "desc": "Pierna o espaldilla de cerdo cocida suave y picada en cubos finos"}, {"n": 22, "rec": "Veracruz: Tamal de Masa Colada de Sotavento con Cerdo y Salsa de Jitomate", "ins": "Jitomate saladet", "cant": 4.0, "u": "pza", "desc": "Jitomates maduros asados y licuados con 2 dientes de ajo y 1/4 cebolla"}, {"n": 22, "rec": "Veracruz: Tamal de Masa Colada de Sotavento con Cerdo y Salsa de Jitomate", "ins": "Chile jalapeño fresco", "cant": 2.0, "u": "pza", "desc": "Chiles jalapeños o serranos en rajas finas"}, {"n": 22, "rec": "Veracruz: Tamal de Masa Colada de Sotavento con Cerdo y Salsa de Jitomate", "ins": "Hoja de acuyo (hoja santa) fresca", "cant": 2.0, "u": "pza", "desc": "Hojas de acuyo picadas finamente"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Manteca de cerdo criollo lavada", "cant": 255.0, "u": "g", "desc": "Manteca de cerdo o aceite de maíz"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Caldo de pescado o marisco", "cant": 260.0, "u": "ml", "desc": "Caldo concentrado de cabezas de camarón y pescado tibio"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Sal de grano", "cant": 15.0, "u": "g", "desc": "Sal de grano"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Filete de pescado blanco", "cant": 300.0, "u": "g", "desc": "Filete de robalo o mero cortado en 12 trozos"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Camarón pacotilla", "cant": 250.0, "u": "g", "desc": "Camarón pacotilla limpio"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Chile guajillo seco", "cant": 6.0, "u": "pza", "desc": "Chiles guajillos y 2 chiles chipotles secos tostados y remojados"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Ajo", "cant": 5.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 23, "rec": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "ins": "Epazote fresco", "cant": 12.0, "u": "pza", "desc": "Hojas de epazote fresco"}, {"n": 24, "rec": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 24, "rec": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "ins": "Manteca de cerdo criollo lavada", "cant": 260.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 24, "rec": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "ins": "Caldo de frijol", "cant": 250.0, "u": "ml", "desc": "Caldo de cocción de frijol o verduras tibio"}, {"n": 24, "rec": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "ins": "Sal de grano", "cant": 15.0, "u": "g", "desc": "Sal fina"}, {"n": 24, "rec": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 24, "rec": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "ins": "Frijol negro", "cant": 450.0, "u": "g", "desc": "Pasta de frijol negro o frijol gordo refrito muy seco con ajo y manteca"}, {"n": 24, "rec": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "ins": "Semilla de calabaza (pepita)", "cant": 150.0, "u": "g", "desc": "Semillas de calabaza (pepitas) peladas y tostadas al comal"}, {"n": 24, "rec": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "ins": "Cilantro fresco", "cant": 1.0, "u": "pza", "desc": "Manojo abundante de cilantro fresco"}, {"n": 24, "rec": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "ins": "Hoja de acuyo (hoja santa) fresca", "cant": 2.0, "u": "pza", "desc": "Hojas de hoja santa (acuyo) picadas"}, {"n": 24, "rec": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "ins": "Chile serrano fresco", "cant": 3.0, "u": "pza", "desc": "Chiles verdes serranos"}, {"n": 25, "rec": "Hidalgo: Tamal de Xojol Huasteco de Piloncillo, Canela y Masa Martajada", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado martajada gruesa (quebrada)"}, {"n": 25, "rec": "Hidalgo: Tamal de Xojol Huasteco de Piloncillo, Canela y Masa Martajada", "ins": "Manteca de cerdo criollo lavada", "cant": 220.0, "u": "g", "desc": "Manteca de cerdo criollo lavada (o manteca de rancho)"}, {"n": 25, "rec": "Hidalgo: Tamal de Xojol Huasteco de Piloncillo, Canela y Masa Martajada", "ins": "Piloncillo", "cant": 280.0, "u": "g", "desc": "Piloncillo oscuro rallado fino o picado en trozos pequeños"}, {"n": 25, "rec": "Hidalgo: Tamal de Xojol Huasteco de Piloncillo, Canela y Masa Martajada", "ins": "Canela en polvo", "cant": 186.0, "u": "g", "desc": "Canela Ceilán en polvo recién molida"}, {"n": 25, "rec": "Hidalgo: Tamal de Xojol Huasteco de Piloncillo, Canela y Masa Martajada", "ins": "Clavo de olor", "cant": 4.0, "u": "pza", "desc": "Clavos de olor molidos"}, {"n": 25, "rec": "Hidalgo: Tamal de Xojol Huasteco de Piloncillo, Canela y Masa Martajada", "ins": "Sal de grano", "cant": 5.0, "u": "g", "desc": "Sal fina"}, {"n": 25, "rec": "Hidalgo: Tamal de Xojol Huasteco de Piloncillo, Canela y Masa Martajada", "ins": "Polvo para hornear", "cant": 6.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado blanca fresca"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Manteca de cerdo criollo lavada", "cant": 275.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Caldo de pollo", "cant": 180.0, "u": "ml", "desc": "Caldo concentrado de conejo tibio"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Pulque natural", "cant": 140.0, "u": "ml", "desc": "Pulque blanco natural (sin curar)"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Conejo", "cant": 500.0, "u": "g", "desc": "Carne de conejo cocida suave y deshebrada gruesa"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Chile guajillo seco", "cant": 6.0, "u": "pza", "desc": "Chiles guajillos y 2 chiles anchos tostados y desvenados"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Cebolla blanca", "cant": 0.25, "u": "pza", "desc": "Cebolla asada"}, {"n": 26, "rec": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "ins": "Hoja de laurel seca", "cant": 1.0, "u": "pza", "desc": "Rama de mejorana y 2 hojas de laurel"}, {"n": 27, "rec": "Hidalgo: Tamal de Barbacoa de Borrego en Hoja de Maguey y Salsa Borracha", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 27, "rec": "Hidalgo: Tamal de Barbacoa de Borrego en Hoja de Maguey y Salsa Borracha", "ins": "Manteca de cerdo criollo lavada", "cant": 240.0, "u": "g", "desc": "Manteca de cerdo"}, {"n": 27, "rec": "Hidalgo: Tamal de Barbacoa de Borrego en Hoja de Maguey y Salsa Borracha", "ins": "Caldo de pollo", "cant": 280.0, "u": "ml", "desc": "Grasa superficial del consomé de barbacoa"}, {"n": 27, "rec": "Hidalgo: Tamal de Barbacoa de Borrego en Hoja de Maguey y Salsa Borracha", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 27, "rec": "Hidalgo: Tamal de Barbacoa de Borrego en Hoja de Maguey y Salsa Borracha", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 27, "rec": "Hidalgo: Tamal de Barbacoa de Borrego en Hoja de Maguey y Salsa Borracha", "ins": "Barbacoa de borrego", "cant": 550.0, "u": "g", "desc": "Barbacoa de borrego deshebrada tradicional (cocida en horno de tierra)"}, {"n": 27, "rec": "Hidalgo: Tamal de Barbacoa de Borrego en Hoja de Maguey y Salsa Borracha", "ins": "Chile pasilla oaxaqueño", "cant": 5.0, "u": "pza", "desc": "Chiles pasilla tostados y licuados con 2 jitomates asados, 1 diente de ajo y 50 ml de pulque"}, {"n": 27, "rec": "Hidalgo: Tamal de Barbacoa de Borrego en Hoja de Maguey y Salsa Borracha", "ins": "Orégano seco oaxaqueño", "cant": 20.0, "u": "g", "desc": "Pizca de orégano de monte"}, {"n": 28, "rec": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado blanca fresca"}, {"n": 28, "rec": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "ins": "Manteca de cerdo criollo lavada", "cant": 285.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 28, "rec": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "ins": "Caldo de pollo", "cant": 260.0, "u": "ml", "desc": "Caldo de pollo sazonado tibio"}, {"n": 28, "rec": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 28, "rec": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "ins": "Polvo para hornear", "cant": 6.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 28, "rec": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "ins": "Pollo de rancho", "cant": 500.0, "u": "g", "desc": "Pechuga de pollo cocida y deshebrada"}, {"n": 28, "rec": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "ins": "Miltomate (tomate verde)", "cant": 600.0, "u": "g", "desc": "Tomate verde (tomatillo de cáscara) cocido"}, {"n": 28, "rec": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "ins": "Chile jalapeño fresco", "cant": 4.0, "u": "pza", "desc": "Chiles cuaresmeños (jalapeños verdes) o serranos cocidos"}, {"n": 28, "rec": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo y 1/4 cebolla"}, {"n": 28, "rec": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "ins": "Cilantro fresco", "cant": 1.0, "u": "pza", "desc": "Manojo de cilantro fresco"}, {"n": 29, "rec": "Ciudad de México: Tamal Dulce Rosa con Pasitas y Esencia de Vainilla", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 29, "rec": "Ciudad de México: Tamal Dulce Rosa con Pasitas y Esencia de Vainilla", "ins": "Manteca de cerdo criollo lavada", "cant": 240.0, "u": "g", "desc": "Manteca de cerdo lavada en agua helada (o manteca vegetal)"}, {"n": 29, "rec": "Ciudad de México: Tamal Dulce Rosa con Pasitas y Esencia de Vainilla", "ins": "Azúcar de caña", "cant": 180.0, "u": "g", "desc": "Azúcar de caña estándar"}, {"n": 29, "rec": "Ciudad de México: Tamal Dulce Rosa con Pasitas y Esencia de Vainilla", "ins": "Canela en polvo", "cant": 220.0, "u": "g", "desc": "Infusión tibia de canela y anís"}, {"n": 29, "rec": "Ciudad de México: Tamal Dulce Rosa con Pasitas y Esencia de Vainilla", "ins": "Extracto natural de vainilla", "cant": 15.0, "u": "ml", "desc": "Extracto natural de vainilla"}, {"n": 29, "rec": "Ciudad de México: Tamal Dulce Rosa con Pasitas y Esencia de Vainilla", "ins": "Colorante vegetal comestible", "cant": 2.0, "u": "ml", "desc": "Colorante vegetal comestible rosa/rojo tradicional"}, {"n": 29, "rec": "Ciudad de México: Tamal Dulce Rosa con Pasitas y Esencia de Vainilla", "ins": "Pasitas", "cant": 150.0, "u": "g", "desc": "Pasitas negras enteras"}, {"n": 29, "rec": "Ciudad de México: Tamal Dulce Rosa con Pasitas y Esencia de Vainilla", "ins": "Sal de grano", "cant": 4.0, "u": "g", "desc": "Sal fina"}, {"n": 29, "rec": "Ciudad de México: Tamal Dulce Rosa con Pasitas y Esencia de Vainilla", "ins": "Polvo para hornear", "cant": 6.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 30, "rec": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca de molienda fina"}, {"n": 30, "rec": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "ins": "Manteca de cerdo criollo lavada", "cant": 260.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 30, "rec": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "ins": "Caldo de cerdo", "cant": 480.0, "u": "ml", "desc": "Caldo de cerdo tibio"}, {"n": 30, "rec": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 30, "rec": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "ins": "Polvo para hornear", "cant": 4.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 30, "rec": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "ins": "Pulpa de cerdo", "cant": 350.0, "u": "g", "desc": "Pulpa de cerdo cocida cortada en 12 cubos de 25 g"}, {"n": 30, "rec": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "ins": "Chile pasilla oaxaqueño", "cant": 6.0, "u": "pza", "desc": "Chiles pasilla mexicanos tostados y desvenados"}, {"n": 30, "rec": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "ins": "Miltomate (tomate verde)", "cant": 100.0, "u": "g", "desc": "Tomates verdes (miltomates) asados"}, {"n": 30, "rec": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 30, "rec": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "ins": "Epazote fresco", "cant": 1.0, "u": "pza", "desc": "Rama de epazote"}, {"n": 31, "rec": "Puebla: Tamal de Mole Poblano Artesanal con Pollo y Ajonjolí", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado blanca fresca"}, {"n": 31, "rec": "Puebla: Tamal de Mole Poblano Artesanal con Pollo y Ajonjolí", "ins": "Manteca de cerdo criollo lavada", "cant": 270.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 31, "rec": "Puebla: Tamal de Mole Poblano Artesanal con Pollo y Ajonjolí", "ins": "Caldo de pollo", "cant": 510.0, "u": "ml", "desc": "Caldo de pollo sazonado tibio"}, {"n": 31, "rec": "Puebla: Tamal de Mole Poblano Artesanal con Pollo y Ajonjolí", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 31, "rec": "Puebla: Tamal de Mole Poblano Artesanal con Pollo y Ajonjolí", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 31, "rec": "Puebla: Tamal de Mole Poblano Artesanal con Pollo y Ajonjolí", "ins": "Pollo de rancho", "cant": 500.0, "u": "g", "desc": "Pechuga de pollo cocida y deshebrada en hebras gruesas"}, {"n": 31, "rec": "Puebla: Tamal de Mole Poblano Artesanal con Pollo y Ajonjolí", "ins": "Chile poblano fresco", "cant": 3.89, "u": "pza", "desc": "Pasta de Mole Poblano tradicional artesanal"}, {"n": 31, "rec": "Puebla: Tamal de Mole Poblano Artesanal con Pollo y Ajonjolí", "ins": "Chocolate de metate oaxaqueño", "cant": 20.0, "u": "g", "desc": "Chocolate de metate con canela"}, {"n": 31, "rec": "Puebla: Tamal de Mole Poblano Artesanal con Pollo y Ajonjolí", "ins": "Ajonjolí", "cant": 20.0, "u": "g", "desc": "Ajonjolí blanco tostado en comal"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Manteca de cerdo criollo lavada", "cant": 265.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Caldo de cerdo", "cant": 250.0, "u": "ml", "desc": "Caldo de cerdo tibio"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Sal de grano", "cant": 15.0, "u": "g", "desc": "Sal fina"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Pulpa de cerdo", "cant": 450.0, "u": "g", "desc": "Carne de cerdo (espalda o falda) cocida suave y picada"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Semilla de calabaza (pepita)", "cant": 200.0, "u": "g", "desc": "Semillas de calabaza (pepitas verdes) tostadas ligeramente"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Miltomate (tomate verde)", "cant": 350.0, "u": "g", "desc": "Tomates verdes (miltomates) asados"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Chile serrano fresco", "cant": 3.0, "u": "pza", "desc": "Chiles serranos o poblanos verdes asados"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Epazote fresco", "cant": 1.0, "u": "pza", "desc": "Manojo de epazote y hojas de lechuga orejona (para color y frescura)"}, {"n": 32, "rec": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "ins": "Chilacayote tierno", "cant": 250.0, "u": "g", "desc": "Chilacayote tierno cocido al dente y cortado en cubitos"}, {"n": 33, "rec": "Tlaxcala: Tamal Tatemado de Frijol con Hojas de Aguacate Criollo", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 33, "rec": "Tlaxcala: Tamal Tatemado de Frijol con Hojas de Aguacate Criollo", "ins": "Manteca de cerdo criollo lavada", "cant": 280.0, "u": "g", "desc": "Manteca de cerdo criollo (o manteca de rancho)"}, {"n": 33, "rec": "Tlaxcala: Tamal Tatemado de Frijol con Hojas de Aguacate Criollo", "ins": "Caldo de frijol", "cant": 250.0, "u": "ml", "desc": "Caldo de frijol colado o agua tibia"}, {"n": 33, "rec": "Tlaxcala: Tamal Tatemado de Frijol con Hojas de Aguacate Criollo", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal de grano"}, {"n": 33, "rec": "Tlaxcala: Tamal Tatemado de Frijol con Hojas de Aguacate Criollo", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 33, "rec": "Tlaxcala: Tamal Tatemado de Frijol con Hojas de Aguacate Criollo", "ins": "Frijol negro", "cant": 500.0, "u": "g", "desc": "Frijol negro cocido y escurrido"}, {"n": 33, "rec": "Tlaxcala: Tamal Tatemado de Frijol con Hojas de Aguacate Criollo", "ins": "Hoja de aguacate criollo", "cant": 6.0, "u": "pza", "desc": "Hojas de aguacate criollo seco (tostadas al comal y pulverizadas)"}, {"n": 33, "rec": "Tlaxcala: Tamal Tatemado de Frijol con Hojas de Aguacate Criollo", "ins": "Chile serrano fresco", "cant": 3.0, "u": "pza", "desc": "Chiles serranos secos o chiles chipotles tostados"}, {"n": 33, "rec": "Tlaxcala: Tamal Tatemado de Frijol con Hojas de Aguacate Criollo", "ins": "Ajo", "cant": 1.0, "u": "pza", "desc": "Diente de ajo asado"}, {"n": 34, "rec": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 34, "rec": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "ins": "Manteca de cerdo criollo lavada", "cant": 250.0, "u": "g", "desc": "Manteca de cerdo o mantequilla de rancho"}, {"n": 34, "rec": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "ins": "Caldo de pollo", "cant": 250.0, "u": "ml", "desc": "Caldo de verduras tibio"}, {"n": 34, "rec": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "ins": "Epazote fresco", "cant": 2.0, "u": "pza", "desc": "Hojas de epazote fresco finamente picadas"}, {"n": 34, "rec": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "ins": "Sal de grano", "cant": 17.0, "u": "g", "desc": "Sal fina"}, {"n": 34, "rec": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 34, "rec": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "ins": "Nopal tierno", "cant": 350.0, "u": "g", "desc": "Nopales tiernos cocidos al dente en tiras (bien escurridos)"}, {"n": 34, "rec": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "ins": "Chile serrano fresco", "cant": 4.0, "u": "pza", "desc": "Chiles verdes serranos picados finamente"}, {"n": 34, "rec": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "ins": "Cebolla blanca", "cant": 0.5, "u": "pza", "desc": "Cebolla blanca picada"}, {"n": 34, "rec": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "ins": "Queso fresco de aro oaxaqueño", "cant": 300.0, "u": "g", "desc": "Queso fresco de aro o panela en 14 tiras"}, {"n": 35, "rec": "Morelos: Tamal de Frijol con Manteca y Flor de Tzompantle (Colorín)", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 35, "rec": "Morelos: Tamal de Frijol con Manteca y Flor de Tzompantle (Colorín)", "ins": "Manteca de cerdo criollo lavada", "cant": 275.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 35, "rec": "Morelos: Tamal de Frijol con Manteca y Flor de Tzompantle (Colorín)", "ins": "Caldo de frijol", "cant": 250.0, "u": "ml", "desc": "Caldo de frijol o agua tibia"}, {"n": 35, "rec": "Morelos: Tamal de Frijol con Manteca y Flor de Tzompantle (Colorín)", "ins": "Sal de grano", "cant": 316.0, "u": "g", "desc": "Sal fina"}, {"n": 35, "rec": "Morelos: Tamal de Frijol con Manteca y Flor de Tzompantle (Colorín)", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 35, "rec": "Morelos: Tamal de Frijol con Manteca y Flor de Tzompantle (Colorín)", "ins": "Frijol negro", "cant": 250.0, "u": "g", "desc": "Frijoles negros o bayos quebrados/refritos espesos"}, {"n": 35, "rec": "Morelos: Tamal de Frijol con Manteca y Flor de Tzompantle (Colorín)", "ins": "Chile guajillo seco", "cant": 4.0, "u": "pza", "desc": "Chiles guajillos y 2 chiles morita tostados y licuados con 2 jitomates y 1 diente de ajo"}, {"n": 36, "rec": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado blanca fresca"}, {"n": 36, "rec": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "ins": "Manteca de cerdo criollo lavada", "cant": 280.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 36, "rec": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "ins": "Caldo de pollo", "cant": 260.0, "u": "ml", "desc": "Caldo de cocción de los ayocotes (tibio)"}, {"n": 36, "rec": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 36, "rec": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 36, "rec": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "ins": "Frijol negro", "cant": 450.0, "u": "g", "desc": "Frijoles ayocotes morados o negros cocidos al dente con epazote (escurridos)"}, {"n": 36, "rec": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "ins": "Chile chipotle seco", "cant": 5.0, "u": "pza", "desc": "Chiles chipotles secos (mora) tostados y desvenados"}, {"n": 36, "rec": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 36, "rec": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo asados y 1/4 cebolla"}, {"n": 36, "rec": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "ins": "Hoja de aguacate criollo", "cant": 2.0, "u": "pza", "desc": "Hojas de aguacate criollo tostadas"}, {"n": 37, "rec": "Guerrero: Tamal Costeño de Tichindas con Chile Costeño en Hoja de Plátano", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 37, "rec": "Guerrero: Tamal Costeño de Tichindas con Chile Costeño en Hoja de Plátano", "ins": "Manteca de cerdo criollo lavada", "cant": 270.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 37, "rec": "Guerrero: Tamal Costeño de Tichindas con Chile Costeño en Hoja de Plátano", "ins": "Tichinda (almeja de laguna)", "cant": 1050.0, "u": "g", "desc": "Jugo filtrado de tichindas tibio"}, {"n": 37, "rec": "Guerrero: Tamal Costeño de Tichindas con Chile Costeño en Hoja de Plátano", "ins": "Sal de grano", "cant": 15.0, "u": "g", "desc": "Sal fina"}, {"n": 37, "rec": "Guerrero: Tamal Costeño de Tichindas con Chile Costeño en Hoja de Plátano", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 37, "rec": "Guerrero: Tamal Costeño de Tichindas con Chile Costeño en Hoja de Plátano", "ins": "Chile costeño rojo", "cant": 6.0, "u": "pza", "desc": "Chiles costeños rojos tostados"}, {"n": 37, "rec": "Guerrero: Tamal Costeño de Tichindas con Chile Costeño en Hoja de Plátano", "ins": "Jitomate saladet", "cant": 4.0, "u": "pza", "desc": "Jitomates asados al comal"}, {"n": 37, "rec": "Guerrero: Tamal Costeño de Tichindas con Chile Costeño en Hoja de Plátano", "ins": "Ajo", "cant": 3.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 37, "rec": "Guerrero: Tamal Costeño de Tichindas con Chile Costeño en Hoja de Plátano", "ins": "Epazote fresco", "cant": 1.0, "u": "pza", "desc": "Manojo de epazote fresco picado"}, {"n": 38, "rec": "Guerrero: Tamal Nejo de Maíz con Ceniza de Leña y Mole Verde de Pipián", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Maíz criollo nixtamalizado con ceniza de leña cernida (sin cal, molienda fina y tersa)"}, {"n": 38, "rec": "Guerrero: Tamal Nejo de Maíz con Ceniza de Leña y Mole Verde de Pipián", "ins": "Manteca de cerdo criollo lavada", "cant": 220.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 38, "rec": "Guerrero: Tamal Nejo de Maíz con Ceniza de Leña y Mole Verde de Pipián", "ins": "Agua", "cant": 240.0, "u": "ml", "desc": "Agua tibia"}, {"n": 38, "rec": "Guerrero: Tamal Nejo de Maíz con Ceniza de Leña y Mole Verde de Pipián", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 38, "rec": "Guerrero: Tamal Nejo de Maíz con Ceniza de Leña y Mole Verde de Pipián", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 38, "rec": "Guerrero: Tamal Nejo de Maíz con Ceniza de Leña y Mole Verde de Pipián", "ins": "Epazote fresco", "cant": 26.67, "u": "pza", "desc": "Semillas de calabaza tostadas y molidas con epazote, chile verde y miltomate frito en manteca"}, {"n": 38, "rec": "Guerrero: Tamal Nejo de Maíz con Ceniza de Leña y Mole Verde de Pipián", "ins": "Queso fresco de aro oaxaqueño", "cant": 200.0, "u": "g", "desc": "Queso fresco de aro desmoronado"}, {"n": 39, "rec": "Oaxaca: Tamal de Mole Negro Tradicional con Pollo en Hoja de Plátano", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 39, "rec": "Oaxaca: Tamal de Mole Negro Tradicional con Pollo en Hoja de Plátano", "ins": "Manteca de cerdo criollo lavada", "cant": 270.0, "u": "g", "desc": "Manteca de cerdo criollo lavada"}, {"n": 39, "rec": "Oaxaca: Tamal de Mole Negro Tradicional con Pollo en Hoja de Plátano", "ins": "Caldo de pollo", "cant": 470.0, "u": "ml", "desc": "Caldo de pollo de rancho concentrado tibio"}, {"n": 39, "rec": "Oaxaca: Tamal de Mole Negro Tradicional con Pollo en Hoja de Plátano", "ins": "Sal de grano", "cant": 15.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 39, "rec": "Oaxaca: Tamal de Mole Negro Tradicional con Pollo en Hoja de Plátano", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 39, "rec": "Oaxaca: Tamal de Mole Negro Tradicional con Pollo en Hoja de Plátano", "ins": "Pollo de rancho", "cant": 450.0, "u": "g", "desc": "Pechuga de pollo de rancho cocida y deshebrada gruesa"}, {"n": 39, "rec": "Oaxaca: Tamal de Mole Negro Tradicional con Pollo en Hoja de Plátano", "ins": "Pasta de mole negro oaxaqueño", "cant": 350.0, "u": "g", "desc": "Pasta de Mole Negro Oaxaqueño auténtico (con chilhuacle negro y chocolate de metate)"}, {"n": 40, "rec": "Oaxaca: Tamal de Chepil con Queso Fresco de Aro y Salsa Roja Martajada", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 40, "rec": "Oaxaca: Tamal de Chepil con Queso Fresco de Aro y Salsa Roja Martajada", "ins": "Manteca de cerdo criollo lavada", "cant": 265.0, "u": "g", "desc": "Manteca de cerdo criollo (o mantequilla de rancho)"}, {"n": 40, "rec": "Oaxaca: Tamal de Chepil con Queso Fresco de Aro y Salsa Roja Martajada", "ins": "Caldo de pollo", "cant": 250.0, "u": "ml", "desc": "Caldo de verduras o agua tibia"}, {"n": 40, "rec": "Oaxaca: Tamal de Chepil con Queso Fresco de Aro y Salsa Roja Martajada", "ins": "Hoja de chepil (chipilín) fresca", "cant": 120.0, "u": "g", "desc": "Hojas frescas de chepil (chipilín) lavadas, despalilladas y secas"}, {"n": 40, "rec": "Oaxaca: Tamal de Chepil con Queso Fresco de Aro y Salsa Roja Martajada", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 40, "rec": "Oaxaca: Tamal de Chepil con Queso Fresco de Aro y Salsa Roja Martajada", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 40, "rec": "Oaxaca: Tamal de Chepil con Queso Fresco de Aro y Salsa Roja Martajada", "ins": "Queso fresco de aro oaxaqueño", "cant": 300.0, "u": "g", "desc": "Queso fresco de aro oaxaqueño cortado en 12 bastones de 25 g"}, {"n": 40, "rec": "Oaxaca: Tamal de Chepil con Queso Fresco de Aro y Salsa Roja Martajada", "ins": "Jitomate saladet", "cant": 4.0, "u": "pza", "desc": "Jitomates asados al comal martajados con 3 chiles serranos y 1 diente de ajo"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Manteca de cerdo criollo lavada", "cant": 270.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Caldo de cerdo", "cant": 260.0, "u": "ml", "desc": "Caldo concentrado de cerdo tibio"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Pulpa de cerdo", "cant": 450.0, "u": "g", "desc": "Pierna o lomo de cerdo cocido y cortado en trozos medianos"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Chile ancho seco", "cant": 4.0, "u": "pza", "desc": "Chiles anchos tostados y desvenados"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo y 1/4 cebolla asados"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Chocolate de metate oaxaqueño", "cant": 20.0, "u": "g", "desc": "Chocolate de metate con canela"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Clavo de olor", "cant": 2.0, "u": "pza", "desc": "Clavos de olor, 2 pimientas gordas y 1 raja de canela"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Pasitas", "cant": 275.0, "u": "g", "desc": "Ciruelas pasas enteras sin hueso"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Plátano macho maduro", "cant": 1.0, "u": "pza", "desc": "Plátano macho maduro cortado en 12 rebanadas y frito en manteca"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Huevo", "cant": 3.0, "u": "pza", "desc": "Huevos cocidos duros (cortados en cuartos)"}, {"n": 41, "rec": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "ins": "Pimiento morrón rojo", "cant": 1.0, "u": "pza", "desc": "Pimiento morrón rojo asado y cortado en 12 tiras"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado de textura fina"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Manteca de cerdo criollo lavada", "cant": 285.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Caldo de cerdo", "cant": 220.0, "u": "ml", "desc": "Caldo de costilla de cerdo tibio"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Sal de grano", "cant": 18.0, "u": "g", "desc": "Sal fina"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Polvo para hornear", "cant": 4.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Costilla de cerdo", "cant": 500.0, "u": "g", "desc": "Costilla de cerdo cargada (cocida suave con sal y ajo, cortada en 12 trozos con huesito)"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Chile piquín seco (Simojovel / amashito)", "cant": 160.0, "u": "g", "desc": "Chiles Simojovel secos (chile piquín seco chiapaneco) tostados al comal"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Chile ancho seco", "cant": 4.0, "u": "pza", "desc": "Chiles anchos tostados"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Jitomate saladet", "cant": 4.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Ajo", "cant": 3.0, "u": "pza", "desc": "Dientes de ajo asados"}, {"n": 42, "rec": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "ins": "Tomillo fresco", "cant": 1.0, "u": "pza", "desc": "Pizca de tomillo y orégano seco"}, {"n": 43, "rec": "Chiapas: Tamal de Chipilín con Camarón Seco y Queso Crema de Cuadro", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 43, "rec": "Chiapas: Tamal de Chipilín con Camarón Seco y Queso Crema de Cuadro", "ins": "Manteca de cerdo criollo lavada", "cant": 240.0, "u": "g", "desc": "Manteca de cerdo (o manteca vegetal)"}, {"n": 43, "rec": "Chiapas: Tamal de Chipilín con Camarón Seco y Queso Crema de Cuadro", "ins": "Caldo de pescado o marisco", "cant": 250.0, "u": "ml", "desc": "Caldo colado de camarón tibio"}, {"n": 43, "rec": "Chiapas: Tamal de Chipilín con Camarón Seco y Queso Crema de Cuadro", "ins": "Hoja de chepil (chipilín) fresca", "cant": 120.0, "u": "g", "desc": "Hojas frescas de chipilín (limpias y secas)"}, {"n": 43, "rec": "Chiapas: Tamal de Chipilín con Camarón Seco y Queso Crema de Cuadro", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 43, "rec": "Chiapas: Tamal de Chipilín con Camarón Seco y Queso Crema de Cuadro", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 43, "rec": "Chiapas: Tamal de Chipilín con Camarón Seco y Queso Crema de Cuadro", "ins": "Camarón pacotilla", "cant": 300.0, "u": "g", "desc": "Camarón seco chiapaneco (remojado en agua tibia 15 min, escurrido y salteado en 15 ml de manteca)"}, {"n": 43, "rec": "Chiapas: Tamal de Chipilín con Camarón Seco y Queso Crema de Cuadro", "ins": "Crema de rancho", "cant": 300.0, "u": "ml", "desc": "Queso crema de cuadro chiapaneco artesanal cortado en 12 bastones de 25 g"}, {"n": 43, "rec": "Chiapas: Tamal de Chipilín con Camarón Seco y Queso Crema de Cuadro", "ins": "Jitomate saladet", "cant": 3.0, "u": "pza", "desc": "Tomates rojos (jitomates) asados y martajados con 1 chile verde para salsear"}, {"n": 44, "rec": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 800.0, "u": "g", "desc": "Masa de maíz nixtamalizado martajada (molienda quebrada/media)"}, {"n": 44, "rec": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "ins": "Manteca de cerdo criollo lavada", "cant": 250.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 44, "rec": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "ins": "Falda de res", "cant": 250.0, "u": "g", "desc": "Carne de res (falda) cocida y deshebrada fina"}, {"n": 44, "rec": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "ins": "Pulpa de cerdo", "cant": 250.0, "u": "g", "desc": "Carne de cerdo (pierna) cocida y deshebrada fina"}, {"n": 44, "rec": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "ins": "Caldo de cerdo", "cant": 250.0, "u": "ml", "desc": "Caldo mixto de res y cerdo tibio"}, {"n": 44, "rec": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "ins": "Cilantro fresco", "cant": 1.0, "u": "pza", "desc": "Manojo de cilantro cimarrón (cilantro de hoja ancha) picado fino"}, {"n": 44, "rec": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "ins": "Epazote fresco", "cant": 1.0, "u": "pza", "desc": "Manojo de epazote y cebollín picados"}, {"n": 44, "rec": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "ins": "Jitomate saladet", "cant": 4.0, "u": "pza", "desc": "Jitomates y 1/4 cebolla licuados y fritos en 20 ml de manteca (recaudo tabasqueño)"}, {"n": 44, "rec": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "ins": "Sal de grano", "cant": 18.0, "u": "g", "desc": "Sal fina"}, {"n": 44, "rec": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 45, "rec": "Tabasco: Tamal de Masa Colada de Pejelagarto al Chileamash en Hoja de To", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 600.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 45, "rec": "Tabasco: Tamal de Masa Colada de Pejelagarto al Chileamash en Hoja de To", "ins": "Caldo de pescado o marisco", "cant": 1200.0, "u": "ml", "desc": "Caldo colado ligero de pescado tibio"}, {"n": 45, "rec": "Tabasco: Tamal de Masa Colada de Pejelagarto al Chileamash en Hoja de To", "ins": "Manteca de cerdo criollo lavada", "cant": 245.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 45, "rec": "Tabasco: Tamal de Masa Colada de Pejelagarto al Chileamash en Hoja de To", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 45, "rec": "Tabasco: Tamal de Masa Colada de Pejelagarto al Chileamash en Hoja de To", "ins": "Piña miel", "cant": 0.38, "u": "pza", "desc": "Carne limpia de pejelagarto asado a la leña y deshebrado (sin espinas ni piel dura)"}, {"n": 45, "rec": "Tabasco: Tamal de Masa Colada de Pejelagarto al Chileamash en Hoja de To", "ins": "Jitomate saladet", "cant": 4.0, "u": "pza", "desc": "Jitomates maduros asados y picados"}, {"n": 45, "rec": "Tabasco: Tamal de Masa Colada de Pejelagarto al Chileamash en Hoja de To", "ins": "Chile piquín seco (Simojovel / amashito)", "cant": 120.0, "u": "g", "desc": "Chiles amashito (chile amash / piquín verde tabasqueño) machacados"}, {"n": 45, "rec": "Tabasco: Tamal de Masa Colada de Pejelagarto al Chileamash en Hoja de To", "ins": "Cebolla blanca", "cant": 0.5, "u": "pza", "desc": "Cebolla blanca y 2 dientes de ajo picados"}, {"n": 45, "rec": "Tabasco: Tamal de Masa Colada de Pejelagarto al Chileamash en Hoja de To", "ins": "Epazote fresco", "cant": 1.0, "u": "pza", "desc": "Rama de epazote y cilantro de monte picados"}, {"n": 46, "rec": "Tabasco: Tamal de Chipilín con Queso de Hebra Tabasqueño en Hoja de Plátano", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 46, "rec": "Tabasco: Tamal de Chipilín con Queso de Hebra Tabasqueño en Hoja de Plátano", "ins": "Manteca de cerdo criollo lavada", "cant": 260.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 46, "rec": "Tabasco: Tamal de Chipilín con Queso de Hebra Tabasqueño en Hoja de Plátano", "ins": "Caldo de cerdo", "cant": 250.0, "u": "ml", "desc": "Caldo de cerdo o agua tibia"}, {"n": 46, "rec": "Tabasco: Tamal de Chipilín con Queso de Hebra Tabasqueño en Hoja de Plátano", "ins": "Hoja de chepil (chipilín) fresca", "cant": 120.0, "u": "g", "desc": "Hojas frescas de chipilín (lavadas y secas)"}, {"n": 46, "rec": "Tabasco: Tamal de Chipilín con Queso de Hebra Tabasqueño en Hoja de Plátano", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 46, "rec": "Tabasco: Tamal de Chipilín con Queso de Hebra Tabasqueño en Hoja de Plátano", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 46, "rec": "Tabasco: Tamal de Chipilín con Queso de Hebra Tabasqueño en Hoja de Plátano", "ins": "Quesillo oaxaqueño artesanal", "cant": 360.0, "u": "g", "desc": "Queso de hebra artesanal tabasqueño (tipo quesillo local) en 12 bastones de 30 g"}, {"n": 46, "rec": "Tabasco: Tamal de Chipilín con Queso de Hebra Tabasqueño en Hoja de Plátano", "ins": "Jitomate saladet", "cant": 4.0, "u": "pza", "desc": "Jitomates maduros asados y licuados con 1/4 cebolla, 1 diente de ajo y 1 chile amashito"}, {"n": 47, "rec": "Campeche: Tamal Colado Campechano de Pollo en Achiote con Pasas y Almendras", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 640.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 47, "rec": "Campeche: Tamal Colado Campechano de Pollo en Achiote con Pasas y Almendras", "ins": "Caldo de pollo", "cant": 1500.0, "u": "ml", "desc": "Caldo concentrado de pollo colado y desgrasado"}, {"n": 47, "rec": "Campeche: Tamal Colado Campechano de Pollo en Achiote con Pasas y Almendras", "ins": "Manteca de cerdo criollo lavada", "cant": 240.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 47, "rec": "Campeche: Tamal Colado Campechano de Pollo en Achiote con Pasas y Almendras", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 47, "rec": "Campeche: Tamal Colado Campechano de Pollo en Achiote con Pasas y Almendras", "ins": "Pollo de rancho", "cant": 450.0, "u": "g", "desc": "Pechuga o muslo de pollo cocido en caldo aromático con recado rojo, deshebrado grueso"}, {"n": 47, "rec": "Campeche: Tamal Colado Campechano de Pollo en Achiote con Pasas y Almendras", "ins": "Pasta de achiote artesanal", "cant": 40.0, "u": "g", "desc": "Pasta de recado rojo artesanal (achiote)"}, {"n": 47, "rec": "Campeche: Tamal Colado Campechano de Pollo en Achiote con Pasas y Almendras", "ins": "Aceituna verde sin hueso", "cant": 240.0, "u": "g", "desc": "Aceitunas verdes sin hueso"}, {"n": 47, "rec": "Campeche: Tamal Colado Campechano de Pollo en Achiote con Pasas y Almendras", "ins": "Pasitas", "cant": 720.0, "u": "g", "desc": "Pasitas negras"}, {"n": 47, "rec": "Campeche: Tamal Colado Campechano de Pollo en Achiote con Pasas y Almendras", "ins": "Almendra", "cant": 480.0, "u": "g", "desc": "Almendras tostadas"}, {"n": 48, "rec": "Campeche: Tamal de Cazón Guisado con Epazote y Chiltomate en Hoja de Plátano", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 48, "rec": "Campeche: Tamal de Cazón Guisado con Epazote y Chiltomate en Hoja de Plátano", "ins": "Manteca de cerdo criollo lavada", "cant": 265.0, "u": "g", "desc": "Manteca de cerdo criollo"}, {"n": 48, "rec": "Campeche: Tamal de Cazón Guisado con Epazote y Chiltomate en Hoja de Plátano", "ins": "Caldo de pescado o marisco", "cant": 260.0, "u": "ml", "desc": "Caldo de pescado tibio"}, {"n": 48, "rec": "Campeche: Tamal de Cazón Guisado con Epazote y Chiltomate en Hoja de Plátano", "ins": "Sal de grano", "cant": 515.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 48, "rec": "Campeche: Tamal de Cazón Guisado con Epazote y Chiltomate en Hoja de Plátano", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 48, "rec": "Campeche: Tamal de Cazón Guisado con Epazote y Chiltomate en Hoja de Plátano", "ins": "Jitomate saladet", "cant": 4.0, "u": "pza", "desc": "Jitomates maduros asados y picados"}, {"n": 48, "rec": "Campeche: Tamal de Cazón Guisado con Epazote y Chiltomate en Hoja de Plátano", "ins": "Cebolla blanca", "cant": 0.5, "u": "pza", "desc": "Cebolla morada y 2 dientes de ajo picados"}, {"n": 48, "rec": "Campeche: Tamal de Cazón Guisado con Epazote y Chiltomate en Hoja de Plátano", "ins": "Epazote fresco", "cant": 1.0, "u": "pza", "desc": "Manojo abundante de epazote fresco picado"}, {"n": 48, "rec": "Campeche: Tamal de Cazón Guisado con Epazote y Chiltomate en Hoja de Plátano", "ins": "Chile habanero fresco", "cant": 1.0, "u": "pza", "desc": "Chile habanero entero tatemado (para aromatizar el sofrito sin reventar)"}, {"n": 49, "rec": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1060.0, "u": "g", "desc": "Masa de maíz nixtamalizado de molienda quebrada/media"}, {"n": 49, "rec": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "ins": "Manteca de cerdo criollo lavada", "cant": 280.0, "u": "g", "desc": "Manteca de cerdo criollo lavada (preferiblemente coloreada con achiote)"}, {"n": 49, "rec": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "ins": "Frijol negro", "cant": 180.0, "u": "g", "desc": "Frijoles xpelón tiernos (frijol negro nuevo yucateco, lavados y crudos)"}, {"n": 49, "rec": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "ins": "Pasta de achiote artesanal", "cant": 40.0, "u": "g", "desc": "Pasta de recado rojo artesanal (achiote)"}, {"n": 49, "rec": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "ins": "Sal de grano", "cant": 18.0, "u": "g", "desc": "Sal de grano"}, {"n": 49, "rec": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "ins": "Caldo de pollo", "cant": 750.0, "u": "ml", "desc": "Caldo del guisado tibio"}, {"n": 49, "rec": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "ins": "Pollo de rancho", "cant": 400.0, "u": "g", "desc": "Pollo en trozos pequeños cocido con recado de pib (achiote, orégano yucateco, ajo y naranja agria)"}, {"n": 49, "rec": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "ins": "Pulpa de cerdo", "cant": 400.0, "u": "g", "desc": "Espaldilla de cerdo en trozos pequeños cocida con el mismo recado"}, {"n": 49, "rec": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "ins": "Epazote fresco", "cant": 4.0, "u": "pza", "desc": "Hojas de epazote fresco"}, {"n": 49, "rec": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "ins": "Jitomate saladet", "cant": 2.0, "u": "pza", "desc": "Tomates rebanados (para colocar sobre la carne)"}, {"n": 50, "rec": "Yucatán: Tamal de Brazo de Reina (Dzotobilchay) con Chaya, Pepita y Huevo Duro", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado blanca fresca"}, {"n": 50, "rec": "Yucatán: Tamal de Brazo de Reina (Dzotobilchay) con Chaya, Pepita y Huevo Duro", "ins": "Manteca de cerdo criollo lavada", "cant": 240.0, "u": "g", "desc": "Manteca de cerdo criollo (o manteca vegetal)"}, {"n": 50, "rec": "Yucatán: Tamal de Brazo de Reina (Dzotobilchay) con Chaya, Pepita y Huevo Duro", "ins": "Caldo de pollo", "cant": 240.0, "u": "ml", "desc": "Caldo de verduras o agua tibia"}, {"n": 50, "rec": "Yucatán: Tamal de Brazo de Reina (Dzotobilchay) con Chaya, Pepita y Huevo Duro", "ins": "Hoja de chaya fresca", "cant": 150.0, "u": "g", "desc": "Hojas de chaya fresca limpias, despalilladas, hervidas 5 min y finamente picadas"}, {"n": 50, "rec": "Yucatán: Tamal de Brazo de Reina (Dzotobilchay) con Chaya, Pepita y Huevo Duro", "ins": "Sal de grano", "cant": 16.0, "u": "g", "desc": "Sal fina"}, {"n": 50, "rec": "Yucatán: Tamal de Brazo de Reina (Dzotobilchay) con Chaya, Pepita y Huevo Duro", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 50, "rec": "Yucatán: Tamal de Brazo de Reina (Dzotobilchay) con Chaya, Pepita y Huevo Duro", "ins": "Semilla de calabaza (pepita)", "cant": 250.0, "u": "g", "desc": "Semillas de calabaza gruesas (pepita menuda yucateca) tostadas y molidas en polvo fino"}, {"n": 50, "rec": "Yucatán: Tamal de Brazo de Reina (Dzotobilchay) con Chaya, Pepita y Huevo Duro", "ins": "Huevo", "cant": 6.0, "u": "pza", "desc": "Huevos cocidos duros (cortados a lo largo)"}, {"n": 50, "rec": "Yucatán: Tamal de Brazo de Reina (Dzotobilchay) con Chaya, Pepita y Huevo Duro", "ins": "Jitomate saladet", "cant": 3.33, "u": "pza", "desc": "Salsa chiltomate (jitomates asados cocidos con cebolla morada, epazote y chile habanero entero)"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Masa de maíz nixtamalizado fresca de molino", "cant": 1000.0, "u": "g", "desc": "Masa de maíz nixtamalizado fresca"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Manteca de cerdo criollo lavada", "cant": 230.0, "u": "g", "desc": "Manteca de cerdo o mantequilla de rancho"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Caldo de pescado o marisco", "cant": 250.0, "u": "ml", "desc": "Caldo concentrado de cabezas de camarón tibio"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Caldo de pollo", "cant": 30.0, "u": "ml", "desc": "Pasta de recado rojo artesanal (disuelta en 30 ml de caldo para teñir la masa)"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Sal de grano", "cant": 15.0, "u": "g", "desc": "Sal de grano molida"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Polvo para hornear", "cant": 5.0, "u": "g", "desc": "Polvo para hornear"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Camarón pacotilla", "cant": 300.0, "u": "g", "desc": "Camarón pacotilla limpio troceado"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Pulpo", "cant": 200.0, "u": "g", "desc": "Pulpa de pulpo o calamar cocido troceado"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Pasta de achiote artesanal", "cant": 40.0, "u": "g", "desc": "Pasta de recado rojo (achiote) disuelta en 40 ml de jugo de naranja agria"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Chile habanero fresco", "cant": 3.0, "u": "pza", "desc": "Chiles habaneros tatemados al comal y finamente picados"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Cebolla blanca", "cant": 0.5, "u": "pza", "desc": "Cebolla morada picada"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Ajo", "cant": 2.0, "u": "pza", "desc": "Dientes de ajo picados"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Orégano seco oaxaqueño", "cant": 20.0, "u": "g", "desc": "Rama de orégano fresco de la península"}, {"n": 51, "rec": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "ins": "Aceite de maíz", "cant": 25.0, "u": "ml", "desc": "Aceite de coco neutro o manteca"}], "recetas": [{"n": 1, "nom": "Baja California: Tamal Estilo Tijuana de Carne de Res Adobada en Hoja de Maíz", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Baja California"}, {"n": 2, "nom": "Baja California Sur: Tamal Sudcaliforniano de Res, Cerdo, Aceitunas y Pasas", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Baja California Sur"}, {"n": 3, "nom": "Sonora: Tamal de Chile Colorado con Puerco Deshebrado", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 15, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Sonora"}, {"n": 4, "nom": "Chihuahua: Tamal Norteño de Chile Pasado con Queso Menonita y Res", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Chihuahua"}, {"n": 5, "nom": "Coahuila: Tamal de Costilla de Puerco en Salsa Verde de Tomatillo y Serrano", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 15, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Coahuila"}, {"n": 6, "nom": "Nuevo León: Tamal Norteño \"De Dedo\" de Picadillo Ranchero con Chile Ancho", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 20, "sello": "rojo", "clas": "Tradición Ancestral / Regional (Bocado Regio)", "estado": "Nuevo León"}, {"n": 7, "nom": "Tamaulipas: Tamal de Puerco en Salsa de Chile Cascabel y Comino", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 15, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Tamaulipas"}, {"n": 8, "nom": "Sinaloa: Tamal Barbón de Escuinapa (Camarones Enteros con Barbas)", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo", "estado": "Sinaloa"}, {"n": 9, "nom": "Sinaloa / Sonora: Tamal Tonto de Masa con Chile Colorado (Para Caldos)", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 16, "sello": "rojo", "clas": "Tradición Ancestral / Regional (Acompañamiento)", "estado": "Sinaloa / Sonora"}, {"n": 10, "nom": "Michoacán: Corundas Michoacanas Triangulares en Hoja de Caña", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 16, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía", "estado": "Michoacán"}, {"n": 11, "nom": "Michoacán: Uchepos Tradicionales de Elote Tierno con Mantequilla", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "verde", "clas": "Milpa, Sierra y Maíz Tierno", "estado": "Michoacán"}, {"n": 12, "nom": "Jalisco: Tamal Tapatío de Lomo de Cerdo en Mole Dulce de Chile Ancho", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Jalisco"}, {"n": 13, "nom": "Jalisco: Tamal de Costilla de Cerdo al Chile Jalapeño Rojo (Los Altos)", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Regional (Región de Los Altos)", "estado": "Jalisco"}, {"n": 14, "nom": "Guanajuato: Tamal Muerto de Maíz Azul con Piloncillo, Canela y Ceniza de Olote", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 15, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía", "estado": "Guanajuato"}, {"n": 15, "nom": "Guanajuato: Tamal de Acelgas con Queso Fresco y Salsa Verde de Tomatillo", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "verde", "clas": "Milpa, Sierra y Maíz Tierno (Vegetariano)", "estado": "Guanajuato"}, {"n": 16, "nom": "Querétaro: Tamal de Queso de Cabra Serrano con Rajas de Chile Cuaresmeño", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "verde", "clas": "Milpa, Sierra y Maíz Tierno (Sierra Gorda Queretana)", "estado": "Querétaro"}, {"n": 17, "nom": "Aguascalientes: Tamal de Calabacitas con Queso de Cuadro y Crema de Rancho", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "verde", "clas": "Milpa, Sierra y Maíz Tierno (Cocina Hidrocálida)", "estado": "Aguascalientes"}, {"n": 18, "nom": "Zacatecas: Tamal de Chile Colorado Zacatecano con Pierna de Cerdo Deshebrada", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 15, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Zacatecas"}, {"n": 19, "nom": "San Luis Potosí: Zacahuil Huasteco Tradicional de Masa Martajada (Porción Individual Estandarizada)", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 10, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía (Huasteca Potosina)", "estado": "San Luis Potosí"}, {"n": 20, "nom": "San Luis Potosí: Tamal de Muerto de Maíz Morado con Chile Cascabel y Queso", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía (Altiplano Potosino)", "estado": "San Luis Potosí"}, {"n": 21, "nom": "Veracruz: Tamal de Cazuela Jarocho de Pollo en Acuyo y Salsa de Guajillo", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo", "estado": "Veracruz"}, {"n": 22, "nom": "Veracruz: Tamal de Masa Colada de Sotavento con Cerdo y Salsa de Jitomate", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo (Alta Técnica de Masa Colada)", "estado": "Veracruz"}, {"n": 23, "nom": "Veracruz: Tamal de Mariscos y Pescado al Chileajo en Hoja de Plátano", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo", "estado": "Veracruz"}, {"n": 24, "nom": "Veracruz: Tamal de Frijol con Pipián de Cilantro y Hoja Santa (Papantla)", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "rojo", "clas": "Tradición Ancestral / Regional (Totonacapan)", "estado": "Veracruz"}, {"n": 25, "nom": "Hidalgo: Tamal de Xojol Huasteco de Piloncillo, Canela y Masa Martajada", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía (Huasteca Hidalguense)", "estado": "Hidalgo"}, {"n": 26, "nom": "Hidalgo: Tamal de Conejo al Pulque y Chile Guajillo (Valle del Mezquital)", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Hidalgo"}, {"n": 27, "nom": "Hidalgo: Tamal de Barbacoa de Borrego en Hoja de Maguey y Salsa Borracha", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Hidalgo"}, {"n": 28, "nom": "Ciudad de México: Tamal Verde Clásico de Pollo con Tomatillo y Chile Cuaresmeño", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 15, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía (Urbano Capitalino)", "estado": "Ciudad de México"}, {"n": 29, "nom": "Ciudad de México: Tamal Dulce Rosa con Pasitas y Esencia de Vainilla", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 15, "sello": "rojo", "clas": "Tradición Ancestral / Urbano Capitalino (Dulce)", "estado": "Ciudad de México"}, {"n": 30, "nom": "Estado de México: Tamal de Ollita / Chuchuluco de Ocoyoacac (Pasilla y Cerdo)", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía", "estado": "Estado de México"}, {"n": 31, "nom": "Puebla: Tamal de Mole Poblano Artesanal con Pollo y Ajonjolí", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía", "estado": "Puebla"}, {"n": 32, "nom": "Puebla: Tamal de Pipián Verde con Cerdo y Chilacayote (Sierra Norte)", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Puebla"}, {"n": 33, "nom": "Tlaxcala: Tamal Tatemado de Frijol con Hojas de Aguacate Criollo", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Tlaxcala"}, {"n": 34, "nom": "Tlaxcala: Tamal de Masa con Epazote, Chile Verde y Nopales de Milpa", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "verde", "clas": "Milpa, Sierra y Maíz Tierno (Campirano)", "estado": "Tlaxcala"}, {"n": 35, "nom": "Morelos: Tamal de Frijol con Manteca y Flor de Tzompantle (Colorín)", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "rojo", "clas": "Tradición Ancestral / Regional (Cocina Tlahuica)", "estado": "Morelos"}, {"n": 36, "nom": "Guerrero: Tamal de Ayocote con Salsa de Chile Chipotle y Manteca", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Regional (Montaña de Guerrero)", "estado": "Guerrero"}, {"n": 37, "nom": "Guerrero: Tamal Costeño de Tichindas con Chile Costeño en Hoja de Plátano", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo (Costa Chica de Guerrero)", "estado": "Guerrero"}, {"n": 38, "nom": "Guerrero: Tamal Nejo de Maíz con Ceniza de Leña y Mole Verde de Pipián", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 14, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía (Tixtla)", "estado": "Guerrero"}, {"n": 39, "nom": "Oaxaca: Tamal de Mole Negro Tradicional con Pollo en Hoja de Plátano", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía (Valles Centrales)", "estado": "Oaxaca"}, {"n": 40, "nom": "Oaxaca: Tamal de Chepil con Queso Fresco de Aro y Salsa Roja Martajada", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "rojo", "clas": "Tradición Ancestral / Regional (Valles y Costa)", "estado": "Oaxaca"}, {"n": 41, "nom": "Chiapas: Tamal Chiapaneco de Fiesta con Cerdo, Mole, Ciruela Pasa y Plátano Macho", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía", "estado": "Chiapas"}, {"n": 42, "nom": "Chiapas: Tamal de Bola de San Cristóbal de Las Casas (Costilla en Chile Simojovel)", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "rojo", "clas": "Tradición Ancestral / Regional (Altos de Chiapas)", "estado": "Chiapas"}, {"n": 43, "nom": "Chiapas: Tamal de Chipilín con Camarón Seco y Queso Crema de Cuadro", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "rojo", "clas": "Tradición Ancestral / Regional", "estado": "Chiapas"}, {"n": 44, "nom": "Tabasco: Tamal de Manea / Caminito con Res y Cerdo Salpicada en Masa Martajada", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo (Tradición Chontal)", "estado": "Tabasco"}, {"n": 45, "nom": "Tabasco: Tamal de Masa Colada de Pejelagarto al Chileamash en Hoja de To", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo (Alta Técnica de Masa Colada)", "estado": "Tabasco"}, {"n": 46, "nom": "Tabasco: Tamal de Chipilín con Queso de Hebra Tabasqueño en Hoja de Plátano", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo", "estado": "Tabasco"}, {"n": 47, "nom": "Campeche: Tamal Colado Campechano de Pollo en Achiote con Pasas y Almendras", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo (Alta Técnica de Masa Colada)", "estado": "Campeche"}, {"n": 48, "nom": "Campeche: Tamal de Cazón Guisado con Epazote y Chiltomate en Hoja de Plátano", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo", "estado": "Campeche"}, {"n": 49, "nom": "Yucatán: Mucbipollo (Pib) Tradicional Enterrado con Pollo, Cerdo, Xpelón y Kol", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 8, "sello": "rojo", "clas": "Tradición Ancestral / Mayordomía (Hanal Pixán)", "estado": "Yucatán"}, {"n": 50, "nom": "Yucatán: Tamal de Brazo de Reina (Dzotobilchay) con Chaya, Pepita y Huevo Duro", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "verde", "clas": "Milpa, Sierra y Maíz Tierno", "estado": "Yucatán"}, {"n": 51, "nom": "Quintana Roo: Tamal Caribeño de Mariscos en Achiote y Habanero Tatemado", "empaque": 5.0, "energia": 3.0, "min": 5.0, "merma": null, "piezas": 12, "sello": "amar", "clas": "Especialidad de Costa e Istmo", "estado": "Quintana Roo"}], "params": {"margenes": {"menudeo": 0.5, "docena": 0.42, "evento": 0.55, "mayoreo": 0.3}, "mermaDefault": 0.12}, "gf": {"lineas": [{"nom": "Renta del espacio de producción", "monto": 2500.0}, {"nom": "Gas de la vaporera y servicios", "monto": 900.0}, {"nom": "Internet y telefonía", "monto": 600.0}, {"nom": "Publicidad y anuncios pagados", "monto": 1000.0}, {"nom": "Papelería, limpieza y consumibles generales", "monto": 250.0}, {"nom": "Suscripciones y software (diseño, facturación)", "monto": 200.0}, {"nom": "Transporte y repartos", "monto": 400.0}, {"nom": "Depreciación de equipo (vaporera, congelador)", "monto": 150.0}, {"nom": "Sueldos fijos de terceros", "monto": 1000.0}, {"nom": "Otros gastos fijos", "monto": 150.0}], "piezasMes": 1000.0, "sueldo": 12000.0, "horas": 160.0}, "canales": ["Menudeo por pieza", "Docena por encargo", "Evento y banquete", "Mayoreo / reventa", "Temporada", "Venta en línea"], "causas": ["Tamal abierto en la vaporera", "Masa cruda al centro", "Masa apelmazada", "Lote salado", "Hoja rota al amarrar", "Relleno mal repartido", "Falla de cadena de frío", "Pieza de prueba / tamal testigo", "Devolución de cliente", "Otro"]};</script>
+<script>
+/* =========================================================
+   Endulcora · Calculadora de Tamales Regionales de México
+   Motor de cálculo espejo del archivo Excel original.
+   ========================================================= */
+const KEY='endulcora_tamales_regionales_v1';
+let mem=null, canPersist=true;
+const store={
+  read(){ try{ const s=localStorage.getItem(KEY); return s?JSON.parse(s):null }catch(e){ canPersist=false; return mem } },
+  write(o){ try{ localStorage.setItem(KEY,JSON.stringify(o)) }catch(e){ canPersist=false; mem=o } }
+};
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+function freshDB(){
+  return {
+    v:1,
+    insumos: clone(SEED.insumos),
+    recetas: SEED.recetas.map(r=>({...r, merma:null})),
+    params: clone(SEED.params),
+    gf: clone(SEED.gf),
+    prod: [], ventas: [],
+    mes: new Date().toISOString().slice(0,7)
+  };
+}
+let DB = store.read() || freshDB();
+// migración suave por si el archivo trae datos viejos
+if(!DB.recetas || DB.recetas.length!==51){ const d=freshDB(); d.prod=DB.prod||[]; d.ventas=DB.ventas||[]; DB=d; }
+const save=()=>store.write(DB);
+
+/* ---------- índices ---------- */
+const LIN = SEED.lineas;
+const insByName = {}; DB.insumos.forEach(i=>insByName[i.nom]=i);
+const linByRec = {}; LIN.forEach(l=>{ (linByRec[l.n]=linByRec[l.n]||[]).push(l) });
+const recByN = {}; DB.recetas.forEach(r=>recByN[r.n]=r);
+function reindex(){ Object.keys(insByName).forEach(k=>delete insByName[k]); DB.insumos.forEach(i=>insByName[i.nom]=i);
+  Object.keys(recByN).forEach(k=>delete recByN[k]); DB.recetas.forEach(r=>recByN[r.n]=r); }
+
+/* ---------- formato ---------- */
+const nf = new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:2});
+const nf0= new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0});
+const money=v=>nf.format(isFinite(v)?v:0);
+const money0=v=>nf0.format(isFinite(v)?v:0);
+const pct=v=>((isFinite(v)?v:0)*100).toFixed(1).replace('.0','')+'%';
+const num=v=>new Intl.NumberFormat('es-MX').format(isFinite(v)?v:0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayISO=()=>new Date().toISOString().slice(0,10);
+
+/* ---------- motor de cálculo ---------- */
+const costoUnidad = ins => (ins && ins.pres>0) ? ins.precio/ins.pres : 0;
+function costoInsumos(n){ return (linByRec[n]||[]).reduce((s,l)=> s + (+l.cant||0)*costoUnidad(insByName[l.ins]), 0); }
+const gastosTotales = () => DB.gf.lineas.reduce((s,l)=>s+(+l.monto||0),0);
+const overhead = () => DB.gf.piezasMes>0 ? gastosTotales()/DB.gf.piezasMes : 0;
+const costoHora = () => DB.gf.horas>0 ? DB.gf.sueldo/DB.gf.horas : 0;
+const CANALES = [
+  {k:'menudeo',  nom:'Menudeo por pieza',  rango:'45 – 55 %'},
+  {k:'docena',   nom:'Docena por encargo', rango:'38 – 48 %'},
+  {k:'evento',   nom:'Evento y banquete',  rango:'50 – 62 %'},
+  {k:'mayoreo',  nom:'Mayoreo / reventa',  rango:'25 – 35 %'}
+];
+const canalKey = nom => (CANALES.find(c=>c.nom===nom)||{k:'menudeo'}).k;
+
+function calc(n){
+  const r = recByN[n]; if(!r) return null;
+  const ins = costoInsumos(n)/(+r.piezas||1);   // cada receta rinde lo suyo (8 a 20 pz)
+  const emp = +r.empaque||0, ene = +r.energia||0;
+  const mo  = costoHora()*(+r.min||0)/60;
+  const oh  = overhead();
+  const base = ins+emp+ene+mo+oh;
+  const merma = (r.merma==null? DB.params.mermaDefault : r.merma);
+  const total = merma<1 ? base/(1-merma) : base;
+  const precios = {};
+  CANALES.forEach(c=>{
+    const m = DB.params.margenes[c.k];
+    const pvp = m<1 ? Math.ceil(total/(1-m)/5)*5 : 0;
+    precios[c.k] = {pvp, util: pvp-total, margen: pvp>0 ? (pvp-total)/pvp : 0};
+  });
+  return {n, nom:r.nom, ins, emp, ene, mo, oh, base, merma, mermaCosto: total-base, total, precios};
+}
+const costoTotalDe = n => (calc(n)||{total:0}).total;
+
+function equilibrio(){
+  const cs = DB.recetas.map(r=>calc(r.n));
+  const avgP = cs.reduce((s,c)=>s+c.precios.menudeo.pvp,0)/cs.length;
+  const avgC = cs.reduce((s,c)=>s+c.total,0)/cs.length;
+  const mc = avgP-avgC;
+  const gf = gastosTotales();
+  return {avgP, avgC, mc, gf, piezas: mc>0?Math.ceil(gf/mc):0, ingreso: mc>0?Math.ceil(gf/mc)*avgP:0};
+}
+
+/* ---------- helpers UI ---------- */
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),2300); }
+function openModal(html){ document.getElementById('modalBox').innerHTML=html; document.getElementById('modal').classList.add('on'); }
+function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+/* ---------- navegación ---------- */
+const ICONS={
+  tablero:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>',
+  calc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="7" y="9" width="10" height="13" rx="2.5"/><path d="M12 9V6.5"/><path d="M12 2.5c1.9 1.6 2.6 2.6 2.6 3.6a2.6 2.6 0 1 1-5.2 0c0-1 .7-2 2.6-3.6z" fill="currentColor" stroke="none" opacity=".85"/></svg>',
+  insumos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 8h16l-1.3 12.2a2 2 0 0 1-2 1.8H7.3a2 2 0 0 1-2-1.8L4 8z"/><path d="M8.5 8V6a3.5 3.5 0 1 1 7 0v2"/></svg>',
+  recetas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5.5 3.5h13v17l-6.5-3-6.5 3v-17z"/><path d="M9 8.5h6M9 12.5h6"/></svg>',
+  prod:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 3.5h6M10.5 3.5v6L5.2 18.4A2 2 0 0 0 6.9 21.5h10.2a2 2 0 0 0 1.7-3.1L13.5 9.5v-6"/><path d="M7.5 15h9"/></svg>',
+  ventas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3.5 12.5 12 4h7.5v7.5L11 20a2 2 0 0 1-2.8 0l-4.7-4.7a2 2 0 0 1 0-2.8z"/><circle cx="16" cy="8" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  negocio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="3.6" height="8.5" rx="1"/><rect x="10.2" y="7" width="3.6" height="13.5" rx="1"/><rect x="15.4" y="3.5" width="3.6" height="17" rx="1"/></svg>',
+  datos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></svg>'
+};
+const VIEWS=[
+  ['tablero','Tablero','tablero'],
+  ['calc','Calculadora','calc'],
+  ['recetas','Recetas','recetas'],
+  ['insumos','Insumos','insumos'],
+  ['prod','Producción','prod'],
+  ['ventas','Ventas','ventas'],
+  ['negocio','Mi negocio','negocio'],
+  ['datos','Mis datos','datos']
+];
+let current='tablero';
+function buildNav(){
+  document.getElementById('nav').innerHTML = VIEWS.map(([id,lbl,ic])=>
+    `<button class="navbtn${id===current?' on':''}" data-go="${id}">${ICONS[ic]}<span>${lbl}</span></button>`).join('');
+}
+function go(id){ current=id; buildNav(); render(); window.scrollTo({top:0,behavior:'instant'}); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-go]'); if(b){ go(b.dataset.go); } });
+
+/* =========================================================
+   VISTA · TABLERO
+   ========================================================= */
+function vTablero(){
+  const mes = DB.mes || todayISO().slice(0,7);
+  const ven = DB.ventas.filter(v=>v.fecha.slice(0,7)===mes);
+  const pro = DB.prod.filter(p=>p.fecha.slice(0,7)===mes);
+  const ingreso = ven.reduce((s,v)=>s+v.piezas*v.precio,0);
+  const piezas  = ven.reduce((s,v)=>s+ (+v.piezas||0),0);
+  const costo   = ven.reduce((s,v)=>s+v.piezas*costoTotalDe(v.n),0);
+  const comis   = ven.reduce((s,v)=>s+v.piezas*v.precio*(+v.comision||0),0);
+  const utilidad= ingreso-costo-comis;
+  const buenas  = pro.reduce((s,p)=>s+(+p.buenas||0),0);
+  const fallas  = pro.reduce((s,p)=>s+(+p.fallas||0),0);
+  const mermaPct= (buenas+fallas)>0 ? fallas/(buenas+fallas) : 0;
+  const mermaMXN= pro.reduce((s,p)=>s+(+p.fallas||0)*costoTotalDe(p.n),0);
+  const eq = equilibrio();
+  const avance = eq.piezas>0 ? piezas/eq.piezas : 0;
+  const gf = gastosTotales();
+
+  // ventas por canal
+  const porCanal = SEED.canales.map(c=>{
+    const f=ven.filter(v=>v.canal===c);
+    return {c, piezas:f.reduce((s,v)=>s+v.piezas,0), ingreso:f.reduce((s,v)=>s+v.piezas*v.precio,0)};
+  }).filter(x=>x.piezas>0).sort((a,b)=>b.ingreso-a.ingreso);
+  const maxCanal = Math.max(1,...porCanal.map(x=>x.ingreso));
+
+  // top recetas
+  const porRec={};
+  ven.forEach(v=>{ const o=porRec[v.n]=porRec[v.n]||{n:v.n,piezas:0,ingreso:0,util:0};
+    o.piezas+=v.piezas; o.ingreso+=v.piezas*v.precio;
+    o.util+=v.piezas*v.precio - v.piezas*costoTotalDe(v.n) - v.piezas*v.precio*(+v.comision||0); });
+  const top = Object.values(porRec).sort((a,b)=>b.util-a.util).slice(0,6);
+
+  const mesNom = new Date(mes+'-02').toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+
+  return `
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Endulcora · Estudio Gastronómico</div>
+      <h1 class="title">Tablero de ${esc(mesNom)}</h1>
+      <p class="sub">Todo lo que registres en Producción y Ventas se resume aquí. Cambia el mes para ver otro periodo.</p>
+    </div>
+    <div style="min-width:170px"><label class="f">Mes que analizas</label><input type="month" id="mesSel" value="${mes}"></div>
+  </div>
+
+  <div class="grid g4">
+    <div class="kpi dark"><div class="k-l">Ingreso del mes</div><div class="k-v">${money0(ingreso)}</div><div class="k-n">${num(piezas)} piezas vendidas</div></div>
+    <div class="kpi"><div class="k-l">Utilidad neta</div><div class="k-v" style="color:${utilidad>=0?'var(--good)':'var(--danger)'}">${money0(utilidad)}</div><div class="k-n">Margen ${pct(ingreso>0?utilidad/ingreso:0)}</div></div>
+    <div class="kpi"><div class="k-l">Ticket promedio</div><div class="k-v">${money0(piezas>0?ingreso/piezas:0)}</div><div class="k-n">por pieza vendida</div></div>
+    <div class="kpi"><div class="k-l">Merma del mes</div><div class="k-v" style="color:${mermaPct>0.15?'var(--ember)':'var(--deep)'}">${pct(mermaPct)}</div><div class="k-n">${money0(mermaMXN)} perdidos · ${num(fallas)} piezas</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Punto de equilibrio</h3>
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:9px">
+      <div><span style="font-family:'Bebas Neue';font-size:30px;color:var(--deep)">${num(piezas)}</span>
+        <span class="mini"> de ${num(eq.piezas)} piezas necesarias este mes</span></div>
+      <div class="mini">Gastos fijos ${money0(gf)} · margen de contribución ${money0(eq.mc)}/pieza</div>
+    </div>
+    <div class="bar"><i style="width:${Math.min(100,avance*100).toFixed(1)}%"></i></div>
+    <p class="mini" style="margin:9px 0 0">${
+      avance>=1 ? '✔ Ya cubriste tus gastos fijos. Cada pieza extra es ganancia real.'
+                : 'Te faltan <b>'+num(Math.max(0,eq.piezas-piezas))+'</b> piezas para cubrir los gastos fijos del mes.'}</p>
+    <p class="mini" style="margin:4px 0 0">Utilidad después de gastos fijos: <b style="color:${(utilidad-gf)>=0?'var(--good)':'var(--danger)'}">${money0(utilidad-gf)}</b></p>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h3>Ventas por canal</h3>
+      ${porCanal.length? porCanal.map(x=>`
+        <div style="margin-bottom:11px">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
+            <span>${esc(x.c)}</span><span style="font-variant-numeric:tabular-nums">${money0(x.ingreso)} <span class="mini">· ${num(x.piezas)} pz</span></span>
+          </div>
+          <div class="bar"><i style="width:${(x.ingreso/maxCanal*100).toFixed(1)}%"></i></div>
+        </div>`).join('')
+      : `<div class="empty"><b>Aún no hay ventas de este mes</b>Registra tu primera venta y este bloque cobra vida.<br><br><button class="btn sm" data-go="ventas">Registrar una venta</button></div>`}
+    </div>
+    <div class="card">
+      <h3>Recetas más rentables del mes</h3>
+      ${top.length? `<div class="tw"><table class="slim"><thead><tr><th>Receta</th><th class="num">Pz</th><th class="num">Utilidad</th></tr></thead><tbody>
+        ${top.map(t=>`<tr><td style="font-size:12.5px">${esc((recByN[t.n]||{}).nom||'')}<div class="mini">${money0(t.ingreso)} de ingreso</div></td><td class="num">${num(t.piezas)}</td><td class="num" style="color:${t.util>=0?'var(--good)':'var(--danger)'}">${money0(t.util)}</td></tr>`).join('')}
+      </tbody></table></div>`
+      : `<div class="empty"><b>Sin datos todavía</b>Aquí verás qué tamales te dejan más dinero, no solo cuáles vendes más.</div>`}
+    </div>
+  </div>
+
+  <div class="note"><b>Cómo se usa:</b> 1) Ajusta precios reales en <b>Insumos</b> → 2) Revisa la <b>Calculadora</b> y fija tu precio → 3) Registra cada lote en <b>Producción</b> y cada venta en <b>Ventas</b> → 4) Vuelve aquí a fin de mes.</div>`;
+}
+function hookTablero(){
+  const m=document.getElementById('mesSel');
+  if(m) m.onchange=e=>{ DB.mes=e.target.value||todayISO().slice(0,7); save(); render(); };
+}
+
+/* =========================================================
+   VISTA · CALCULADORA  (elemento firma: el tamal de costos)
+   ========================================================= */
+let calcN = 1, precioManual = null;
+function tamalSVG(c){
+  const segs=[
+    ['Insumos', c.ins, '#7A2E7E'],
+    ['Empaque', c.emp, '#A25AA6'],
+    ['Energía', c.ene, '#C98BCB'],
+    ['Mano de obra', c.mo, '#4E1454'],
+    ['Overhead', c.oh, '#9C9C9C'],
+    ['Costo de la merma', c.mermaCosto, '#E4572E']
+  ].filter(s=>s[1]>0.0001);
+  const tot=segs.reduce((s,x)=>s+x[1],0)||1;
+  const W=112, H=150, X=19, TOP=76;
+  let y=TOP+H, out='';
+  segs.forEach(([nm,v],i)=>{
+    const hh=v/tot*H; y-=hh;
+    out+=`<rect x="${X}" y="${y.toFixed(2)}" width="${W}" height="${Math.max(hh,1).toFixed(2)}" fill="${segs[i][2]}"/>`;
+  });
+  return `<svg viewBox="0 0 150 250" width="100%" style="max-width:186px;display:block;margin:0 auto" role="img" aria-label="Composición del costo del tamal">
+    <defs>
+      <clipPath id="tbody"><rect x="${X}" y="${TOP}" width="${W}" height="${H}" rx="9"/></clipPath>
+      <radialGradient id="vapor"><stop offset="0%" stop-color="#F8B818" stop-opacity=".40"/><stop offset="100%" stop-color="#F8B818" stop-opacity="0"/></radialGradient>
+    </defs>
+    <circle cx="75" cy="44" r="34" fill="url(#vapor)"/>
+    <g class="flame" fill="none" stroke="#C98BCB" stroke-width="3" stroke-linecap="round" opacity=".9">
+      <path d="M58 62c0-9 7-9 7-18s-7-9-7-17"/>
+      <path d="M75 58c0-10 7-10 7-19s-7-10-7-18"/>
+      <path d="M92 62c0-9 7-9 7-18s-7-9-7-17"/>
+    </g>
+    <g clip-path="url(#tbody)">${out}</g>
+    <rect x="${X}" y="${TOP}" width="${W}" height="${H}" rx="9" fill="none" stroke="rgba(78,20,84,.28)" stroke-width="1.5"/>
+    <path d="M${X} ${TOP+42} H${X+W} M${X} ${TOP+H-42} H${X+W}" stroke="rgba(251,244,233,.55)" stroke-width="2.5" stroke-dasharray="5 4"/>
+    <path d="M75 ${TOP} v${H}" stroke="rgba(251,244,233,.30)" stroke-width="1.5"/>
+    <ellipse cx="75" cy="${TOP+H+8}" rx="${W/2}" ry="6" fill="rgba(78,20,84,.10)"/>
+  </svg>`;
+}
+function vCalc(){
+  const c = calc(calcN); const r = recByN[calcN];
+  const segs=[
+    ['Insumos', c.ins, '#7A2E7E'],['Empaque', c.emp, '#A25AA6'],['Energía y consumibles', c.ene, '#C98BCB'],
+    ['Mano de obra', c.mo, '#4E1454'],['Gastos fijos (overhead)', c.oh, '#9C9C9C'],['Costo de la merma', c.mermaCosto, '#E4572E']
+  ];
+  const pm = precioManual;
+  const utilPM = pm!=null ? pm - c.total : null;
+
+  return `
+  <div class="page-head">
+    <div><div class="eyebrow">Paso 2 · el corazón del sistema</div>
+      <h1 class="title">Calculadora de precio</h1>
+      <p class="sub">Elige una receta, ajusta lo que cambia en tu cocina y mira cuánto cuesta de verdad y a cuánto deberías venderla.</p></div>
+  </div>
+
+  <div class="card">
+    <div class="field"><label class="f">Receta</label>
+      <select id="recSel">${DB.recetas.map(x=>`<option value="${x.n}"${x.n===calcN?' selected':''}>${x.n}. ${esc(x.nom)}</option>`).join('')}</select></div>
+    <div class="row">
+      <div class="field"><label class="f">Empaque por pieza</label><input type="number" step="0.5" min="0" id="fEmp" value="${r.empaque}"></div>
+      <div class="field"><label class="f">Energía y consumibles</label><input type="number" step="0.5" min="0" id="fEne" value="${r.energia}"></div>
+      <div class="field"><label class="f">Minutos de trabajo</label><input type="number" step="1" min="0" id="fMin" value="${r.min}"></div>
+      <div class="field"><label class="f">% de merma <span id="mermaVal" style="color:var(--purple)">${pct(c.merma)}</span></label>
+        <input type="range" min="0" max="40" step="1" id="fMer" value="${Math.round(c.merma*100)}"></div>
+    </div>
+    <p class="mini" style="margin:0">Merma sugerida: principiante 15–25 % · intermedio 8–15 % · avanzado 3–8 %. Mano de obra ${money(costoHora())}/hora y overhead ${money(overhead())}/pieza salen de <a href="#" data-go="negocio">Mi negocio</a>.</p>
+  </div>
+
+  <div class="card">
+    <h3>De qué está hecho tu tamal (costo por pieza)</h3>
+    <div class="candle-wrap">
+      <div>${tamalSVG(c)}</div>
+      <div class="legend">
+        ${segs.map(([nm,v,col])=>`<div class="lg"><span class="sw" style="background:${col}"></span><span class="nm">${nm}</span><span class="vl">${money(v)}</span><span class="pc">${pct(c.total>0?v/c.total:0)}</span></div>`).join('')}
+        <div class="lg tot"><span class="sw" style="background:var(--yellow)"></span><span class="nm">Costo total unitario</span><span class="vl">${money(c.total)}</span><span class="pc">100%</span></div>
+      </div>
+    </div>
+    <div class="note"><b>Ojo con la merma:</b> el costo base (${money(c.base)}) se divide entre (1 − merma), no se suma. Por eso una merma del ${pct(c.merma)} te cuesta ${money(c.mermaCosto)} extra en cada pieza buena que sí vendes.</div>
+  </div>
+
+  <div class="card">
+    <h3>Precio sugerido por canal</h3>
+    <div class="grid g4">
+      ${CANALES.map(cn=>{const p=c.precios[cn.k];return `
+        <div class="price">
+          <div class="ch">${cn.nom}</div>
+          <div class="pv">${money0(p.pvp)}</div>
+          <div class="ut">Ganas <b>${money(p.util)}</b> por pieza</div>
+          <div class="ut mini" style="margin-top:3px">Margen real ${pct(p.margen)} · objetivo ${pct(DB.params.margenes[cn.k])}</div>
+          <button class="btn sm ghost" style="margin-top:10px;width:100%" data-vender="${cn.k}">Vender a este precio</button>
+        </div>`}).join('')}
+    </div>
+    <div class="row" style="margin-top:16px;align-items:flex-end">
+      <div class="field" style="max-width:200px"><label class="f">¿Y si cobro otro precio?</label>
+        <input type="number" step="10" min="0" id="fPM" placeholder="Escribe tu precio" value="${pm??''}"></div>
+      <div class="field" style="flex:2">
+        ${pm!=null && pm>0 ? `<div style="padding:9px 0">
+            <span class="pill ${utilPM>0?'g':'r'}">${utilPM>0?'Ganas':'Pierdes'} ${money(Math.abs(utilPM))} por pieza</span>
+            <span class="pill" style="margin-left:6px">Margen ${pct(utilPM/pm)}</span>
+            ${utilPM<=0?'<span class="pill r" style="margin-left:6px">Estás vendiendo por debajo del costo</span>':''}
+          </div>` : `<p class="mini" style="margin:0 0 12px">Escribe un precio y te digo si ganas o pierdes con él.</p>`}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Ingredientes de esta receta</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Insumo</th><th class="num">Cantidad</th><th class="num">Costo unitario</th><th class="num">Costo</th></tr></thead>
+      <tbody>${(linByRec[calcN]||[]).map(l=>{const i=insByName[l.ins];const cu=costoUnidad(i);return `
+        <tr><td>${esc(l.ins)}<div class="mini">${esc(l.desc)}</div></td>
+        <td class="num">${num(l.cant)} ${esc(l.u)}</td>
+        <td class="num">${money(cu)}<div class="mini">por ${esc(l.u)}</div></td>
+        <td class="num">${money(l.cant*cu)}</td></tr>`}).join('')}
+      </tbody>
+      <tfoot><tr><td colspan="3" style="text-align:right;font-weight:600;padding-top:10px">Costo de insumos</td><td class="num" style="font-weight:600;padding-top:10px">${money(c.ins)}</td></tr></tfoot>
+    </table></div>
+  </div>`;
+}
+function hookCalc(){
+  const S=id=>document.getElementById(id);
+  S('recSel').onchange=e=>{ calcN=+e.target.value; precioManual=null; render(); };
+  const r=recByN[calcN];
+  S('fEmp').oninput=e=>{ r.empaque=+e.target.value||0; save(); softCalc(); };
+  S('fEne').oninput=e=>{ r.energia=+e.target.value||0; save(); softCalc(); };
+  S('fMin').oninput=e=>{ r.min=+e.target.value||0; save(); softCalc(); };
+  S('fMer').oninput=e=>{ r.merma=(+e.target.value||0)/100; save(); softCalc(); };
+  S('fPM').oninput=e=>{ precioManual = e.target.value===''?null:(+e.target.value||0); softCalc(); };
+  document.querySelectorAll('[data-vender]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.vender; const cn=CANALES.find(x=>x.k===k);
+    nuevaVenta({n:calcN, canal:cn.nom, precio:calc(calcN).precios[k].pvp});
+  });
+}
+let softTimer=null;
+function softCalc(){ // re-render conservando foco
+  clearTimeout(softTimer);
+  softTimer=setTimeout(()=>{
+    const act=document.activeElement; const id=act?act.id:null; const pos=act&&act.selectionStart;
+    render();
+    if(id){ const el=document.getElementById(id); if(el){ el.focus(); try{el.setSelectionRange(pos,pos)}catch(e){} } }
+  },160);
+}
+
+/* =========================================================
+   VISTA · RECETAS
+   ========================================================= */
+let recQ='', recSort='n';
+function vRecetas(){
+  let list=DB.recetas.map(r=>({...r, c:calc(r.n)}));
+  if(recQ) list=list.filter(r=>r.nom.toLowerCase().includes(recQ.toLowerCase()));
+  if(recSort==='costo') list.sort((a,b)=>b.c.total-a.c.total);
+  if(recSort==='util') list.sort((a,b)=>b.c.precios.menudeo.util-a.c.precios.menudeo.util);
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Catálogo del eBook</div>
+    <h1 class="title">Las 51 recetas</h1>
+    <p class="sub">Costo y precio sugerido de cada receta con tus precios de insumos actuales. Toca una para abrirla en la calculadora.</p>
+  </div></div>
+  <div class="search">
+    <input id="recQ" placeholder="Buscar receta…" value="${esc(recQ)}">
+    <select id="recSort">
+      <option value="n"${recSort==='n'?' selected':''}>Orden del libro</option>
+      <option value="costo"${recSort==='costo'?' selected':''}>Más cara primero</option>
+      <option value="util"${recSort==='util'?' selected':''}>Más ganancia primero</option>
+    </select>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>#</th><th>Receta</th><th class="num">Insumos</th><th class="num">Costo total</th><th class="num">PVP menudeo</th><th class="num">Ganancia</th><th></th></tr></thead>
+    <tbody>${list.map(r=>`<tr>
+      <td class="mini">${r.n}</td>
+      <td style="max-width:340px">${esc(r.nom)}</td>
+      <td class="num">${money(r.c.ins)}</td>
+      <td class="num"><b>${money(r.c.total)}</b></td>
+      <td class="num">${money0(r.c.precios.menudeo.pvp)}</td>
+      <td class="num" style="color:var(--good)">${money(r.c.precios.menudeo.util)}</td>
+      <td><button class="btn sm ghost" data-abrir="${r.n}">Abrir</button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>${list.length?'':'<div class="empty"><b>Sin resultados</b>Prueba con otra palabra.</div>'}</div>`;
+}
+function hookRecetas(){
+  const q=document.getElementById('recQ');
+  q.oninput=e=>{ recQ=e.target.value; softCalc(); };
+  document.getElementById('recSort').onchange=e=>{ recSort=e.target.value; render(); };
+  document.querySelectorAll('[data-abrir]').forEach(b=>b.onclick=()=>{ calcN=+b.dataset.abrir; precioManual=null; go('calc'); });
+}
+
+/* =========================================================
+   VISTA · INSUMOS
+   ========================================================= */
+let insQ='', insCat='';
+function vInsumos(){
+  const cats=[...new Set(DB.insumos.map(i=>i.cat))].filter(Boolean).sort();
+  let list=DB.insumos.map((i,idx)=>({...i,idx}));
+  if(insCat) list=list.filter(i=>i.cat===insCat);
+  if(insQ) list=list.filter(i=>i.nom.toLowerCase().includes(insQ.toLowerCase()));
+  const usos={}; LIN.forEach(l=>usos[l.ins]=(usos[l.ins]||0)+1);
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Paso 1 · lo primero que debes hacer</div>
+    <h1 class="title">Mis insumos</h1>
+    <p class="sub">Escribe el precio y el tamaño de la presentación que tú compras. Todo el sistema se recalcula al instante.</p>
+  </div></div>
+  <div class="note" style="margin:0 0 16px"><b>Los precios cargados son de referencia</b> (mercado CDMX 2026), no cotizaciones. Cámbialos por los de tus tickets reales antes de fijar cualquier precio de venta.</div>
+  <div class="search"><input id="insQ" placeholder="Buscar insumo…" value="${esc(insQ)}"></div>
+  <div class="chips">
+    <button class="chip${insCat===''?' on':''}" data-cat="">Todos (${DB.insumos.length})</button>
+    ${cats.map(c=>`<button class="chip${insCat===c?' on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Insumo</th><th class="num" style="width:110px">Presentación</th><th class="num" style="width:120px">Precio pagado</th><th class="num">Costo por unidad</th><th class="num">Recetas</th></tr></thead>
+    <tbody>${list.map(i=>`<tr>
+      <td>${esc(i.nom)}<div class="mini">${esc(i.cat)}${i.prov?' · '+esc(i.prov):''}</div></td>
+      <td class="num"><div style="display:flex;gap:4px;align-items:center;justify-content:flex-end">
+        <input type="number" step="1" min="0" value="${i.pres}" data-pres="${i.idx}" style="width:76px;text-align:right;padding:6px 8px;font-size:13px">
+        <span class="mini">${esc(i.u)}</span></div></td>
+      <td class="num"><input type="number" step="1" min="0" value="${i.precio}" data-precio="${i.idx}" style="width:92px;text-align:right;padding:6px 8px;font-size:13px"></td>
+      <td class="num"><b>${money(costoUnidad(i))}</b><div class="mini">por ${esc(i.u)}</div></td>
+      <td class="num"><span class="pill">${usos[i.nom]||0}</span></td>
+    </tr>`).join('')}</tbody>
+  </table></div>${list.length?'':'<div class="empty"><b>Sin resultados</b>Cambia la búsqueda o la categoría.</div>'}</div>`;
+}
+function hookInsumos(){
+  document.getElementById('insQ').oninput=e=>{ insQ=e.target.value; softCalc(); };
+  document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{ insCat=b.dataset.cat; render(); });
+  document.querySelectorAll('[data-pres]').forEach(el=>el.oninput=e=>{ DB.insumos[+el.dataset.pres].pres=+e.target.value||0; reindex(); save(); softCalc(); });
+  document.querySelectorAll('[data-precio]').forEach(el=>el.oninput=e=>{ DB.insumos[+el.dataset.precio].precio=+e.target.value||0; reindex(); save(); softCalc(); });
+}
+
+/* =========================================================
+   VISTA · PRODUCCIÓN
+   ========================================================= */
+function vProd(){
+  const rows=[...DB.prod].sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const buenas=DB.prod.reduce((s,p)=>s+(+p.buenas||0),0);
+  const fallas=DB.prod.reduce((s,p)=>s+(+p.fallas||0),0);
+  const mermaReal=(buenas+fallas)>0?fallas/(buenas+fallas):0;
+  const costoMerma=DB.prod.reduce((s,p)=>s+(+p.fallas||0)*costoTotalDe(p.n),0);
+  const supuesta=DB.params.mermaDefault;
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Bitácora</div><h1 class="title">Producción y merma</h1>
+    <p class="sub">Anota cada lote: cuántas salieron buenas y cuántas se echaron a perder. Así sabrás si tu % de merma supuesto es el verdadero.</p>
+  </div></div>
+
+  <div class="grid g4">
+    <div class="kpi"><div class="k-l">Piezas buenas</div><div class="k-v">${num(buenas)}</div><div class="k-n">acumuladas</div></div>
+    <div class="kpi"><div class="k-l">Piezas falladas</div><div class="k-v">${num(fallas)}</div><div class="k-n">acumuladas</div></div>
+    <div class="kpi"><div class="k-l">Merma real</div><div class="k-v" style="color:${mermaReal>supuesta?'var(--ember)':'var(--good)'}">${pct(mermaReal)}</div><div class="k-n">supones ${pct(supuesta)}</div></div>
+    <div class="kpi"><div class="k-l">Dinero perdido</div><div class="k-v" style="color:var(--ember)">${money0(costoMerma)}</div><div class="k-n">en piezas falladas</div></div>
+  </div>
+
+  ${(buenas+fallas)>0 && Math.abs(mermaReal-supuesta)>0.03 ? `<div class="note" style="margin-top:16px"><b>Tu merma real es ${pct(mermaReal)}, no ${pct(supuesta)}.</b> ${mermaReal>supuesta?'Estás costeando de menos: sube el % de merma en la calculadora o tus precios se quedan cortos.':'Estás costeando de más: puedes bajar el % de merma y mejorar tu margen o tu precio.'} <button class="btn sm gold" id="ajustarMerma" style="margin-left:6px">Usar ${pct(mermaReal)} en todas las recetas</button></div>`:''}
+
+  <div class="card" style="margin-top:16px">
+    <h3>Registrar un lote</h3>
+    <div class="row">
+      <div class="field" style="max-width:150px"><label class="f">Fecha</label><input type="date" id="pFecha" value="${todayISO()}"></div>
+      <div class="field" style="max-width:140px"><label class="f">Lote</label><input id="pLote" placeholder="L-2608-01" value="${sugerirLote()}"></div>
+      <div class="field" style="min-width:220px;flex:2"><label class="f">Receta</label>
+        <select id="pRec">${DB.recetas.map(r=>`<option value="${r.n}">${r.n}. ${esc(r.nom)}</option>`).join('')}</select></div>
+    </div>
+    <div class="row">
+      <div class="field" style="max-width:120px"><label class="f">Planeadas</label><input type="number" min="0" id="pPlan" placeholder="12"></div>
+      <div class="field" style="max-width:120px"><label class="f">Buenas</label><input type="number" min="0" id="pBuen" placeholder="10"></div>
+      <div class="field" style="max-width:120px"><label class="f">Falladas</label><input type="number" min="0" id="pFall" placeholder="2"></div>
+      <div class="field" style="min-width:180px"><label class="f">Causa principal</label>
+        <select id="pCausa">${SEED.causas.map(c=>`<option>${esc(c)}</option>`).join('')}</select></div>
+      <div class="field" style="min-width:160px;flex:1"><label class="f">Notas</label><input id="pNota" placeholder="Opcional"></div>
+    </div>
+    <button class="btn" id="pAdd">Guardar lote</button>
+  </div>
+
+  <div class="card">
+    <h3>Lotes registrados (${DB.prod.length})</h3>
+    ${rows.length?`<div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Lote</th><th>Receta</th><th class="num">Buenas</th><th class="num">Fallas</th><th class="num">Merma</th><th class="num">Costo perdido</th><th>Causa</th><th></th></tr></thead>
+      <tbody>${rows.map(p=>{const m=(p.buenas+p.fallas)>0?p.fallas/(p.buenas+p.fallas):0;return `<tr>
+        <td class="mini">${esc(p.fecha)}</td><td class="mini">${esc(p.lote||'')}</td>
+        <td style="max-width:250px;font-size:12.5px">${esc((recByN[p.n]||{}).nom||'')}</td>
+        <td class="num">${num(p.buenas)}</td><td class="num">${num(p.fallas)}</td>
+        <td class="num"><span class="pill ${m>0.15?'r':'g'}">${pct(m)}</span></td>
+        <td class="num">${money(p.fallas*costoTotalDe(p.n))}</td>
+        <td class="mini">${esc(p.causa||'')}</td>
+        <td><button class="x" data-delp="${p.id}" title="Eliminar">✕</button></td></tr>`}).join('')}</tbody>
+    </table></div>`:`<div class="empty"><b>Todavía no hay lotes</b>Registra el primero arriba y empieza a ver tu merma real.</div>`}
+  </div>`;
+}
+function sugerirLote(){
+  const d=new Date(); const p='L-'+String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+'-';
+  const n=DB.prod.filter(x=>(x.lote||'').startsWith(p)).length+1;
+  return p+String(n).padStart(2,'0');
+}
+function hookProd(){
+  const S=id=>document.getElementById(id);
+  S('pAdd').onclick=()=>{
+    const buenas=+S('pBuen').value||0, fallas=+S('pFall').value||0;
+    if(buenas+fallas<=0){ toast('Escribe cuántas piezas salieron buenas o falladas.'); S('pBuen').focus(); return; }
+    DB.prod.push({id:Date.now(), fecha:S('pFecha').value||todayISO(), lote:S('pLote').value, n:+S('pRec').value,
+      plan:+S('pPlan').value||0, buenas, fallas, causa:fallas>0?S('pCausa').value:'', nota:S('pNota').value});
+    save(); toast('Lote guardado'); render();
+  };
+  document.querySelectorAll('[data-delp]').forEach(b=>b.onclick=()=>{ DB.prod=DB.prod.filter(x=>x.id!=b.dataset.delp); save(); toast('Lote eliminado'); render(); });
+  const aj=S('ajustarMerma');
+  if(aj) aj.onclick=()=>{ const buenas=DB.prod.reduce((s,p)=>s+p.buenas,0), fallas=DB.prod.reduce((s,p)=>s+p.fallas,0);
+    const m=fallas/(buenas+fallas); DB.params.mermaDefault=Math.round(m*1000)/1000; DB.recetas.forEach(r=>r.merma=null); save(); toast('Merma actualizada en las 51 recetas'); render(); };
+}
+
+/* =========================================================
+   VISTA · VENTAS
+   ========================================================= */
+let preVenta=null;
+function nuevaVenta(v){ preVenta=v; go('ventas'); }
+function vVentas(){
+  const rows=[...DB.ventas].sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const ingreso=DB.ventas.reduce((s,v)=>s+v.piezas*v.precio,0);
+  const costo=DB.ventas.reduce((s,v)=>s+v.piezas*costoTotalDe(v.n),0);
+  const comis=DB.ventas.reduce((s,v)=>s+v.piezas*v.precio*(+v.comision||0),0);
+  const util=ingreso-costo-comis;
+  const piezas=DB.ventas.reduce((s,v)=>s+v.piezas,0);
+  const pv=preVenta||{}; preVenta=null;
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Bitácora</div><h1 class="title">Ventas</h1>
+    <p class="sub">Una línea por venta. Se descuenta el costo real de producción y la comisión de la plataforma para darte la utilidad neta.</p>
+  </div></div>
+
+  <div class="grid g4">
+    <div class="kpi dark"><div class="k-l">Ingreso acumulado</div><div class="k-v">${money0(ingreso)}</div><div class="k-n">${num(piezas)} piezas</div></div>
+    <div class="kpi"><div class="k-l">Costo de lo vendido</div><div class="k-v">${money0(costo)}</div><div class="k-n">+ ${money0(comis)} de comisiones</div></div>
+    <div class="kpi"><div class="k-l">Utilidad neta</div><div class="k-v" style="color:${util>=0?'var(--good)':'var(--danger)'}">${money0(util)}</div><div class="k-n">antes de gastos fijos</div></div>
+    <div class="kpi"><div class="k-l">Margen neto</div><div class="k-v">${pct(ingreso>0?util/ingreso:0)}</div><div class="k-n">promedio</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Registrar una venta</h3>
+    <div class="row">
+      <div class="field" style="max-width:150px"><label class="f">Fecha</label><input type="date" id="vFecha" value="${todayISO()}"></div>
+      <div class="field" style="min-width:220px;flex:2"><label class="f">Receta</label>
+        <select id="vRec">${DB.recetas.map(r=>`<option value="${r.n}"${pv.n===r.n?' selected':''}>${r.n}. ${esc(r.nom)}</option>`).join('')}</select></div>
+      <div class="field" style="min-width:170px"><label class="f">Canal</label>
+        <select id="vCanal">${SEED.canales.map(c=>`<option${pv.canal===c?' selected':''}>${esc(c)}</option>`).join('')}</select></div>
+    </div>
+    <div class="row">
+      <div class="field" style="max-width:110px"><label class="f">Piezas</label><input type="number" min="1" id="vPz" value="1"></div>
+      <div class="field" style="max-width:140px"><label class="f">Precio unitario</label><input type="number" min="0" step="10" id="vPrecio" value="${pv.precio??''}"></div>
+      <div class="field" style="max-width:130px"><label class="f">Comisión %</label><input type="number" min="0" max="100" step="1" id="vCom" value="0"></div>
+      <div class="field" style="min-width:170px;flex:1"><label class="f">Cliente o nota</label><input id="vNota" placeholder="Opcional"></div>
+    </div>
+    <div id="vPrev" class="mini" style="margin-bottom:12px"></div>
+    <button class="btn" id="vAdd">Guardar venta</button>
+    <button class="btn ghost" id="vSug">Usar precio sugerido del canal</button>
+  </div>
+
+  <div class="card">
+    <h3>Ventas registradas (${DB.ventas.length})</h3>
+    ${rows.length?`<div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Receta</th><th>Canal</th><th class="num">Pz</th><th class="num">Precio</th><th class="num">Ingreso</th><th class="num">Utilidad neta</th><th class="num">Margen</th><th></th></tr></thead>
+      <tbody>${rows.map(v=>{const ing=v.piezas*v.precio, cst=v.piezas*costoTotalDe(v.n), com=ing*(+v.comision||0), ut=ing-cst-com;return `<tr>
+        <td class="mini">${esc(v.fecha)}</td>
+        <td style="max-width:230px;font-size:12.5px">${esc((recByN[v.n]||{}).nom||'')}${v.nota?`<div class="mini">${esc(v.nota)}</div>`:''}</td>
+        <td><span class="pill">${esc(v.canal)}</span></td>
+        <td class="num">${num(v.piezas)}</td><td class="num">${money0(v.precio)}</td><td class="num">${money0(ing)}</td>
+        <td class="num" style="color:${ut>=0?'var(--good)':'var(--danger)'}">${money(ut)}</td>
+        <td class="num"><span class="pill ${ut/ing>=0.4?'g':(ut<=0?'r':'y')}">${pct(ing>0?ut/ing:0)}</span></td>
+        <td><button class="x" data-delv="${v.id}" title="Eliminar">✕</button></td></tr>`}).join('')}</tbody>
+    </table></div>`:`<div class="empty"><b>Todavía no hay ventas</b>Registra la primera arriba, o entra a la calculadora y usa «Vender a este precio».</div>`}
+  </div>`;
+}
+function hookVentas(){
+  const S=id=>document.getElementById(id);
+  function prev(){
+    const n=+S('vRec').value, pz=+S('vPz').value||0, pr=+S('vPrecio').value||0, cm=(+S('vCom').value||0)/100;
+    const ing=pz*pr, cst=pz*costoTotalDe(n), com=ing*cm, ut=ing-cst-com;
+    S('vPrev').innerHTML = pr>0 ? `Ingreso ${money(ing)} − costo ${money(cst)} − comisión ${money(com)} = <b style="color:${ut>=0?'var(--good)':'var(--danger)'}">utilidad neta ${money(ut)}</b> (${pct(ing>0?ut/ing:0)})`:'';
+  }
+  ['vRec','vPz','vPrecio','vCom','vCanal'].forEach(id=>S(id).oninput=prev);
+  S('vSug').onclick=()=>{ const k=canalKey(S('vCanal').value); S('vPrecio').value=calc(+S('vRec').value).precios[k].pvp; prev(); };
+  S('vAdd').onclick=()=>{
+    const pz=+S('vPz').value||0, pr=+S('vPrecio').value||0;
+    if(pz<=0||pr<=0){ toast('Escribe cuántas piezas vendiste y a qué precio.'); S('vPrecio').focus(); return; }
+    DB.ventas.push({id:Date.now(), fecha:S('vFecha').value||todayISO(), n:+S('vRec').value, canal:S('vCanal').value,
+      piezas:pz, precio:pr, comision:(+S('vCom').value||0)/100, nota:S('vNota').value});
+    save(); toast('Venta guardada'); render();
+  };
+  document.querySelectorAll('[data-delv]').forEach(b=>b.onclick=()=>{ DB.ventas=DB.ventas.filter(x=>x.id!=b.dataset.delv); save(); toast('Venta eliminada'); render(); });
+  prev();
+}
+
+/* =========================================================
+   VISTA · MI NEGOCIO
+   ========================================================= */
+function vNegocio(){
+  const eq=equilibrio();
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Supuestos que mueven todo</div><h1 class="title">Mi negocio</h1>
+    <p class="sub">De aquí salen el overhead por pieza y el costo de tu hora de trabajo. Si estos números están mal, todos tus precios están mal.</p>
+  </div></div>
+
+  <div class="grid g3">
+    <div class="kpi"><div class="k-l">Gastos fijos al mes</div><div class="k-v">${money0(gastosTotales())}</div></div>
+    <div class="kpi"><div class="k-l">Overhead por pieza</div><div class="k-v">${money(overhead())}</div><div class="k-n">${num(DB.gf.piezasMes)} piezas al mes</div></div>
+    <div class="kpi"><div class="k-l">Tu hora de trabajo</div><div class="k-v">${money(costoHora())}</div><div class="k-n">${money0(DB.gf.sueldo)} ÷ ${num(DB.gf.horas)} h</div></div>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h3>Gastos fijos mensuales</h3>
+      ${DB.gf.lineas.map((l,i)=>`<div class="row" style="margin-bottom:7px;align-items:center">
+        <input value="${esc(l.nom)}" data-gfn="${i}" style="flex:2;min-width:150px;font-size:13px;padding:7px 9px">
+        <input type="number" min="0" step="50" value="${l.monto}" data-gfm="${i}" style="max-width:110px;text-align:right;font-size:13px;padding:7px 9px">
+        <button class="x" data-gfd="${i}" title="Quitar">✕</button></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1.5px solid var(--line)">
+        <button class="btn sm ghost" id="gfAdd">+ Agregar gasto</button>
+        <div><span class="mini">Total</span> <b style="font-family:'Bebas Neue';font-size:24px;color:var(--deep);margin-left:6px">${money0(gastosTotales())}</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Trabajo y volumen</h3>
+      <div class="field"><label class="f">Piezas que produces al mes</label><input type="number" min="1" id="gPz" value="${DB.gf.piezasMes}"></div>
+      <div class="field"><label class="f">Sueldo mensual que quieres cobrarte</label><input type="number" min="0" step="500" id="gSu" value="${DB.gf.sueldo}"></div>
+      <div class="field"><label class="f">Horas de trabajo al mes</label><input type="number" min="1" id="gHo" value="${DB.gf.horas}"></div>
+      <h3 style="margin-top:22px">Márgenes objetivo por canal</h3>
+      ${CANALES.map(c=>`<div class="field"><label class="f">${c.nom} · <span style="color:var(--purple)">${pct(DB.params.margenes[c.k])}</span> <span style="color:var(--gray);font-weight:500">(libro: ${c.rango})</span></label>
+        <input type="range" min="10" max="85" step="1" value="${Math.round(DB.params.margenes[c.k]*100)}" data-mg="${c.k}"></div>`).join('')}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Punto de equilibrio</h3>
+    <div class="grid g4">
+      <div><div class="mini">Precio promedio (menudeo)</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${money0(eq.avgP)}</b></div>
+      <div><div class="mini">Costo total promedio</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${money0(eq.avgC)}</b></div>
+      <div><div class="mini">Margen de contribución</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--good)">${money0(eq.mc)}</b></div>
+      <div><div class="mini">Piezas al mes para no perder</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--purple)">${num(eq.piezas)}</b></div>
+    </div>
+    <div class="note">Con ${money0(eq.gf)} de gastos fijos necesitas vender <b>${num(eq.piezas)} tamales al mes</b> (${money0(eq.ingreso)} de ingreso) solo para quedar en ceros. A partir de la pieza ${num(eq.piezas+1)}, empiezas a ganar.</div>
+  </div>`;
+}
+function hookNegocio(){
+  const S=id=>document.getElementById(id);
+  document.querySelectorAll('[data-gfn]').forEach(el=>el.oninput=e=>{ DB.gf.lineas[+el.dataset.gfn].nom=e.target.value; save(); });
+  document.querySelectorAll('[data-gfm]').forEach(el=>el.oninput=e=>{ DB.gf.lineas[+el.dataset.gfm].monto=+e.target.value||0; save(); softCalc(); });
+  document.querySelectorAll('[data-gfd]').forEach(el=>el.onclick=()=>{ DB.gf.lineas.splice(+el.dataset.gfd,1); save(); render(); });
+  S('gfAdd').onclick=()=>{ DB.gf.lineas.push({nom:'Nuevo gasto',monto:0}); save(); render(); };
+  S('gPz').oninput=e=>{ DB.gf.piezasMes=+e.target.value||1; save(); softCalc(); };
+  S('gSu').oninput=e=>{ DB.gf.sueldo=+e.target.value||0; save(); softCalc(); };
+  S('gHo').oninput=e=>{ DB.gf.horas=+e.target.value||1; save(); softCalc(); };
+  document.querySelectorAll('[data-mg]').forEach(el=>el.oninput=e=>{ DB.params.margenes[el.dataset.mg]=(+e.target.value||0)/100; save(); softCalc(); });
+}
+
+/* =========================================================
+   VISTA · MIS DATOS
+   ========================================================= */
+function vDatos(){
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Respaldo y privacidad</div><h1 class="title">Mis datos</h1>
+    <p class="sub">Todo lo que escribes se guarda solo en este dispositivo, dentro de tu navegador. Nada viaja a internet.</p>
+  </div></div>
+
+  ${!canPersist?`<div class="note" style="margin:0 0 16px"><b>Estás viendo una vista previa.</b> Para que tus datos se guarden, descarga este archivo a tu computadora o celular y ábrelo desde ahí.</div>`:''}
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Respaldar</h3>
+      <p class="mini">Descarga un archivo con tus precios, lotes y ventas. Guárdalo en tu nube o mándatelo por correo: es tu seguro contra borrar el historial del navegador.</p>
+      <button class="btn" id="dExp">Descargar respaldo</button>
+      <button class="btn ghost" id="dImp">Restaurar respaldo</button>
+      <input type="file" id="dFile" accept="application/json" style="display:none">
+    </div>
+    <div class="card">
+      <h3>Exportar a Excel</h3>
+      <p class="mini">Baja tus bitácoras en formato CSV para abrirlas en Excel, Google Sheets o mandárselas a tu contador.</p>
+      <button class="btn ghost" id="dCsvV">Ventas (${DB.ventas.length})</button>
+      <button class="btn ghost" id="dCsvP">Producción (${DB.prod.length})</button>
+      <button class="btn ghost" id="dCsvC">Costos de las 51 recetas</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Resumen de lo que tienes cargado</h3>
+    <div class="grid g4">
+      <div><div class="mini">Insumos</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.insumos.length}</b></div>
+      <div><div class="mini">Recetas</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.recetas.length}</b></div>
+      <div><div class="mini">Lotes</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.prod.length}</b></div>
+      <div><div class="mini">Ventas</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.ventas.length}</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Empezar de nuevo</h3>
+    <p class="mini">Vuelve a los precios de referencia y borra tus bitácoras. Esto no se puede deshacer, así que descarga antes un respaldo.</p>
+    <button class="btn danger" id="dReset">Restablecer todo</button>
+  </div>
+
+  <div class="note"><b>Endulcora · Estudio Gastronómico.</b> Herramienta complementaria del eBook «Tamales de México: Ruta Regional». Contenido: Chef Luis Alfonso Jiménez Cárdenas · Edición: Manuel Ramiro Justo Guzmán · WhatsApp 5665271901. Uso personal del comprador; no se autoriza su reventa ni redistribución.</div>`;
+}
+function download(name, text, type){
+  const b=new Blob([type==='csv'?'\ufeff'+text:text],{type:(type==='csv'?'text/csv':'application/json')+';charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+const csvCell=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+function hookDatos(){
+  const S=id=>document.getElementById(id);
+  S('dExp').onclick=()=>{ download(`Endulcora_Tamales_Regionales_respaldo_${todayISO()}.json`, JSON.stringify(DB), 'json'); toast('Respaldo descargado'); };
+  S('dImp').onclick=()=>S('dFile').click();
+  S('dFile').onchange=e=>{
+    const f=e.target.files[0]; if(!f) return; const rd=new FileReader();
+    rd.onload=()=>{ try{ const o=JSON.parse(rd.result); if(!o.insumos||!o.recetas) throw 0;
+      DB=o; reindex(); save(); toast('Respaldo restaurado'); render(); }catch(err){ toast('Ese archivo no es un respaldo válido.'); } };
+    rd.readAsText(f);
+  };
+  S('dCsvV').onclick=()=>{
+    const h=['Fecha','Receta','Canal','Piezas','Precio unitario','Ingreso','Costo total','Comision','Utilidad neta','Margen','Cliente/Nota'];
+    const rows=DB.ventas.map(v=>{const ing=v.piezas*v.precio,cst=v.piezas*costoTotalDe(v.n),com=ing*(+v.comision||0);
+      return [v.fecha,(recByN[v.n]||{}).nom,v.canal,v.piezas,v.precio,ing,cst,com,ing-cst-com,ing>0?((ing-cst-com)/ing).toFixed(4):0,v.nota].map(csvCell).join(',');});
+    download(`Endulcora_Ventas_${todayISO()}.csv`,[h.map(csvCell).join(','),...rows].join('\n'),'csv'); toast('CSV de ventas descargado');
+  };
+  S('dCsvP').onclick=()=>{
+    const h=['Fecha','Lote','Receta','Planeadas','Buenas','Falladas','% merma','Costo merma','Causa','Notas'];
+    const rows=DB.prod.map(p=>{const m=(p.buenas+p.fallas)>0?p.fallas/(p.buenas+p.fallas):0;
+      return [p.fecha,p.lote,(recByN[p.n]||{}).nom,p.plan,p.buenas,p.fallas,m.toFixed(4),(p.fallas*costoTotalDe(p.n)).toFixed(2),p.causa,p.nota].map(csvCell).join(',');});
+    download(`Endulcora_Produccion_${todayISO()}.csv`,[h.map(csvCell).join(','),...rows].join('\n'),'csv'); toast('CSV de producción descargado');
+  };
+  S('dCsvC').onclick=()=>{
+    const h=['No','Receta','Insumos','Empaque','Energia','Mano de obra','Overhead','Costo base','% merma','Costo total','PVP menudeo','PVP docena','PVP evento','PVP mayoreo'];
+    const rows=DB.recetas.map(r=>{const c=calc(r.n);
+      return [String(r.n), r.nom, ...[c.ins,c.emp,c.ene,c.mo,c.oh,c.base].map(x=>x.toFixed(2)), c.merma.toFixed(3), c.total.toFixed(2),
+        c.precios.menudeo.pvp, c.precios.restaurante.pvp, c.precios.evento.pvp, c.precios.mayoreo.pvp].map(csvCell).join(',');});
+    download(`Endulcora_Costos_${todayISO()}.csv`,[h.map(csvCell).join(','),...rows].join('\n'),'csv'); toast('CSV de costos descargado');
+  };
+  S('dReset').onclick=()=>{
+    openModal(`<h2 style="font-family:'Bebas Neue';font-size:28px;color:var(--deep);margin-bottom:8px">¿Restablecer todo?</h2>
+      <p class="mini">Se borrarán tus ${DB.ventas.length} ventas, ${DB.prod.length} lotes y los precios que hayas cambiado. Volverás a los valores de referencia del libro.</p>
+      <div style="display:flex;gap:8px;margin-top:16px"><button class="btn ghost" id="noReset">Cancelar</button>
+      <button class="btn danger" id="okReset">Sí, borrar todo</button></div>`);
+    document.getElementById('noReset').onclick=closeModal;
+    document.getElementById('okReset').onclick=()=>{ DB=freshDB(); reindex(); save(); closeModal(); toast('Todo restablecido'); go('tablero'); };
+  };
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function render(){
+  const v=document.getElementById('view');
+  const map={tablero:vTablero,calc:vCalc,recetas:vRecetas,insumos:vInsumos,prod:vProd,ventas:vVentas,negocio:vNegocio,datos:vDatos};
+  const hooks={tablero:hookTablero,calc:hookCalc,recetas:hookRecetas,insumos:hookInsumos,prod:hookProd,ventas:hookVentas,negocio:hookNegocio,datos:hookDatos};
+  v.innerHTML=map[current]();
+  reindex();
+  hooks[current]();
+}
+buildNav(); render();
+</script>
+</body>
+</html>

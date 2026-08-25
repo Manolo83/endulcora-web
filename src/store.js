@@ -1,4 +1,6 @@
 const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 const { Pool } = require('pg');
 const { DATA_DIR, UPLOAD_DIR } = require('./config');
 
@@ -206,11 +208,253 @@ async function init() {
         changed = true;
       }
       if (typeof p.esPaquete !== 'boolean') { p.esPaquete = false; changed = true; }
+      if (typeof p.ocultoEnCatalogo !== 'boolean') { p.ocultoEnCatalogo = false; changed = true; }
       if (!p.slug) {
         p.slug = slugUnico(p.titulo, data.products, p.id);
         changed = true;
       }
     });
+    // Reemplaza un producto "paquete completo" antiguo (un solo articulo)
+    // por una familia de 4: eBook (principal, visible en el catalogo) +
+    // Anexo Excel + App + Paquete completo (estos 3 ocultos del catalogo,
+    // solo se compran desde la pagina del eBook). Precios estandar de la
+    // linea de eBooks: eBook $99, Anexo $50, App $50, Paquete $149.
+    // Para agregar un producto nuevo a esta lista: sube sus 3 archivos a
+    // seed-archivos/<carpetaSeed>/ y agrega una entrada a
+    // FAMILIAS_A_DESGLOSAR. Cada entrada corre una sola vez.
+    const PRECIOS_LINEA_EBOOKS = { ebook: '99', anexo: '50', app: '50', paquete: '149' };
+    function crearFamiliaEbookDesglosada({ tituloBase, categoria, carpetaSeed, archivos }) {
+      const SEED_DIR = path.join(__dirname, '..', 'seed-archivos', carpetaSeed);
+      const nuevoProducto = (titulo, categoriaItem, precio, boton, nombreArchivo) => {
+        const item = {
+          id: nextId(data.products),
+          orden: data.products.length,
+          categoria: categoriaItem,
+          etiqueta: '',
+          destacado: '',
+          titulo,
+          subtitulo: '',
+          descripcionCorta: '',
+          descripcionLarga: '',
+          bullets: [],
+          precio,
+          precioAnterior: '',
+          boton,
+          imagen: '',
+          galeria: [],
+          archivo: '',
+          archivoNombre: '',
+          slug: '',
+          productosRelacionados: [],
+          esPaquete: false,
+          ocultoEnCatalogo: false,
+        };
+        item.slug = slugUnico(titulo, data.products, item.id);
+        data.products.push(item);
+        if (nombreArchivo) {
+          const origen = path.join(SEED_DIR, nombreArchivo);
+          if (fs.existsSync(origen)) {
+            const destino = `${crypto.randomUUID()}${path.extname(nombreArchivo)}`;
+            fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+            item.archivo = `/uploads/${destino}`;
+            item.archivoNombre = nombreArchivo;
+          }
+        }
+        return item;
+      };
+      const anexo = nuevoProducto(`Anexo Excel · ${tituloBase}`, 'anexo', PRECIOS_LINEA_EBOOKS.anexo, 'Añadir anexo Excel al carrito', archivos.anexo);
+      const app = nuevoProducto(`App · ${tituloBase}`, categoria, PRECIOS_LINEA_EBOOKS.app, 'Añadir app al carrito', archivos.app);
+      anexo.ocultoEnCatalogo = true;
+      app.ocultoEnCatalogo = true;
+      const paquete = nuevoProducto(`${tituloBase} · Paquete completo`, categoria, PRECIOS_LINEA_EBOOKS.paquete, 'Comprar paquete completo', archivos.paquete || null);
+      paquete.esPaquete = true;
+      paquete.ocultoEnCatalogo = true;
+      const ebook = nuevoProducto(tituloBase, categoria, PRECIOS_LINEA_EBOOKS.ebook, 'Agregar al carrito', archivos.ebook);
+      ebook.productosRelacionados = [anexo.id, app.id, paquete.id];
+    }
+    const FAMILIAS_A_DESGLOSAR = [
+      {
+        tituloViejo: 'Galletas Tipo New York · Paquete completo',
+        tituloBase: 'Galletas Tipo New York',
+        categoria: 'ebook',
+        carpetaSeed: 'galletas-tipo-new-york',
+        archivos: { ebook: 'Endulcora_Galletas_NY_eBook.pdf', anexo: 'Endulcora_Galletas_NY_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Galletas_NY_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloViejo: 'Repostería para Diabéticos · Paquete completo',
+        tituloBase: 'Repostería para Diabéticos',
+        categoria: 'ebook',
+        carpetaSeed: 'reposteria-para-diabeticos',
+        archivos: { ebook: 'Endulcora_Reposteria_Diabeticos_eBook.pdf', anexo: 'Endulcora_Reposteria_Diabeticos_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Reposteria_Diabeticos_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloViejo: 'PAQUETE MAESTRO DE ROLES GOURMET',
+        tituloBase: 'Roles Gourmet',
+        categoria: 'ebook',
+        carpetaSeed: 'roles-gourmet',
+        archivos: { ebook: 'Endulcora_Roles_Gourmet_eBook.pdf', anexo: 'Endulcora_Roles_Gourmet_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Roles_Gourmet_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        // Productos nuevos, sin producto viejo que borrar.
+        tituloBase: 'Tamales Oaxaqueños',
+        categoria: 'ebook',
+        carpetaSeed: 'tamales-oaxaquenos',
+        archivos: { ebook: 'Endulcora_Tamales_Oaxaquenos_eBook.pdf', anexo: 'Endulcora_Tamales_Oaxaquenos_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tamales_Oaxaquenos_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'Tamales Regionales',
+        categoria: 'ebook',
+        carpetaSeed: 'tamales-regionales',
+        archivos: { ebook: 'Endulcora_Tamales_Regionales_eBook.pdf', anexo: 'Endulcora_Tamales_Regionales_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tamales_Regionales_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+    ];
+    for (const familia of FAMILIAS_A_DESGLOSAR) {
+      const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
+      if (data[flag]) continue;
+      if (familia.tituloViejo) {
+        const viejo = data.products.find((p) => (p.titulo || '').toLowerCase() === familia.tituloViejo.toLowerCase());
+        if (!viejo) continue;
+        data.products = data.products.filter((p) => p.id !== viejo.id);
+        if (typeof viejo.imagen === 'string' && viejo.imagen.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.imagen)), () => {});
+        }
+        if (typeof viejo.archivo === 'string' && viejo.archivo.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.archivo)), () => {});
+        }
+      }
+      crearFamiliaEbookDesglosada(familia);
+      data[flag] = true;
+      changed = true;
+    }
+    // Completa el archivo del "paquete completo" de familias que ya se
+    // crearon antes de que existiera archivos.paquete en la config de
+    // arriba (para no dejarlo sin descarga). Si el producto ya tiene un
+    // archivo, no lo pisa.
+    for (const familia of FAMILIAS_A_DESGLOSAR) {
+      if (!familia.archivos.paquete) continue;
+      const paquete = data.products.find((p) => p.titulo === `${familia.tituloBase} · Paquete completo`);
+      if (!paquete || paquete.archivo) continue;
+      const origen = path.join(__dirname, '..', 'seed-archivos', familia.carpetaSeed, familia.archivos.paquete);
+      if (!fs.existsSync(origen)) continue;
+      const destino = `${crypto.randomUUID()}${path.extname(familia.archivos.paquete)}`;
+      fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+      paquete.archivo = `/uploads/${destino}`;
+      paquete.archivoNombre = familia.archivos.paquete;
+      changed = true;
+    }
+    // Corrige el enlace del "paquete completo" en la pagina del eBook de
+    // Velas Comestibles: por un producto duplicado que ya existia de antes
+    // (mismo nombre, distinto id), la migracion original engancho el
+    // paquete equivocado (uno que solo entrega el PDF del eBook) en vez
+    // del paquete real (el que entrega los 3 archivos en un ZIP).
+    if (!data._fixVelasComestiblesPaqueteLink) {
+      const ebookVelas = data.products.find((p) => p.slug === 'velas-comestibles');
+      const paqueteReal = data.products.find((p) => p.slug === 'velas-comestibles-paquete-completo');
+      if (ebookVelas && paqueteReal) {
+        const limpios = ebookVelas.productosRelacionados.filter((id) => id !== 1);
+        if (!limpios.includes(paqueteReal.id)) limpios.push(paqueteReal.id);
+        ebookVelas.productosRelacionados = limpios;
+        data._fixVelasComestiblesPaqueteLink = true;
+        changed = true;
+      }
+    }
+    // Consolida los duplicados: Velas Comestibles, Galletas Tipo New York,
+    // Reposteria para Diabeticos y Roles Gourmet ya tenian, desde antes de
+    // este trabajo, su propio eBook/Anexo/App con foto y contenido real.
+    // Se copia ese contenido (foto, textos, bullets) a los productos nuevos
+    // y se borran los viejos, incluyendo el slug (para no perder el enlace
+    // publico que ya existia). No se toca el archivo descargable del
+    // producto nuevo (ya tiene el suyo propio) ni se borra la foto (ahora
+    // la usa el producto nuevo).
+    const CONSOLIDACIONES = [
+      {
+        pares: [
+          { viejoSlug: 'velas-comestibles-paquete', nuevoSlug: 'velas-comestibles' },
+          { viejoSlug: 'costeo-de-velas-comestibles-excel', nuevoSlug: 'anexo-excel-velas-comestibles' },
+          { viejoSlug: 'calculadora-velas-comestibles-app', nuevoSlug: 'app-velas-comestibles' },
+        ],
+        paquete: { slug: 'velas-comestibles-paquete-completo', precio: '149', boton: 'Comprar paquete completo' },
+      },
+      {
+        pares: [
+          { viejoSlug: 'galletas-tipo-new-york', nuevoSlug: 'galletas-tipo-new-york-2' },
+          { viejoSlug: 'costeo-de-galletas-tipo-new-york-excel', nuevoSlug: 'anexo-excel-galletas-tipo-new-york' },
+          { viejoSlug: 'calculadora-galletas-tipo-new-york-app', nuevoSlug: 'app-galletas-tipo-new-york' },
+        ],
+      },
+      {
+        pares: [
+          { viejoSlug: 'reposteria-para-diabeticos', nuevoSlug: 'reposteria-para-diabeticos-2' },
+          { viejoSlug: 'costeo-de-reposteria-para-diabeticos-excel', nuevoSlug: 'anexo-excel-reposteria-para-diabeticos' },
+          { viejoSlug: 'calculadora-reposteria-para-diabeticos-app', nuevoSlug: 'app-reposteria-para-diabeticos' },
+        ],
+      },
+      {
+        pares: [
+          { viejoSlug: 'roles-gourmet', nuevoSlug: 'roles-gourmet-3' },
+          { viejoSlug: 'roles-gourmet-2', nuevoSlug: 'anexo-excel-roles-gourmet' },
+          { viejoSlug: 'roles-gourmet-app', nuevoSlug: 'app-roles-gourmet' },
+        ],
+      },
+    ];
+    if (!data._migConsolidaDuplicados) {
+      let algoCambio = false;
+      for (const c of CONSOLIDACIONES) {
+        for (const par of c.pares) {
+          const viejo = data.products.find((p) => p.slug === par.viejoSlug);
+          const nuevo = data.products.find((p) => p.slug === par.nuevoSlug);
+          if (!viejo || !nuevo) continue;
+          nuevo.etiqueta = viejo.etiqueta || nuevo.etiqueta;
+          nuevo.destacado = viejo.destacado || nuevo.destacado;
+          nuevo.subtitulo = viejo.subtitulo || nuevo.subtitulo;
+          nuevo.bullets = viejo.bullets && viejo.bullets.length ? viejo.bullets : nuevo.bullets;
+          nuevo.descripcionCorta = viejo.descripcionCorta || nuevo.descripcionCorta;
+          nuevo.descripcionLarga = viejo.descripcionLarga || nuevo.descripcionLarga;
+          nuevo.imagen = viejo.imagen || nuevo.imagen;
+          if (typeof viejo.archivo === 'string' && viejo.archivo.startsWith('/uploads/')) {
+            fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.archivo)), () => {});
+          }
+          nuevo.slug = par.viejoSlug;
+          data.products = data.products.filter((p) => p.id !== viejo.id);
+          algoCambio = true;
+        }
+        if (c.paquete) {
+          const paquete = data.products.find((p) => p.slug === c.paquete.slug);
+          if (paquete) {
+            paquete.precio = c.paquete.precio;
+            paquete.boton = c.paquete.boton;
+            paquete.ocultoEnCatalogo = true;
+            paquete.productosRelacionados = [];
+            paquete.precioAnterior = '';
+            algoCambio = true;
+          }
+        }
+      }
+      if (algoCambio) {
+        data._migConsolidaDuplicados = true;
+        changed = true;
+      }
+    }
+    // El negocio dejo de vender recetarios: de ahora en adelante todo se
+    // vende como eBooks con anexos. Borra todos los productos de categoria
+    // "recetario" (confirmado que ninguno tenia ventas previas). Corre una
+    // sola vez.
+    if (!data._migBorraRecetarios) {
+      const recetarios = data.products.filter((p) => p.categoria === 'recetario');
+      recetarios.forEach((p) => {
+        if (typeof p.imagen === 'string' && p.imagen.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(p.imagen)), () => {});
+        }
+        if (typeof p.archivo === 'string' && p.archivo.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(p.archivo)), () => {});
+        }
+      });
+      if (recetarios.length) {
+        data.products = data.products.filter((p) => p.categoria !== 'recetario');
+      }
+      data._migBorraRecetarios = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
@@ -408,6 +652,7 @@ module.exports = {
       slug: '',
       productosRelacionados: [],
       esPaquete: false,
+      ocultoEnCatalogo: false,
       ...fields,
     };
     item.slug = slugUnico(item.slug || item.titulo, data.products, item.id);

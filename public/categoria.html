@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="tituloPagina">Tienda · Endulcora</title>
-<meta id="metaDescripcion" name="description" content="eBooks, hojas de costeo y recetarios de Endulcora, Estudio Gastronómico.">
+<meta id="metaDescripcion" name="description" content="eBooks y hojas de costeo de Endulcora, Estudio Gastronómico.">
 <meta name="robots" content="index, follow">
 <link id="linkCanonico" rel="canonical" href="https://www.endulcora.com/tienda">
 <meta name="theme-color" content="#1B0720">
@@ -31,7 +31,7 @@ src="https://www.facebook.com/tr?id=1302735011542499&ev=PageView&noscript=1"
 <meta id="ogUrl" property="og:url" content="https://www.endulcora.com/tienda">
 <meta property="og:site_name" content="Endulcora · Estudio Gastronómico">
 <meta id="ogTitulo" property="og:title" content="Tienda · Endulcora">
-<meta id="ogDescripcion" property="og:description" content="eBooks, hojas de costeo y recetarios de Endulcora, Estudio Gastronómico.">
+<meta id="ogDescripcion" property="og:description" content="eBooks y hojas de costeo de Endulcora, Estudio Gastronómico.">
 <meta property="og:image" content="https://www.endulcora.com/og-image.png">
 <meta property="og:locale" content="es_MX">
 
@@ -86,7 +86,6 @@ body { background: #FBF4E9; }
       <a href="/tienda" class="hover:text-vino transition">Todo</a>
       <a href="/ebooks" class="hover:text-vino transition">eBooks</a>
       <a href="/anexos" class="hover:text-vino transition">Anexos</a>
-      <a href="/recetarios" class="hover:text-vino transition">Recetarios</a>
     </nav>
     <a id="linkCarrito" href="/?verCarrito=1#tienda" aria-label="Ver carrito"
       class="relative grid h-11 w-11 shrink-0 place-items-center rounded-full boton-vivo border border-vino/25 text-vino hover:border-vino transition">
@@ -98,7 +97,6 @@ body { background: #FBF4E9; }
     <a href="/tienda" class="shrink-0 hover:text-vino transition">Todo</a>
     <a href="/ebooks" class="shrink-0 hover:text-vino transition">eBooks</a>
     <a href="/anexos" class="shrink-0 hover:text-vino transition">Anexos</a>
-    <a href="/recetarios" class="shrink-0 hover:text-vino transition">Recetarios</a>
   </nav>
 </header>
 
@@ -137,10 +135,9 @@ document.getElementById('anioFooter').textContent = new Date().getFullYear();
 
 const PREFIJO_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
 const INFO_CATEGORIA = {
-  tienda: { titulo: 'Tienda', desc: 'Todo lo que tenemos para vender: eBooks, anexos y recetarios.', filtro: null },
+  tienda: { titulo: 'Tienda', desc: 'Todo lo que tenemos para vender: eBooks y anexos.', filtro: null },
   ebooks: { titulo: 'eBooks', desc: 'Manuales técnicos completos, listos para descargar.', filtro: 'ebook' },
   anexos: { titulo: 'Anexos', desc: 'Hojas de cálculo de costeo, listas para usar.', filtro: 'anexo' },
-  recetarios: { titulo: 'Recetarios', desc: 'Colecciones de recetas para tu estudio o negocio.', filtro: 'recetario' },
 };
 
 const seg = window.location.pathname.replace(/^\/|\/$/g, '') || 'tienda';
@@ -167,7 +164,8 @@ actualizarBadgeCarrito();
 
 function tarjetaProducto(p){
   const imagenEstilo = p.imagen ? `background-image:url('${p.imagen}');background-size:cover;background-position:center;` : '';
-  const anteriorPrecio = p.precioAnterior ? `<span class="pb-1 text-sm text-humo line-through">$${formatoMonto(p.precioAnterior)}</span>` : '';
+  const anteriorNum = parseFloat(String(p.precioAnterior || '').replace(/,/g, ''));
+  const anteriorPrecio = Number.isFinite(anteriorNum) && anteriorNum > 0 ? `<span class="pb-1 text-sm text-humo line-through">$${formatoMonto(anteriorNum)}</span>` : '';
   const destacado = p.destacado ? `<span class="absolute right-5 top-5 rounded-full bg-flama px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-widest text-carbon">${escapeHtml(p.destacado)}</span>` : '';
   const subtitulo = p.subtitulo ? `<p class="relative mt-2 font-firma text-xl text-flama">${escapeHtml(p.subtitulo)}</p>` : '';
   const prefijo = PREFIJO_POR_CATEGORIA[p.categoria] || 'tienda';
@@ -206,7 +204,7 @@ function pintar(){
   TODOS.forEach(p => {
     if(p.esPaquete) (p.productosRelacionados || []).forEach(id => componentesDePaquete.add(id));
   });
-  let items = TODOS.filter(p => !componentesDePaquete.has(p.id));
+  let items = TODOS.filter(p => !componentesDePaquete.has(p.id) && !p.ocultoEnCatalogo);
   if(info.filtro) items = items.filter(p => (p.categoria || 'ebook') === info.filtro);
   if(q){
     items = items.filter(p => `${p.titulo || ''} ${p.subtitulo || ''} ${p.etiqueta || ''} ${p.descripcionCorta || ''}`.toLowerCase().includes(q));

@@ -123,15 +123,9 @@ body { background: #FBF4E9; }
   </div>
 
   <div id="contenidoProducto" class="hidden">
-    <!-- Paquete completo (arriba, como opción destacada) -->
-    <div id="bloquePaquete" class="mt-8 hidden rounded-3xl bg-vino p-6 text-crema sm:p-8">
-      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">¿Prefieres llevar todo junto?</p>
-      <div id="pPaquete" class="mt-4 space-y-3"></div>
-    </div>
-
     <!-- Hero del producto -->
-    <div class="mt-8 grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-start">
-      <div id="pImagen" class="reveal visible tarjeta-viva aspect-[4/3] w-full overflow-hidden rounded-3xl bg-gradient-to-br from-vino to-uva bg-cover bg-center ring-1 ring-vino/10"></div>
+    <div class="mt-8 grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-stretch">
+      <div id="pImagen" class="reveal visible tarjeta-viva aspect-[4/3] min-h-[22rem] w-full overflow-hidden rounded-3xl bg-gradient-to-br from-vino to-uva bg-cover bg-center ring-1 ring-vino/10 lg:aspect-auto lg:min-h-[32rem]"></div>
 
       <div>
         <p id="pEtiqueta" class="font-titulo text-[11px] tracking-[.3em] text-flama"></p>
@@ -157,12 +151,15 @@ body { background: #FBF4E9; }
           </a>
         </div>
 
-        <!-- Anexos sueltos: aqui mismo, junto al boton de compra, para que se
-             puedan sumar al carrito sin bajar hasta el final de la pagina. -->
-        <div id="bloqueRelacionados" class="mt-8 hidden border-t border-vino/10 pt-6">
-          <h2 class="font-titulo text-base tracking-wide text-vino">Agrega también por separado</h2>
-          <p class="mt-1 text-xs text-carbon/60">Anexos que puedes sumar a esta compra.</p>
-          <div id="pRelacionados" class="mt-4 grid gap-3"></div>
+        <!-- Anexos: opción de compra individual -->
+        <div id="bloqueRelacionados" class="mt-6 hidden">
+          <div id="pRelacionados" class="grid gap-3 sm:grid-cols-2"></div>
+        </div>
+
+        <!-- Paquete completo, como opción destacada -->
+        <div id="bloquePaquete" class="mt-4 hidden rounded-2xl bg-vino p-5 text-crema">
+          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">¿Prefieres llevar todo junto?</p>
+          <div id="pPaquete" class="mt-3 space-y-3"></div>
         </div>
       </div>
     </div>
@@ -361,9 +358,10 @@ async function cargarProducto(){
   bullets.innerHTML = (p.bullets || []).map(b => `<li class="flex gap-2.5"><span class="text-flama">▸</span> ${escapeHtml(b)}</li>`).join('');
 
   document.getElementById('pPrecio').textContent = `$${formatoMonto(p.precio || '0')}`;
-  if(p.precioAnterior){
+  const anteriorNum = parseFloat(String(p.precioAnterior || '').replace(/,/g, ''));
+  if(Number.isFinite(anteriorNum) && anteriorNum > 0){
     const el = document.getElementById('pPrecioAnterior');
-    el.textContent = `$${formatoMonto(p.precioAnterior)}`;
+    el.textContent = `$${formatoMonto(anteriorNum)}`;
     el.classList.remove('hidden');
   }
 
@@ -383,15 +381,15 @@ async function cargarProducto(){
 
     if(paquetes.length){
       document.getElementById('pPaquete').innerHTML = paquetes.map(r => `
-        <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white/10 p-5 ring-1 ring-white/15">
+        <div class="flex flex-col gap-3 rounded-2xl bg-white/10 p-4 ring-1 ring-white/15">
           <div class="min-w-0">
-            <a href="/${r.prefijo}/${r.slug}" class="font-titulo text-lg text-crema hover:underline">${escapeHtml(r.titulo || '')}</a>
+            <a href="/${r.prefijo}/${r.slug}" class="font-titulo text-base text-crema hover:underline">${escapeHtml(r.titulo || '')}</a>
             <p class="mt-1 text-sm text-crema/70">${escapeHtml(r.descripcionCorta || '')}</p>
             <p class="mt-1.5 font-ui text-base font-700 text-flama">$${formatoMonto(r.precio || '0')} MXN</p>
           </div>
           <button type="button" data-id="${r.id}" data-titulo="${escapeHtml(r.titulo || '')}" data-precio="${r.precio || '0'}"
-            class="btnAgregarRelacionado shrink-0 rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
-            Agregar paquete
+            class="btnAgregarRelacionado w-full rounded-full boton-vivo bg-flama px-4 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
+            ${escapeHtml(r.boton || 'Agregar paquete')}
           </button>
         </div>
       `).join('');
@@ -400,15 +398,14 @@ async function cargarProducto(){
 
     if(individuales.length){
       document.getElementById('pRelacionados').innerHTML = individuales.map(r => `
-        <div class="tarjeta-viva flex items-center justify-between gap-3 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+        <div class="tarjeta-viva flex flex-col gap-2.5 rounded-2xl bg-white p-4 ring-1 ring-vino/10">
           <div class="min-w-0">
-            <a href="/${r.prefijo}/${r.slug}" class="font-titulo text-base text-vino hover:underline">${escapeHtml(r.titulo || '')}</a>
-            <p class="mt-1 truncate text-xs text-carbon/60">${escapeHtml(r.descripcionCorta || '')}</p>
-            <p class="mt-1.5 font-ui text-sm font-700 text-vino">$${formatoMonto(r.precio || '0')} MXN</p>
+            <a href="/${r.prefijo}/${r.slug}" class="font-titulo text-sm text-vino hover:underline">${escapeHtml(r.titulo || '')}</a>
+            <p class="mt-1 font-ui text-sm font-700 text-vino">$${formatoMonto(r.precio || '0')} MXN</p>
           </div>
           <button type="button" data-id="${r.id}" data-titulo="${escapeHtml(r.titulo || '')}" data-precio="${r.precio || '0'}"
-            class="btnAgregarRelacionado shrink-0 rounded-full boton-vivo border border-vino/25 px-4 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
-            Agregar
+            class="btnAgregarRelacionado w-full rounded-full boton-vivo border border-vino/25 px-3 py-2 font-ui text-[10px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+            ${escapeHtml(r.boton || 'Agregar')}
           </button>
         </div>
       `).join('');
@@ -438,8 +435,9 @@ async function cargarProducto(){
     document.getElementById('bloqueGaleria').classList.remove('hidden');
   }
 
-  document.getElementById('linkWhatsappProducto').href = `https://wa.me/52${numero}?text=${encodeURIComponent(`Hola, tengo una duda sobre "${p.titulo}"`)}`;
+  document.getElementById('linkWhatsappProducto').href = `https://wa.me/52${numero}?text=${encodeURIComponent(`Ponte en contacto con nosotros para saber más información acerca de ${p.titulo} y agendar tu taller.`)}`;
 
+  document.getElementById('btnComprarProducto').textContent = p.boton || 'Agregar al carrito';
   document.getElementById('btnComprarProducto').addEventListener('click', () => {
     agregarAlCarritoLocal({
       tipo: 'producto',

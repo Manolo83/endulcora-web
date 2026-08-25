@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Endulcora · Costos de Roles Gourmet</title>
+<meta name="description" content="Calculadora de costos, merma y precios para roles gourmet de masa enriquecida. Endulcora · Estudio Gastronómico.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --purple:#7A2E7E; --deep:#4E1454; --deep2:#5C2360; --plum:#A25AA6; --lilac:#C98BCB;
+  --yellow:#F8B818; --amber:#E39B0C; --gray:#9C9C9C; --cream:#FBF4E9; --cream2:#FBF5EC;
+  --ink:#2A1330; --ink-soft:#6B5470; --line:rgba(78,20,84,.13); --card:#FFFFFF;
+  --danger:#C0392B; --ember:#E4572E; --good:#2E7D57;
+  --r:18px; --r-sm:12px;
+  --sh:0 1px 2px rgba(78,20,84,.06), 0 8px 24px -12px rgba(78,20,84,.28);
+  --sh-lg:0 24px 60px -28px rgba(78,20,84,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:var(--ink); background:var(--cream);
+  background-image:radial-gradient(1100px 520px at 85% -10%, rgba(248,184,24,.16), transparent 60%),
+                   radial-gradient(900px 520px at -10% 0%, rgba(122,46,126,.10), transparent 55%);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased; font-size:15px; line-height:1.5;
+}
+h1,h2,h3,h4{margin:0}
+button{font-family:inherit}
+a{color:var(--purple)}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+@media(min-width:901px){.shell{background:linear-gradient(90deg,#6A2570 0 250px,transparent 250px)}}
+.shell>*{min-width:0}
+.rail{
+  background:linear-gradient(180deg,var(--deep) 0%, var(--deep2) 55%, #6A2570 100%);
+  color:#fff;padding:20px 14px 26px;position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.brand{display:flex;flex-direction:column;gap:10px;padding:6px 8px 18px}
+.brand img{width:152px;height:auto;opacity:.97}
+.brand .flame-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--yellow);box-shadow:0 0 10px var(--yellow)}
+.brand small{font-family:'Montserrat',sans-serif;font-weight:600;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+.navlist{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.navbtn{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;cursor:pointer;
+  background:transparent;border:0;color:rgba(255,255,255,.78);padding:10px 12px;border-radius:11px;
+  font-size:13.5px;font-weight:400;transition:background .18s,color .18s;
+}
+.navbtn svg{width:17px;height:17px;flex:none;opacity:.85}
+.navbtn:hover{background:rgba(255,255,255,.09);color:#fff}
+.navbtn.on{background:rgba(255,255,255,.13);color:#fff;font-weight:500}
+.navbtn.on svg{opacity:1;color:var(--yellow)}
+.rail-foot{margin-top:22px;padding:12px;border-top:1px solid rgba(255,255,255,.14);font-size:10.5px;color:rgba(255,255,255,.5);line-height:1.6}
+.rail-foot b{color:rgba(255,255,255,.78);font-weight:500}
+
+main{padding:26px 30px 90px;max-width:1180px;width:100%;min-width:0}
+.page-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:20px}
+.eyebrow{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--plum);margin-bottom:5px}
+h1.title{font-family:'Bebas Neue',Impact,sans-serif;font-size:38px;line-height:1;letter-spacing:.01em;color:var(--deep)}
+.sub{color:var(--ink-soft);font-size:13px;max-width:64ch;margin-top:6px;font-weight:300}
+
+/* ---------- cards ---------- */
+.card{min-width:0;background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:20px;border:1px solid rgba(78,20,84,.06)}
+.card + .card{margin-top:16px}
+.card h3{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--purple);margin-bottom:14px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* ---------- kpi ---------- */
+.kpi{background:var(--card);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);border:1px solid rgba(78,20,84,.06);position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--yellow)}
+.kpi .k-l{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gray)}
+.kpi .k-v{font-family:'Bebas Neue',Impact,sans-serif;font-size:33px;line-height:1.05;color:var(--deep);margin-top:5px;letter-spacing:.01em}
+.kpi .k-n{font-size:11px;color:var(--ink-soft);margin-top:2px;font-weight:300}
+.kpi.dark{background:linear-gradient(135deg,var(--deep),var(--purple));color:#fff}
+.kpi.dark .k-l{color:rgba(255,255,255,.6)} .kpi.dark .k-v{color:#fff} .kpi.dark .k-n{color:rgba(255,255,255,.7)}
+
+/* ---------- form ---------- */
+label.f{display:block;font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gray);margin-bottom:5px}
+input,select,textarea{
+  width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:var(--cream2);
+  font-family:'Poppins',sans-serif;font-size:14px;color:var(--deep);transition:border-color .15s,background .15s;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple);background:#fff;box-shadow:0 0 0 3px rgba(122,46,126,.10)}
+input[type=range]{padding:0;border:0;background:transparent;accent-color:var(--purple);height:26px}
+.field{margin-bottom:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.field{flex:1;min-width:120px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;border:0;border-radius:11px;
+  padding:10px 16px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--purple);color:#fff;transition:transform .12s, box-shadow .18s, background .18s;
+  box-shadow:0 6px 16px -8px rgba(122,46,126,.8);
+}
+.btn:hover{background:var(--deep);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:transparent;color:var(--purple);border:1.5px solid var(--line);box-shadow:none}
+.btn.ghost:hover{background:rgba(122,46,126,.07);color:var(--deep)}
+.btn.gold{background:var(--yellow);color:var(--deep);box-shadow:0 6px 16px -8px rgba(248,184,24,.9)}
+.btn.gold:hover{background:var(--amber)}
+.btn.sm{padding:7px 11px;font-size:10px;border-radius:9px}
+.btn.danger{background:transparent;color:var(--danger);border:1.5px solid rgba(192,57,43,.3);box-shadow:none}
+.btn.danger:hover{background:rgba(192,57,43,.08)}
+:focus-visible{outline:2.5px solid var(--yellow);outline-offset:2px}
+
+/* ---------- table ---------- */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -6px;padding:0 6px;max-width:100%}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+table.slim{min-width:300px}
+th{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gray);text-align:left;padding:8px 10px;border-bottom:1.5px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid rgba(78,20,84,.07);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:rgba(251,244,233,.75)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.mini{font-size:11.5px;color:var(--ink-soft)}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:10.5px;font-weight:500;background:rgba(122,46,126,.10);color:var(--purple);white-space:nowrap}
+.pill.g{background:rgba(46,125,87,.12);color:var(--good)}
+.pill.r{background:rgba(228,87,46,.13);color:var(--ember)}
+.pill.y{background:rgba(248,184,24,.20);color:#8a6200}
+.x{background:none;border:0;color:var(--gray);cursor:pointer;font-size:16px;line-height:1;padding:4px 6px;border-radius:6px}
+.x:hover{color:var(--danger);background:rgba(192,57,43,.08)}
+.empty{text-align:center;padding:32px 16px;color:var(--gray);font-size:13px;font-weight:300}
+.empty b{display:block;color:var(--ink-soft);font-weight:500;margin-bottom:4px;font-size:14px}
+
+/* ---------- candle (signature) ---------- */
+.candle-wrap{display:grid;grid-template-columns:190px 1fr;gap:22px;align-items:center}
+@media(max-width:640px){.candle-wrap{grid-template-columns:1fr;gap:8px}}
+.legend{display:flex;flex-direction:column;gap:1px}
+.lg{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:9px;cursor:default;transition:background .15s}
+.lg:hover{background:var(--cream2)}
+.lg .sw{width:11px;height:11px;border-radius:3px;flex:none}
+.lg .nm{flex:1;font-size:12.5px}
+.lg .vl{font-variant-numeric:tabular-nums;font-size:13px;font-weight:500}
+.lg .pc{width:44px;text-align:right;font-size:11px;color:var(--gray);font-variant-numeric:tabular-nums}
+.lg.tot{border-top:1.5px solid var(--line);margin-top:5px;padding-top:11px;font-weight:600}
+.lg.tot .nm,.lg.tot .vl{font-size:14px;color:var(--deep)}
+@keyframes flicker{0%,100%{transform:scale(1) translateY(0);opacity:.95}50%{transform:scale(1.06) translateY(-1.5px);opacity:1}}
+.flame{transform-origin:center bottom;animation:flicker 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.flame{animation:none}}
+
+/* ---------- price cards ---------- */
+.price{border:1.5px solid var(--line);border-radius:var(--r-sm);padding:14px;background:var(--cream2);position:relative;transition:border-color .18s,transform .18s}
+.price:hover{border-color:var(--plum);transform:translateY(-2px)}
+.price .ch{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);min-height:24px}
+.price .pv{font-family:'Bebas Neue',Impact,sans-serif;font-size:36px;line-height:1;color:var(--deep);margin:4px 0 2px}
+.price .ut{font-size:11.5px;color:var(--ink-soft)}
+.price .ut b{color:var(--good);font-weight:600}
+
+.note{background:rgba(248,184,24,.13);border-left:3px solid var(--yellow);border-radius:0 10px 10px 0;padding:11px 14px;font-size:12.5px;color:#6b4c00;margin-top:14px;font-weight:300}
+.note b{font-weight:600;color:#573d00}
+.bar{height:9px;border-radius:99px;background:rgba(78,20,84,.10);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--purple),var(--yellow));transition:width .5s ease}
+.search{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.search input,.search select{max-width:280px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:99px;padding:5px 12px;font-size:11.5px;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--plum)}
+.chip.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+
+/* ---------- toast / modal ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,24px);background:var(--deep);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;box-shadow:var(--sh-lg);opacity:0;pointer-events:none;transition:.28s;z-index:90;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:rgba(42,19,48,.55);display:none;align-items:center;justify-content:center;padding:18px;z-index:80;backdrop-filter:blur(3px)}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:20px;padding:24px;max-width:520px;width:100%;box-shadow:var(--sh-lg);max-height:88vh;overflow:auto}
+
+/* ---------- mobile ---------- */
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:sticky;top:0;height:auto;padding:12px 12px 0;z-index:50}
+  .brand{flex-direction:row;align-items:center;justify-content:space-between;padding:2px 4px 12px}
+  .brand img{width:108px}
+  .brand small{display:none}
+  .navlist{flex-direction:row;overflow-x:auto;gap:5px;padding-bottom:10px;scrollbar-width:none}
+  .navlist::-webkit-scrollbar{display:none}
+  .navbtn{flex:none;width:auto;padding:8px 13px;font-size:12.5px;border-radius:99px;background:rgba(255,255,255,.09)}
+  .navbtn span{white-space:nowrap}
+  .rail-foot{display:none}
+  main{padding:18px 16px 70px}
+  h1.title{font-size:30px}
+  .card{padding:16px}
+}
+@media print{
+  .rail,.btn,.search,.chips{display:none!important}
+  body{background:#fff}.card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+  .shell{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="brand">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAADuCAMAAAC09MpMAAAAYFBMVEUAAADq4uv9/P34txbz8PTz7u/+1Fz84p7+xiqxqLL//LK7rN3xr/L//wB+fn774qL/fwD//Xn/srL/AAD/f///AP//qgD/q1gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACf7PnmAAAAGHRSTlMAJPz+Ypz85/4GAwoGAQKmAgIDAQIBAwMG+UmtAAASK0lEQVR42u2dh5rjKAyAkRdcMimTmczN+7/p0S3RjH05pyz+tqRgA38ESEIAg3ZVX6whaLAarAarwWqwGqyGoMFqsBqsBqvBarAaggarwWqwGqwGq8FqCBqsBqvBarAarAarXbVXg9VgNVgNVoPVYLWrwWqwGqwGq8H662A167Ma1vmeVYT3hgX3lCx4F1ppWLJ6orvfxdntfWFJYejuevH3kK00LMbvC6t7j24+A0vcGxZrsFbBWlYkInVjmy5SSHgOv1ql4OwvWStEDEo0tigqEL6EVfrNnpIl1JVvkC4FSsXjy3PK8wKfNsgLwq/IB08FyzxTZCsJSF0RWjnLDTNCmMqlnoTvCvIig7ztGFaN2LvBYpOrAcvpwUBuuMG0oI9Aqvik7FS0yFeKDfk5xDPCyv2EISxgx6WnCtWa4K1hZWjFsKbl5wrOon7pvWClaW2Cpfol+rC3gyXfThWwPrYovO8HK2X+bIZFBfUNYSUUiO2wCK03hJWg9R9gYVrvCCsu23+Bhai8JaxoSCzD0kZQjQ/oPWGFtMqwXNJJUuGJ0gk3vr4prKgqRViBZ4XnHvausGhdliTLJP1xzMJJAvHusEhl6mChYkOyVb8+LJ4xXsQEsAmWLjikROvlYclynNOWnpgLsBJWeINL8kywBF9/Gb/TlOO4FZYc/yBuh88Ei2+aFfnJ+xC8ArEeFjuScorng7UxMiTvcOF+GFsN6wZH2g7PzyZZ2yYAC94p66/ZACsoqC7bm8PyPfMGWCTO4K+AZQy7LbAYaYdCdmJvCCuw7oQJS9oCC5dUvKdkcYgViI2weDiV+36wErZKg5WVrJRltwHWFN30lpIVzs2r6dItkvVXwErRarBykhVlAtPbNcON4e8xrCgX8YaStS2oMAULAm+neLvR8H6StWgCvbxSusblR53GMazQIbUBFnnAK8PCbtA0rAKttzCkV7vei7DyoZBbXDTw0rDEkmQpZyffDitYCaLTTCGRl5mwwCEIU0Ugx1pYCbcyq4QFrwgrk1kNrKANuyGWk7Gb+Oy7l4cFk9gCC3JTYTkAoQLLXhBWOix5CRbkJ1l5dso71sleDlaSVh6WD3bgyaAjCFQv5hdkEIr8VWFFc8uFKBofhsVzs7V0hJSaMTtaul0Z1vJSqqeAlVAgcvFZRrQSEVoomo0HBlqKLiQki72EZLGkLzCO/BP5+D+eCQNwIQfJACWaK8oitwjkOWBFWa6MKRWLukhKDvNLqXLW1ZPACvJcB0t8oHqcGVSyzcPiTw2L3eAsNsMKbUBeJVivCytIsQpWpIT9iKr0rwuL9swrYIlEVGBxW4pln8fzwyLerXpYPNEZn9kkKhxHzwsLlueIUOFrl9AJyCz+LQx003I9Hw3rWDGhNtOqlCyeWzUPmR1ixBHdMD0TLLyaKXAmTbnpRTFPUE/LUlXYYUAJl0jcATXD5gNgUbeVNFK8gnzOV1F4WAUNQD4DiqhcrDziJaIV6Pk9dwB2h7VhBxo3kFnnVHpjh49zvuzE5ARnS8q7puQdx1x89d7mTuhb8NdUqODNdG5TWW7qN0SB5GvUVnNt+B6wRO3FN27WozcOsfemZ2/PqwS2vOEZHFfsdvN/xsFv3NjoefdD+j/j4LeX6Ul329or5OgtrgbrlWAt96ooTf7eLU1/dWt/JCxZ2N9P9P50Te2NAXDyb65BzFd8/R6qCSwptc8ECw5++gHvIfYFcfF8ElJgiHRW59OrKuIkb1+p3TwKFnxpBpeu693lbBisR2olXtgEQ3fhs3F3YHzow0tNTtQJDFxh6Fdu3PgYWPCrKMi6juOf+RpHWVuEAz5tIpRgkN9/6+9/mcA3z0kU0cPyJorq9lHA08PSi+eH/k/ikji8+s6U7IQJJC5D85SERZKU7YRBJh1WidYDYMFVouozFdV1tYFWEmjye0MzD+vPOIglCGDuHsVzw9ICk0elayB5HuRP3+dYyHbGPvOwNNBvWBYsJVorGuLusCAnMOjSogWFVL0sxqkES9E6FDcs5b1/0tPCUr748c8SLHYtstJ1PBRhSVplD0/nf5h60doZVhUrCesXRDlZB99lWH+GQlEPTrAs9qeEVcdKwmKiLydRg34ZluzZCtsNz8VYIVq7woJTqoKjuQgs6OM0UUNcAJrvjr5mwVrVa+0JS/nX+0it6q1nVb4a/Y9NmCrdS14DVTc6ULra4C+t4/dE+CSVnPI+BsPJ88HCP6ihgOKJpfEjTR/TgEi6XnBr8hHUPU+4HXgNhQMtR71o7Qgr0gaMbaNq/HWQmtWMo8Md28Bn5ynHD7hAomfGWQzZie9LKKPwdLCCDkuZeQx5VJRtbXB0tMYnZyueIhaxPwsJzciT7RBOgYAPtZXaDxZQuVAWf5j7ScqXaosd7X4h3ZCTzefAZqmUndYhXbs+thieDRYWrL7LRXQon8yI+p0rZKRzvLDvVH+EYV2TQ/JQPW4+CNaBNKExv4BQ/p27lFBlJKI1JNc+zQlGkV7EEqkcsjS3J4Ml6oZr2W0PYy4dGSSGeNmFFCUxFnWHhGDJ36ROe9hv9T0uY0nulZaf5/HNhhJxks2YsmQgpctWemr2g4W79wG+NsJicEFf/nP9x19qLPwk5lRqlMt4M+p6rb1g4Y63XLQyrE92KfVZHA2kybYeKcZrRGs3ycJKVlc+NqcoWbgZigu6jEVEAVwTFteQcaFVKKY7wQJsGsta/Fb2bmFLgm/8nH70l3zT9/1i06KChfW5GtF6BKyeF12+/5ABjTo8YdF3UxQWuCGpleUY1pnTD4FVLhfVpYJ1nDDUsloULCngfJ1o7QaLr4AFmV5avkQmcN+VvYMJVlfccw78CutE6wGwxqViAXGnDmpWVXkmlC2J3QVDCZZUyr8XBKuTlrtY5QR8BKylSb1geB+4X72KvVUjL7iV0z9IIFhBqx7gBM8HS002LHifh2CGWTv2up7233lYY2ZrA8pGBehQ0fq6M6y1WwVPk9mEFAnLYjgG0WB1PcZhGKlXWXbIOVi5CWkylA48chZ2S6K1z0bUq0bDqNfKKAbfGVh9sI4iI1g2SmnBPPpPsARftcm5MCH4ZwJr2TN5iKZ3EopBRrLUN0nL80q8yS5IaSSNF+CesDavd0ITKhXzmoFbdc2MtOzbkxP3Sd9M/bzsbrDkL3agfqbFUeKrSKvXDuNMM8w8vkL5H8V9O/jtC1OIi3PZai3JlmT1CySKhoTlJDWma43y35e7+P1gobLWWa25yKRRtpYr9YmS+aCcI6vCqlyQ+YfAqpsE/krHvKnB7qQjLXHDJmrsGCsBWd9M7F8+Px4W6Y9lbT5hsUgmTrIPpvtdCOQn7QVF4Mr6hdIsdEm04BlgYW1A9dCZ2Z2vWUlScbpc6DCGUfurBjWTb4WGwvqk+nwfL9+rc1cUdcD9muGVzhsKdk1nTYqkDCO1T49QnlATF3HwDmYiWScodfJQJ1iFaJJ9YYXhGMKgCDfKlakGrIfBF52zBpaGdQhGO9ItAjUJlPE0oPibsTKmZj9YoQ1jrBI63fzN4NIrtfJEt4CSFu8pXJoTwjoE3RZWx8kPNQ6xoTH+qdGY94QV2DCj9r18epP70zthhuJCVoAkrDD6C+knKIR0NqGzsTdQiBjcDVas6ugFAihb54RZ9A6mm+E3dGltK3T6yetA6dd5anaFBRCqmf1wEXqBkmwKFx/aZ0K7AXLmuX5aBCvy0PdgV8mRsSXS79UCdypan/B4WHRKMDT/kf45KK0zuZDJXPpxMaxozOvg+yPp9EsEYtT4l3eFtehMwLDw3HPKKEnAChv6KMxuDosoQpxf8ASwKvUdCyvLVcWHJGFNv1HcKQS+mXTA96HYUB8ESzeu5RUWqs8qwmJpWFG3pUMpK9oYnTHPOQH3hlW1bmCAb7YNVtTQdYBhhQlPgnKHh+wmmZoTOjBYcpYMaln0aROs2FCggiWyAYc0GONJYGUWXUZ2XR7WeFG7JGVgxeHyVXODcCOiBek45/1hsdtBL+fNOIX7C1g96jKWvL9ZWN+BtoVafd7rCKFoXeth8f8Tll0oLgJflQKldHr7qxb6rIt6wCEDK+zkRxw3U1qyiZ08qUDoHCyA+8KKRhez64DR2p1OOihtft5sQSmKyWsc3C7S7t6xD846lyOuTz6I+c1CxOFAc6iDpTaRvWNDTEdY4y0b7K4MJh5hHjiz5o4LisxsDnZgZOMwdOOpPBVMDapKWGRPk/985ffuCpwhp8pFNDYRqvkpmcDN6+SSscJdK2Cxe27KVHqW9gAczN/U1irFvaZm50HpzkKyzF2H1VBud5SsN7ngL97hqcFqsBqsBuuvhYWGsx8/CpMhecIa5mTjIoFonfNjMk9nQXJ/sg7ZmtS8m+Y4hAnffZv3iZ38OTvk5Jkgnw9auLke59LwvUoL3PIDoGqk05wzmUGpJHh/tmRyBI8kgEy9IPnQalh6J1q7b7TZRFpZDniHW3C7QctvObPfcbNbmLrb7htmNqDmZKdu/LFzrEgT+mfOd87evOP22W5rLfMtn9jR5CX/t0XRu6Ojx5u81GfMFUu/P6st57kvMyrTcY1bOXA9CGcpCkasY+73i9ZH/BBbUG+1bpil3aX040llpit8c9mSU4WEcxrp1Nh0lRXWebl53PCQagH2BANz7Jx9pTM7BicbkIdugGUli+vI264z0mN3WA5hCfOxj/TTeYJNbT61RYAfsMG8whzrYtwc4gvsV+pzDigvbp5uamXPirFPdQf8cgfDH39ub3dHsAF8GG9KKhVn5KFrvA4elv1W6MOhrLkPLsDbwzpaWMLOK6uC2buF2+OeI1pHcB8rQ1+1BlNuBdfeBwJQzvpFZ38VSxZQXsLfbQrHO3vslc7Icbj5hFb+fCrVKidS1MxJnWVYdnbbuVn0W7t0YIYFwsIyAwvXBeTuhHYzrpmXZ2C2zQm8h7I9H0HYBsTnvMxDbauemBFEc7se0bgTatt4DAbTLH2utrlx2zgdUmEECj7cTy/MIGtewnbJ0rRsF2lEJAXLhlfp7orbf/xstJjPa3QvQe0w7p6pbvgxFVN1+LEp5wOPmauFcNjhyHTlZSotDmcLC53Z5D5QvYj6w2fJ8ucR+1+D2R32Reaozqo+S/c8HHAfmoWld+BxsFSuutryJ+OuHZ5ZdKalTjeLlhdkAsv1WTMLx113p+bMDCtA/Aze5yt0kQGPSo7gbS6FadDMSf4GWHYoYvNZCethsR/8G+uX9iBgM/yDrZEh5kYyfyg0PUrbFkB41XPORjgsqK7APCzbIiksNECrdEf80PWSZRyztvELJefLsBiF5X5jpxxoWB24Qa2zZ+S4UcgdAqN7ICpZbsxLSZY5/IJ7ybJe6/MsWfJjziANC+DkzoJguGZb+iynGTlsMywVCA0f3dzBS3Pn2AV9FtCO4Oh1MH3uID32CtwJQ1qlwLCEKwLzJTEDo4OlezvSG/nxwmsWLOqzXFySeyhzD90wGh5vsl1z3/wmD+vDlmNifnCZR3lORkOmWiI3g7eGBf4IHIdUi7AZxLhnA1Sy7ONMeuvZF25cAzYPevZT27ocHGlYwoRguVTW0gGnzZjxzDbJ1aqDGnJMvTiWLKen3CwRK1mmDX1YuTQazxGI8mIalem1fJfjlCmuRxIFKWyGzMqJVdN8XkjUXFO2JyRZ7W4ewDEsl+qmkhl2pqgidwpOXQfvhyLUwTtN0irAU3j8N5+V6zjwyAwYVgV3ituH7lBc/8XDZtipnsViMbd3SIMHr9t63bzzdgO4gZjAspLoO8vgodtgdd5cw6MhTsGtMTifC+dgIeRkGf0HnxEK2/cZpcDZoRCNhk521H+cHKwm7LBvRW9Cdt7cGEJYHyiVfMyRJYta7XWYpzDBjor243lg5u4Lnxzmr0z57db3wSld7lb9Cj/PfOP0LJhz9bkoh4HP2X5onzD5dLbIkzsZan4g91UA9BhG3q31OtS4mFwn+FF4pvcnndOuJEDvfubX53JJjqG7KswNgiKWHXUAOO2WyVQ8paz6eZ8/8pJNs280PBbbuf0W5kGpJ9CZH0A+QL5O91icc+BmxRkE/lN3v39/JjUD03U2H3ybsGiwGqwGq8FqV4PVYDVYDVaD1WC1q8FqsBqsBqvBarDaVYAF7apfWdMQNFgNVoPVYDVYDVZD0GA1WA1Wg9VgNVgNQYPVYDVYDVaD1WA1BA1Wg9VgNVgN1l9//QsFLDeuUr1KggAAAABJRU5ErkJggg==" alt="Endulcora">
+      <small><span class="flame-dot"></span> Costos · Merma · Precios</small>
+    </div>
+    <div class="navlist" id="nav"></div>
+    <div class="rail-foot">
+      <b>Roles Gourmet</b><br>
+      Herramienta del eBook «El Arte de la Masa Enriquecida».<br>
+      Contenido: Chef Luis Alfonso Jiménez Cárdenas · Edición: Manuel Ramiro Justo Guzmán · WhatsApp 5665271901
+    </div>
+  </aside>
+  <main id="view"></main>
+</div>
+<div id="toast"></div>
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+
+<script>const SEED = {"insumos":[{"cat":"Harinas y secos","nom":"Harina de fuerza (alto gluten)","u":"g","pres":1000.0,"precio":32.0},{"cat":"Harinas y secos","nom":"Harina de trigo todo uso","u":"g","pres":1000.0,"precio":26.0},{"cat":"Harinas y secos","nom":"Harina de almendra","u":"g","pres":1000.0,"precio":420.0},{"cat":"Harinas y secos","nom":"Fécula de maíz","u":"g","pres":500.0,"precio":32.0},{"cat":"Harinas y secos","nom":"Masa madre activa (cultivo propio)","u":"g","pres":1000.0,"precio":45.0},{"cat":"Harinas y secos","nom":"Galleta María o Graham","u":"g","pres":500.0,"precio":58.0},{"cat":"Harinas y secos","nom":"Galleta Lotus Biscoff","u":"g","pres":250.0,"precio":95.0},{"cat":"Harinas y secos","nom":"Galleta de barquillo","u":"g","pres":250.0,"precio":75.0},{"cat":"Azúcares","nom":"Azúcar refinada","u":"g","pres":1000.0,"precio":32.0},{"cat":"Azúcares","nom":"Azúcar glass","u":"g","pres":1000.0,"precio":45.0},{"cat":"Azúcares","nom":"Azúcar mascabado","u":"g","pres":1000.0,"precio":52.0},{"cat":"Azúcares","nom":"Piloncillo","u":"g","pres":1000.0,"precio":48.0},{"cat":"Azúcares","nom":"Miel de abeja","u":"g","pres":500.0,"precio":110.0},{"cat":"Azúcares","nom":"Jarabe de maple puro","u":"ml","pres":250.0,"precio":190.0},{"cat":"Azúcares","nom":"Glucosa líquida","u":"g","pres":500.0,"precio":75.0},{"cat":"Lácteos y huevo","nom":"Mantequilla sin sal","u":"g","pres":1000.0,"precio":260.0},{"cat":"Lácteos y huevo","nom":"Leche entera","u":"ml","pres":1000.0,"precio":28.0},{"cat":"Lácteos y huevo","nom":"Crema para batir (Nata 35% M.G.)","u":"ml","pres":1000.0,"precio":130.0},{"cat":"Lácteos y huevo","nom":"Queso crema original","u":"g","pres":1000.0,"precio":190.0},{"cat":"Lácteos y huevo","nom":"Queso mascarpone","u":"g","pres":500.0,"precio":220.0},{"cat":"Lácteos y huevo","nom":"Leche condensada","u":"g","pres":397.0,"precio":42.0},{"cat":"Lácteos y huevo","nom":"Leche evaporada","u":"ml","pres":360.0,"precio":26.0},{"cat":"Lácteos y huevo","nom":"Media crema","u":"ml","pres":250.0,"precio":25.0},{"cat":"Lácteos y huevo","nom":"Huevo entero","u":"pza","pres":30.0,"precio":105.0},{"cat":"Lácteos y huevo","nom":"Yema de huevo","u":"pza","pres":30.0,"precio":105.0},{"cat":"Lácteos y huevo","nom":"Clara de huevo","u":"pza","pres":30.0,"precio":105.0},{"cat":"Lácteos y huevo","nom":"Manteca vegetal","u":"g","pres":500.0,"precio":60.0},{"cat":"Quesos de autor","nom":"Queso parmigiano reggiano","u":"g","pres":500.0,"precio":480.0},{"cat":"Quesos de autor","nom":"Queso cotija genuino","u":"g","pres":500.0,"precio":150.0},{"cat":"Quesos de autor","nom":"Queso brie","u":"g","pres":500.0,"precio":320.0},{"cat":"Quesos de autor","nom":"Queso azul","u":"g","pres":250.0,"precio":220.0},{"cat":"Quesos de autor","nom":"Queso gruyère","u":"g","pres":500.0,"precio":420.0},{"cat":"Quesos de autor","nom":"Queso cheddar añejado","u":"g","pres":500.0,"precio":260.0},{"cat":"Quesos de autor","nom":"Queso provolone o mozzarella baja humedad","u":"g","pres":500.0,"precio":140.0},{"cat":"Chocolate y cacao","nom":"Chocolate semi-amargo (54-70%)","u":"g","pres":1000.0,"precio":320.0},{"cat":"Chocolate y cacao","nom":"Chispas de chocolate semi-amargo","u":"g","pres":1000.0,"precio":290.0},{"cat":"Chocolate y cacao","nom":"Chocolate con leche","u":"g","pres":1000.0,"precio":300.0},{"cat":"Chocolate y cacao","nom":"Chocolate blanco de cobertura","u":"g","pres":1000.0,"precio":340.0},{"cat":"Chocolate y cacao","nom":"Chispas de chocolate blanco","u":"g","pres":1000.0,"precio":320.0},{"cat":"Chocolate y cacao","nom":"Chocolate rubí en callets","u":"g","pres":1000.0,"precio":690.0},{"cat":"Chocolate y cacao","nom":"Chocolate Gold (rubio)","u":"g","pres":1000.0,"precio":650.0},{"cat":"Chocolate y cacao","nom":"Chocolate mexicano de mesa","u":"g","pres":1000.0,"precio":145.0},{"cat":"Chocolate y cacao","nom":"Cocoa alcalina en polvo","u":"g","pres":1000.0,"precio":290.0},{"cat":"Chocolate y cacao","nom":"Cocoa natural en polvo","u":"g","pres":1000.0,"precio":260.0},{"cat":"Chocolate y cacao","nom":"Manteca de cacao pura","u":"g","pres":500.0,"precio":320.0},{"cat":"Chocolate y cacao","nom":"Crema de cacao y avellana","u":"g","pres":1000.0,"precio":290.0},{"cat":"Chocolate y cacao","nom":"Crema dulce de pistache","u":"g","pres":500.0,"precio":420.0},{"cat":"Chocolate y cacao","nom":"Crema Lotus Biscoff","u":"g","pres":400.0,"precio":140.0},{"cat":"Chocolate y cacao","nom":"Crema de cacahuate","u":"g","pres":500.0,"precio":110.0},{"cat":"Frutos secos","nom":"Nuez pecana","u":"g","pres":1000.0,"precio":480.0},{"cat":"Frutos secos","nom":"Nuez de Castilla","u":"g","pres":1000.0,"precio":420.0},{"cat":"Frutos secos","nom":"Nuez macadamia","u":"g","pres":250.0,"precio":290.0},{"cat":"Frutos secos","nom":"Almendra entera","u":"g","pres":1000.0,"precio":320.0},{"cat":"Frutos secos","nom":"Almendra fileteada","u":"g","pres":500.0,"precio":190.0},{"cat":"Frutos secos","nom":"Avellana","u":"g","pres":500.0,"precio":340.0},{"cat":"Frutos secos","nom":"Pistache sin sal","u":"g","pres":250.0,"precio":300.0},{"cat":"Frutos secos","nom":"Cacahuate","u":"g","pres":500.0,"precio":70.0},{"cat":"Frutos secos","nom":"Piñón blanco","u":"g","pres":100.0,"precio":220.0},{"cat":"Frutos secos","nom":"Semillas de amapola","u":"g","pres":100.0,"precio":90.0},{"cat":"Frutos secos","nom":"Semillas de sésamo","u":"g","pres":250.0,"precio":55.0},{"cat":"Frutas y compotas","nom":"Manzana Granny Smith","u":"g","pres":1000.0,"precio":55.0},{"cat":"Frutas y compotas","nom":"Plátano","u":"g","pres":1000.0,"precio":30.0},{"cat":"Frutas y compotas","nom":"Zanahoria","u":"g","pres":1000.0,"precio":25.0},{"cat":"Frutas y compotas","nom":"Camote","u":"g","pres":1000.0,"precio":35.0},{"cat":"Frutas y compotas","nom":"Frutos rojos mixtos","u":"g","pres":500.0,"precio":170.0},{"cat":"Frutas y compotas","nom":"Frambuesa liofilizada","u":"g","pres":100.0,"precio":190.0},{"cat":"Frutas y compotas","nom":"Cereza tipo amarena","u":"g","pres":500.0,"precio":280.0},{"cat":"Frutas y compotas","nom":"Pulpa de maracuyá","u":"g","pres":500.0,"precio":140.0},{"cat":"Frutas y compotas","nom":"Pulpa de tamarindo","u":"g","pres":500.0,"precio":75.0},{"cat":"Frutas y compotas","nom":"Limón amarillo","u":"pza","pres":10.0,"precio":60.0},{"cat":"Frutas y compotas","nom":"Naranja","u":"pza","pres":10.0,"precio":45.0},{"cat":"Frutas y compotas","nom":"Uvas pasas","u":"g","pres":500.0,"precio":75.0},{"cat":"Frutas y compotas","nom":"Ate de frutas","u":"g","pres":500.0,"precio":85.0},{"cat":"Frutas y compotas","nom":"Higo cristalizado","u":"g","pres":250.0,"precio":120.0},{"cat":"Frutas y compotas","nom":"Cáscara de naranja confitada","u":"g","pres":250.0,"precio":140.0},{"cat":"Frutas y compotas","nom":"Mango deshidratado","u":"g","pres":250.0,"precio":110.0},{"cat":"Frutas y compotas","nom":"Pétalos de rosa deshidratados","u":"g","pres":50.0,"precio":180.0},{"cat":"Frutas y compotas","nom":"Champiñón y hongo cremini","u":"g","pres":500.0,"precio":90.0},{"cat":"Frutas y compotas","nom":"Chalota","u":"g","pres":500.0,"precio":80.0},{"cat":"Frutas y compotas","nom":"Ajo","u":"g","pres":500.0,"precio":60.0},{"cat":"Dulces y untables","nom":"Dulce de leche repostero","u":"g","pres":1000.0,"precio":180.0},{"cat":"Dulces y untables","nom":"Cajeta horneable","u":"g","pres":1000.0,"precio":190.0},{"cat":"Dulces y untables","nom":"Mermelada de higo","u":"g","pres":300.0,"precio":120.0},{"cat":"Dulces y untables","nom":"Mermelada de guayaba","u":"g","pres":500.0,"precio":75.0},{"cat":"Dulces y untables","nom":"Mermelada de naranja","u":"g","pres":500.0,"precio":85.0},{"cat":"Dulces y untables","nom":"Jalea de uva o fresa","u":"g","pres":500.0,"precio":65.0},{"cat":"Dulces y untables","nom":"Jalea de chabacano","u":"g","pres":500.0,"precio":80.0},{"cat":"Dulces y untables","nom":"Compota de higo","u":"g","pres":300.0,"precio":130.0},{"cat":"Dulces y untables","nom":"Chamoy líquido","u":"ml","pres":500.0,"precio":60.0},{"cat":"Dulces y untables","nom":"Malvavisco","u":"g","pres":500.0,"precio":60.0},{"cat":"Dulces y untables","nom":"Mazapán de cacahuate","u":"g","pres":500.0,"precio":90.0},{"cat":"Dulces y untables","nom":"Crema pastelera de vainilla (elaboración propia)","u":"g","pres":1000.0,"precio":95.0},{"cat":"Dulces y untables","nom":"Arroz con leche (elaboración propia)","u":"g","pres":1000.0,"precio":60.0},{"cat":"Dulces y untables","nom":"Ganache oscuro (elaboración propia)","u":"g","pres":1000.0,"precio":240.0},{"cat":"Dulces y untables","nom":"Pesto genovés","u":"g","pres":250.0,"precio":140.0},{"cat":"Aromáticos","nom":"Extracto de vainilla de Papantla","u":"ml","pres":250.0,"precio":320.0},{"cat":"Aromáticos","nom":"Pasta de vainilla","u":"g","pres":100.0,"precio":290.0},{"cat":"Aromáticos","nom":"Extracto de almendra","u":"ml","pres":60.0,"precio":110.0},{"cat":"Aromáticos","nom":"Canela en polvo (Ceilán)","u":"g","pres":250.0,"precio":180.0},{"cat":"Aromáticos","nom":"Raja de canela","u":"g","pres":100.0,"precio":55.0},{"cat":"Aromáticos","nom":"Jengibre en polvo","u":"g","pres":100.0,"precio":55.0},{"cat":"Aromáticos","nom":"Nuez moscada","u":"g","pres":50.0,"precio":85.0},{"cat":"Aromáticos","nom":"Clavo de olor molido","u":"g","pres":50.0,"precio":55.0},{"cat":"Aromáticos","nom":"Anís estrella","u":"g","pres":50.0,"precio":70.0},{"cat":"Aromáticos","nom":"Cardamomo","u":"g","pres":50.0,"precio":140.0},{"cat":"Aromáticos","nom":"Azafrán","u":"g","pres":1.0,"precio":180.0},{"cat":"Aromáticos","nom":"Lavanda culinaria seca","u":"g","pres":50.0,"precio":120.0},{"cat":"Aromáticos","nom":"Té Earl Grey","u":"g","pres":100.0,"precio":130.0},{"cat":"Aromáticos","nom":"Té matcha grado culinario","u":"g","pres":100.0,"precio":320.0},{"cat":"Aromáticos","nom":"Café espresso preparado","u":"ml","pres":1000.0,"precio":90.0},{"cat":"Aromáticos","nom":"Café soluble","u":"g","pres":200.0,"precio":140.0},{"cat":"Aromáticos","nom":"Agua de azahar","u":"ml","pres":250.0,"precio":120.0},{"cat":"Aromáticos","nom":"Agua de rosas","u":"ml","pres":250.0,"precio":130.0},{"cat":"Aromáticos","nom":"Pimienta negra","u":"g","pres":100.0,"precio":60.0},{"cat":"Aromáticos","nom":"Chile en polvo","u":"g","pres":100.0,"precio":45.0},{"cat":"Aromáticos","nom":"Romero fresco","u":"g","pres":50.0,"precio":35.0},{"cat":"Aromáticos","nom":"Albahaca fresca","u":"g","pres":50.0,"precio":35.0},{"cat":"Aromáticos","nom":"Aceite de trufa negra","u":"ml","pres":100.0,"precio":320.0},{"cat":"Aromáticos","nom":"Colorante en gel","u":"g","pres":30.0,"precio":75.0},{"cat":"Licores","nom":"Ron oscuro","u":"ml","pres":750.0,"precio":320.0},{"cat":"Licores","nom":"Kirsch o brandy","u":"ml","pres":750.0,"precio":420.0},{"cat":"Licores","nom":"Licor de café o amaretto","u":"ml","pres":750.0,"precio":380.0},{"cat":"Licores","nom":"Rompope","u":"ml","pres":1000.0,"precio":180.0},{"cat":"Licores","nom":"Cerveza negra (stout)","u":"ml","pres":355.0,"precio":45.0},{"cat":"Cárnicos","nom":"Tocino ahumado de corte grueso","u":"g","pres":500.0,"precio":180.0},{"cat":"Aditivos","nom":"Levadura seca instantánea","u":"g","pres":500.0,"precio":150.0},{"cat":"Aditivos","nom":"Sal fina","u":"g","pres":1000.0,"precio":22.0},{"cat":"Aditivos","nom":"Sal de mar en escamas","u":"g","pres":250.0,"precio":120.0},{"cat":"Aditivos","nom":"Vinagre blanco","u":"ml","pres":1000.0,"precio":28.0},{"cat":"Aditivos","nom":"Aceite vegetal","u":"ml","pres":1000.0,"precio":45.0},{"cat":"Aditivos","nom":"Aceite de oliva","u":"ml","pres":500.0,"precio":120.0},{"cat":"Aditivos","nom":"Agua purificada","u":"ml","pres":20000.0,"precio":35.0},{"cat":"Aromáticos","nom":"Pasta de miso blanco","u":"g","pres":250.0,"precio":190.0}],"lineas":[{"kind":"receta","n":1,"rec":"Rol de Canela Clásico con Glaseado de Vainilla de Papantla","ins":"Mantequilla sin sal","cant":120.0,"u":"g","desc":"120 g Mantequilla sin sal (textura pomada, muy suave pero no derretida)","sub":"Para el Relleno de Canela"},{"kind":"receta","n":1,"rec":"Rol de Canela Clásico con Glaseado de Vainilla de Papantla","ins":"Azúcar mascabado","cant":180.0,"u":"g","desc":"180 g Azúcar mascabado o morena (aporta humedad)","sub":"Para el Relleno de Canela"},{"kind":"receta","n":1,"rec":"Rol de Canela Clásico con Glaseado de Vainilla de Papantla","ins":"Canela en polvo (Ceilán)","cant":25.0,"u":"g","desc":"25 g Canela en polvo (preferentemente variedad Ceilán)","sub":"Para el Relleno de Canela"},{"kind":"receta","n":1,"rec":"Rol de Canela Clásico con Glaseado de Vainilla de Papantla","ins":"Sal fina","cant":2.0,"u":"g","desc":"2 g Sal fina","sub":"Para el Relleno de Canela"},{"kind":"receta","n":1,"rec":"Rol de Canela Clásico con Glaseado de Vainilla de Papantla","ins":"Queso crema original","cant":150.0,"u":"g","desc":"150 g Queso crema original (a temperatura ambiente)","sub":"Para el Glaseado de Vainilla de Papantla"},{"kind":"receta","n":1,"rec":"Rol de Canela Clásico con Glaseado de Vainilla de Papantla","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Glaseado de Vainilla de Papantla"},{"kind":"receta","n":1,"rec":"Rol de Canela Clásico con Glaseado de Vainilla de Papantla","ins":"Azúcar glass","cant":120.0,"u":"g","desc":"120 g Azúcar glass (cernida)","sub":"Para el Glaseado de Vainilla de Papantla"},{"kind":"receta","n":1,"rec":"Rol de Canela Clásico con Glaseado de Vainilla de Papantla","ins":"Extracto de vainilla de Papantla","cant":10.0,"u":"ml","desc":"10 ml Extracto puro de vainilla de Papantla","sub":"Para el Glaseado de Vainilla de Papantla"},{"kind":"receta","n":1,"rec":"Rol de Canela Clásico con Glaseado de Vainilla de Papantla","ins":"Crema para batir (Nata 35% M.G.)","cant":15.0,"u":"ml","desc":"15 ml Crema para batir o leche entera (solo para ajustar textura)","sub":"Para el Glaseado de Vainilla de Papantla"},{"kind":"receta","n":2,"rec":"Rol de Doble Chocolate y Cocoa Alcalina","ins":"Mantequilla sin sal","cant":100.0,"u":"g","desc":"100 g Mantequilla sin sal (pomada)","sub":"Para el Relleno de Doble Chocolate"},{"kind":"receta","n":2,"rec":"Rol de Doble Chocolate y Cocoa Alcalina","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"120 g Azúcar refinada","sub":"Para el Relleno de Doble Chocolate"},{"kind":"receta","n":2,"rec":"Rol de Doble Chocolate y Cocoa Alcalina","ins":"Cocoa alcalina en polvo","cant":40.0,"u":"g","desc":"40 g Cocoa alcalina en polvo (procesada en holandés)","sub":"Para el Relleno de Doble Chocolate"},{"kind":"receta","n":2,"rec":"Rol de Doble Chocolate y Cocoa Alcalina","ins":"Chispas de chocolate semi-amargo","cant":150.0,"u":"g","desc":"150 g Chispas de chocolate semi-amargo (54% a 70% cacao)","sub":"Para el Relleno de Doble Chocolate"},{"kind":"receta","n":2,"rec":"Rol de Doble Chocolate y Cocoa Alcalina","ins":"Chocolate semi-amargo (54-70%)","cant":150.0,"u":"g","desc":"150 g Chocolate semi-amargo picado finamente","sub":"Para el Ganache de Cubierta"},{"kind":"receta","n":2,"rec":"Rol de Doble Chocolate y Cocoa Alcalina","ins":"Crema para batir (Nata 35% M.G.)","cant":150.0,"u":"ml","desc":"150 ml Crema para batir (Nata 35% M.G.)","sub":"Para el Ganache de Cubierta"},{"kind":"receta","n":2,"rec":"Rol de Doble Chocolate y Cocoa Alcalina","ins":"Mantequilla sin sal","cant":15.0,"u":"g","desc":"15 g Mantequilla sin sal","sub":"Para el Ganache de Cubierta"},{"kind":"receta","n":3,"rec":"Rol de Nuez Pecana y Caramelo Salado","ins":"Mantequilla sin sal","cant":100.0,"u":"g","desc":"100 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":3,"rec":"Rol de Nuez Pecana y Caramelo Salado","ins":"Azúcar mascabado","cant":150.0,"u":"g","desc":"150 g Azúcar mascabado","sub":"Para el Relleno"},{"kind":"receta","n":3,"rec":"Rol de Nuez Pecana y Caramelo Salado","ins":"Nuez pecana","cant":150.0,"u":"g","desc":"150 g Nuez pecana (tostada y troceada rústicamente)","sub":"Para el Relleno"},{"kind":"receta","n":3,"rec":"Rol de Nuez Pecana y Caramelo Salado","ins":"Azúcar refinada","cant":200.0,"u":"g","desc":"200 g Azúcar refinada","sub":"Para la Salsa de Caramelo Salado"},{"kind":"receta","n":3,"rec":"Rol de Nuez Pecana y Caramelo Salado","ins":"Mantequilla sin sal","cant":90.0,"u":"g","desc":"90 g Mantequilla sin sal (en cubos, fría)","sub":"Para la Salsa de Caramelo Salado"},{"kind":"receta","n":3,"rec":"Rol de Nuez Pecana y Caramelo Salado","ins":"Crema para batir (Nata 35% M.G.)","cant":120.0,"u":"ml","desc":"120 ml Crema para batir (Nata 35% M.G., tibia)","sub":"Para la Salsa de Caramelo Salado"},{"kind":"receta","n":3,"rec":"Rol de Nuez Pecana y Caramelo Salado","ins":"Sal de mar en escamas","cant":5.0,"u":"g","desc":"5 g Sal de mar en escamas (tipo Maldon)","sub":"Para la Salsa de Caramelo Salado"},{"kind":"receta","n":4,"rec":"Rol de Manzana Canela y Streusel Crujiente","ins":"Manzana Granny Smith","cant":480,"u":"g","desc":"3 Manzanas Granny Smith (verdes, peladas y en cubos pequeños)","sub":"Para la Compota de Manzana (Relleno)"},{"kind":"receta","n":4,"rec":"Rol de Manzana Canela y Streusel Crujiente","ins":"Mantequilla sin sal","cant":30.0,"u":"g","desc":"30 g Mantequilla sin sal","sub":"Para la Compota de Manzana (Relleno)"},{"kind":"receta","n":4,"rec":"Rol de Manzana Canela y Streusel Crujiente","ins":"Azúcar mascabado","cant":50.0,"u":"g","desc":"50 g Azúcar mascabado","sub":"Para la Compota de Manzana (Relleno)"},{"kind":"receta","n":4,"rec":"Rol de Manzana Canela y Streusel Crujiente","ins":"Canela en polvo (Ceilán)","cant":5.0,"u":"g","desc":"5 g Canela en polvo","sub":"Para la Compota de Manzana (Relleno)"},{"kind":"receta","n":4,"rec":"Rol de Manzana Canela y Streusel Crujiente","ins":"Fécula de maíz","cant":10.0,"u":"g","desc":"10 g Fécula de maíz (Maicena) diluida en 15 ml de agua fría","sub":"Para la Compota de Manzana (Relleno)"},{"kind":"receta","n":4,"rec":"Rol de Manzana Canela y Streusel Crujiente","ins":"Harina de trigo todo uso","cant":80.0,"u":"g","desc":"80 g Harina de trigo","sub":"Para el Streusel Crujiente (Cubierta)"},{"kind":"receta","n":4,"rec":"Rol de Manzana Canela y Streusel Crujiente","ins":"Azúcar refinada","cant":50.0,"u":"g","desc":"50 g Azúcar estándar o mascabado","sub":"Para el Streusel Crujiente (Cubierta)"},{"kind":"receta","n":4,"rec":"Rol de Manzana Canela y Streusel Crujiente","ins":"Mantequilla sin sal","cant":50.0,"u":"g","desc":"50 g Mantequilla sin sal (muy fría, en cubos)","sub":"Para el Streusel Crujiente (Cubierta)"},{"kind":"receta","n":4,"rec":"Rol de Manzana Canela y Streusel Crujiente","ins":"Canela en polvo (Ceilán)","cant":2.0,"u":"g","desc":"2 g Canela en polvo","sub":"Para el Streusel Crujiente (Cubierta)"},{"kind":"receta","n":5,"rec":"Rol de Frutos Rojos y Queso Crema","ins":"Frutos rojos mixtos","cant":300.0,"u":"g","desc":"300 g Frutos rojos mixtos (frescos o congelados)","sub":"Para el Relleno de Frutos Rojos"},{"kind":"receta","n":5,"rec":"Rol de Frutos Rojos y Queso Crema","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"80 g Azúcar refinada","sub":"Para el Relleno de Frutos Rojos"},{"kind":"receta","n":5,"rec":"Rol de Frutos Rojos y Queso Crema","ins":"Limón amarillo","cant":0.5,"u":"pza","desc":"15 ml Jugo de limón amarillo","sub":"Para el Relleno de Frutos Rojos"},{"kind":"receta","n":5,"rec":"Rol de Frutos Rojos y Queso Crema","ins":"Fécula de maíz","cant":15.0,"u":"g","desc":"15 g Fécula de maíz diluida en 20 ml de agua","sub":"Para el Relleno de Frutos Rojos"},{"kind":"receta","n":5,"rec":"Rol de Frutos Rojos y Queso Crema","ins":"Queso crema original","cant":120.0,"u":"g","desc":"120 g Queso crema original","sub":"Para la Cubierta (Frosting Ligero de Limón)"},{"kind":"receta","n":5,"rec":"Rol de Frutos Rojos y Queso Crema","ins":"Mantequilla sin sal","cant":40.0,"u":"g","desc":"40 g Mantequilla sin sal","sub":"Para la Cubierta (Frosting Ligero de Limón)"},{"kind":"receta","n":5,"rec":"Rol de Frutos Rojos y Queso Crema","ins":"Azúcar glass","cant":60.0,"u":"g","desc":"60 g Azúcar glass","sub":"Para la Cubierta (Frosting Ligero de Limón)"},{"kind":"receta","n":5,"rec":"Rol de Frutos Rojos y Queso Crema","ins":"Limón amarillo","cant":30,"u":"pza","desc":"Zumo y ralladura fina de 1 limón amarillo (Eureka)","sub":"Para la Cubierta (Frosting Ligero de Limón)"},{"kind":"receta","n":6,"rec":"Rol de Almendra y Frangipane Clásico","ins":"Harina de almendra","cant":100.0,"u":"g","desc":"100 g Harina de almendra (finamente molida)","sub":"Para el Relleno (Frangipane Clásico)"},{"kind":"receta","n":6,"rec":"Rol de Almendra y Frangipane Clásico","ins":"Mantequilla sin sal","cant":100.0,"u":"g","desc":"100 g Mantequilla sin sal (pomada)","sub":"Para el Relleno (Frangipane Clásico)"},{"kind":"receta","n":6,"rec":"Rol de Almendra y Frangipane Clásico","ins":"Azúcar glass","cant":100.0,"u":"g","desc":"100 g Azúcar glass","sub":"Para el Relleno (Frangipane Clásico)"},{"kind":"receta","n":6,"rec":"Rol de Almendra y Frangipane Clásico","ins":"Huevo entero","cant":1.0,"u":"pza","desc":"1 pza Huevo entero (a temperatura ambiente)","sub":"Para el Relleno (Frangipane Clásico)"},{"kind":"receta","n":6,"rec":"Rol de Almendra y Frangipane Clásico","ins":"Extracto de almendra","cant":5.0,"u":"ml","desc":"5 ml Extracto de almendra","sub":"Para el Relleno (Frangipane Clásico)"},{"kind":"receta","n":6,"rec":"Rol de Almendra y Frangipane Clásico","ins":"Harina de trigo todo uso","cant":20.0,"u":"g","desc":"20 g Harina de trigo","sub":"Para el Relleno (Frangipane Clásico)"},{"kind":"receta","n":6,"rec":"Rol de Almendra y Frangipane Clásico","ins":"Almendra fileteada","cant":60.0,"u":"g","desc":"60 g Almendras fileteadas (para espolvorear dentro)","sub":"Para el Relleno (Frangipane Clásico)"},{"kind":"receta","n":6,"rec":"Rol de Almendra y Frangipane Clásico","ins":"Jalea de chabacano","cant":50.0,"u":"g","desc":"50 g Jalea de chabacano o albaricoque","sub":"Para el Brillo Final"},{"kind":"receta","n":6,"rec":"Rol de Almendra y Frangipane Clásico","ins":"Agua purificada","cant":15.0,"u":"ml","desc":"15 ml Agua caliente","sub":"Para el Brillo Final"},{"kind":"receta","n":6,"rec":"Rol de Almendra y Frangipane Clásico","ins":"Almendra fileteada","cant":25,"u":"g","desc":"Almendras fileteadas tostadas (para decorar)","sub":"Para el Brillo Final"},{"kind":"receta","n":7,"rec":"Rol de Limón y Semillas de Amapola","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"150 g Azúcar refinada","sub":"Para el Relleno Cítrico"},{"kind":"receta","n":7,"rec":"Rol de Limón y Semillas de Amapola","ins":"Limón amarillo","cant":2,"u":"pza","desc":"Ralladura fina de 2 limones amarillos (Eureka)","sub":"Para el Relleno Cítrico"},{"kind":"receta","n":7,"rec":"Rol de Limón y Semillas de Amapola","ins":"Mantequilla sin sal","cant":100.0,"u":"g","desc":"100 g Mantequilla sin sal (pomada)","sub":"Para el Relleno Cítrico"},{"kind":"receta","n":7,"rec":"Rol de Limón y Semillas de Amapola","ins":"Semillas de amapola","cant":20.0,"u":"g","desc":"20 g Semillas de amapola (poppy seeds)","sub":"Para el Relleno Cítrico"},{"kind":"receta","n":7,"rec":"Rol de Limón y Semillas de Amapola","ins":"Azúcar glass","cant":150.0,"u":"g","desc":"150 g Azúcar glass","sub":"Para el Glaseado Ligero"},{"kind":"receta","n":7,"rec":"Rol de Limón y Semillas de Amapola","ins":"Limón amarillo","cant":1,"u":"pza","desc":"30 ml Jugo de limón amarillo fresco","sub":"Para el Glaseado Ligero"},{"kind":"receta","n":7,"rec":"Rol de Limón y Semillas de Amapola","ins":"Leche entera","cant":10.0,"u":"ml","desc":"10 ml Leche entera","sub":"Para el Glaseado Ligero"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Mantequilla sin sal","cant":100.0,"u":"g","desc":"100 g Mantequilla sin sal (pomada)","sub":"Para el Relleno Especiado"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Azúcar mascabado","cant":120.0,"u":"g","desc":"120 g Azúcar mascabado","sub":"Para el Relleno Especiado"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Canela en polvo (Ceilán)","cant":4.0,"u":"g","desc":"4 g Canela en polvo","sub":"Para el Relleno Especiado"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Jengibre en polvo","cant":2.0,"u":"g","desc":"2 g Jengibre en polvo","sub":"Para el Relleno Especiado"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Nuez moscada","cant":1.0,"u":"g","desc":"1 g Nuez moscada en polvo","sub":"Para el Relleno Especiado"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Zanahoria","cant":120.0,"u":"g","desc":"120 g Zanahoria rallada finamente","sub":"Para el Relleno Especiado"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Nuez pecana","cant":60.0,"u":"g","desc":"60 g Nuez pecana finamente picada","sub":"Para el Relleno Especiado"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Queso crema original","cant":190.0,"u":"g","desc":"190 g Queso crema original (frío)","sub":"Para el Frosting (Betún Clásico)"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Frosting (Betún Clásico)"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Azúcar glass","cant":120.0,"u":"g","desc":"120 g Azúcar glass (cernida)","sub":"Para el Frosting (Betún Clásico)"},{"kind":"receta","n":8,"rec":"Rol de Zanahoria (Estilo Carrot Cake)","ins":"Extracto de vainilla de Papantla","cant":5.0,"u":"ml","desc":"5 ml Extracto de vainilla","sub":"Para el Frosting (Betún Clásico)"},{"kind":"receta","n":9,"rec":"Rol de Dulce de Leche y Nuez Macadamia","ins":"Dulce de leche repostero","cant":250.0,"u":"g","desc":"250 g Dulce de leche repostero o de horneo (denso)","sub":"Para el Relleno"},{"kind":"receta","n":9,"rec":"Rol de Dulce de Leche y Nuez Macadamia","ins":"Nuez macadamia","cant":120.0,"u":"g","desc":"120 g Nuez macadamia (tostada y troceada gruesa)","sub":"Para el Relleno"},{"kind":"receta","n":9,"rec":"Rol de Dulce de Leche y Nuez Macadamia","ins":"Dulce de leche repostero","cant":100.0,"u":"g","desc":"100 g Dulce de leche (suavizado con 10 ml de crema para batir tibia)","sub":"Para la Cubierta"},{"kind":"receta","n":9,"rec":"Rol de Dulce de Leche y Nuez Macadamia","ins":"Sal de mar en escamas","cant":3,"u":"g","desc":"Sal de mar en escamas (opcional, para contraste)","sub":"Para la Cubierta"},{"kind":"receta","n":10,"rec":"Rol de Plátano Caramelizado y Nuez de Castilla","ins":"Plátano","cant":150.0,"u":"g","desc":"150 g Puré de plátano muy maduro","sub":"Para el Relleno de Plátano"},{"kind":"receta","n":10,"rec":"Rol de Plátano Caramelizado y Nuez de Castilla","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Relleno de Plátano"},{"kind":"receta","n":10,"rec":"Rol de Plátano Caramelizado y Nuez de Castilla","ins":"Azúcar mascabado","cant":120.0,"u":"g","desc":"120 g Azúcar mascabado oscuro","sub":"Para el Relleno de Plátano"},{"kind":"receta","n":10,"rec":"Rol de Plátano Caramelizado y Nuez de Castilla","ins":"Canela en polvo (Ceilán)","cant":5.0,"u":"g","desc":"5 g Canela en polvo","sub":"Para el Relleno de Plátano"},{"kind":"receta","n":10,"rec":"Rol de Plátano Caramelizado y Nuez de Castilla","ins":"Nuez de Castilla","cant":100.0,"u":"g","desc":"100 g Nuez de Castilla (troceada y tostada)","sub":"Para el Relleno de Plátano"},{"kind":"receta","n":10,"rec":"Rol de Plátano Caramelizado y Nuez de Castilla","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"100 g Azúcar mascabado","sub":"Para el Glaseado (Toffee de Plátano)"},{"kind":"receta","n":10,"rec":"Rol de Plátano Caramelizado y Nuez de Castilla","ins":"Mantequilla sin sal","cant":50.0,"u":"g","desc":"50 g Mantequilla","sub":"Para el Glaseado (Toffee de Plátano)"},{"kind":"receta","n":10,"rec":"Rol de Plátano Caramelizado y Nuez de Castilla","ins":"Crema para batir (Nata 35% M.G.)","cant":60.0,"u":"ml","desc":"60 ml Crema para batir","sub":"Para el Glaseado (Toffee de Plátano)"},{"kind":"receta","n":11,"rec":"Rol Volcán de Crema de Avellana (Estilo Nutella)","ins":"Crema de cacao y avellana","cant":180.0,"u":"g","desc":"180 g Crema de cacao y avellana (tipo Nutella)","sub":"Para el Núcleo Volcánico"},{"kind":"receta","n":11,"rec":"Rol Volcán de Crema de Avellana (Estilo Nutella)","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":11,"rec":"Rol Volcán de Crema de Avellana (Estilo Nutella)","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"100 g Azúcar mascabado","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":11,"rec":"Rol Volcán de Crema de Avellana (Estilo Nutella)","ins":"Cocoa natural en polvo","cant":30.0,"u":"g","desc":"30 g Cocoa en polvo","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":11,"rec":"Rol Volcán de Crema de Avellana (Estilo Nutella)","ins":"Avellana","cant":50.0,"u":"g","desc":"50 g Avellanas tostadas y trituradas","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":12,"rec":"Rol Volcán de Pistache y Chocolate Blanco","ins":"Crema dulce de pistache","cant":180.0,"u":"g","desc":"180 g Crema dulce de pistache (untable, estilo italiana)","sub":"Para el Núcleo Volcánico"},{"kind":"receta","n":12,"rec":"Rol Volcán de Pistache y Chocolate Blanco","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":12,"rec":"Rol Volcán de Pistache y Chocolate Blanco","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"100 g Azúcar refinada","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":12,"rec":"Rol Volcán de Pistache y Chocolate Blanco","ins":"Pistache sin sal","cant":80.0,"u":"g","desc":"80 g Pistaches sin sal (troceados rústicamente)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":12,"rec":"Rol Volcán de Pistache y Chocolate Blanco","ins":"Chispas de chocolate blanco","cant":80.0,"u":"g","desc":"80 g Chispas de chocolate blanco","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":13,"rec":"Rol Volcán de Lotus Biscoff","ins":"Crema Lotus Biscoff","cant":180.0,"u":"g","desc":"180 g Crema Lotus Biscoff (Smooth)","sub":"Para el Núcleo Volcánico"},{"kind":"receta","n":13,"rec":"Rol Volcán de Lotus Biscoff","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":13,"rec":"Rol Volcán de Lotus Biscoff","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"100 g Azúcar mascabado","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":13,"rec":"Rol Volcán de Lotus Biscoff","ins":"Canela en polvo (Ceilán)","cant":5.0,"u":"g","desc":"5 g Canela en polvo","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":13,"rec":"Rol Volcán de Lotus Biscoff","ins":"Galleta Lotus Biscoff","cant":100.0,"u":"g","desc":"100 g Galletas Lotus Biscoff (troceadas gruesas)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":14,"rec":"Rol Volcán de Queso Brie y Mermelada de Higo","ins":"Queso brie","cant":180.0,"u":"g","desc":"180 g Queso Brie (frío, cortado en cubos de 15 g, conservando su corteza)","sub":"Para el Núcleo Volcánico"},{"kind":"receta","n":14,"rec":"Rol Volcán de Queso Brie y Mermelada de Higo","ins":"Mermelada de higo","cant":120.0,"u":"g","desc":"120 g Mermelada de higo artesanal","sub":"Para el Núcleo Volcánico"},{"kind":"receta","n":14,"rec":"Rol Volcán de Queso Brie y Mermelada de Higo","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":14,"rec":"Rol Volcán de Queso Brie y Mermelada de Higo","ins":"Azúcar mascabado","cant":80.0,"u":"g","desc":"80 g Azúcar mascabado","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":14,"rec":"Rol Volcán de Queso Brie y Mermelada de Higo","ins":"Nuez de Castilla","cant":60.0,"u":"g","desc":"60 g Nuez de Castilla finamente picada","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":15,"rec":"Rol Volcán de Matcha y Ganache Blanco","ins":"Chocolate blanco de cobertura","cant":150.0,"u":"g","desc":"150 g Chocolate blanco de cobertura (mín. 28 % manteca de cacao, troceado fino)","sub":"Para el Núcleo Volcánico (Ganache Blanco)"},{"kind":"receta","n":15,"rec":"Rol Volcán de Matcha y Ganache Blanco","ins":"Crema para batir (Nata 35% M.G.)","cant":60.0,"u":"ml","desc":"60 ml Crema para batir (Nata 35% M.G.)","sub":"Para el Núcleo Volcánico (Ganache Blanco)"},{"kind":"receta","n":15,"rec":"Rol Volcán de Matcha y Ganache Blanco","ins":"Mantequilla sin sal","cant":10.0,"u":"g","desc":"10 g Mantequilla sin sal","sub":"Para el Núcleo Volcánico (Ganache Blanco)"},{"kind":"receta","n":15,"rec":"Rol Volcán de Matcha y Ganache Blanco","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno de Matcha"},{"kind":"receta","n":15,"rec":"Rol Volcán de Matcha y Ganache Blanco","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"120 g Azúcar refinada","sub":"Para el Relleno de Matcha"},{"kind":"receta","n":15,"rec":"Rol Volcán de Matcha y Ganache Blanco","ins":"Té matcha grado culinario","cant":15.0,"u":"g","desc":"15 g Té Matcha grado culinario de alta calidad","sub":"Para el Relleno de Matcha"},{"kind":"receta","n":16,"rec":"Rol Volcán de Chocolate Rubí y Frambuesa","ins":"Chocolate rubí en callets","cant":180.0,"u":"g","desc":"180 g Chocolate Rubí en callets (gotas)","sub":"Para el Núcleo Volcánico (Ganache Rubí)"},{"kind":"receta","n":16,"rec":"Rol Volcán de Chocolate Rubí y Frambuesa","ins":"Crema para batir (Nata 35% M.G.)","cant":60.0,"u":"ml","desc":"60 ml Crema para batir (Nata 35% M.G.)","sub":"Para el Núcleo Volcánico (Ganache Rubí)"},{"kind":"receta","n":16,"rec":"Rol Volcán de Chocolate Rubí y Frambuesa","ins":"Manteca de cacao pura","cant":10.0,"u":"g","desc":"10 g Manteca de cacao pura","sub":"Para el Núcleo Volcánico (Ganache Rubí)"},{"kind":"receta","n":16,"rec":"Rol Volcán de Chocolate Rubí y Frambuesa","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":16,"rec":"Rol Volcán de Chocolate Rubí y Frambuesa","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"100 g Azúcar refinada","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":16,"rec":"Rol Volcán de Chocolate Rubí y Frambuesa","ins":"Frambuesa liofilizada","cant":80.0,"u":"g","desc":"80 g Frambuesas liofilizadas (trituradas en polvo grueso)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":17,"rec":"Rol Volcán de Crema Pastelera","ins":"Leche entera","cant":250.0,"u":"ml","desc":"250 ml Leche entera","sub":"Para el Núcleo Volcánico (Pastelera Estructural)"},{"kind":"receta","n":17,"rec":"Rol Volcán de Crema Pastelera","ins":"Yema de huevo","cant":3.0,"u":"pza","desc":"3 Yemas de huevo","sub":"Para el Núcleo Volcánico (Pastelera Estructural)"},{"kind":"receta","n":17,"rec":"Rol Volcán de Crema Pastelera","ins":"Azúcar refinada","cant":60.0,"u":"g","desc":"60 g Azúcar refinada","sub":"Para el Núcleo Volcánico (Pastelera Estructural)"},{"kind":"receta","n":17,"rec":"Rol Volcán de Crema Pastelera","ins":"Fécula de maíz","cant":25.0,"u":"g","desc":"25 g Fécula de maíz (Maicena)","sub":"Para el Núcleo Volcánico (Pastelera Estructural)"},{"kind":"receta","n":17,"rec":"Rol Volcán de Crema Pastelera","ins":"Extracto de vainilla de Papantla","cant":10.0,"u":"ml","desc":"10 ml Extracto de vainilla o pasta de vainilla","sub":"Para el Núcleo Volcánico (Pastelera Estructural)"},{"kind":"receta","n":17,"rec":"Rol Volcán de Crema Pastelera","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":17,"rec":"Rol Volcán de Crema Pastelera","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"100 g Azúcar estándar","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":17,"rec":"Rol Volcán de Crema Pastelera","ins":"Huevo entero","cant":1.0,"u":"pza","desc":"1 pza Huevo (para barnizar)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":18,"rec":"Rol Volcán de Peanut Butter y Jalea","ins":"Crema de cacahuate","cant":180.0,"u":"g","desc":"180 g Crema de cacahuate (Peanut Butter) cremosa, sin azúcar añadida.","sub":"Para el Núcleo Volcánico"},{"kind":"receta","n":18,"rec":"Rol Volcán de Peanut Butter y Jalea","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":18,"rec":"Rol Volcán de Peanut Butter y Jalea","ins":"Jalea de uva o fresa","cant":150.0,"u":"g","desc":"150 g Mermelada o jalea de uva o fresa (densa)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":18,"rec":"Rol Volcán de Peanut Butter y Jalea","ins":"Cacahuate","cant":80.0,"u":"g","desc":"80 g Cacahuates tostados (sin sal, picados)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":19,"rec":"Rol Volcán de Cajeta Quemada","ins":"Cajeta horneable","cant":120.0,"u":"g","desc":"120 g de cajeta horneable o dulce de leche repostero","sub":"Para el Núcleo Volcánico"},{"kind":"receta","n":19,"rec":"Rol Volcán de Cajeta Quemada","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":19,"rec":"Rol Volcán de Cajeta Quemada","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"100 g Azúcar mascabado","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":19,"rec":"Rol Volcán de Cajeta Quemada","ins":"Nuez pecana","cant":60.0,"u":"g","desc":"60 g Nuez pecana finamente picada","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":20,"rec":"Rol Volcán S'mores (Malvavisco Fundido y Ganache Oscuro)","ins":"Malvavisco","cant":84,"u":"g","desc":"12 Malvaviscos grandes (bombones)","sub":"Para el Núcleo Volcánico"},{"kind":"receta","n":20,"rec":"Rol Volcán S'mores (Malvavisco Fundido y Ganache Oscuro)","ins":"Ganache oscuro (elaboración propia)","cant":100.0,"u":"g","desc":"100 g Ganache oscuro (crema para batir y chocolate semiamargo al 50/50, frío)","sub":"Para el Núcleo Volcánico"},{"kind":"receta","n":20,"rec":"Rol Volcán S'mores (Malvavisco Fundido y Ganache Oscuro)","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":20,"rec":"Rol Volcán S'mores (Malvavisco Fundido y Ganache Oscuro)","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"100 g Azúcar mascabado","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":20,"rec":"Rol Volcán S'mores (Malvavisco Fundido y Ganache Oscuro)","ins":"Galleta María o Graham","cant":120.0,"u":"g","desc":"120 g Galleta Graham (o galleta María) molida finamente","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":21,"rec":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno y Embebido"},{"kind":"receta","n":21,"rec":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"100 g Azúcar mascabado","sub":"Para el Relleno y Embebido"},{"kind":"receta","n":21,"rec":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","ins":"Cocoa alcalina en polvo","cant":15.0,"u":"g","desc":"15 g Cocoa alcalina","sub":"Para el Relleno y Embebido"},{"kind":"receta","n":21,"rec":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","ins":"Café espresso preparado","cant":60.0,"u":"ml","desc":"60 ml Carga de café espresso muy fuerte (para el jarabe de remojo)","sub":"Para el Relleno y Embebido"},{"kind":"receta","n":21,"rec":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","ins":"Azúcar refinada","cant":30.0,"u":"g","desc":"30 g Azúcar refinada (para el jarabe de remojo)","sub":"Para el Relleno y Embebido"},{"kind":"receta","n":21,"rec":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","ins":"Licor de café o amaretto","cant":15.0,"u":"ml","desc":"15 ml Licor de café o Amaretto (opcional)","sub":"Para el Relleno y Embebido"},{"kind":"receta","n":21,"rec":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","ins":"Queso mascarpone","cant":150.0,"u":"g","desc":"150 g Queso Mascarpone (frío)","sub":"Para la Crema de Mascarpone"},{"kind":"receta","n":21,"rec":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","ins":"Crema para batir (Nata 35% M.G.)","cant":100.0,"u":"ml","desc":"100 ml Crema para batir (Nata 35% M.G., muy fría)","sub":"Para la Crema de Mascarpone"},{"kind":"receta","n":21,"rec":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","ins":"Azúcar glass","cant":60.0,"u":"g","desc":"60 g Azúcar glass","sub":"Para la Crema de Mascarpone"},{"kind":"receta","n":21,"rec":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","ins":"Cocoa natural en polvo","cant":8,"u":"g","desc":"Cocoa extra para espolvorear","sub":"Para la Crema de Mascarpone"},{"kind":"receta","n":22,"rec":"Rol Crème Brûlée (Con Cubierta Caramelizada a Fuego)","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno de Vainilla"},{"kind":"receta","n":22,"rec":"Rol Crème Brûlée (Con Cubierta Caramelizada a Fuego)","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"100 g Azúcar estándar","sub":"Para el Relleno de Vainilla"},{"kind":"receta","n":22,"rec":"Rol Crème Brûlée (Con Cubierta Caramelizada a Fuego)","ins":"Pasta de vainilla","cant":10.0,"u":"g","desc":"10 ml Pasta de vainilla (con semillas visibles)","sub":"Para el Relleno de Vainilla"},{"kind":"receta","n":22,"rec":"Rol Crème Brûlée (Con Cubierta Caramelizada a Fuego)","ins":"Crema pastelera de vainilla (elaboración propia)","cant":200.0,"u":"g","desc":"200 g Crema pastelera de vainilla (densa y fría - puedes usar la base de la Receta 17)","sub":"Para la Cubierta Crème Brûlée"},{"kind":"receta","n":22,"rec":"Rol Crème Brûlée (Con Cubierta Caramelizada a Fuego)","ins":"Azúcar refinada","cant":40,"u":"g","desc":"Azúcar refinada cantidad necesaria (para caramelizar)","sub":"Para la Cubierta Crème Brûlée"},{"kind":"receta","n":23,"rec":"Rol Cheesecake de Maracuyá","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":23,"rec":"Rol Cheesecake de Maracuyá","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"80 g Azúcar refinada","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":23,"rec":"Rol Cheesecake de Maracuyá","ins":"Galleta María o Graham","cant":100.0,"u":"g","desc":"100 g Galleta Graham o María (molida rústicamente)","sub":"Para el Relleno del Rollo"},{"kind":"receta","n":23,"rec":"Rol Cheesecake de Maracuyá","ins":"Pulpa de maracuyá","cant":100.0,"u":"g","desc":"100 ml Pulpa de maracuyá pura (sin semillas)","sub":"Para el Curd (Crema) de Maracuyá"},{"kind":"receta","n":23,"rec":"Rol Cheesecake de Maracuyá","ins":"Yema de huevo","cant":3.0,"u":"pza","desc":"3 Yemas de huevo","sub":"Para el Curd (Crema) de Maracuyá"},{"kind":"receta","n":23,"rec":"Rol Cheesecake de Maracuyá","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"80 g Azúcar refinada","sub":"Para el Curd (Crema) de Maracuyá"},{"kind":"receta","n":23,"rec":"Rol Cheesecake de Maracuyá","ins":"Mantequilla sin sal","cant":40.0,"u":"g","desc":"40 g Mantequilla sin sal (fría en cubos)","sub":"Para el Curd (Crema) de Maracuyá"},{"kind":"receta","n":23,"rec":"Rol Cheesecake de Maracuyá","ins":"Queso crema original","cant":150.0,"u":"g","desc":"150 g Queso crema original (frío)","sub":"Para el Frosting de Cheesecake"},{"kind":"receta","n":23,"rec":"Rol Cheesecake de Maracuyá","ins":"Azúcar glass","cant":50.0,"u":"g","desc":"50 g Azúcar glass","sub":"Para el Frosting de Cheesecake"},{"kind":"receta","n":24,"rec":"Rol Red Velvet con Glaseado de Queso Ácido","ins":"Cocoa natural en polvo","cant":15.0,"u":"g","desc":"15 g Cocoa natural (no alcalina)","sub":"Para la Adaptación de la Masa (Durante el amasado de la Fórmula 00A)"},{"kind":"receta","n":24,"rec":"Rol Red Velvet con Glaseado de Queso Ácido","ins":"Vinagre blanco","cant":5.0,"u":"ml","desc":"5 ml Vinagre blanco","sub":"Para la Adaptación de la Masa (Durante el amasado de la Fórmula 00A)"},{"kind":"receta","n":24,"rec":"Rol Red Velvet con Glaseado de Queso Ácido","ins":"Colorante en gel","cant":3,"u":"g","desc":"Colorante en gel rojo intenso (cantidad necesaria)","sub":"Para la Adaptación de la Masa (Durante el amasado de la Fórmula 00A)"},{"kind":"receta","n":24,"rec":"Rol Red Velvet con Glaseado de Queso Ácido","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":24,"rec":"Rol Red Velvet con Glaseado de Queso Ácido","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"120 g Azúcar estándar","sub":"Para el Relleno"},{"kind":"receta","n":24,"rec":"Rol Red Velvet con Glaseado de Queso Ácido","ins":"Chispas de chocolate blanco","cant":100.0,"u":"g","desc":"100 g Chispas de chocolate blanco","sub":"Para el Relleno"},{"kind":"receta","n":24,"rec":"Rol Red Velvet con Glaseado de Queso Ácido","ins":"Queso crema original","cant":150.0,"u":"g","desc":"150 g Queso crema original (frío)","sub":"Para el Glaseado de Queso Ácido"},{"kind":"receta","n":24,"rec":"Rol Red Velvet con Glaseado de Queso Ácido","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Glaseado de Queso Ácido"},{"kind":"receta","n":24,"rec":"Rol Red Velvet con Glaseado de Queso Ácido","ins":"Azúcar glass","cant":100.0,"u":"g","desc":"100 g Azúcar glass","sub":"Para el Glaseado de Queso Ácido"},{"kind":"receta","n":24,"rec":"Rol Red Velvet con Glaseado de Queso Ácido","ins":"Limón amarillo","cant":0.2,"u":"pza","desc":"5 ml Jugo de limón (para el toque ácido)","sub":"Para el Glaseado de Queso Ácido"},{"kind":"receta","n":25,"rec":"Rol Selva Negra (Cereza Amarena y Kirsch)","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":25,"rec":"Rol Selva Negra (Cereza Amarena y Kirsch)","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"100 g Azúcar refinada","sub":"Para el Relleno"},{"kind":"receta","n":25,"rec":"Rol Selva Negra (Cereza Amarena y Kirsch)","ins":"Cereza tipo amarena","cant":150.0,"u":"g","desc":"150 g Cerezas tipo Amarena (o cerezas negras en almíbar), bien escurridas y picadas","sub":"Para el Relleno"},{"kind":"receta","n":25,"rec":"Rol Selva Negra (Cereza Amarena y Kirsch)","ins":"Chispas de chocolate semi-amargo","cant":80.0,"u":"g","desc":"80 g Chispas de chocolate semiamargo","sub":"Para el Relleno"},{"kind":"receta","n":25,"rec":"Rol Selva Negra (Cereza Amarena y Kirsch)","ins":"Cereza tipo amarena","cant":40.0,"u":"g","desc":"40 ml Almíbar de las cerezas","sub":"Para el Almíbar de Kirsch (Licor de Cereza)"},{"kind":"receta","n":25,"rec":"Rol Selva Negra (Cereza Amarena y Kirsch)","ins":"Kirsch o brandy","cant":20.0,"u":"ml","desc":"20 ml Kirsch (licor de cereza) o brandy","sub":"Para el Almíbar de Kirsch (Licor de Cereza)"},{"kind":"receta","n":25,"rec":"Rol Selva Negra (Cereza Amarena y Kirsch)","ins":"Crema para batir (Nata 35% M.G.)","cant":150.0,"u":"ml","desc":"150 ml Crema para batir (Nata 35% M.G., muy fría)","sub":"Para la Cubierta Chantilly"},{"kind":"receta","n":25,"rec":"Rol Selva Negra (Cereza Amarena y Kirsch)","ins":"Azúcar glass","cant":20.0,"u":"g","desc":"20 g Azúcar glass","sub":"Para la Cubierta Chantilly"},{"kind":"receta","n":25,"rec":"Rol Selva Negra (Cereza Amarena y Kirsch)","ins":"Chocolate semi-amargo (54-70%)","cant":40,"u":"g","desc":"Virutas de chocolate oscuro y cerezas enteras para decorar","sub":"Para la Cubierta Chantilly"},{"kind":"receta","n":26,"rec":"Rol Ferrero (Avellana Tostada, Cacao y Barquillo)","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":26,"rec":"Rol Ferrero (Avellana Tostada, Cacao y Barquillo)","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"100 g Azúcar mascabado","sub":"Para el Relleno"},{"kind":"receta","n":26,"rec":"Rol Ferrero (Avellana Tostada, Cacao y Barquillo)","ins":"Crema de cacao y avellana","cant":150.0,"u":"g","desc":"150 g Crema de cacao y avellanas (estilo Nutella)","sub":"Para el Relleno"},{"kind":"receta","n":26,"rec":"Rol Ferrero (Avellana Tostada, Cacao y Barquillo)","ins":"Galleta de barquillo","cant":60.0,"u":"g","desc":"60 g Galleta de barquillo (troceada)","sub":"Para el Relleno"},{"kind":"receta","n":26,"rec":"Rol Ferrero (Avellana Tostada, Cacao y Barquillo)","ins":"Avellana","cant":50.0,"u":"g","desc":"50 g Avellana tostada y picada","sub":"Para el Relleno"},{"kind":"receta","n":26,"rec":"Rol Ferrero (Avellana Tostada, Cacao y Barquillo)","ins":"Chocolate con leche","cant":150.0,"u":"g","desc":"150 g Chocolate con leche (de buena calidad)","sub":"Para la Cubierta (Glaseado Rocher)"},{"kind":"receta","n":26,"rec":"Rol Ferrero (Avellana Tostada, Cacao y Barquillo)","ins":"Aceite vegetal","cant":30.0,"u":"ml","desc":"30 ml Aceite vegetal (girasol o canola)","sub":"Para la Cubierta (Glaseado Rocher)"},{"kind":"receta","n":26,"rec":"Rol Ferrero (Avellana Tostada, Cacao y Barquillo)","ins":"Avellana","cant":60.0,"u":"g","desc":"60 g Avellana tostada (picada finamente)","sub":"Para la Cubierta (Glaseado Rocher)"},{"kind":"receta","n":27,"rec":"Rol Ópera (Jarabe de Café, Almendra y Ganache)","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno (Frangipane Ligero)"},{"kind":"receta","n":27,"rec":"Rol Ópera (Jarabe de Café, Almendra y Ganache)","ins":"Harina de almendra","cant":80.0,"u":"g","desc":"80 g Harina de almendra","sub":"Para el Relleno (Frangipane Ligero)"},{"kind":"receta","n":27,"rec":"Rol Ópera (Jarabe de Café, Almendra y Ganache)","ins":"Azúcar glass","cant":80.0,"u":"g","desc":"80 g Azúcar glass","sub":"Para el Relleno (Frangipane Ligero)"},{"kind":"receta","n":27,"rec":"Rol Ópera (Jarabe de Café, Almendra y Ganache)","ins":"Huevo entero","cant":1.0,"u":"pza","desc":"1 pza Huevo entero","sub":"Para el Relleno (Frangipane Ligero)"},{"kind":"receta","n":27,"rec":"Rol Ópera (Jarabe de Café, Almendra y Ganache)","ins":"Agua purificada","cant":100.0,"u":"ml","desc":"100 ml Agua","sub":"Para el Jarabe de Café"},{"kind":"receta","n":27,"rec":"Rol Ópera (Jarabe de Café, Almendra y Ganache)","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"100 g Azúcar refinada","sub":"Para el Jarabe de Café"},{"kind":"receta","n":27,"rec":"Rol Ópera (Jarabe de Café, Almendra y Ganache)","ins":"Café soluble","cant":15.0,"u":"g","desc":"15 g Café soluble de alta intensidad (o espresso en polvo)","sub":"Para el Jarabe de Café"},{"kind":"receta","n":27,"rec":"Rol Ópera (Jarabe de Café, Almendra y Ganache)","ins":"Chocolate semi-amargo (54-70%)","cant":150.0,"u":"g","desc":"150 g Chocolate semi-amargo (54% a 70%)","sub":"Para la Cubierta (Ganache Ópera)"},{"kind":"receta","n":27,"rec":"Rol Ópera (Jarabe de Café, Almendra y Ganache)","ins":"Crema para batir (Nata 35% M.G.)","cant":150.0,"u":"ml","desc":"150 ml Crema para batir (Nata 35% M.G.)","sub":"Para la Cubierta (Ganache Ópera)"},{"kind":"receta","n":28,"rec":"Rol Lemon Pie (Curd de Limón y Merengue Suizo Tostado)","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":28,"rec":"Rol Lemon Pie (Curd de Limón y Merengue Suizo Tostado)","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"100 g Azúcar estándar","sub":"Para el Relleno"},{"kind":"receta","n":28,"rec":"Rol Lemon Pie (Curd de Limón y Merengue Suizo Tostado)","ins":"Galleta María o Graham","cant":60.0,"u":"g","desc":"60 g Galleta María o Graham (molida)","sub":"Para el Relleno"},{"kind":"receta","n":28,"rec":"Rol Lemon Pie (Curd de Limón y Merengue Suizo Tostado)","ins":"Leche condensada","cant":100.0,"u":"g","desc":"100 g Leche condensada","sub":"Para el Núcleo (Centro de Pay de Limón)"},{"kind":"receta","n":28,"rec":"Rol Lemon Pie (Curd de Limón y Merengue Suizo Tostado)","ins":"Limón amarillo","cant":1,"u":"pza","desc":"30 ml Jugo de limón recién exprimido","sub":"Para el Núcleo (Centro de Pay de Limón)"},{"kind":"receta","n":28,"rec":"Rol Lemon Pie (Curd de Limón y Merengue Suizo Tostado)","ins":"Limón amarillo","cant":1,"u":"pza","desc":"Ralladura de 1 limón","sub":"Para el Núcleo (Centro de Pay de Limón)"},{"kind":"receta","n":28,"rec":"Rol Lemon Pie (Curd de Limón y Merengue Suizo Tostado)","ins":"Clara de huevo","cant":3,"u":"pza","desc":"100 g Claras de huevo (aprox. 3 claras grandes)","sub":"Para el Merengue Suizo"},{"kind":"receta","n":28,"rec":"Rol Lemon Pie (Curd de Limón y Merengue Suizo Tostado)","ins":"Azúcar refinada","cant":200.0,"u":"g","desc":"200 g Azúcar refinada (el doble del peso de las claras)","sub":"Para el Merengue Suizo"},{"kind":"receta","n":29,"rec":"Rol de Tres Leches (Masa Embebida y Crema Montada)","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":29,"rec":"Rol de Tres Leches (Masa Embebida y Crema Montada)","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"100 g Azúcar refinada (no uses mascabado para no oscurecer la masa)","sub":"Para el Relleno"},{"kind":"receta","n":29,"rec":"Rol de Tres Leches (Masa Embebida y Crema Montada)","ins":"Leche evaporada","cant":150.0,"u":"ml","desc":"150 ml Leche evaporada","sub":"Para el Baño de Tres Leches"},{"kind":"receta","n":29,"rec":"Rol de Tres Leches (Masa Embebida y Crema Montada)","ins":"Leche condensada","cant":150.0,"u":"g","desc":"150 ml Leche condensada","sub":"Para el Baño de Tres Leches"},{"kind":"receta","n":29,"rec":"Rol de Tres Leches (Masa Embebida y Crema Montada)","ins":"Leche entera","cant":100.0,"u":"ml","desc":"100 ml Leche entera o media crema","sub":"Para el Baño de Tres Leches"},{"kind":"receta","n":29,"rec":"Rol de Tres Leches (Masa Embebida y Crema Montada)","ins":"Extracto de vainilla de Papantla","cant":5.0,"u":"ml","desc":"5 ml Extracto de vainilla","sub":"Para el Baño de Tres Leches"},{"kind":"receta","n":29,"rec":"Rol de Tres Leches (Masa Embebida y Crema Montada)","ins":"Crema para batir (Nata 35% M.G.)","cant":200.0,"u":"ml","desc":"200 ml Crema para batir (Nata 35% M.G., muy fría)","sub":"Para la Cubierta"},{"kind":"receta","n":29,"rec":"Rol de Tres Leches (Masa Embebida y Crema Montada)","ins":"Azúcar glass","cant":30.0,"u":"g","desc":"30 g Azúcar glass","sub":"Para la Cubierta"},{"kind":"receta","n":29,"rec":"Rol de Tres Leches (Masa Embebida y Crema Montada)","ins":"Canela en polvo (Ceilán)","cant":3,"u":"g","desc":"Canela en polvo para espolvorear","sub":"Para la Cubierta"},{"kind":"receta","n":30,"rec":"Rol Banoffee (Plátano Fresco, Toffee y Crema)","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno y Costra"},{"kind":"receta","n":30,"rec":"Rol Banoffee (Plátano Fresco, Toffee y Crema)","ins":"Azúcar mascabado","cant":80.0,"u":"g","desc":"80 g Azúcar mascabado","sub":"Para el Relleno y Costra"},{"kind":"receta","n":30,"rec":"Rol Banoffee (Plátano Fresco, Toffee y Crema)","ins":"Galleta María o Graham","cant":100.0,"u":"g","desc":"100 g Galleta María (triturada en polvo)","sub":"Para el Relleno y Costra"},{"kind":"receta","n":30,"rec":"Rol Banoffee (Plátano Fresco, Toffee y Crema)","ins":"Dulce de leche repostero","cant":150.0,"u":"g","desc":"150 g Dulce de leche repostero (o Toffee espeso)","sub":"Para el Centro Banoffee"},{"kind":"receta","n":30,"rec":"Rol Banoffee (Plátano Fresco, Toffee y Crema)","ins":"Plátano","cant":240,"u":"g","desc":"2 Plátanos maduros (en rodajas)","sub":"Para el Centro Banoffee"},{"kind":"receta","n":30,"rec":"Rol Banoffee (Plátano Fresco, Toffee y Crema)","ins":"Crema para batir (Nata 35% M.G.)","cant":150.0,"u":"ml","desc":"150 ml Crema para batir (sin azúcar o muy baja en azúcar)","sub":"Para la Cubierta"},{"kind":"receta","n":30,"rec":"Rol Banoffee (Plátano Fresco, Toffee y Crema)","ins":"Chocolate semi-amargo (54-70%)","cant":30,"u":"g","desc":"Rizos de chocolate oscuro","sub":"Para la Cubierta"},{"kind":"receta","n":31,"rec":"Rol de Pan de Muerto (Toque de Azahar y Naranja)","ins":"Mantequilla sin sal","cant":100.0,"u":"g","desc":"100 g Mantequilla sin sal (pomada)","sub":"Para el Relleno Aromático"},{"kind":"receta","n":31,"rec":"Rol de Pan de Muerto (Toque de Azahar y Naranja)","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"120 g Azúcar refinada","sub":"Para el Relleno Aromático"},{"kind":"receta","n":31,"rec":"Rol de Pan de Muerto (Toque de Azahar y Naranja)","ins":"Naranja","cant":2,"u":"pza","desc":"Ralladura fina de 2 naranjas dulces","sub":"Para el Relleno Aromático"},{"kind":"receta","n":31,"rec":"Rol de Pan de Muerto (Toque de Azahar y Naranja)","ins":"Agua de azahar","cant":10.0,"u":"ml","desc":"10 ml Agua de azahar (esencia de flor de naranjo)","sub":"Para el Relleno Aromático"},{"kind":"receta","n":31,"rec":"Rol de Pan de Muerto (Toque de Azahar y Naranja)","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (fundida)","sub":"Para la Cubierta Clásica"},{"kind":"receta","n":31,"rec":"Rol de Pan de Muerto (Toque de Azahar y Naranja)","ins":"Azúcar refinada","cant":150.0,"u":"g","desc":"150 g Azúcar refinada (para espolvorear)","sub":"Para la Cubierta Clásica"},{"kind":"receta","n":32,"rec":"Rol de Rosca de Reyes con Costra de Azúcar","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":32,"rec":"Rol de Rosca de Reyes con Costra de Azúcar","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"80 g Azúcar estándar","sub":"Para el Relleno"},{"kind":"receta","n":32,"rec":"Rol de Rosca de Reyes con Costra de Azúcar","ins":"Ate de frutas","cant":100.0,"u":"g","desc":"100 g Ate de frutas (membrillo, guayaba, perón) cortado en cubos pequeños","sub":"Para el Relleno"},{"kind":"receta","n":32,"rec":"Rol de Rosca de Reyes con Costra de Azúcar","ins":"Almendra fileteada","cant":50.0,"u":"g","desc":"50 g Almendras fileteadas tostadas","sub":"Para el Relleno"},{"kind":"receta","n":32,"rec":"Rol de Rosca de Reyes con Costra de Azúcar","ins":"Manteca vegetal","cant":50.0,"u":"g","desc":"50 g Manteca vegetal (o mantequilla pomada)","sub":"Para la Costra de Azúcar (Tipo Concha/Rosca)"},{"kind":"receta","n":32,"rec":"Rol de Rosca de Reyes con Costra de Azúcar","ins":"Azúcar glass","cant":50.0,"u":"g","desc":"50 g Azúcar glass","sub":"Para la Costra de Azúcar (Tipo Concha/Rosca)"},{"kind":"receta","n":32,"rec":"Rol de Rosca de Reyes con Costra de Azúcar","ins":"Harina de trigo todo uso","cant":50.0,"u":"g","desc":"50 g Harina de trigo","sub":"Para la Costra de Azúcar (Tipo Concha/Rosca)"},{"kind":"receta","n":32,"rec":"Rol de Rosca de Reyes con Costra de Azúcar","ins":"Higo cristalizado","cant":40,"u":"g","desc":"Higo cristalizado o cerezas (para decorar)","sub":"Para la Costra de Azúcar (Tipo Concha/Rosca)"},{"kind":"receta","n":33,"rec":"Rol de Guayaba y Queso Cotija","ins":"Mermelada de guayaba","cant":200.0,"u":"g","desc":"200 g Mermelada rústica de guayaba (densa, tipo ate suave)","sub":"Para el Relleno"},{"kind":"receta","n":33,"rec":"Rol de Guayaba y Queso Cotija","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":33,"rec":"Rol de Guayaba y Queso Cotija","ins":"Queso cotija genuino","cant":120.0,"u":"g","desc":"120 g Queso Cotija genuino (seco y añejo, rallado finamente)","sub":"Para el Relleno"},{"kind":"receta","n":33,"rec":"Rol de Guayaba y Queso Cotija","ins":"Queso crema original","cant":100.0,"u":"g","desc":"100 g Queso crema","sub":"Para el Glaseado (Opcional)"},{"kind":"receta","n":33,"rec":"Rol de Guayaba y Queso Cotija","ins":"Azúcar glass","cant":30.0,"u":"g","desc":"30 g Azúcar glass","sub":"Para el Glaseado (Opcional)"},{"kind":"receta","n":33,"rec":"Rol de Guayaba y Queso Cotija","ins":"Queso cotija genuino","cant":20,"u":"g","desc":"Un toque extra de Cotija rallado","sub":"Para el Glaseado (Opcional)"},{"kind":"receta","n":34,"rec":"Rol de Café de Olla y Piloncillo","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno Especiado"},{"kind":"receta","n":34,"rec":"Rol de Café de Olla y Piloncillo","ins":"Piloncillo","cant":150.0,"u":"g","desc":"150 g Piloncillo granulado (o panela rallada)","sub":"Para el Relleno Especiado"},{"kind":"receta","n":34,"rec":"Rol de Café de Olla y Piloncillo","ins":"Café soluble","cant":10.0,"u":"g","desc":"10 g Café soluble de grano oscuro (pulverizado)","sub":"Para el Relleno Especiado"},{"kind":"receta","n":34,"rec":"Rol de Café de Olla y Piloncillo","ins":"Canela en polvo (Ceilán)","cant":4.0,"u":"g","desc":"4 g Canela en polvo","sub":"Para el Relleno Especiado"},{"kind":"receta","n":34,"rec":"Rol de Café de Olla y Piloncillo","ins":"Clavo de olor molido","cant":1.0,"u":"g","desc":"1 g Clavo de olor en polvo","sub":"Para el Relleno Especiado"},{"kind":"receta","n":34,"rec":"Rol de Café de Olla y Piloncillo","ins":"Anís estrella","cant":1.0,"u":"g","desc":"1 g Anís estrella en polvo (opcional pero recomendado)","sub":"Para el Relleno Especiado"},{"kind":"receta","n":34,"rec":"Rol de Café de Olla y Piloncillo","ins":"Piloncillo","cant":100.0,"u":"g","desc":"100 g Piloncillo (en trozos o rallado)","sub":"Para el Jarabe de Piloncillo (Cubierta)"},{"kind":"receta","n":34,"rec":"Rol de Café de Olla y Piloncillo","ins":"Agua purificada","cant":50.0,"u":"ml","desc":"50 ml Agua","sub":"Para el Jarabe de Piloncillo (Cubierta)"},{"kind":"receta","n":34,"rec":"Rol de Café de Olla y Piloncillo","ins":"Raja de canela","cant":4,"u":"g","desc":"1 raja de Canela","sub":"Para el Jarabe de Piloncillo (Cubierta)"},{"kind":"receta","n":35,"rec":"Rol de Chocolate Oaxaqueño y Almendras","ins":"Mantequilla sin sal","cant":100.0,"u":"g","desc":"100 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":35,"rec":"Rol de Chocolate Oaxaqueño y Almendras","ins":"Chocolate mexicano de mesa","cant":180,"u":"g","desc":"2 Tabletas (180 g total) de Chocolate mexicano de mesa (tipo Mayordomo, Abuelita o Ibarra), rallado grueso.","sub":"Para el Relleno"},{"kind":"receta","n":35,"rec":"Rol de Chocolate Oaxaqueño y Almendras","ins":"Azúcar mascabado","cant":50.0,"u":"g","desc":"50 g Azúcar mascabado","sub":"Para el Relleno"},{"kind":"receta","n":35,"rec":"Rol de Chocolate Oaxaqueño y Almendras","ins":"Almendra entera","cant":60.0,"u":"g","desc":"60 g Almendras enteras (tostadas y picadas rústicamente)","sub":"Para el Relleno"},{"kind":"receta","n":35,"rec":"Rol de Chocolate Oaxaqueño y Almendras","ins":"Azúcar glass","cant":100.0,"u":"g","desc":"100 g Azúcar glass","sub":"Para el Glaseado (Opcional, ligero)"},{"kind":"receta","n":35,"rec":"Rol de Chocolate Oaxaqueño y Almendras","ins":"Leche entera","cant":20.0,"u":"ml","desc":"20 ml Leche entera","sub":"Para el Glaseado (Opcional, ligero)"},{"kind":"receta","n":35,"rec":"Rol de Chocolate Oaxaqueño y Almendras","ins":"Canela en polvo (Ceilán)","cant":1,"u":"g","desc":"Una pizca de canela","sub":"Para el Glaseado (Opcional, ligero)"},{"kind":"receta","n":36,"rec":"Rol de Mazapán de Cacahuate","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":36,"rec":"Rol de Mazapán de Cacahuate","ins":"Mazapán de cacahuate","cant":180.0,"u":"g","desc":"180 g Mazapán de cacahuate tradicional (aprox. 6 piezas grandes, desmoronadas)","sub":"Para el Relleno"},{"kind":"receta","n":36,"rec":"Rol de Mazapán de Cacahuate","ins":"Azúcar glass","cant":40.0,"u":"g","desc":"40 g Azúcar glass (para dar estructura al mazapán)","sub":"Para el Relleno"},{"kind":"receta","n":36,"rec":"Rol de Mazapán de Cacahuate","ins":"Cacahuate","cant":60.0,"u":"g","desc":"60 g Cacahuate tostado sin sal (troceado)","sub":"Para el Relleno"},{"kind":"receta","n":36,"rec":"Rol de Mazapán de Cacahuate","ins":"Queso crema original","cant":100.0,"u":"g","desc":"100 g Queso crema original","sub":"Para el Glaseado Ligero"},{"kind":"receta","n":36,"rec":"Rol de Mazapán de Cacahuate","ins":"Mazapán de cacahuate","cant":30,"u":"g","desc":"1 pieza (30 g) de Mazapán","sub":"Para el Glaseado Ligero"},{"kind":"receta","n":36,"rec":"Rol de Mazapán de Cacahuate","ins":"Leche entera","cant":30.0,"u":"ml","desc":"30 ml Leche entera","sub":"Para el Glaseado Ligero"},{"kind":"receta","n":37,"rec":"Rol de Tamarindo y Chamoy Suave (Contraste Dulce/Ácido)","ins":"Pulpa de tamarindo","cant":150.0,"u":"g","desc":"150 g Pulpa natural de tamarindo (espesa, endulzada y sin semillas)","sub":"Para el Relleno"},{"kind":"receta","n":37,"rec":"Rol de Tamarindo y Chamoy Suave (Contraste Dulce/Ácido)","ins":"Chamoy líquido","cant":60.0,"u":"ml","desc":"60 g Chamoy líquido de buena calidad (espeso, tipo artesanal)","sub":"Para el Relleno"},{"kind":"receta","n":37,"rec":"Rol de Tamarindo y Chamoy Suave (Contraste Dulce/Ácido)","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"80 g Azúcar estándar","sub":"Para el Relleno"},{"kind":"receta","n":37,"rec":"Rol de Tamarindo y Chamoy Suave (Contraste Dulce/Ácido)","ins":"Chile en polvo","cant":10.0,"u":"g","desc":"10 g Chile en polvo (tipo Tajín o mezcla dulce/salada)","sub":"Para el Relleno"},{"kind":"receta","n":37,"rec":"Rol de Tamarindo y Chamoy Suave (Contraste Dulce/Ácido)","ins":"Mango deshidratado","cant":100.0,"u":"g","desc":"100 g Mango deshidratado (picado finamente) o gomitas de tamarindo para decorar.","sub":"Para la Cubierta"},{"kind":"receta","n":38,"rec":"Rol de Rompope y Nuez","ins":"Rompope","cant":200.0,"u":"ml","desc":"200 ml Rompope (licor de yema tradicional)","sub":"Para el Relleno (Pastelera de Rompope)"},{"kind":"receta","n":38,"rec":"Rol de Rompope y Nuez","ins":"Leche entera","cant":50.0,"u":"ml","desc":"50 ml Leche entera","sub":"Para el Relleno (Pastelera de Rompope)"},{"kind":"receta","n":38,"rec":"Rol de Rompope y Nuez","ins":"Yema de huevo","cant":3.0,"u":"pza","desc":"3 Yemas de huevo","sub":"Para el Relleno (Pastelera de Rompope)"},{"kind":"receta","n":38,"rec":"Rol de Rompope y Nuez","ins":"Azúcar refinada","cant":40.0,"u":"g","desc":"40 g Azúcar refinada","sub":"Para el Relleno (Pastelera de Rompope)"},{"kind":"receta","n":38,"rec":"Rol de Rompope y Nuez","ins":"Fécula de maíz","cant":30.0,"u":"g","desc":"30 g Fécula de maíz (Maicena)","sub":"Para el Relleno (Pastelera de Rompope)"},{"kind":"receta","n":38,"rec":"Rol de Rompope y Nuez","ins":"Nuez pecana","cant":100.0,"u":"g","desc":"100 g Nuez pecana (tostada y troceada)","sub":"Para el Armado"},{"kind":"receta","n":38,"rec":"Rol de Rompope y Nuez","ins":"Azúcar glass","cant":100.0,"u":"g","desc":"100 g Azúcar glass","sub":"Para el Glaseado (Opcional)"},{"kind":"receta","n":38,"rec":"Rol de Rompope y Nuez","ins":"Rompope","cant":20.0,"u":"ml","desc":"20 ml Rompope","sub":"Para el Glaseado (Opcional)"},{"kind":"receta","n":39,"rec":"Rol de Arroz con Leche y Pasas al Ron","ins":"Uvas pasas","cant":80.0,"u":"g","desc":"80 g Uvas pasas","sub":"Para la Maceración"},{"kind":"receta","n":39,"rec":"Rol de Arroz con Leche y Pasas al Ron","ins":"Ron oscuro","cant":40.0,"u":"ml","desc":"40 ml Ron oscuro (macerar por 2 horas o toda la noche)","sub":"Para la Maceración"},{"kind":"receta","n":39,"rec":"Rol de Arroz con Leche y Pasas al Ron","ins":"Arroz con leche (elaboración propia)","cant":150.0,"u":"g","desc":"150 g Arroz con leche clásico (muy espeso, pre-elaborado)","sub":"Para el Relleno de Arroz"},{"kind":"receta","n":39,"rec":"Rol de Arroz con Leche y Pasas al Ron","ins":"Fécula de maíz","cant":15.0,"u":"g","desc":"15 g Fécula de maíz","sub":"Para el Relleno de Arroz"},{"kind":"receta","n":39,"rec":"Rol de Arroz con Leche y Pasas al Ron","ins":"Canela en polvo (Ceilán)","cant":5.0,"u":"g","desc":"5 g Canela en polvo","sub":"Para el Relleno de Arroz"},{"kind":"receta","n":40,"rec":"Rol de Camote Enmielado y Especias Cálidas","ins":"Camote","cant":200.0,"u":"g","desc":"200 g Puré de camote amarillo o naranja (rostizado, no hervido)","sub":"Para el Relleno de Camote"},{"kind":"receta","n":40,"rec":"Rol de Camote Enmielado y Especias Cálidas","ins":"Piloncillo","cant":100.0,"u":"g","desc":"100 g Piloncillo rallado fino (o azúcar mascabado)","sub":"Para el Relleno de Camote"},{"kind":"receta","n":40,"rec":"Rol de Camote Enmielado y Especias Cálidas","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Relleno de Camote"},{"kind":"receta","n":40,"rec":"Rol de Camote Enmielado y Especias Cálidas","ins":"Canela en polvo (Ceilán)","cant":4.0,"u":"g","desc":"4 g Canela en polvo, 1 g Clavo molido, 1 g Anís en polvo","sub":"Para el Relleno de Camote"},{"kind":"receta","n":40,"rec":"Rol de Camote Enmielado y Especias Cálidas","ins":"Piloncillo","cant":50.0,"u":"g","desc":"50 g Piloncillo fundido con 20 ml de agua","sub":"Para el Brillo de Piloncillo"},{"kind":"receta","n":41,"rec":"Rol de Miso Blanco, Chocolate Gold (Rubio) y Sésamo Tostado","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno Umami-Dulce"},{"kind":"receta","n":41,"rec":"Rol de Miso Blanco, Chocolate Gold (Rubio) y Sésamo Tostado","ins":"Pasta de miso blanco","cant":40.0,"u":"g","desc":"40 g Pasta de Miso Blanco (Shiro Miso)","sub":"Para el Relleno Umami-Dulce"},{"kind":"receta","n":41,"rec":"Rol de Miso Blanco, Chocolate Gold (Rubio) y Sésamo Tostado","ins":"Azúcar mascabado","cant":80.0,"u":"g","desc":"80 g Azúcar mascabado","sub":"Para el Relleno Umami-Dulce"},{"kind":"receta","n":41,"rec":"Rol de Miso Blanco, Chocolate Gold (Rubio) y Sésamo Tostado","ins":"Chocolate Gold (rubio)","cant":120.0,"u":"g","desc":"120 g Chocolate Gold (chocolate blanco caramelizado, en callets)","sub":"Para el Relleno Umami-Dulce"},{"kind":"receta","n":41,"rec":"Rol de Miso Blanco, Chocolate Gold (Rubio) y Sésamo Tostado","ins":"Semillas de sésamo","cant":30.0,"u":"g","desc":"30 g Semillas de sésamo (ajonjolí) blanco y negro, ligeramente tostadas","sub":"Para el Relleno Umami-Dulce"},{"kind":"receta","n":42,"rec":"Rol de Ajo Rostizado, Romero y Parmesano","ins":"Ajo","cant":90,"u":"g","desc":"2 Cabezas de ajo enteras (rostizadas)","sub":"Para el Relleno Salado"},{"kind":"receta","n":42,"rec":"Rol de Ajo Rostizado, Romero y Parmesano","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno Salado"},{"kind":"receta","n":42,"rec":"Rol de Ajo Rostizado, Romero y Parmesano","ins":"Queso parmigiano reggiano","cant":150.0,"u":"g","desc":"150 g Queso Parmigiano Reggiano (rallado finamente)","sub":"Para el Relleno Salado"},{"kind":"receta","n":42,"rec":"Rol de Ajo Rostizado, Romero y Parmesano","ins":"Romero fresco","cant":10.0,"u":"g","desc":"10 g Hojas frescas de romero (picadas muy fino)","sub":"Para el Relleno Salado"},{"kind":"receta","n":42,"rec":"Rol de Ajo Rostizado, Romero y Parmesano","ins":"Pimienta negra","cant":2.0,"u":"g","desc":"2 g Pimienta negra recién molida","sub":"Para el Relleno Salado"},{"kind":"receta","n":43,"rec":"Rol de Pesto de Albahaca y Piñones","ins":"Pesto genovés","cant":180.0,"u":"g","desc":"180 g Pesto genovés clásico (muy espeso, bajo en aceite)","sub":"Para el Relleno"},{"kind":"receta","n":43,"rec":"Rol de Pesto de Albahaca y Piñones","ins":"Piñón blanco","cant":60.0,"u":"g","desc":"60 g Piñones blancos (ligeramente tostados)","sub":"Para el Relleno"},{"kind":"receta","n":43,"rec":"Rol de Pesto de Albahaca y Piñones","ins":"Queso provolone o mozzarella baja humedad","cant":120.0,"u":"g","desc":"120 g Queso Provolone o Mozzarella de baja humedad (rallado)","sub":"Para el Relleno"},{"kind":"receta","n":44,"rec":"Rol de Queso Azul, Compota de Higo y Nuez Caramelizada","ins":"Compota de higo","cant":150.0,"u":"g","desc":"150 g Compota rústica de higo (densa, estilo mermelada reducida)","sub":"Para el Relleno"},{"kind":"receta","n":44,"rec":"Rol de Queso Azul, Compota de Higo y Nuez Caramelizada","ins":"Queso azul","cant":100.0,"u":"g","desc":"100 g Queso Azul (Gorgonzola o Roquefort, desmoronado)","sub":"Para el Relleno"},{"kind":"receta","n":44,"rec":"Rol de Queso Azul, Compota de Higo y Nuez Caramelizada","ins":"Nuez pecana","cant":80.0,"u":"g","desc":"80 g Nueces pecanas caramelizadas (troceadas)","sub":"Para el Relleno"},{"kind":"receta","n":45,"rec":"Rol de Trufa Negra y Hongos Silvestres","ins":"Champiñón y hongo cremini","cant":300.0,"u":"g","desc":"300 g Champiñones frescos y hongos cremini (picados extremadamente finos o procesados en pulsos)","sub":"Para la Duxelles de Hongos"},{"kind":"receta","n":45,"rec":"Rol de Trufa Negra y Hongos Silvestres","ins":"Chalota","cant":35,"u":"g","desc":"1 Chalota finamente picada","sub":"Para la Duxelles de Hongos"},{"kind":"receta","n":45,"rec":"Rol de Trufa Negra y Hongos Silvestres","ins":"Mantequilla sin sal","cant":40.0,"u":"g","desc":"40 g Mantequilla sin sal","sub":"Para la Duxelles de Hongos"},{"kind":"receta","n":45,"rec":"Rol de Trufa Negra y Hongos Silvestres","ins":"Aceite de trufa negra","cant":10.0,"u":"ml","desc":"10 ml Aceite de trufa negra (o 15 g de pasta tartufata)","sub":"Para la Duxelles de Hongos"},{"kind":"receta","n":45,"rec":"Rol de Trufa Negra y Hongos Silvestres","ins":"Queso gruyère","cant":120.0,"u":"g","desc":"120 g Queso Gruyère (rallado)","sub":"Para la Duxelles de Hongos"},{"kind":"receta","n":46,"rec":"Rol de Tocino Glaseado con Maple","ins":"Tocino ahumado de corte grueso","cant":250.0,"u":"g","desc":"250 g Tocino ahumado de corte grueso","sub":"Para el Relleno"},{"kind":"receta","n":46,"rec":"Rol de Tocino Glaseado con Maple","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":46,"rec":"Rol de Tocino Glaseado con Maple","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"100 g Azúcar mascabado","sub":"Para el Relleno"},{"kind":"receta","n":46,"rec":"Rol de Tocino Glaseado con Maple","ins":"Jarabe de maple puro","cant":40.0,"u":"ml","desc":"40 ml Jarabe de maple puro (Grado A, ámbar oscuro)","sub":"Para el Relleno"},{"kind":"receta","n":46,"rec":"Rol de Tocino Glaseado con Maple","ins":"Azúcar glass","cant":120.0,"u":"g","desc":"120 g Azúcar glass","sub":"Para el Glaseado de Maple"},{"kind":"receta","n":46,"rec":"Rol de Tocino Glaseado con Maple","ins":"Jarabe de maple puro","cant":30.0,"u":"ml","desc":"30 ml Jarabe de maple puro","sub":"Para el Glaseado de Maple"},{"kind":"receta","n":46,"rec":"Rol de Tocino Glaseado con Maple","ins":"Leche entera","cant":10.0,"u":"ml","desc":"10 ml Leche entera (o crema)","sub":"Para el Glaseado de Maple"},{"kind":"receta","n":47,"rec":"Rol de Cerveza Stout y Cheddar Añejo","ins":"Cerveza negra (stout)","cant":350.0,"u":"ml","desc":"350 ml Cerveza negra (tipo Stout o Porter)","sub":"Para la Reducción de Cerveza"},{"kind":"receta","n":47,"rec":"Rol de Cerveza Stout y Cheddar Añejo","ins":"Azúcar mascabado","cant":50.0,"u":"g","desc":"50 g Azúcar mascabado","sub":"Para la Reducción de Cerveza"},{"kind":"receta","n":47,"rec":"Rol de Cerveza Stout y Cheddar Añejo","ins":"Mantequilla sin sal","cant":60.0,"u":"g","desc":"60 g Mantequilla sin sal (pomada)","sub":"Para el Relleno"},{"kind":"receta","n":47,"rec":"Rol de Cerveza Stout y Cheddar Añejo","ins":"Queso cheddar añejado","cant":150.0,"u":"g","desc":"150 g Queso Cheddar añejado (rallado grueso)","sub":"Para el Relleno"},{"kind":"receta","n":47,"rec":"Rol de Cerveza Stout y Cheddar Añejo","ins":"Pimienta negra","cant":1.0,"u":"g","desc":"1 g Pimienta negra molida","sub":"Para el Relleno"},{"kind":"receta","n":48,"rec":"Rol de Cardamomo, Naranja Confitada y Pistache","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno Especiado"},{"kind":"receta","n":48,"rec":"Rol de Cardamomo, Naranja Confitada y Pistache","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"120 g Azúcar refinada","sub":"Para el Relleno Especiado"},{"kind":"receta","n":48,"rec":"Rol de Cardamomo, Naranja Confitada y Pistache","ins":"Cardamomo","cant":8.0,"u":"g","desc":"8 g Cardamomo recién molido (solo las semillas internas)","sub":"Para el Relleno Especiado"},{"kind":"receta","n":48,"rec":"Rol de Cardamomo, Naranja Confitada y Pistache","ins":"Cáscara de naranja confitada","cant":80.0,"u":"g","desc":"80 g Cáscara de naranja confitada (en cubitos muy pequeños)","sub":"Para el Relleno Especiado"},{"kind":"receta","n":48,"rec":"Rol de Cardamomo, Naranja Confitada y Pistache","ins":"Pistache sin sal","cant":60.0,"u":"g","desc":"60 g Pistaches tostados (troceados rústicamente)","sub":"Para el Relleno Especiado"},{"kind":"receta","n":48,"rec":"Rol de Cardamomo, Naranja Confitada y Pistache","ins":"Mermelada de naranja","cant":30.0,"u":"g","desc":"30 g Mermelada de naranja fundida con 10 ml de agua","sub":"Para el Brillo"},{"kind":"receta","n":49,"rec":"Rol de Azafrán y Agua de Rosas","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (fundida)","sub":"Para el Relleno de Azafrán"},{"kind":"receta","n":49,"rec":"Rol de Azafrán y Agua de Rosas","ins":"Azafrán","cant":0.5,"u":"g","desc":"0.5 g Hebras de azafrán puro","sub":"Para el Relleno de Azafrán"},{"kind":"receta","n":49,"rec":"Rol de Azafrán y Agua de Rosas","ins":"Leche entera","cant":10.0,"u":"ml","desc":"10 ml Leche caliente (para activar el azafrán)","sub":"Para el Relleno de Azafrán"},{"kind":"receta","n":49,"rec":"Rol de Azafrán y Agua de Rosas","ins":"Azúcar refinada","cant":100.0,"u":"g","desc":"100 g Azúcar refinada","sub":"Para el Relleno de Azafrán"},{"kind":"receta","n":49,"rec":"Rol de Azafrán y Agua de Rosas","ins":"Harina de almendra","cant":50.0,"u":"g","desc":"50 g Harina de almendra","sub":"Para el Relleno de Azafrán"},{"kind":"receta","n":49,"rec":"Rol de Azafrán y Agua de Rosas","ins":"Azúcar glass","cant":120.0,"u":"g","desc":"120 g Azúcar glass","sub":"Para el Glaseado de Rosas"},{"kind":"receta","n":49,"rec":"Rol de Azafrán y Agua de Rosas","ins":"Leche entera","cant":15.0,"u":"ml","desc":"15 ml Leche entera","sub":"Para el Glaseado de Rosas"},{"kind":"receta","n":49,"rec":"Rol de Azafrán y Agua de Rosas","ins":"Agua de rosas","cant":0.2,"u":"ml","desc":"2 a 3 gotas de Agua de rosas pura","sub":"Para el Glaseado de Rosas"},{"kind":"receta","n":49,"rec":"Rol de Azafrán y Agua de Rosas","ins":"Pétalos de rosa deshidratados","cant":2,"u":"g","desc":"Pétalos de rosa deshidratados (comestibles, para decorar)","sub":"Para el Glaseado de Rosas"},{"kind":"receta","n":50,"rec":"Rol de Masa Madre, Mantequilla Avellanada y Sal en Escamas","ins":"Mantequilla sin sal","cant":120.0,"u":"g","desc":"120 g Mantequilla sin sal","sub":"Para el Relleno (Beurre Noisette)"},{"kind":"receta","n":50,"rec":"Rol de Masa Madre, Mantequilla Avellanada y Sal en Escamas","ins":"Azúcar mascabado","cant":100.0,"u":"g","desc":"100 g Azúcar mascabado oscuro","sub":"Para el Relleno (Beurre Noisette)"},{"kind":"receta","n":50,"rec":"Rol de Masa Madre, Mantequilla Avellanada y Sal en Escamas","ins":"Sal de mar en escamas","cant":5.0,"u":"g","desc":"5 g Sal de mar en escamas (tipo Maldon)","sub":"Para el Relleno (Beurre Noisette)"},{"kind":"receta","n":51,"rec":"Rol de Earl Grey y Lavanda","ins":"Mantequilla sin sal","cant":80.0,"u":"g","desc":"80 g Mantequilla sin sal (pomada)","sub":"Para el Relleno Botánico"},{"kind":"receta","n":51,"rec":"Rol de Earl Grey y Lavanda","ins":"Azúcar refinada","cant":120.0,"u":"g","desc":"120 g Azúcar estándar","sub":"Para el Relleno Botánico"},{"kind":"receta","n":51,"rec":"Rol de Earl Grey y Lavanda","ins":"Té Earl Grey","cant":8.0,"u":"g","desc":"8 g Té Earl Grey (hojas secas molidas finamente)","sub":"Para el Relleno Botánico"},{"kind":"receta","n":51,"rec":"Rol de Earl Grey y Lavanda","ins":"Lavanda culinaria seca","cant":2.0,"u":"g","desc":"2 g Lavanda culinaria seca (pulverizada)","sub":"Para el Relleno Botánico"},{"kind":"receta","n":51,"rec":"Rol de Earl Grey y Lavanda","ins":"Azúcar glass","cant":120.0,"u":"g","desc":"120 g Azúcar glass","sub":"Para el Glaseado de Bergamota o Limón"},{"kind":"receta","n":51,"rec":"Rol de Earl Grey y Lavanda","ins":"Leche entera","cant":20.0,"u":"ml","desc":"20 ml Leche entera","sub":"Para el Glaseado de Bergamota o Limón"},{"kind":"receta","n":51,"rec":"Rol de Earl Grey y Lavanda","ins":"Limón amarillo","cant":1,"u":"pza","desc":"Zumo de medio limón o esencia de bergamota","sub":"Para el Glaseado de Bergamota o Limón"},{"kind":"formula","n":"00A","rec":"Masa Maestra Universal (Estilo Brioche Ligero)","ins":"Harina de fuerza (alto gluten)","cant":500.0,"u":"g","desc":"500 g Harina de fuerza (mínimo 12% a 14% de proteína)","sub":""},{"kind":"formula","n":"00A","rec":"Masa Maestra Universal (Estilo Brioche Ligero)","ins":"Azúcar refinada","cant":80.0,"u":"g","desc":"80 g Azúcar refinada","sub":""},{"kind":"formula","n":"00A","rec":"Masa Maestra Universal (Estilo Brioche Ligero)","ins":"Sal fina","cant":10.0,"u":"g","desc":"10 g Sal fina","sub":""},{"kind":"formula","n":"00A","rec":"Masa Maestra Universal (Estilo Brioche Ligero)","ins":"Levadura seca instantánea","cant":15.0,"u":"g","desc":"15 g Levadura seca instantánea (o 45 g de levadura fresca)","sub":""},{"kind":"formula","n":"00A","rec":"Masa Maestra Universal (Estilo Brioche Ligero)","ins":"Leche entera","cant":200.0,"u":"ml","desc":"200 ml Leche entera (tibia, a no más de 35 °C)","sub":""},{"kind":"formula","n":"00A","rec":"Masa Maestra Universal (Estilo Brioche Ligero)","ins":"Huevo entero","cant":2.0,"u":"pza","desc":"2 pzas Huevo entero (a temperatura ambiente, aprox. 100 g)","sub":""},{"kind":"formula","n":"00A","rec":"Masa Maestra Universal (Estilo Brioche Ligero)","ins":"Mantequilla sin sal","cant":120.0,"u":"g","desc":"120 g Mantequilla sin sal (fría, cortada en cubos pequeños)","sub":""},{"kind":"formula","n":"00A","rec":"Masa Maestra Universal (Estilo Brioche Ligero)","ins":"Extracto de vainilla de Papantla","cant":5.0,"u":"ml","desc":"5 ml Extracto puro de vainilla","sub":""},{"kind":"formula","n":"00D","rec":"Variación Técnica: Masa Madre y Fermentación Salvaje","ins":"Harina de fuerza (alto gluten)","cant":450.0,"u":"g","desc":"450 g Harina de fuerza","sub":""},{"kind":"formula","n":"00D","rec":"Variación Técnica: Masa Madre y Fermentación Salvaje","ins":"Masa madre activa (cultivo propio)","cant":150.0,"u":"g","desc":"150 g Masa Madre activa (alimentada 4 horas antes, al 100% de hidratación)","sub":""},{"kind":"formula","n":"00D","rec":"Variación Técnica: Masa Madre y Fermentación Salvaje","ins":"Azúcar refinada","cant":60.0,"u":"g","desc":"60 g Azúcar refinada","sub":""},{"kind":"formula","n":"00D","rec":"Variación Técnica: Masa Madre y Fermentación Salvaje","ins":"Sal fina","cant":10.0,"u":"g","desc":"10 g Sal fina","sub":""},{"kind":"formula","n":"00D","rec":"Variación Técnica: Masa Madre y Fermentación Salvaje","ins":"Leche entera","cant":160.0,"u":"ml","desc":"160 ml Leche entera (a temperatura ambiente, no tibia)","sub":""},{"kind":"formula","n":"00D","rec":"Variación Técnica: Masa Madre y Fermentación Salvaje","ins":"Huevo entero","cant":2.0,"u":"pza","desc":"2 pzas Huevo entero","sub":""},{"kind":"formula","n":"00D","rec":"Variación Técnica: Masa Madre y Fermentación Salvaje","ins":"Mantequilla sin sal","cant":120.0,"u":"g","desc":"120 g Mantequilla sin sal (fría en cubos)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Harina de fuerza (alto gluten)","cant":450,"u":"g","desc":"450 g Harina de fuerza (alto gluten) (ajuste sobre Fórmula 00A)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Azúcar refinada","cant":100,"u":"g","desc":"100 g Azúcar refinada (ajuste sobre Fórmula 00A)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Sal fina","cant":10.0,"u":"g","desc":"10 g Sal fina","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Levadura seca instantánea","cant":15.0,"u":"g","desc":"15 g Levadura seca instantánea (o 45 g de levadura fresca)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Leche entera","cant":220,"u":"ml","desc":"220 ml Leche entera (ajuste sobre Fórmula 00A)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Huevo entero","cant":2.0,"u":"pza","desc":"2 pzas Huevo entero (a temperatura ambiente, aprox. 100 g)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Mantequilla sin sal","cant":120.0,"u":"g","desc":"120 g Mantequilla sin sal (fría, cortada en cubos pequeños)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Extracto de vainilla de Papantla","cant":5.0,"u":"ml","desc":"5 ml Extracto puro de vainilla","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Cocoa alcalina en polvo","cant":50,"u":"g","desc":"50 g Cocoa alcalina en polvo (sustituye 50 g de harina de fuerza)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Harina de fuerza (alto gluten)","cant":500.0,"u":"g","desc":"500 g Harina de fuerza (mínimo 12% a 14% de proteína)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Azúcar refinada","cant":25,"u":"g","desc":"25 g Azúcar refinada (ajuste sobre Fórmula 00A)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Sal fina","cant":14,"u":"g","desc":"14 g Sal fina (ajuste sobre Fórmula 00A)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Levadura seca instantánea","cant":15.0,"u":"g","desc":"15 g Levadura seca instantánea (o 45 g de levadura fresca)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Leche entera","cant":200.0,"u":"ml","desc":"200 ml Leche entera (tibia, a no más de 35 °C)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Huevo entero","cant":2.0,"u":"pza","desc":"2 pzas Huevo entero (a temperatura ambiente, aprox. 100 g)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Mantequilla sin sal","cant":120.0,"u":"g","desc":"120 g Mantequilla sin sal (fría, cortada en cubos pequeños)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Harina de fuerza (alto gluten)","cant":450,"u":"g","desc":"450 g Harina de fuerza (alto gluten) (ajuste sobre Fórmula 00A)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Azúcar refinada","cant":100,"u":"g","desc":"100 g Azúcar refinada (ajuste sobre Fórmula 00A)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Sal fina","cant":10.0,"u":"g","desc":"10 g Sal fina","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Levadura seca instantánea","cant":15.0,"u":"g","desc":"15 g Levadura seca instantánea (o 45 g de levadura fresca)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Leche entera","cant":220,"u":"ml","desc":"220 ml Leche entera (ajuste sobre Fórmula 00A)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Huevo entero","cant":2.0,"u":"pza","desc":"2 pzas Huevo entero (a temperatura ambiente, aprox. 100 g)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Mantequilla sin sal","cant":120.0,"u":"g","desc":"120 g Mantequilla sin sal (fría, cortada en cubos pequeños)","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Extracto de vainilla de Papantla","cant":5.0,"u":"ml","desc":"5 ml Extracto puro de vainilla","sub":""},{"kind":"formula","n":"00B","rec":"Variación Técnica: Masa Negra de Cacao Alcalino","ins":"Cocoa alcalina en polvo","cant":50,"u":"g","desc":"50 g Cocoa alcalina en polvo (sustituye 50 g de harina de fuerza)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Harina de fuerza (alto gluten)","cant":500.0,"u":"g","desc":"500 g Harina de fuerza (mínimo 12% a 14% de proteína)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Azúcar refinada","cant":25,"u":"g","desc":"25 g Azúcar refinada (ajuste sobre Fórmula 00A)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Sal fina","cant":14,"u":"g","desc":"14 g Sal fina (ajuste sobre Fórmula 00A)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Levadura seca instantánea","cant":15.0,"u":"g","desc":"15 g Levadura seca instantánea (o 45 g de levadura fresca)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Leche entera","cant":200.0,"u":"ml","desc":"200 ml Leche entera (tibia, a no más de 35 °C)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Huevo entero","cant":2.0,"u":"pza","desc":"2 pzas Huevo entero (a temperatura ambiente, aprox. 100 g)","sub":""},{"kind":"formula","n":"00C","rec":"Variación Técnica: Masa Salada y Umami","ins":"Mantequilla sin sal","cant":120.0,"u":"g","desc":"120 g Mantequilla sin sal (fría, cortada en cubos pequeños)","sub":""}],"masas":[{"code":"00A","title":"Masa Maestra Universal (Estilo Brioche Ligero)"},{"code":"00B","title":"Variación Técnica: Masa Negra de Cacao Alcalino"},{"code":"00C","title":"Variación Técnica: Masa Salada y Umami"},{"code":"00D","title":"Variación Técnica: Masa Madre y Fermentación Salvaje"}],"recetas":[{"n":1,"nom":"Rol de Canela Clásico con Glaseado de Vainilla de Papantla","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":5,"capTitle":"Los Clásicos de Taller","base":"00A","nivel":"Fácil","dificultad":"Fácil (Ideal para dominar el armado)","dulce":true,"desc":"El estándar de oro. Un rollo de textura alveolada con un contraste perfecto entre el picor cálido de la canela y la untuosidad de un glaseado de vainilla real."},{"n":2,"nom":"Rol de Doble Chocolate y Cocoa Alcalina","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":5,"capTitle":"Los Clásicos de Taller","base":"00B","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Un perfil profundo y oscuro. Utilizamos la masa negra para intensificar el sabor a cacao, rellenando con chocolate fundente para los amantes del amargo."},{"n":3,"nom":"Rol de Nuez Pecana y Caramelo Salado","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":5,"capTitle":"Los Clásicos de Taller","base":"00A","nivel":"Intermedio","dificultad":"Intermedio (Elaboración de caramelo)","dulce":true,"desc":"El equilibrio perfecto entre dulzor caramelizado, notas tostadas de la nuez y los destellos de la sal marina en escamas."},{"n":4,"nom":"Rol de Manzana Canela y Streusel Crujiente","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":5,"capTitle":"Los Clásicos de Taller","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Inspirado en el clásico \"Apple Cobbler\". El rollo esconde un centro frutal suave y culmina con una costra crujiente de mantequilla en la superficie."},{"n":5,"nom":"Rol de Frutos Rojos y Queso Crema","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":5,"capTitle":"Los Clásicos de Taller","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Un perfil más ácido y fresco. La mermelada reducida evita que la masa quede cruda, logrando espirales definidas y vibrantes."},{"n":6,"nom":"Rol de Almendra y Frangipane Clásico","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":5,"capTitle":"Los Clásicos de Taller","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Una oda a la pastelería francesa. El relleno no es azúcar y canela, sino una untuosa crema horneable de almendras (Frangipane) que se infla y dora dentro de las espirales."},{"n":7,"nom":"Rol de Limón y Semillas de Amapola","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":5,"capTitle":"Los Clásicos de Taller","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"Un guiño a los panqués de cafetería de especialidad, transformado en un rol de masa enriquecida con destellos aromáticos y crujientes."},{"n":8,"nom":"Rol de Zanahoria (Estilo Carrot Cake)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":5,"capTitle":"Los Clásicos de Taller","base":"00A","nivel":"Intermedio","dificultad":"Intermedio (Manejo de humedad)","dulce":true,"desc":"Todo el perfil especiado y terroso de un pastel de zanahoria, compactado en las espirales de una masa brioche y coronado con el icónico betún de queso."},{"n":9,"nom":"Rol de Dulce de Leche y Nuez Macadamia","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":5,"capTitle":"Los Clásicos de Taller","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"Un tributo a la golosina latinoamericana, elevado con la textura crujiente y mantecosa de la macadamia tostada."},{"n":10,"nom":"Rol de Plátano Caramelizado y Nuez de Castilla","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":5,"capTitle":"Los Clásicos de Taller","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Un perfil que rescata las notas del \"Banana Bread\". Profundo, húmedo y con un fuerte aroma a caramelo oscuro."},{"n":11,"nom":"Rol Volcán de Crema de Avellana (Estilo Nutella)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":6,"capTitle":"Volcanes y Rellenos Fundidos (Estilo Nueva York)","base":"00A","nivel":"Intermedio","dificultad":"Intermedio (encapsulado de núcleo congelado)","dulce":true,"desc":"El favorito indiscutible. Un exterior dorado y acaramelado que esconde un centro fluido y tibio de cacao y avellana."},{"n":12,"nom":"Rol Volcán de Pistache y Chocolate Blanco","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":6,"capTitle":"Volcanes y Rellenos Fundidos (Estilo Nueva York)","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Un perfil visualmente deslumbrante y de altísima rentabilidad gracias a la percepción premium del pistache."},{"n":13,"nom":"Rol Volcán de Lotus Biscoff","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":6,"capTitle":"Volcanes y Rellenos Fundidos (Estilo Nueva York)","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"El sabor caramelizado y especiado de la famosa galleta belga llevado al límite en formato líquido y crujiente."},{"n":14,"nom":"Rol Volcán de Queso Brie y Mermelada de Higo","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":6,"capTitle":"Volcanes y Rellenos Fundidos (Estilo Nueva York)","base":"00A","nivel":"Fácil","dificultad":"Fácil (No requiere congelación previa)","dulce":true,"desc":"Un perfil gourmet que coquetea entre lo dulce y lo salado. Sofisticado y perfecto para acompañar vinos o vitrinas de brunch."},{"n":15,"nom":"Rol Volcán de Matcha y Ganache Blanco","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":14,"energia":5,"min":10,"merma":null,"cap":6,"capTitle":"Volcanes y Rellenos Fundidos (Estilo Nueva York)","base":"00A","nivel":"Avanzado","dificultad":"Avanzado (Elaboración de ganache de inserción)","dulce":true,"desc":"Inspirado en los postres asiáticos de vanguardia. La astringencia herbal del té verde se equilibra con la cremosidad láctea del chocolate blanco fundido. Estas recetas son las joyas de la corona para vitrinas impactantes, integrando técnicas de alta repostería y manejo de temperaturas."},{"n":16,"nom":"Rol Volcán de Chocolate Rubí y Frambuesa","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":14,"energia":5,"min":10,"merma":null,"cap":6,"capTitle":"Volcanes y Rellenos Fundidos (Estilo Nueva York)","base":"00A","nivel":"Avanzado","dificultad":"Avanzado (Manejo de temperaturas del chocolate)","dulce":true,"desc":"El exotismo frutal del chocolate rubí en contraste con la acidez vibrante de la frambuesa. Un espectáculo visual en tonos rosados y rojizos sin colorantes artificiales."},{"n":17,"nom":"Rol Volcán de Crema Pastelera","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":6,"capTitle":"Volcanes y Rellenos Fundidos (Estilo Nueva York)","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Un clásico de la panadería europea transformado en formato volcán. La crema pastelera, densa y avainillada, explota al primer bocado."},{"n":18,"nom":"Rol Volcán de Peanut Butter y Jalea","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":6,"capTitle":"Volcanes y Rellenos Fundidos (Estilo Nueva York)","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"La nostalgia norteamericana (PB&J) encapsulada. Una explosión untuosa de cacahuate salado que se corta con la dulzura frutal de la jalea."},{"n":19,"nom":"Rol Volcán de Cajeta Quemada","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":6,"capTitle":"Volcanes y Rellenos Fundidos (Estilo Nueva York)","base":"00A","nivel":"Intermedio","dificultad":"Intermedio (la cajeta tiende a escurrir si no se congela bien).","dulce":true,"desc":"Un homenaje absoluto a la dulcería tradicional mexicana. El centro líquido exige respeto técnico, pero el resultado es un perfil de caramelo de leche de cabra inigualable."},{"n":20,"nom":"Rol Volcán S'mores (Malvavisco Fundido y Ganache Oscuro)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":6,"capTitle":"Volcanes y Rellenos Fundidos (Estilo Nueva York)","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"La fogata de campamento llevada a la vitrina gourmet. Galleta crujiente, chocolate intenso y un malvavisco pegajoso que se estira al romper el rol. Aquí el objetivo es elevar el ticket promedio de tu vitrina. Vamos a tomar la arquitectura de postres internacionales emplatados y la vamos a traducir al formato de un rollo enriquecido. Estas recetas requieren un poco más de técnica en los acabados, pero el margen de ganancia y el impacto visual valen cada segundo invertido."},{"n":21,"nom":"Rol Tiramisú (Mascarpone, Espresso y Cocoa)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":7,"capTitle":"Postres Reinventados y Alta Repostería","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"La elegancia italiana hecha pan. La masa actúa como las soletas (savoiardi), absorbiendo un jarabe de café intenso, coronado con una nube de mascarpone."},{"n":22,"nom":"Rol Crème Brûlée (Con Cubierta Caramelizada a Fuego)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":7,"capTitle":"Postres Reinventados y Alta Repostería","base":"00A","nivel":"Intermedio","dificultad":"Intermedio (Requiere soplete de repostería)","dulce":true,"desc":"Un espectáculo para el cliente. Un rollo de vainilla profunda que culmina con una capa de crema pastelera espesa y una costra de caramelo que debe romperse con la cuchara."},{"n":23,"nom":"Rol Cheesecake de Maracuyá","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":7,"capTitle":"Postres Reinventados y Alta Repostería","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"El contraste definitivo entre grasa láctea y acidez tropical. Una base de galleta y un curd vibrante de la fruta de la pasión."},{"n":24,"nom":"Rol Red Velvet con Glaseado de Queso Ácido","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":7,"capTitle":"Postres Reinventados y Alta Repostería","base":"00A","nivel":"Fácil","dificultad":"Fácil (Ajuste de masa en amasado)","dulce":true,"desc":"No es solo un pan rojo, es el sabor técnico de un auténtico Red Velvet: notas sutiles de cacao, un toque de acidez avinagrada y un contraste blanco impoluto del betún."},{"n":25,"nom":"Rol Selva Negra (Cereza Amarena y Kirsch)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":7,"capTitle":"Postres Reinventados y Alta Repostería","base":"00B","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"El clásico de la pastelería alemana. Un bloque denso de masa de cacao que contrasta con la intensidad de la cereza y la ligereza de una crema chantilly. Estas recetas completan la colección de postres internacionales llevados a su máxima expresión en formato de rollo, integrando técnicas valiosas como el merengue suizo y la masa embebida."},{"n":26,"nom":"Rol Ferrero (Avellana Tostada, Cacao y Barquillo)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":7,"capTitle":"Postres Reinventados y Alta Repostería","base":"00B","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Inspirado en el famoso bombón italiano. Un núcleo de avellana envuelto en masa oscura, coronado con un glaseado crujiente tipo \"Rocher\"."},{"n":27,"nom":"Rol Ópera (Jarabe de Café, Almendra y Ganache)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":14,"energia":5,"min":10,"merma":null,"cap":7,"capTitle":"Postres Reinventados y Alta Repostería","base":"00A","nivel":"Avanzado","dificultad":"Avanzado (Requiere tiempos de reposo y tres preparaciones)","dulce":true,"desc":"Toda la sofisticación del pastel Ópera francés. Capas alternas de almendra, café intenso y un glaseado de chocolate oscuro y liso."},{"n":28,"nom":"Rol Lemon Pie (Curd de Limón y Merengue Suizo Tostado)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":7,"capTitle":"Postres Reinventados y Alta Repostería","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"El equilibrio perfecto entre dulzor, acidez cítrica y la textura de nube quemada del merengue."},{"n":29,"nom":"Rol de Tres Leches (Masa Embebida y Crema Montada)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":14,"energia":5,"min":10,"merma":null,"cap":7,"capTitle":"Postres Reinventados y Alta Repostería","base":"00A","nivel":"Avanzado","dificultad":"Avanzado (Control de humedad)","dulce":true,"desc":"Una innovación técnica sorprendente. La masa brioche se trata como un bizcocho genovés, absorbiendo la mezcla de leches sin deshacerse."},{"n":30,"nom":"Rol Banoffee (Plátano Fresco, Toffee y Crema)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":7,"capTitle":"Postres Reinventados y Alta Repostería","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"El clásico pastel inglés. Un juego de texturas entre el pan suave, el caramelo chicloso, la frescura de la fruta y la ligereza de la crema batida. Esta sección está diseñada para capitalizar la nostalgia y las temporadas altas de venta (como Día de Muertos y Reyes), utilizando ingredientes locales que resuenan profundamente en el paladar latinoamericano. Aquí tienes el bloque de las recetas 31 a la 35."},{"n":31,"nom":"Rol de Pan de Muerto (Toque de Azahar y Naranja)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":8,"capTitle":"Fusión Mexicana y Herencia","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"La esencia de noviembre capturada en una espiral. Su aroma inconfundible y su cubierta de mantequilla fundida y azúcar lo convierten en un éxito rotundo de temporada."},{"n":32,"nom":"Rol de Rosca de Reyes con Costra de Azúcar","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":8,"capTitle":"Fusión Mexicana y Herencia","base":"00A","nivel":"Intermedio","dificultad":"Intermedio (Elaboración de costra)","dulce":true,"desc":"Un híbrido perfecto para enero. El rol esconde frutos cristalizados y se hornea con la icónica costra dulce y quebradiza en la parte superior."},{"n":33,"nom":"Rol de Guayaba y Queso Cotija","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":8,"capTitle":"Fusión Mexicana y Herencia","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"Un perfil de autor con raíces michoacanas y jaliscienses. El dulzor floral de la guayaba hace un contraste violento y adictivo con la salinidad del queso Cotija añejo."},{"n":34,"nom":"Rol de Café de Olla y Piloncillo","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":8,"capTitle":"Fusión Mexicana y Herencia","base":"00A","nivel":"Intermedio","dificultad":"Intermedio (manejo de melazas)","dulce":true,"desc":"Un abrazo cálido. El almíbar rústico del piloncillo penetra las espirales junto con los acentos especiados del clavo, anís y café tostado."},{"n":35,"nom":"Rol de Chocolate Oaxaqueño y Almendras","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":8,"capTitle":"Fusión Mexicana y Herencia","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"Rústico y texturizado. El chocolate de metate mexicano no se funde por completo, dejando deliciosos cristales de azúcar y trozos de almendra tostada."},{"n":36,"nom":"Rol de Mazapán de Cacahuate","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":8,"capTitle":"Fusión Mexicana y Herencia","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"Una oda a la golosina más querida de México. El calor del horno tuesta el cacahuate del mazapán, intensificando su aroma y creando un relleno que se funde en la boca."},{"n":37,"nom":"Rol de Tamarindo y Chamoy Suave (Contraste Dulce/Ácido)","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":8,"capTitle":"Fusión Mexicana y Herencia","base":"00A","nivel":"Intermedio","dificultad":"Intermedio (Control de humedad del relleno)","dulce":true,"desc":"Un perfil atrevido para paladares que buscan salir de la rutina. La acidez frutal del tamarindo y el picor ligero del chamoy rompen con la dulzura de la masa brioche."},{"n":38,"nom":"Rol de Rompope y Nuez","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":8,"capTitle":"Fusión Mexicana y Herencia","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Inspirado en los conventos poblanos. La masa es abrazada por una crema densa infusionada con rompope, coronada con nueces tostadas para dar textura."},{"n":39,"nom":"Rol de Arroz con Leche y Pasas al Ron","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":8,"capTitle":"Fusión Mexicana y Herencia","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Dos postres en uno. Las notas lácteas y de canela del arroz con leche se compactan en un relleno espeso, punteado con explosiones de ron."},{"n":40,"nom":"Rol de Camote Enmielado y Especias Cálidas","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":8,"capTitle":"Fusión Mexicana y Herencia","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"Un perfil de otoño profundo. El camote caramelizado aporta una humedad excepcional a la masa, sostenido por la fuerza del piloncillo y el anís. Aquí es donde tu vitrina se separa por completo de la competencia. Vamos a jugar con el umami (el quinto sabor), integrando perfiles salados, fermentados y de lujo. Para la mayoría de estas recetas, utilizaremos la Fórmula 00C (Masa Salada y Umami), que reduce el azúcar de la masa para soportar ingredientes intensos sin empalagar. Aquí tienes el bloque de las recetas 41 a la 45."},{"n":41,"nom":"Rol de Miso Blanco, Chocolate Gold (Rubio) y Sésamo Tostado","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00A","nivel":"Intermedio","dificultad":"Intermedio","dulce":true,"desc":"Un perfil asiático vanguardista. El miso blanco aporta una nota salada y fermentada que eleva exponencialmente el sabor a caramelo lácteo del chocolate Gold."},{"n":42,"nom":"Rol de Ajo Rostizado, Romero y Parmesano","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00C","nivel":"Intermedio","dificultad":"Intermedio (Tiempo de rostizado)","dulce":false,"desc":"El rey de los roles salados. Inspirado en el concepto de la \"vela comestible de ajo y romero\", este pan es un acompañamiento espectacular para pastas, brunch o cenas de lujo."},{"n":43,"nom":"Rol de Pesto de Albahaca y Piñones","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00C","nivel":"Fácil","dificultad":"Fácil (Control de grasa)","dulce":false,"desc":"El Mediterráneo en espiral. Un producto de vitrina salada excepcionalmente aromático, con el verde brillante de la albahaca asomándose entre las capas."},{"n":44,"nom":"Rol de Queso Azul, Compota de Higo y Nuez Caramelizada","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00C","nivel":"Intermedio","dificultad":"Intermedio","dulce":false,"desc":"Una obra maestra de contrastes. La elegancia pungente del queso azul se domestica con el dulzor concentrado de la fruta y el crujido de la nuez."},{"n":45,"nom":"Rol de Trufa Negra y Hongos Silvestres","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":14,"energia":5,"min":10,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00C","nivel":"Avanzado","dificultad":"Avanzado (Elaboración de Duxelles)","dulce":false,"desc":"La definición del lujo en panadería. Un relleno espeso de champiñones concentrados (Duxelles) con el aroma terroso e inconfundible de la trufa. ¡Llegamos al final del recorrido técnico! Aquí tienes el último bloque para cerrar el Capítulo 5: Alta Gama, Umami y Propuestas de Autor, completando así el recetario maestro de 51 piezas. Estas últimas recetas combinan técnicas de reducción, infusiones florales y el uso magistral de la masa madre para lograr productos de vitrina de lujo."},{"n":46,"nom":"Rol de Tocino Glaseado con Maple","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00A","nivel":"Intermedio","dificultad":"Intermedio (Control de humedad del tocino)","dulce":false,"desc":"El rey del \"Sweet & Savory\". Inspirado en los desayunos norteamericanos, donde la grasa ahumada y salada del tocino crujiente se encuentra con la profundidad amaderada del jarabe de maple puro."},{"n":47,"nom":"Rol de Cerveza Stout y Cheddar Añejo","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00C","nivel":"Intermedio","dificultad":"Intermedio (Elaboración de reducción)","dulce":false,"desc":"Inspirado en los panes de pub británico. Las notas a café y cacao de la cerveza oscura se concentran en un jarabe que complementa la salinidad intensa del cheddar madurado."},{"n":48,"nom":"Rol de Cardamomo, Naranja Confitada y Pistache","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"Un perfil que viaja hacia el Medio Oriente. Sofisticado, muy aromático y con un juego de texturas que lo hace ideal para vitrinas de alta repostería."},{"n":49,"nom":"Rol de Azafrán y Agua de Rosas","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":11,"energia":4,"min":7,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00A","nivel":"Intermedio","dificultad":"Intermedio (Manejo de infusiones)","dulce":true,"desc":"Un lujo asiático y persa. El azafrán tiñe el interior de un amarillo vibrante y aporta notas amieladas, equilibradas con el perfume elegante de las rosas."},{"n":50,"nom":"Rol de Masa Madre, Mantequilla Avellanada y Sal en Escamas","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":14,"energia":5,"min":10,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00D","nivel":"Avanzado","dificultad":"Avanzado (Uso de masa madre y tostado de grasa)","dulce":true,"desc":"El purismo panadero en su máxima expresión. No hay rellenos frutales ni cremas; solo la acidez compleja de la masa fermentada lentamente, el sabor a nuez tostada de la mantequilla noisette y cristales de sal pura."},{"n":51,"nom":"Rol de Earl Grey y Lavanda","rend":12,"rendTxt":"12 roles medianos o 9 jumbo","empaque":9,"energia":3,"min":5,"merma":null,"cap":9,"capTitle":"Alta Gama, Umami y Propuestas de Autor","base":"00A","nivel":"Fácil","dificultad":"Fácil","dulce":true,"desc":"Una taza de té inglés servida en un rollo. Astringente, floral y elegante, es el cierre perfecto para un recetario diseñado para paladares maduros. Pero un recetario maestro no está completo si no dominamos el corazón del producto. En todos los bloques anteriores asumimos que ya teníamos la masa lista (Fórmulas 00A, 00B, 00C y 00D). Ahora nos toca retroceder un paso estratégico y desarrollar Las Fórmulas Base. Estas son las recetas fundacionales. La técnica que hay aquí (desarrollo de gluten, integración de materia grasa y control de temperatura) es lo que separa a un panadero casero de un profesional de vitrina. SECCIÓN 2 · LAS FÓRMULAS BASE: El Alma del Rol El éxito de las 51 recetas anteriores depende de la ejecución impecable de estas masas. La temperatura de la mantequilla y la paciencia en la fermentación en frío son innegociables."}],"params":{"margenes":{"regalo":0.6,"restaurante":0.65,"evento":0.5,"mayoreo":0.4},"mermaDefault":0.12},"gf":{"lineas":[{"nom":"Renta del espacio de producción","monto":3000.0},{"nom":"Luz, gas y agua","monto":700.0},{"nom":"Internet y telefonía","monto":600.0},{"nom":"Publicidad y anuncios pagados","monto":1200.0},{"nom":"Papelería, limpieza y consumibles generales","monto":300.0},{"nom":"Suscripciones y software (diseño, facturación)","monto":200.0},{"nom":"Transporte y repartos","monto":500.0},{"nom":"Depreciación de equipo (batidora, horno, cámara)","monto":350.0},{"nom":"Sueldos fijos de terceros","monto":2000.0},{"nom":"Otros gastos fijos","monto":700.0}],"piezasMes":900.0,"sueldo":12000.0,"horas":160.0},"canales":["Mostrador","Caja de regalo","Cafetería / restaurante","Mayoreo / suscripción","Taller","Venta en línea"],"causas":["Masa sobrefermentada","Masa subfermentada","Fuga de relleno en el horneado","Corte que aplastó la espiral","Centro crudo / horneado desigual","Glaseado cortado o aguado","Masa grasosa por exceso de temperatura","Prueba de ventana no lograda","Devolución de cliente","Otro"]};</script>
+<script>
+/* =========================================================
+   Endulcora · Calculadora de Roles Gourmet
+   Motor de cálculo espejo del archivo Excel original.
+   ========================================================= */
+const KEY='endulcora_roles_gourmet_v1';
+let mem=null, canPersist=true;
+const store={
+  read(){ try{ const s=localStorage.getItem(KEY); return s?JSON.parse(s):null }catch(e){ canPersist=false; return mem } },
+  write(o){ try{ localStorage.setItem(KEY,JSON.stringify(o)) }catch(e){ canPersist=false; mem=o } }
+};
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+function freshDB(){
+  return {
+    v:1,
+    insumos: clone(SEED.insumos),
+    recetas: SEED.recetas.map(r=>({...r, merma:null})),
+    params: clone(SEED.params),
+    gf: clone(SEED.gf),
+    prod: [], ventas: [],
+    mes: new Date().toISOString().slice(0,7)
+  };
+}
+let DB = store.read() || freshDB();
+// migración suave por si el archivo trae datos viejos
+if(!DB.recetas || DB.recetas.length!==51 || DB.recetas[0].base===undefined){ const d=freshDB(); d.prod=DB.prod||[]; d.ventas=DB.ventas||[]; DB=d; }
+const save=()=>store.write(DB);
+
+/* ---------- índices ---------- */
+const LIN = SEED.lineas;
+const insByName = {}; DB.insumos.forEach(i=>insByName[i.nom]=i);
+const linByRec = {}; LIN.forEach(l=>{ (linByRec[l.n]=linByRec[l.n]||[]).push(l) });
+const recByN = {}; DB.recetas.forEach(r=>recByN[r.n]=r);
+function reindex(){ Object.keys(insByName).forEach(k=>delete insByName[k]); DB.insumos.forEach(i=>insByName[i.nom]=i);
+  Object.keys(recByN).forEach(k=>delete recByN[k]); DB.recetas.forEach(r=>recByN[r.n]=r); }
+
+/* ---------- formato ---------- */
+const nf = new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:2});
+const nf0= new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0});
+const money=v=>nf.format(isFinite(v)?v:0);
+const money0=v=>nf0.format(isFinite(v)?v:0);
+const pct=v=>((isFinite(v)?v:0)*100).toFixed(1).replace('.0','')+'%';
+const num=v=>new Intl.NumberFormat('es-MX').format(isFinite(v)?v:0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayISO=()=>new Date().toISOString().slice(0,10);
+
+/* ---------- motor de cálculo ---------- */
+const costoUnidad = ins => (ins && ins.pres>0) ? ins.precio/ins.pres : 0;
+function costoInsumos(n){ return (linByRec[n]||[]).reduce((s,l)=> s + (+l.cant||0)*costoUnidad(insByName[l.ins]), 0); }
+const gastosTotales = () => DB.gf.lineas.reduce((s,l)=>s+(+l.monto||0),0);
+const overhead = () => DB.gf.piezasMes>0 ? gastosTotales()/DB.gf.piezasMes : 0;
+const costoHora = () => DB.gf.horas>0 ? DB.gf.sueldo/DB.gf.horas : 0;
+const CANALES = [
+  {k:'regalo',       nom:'Mostrador',               rango:'55 – 70 %'},
+  {k:'restaurante',  nom:'Caja de regalo',          rango:'60 – 75 %'},
+  {k:'evento',       nom:'Cafetería / restaurante', rango:'45 – 60 %'},
+  {k:'mayoreo',      nom:'Mayoreo / suscripción',   rango:'35 – 50 %'}
+];
+const canalKey = nom => (CANALES.find(c=>c.nom===nom)||{k:'regalo'}).k;
+/* un rol se costea en dos capas: el lote de masa base y el relleno de la receta */
+const roles = r => Math.max(+r.rend||1, 1);
+const masaNom = code => (SEED.masas.find(m=>m.code===code)||{}).title || code;
+/* las líneas de las masas base viven en el índice bajo su clave 00A…00D */
+const costoMasa = code => costoInsumos(code);
+
+function calc(n){
+  const r = recByN[n]; if(!r) return null;
+  const relleno = costoInsumos(n);
+  const masa = costoMasa(r.base);
+  const insLote = masa + relleno;
+  const ins = insLote/roles(r);
+  const emp = +r.empaque||0, ene = +r.energia||0;
+  const mo  = costoHora()*(+r.min||0)/60;
+  const oh  = overhead();
+  const base = ins+emp+ene+mo+oh;
+  const merma = (r.merma==null? DB.params.mermaDefault : r.merma);
+  const total = merma<1 ? base/(1-merma) : base;
+  const precios = {};
+  CANALES.forEach(c=>{
+    const m = DB.params.margenes[c.k];
+    const pvp = m<1 ? Math.ceil(total/(1-m)/5)*5 : 0;
+    precios[c.k] = {pvp, util: pvp-total, margen: pvp>0 ? (pvp-total)/pvp : 0};
+  });
+  return {n, nom:r.nom, ins, insLote, masa, relleno, rend:roles(r), emp, ene, mo, oh, base, merma, mermaCosto: total-base, total, precios};
+}
+const costoTotalDe = n => (calc(n)||{total:0}).total;
+
+function equilibrio(){
+  const cs = DB.recetas.map(r=>calc(r.n));
+  const avgP = cs.reduce((s,c)=>s+c.precios.regalo.pvp,0)/cs.length;
+  const avgC = cs.reduce((s,c)=>s+c.total,0)/cs.length;
+  const mc = avgP-avgC;
+  const gf = gastosTotales();
+  return {avgP, avgC, mc, gf, piezas: mc>0?Math.ceil(gf/mc):0, ingreso: mc>0?Math.ceil(gf/mc)*avgP:0};
+}
+
+/* ---------- helpers UI ---------- */
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),2300); }
+function openModal(html){ document.getElementById('modalBox').innerHTML=html; document.getElementById('modal').classList.add('on'); }
+function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+/* ---------- navegación ---------- */
+const ICONS={
+  tablero:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>',
+  calc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="7" y="9" width="10" height="13" rx="2.5"/><path d="M12 9V6.5"/><path d="M12 2.5c1.9 1.6 2.6 2.6 2.6 3.6a2.6 2.6 0 1 1-5.2 0c0-1 .7-2 2.6-3.6z" fill="currentColor" stroke="none" opacity=".85"/></svg>',
+  insumos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 8h16l-1.3 12.2a2 2 0 0 1-2 1.8H7.3a2 2 0 0 1-2-1.8L4 8z"/><path d="M8.5 8V6a3.5 3.5 0 1 1 7 0v2"/></svg>',
+  recetas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5.5 3.5h13v17l-6.5-3-6.5 3v-17z"/><path d="M9 8.5h6M9 12.5h6"/></svg>',
+  prod:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 3.5h6M10.5 3.5v6L5.2 18.4A2 2 0 0 0 6.9 21.5h10.2a2 2 0 0 0 1.7-3.1L13.5 9.5v-6"/><path d="M7.5 15h9"/></svg>',
+  ventas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3.5 12.5 12 4h7.5v7.5L11 20a2 2 0 0 1-2.8 0l-4.7-4.7a2 2 0 0 1 0-2.8z"/><circle cx="16" cy="8" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  negocio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="3.6" height="8.5" rx="1"/><rect x="10.2" y="7" width="3.6" height="13.5" rx="1"/><rect x="15.4" y="3.5" width="3.6" height="17" rx="1"/></svg>',
+  datos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></svg>'
+};
+const VIEWS=[
+  ['tablero','Tablero','tablero'],
+  ['calc','Calculadora','calc'],
+  ['recetas','Recetas','recetas'],
+  ['insumos','Insumos','insumos'],
+  ['prod','Producción','prod'],
+  ['ventas','Ventas','ventas'],
+  ['negocio','Mi negocio','negocio'],
+  ['datos','Mis datos','datos']
+];
+let current='tablero';
+function buildNav(){
+  document.getElementById('nav').innerHTML = VIEWS.map(([id,lbl,ic])=>
+    `<button class="navbtn${id===current?' on':''}" data-go="${id}">${ICONS[ic]}<span>${lbl}</span></button>`).join('');
+}
+function go(id){ current=id; buildNav(); render(); window.scrollTo({top:0,behavior:'instant'}); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-go]'); if(b){ go(b.dataset.go); } });
+
+/* =========================================================
+   VISTA · TABLERO
+   ========================================================= */
+function vTablero(){
+  const mes = DB.mes || todayISO().slice(0,7);
+  const ven = DB.ventas.filter(v=>v.fecha.slice(0,7)===mes);
+  const pro = DB.prod.filter(p=>p.fecha.slice(0,7)===mes);
+  const ingreso = ven.reduce((s,v)=>s+v.piezas*v.precio,0);
+  const piezas  = ven.reduce((s,v)=>s+ (+v.piezas||0),0);
+  const costo   = ven.reduce((s,v)=>s+v.piezas*costoTotalDe(v.n),0);
+  const comis   = ven.reduce((s,v)=>s+v.piezas*v.precio*(+v.comision||0),0);
+  const utilidad= ingreso-costo-comis;
+  const buenas  = pro.reduce((s,p)=>s+(+p.buenas||0),0);
+  const fallas  = pro.reduce((s,p)=>s+(+p.fallas||0),0);
+  const mermaPct= (buenas+fallas)>0 ? fallas/(buenas+fallas) : 0;
+  const mermaMXN= pro.reduce((s,p)=>s+(+p.fallas||0)*costoTotalDe(p.n),0);
+  const eq = equilibrio();
+  const avance = eq.piezas>0 ? piezas/eq.piezas : 0;
+  const gf = gastosTotales();
+
+  // ventas por canal
+  const porCanal = SEED.canales.map(c=>{
+    const f=ven.filter(v=>v.canal===c);
+    return {c, piezas:f.reduce((s,v)=>s+v.piezas,0), ingreso:f.reduce((s,v)=>s+v.piezas*v.precio,0)};
+  }).filter(x=>x.piezas>0).sort((a,b)=>b.ingreso-a.ingreso);
+  const maxCanal = Math.max(1,...porCanal.map(x=>x.ingreso));
+
+  // top recetas
+  const porRec={};
+  ven.forEach(v=>{ const o=porRec[v.n]=porRec[v.n]||{n:v.n,piezas:0,ingreso:0,util:0};
+    o.piezas+=v.piezas; o.ingreso+=v.piezas*v.precio;
+    o.util+=v.piezas*v.precio - v.piezas*costoTotalDe(v.n) - v.piezas*v.precio*(+v.comision||0); });
+  const top = Object.values(porRec).sort((a,b)=>b.util-a.util).slice(0,6);
+
+  const mesNom = new Date(mes+'-02').toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+
+  return `
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Endulcora · Estudio Gastronómico</div>
+      <h1 class="title">Tablero de ${esc(mesNom)}</h1>
+      <p class="sub">Todo lo que registres en Producción y Ventas se resume aquí. Cambia el mes para ver otro periodo.</p>
+    </div>
+    <div style="min-width:170px"><label class="f">Mes que analizas</label><input type="month" id="mesSel" value="${mes}"></div>
+  </div>
+
+  <div class="grid g4">
+    <div class="kpi dark"><div class="k-l">Ingreso del mes</div><div class="k-v">${money0(ingreso)}</div><div class="k-n">${num(piezas)} piezas vendidas</div></div>
+    <div class="kpi"><div class="k-l">Utilidad neta</div><div class="k-v" style="color:${utilidad>=0?'var(--good)':'var(--danger)'}">${money0(utilidad)}</div><div class="k-n">Margen ${pct(ingreso>0?utilidad/ingreso:0)}</div></div>
+    <div class="kpi"><div class="k-l">Ticket promedio</div><div class="k-v">${money0(piezas>0?ingreso/piezas:0)}</div><div class="k-n">por pieza vendida</div></div>
+    <div class="kpi"><div class="k-l">Merma del mes</div><div class="k-v" style="color:${mermaPct>0.15?'var(--ember)':'var(--deep)'}">${pct(mermaPct)}</div><div class="k-n">${money0(mermaMXN)} perdidos · ${num(fallas)} piezas</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Punto de equilibrio</h3>
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:9px">
+      <div><span style="font-family:'Bebas Neue';font-size:30px;color:var(--deep)">${num(piezas)}</span>
+        <span class="mini"> de ${num(eq.piezas)} piezas necesarias este mes</span></div>
+      <div class="mini">Gastos fijos ${money0(gf)} · margen de contribución ${money0(eq.mc)}/pieza</div>
+    </div>
+    <div class="bar"><i style="width:${Math.min(100,avance*100).toFixed(1)}%"></i></div>
+    <p class="mini" style="margin:9px 0 0">${
+      avance>=1 ? '✔ Ya cubriste tus gastos fijos. Cada pieza extra es ganancia real.'
+                : 'Te faltan <b>'+num(Math.max(0,eq.piezas-piezas))+'</b> piezas para cubrir los gastos fijos del mes.'}</p>
+    <p class="mini" style="margin:4px 0 0">Utilidad después de gastos fijos: <b style="color:${(utilidad-gf)>=0?'var(--good)':'var(--danger)'}">${money0(utilidad-gf)}</b></p>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h3>Ventas por canal</h3>
+      ${porCanal.length? porCanal.map(x=>`
+        <div style="margin-bottom:11px">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
+            <span>${esc(x.c)}</span><span style="font-variant-numeric:tabular-nums">${money0(x.ingreso)} <span class="mini">· ${num(x.piezas)} pz</span></span>
+          </div>
+          <div class="bar"><i style="width:${(x.ingreso/maxCanal*100).toFixed(1)}%"></i></div>
+        </div>`).join('')
+      : `<div class="empty"><b>Aún no hay ventas de este mes</b>Registra tu primera venta y este bloque cobra vida.<br><br><button class="btn sm" data-go="ventas">Registrar una venta</button></div>`}
+    </div>
+    <div class="card">
+      <h3>Recetas más rentables del mes</h3>
+      ${top.length? `<div class="tw"><table class="slim"><thead><tr><th>Receta</th><th class="num">Pz</th><th class="num">Utilidad</th></tr></thead><tbody>
+        ${top.map(t=>`<tr><td style="font-size:12.5px">${esc((recByN[t.n]||{}).nom||'')}<div class="mini">${money0(t.ingreso)} de ingreso</div></td><td class="num">${num(t.piezas)}</td><td class="num" style="color:${t.util>=0?'var(--good)':'var(--danger)'}">${money0(t.util)}</td></tr>`).join('')}
+      </tbody></table></div>`
+      : `<div class="empty"><b>Sin datos todavía</b>Aquí verás qué roles te dejan más dinero, no solo cuáles vendes más.</div>`}
+    </div>
+  </div>
+
+  <div class="note"><b>Cómo se usa:</b> 1) Ajusta precios reales en <b>Insumos</b> → 2) Revisa la <b>Calculadora</b> y fija tu precio → 3) Registra cada lote en <b>Producción</b> y cada venta en <b>Ventas</b> → 4) Vuelve aquí a fin de mes.</div>`;
+}
+function hookTablero(){
+  const m=document.getElementById('mesSel');
+  if(m) m.onchange=e=>{ DB.mes=e.target.value||todayISO().slice(0,7); save(); render(); };
+}
+
+/* =========================================================
+   VISTA · CALCULADORA  (elemento firma: el espiral de costos)
+   ========================================================= */
+let calcN = 1, precioManual = null;
+function candleSVG(c){
+  const segs=[
+    ['Masa base', c.masa/c.rend, '#7A2E7E'],
+    ['Relleno y cubierta', c.relleno/c.rend, '#F8B818'],
+    ['Empaque', c.emp, '#A25AA6'],
+    ['Energía', c.ene, '#C98BCB'],
+    ['Mano de obra', c.mo, '#4E1454'],
+    ['Overhead', c.oh, '#9C9C9C'],
+    ['Costo de la merma', c.mermaCosto, '#E4572E']
+  ].filter(s=>s[1]>0.0001);
+  const tot=segs.reduce((s,x)=>s+x[1],0)||1;
+  // espiral: cada componente es una vuelta proporcional del rollo
+  const cx=75, cy=150, R=62, turns=3.1, steps=segs.length;
+  let acc=0, out='';
+  const pt=(t)=>{
+    const ang=t*turns*2*Math.PI - Math.PI/2;
+    const rad=6 + (R-6)*t;
+    return [cx+rad*Math.cos(ang), cy+rad*Math.sin(ang)];
+  };
+  segs.forEach(([nm,v,col])=>{
+    const t0=acc/tot; acc+=v; const t1=acc/tot;
+    let d='';
+    const N=Math.max(4, Math.round((t1-t0)*120));
+    for(let i=0;i<=N;i++){
+      const [x,y]=pt(t0+(t1-t0)*i/N);
+      d += (i?'L':'M') + x.toFixed(2) + ' ' + y.toFixed(2);
+    }
+    out += `<path d="${d}" fill="none" stroke="${col}" stroke-width="11" stroke-linecap="round"/>`;
+  });
+  return `<svg viewBox="0 0 150 300" width="100%" style="max-width:190px;display:block;margin:0 auto" role="img" aria-label="Composición del costo por rol">
+    <defs><radialGradient id="glow"><stop offset="0%" stop-color="#F8B818" stop-opacity=".35"/><stop offset="100%" stop-color="#F8B818" stop-opacity="0"/></radialGradient></defs>
+    <circle cx="75" cy="150" r="95" fill="url(#glow)"/>
+    <ellipse cx="75" cy="218" rx="66" ry="9" fill="rgba(78,20,84,.10)"/>
+    <circle cx="75" cy="150" r="70" fill="none" stroke="rgba(78,20,84,.18)" stroke-width="2"/>
+    ${out}
+    <circle cx="75" cy="150" r="70" fill="none" stroke="rgba(78,20,84,.10)" stroke-width="1"/>
+  </svg>`;
+}
+function vCalc(){
+  const c = calc(calcN); const r = recByN[calcN];
+  const segs=[
+    ['Insumos', c.ins, '#7A2E7E'],['Empaque', c.emp, '#A25AA6'],['Energía y consumibles', c.ene, '#C98BCB'],
+    ['Mano de obra', c.mo, '#4E1454'],['Gastos fijos (overhead)', c.oh, '#9C9C9C'],['Costo de la merma', c.mermaCosto, '#E4572E']
+  ];
+  const pm = precioManual;
+  const utilPM = pm!=null ? pm - c.total : null;
+
+  return `
+  <div class="page-head">
+    <div><div class="eyebrow">Paso 2 · el corazón del sistema</div>
+      <h1 class="title">Calculadora de precio</h1>
+      <p class="sub">Elige una receta, ajusta lo que cambia en tu obrador y mira cuánto cuesta de verdad cada rol y a cuánto deberías venderlo.</p></div>
+  </div>
+
+  <div class="card">
+    <div class="field"><label class="f">Receta</label>
+      <select id="recSel">${DB.recetas.map(x=>`<option value="${x.n}"${x.n===calcN?' selected':''}>${x.n}. ${esc(x.nom)}</option>`).join('')}</select></div>
+    <div class="row">
+      <div class="field"><label class="f">Roles por lote</label><input type="number" step="1" min="1" id="fRend" value="${r.rend}"></div>
+      <div class="field"><label class="f">Empaque por rol</label><input type="number" step="0.5" min="0" id="fEmp" value="${r.empaque}"></div>
+      <div class="field"><label class="f">Energía y consumibles</label><input type="number" step="0.5" min="0" id="fEne" value="${r.energia}"></div>
+      <div class="field"><label class="f">Minutos de trabajo</label><input type="number" step="1" min="0" id="fMin" value="${r.min}"></div>
+      <div class="field"><label class="f">% de merma <span id="mermaVal" style="color:var(--purple)">${pct(c.merma)}</span></label>
+        <input type="range" min="0" max="40" step="1" id="fMer" value="${Math.round(c.merma*100)}"></div>
+    </div>
+    <p class="mini" style="margin:0">Usa la masa <b>${esc(r.base)} · ${esc(masaNom(r.base))}</b>. Rinde <b>${esc(r.rendTxt)}</b>. Dificultad: ${esc(r.dificultad)}. Merma sugerida: principiante 15–25 % · intermedio 8–15 % · avanzado 3–8 %. Mano de obra ${money(costoHora())}/hora y overhead ${money(overhead())}/rol salen de <a href="#" data-go="negocio">Mi negocio</a>.</p>
+  </div>
+
+  <div class="card">
+    <h3>Las dos capas del costo</h3>
+    <div class="grid g4">
+      <div class="kpi"><div class="k-l">Masa base ${esc(r.base)}</div><div class="k-v">${money(c.masa)}</div><div class="k-n">por lote de ${num(c.rend)} · ${money(c.masa/c.rend)} por rol</div></div>
+      <div class="kpi"><div class="k-l">Relleno y cubierta</div><div class="k-v">${money(c.relleno)}</div><div class="k-n">por lote · ${money(c.relleno/c.rend)} por rol</div></div>
+      <div class="kpi"><div class="k-l">Insumos por rol</div><div class="k-v">${money(c.ins)}</div><div class="k-n">masa + relleno ÷ ${num(c.rend)}</div></div>
+      <div class="kpi"><div class="k-l">Peso del relleno</div><div class="k-v">${c.insLote>0?Math.round(c.relleno/c.insLote*100):0}%</div><div class="k-n">del costo de insumos</div></div>
+    </div>
+    <div class="note" style="margin-top:14px">${c.relleno>c.masa*2 ? 'El relleno domina el costo: aquí es donde debes negociar precio de compra y cuidar el gramaje.' : 'La masa pesa tanto como el relleno: produce lotes completos y no dejes masa sin usar.'}</div>
+  </div>
+
+  <div class="card">
+    <h3>De qué está hecho tu rol (costo unitario)</h3>
+    <div class="candle-wrap">
+      <div>${candleSVG(c)}</div>
+      <div class="legend">
+        ${segs.map(([nm,v,col])=>`<div class="lg"><span class="sw" style="background:${col}"></span><span class="nm">${nm}</span><span class="vl">${money(v)}</span><span class="pc">${pct(c.total>0?v/c.total:0)}</span></div>`).join('')}
+        <div class="lg tot"><span class="sw" style="background:var(--yellow)"></span><span class="nm">Costo total unitario</span><span class="vl">${money(c.total)}</span><span class="pc">100%</span></div>
+      </div>
+    </div>
+    <div class="note"><b>Ojo con la merma:</b> el costo base (${money(c.base)}) se divide entre (1 − merma), no se suma. Por eso una merma del ${pct(c.merma)} te cuesta ${money(c.mermaCosto)} extra en cada rol bueno que sí vendes.</div>
+  </div>
+
+  <div class="card">
+    <h3>Precio sugerido por canal</h3>
+    <div class="grid g4">
+      ${CANALES.map(cn=>{const p=c.precios[cn.k];return `
+        <div class="price">
+          <div class="ch">${cn.nom}</div>
+          <div class="pv">${money0(p.pvp)}</div>
+          <div class="ut">Ganas <b>${money(p.util)}</b> por rol</div>
+          <div class="ut mini" style="margin-top:3px">Margen real ${pct(p.margen)} · objetivo ${pct(DB.params.margenes[cn.k])}</div>
+          <button class="btn sm ghost" style="margin-top:10px;width:100%" data-vender="${cn.k}">Vender a este precio</button>
+        </div>`}).join('')}
+    </div>
+    <div class="row" style="margin-top:16px;align-items:flex-end">
+      <div class="field" style="max-width:200px"><label class="f">¿Y si cobro otro precio?</label>
+        <input type="number" step="10" min="0" id="fPM" placeholder="Escribe tu precio" value="${pm??''}"></div>
+      <div class="field" style="flex:2">
+        ${pm!=null && pm>0 ? `<div style="padding:9px 0">
+            <span class="pill ${utilPM>0?'g':'r'}">${utilPM>0?'Ganas':'Pierdes'} ${money(Math.abs(utilPM))} por rol</span>
+            <span class="pill" style="margin-left:6px">Margen ${pct(utilPM/pm)}</span>
+            ${utilPM<=0?'<span class="pill r" style="margin-left:6px">Estás vendiendo por debajo del costo</span>':''}
+          </div>` : `<p class="mini" style="margin:0 0 12px">Escribe un precio y te digo si ganas o pierdes con él.</p>`}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Relleno, glaseado y cubierta del lote (${num(c.rend)} roles)</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Insumo</th><th class="num">Cantidad</th><th class="num">Costo unitario</th><th class="num">Costo</th></tr></thead>
+      <tbody>${(linByRec[calcN]||[]).map(l=>{const i=insByName[l.ins];const cu=costoUnidad(i);return `
+        <tr><td>${esc(l.ins)}<div class="mini">${l.sub?'<b>'+esc(l.sub)+'</b> · ':''}${esc(l.desc)}</div></td>
+        <td class="num">${num(l.cant)} ${esc(l.u)}</td>
+        <td class="num">${money(cu)}<div class="mini">por ${esc(l.u)}</div></td>
+        <td class="num">${money(l.cant*cu)}</td></tr>`}).join('')}
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3" style="text-align:right;font-weight:600;padding-top:10px">Relleno y cubierta del lote</td><td class="num" style="font-weight:600;padding-top:10px">${money(c.relleno)}</td></tr>
+        <tr><td colspan="3" style="text-align:right;font-weight:600">Masa base ${esc(r.base)} (lote)</td><td class="num" style="font-weight:600">${money(c.masa)}</td></tr>
+        <tr><td colspan="3" style="text-align:right;font-weight:600">Insumos por rol</td><td class="num" style="font-weight:600">${money(c.ins)}</td></tr>
+      </tfoot>
+    </table></div>
+  </div>`;
+}
+function hookCalc(){
+  const S=id=>document.getElementById(id);
+  S('recSel').onchange=e=>{ calcN=+e.target.value; precioManual=null; render(); };
+  const r=recByN[calcN];
+  S('fRend').oninput=e=>{ r.rend=Math.max(+e.target.value||1,1); save(); softCalc(); };
+  S('fEmp').oninput=e=>{ r.empaque=+e.target.value||0; save(); softCalc(); };
+  S('fEne').oninput=e=>{ r.energia=+e.target.value||0; save(); softCalc(); };
+  S('fMin').oninput=e=>{ r.min=+e.target.value||0; save(); softCalc(); };
+  S('fMer').oninput=e=>{ r.merma=(+e.target.value||0)/100; save(); softCalc(); };
+  S('fPM').oninput=e=>{ precioManual = e.target.value===''?null:(+e.target.value||0); softCalc(); };
+  document.querySelectorAll('[data-vender]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.vender; const cn=CANALES.find(x=>x.k===k);
+    nuevaVenta({n:calcN, canal:cn.nom, precio:calc(calcN).precios[k].pvp});
+  });
+}
+let softTimer=null;
+function softCalc(){ // re-render conservando foco
+  clearTimeout(softTimer);
+  softTimer=setTimeout(()=>{
+    const act=document.activeElement; const id=act?act.id:null; const pos=act&&act.selectionStart;
+    render();
+    if(id){ const el=document.getElementById(id); if(el){ el.focus(); try{el.setSelectionRange(pos,pos)}catch(e){} } }
+  },160);
+}
+
+/* =========================================================
+   VISTA · RECETAS
+   ========================================================= */
+let recQ='', recSort='n';
+function vRecetas(){
+  let list=DB.recetas.map(r=>({...r, c:calc(r.n)}));
+  if(recQ) list=list.filter(r=>r.nom.toLowerCase().includes(recQ.toLowerCase()));
+  if(recSort==='costo') list.sort((a,b)=>b.c.total-a.c.total);
+  if(recSort==='util') list.sort((a,b)=>b.c.precios.regalo.util-a.c.precios.regalo.util);
+  if(recSort==='masa') list.sort((a,b)=>(a.base+a.n).localeCompare?a.base.localeCompare(b.base)||a.n-b.n:0);
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Catálogo del eBook</div>
+    <h1 class="title">Las 51 recetas</h1>
+    <p class="sub">Costo por rol, masa base y precio sugerido de cada receta con tus precios de insumos actuales. Toca una para abrirla en la calculadora.</p>
+  </div></div>
+  <div class="search">
+    <input id="recQ" placeholder="Buscar receta…" value="${esc(recQ)}">
+    <select id="recSort">
+      <option value="n"${recSort==='n'?' selected':''}>Orden del libro</option>
+      <option value="costo"${recSort==='costo'?' selected':''}>Más cara primero</option>
+      <option value="util"${recSort==='util'?' selected':''}>Más ganancia primero</option>
+      <option value="masa"${recSort==='masa'?' selected':''}>Agrupar por masa base</option>
+    </select>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>#</th><th>Receta</th><th>Masa</th><th class="num">Insumos/rol</th><th class="num">Costo total</th><th class="num">PVP mostrador</th><th class="num">Ganancia</th><th></th></tr></thead>
+    <tbody>${list.map(r=>`<tr>
+      <td class="mini">${r.n}</td>
+      <td style="max-width:330px">${esc(r.nom)}<div class="mini">Cap. ${r.cap} · ${esc(r.capTitle)}${r.dulce?'':' · Salado'}</div></td>
+      <td class="mini"><b>${esc(r.base)}</b></td>
+      <td class="num">${money(r.c.ins)}</td>
+      <td class="num"><b>${money(r.c.total)}</b></td>
+      <td class="num">${money0(r.c.precios.regalo.pvp)}</td>
+      <td class="num" style="color:var(--good)">${money(r.c.precios.regalo.util)}</td>
+      <td><button class="btn sm ghost" data-abrir="${r.n}">Abrir</button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>${list.length?'':'<div class="empty"><b>Sin resultados</b>Prueba con otra palabra.</div>'}</div>`;
+}
+function hookRecetas(){
+  const q=document.getElementById('recQ');
+  q.oninput=e=>{ recQ=e.target.value; softCalc(); };
+  document.getElementById('recSort').onchange=e=>{ recSort=e.target.value; render(); };
+  document.querySelectorAll('[data-abrir]').forEach(b=>b.onclick=()=>{ calcN=+b.dataset.abrir; precioManual=null; go('calc'); });
+}
+
+/* =========================================================
+   VISTA · INSUMOS
+   ========================================================= */
+let insQ='', insCat='';
+function vInsumos(){
+  const cats=[...new Set(DB.insumos.map(i=>i.cat))].filter(Boolean).sort();
+  let list=DB.insumos.map((i,idx)=>({...i,idx}));
+  if(insCat) list=list.filter(i=>i.cat===insCat);
+  if(insQ) list=list.filter(i=>i.nom.toLowerCase().includes(insQ.toLowerCase()));
+  const usos={}; LIN.forEach(l=>usos[l.ins]=(usos[l.ins]||0)+1);
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Paso 1 · lo primero que debes hacer</div>
+    <h1 class="title">Mis insumos</h1>
+    <p class="sub">Escribe el precio y el tamaño de la presentación que tú compras. Todo el sistema se recalcula al instante.</p>
+  </div></div>
+  <div class="note" style="margin:0 0 16px"><b>Los precios cargados son de referencia</b> (mercado CDMX 2026), no cotizaciones. Cámbialos por los de tus tickets reales antes de fijar cualquier precio de venta.</div>
+  <div class="search"><input id="insQ" placeholder="Buscar insumo…" value="${esc(insQ)}"></div>
+  <div class="chips">
+    <button class="chip${insCat===''?' on':''}" data-cat="">Todos (${DB.insumos.length})</button>
+    ${cats.map(c=>`<button class="chip${insCat===c?' on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Insumo</th><th class="num" style="width:110px">Presentación</th><th class="num" style="width:120px">Precio pagado</th><th class="num">Costo por unidad</th><th class="num">Recetas</th></tr></thead>
+    <tbody>${list.map(i=>`<tr>
+      <td>${esc(i.nom)}<div class="mini">${esc(i.cat)}${i.prov?' · '+esc(i.prov):''}</div></td>
+      <td class="num"><div style="display:flex;gap:4px;align-items:center;justify-content:flex-end">
+        <input type="number" step="1" min="0" value="${i.pres}" data-pres="${i.idx}" style="width:76px;text-align:right;padding:6px 8px;font-size:13px">
+        <span class="mini">${esc(i.u)}</span></div></td>
+      <td class="num"><input type="number" step="1" min="0" value="${i.precio}" data-precio="${i.idx}" style="width:92px;text-align:right;padding:6px 8px;font-size:13px"></td>
+      <td class="num"><b>${money(costoUnidad(i))}</b><div class="mini">por ${esc(i.u)}</div></td>
+      <td class="num"><span class="pill">${usos[i.nom]||0}</span></td>
+    </tr>`).join('')}</tbody>
+  </table></div>${list.length?'':'<div class="empty"><b>Sin resultados</b>Cambia la búsqueda o la categoría.</div>'}</div>`;
+}
+function hookInsumos(){
+  document.getElementById('insQ').oninput=e=>{ insQ=e.target.value; softCalc(); };
+  document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{ insCat=b.dataset.cat; render(); });
+  document.querySelectorAll('[data-pres]').forEach(el=>el.oninput=e=>{ DB.insumos[+el.dataset.pres].pres=+e.target.value||0; reindex(); save(); softCalc(); });
+  document.querySelectorAll('[data-precio]').forEach(el=>el.oninput=e=>{ DB.insumos[+el.dataset.precio].precio=+e.target.value||0; reindex(); save(); softCalc(); });
+}
+
+/* =========================================================
+   VISTA · PRODUCCIÓN
+   ========================================================= */
+function vProd(){
+  const rows=[...DB.prod].sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const buenas=DB.prod.reduce((s,p)=>s+(+p.buenas||0),0);
+  const fallas=DB.prod.reduce((s,p)=>s+(+p.fallas||0),0);
+  const mermaReal=(buenas+fallas)>0?fallas/(buenas+fallas):0;
+  const costoMerma=DB.prod.reduce((s,p)=>s+(+p.fallas||0)*costoTotalDe(p.n),0);
+  const supuesta=DB.params.mermaDefault;
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Bitácora</div><h1 class="title">Producción y merma</h1>
+    <p class="sub">Anota cada lote: cuántas salieron buenas y cuántas se echaron a perder. Así sabrás si tu % de merma supuesto es el verdadero.</p>
+  </div></div>
+
+  <div class="grid g4">
+    <div class="kpi"><div class="k-l">Piezas buenas</div><div class="k-v">${num(buenas)}</div><div class="k-n">acumuladas</div></div>
+    <div class="kpi"><div class="k-l">Piezas falladas</div><div class="k-v">${num(fallas)}</div><div class="k-n">acumuladas</div></div>
+    <div class="kpi"><div class="k-l">Merma real</div><div class="k-v" style="color:${mermaReal>supuesta?'var(--ember)':'var(--good)'}">${pct(mermaReal)}</div><div class="k-n">supones ${pct(supuesta)}</div></div>
+    <div class="kpi"><div class="k-l">Dinero perdido</div><div class="k-v" style="color:var(--ember)">${money0(costoMerma)}</div><div class="k-n">en piezas falladas</div></div>
+  </div>
+
+  ${(buenas+fallas)>0 && Math.abs(mermaReal-supuesta)>0.03 ? `<div class="note" style="margin-top:16px"><b>Tu merma real es ${pct(mermaReal)}, no ${pct(supuesta)}.</b> ${mermaReal>supuesta?'Estás costeando de menos: sube el % de merma en la calculadora o tus precios se quedan cortos.':'Estás costeando de más: puedes bajar el % de merma y mejorar tu margen o tu precio.'} <button class="btn sm gold" id="ajustarMerma" style="margin-left:6px">Usar ${pct(mermaReal)} en todas las recetas</button></div>`:''}
+
+  <div class="card" style="margin-top:16px">
+    <h3>Registrar un lote</h3>
+    <div class="row">
+      <div class="field" style="max-width:150px"><label class="f">Fecha</label><input type="date" id="pFecha" value="${todayISO()}"></div>
+      <div class="field" style="max-width:140px"><label class="f">Lote</label><input id="pLote" placeholder="L-2608-01" value="${sugerirLote()}"></div>
+      <div class="field" style="min-width:220px;flex:2"><label class="f">Receta</label>
+        <select id="pRec">${DB.recetas.map(r=>`<option value="${r.n}">${r.n}. ${esc(r.nom)}</option>`).join('')}</select></div>
+    </div>
+    <div class="row">
+      <div class="field" style="max-width:120px"><label class="f">Planeadas</label><input type="number" min="0" id="pPlan" placeholder="12"></div>
+      <div class="field" style="max-width:120px"><label class="f">Buenas</label><input type="number" min="0" id="pBuen" placeholder="10"></div>
+      <div class="field" style="max-width:120px"><label class="f">Falladas</label><input type="number" min="0" id="pFall" placeholder="2"></div>
+      <div class="field" style="min-width:180px"><label class="f">Causa principal</label>
+        <select id="pCausa">${SEED.causas.map(c=>`<option>${esc(c)}</option>`).join('')}</select></div>
+      <div class="field" style="min-width:160px;flex:1"><label class="f">Notas</label><input id="pNota" placeholder="Opcional"></div>
+    </div>
+    <button class="btn" id="pAdd">Guardar lote</button>
+  </div>
+
+  <div class="card">
+    <h3>Lotes registrados (${DB.prod.length})</h3>
+    ${rows.length?`<div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Lote</th><th>Receta</th><th class="num">Buenas</th><th class="num">Fallas</th><th class="num">Merma</th><th class="num">Costo perdido</th><th>Causa</th><th></th></tr></thead>
+      <tbody>${rows.map(p=>{const m=(p.buenas+p.fallas)>0?p.fallas/(p.buenas+p.fallas):0;return `<tr>
+        <td class="mini">${esc(p.fecha)}</td><td class="mini">${esc(p.lote||'')}</td>
+        <td style="max-width:250px;font-size:12.5px">${esc((recByN[p.n]||{}).nom||'')}</td>
+        <td class="num">${num(p.buenas)}</td><td class="num">${num(p.fallas)}</td>
+        <td class="num"><span class="pill ${m>0.15?'r':'g'}">${pct(m)}</span></td>
+        <td class="num">${money(p.fallas*costoTotalDe(p.n))}</td>
+        <td class="mini">${esc(p.causa||'')}</td>
+        <td><button class="x" data-delp="${p.id}" title="Eliminar">✕</button></td></tr>`}).join('')}</tbody>
+    </table></div>`:`<div class="empty"><b>Todavía no hay lotes</b>Registra el primero arriba y empieza a ver tu merma real.</div>`}
+  </div>`;
+}
+function sugerirLote(){
+  const d=new Date(); const p='L-'+String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+'-';
+  const n=DB.prod.filter(x=>(x.lote||'').startsWith(p)).length+1;
+  return p+String(n).padStart(2,'0');
+}
+function hookProd(){
+  const S=id=>document.getElementById(id);
+  S('pAdd').onclick=()=>{
+    const buenas=+S('pBuen').value||0, fallas=+S('pFall').value||0;
+    if(buenas+fallas<=0){ toast('Escribe cuántas piezas salieron buenas o falladas.'); S('pBuen').focus(); return; }
+    DB.prod.push({id:Date.now(), fecha:S('pFecha').value||todayISO(), lote:S('pLote').value, n:+S('pRec').value,
+      plan:+S('pPlan').value||0, buenas, fallas, causa:fallas>0?S('pCausa').value:'', nota:S('pNota').value});
+    save(); toast('Lote guardado'); render();
+  };
+  document.querySelectorAll('[data-delp]').forEach(b=>b.onclick=()=>{ DB.prod=DB.prod.filter(x=>x.id!=b.dataset.delp); save(); toast('Lote eliminado'); render(); });
+  const aj=S('ajustarMerma');
+  if(aj) aj.onclick=()=>{ const buenas=DB.prod.reduce((s,p)=>s+p.buenas,0), fallas=DB.prod.reduce((s,p)=>s+p.fallas,0);
+    const m=fallas/(buenas+fallas); DB.params.mermaDefault=Math.round(m*1000)/1000; DB.recetas.forEach(r=>r.merma=null); save(); toast('Merma actualizada en las 50 recetas'); render(); };
+}
+
+/* =========================================================
+   VISTA · VENTAS
+   ========================================================= */
+let preVenta=null;
+function nuevaVenta(v){ preVenta=v; go('ventas'); }
+function vVentas(){
+  const rows=[...DB.ventas].sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const ingreso=DB.ventas.reduce((s,v)=>s+v.piezas*v.precio,0);
+  const costo=DB.ventas.reduce((s,v)=>s+v.piezas*costoTotalDe(v.n),0);
+  const comis=DB.ventas.reduce((s,v)=>s+v.piezas*v.precio*(+v.comision||0),0);
+  const util=ingreso-costo-comis;
+  const piezas=DB.ventas.reduce((s,v)=>s+v.piezas,0);
+  const pv=preVenta||{}; preVenta=null;
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Bitácora</div><h1 class="title">Ventas</h1>
+    <p class="sub">Una línea por venta. Se descuenta el costo real de producción y la comisión de la plataforma para darte la utilidad neta.</p>
+  </div></div>
+
+  <div class="grid g4">
+    <div class="kpi dark"><div class="k-l">Ingreso acumulado</div><div class="k-v">${money0(ingreso)}</div><div class="k-n">${num(piezas)} piezas</div></div>
+    <div class="kpi"><div class="k-l">Costo de lo vendido</div><div class="k-v">${money0(costo)}</div><div class="k-n">+ ${money0(comis)} de comisiones</div></div>
+    <div class="kpi"><div class="k-l">Utilidad neta</div><div class="k-v" style="color:${util>=0?'var(--good)':'var(--danger)'}">${money0(util)}</div><div class="k-n">antes de gastos fijos</div></div>
+    <div class="kpi"><div class="k-l">Margen neto</div><div class="k-v">${pct(ingreso>0?util/ingreso:0)}</div><div class="k-n">promedio</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Registrar una venta</h3>
+    <div class="row">
+      <div class="field" style="max-width:150px"><label class="f">Fecha</label><input type="date" id="vFecha" value="${todayISO()}"></div>
+      <div class="field" style="min-width:220px;flex:2"><label class="f">Receta</label>
+        <select id="vRec">${DB.recetas.map(r=>`<option value="${r.n}"${pv.n===r.n?' selected':''}>${r.n}. ${esc(r.nom)}</option>`).join('')}</select></div>
+      <div class="field" style="min-width:170px"><label class="f">Canal</label>
+        <select id="vCanal">${SEED.canales.map(c=>`<option${pv.canal===c?' selected':''}>${esc(c)}</option>`).join('')}</select></div>
+    </div>
+    <div class="row">
+      <div class="field" style="max-width:110px"><label class="f">Piezas</label><input type="number" min="1" id="vPz" value="1"></div>
+      <div class="field" style="max-width:140px"><label class="f">Precio unitario</label><input type="number" min="0" step="10" id="vPrecio" value="${pv.precio??''}"></div>
+      <div class="field" style="max-width:130px"><label class="f">Comisión %</label><input type="number" min="0" max="100" step="1" id="vCom" value="0"></div>
+      <div class="field" style="min-width:170px;flex:1"><label class="f">Cliente o nota</label><input id="vNota" placeholder="Opcional"></div>
+    </div>
+    <div id="vPrev" class="mini" style="margin-bottom:12px"></div>
+    <button class="btn" id="vAdd">Guardar venta</button>
+    <button class="btn ghost" id="vSug">Usar precio sugerido del canal</button>
+  </div>
+
+  <div class="card">
+    <h3>Ventas registradas (${DB.ventas.length})</h3>
+    ${rows.length?`<div class="tw"><table>
+      <thead><tr><th>Fecha</th><th>Receta</th><th>Canal</th><th class="num">Pz</th><th class="num">Precio</th><th class="num">Ingreso</th><th class="num">Utilidad neta</th><th class="num">Margen</th><th></th></tr></thead>
+      <tbody>${rows.map(v=>{const ing=v.piezas*v.precio, cst=v.piezas*costoTotalDe(v.n), com=ing*(+v.comision||0), ut=ing-cst-com;return `<tr>
+        <td class="mini">${esc(v.fecha)}</td>
+        <td style="max-width:230px;font-size:12.5px">${esc((recByN[v.n]||{}).nom||'')}${v.nota?`<div class="mini">${esc(v.nota)}</div>`:''}</td>
+        <td><span class="pill">${esc(v.canal)}</span></td>
+        <td class="num">${num(v.piezas)}</td><td class="num">${money0(v.precio)}</td><td class="num">${money0(ing)}</td>
+        <td class="num" style="color:${ut>=0?'var(--good)':'var(--danger)'}">${money(ut)}</td>
+        <td class="num"><span class="pill ${ut/ing>=0.4?'g':(ut<=0?'r':'y')}">${pct(ing>0?ut/ing:0)}</span></td>
+        <td><button class="x" data-delv="${v.id}" title="Eliminar">✕</button></td></tr>`}).join('')}</tbody>
+    </table></div>`:`<div class="empty"><b>Todavía no hay ventas</b>Registra la primera arriba, o entra a la calculadora y usa «Vender a este precio».</div>`}
+  </div>`;
+}
+function hookVentas(){
+  const S=id=>document.getElementById(id);
+  function prev(){
+    const n=+S('vRec').value, pz=+S('vPz').value||0, pr=+S('vPrecio').value||0, cm=(+S('vCom').value||0)/100;
+    const ing=pz*pr, cst=pz*costoTotalDe(n), com=ing*cm, ut=ing-cst-com;
+    S('vPrev').innerHTML = pr>0 ? `Ingreso ${money(ing)} − costo ${money(cst)} − comisión ${money(com)} = <b style="color:${ut>=0?'var(--good)':'var(--danger)'}">utilidad neta ${money(ut)}</b> (${pct(ing>0?ut/ing:0)})`:'';
+  }
+  ['vRec','vPz','vPrecio','vCom','vCanal'].forEach(id=>S(id).oninput=prev);
+  S('vSug').onclick=()=>{ const k=canalKey(S('vCanal').value); S('vPrecio').value=calc(+S('vRec').value).precios[k].pvp; prev(); };
+  S('vAdd').onclick=()=>{
+    const pz=+S('vPz').value||0, pr=+S('vPrecio').value||0;
+    if(pz<=0||pr<=0){ toast('Escribe cuántas piezas vendiste y a qué precio.'); S('vPrecio').focus(); return; }
+    DB.ventas.push({id:Date.now(), fecha:S('vFecha').value||todayISO(), n:+S('vRec').value, canal:S('vCanal').value,
+      piezas:pz, precio:pr, comision:(+S('vCom').value||0)/100, nota:S('vNota').value});
+    save(); toast('Venta guardada'); render();
+  };
+  document.querySelectorAll('[data-delv]').forEach(b=>b.onclick=()=>{ DB.ventas=DB.ventas.filter(x=>x.id!=b.dataset.delv); save(); toast('Venta eliminada'); render(); });
+  prev();
+}
+
+/* =========================================================
+   VISTA · MI NEGOCIO
+   ========================================================= */
+function vNegocio(){
+  const eq=equilibrio();
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Supuestos que mueven todo</div><h1 class="title">Mi negocio</h1>
+    <p class="sub">De aquí salen el overhead por pieza y el costo de tu hora de trabajo. Si estos números están mal, todos tus precios están mal.</p>
+  </div></div>
+
+  <div class="grid g3">
+    <div class="kpi"><div class="k-l">Gastos fijos al mes</div><div class="k-v">${money0(gastosTotales())}</div></div>
+    <div class="kpi"><div class="k-l">Overhead por pieza</div><div class="k-v">${money(overhead())}</div><div class="k-n">${num(DB.gf.piezasMes)} piezas al mes</div></div>
+    <div class="kpi"><div class="k-l">Tu hora de trabajo</div><div class="k-v">${money(costoHora())}</div><div class="k-n">${money0(DB.gf.sueldo)} ÷ ${num(DB.gf.horas)} h</div></div>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h3>Gastos fijos mensuales</h3>
+      ${DB.gf.lineas.map((l,i)=>`<div class="row" style="margin-bottom:7px;align-items:center">
+        <input value="${esc(l.nom)}" data-gfn="${i}" style="flex:2;min-width:150px;font-size:13px;padding:7px 9px">
+        <input type="number" min="0" step="50" value="${l.monto}" data-gfm="${i}" style="max-width:110px;text-align:right;font-size:13px;padding:7px 9px">
+        <button class="x" data-gfd="${i}" title="Quitar">✕</button></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1.5px solid var(--line)">
+        <button class="btn sm ghost" id="gfAdd">+ Agregar gasto</button>
+        <div><span class="mini">Total</span> <b style="font-family:'Bebas Neue';font-size:24px;color:var(--deep);margin-left:6px">${money0(gastosTotales())}</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Trabajo y volumen</h3>
+      <div class="field"><label class="f">Piezas que produces al mes</label><input type="number" min="1" id="gPz" value="${DB.gf.piezasMes}"></div>
+      <div class="field"><label class="f">Sueldo mensual que quieres cobrarte</label><input type="number" min="0" step="500" id="gSu" value="${DB.gf.sueldo}"></div>
+      <div class="field"><label class="f">Horas de trabajo al mes</label><input type="number" min="1" id="gHo" value="${DB.gf.horas}"></div>
+      <h3 style="margin-top:22px">Márgenes objetivo por canal</h3>
+      ${CANALES.map(c=>`<div class="field"><label class="f">${c.nom} · <span style="color:var(--purple)">${pct(DB.params.margenes[c.k])}</span> <span style="color:var(--gray);font-weight:500">(libro: ${c.rango})</span></label>
+        <input type="range" min="10" max="85" step="1" value="${Math.round(DB.params.margenes[c.k]*100)}" data-mg="${c.k}"></div>`).join('')}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Punto de equilibrio</h3>
+    <div class="grid g4">
+      <div><div class="mini">Precio promedio (regalo)</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${money0(eq.avgP)}</b></div>
+      <div><div class="mini">Costo total promedio</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${money0(eq.avgC)}</b></div>
+      <div><div class="mini">Margen de contribución</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--good)">${money0(eq.mc)}</b></div>
+      <div><div class="mini">Piezas al mes para no perder</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--purple)">${num(eq.piezas)}</b></div>
+    </div>
+    <div class="note">Con ${money0(eq.gf)} de gastos fijos necesitas vender <b>${num(eq.piezas)} roles al mes</b> (${money0(eq.ingreso)} de ingreso) solo para quedar en ceros. A partir del rol ${num(eq.piezas+1)}, empiezas a ganar. Son ${num(Math.ceil(eq.piezas/12))} lotes de masa.</div>
+  </div>`;
+}
+function hookNegocio(){
+  const S=id=>document.getElementById(id);
+  document.querySelectorAll('[data-gfn]').forEach(el=>el.oninput=e=>{ DB.gf.lineas[+el.dataset.gfn].nom=e.target.value; save(); });
+  document.querySelectorAll('[data-gfm]').forEach(el=>el.oninput=e=>{ DB.gf.lineas[+el.dataset.gfm].monto=+e.target.value||0; save(); softCalc(); });
+  document.querySelectorAll('[data-gfd]').forEach(el=>el.onclick=()=>{ DB.gf.lineas.splice(+el.dataset.gfd,1); save(); render(); });
+  S('gfAdd').onclick=()=>{ DB.gf.lineas.push({nom:'Nuevo gasto',monto:0}); save(); render(); };
+  S('gPz').oninput=e=>{ DB.gf.piezasMes=+e.target.value||1; save(); softCalc(); };
+  S('gSu').oninput=e=>{ DB.gf.sueldo=+e.target.value||0; save(); softCalc(); };
+  S('gHo').oninput=e=>{ DB.gf.horas=+e.target.value||1; save(); softCalc(); };
+  document.querySelectorAll('[data-mg]').forEach(el=>el.oninput=e=>{ DB.params.margenes[el.dataset.mg]=(+e.target.value||0)/100; save(); softCalc(); });
+}
+
+/* =========================================================
+   VISTA · MIS DATOS
+   ========================================================= */
+function vDatos(){
+  return `
+  <div class="page-head"><div>
+    <div class="eyebrow">Respaldo y privacidad</div><h1 class="title">Mis datos</h1>
+    <p class="sub">Todo lo que escribes se guarda solo en este dispositivo, dentro de tu navegador. Nada viaja a internet.</p>
+  </div></div>
+
+  ${!canPersist?`<div class="note" style="margin:0 0 16px"><b>Estás viendo una vista previa.</b> Para que tus datos se guarden, descarga este archivo a tu computadora o celular y ábrelo desde ahí.</div>`:''}
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Respaldar</h3>
+      <p class="mini">Descarga un archivo con tus precios, lotes y ventas. Guárdalo en tu nube o mándatelo por correo: es tu seguro contra borrar el historial del navegador.</p>
+      <button class="btn" id="dExp">Descargar respaldo</button>
+      <button class="btn ghost" id="dImp">Restaurar respaldo</button>
+      <input type="file" id="dFile" accept="application/json" style="display:none">
+    </div>
+    <div class="card">
+      <h3>Exportar a Excel</h3>
+      <p class="mini">Baja tus bitácoras en formato CSV para abrirlas en Excel, Google Sheets o mandárselas a tu contador.</p>
+      <button class="btn ghost" id="dCsvV">Ventas (${DB.ventas.length})</button>
+      <button class="btn ghost" id="dCsvP">Producción (${DB.prod.length})</button>
+      <button class="btn ghost" id="dCsvC">Costos de las 50 recetas</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Resumen de lo que tienes cargado</h3>
+    <div class="grid g4">
+      <div><div class="mini">Insumos</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.insumos.length}</b></div>
+      <div><div class="mini">Recetas</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.recetas.length}</b></div>
+      <div><div class="mini">Lotes</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.prod.length}</b></div>
+      <div><div class="mini">Ventas</div><b style="font-family:'Bebas Neue';font-size:26px;color:var(--deep)">${DB.ventas.length}</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Empezar de nuevo</h3>
+    <p class="mini">Vuelve a los precios de referencia y borra tus bitácoras. Esto no se puede deshacer, así que descarga antes un respaldo.</p>
+    <button class="btn danger" id="dReset">Restablecer todo</button>
+  </div>
+
+  <div class="note"><b>Endulcora · Estudio Gastronómico.</b> Herramienta complementaria del eBook «Roles Gourmet: El Arte de la Masa Enriquecida». Seis recetas del Capítulo 9 son saladas y llevan queso, hongos o cárnicos: revisa sus requisitos de refrigeración y vida útil antes de venderlas. Contenido: Chef Luis Alfonso Jiménez Cárdenas · Edición: Manuel Ramiro Justo Guzmán · WhatsApp 5665271901. Uso personal del comprador; no se autoriza su reventa ni redistribución.</div>`;
+}
+function download(name, text, type){
+  const b=new Blob([type==='csv'?'\ufeff'+text:text],{type:(type==='csv'?'text/csv':'application/json')+';charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+const csvCell=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+function hookDatos(){
+  const S=id=>document.getElementById(id);
+  S('dExp').onclick=()=>{ download(`Endulcora_Roles_Gourmet_respaldo_${todayISO()}.json`, JSON.stringify(DB), 'json'); toast('Respaldo descargado'); };
+  S('dImp').onclick=()=>S('dFile').click();
+  S('dFile').onchange=e=>{
+    const f=e.target.files[0]; if(!f) return; const rd=new FileReader();
+    rd.onload=()=>{ try{ const o=JSON.parse(rd.result); if(!o.insumos||!o.recetas) throw 0;
+      DB=o; reindex(); save(); toast('Respaldo restaurado'); render(); }catch(err){ toast('Ese archivo no es un respaldo válido.'); } };
+    rd.readAsText(f);
+  };
+  S('dCsvV').onclick=()=>{
+    const h=['Fecha','Receta','Canal','Piezas','Precio unitario','Ingreso','Costo total','Comision','Utilidad neta','Margen','Cliente/Nota'];
+    const rows=DB.ventas.map(v=>{const ing=v.piezas*v.precio,cst=v.piezas*costoTotalDe(v.n),com=ing*(+v.comision||0);
+      return [v.fecha,(recByN[v.n]||{}).nom,v.canal,v.piezas,v.precio,ing,cst,com,ing-cst-com,ing>0?((ing-cst-com)/ing).toFixed(4):0,v.nota].map(csvCell).join(',');});
+    download(`Endulcora_Ventas_${todayISO()}.csv`,[h.map(csvCell).join(','),...rows].join('\n'),'csv'); toast('CSV de ventas descargado');
+  };
+  S('dCsvP').onclick=()=>{
+    const h=['Fecha','Lote','Receta','Planeadas','Buenas','Falladas','% merma','Costo merma','Causa','Notas'];
+    const rows=DB.prod.map(p=>{const m=(p.buenas+p.fallas)>0?p.fallas/(p.buenas+p.fallas):0;
+      return [p.fecha,p.lote,(recByN[p.n]||{}).nom,p.plan,p.buenas,p.fallas,m.toFixed(4),(p.fallas*costoTotalDe(p.n)).toFixed(2),p.causa,p.nota].map(csvCell).join(',');});
+    download(`Endulcora_Produccion_${todayISO()}.csv`,[h.map(csvCell).join(','),...rows].join('\n'),'csv'); toast('CSV de producción descargado');
+  };
+  S('dCsvC').onclick=()=>{
+    const h=['No','Receta','Insumos','Empaque','Energia','Mano de obra','Overhead','Costo base','% merma','Costo total','PVP regalo','PVP restaurante','PVP evento','PVP mayoreo'];
+    const rows=DB.recetas.map(r=>{const c=calc(r.n);
+      return [String(r.n), r.nom, ...[c.ins,c.emp,c.ene,c.mo,c.oh,c.base].map(x=>x.toFixed(2)), c.merma.toFixed(3), c.total.toFixed(2),
+        c.precios.regalo.pvp, c.precios.restaurante.pvp, c.precios.evento.pvp, c.precios.mayoreo.pvp].map(csvCell).join(',');});
+    download(`Endulcora_Costos_${todayISO()}.csv`,[h.map(csvCell).join(','),...rows].join('\n'),'csv'); toast('CSV de costos descargado');
+  };
+  S('dReset').onclick=()=>{
+    openModal(`<h2 style="font-family:'Bebas Neue';font-size:28px;color:var(--deep);margin-bottom:8px">¿Restablecer todo?</h2>
+      <p class="mini">Se borrarán tus ${DB.ventas.length} ventas, ${DB.prod.length} lotes y los precios que hayas cambiado. Volverás a los valores de referencia del libro.</p>
+      <div style="display:flex;gap:8px;margin-top:16px"><button class="btn ghost" id="noReset">Cancelar</button>
+      <button class="btn danger" id="okReset">Sí, borrar todo</button></div>`);
+    document.getElementById('noReset').onclick=closeModal;
+    document.getElementById('okReset').onclick=()=>{ DB=freshDB(); reindex(); save(); closeModal(); toast('Todo restablecido'); go('tablero'); };
+  };
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function render(){
+  const v=document.getElementById('view');
+  const map={tablero:vTablero,calc:vCalc,recetas:vRecetas,insumos:vInsumos,prod:vProd,ventas:vVentas,negocio:vNegocio,datos:vDatos};
+  const hooks={tablero:hookTablero,calc:hookCalc,recetas:hookRecetas,insumos:hookInsumos,prod:hookProd,ventas:hookVentas,negocio:hookNegocio,datos:hookDatos};
+  v.innerHTML=map[current]();
+  reindex();
+  hooks[current]();
+}
+buildNav(); render();
+</script>
+</body>
+</html>

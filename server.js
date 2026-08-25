@@ -117,6 +117,13 @@ const googleAdsLimiter = rateLimit({
 app.use('/api/google-ads', googleAdsLimiter, googleAdsRoutes);
 
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
+// El contenido de /api cambia en cualquier momento desde /admin (precios,
+// productos, disponibilidad...), asi que nunca debe quedar en cache de
+// navegador, proxy o CDN intermedio.
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/asistente', asistenteRoutes);
@@ -130,7 +137,7 @@ app.use('/admin', adminRoutes);
 const escaparHtml = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-const CATEGORIA_POR_PREFIJO = { ebooks: 'ebook', anexos: 'anexo', recetarios: 'recetario' };
+const CATEGORIA_POR_PREFIJO = { ebooks: 'ebook', anexos: 'anexo' };
 
 function servirPaginaProducto(prefijo) {
   return (req, res) => {
@@ -161,11 +168,10 @@ function servirPaginaProducto(prefijo) {
 
 app.get('/ebooks/:slug', servirPaginaProducto('ebooks'));
 app.get('/anexos/:slug', servirPaginaProducto('anexos'));
-app.get('/recetarios/:slug', servirPaginaProducto('recetarios'));
 
 // Paginas de catalogo, propias y separadas de la pagina principal (para
 // anunciar sin que la gente tenga que bajar por todo el sitio).
-app.get(['/tienda', '/ebooks', '/anexos', '/recetarios'], (req, res) => {
+app.get(['/tienda', '/ebooks', '/anexos'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'categoria.html'));
 });
 
