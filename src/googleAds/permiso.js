@@ -19,6 +19,16 @@ const SCOPE = 'https://www.googleapis.com/auth/adwords';
 const SECRETO_ESTADO = 'googleAdsOauthEstado';
 const VIGENCIA_ESTADO_MS = 15 * 60 * 1000;
 
+// Alfabeto sin caracteres que se confundan al teclear (0/O, 1/I/L).
+const ALFABETO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+function claveCorta(largo = 8) {
+  const bytes = crypto.randomBytes(largo);
+  let salida = '';
+  for (const b of bytes) salida += ALFABETO[b % ALFABETO.length];
+  return salida;
+}
+
 // El store se pide al vuelo: la herramienta de consola puede correr sin base
 // de datos para otros comandos, y no queremos que reviente al cargar.
 function store() {
@@ -32,7 +42,7 @@ function generarEnlace() {
   }
 
   const estado = crypto.randomBytes(24).toString('hex');
-  store().setSecreto(SECRETO_ESTADO, { valor: estado, creadoEn: Date.now() });
+  const clave = claveCorta();
 
   const url = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
     client_id: GOOGLE_ADS.clientId,
@@ -44,7 +54,26 @@ function generarEnlace() {
     state: estado,
   });
 
-  return { url, redirectUri: REDIRECT_URI, vigenciaMinutos: VIGENCIA_ESTADO_MS / 60000 };
+  store().setSecreto(SECRETO_ESTADO, { valor: estado, creadoEn: Date.now(), clave, url });
+
+  // La URL de Google es larguisima y al copiarla de una consola se parte. Este
+  // atajo vive en nuestro dominio, se puede teclear a mano y solo redirige.
+  const base = REDIRECT_URI.replace('/api/google-ads/oauth/callback', '');
+  return {
+    url,
+    enlaceCorto: `${base}/api/google-ads/oauth/ir/${clave}`,
+    redirectUri: REDIRECT_URI,
+    vigenciaMinutos: VIGENCIA_ESTADO_MS / 60000,
+  };
+}
+
+// Busca el enlace de Google que corresponde a un atajo. No gasta el "state":
+// eso pasa hasta que Google regresa al callback.
+function enlaceDeClave(clave) {
+  const guardado = store().getSecreto(SECRETO_ESTADO);
+  if (!guardado || !guardado.clave || !clave || guardado.clave !== String(clave).toUpperCase()) return null;
+  if (Date.now() - Number(guardado.creadoEn || 0) > VIGENCIA_ESTADO_MS) return null;
+  return guardado.url || null;
 }
 
 // El "state" es de un solo uso: se gaste bien o mal, se borra.
@@ -101,6 +130,7 @@ module.exports = {
   REDIRECT_URI,
   SCOPE,
   generarEnlace,
+  enlaceDeClave,
   revisarEstado,
   canjearCodigo,
   permisoGuardado,

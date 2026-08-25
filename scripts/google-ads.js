@@ -16,7 +16,7 @@ try {
   /* sin dotenv: seguimos con process.env */
 }
 
-const { GOOGLE_ADS } = require('../src/config');
+const { GOOGLE_ADS, SITE_URL } = require('../src/config');
 const api = require('../src/googleAds/api');
 const negocios = require('../src/googleAds/negocios');
 const cuentas = require('../src/googleAds/cuentas');
@@ -121,28 +121,81 @@ No caduca; tratalo como una contrasena.
 }
 
 // Imprime el enlace que hay que abrir una sola vez para conceder el permiso.
+//
+// El enlace lo pide al SERVIDOR QUE ESTA CORRIENDO, no lo genera aqui: el
+// servidor guarda los datos en memoria y solo los escribe en la base, asi que
+// si esta herramienta guardara el atajo por su cuenta, el servidor seguiria sin
+// verlo y la pagina contestaria "ese enlace ya no sirve".
 async function comandoPermiso() {
-  const store = require('../src/store');
-  const permiso = require('../src/googleAds/permiso');
+  const token = process.env.GOOGLE_ADS_ADMIN_TOKEN || '';
+  if (!token) {
+    console.error('Falta GOOGLE_ADS_ADMIN_TOKEN: es el que deja pedirle el enlace al servidor.');
+    process.exitCode = 1;
+    return;
+  }
 
-  const { url, redirectUri, vigenciaMinutos } = permiso.generarEnlace();
-  await store.flush(); // que el "state" quede guardado antes de salir
+  const candidatas = [
+    `${SITE_URL}/api/google-ads/oauth/inicio`,
+    `http://127.0.0.1:${process.env.PORT || 3000}/api/google-ads/oauth/inicio`,
+  ];
+
+  let datos = null;
+  let ultimoError = '';
+  for (const url of candidatas) {
+    try {
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const cuerpo = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        ultimoError = `${url} respondio ${res.status}: ${cuerpo.error || ''}`;
+        continue;
+      }
+      datos = cuerpo;
+      break;
+    } catch (err) {
+      ultimoError = `${url}: ${err.message}`;
+    }
+  }
+
+  if (!datos) {
+    console.error(`
+No pude pedirle el enlace al servidor. Ultimo intento: ${ultimoError}
+
+Revisa que el sitio este arriba y que GOOGLE_ADS_ADMIN_TOKEN sea el mismo que
+tiene el servidor.
+`);
+    process.exitCode = 1;
+    return;
+  }
 
   console.log(`
-Abre este enlace con la cuenta de Google duenia de la administradora y dale
-"Permitir". El servidor guarda el permiso solo: no hay que copiar nada de vuelta.
+Escribe esta direccion en el navegador, con la sesion de la cuenta duenia de la
+administradora, y dale "Permitir". El servidor guarda el permiso solo.
 
-${url}
+   ${datos.enlaceCorto}
 
-Dura ${vigenciaMinutos} minutos y sirve una sola vez.
-Regresa a: ${redirectUri}
+Dura ${datos.vigenciaMinutos} minutos y sirve una sola vez.
+
+Si prefieres el enlace largo de Google (por ejemplo para pegarlo en una ventana
+de incognito), es este:
+
+${datos.url}
+
+Google regresa a: ${datos.redirectUri}
 `);
 }
 
 async function comandoOlvidarPermiso() {
-  const store = require('../src/store');
-  require('../src/googleAds/permiso').olvidarPermiso();
-  await store.flush();
+  const token = process.env.GOOGLE_ADS_ADMIN_TOKEN || '';
+  const res = await fetch(`${SITE_URL}/api/google-ads/oauth`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  }).catch((err) => ({ ok: false, status: 0, mensaje: err.message }));
+
+  if (!res.ok) {
+    console.error(`\nNo se pudo borrar el permiso (${res.status || res.mensaje}).\n`);
+    process.exitCode = 1;
+    return;
+  }
   console.log('\nPermiso borrado. Habra que volver a concederlo con "permiso" para operar las cuentas.\n');
 }
 
@@ -151,7 +204,7 @@ async function comandoEstado() {
   console.log('\nCredenciales');
   console.log(falta.length ? `  Faltan: ${falta.join(', ')}` : '  Completas.');
   console.log(`  Cuenta administradora (MCC): ${GOOGLE_ADS.managerId || '(sin configurar)'}`);
-  console.log(`  Version de la API: ${GOOGLE_ADS.apiVersion}`);
+  console.log(`  Version de la API: ${GOOGLE_ADS.apiVersion || 'automatica (la mas nueva que responda)'}`);
   try {
     const permiso = require('../src/googleAds/permiso');
     console.log(`  Permiso de Google: ${permiso.permisoGuardado() ? 'concedido' : 'pendiente (corre "permiso")'}`);
@@ -184,14 +237,42 @@ async function comandoEstado() {
 
 async function comandoCuentas() {
   const accesibles = await cuentas.listarAccesibles();
-  console.log('\nCuentas a las que llega este acceso:');
-  for (const id of accesibles) console.log(`  ${id}`);
-
   const clientes = await cuentas.listarClientesDelMCC();
+  const idsDelMCC = new Set(clientes.map((c) => c.id));
+
   console.log(`\nCuentas dentro del MCC ${GOOGLE_ADS.managerId}:`);
+  if (!clientes.length) {
+    console.log('  (ninguna)');
+  }
   for (const c of clientes) {
     const etiqueta = c.esAdministradora ? '[administradora]' : '';
-    console.log(`  ${c.id.padEnd(12)} ${(c.nombre || '(sin nombre)').padEnd(30)} ${c.moneda} ${c.zona} ${c.estado} ${etiqueta}`);
+    console.log(`  ${c.id.padEnd(12)} ${(c.nombre || '(sin nombre)').padEnd(26)} ${c.moneda.padEnd(4)} ${c.zona.padEnd(20)} ${(c.estado || '-').padEnd(9)} ${etiqueta}`);
+  }
+
+  // Las recien creadas pueden tardar en salir en el listado del MCC, asi que
+  // se pregunta por cada una directo.
+  console.log('\nCuentas de los negocios (preguntando una por una):');
+  for (const r of await cuentas.revisarNegocios()) {
+    if (r.ok) {
+      const d = r.detalle;
+      console.log(`  [OK]    ${r.nombre.padEnd(18)} ${r.customerId.padEnd(12)} ${(d.nombre || '(sin nombre)').padEnd(22)} ${d.moneda.padEnd(4)} ${d.zona.padEnd(20)} ${d.estado || '-'}`);
+    } else {
+      console.log(`  [FALLA] ${r.nombre.padEnd(18)} ${(r.customerId || '-').padEnd(12)} ${r.error.slice(0, 90)}`);
+    }
+  }
+
+  const sueltas = accesibles.filter((id) => !idsDelMCC.has(id));
+  if (sueltas.length) {
+    console.log('\nCuentas a las que llega el acceso pero que NO cuelgan del MCC:');
+    for (const id of sueltas) {
+      try {
+        const c = await cuentas.detalleDeCuentaSuelta(id);
+        console.log(`  ${c.id.padEnd(12)} ${(c.nombre || '(sin nombre)').padEnd(26)} ${c.moneda.padEnd(4)} ${c.zona.padEnd(20)} ${(c.estado || '-').padEnd(9)} ${c.esAdministradora ? '[administradora]' : ''}`);
+      } catch (err) {
+        console.log(`  ${String(id).padEnd(12)} (no se pudo leer: ${err.message.slice(0, 80)})`);
+      }
+    }
+    console.log('\n  Se pueden vincular al MCC desde la interfaz de Google Ads si te interesa administrarlas aqui.');
   }
   console.log('');
 }

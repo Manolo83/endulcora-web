@@ -84,7 +84,10 @@ pestania Console del servicio):
 npm run ads permiso
 ```
 
-Imprime un enlace de Google. Lo abre el duenio de la cuenta administradora,
+Imprime una direccion corta de nuestro propio dominio, del estilo
+`https://www.endulcora.com/api/google-ads/oauth/ir/RTV38B7A`, que se puede
+teclear a mano en el navegador (las consolas web parten el enlace largo de
+Google al copiarlo). Esa direccion redirige al consentimiento de Google. Lo abre el duenio de la cuenta administradora,
 acepta, y el servidor guarda el permiso solo, en la base de datos. El enlace
 dura 15 minutos y sirve una sola vez. Para comprobar o borrar:
 
@@ -279,9 +282,10 @@ En Railway se corren igual, desde la consola del servicio.
 
 ## Notas
 
-- **Version de la API**: se fija en `GOOGLE_ADS_API_VERSION` (por omision `v21`).
-  Google retira cada version mas o menos al ano; si un dia la API contesta que
-  la version no existe, sube ese numero.
+- **Version de la API**: el servidor la averigua solo. Prueba de la mas nueva a
+  la mas vieja y se queda con la primera que exista (una version retirada
+  contesta 404). Si alguna vez hace falta clavar una en concreto, se pone en
+  `GOOGLE_ADS_API_VERSION` y se respeta esa.
 - **Seguridad**: el refresh token y el token de desarrollador dan control total
   sobre las cuatro cuentas. Van solo en variables de entorno, nunca en el codigo
   ni en GitHub.
