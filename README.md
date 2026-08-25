@@ -273,7 +273,27 @@ link `/gracias?orden=<id>&token=<token>` de un pedido ya aprobado) y
 confirma que el `Purchase` aparece marcado como recibido por **servidor**
 en esa pantalla. Borra `META_CAPI_TEST_CODE` de Railway cuando termines.
 
-## 13. Notas técnicas y mejoras futuras (opcionales)
+## 13. Audiencia de clientes en Meta Ads
+
+Para anunciarle talleres, eBooks, etc. directamente a los clientes que ya
+tienen cuenta en el sitio, existe una Audiencia personalizada (tipo "Lista de
+clientes") ya creada en Meta Ads:
+
+- **Cuenta de anuncios:** `75151654` (negocio "Endulcora" — no la cuenta
+  personal "Luis Jm" `541486784443144`, esa no está dentro de un portafolio
+  comercial y Meta no deja crear/editar audiencias de lista de clientes ahí).
+- **Audiencia:** "Clientes con cuenta · Endulcora", ID `52504678496591`.
+- Se creó vacía (todavía no hay clientes con cuenta) el 25 de agosto de 2026,
+  lista para llenarse en cuanto los haya.
+
+Para actualizarla cuando ya haya clientes registrados: en `/admin` →
+Clientes → "Descargar CSV para Meta Ads" y, en un chat de Claude con el
+conector de Facebook Ads activado, pide que suba ese CSV a la audiencia
+`52504678496591` de la cuenta `75151654` (por la API, con
+`ads_update_custom_audience_users`) — no hace falta subirlo a mano en Meta
+Ads Manager. Repite cuando quieras sumar clientes nuevos.
+
+## 14. Notas técnicas y mejoras futuras (opcionales)
 
 - El sitio usa Tailwind CSS por CDN para mantener el HTML original tal cual
   — funciona perfecto para el tráfico de un sitio personal/pequeño negocio.
