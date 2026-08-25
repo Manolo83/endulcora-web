@@ -61,6 +61,8 @@ router.post('/suscribirse', requireCliente, async (req, res) => {
     store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id });
     res.status(201).json({ url: creado.init_point });
   } catch (err) {
+    const detalle = (err && err.cause && JSON.stringify(err.cause)) || (err && err.message) || String(err);
+    console.error('[membresia] Error al crear la suscripción:', detalle);
     res.status(502).json({ error: 'No se pudo iniciar la suscripción. Intenta de nuevo en un momento.' });
   }
 });
