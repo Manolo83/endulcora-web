@@ -7,6 +7,7 @@ const store = require('../store');
 const { SITE_URL, UPLOAD_DIR } = require('../config');
 const { enviarCorreoConfirmacionCompra } = require('../email');
 const { enviarPurchaseCAPI } = require('../metaConversions');
+const { enviarCompraGoogle } = require('../googleAds/conversiones');
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.post('/preference', async (req, res) => {
   const client = mpClient();
   if (!client) return res.status(503).json({ error: 'Los pagos todavia no estan configurados.' });
 
-  const { items: pedido, email, fbp, fbc } = req.body || {};
+  const { items: pedido, email, fbp, fbc, gclid, gbraid, wbraid } = req.body || {};
   if (!Array.isArray(pedido) || pedido.length === 0) {
     return res.status(400).json({ error: 'Tu carrito esta vacio.' });
   }
@@ -67,6 +68,11 @@ router.post('/preference', async (req, res) => {
     viewToken,
     fbp: typeof fbp === 'string' ? fbp.slice(0, 200) : null,
     fbc: typeof fbc === 'string' ? fbc.slice(0, 200) : null,
+    // Identificadores del clic en un anuncio de Google (gclid en buscador y
+    // display; gbraid/wbraid cuando el clic viene de una app o de iOS).
+    gclid: typeof gclid === 'string' ? gclid.slice(0, 200) : null,
+    gbraid: typeof gbraid === 'string' ? gbraid.slice(0, 200) : null,
+    wbraid: typeof wbraid === 'string' ? wbraid.slice(0, 200) : null,
   });
 
   try {
@@ -145,6 +151,11 @@ router.post('/webhook', async (req, res) => {
     if (nuevoEstado === 'aprobado' && !order.capiPurchaseEnviado) {
       await enviarPurchaseCAPI({ order: actualizado, siteUrl: SITE_URL });
       store.updateOrder(order.id, { capiPurchaseEnviado: true });
+    }
+
+    if (nuevoEstado === 'aprobado' && !order.googleAdsEnviado) {
+      await enviarCompraGoogle({ order: actualizado });
+      store.updateOrder(order.id, { googleAdsEnviado: true });
     }
 
     if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado && !order.correoEnviado && actualizado.email) {

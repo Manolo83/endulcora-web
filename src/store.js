@@ -594,6 +594,22 @@ module.exports = {
     return item;
   },
 
+  // ---- Secretos que el propio servidor consigue y guarda ----
+  // (por ejemplo el permiso permanente de Google Ads, que se obtiene con un
+  // clic del duenio de la cuenta y no se puede escribir a mano en Railway).
+  getSecreto(clave) {
+    const data = load();
+    return (data.secretos && data.secretos[clave]) || null;
+  },
+  setSecreto(clave, valor) {
+    const data = load();
+    if (!data.secretos) data.secretos = {};
+    if (valor === null || valor === undefined) delete data.secretos[clave];
+    else data.secretos[clave] = valor;
+    save(data);
+    return valor;
+  },
+
   // ---- Membresia mensual ($50 MXN, recetario + video de taller exclusivos) ----
   getContenidoMembresia() {
     return load().contenidoMembresia;
@@ -833,7 +849,7 @@ module.exports = {
   getOrder(id) {
     return load().orders.find((o) => o.id === Number(id)) || null;
   },
-  addOrder({ items, total, email, userId, viewToken, fbp, fbc }) {
+  addOrder({ items, total, email, userId, viewToken, fbp, fbc, gclid, gbraid, wbraid }) {
     const data = load();
     const item = {
       id: nextId(data.orders),
@@ -848,7 +864,11 @@ module.exports = {
       viewToken: viewToken || null,
       fbp: fbp || null,
       fbc: fbc || null,
+      gclid: gclid || null,
+      gbraid: gbraid || null,
+      wbraid: wbraid || null,
       capiPurchaseEnviado: false,
+      googleAdsEnviado: false,
       correoEnviado: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
