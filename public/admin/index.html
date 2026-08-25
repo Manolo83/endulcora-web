@@ -514,15 +514,15 @@
       </div>
 
       <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
-        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Regalo mensual: recetario del mes</h3>
-        <p class="mt-1 text-xs text-carbon/50">Sube el PDF del recetario de este mes y se lo mandamos por correo, automáticamente, a todos los clientes con cuenta (gratis, vía Resend).</p>
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Regalo mensual: revista mensual</h3>
+        <p class="mt-1 text-xs text-carbon/50">Sube el PDF de la revista de este mes y se lo mandamos por correo, automáticamente, a todos los clientes con cuenta (gratis, vía Resend).</p>
         <form id="formRegaloMensual" class="mt-4 space-y-3">
           <label class="block">
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mes (ej. Marzo 2026)</span>
             <input id="regaloMes" type="text" required placeholder="Marzo 2026" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           </label>
           <label class="block">
-            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">PDF del recetario</span>
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">PDF de la revista mensual</span>
             <input id="regaloArchivo" type="file" accept="application/pdf,.pdf" required class="mt-1.5 w-full text-sm">
           </label>
           <button type="submit" id="btnEnviarRegaloMensual" class="w-full rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
@@ -2031,7 +2031,7 @@ $('btnExportarAudienciaMeta').addEventListener('click', async () => {
 $('formRegaloMensual').addEventListener('submit', async (e) => {
   e.preventDefault();
   const file = $('regaloArchivo').files[0];
-  if(!file){ toast('Elige el PDF del recetario'); return; }
+  if(!file){ toast('Elige el PDF de la revista'); return; }
   const mes = $('regaloMes').value.trim();
   const btn = $('btnEnviarRegaloMensual');
   const resultado = $('regaloMensualResultado');

@@ -9,7 +9,7 @@ const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
-const { enviarCorreoRecetarioMes } = require('../email');
+const { enviarCorreoRevistaMensual } = require('../email');
 
 const router = express.Router();
 
@@ -618,9 +618,9 @@ router.post('/api/users/:id/reset-password', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- Regalo mensual: recetario del mes por correo a todos los clientes ----
+// ---- Regalo mensual: revista mensual por correo a todos los clientes ----
 router.post('/api/regalo-mensual/enviar', requireAdmin, uploadDocumento.single('file'), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'Falta el archivo del recetario.' });
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo de la revista.' });
   const mes = String((req.body && req.body.mes) || '').trim() || 'este mes';
   const url = `${SITE_URL}/uploads/${req.file.filename}`;
   const usuarios = store.getUsers();
@@ -629,7 +629,7 @@ router.post('/api/regalo-mensual/enviar', requireAdmin, uploadDocumento.single('
   for (const u of usuarios) {
     if (!u.email) continue;
     try {
-      await enviarCorreoRecetarioMes({ to: u.email, nombre: u.nombre, url, mes });
+      await enviarCorreoRevistaMensual({ to: u.email, nombre: u.nombre, url, mes });
       enviados++;
     } catch (e) {
       fallidos.push(u.email);
