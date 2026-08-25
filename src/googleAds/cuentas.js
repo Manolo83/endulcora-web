@@ -19,6 +19,9 @@ async function listarAccesibles() {
 async function listarClientesDelMCC() {
   if (!GOOGLE_ADS.managerId) throw new Error('Falta GOOGLE_ADS_MANAGER_ID (el ID de la cuenta administradora).');
 
+  // Sin WHERE a proposito: en GAQL una comparacion contra un campo vacio
+  // descarta la fila, y las cuentas recien creadas todavia no traen estado, asi
+  // que un "WHERE status != 'CANCELED'" las dejaba fuera. Se filtra despues.
   const filas = await buscar(
     GOOGLE_ADS.managerId,
     `SELECT
@@ -30,8 +33,7 @@ async function listarClientesDelMCC() {
        customer_client.test_account,
        customer_client.status,
        customer_client.level
-     FROM customer_client
-     WHERE customer_client.status != 'CANCELED'`
+     FROM customer_client`
   );
 
   return filas.map((f) => {
@@ -46,7 +48,29 @@ async function listarClientesDelMCC() {
       estado: c.status || '',
       nivel: Number(c.level || 0),
     };
-  });
+  }).filter((c) => c.estado !== 'CANCELED');
+}
+
+// Datos de una cuenta suelta a la que llega el acceso pero que no cuelga del
+// MCC: se pregunta directo, sin el encabezado del administrador.
+async function detalleDeCuentaSuelta(id) {
+  const cuenta = String(id || '').replace(/\D/g, '');
+  const filas = await buscar(
+    cuenta,
+    `SELECT customer.id, customer.descriptive_name, customer.currency_code,
+            customer.time_zone, customer.manager, customer.status
+     FROM customer`,
+    { omitirLogin: true }
+  );
+  const c = (filas[0] && filas[0].customer) || {};
+  return {
+    id: String(c.id || cuenta),
+    nombre: c.descriptiveName || '',
+    moneda: c.currencyCode || '',
+    zona: c.timeZone || '',
+    esAdministradora: Boolean(c.manager),
+    estado: c.status || '',
+  };
 }
 
 // Crea la cuenta de Google Ads de un negocio, colgada del MCC.
@@ -107,4 +131,4 @@ async function estado() {
   return { negocios: negociosConEstado, sinAsignar, error };
 }
 
-module.exports = { listarAccesibles, listarClientesDelMCC, crearCuenta, estado };
+module.exports = { listarAccesibles, listarClientesDelMCC, detalleDeCuentaSuelta, crearCuenta, estado };
