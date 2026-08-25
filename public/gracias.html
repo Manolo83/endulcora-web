@@ -63,6 +63,43 @@ fbq('track', 'PageView');
 src="https://www.facebook.com/tr?id=1302735011542499&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
+
+<!-- Etiqueta de Google (Google Ads) -->
+<script>
+// 1) Guarda por 90 dias el identificador del clic en un anuncio de Google que
+//    venga en la URL (gclid en buscador/display, gbraid o wbraid cuando el
+//    clic viene de una app o de iOS). Se necesita al terminar la compra:
+//    el pago pasa por Mercado Pago y el comprador regresa despues, asi que
+//    sin esta cookie Google no sabria que la venta vino de un anuncio.
+(function(){
+  try{
+    var p = new URLSearchParams(location.search);
+    ['gclid','gbraid','wbraid'].forEach(function(k){
+      var v = p.get(k);
+      if(v) document.cookie = k + '=' + encodeURIComponent(v) + '; max-age=' + (90*24*60*60) + '; path=/; SameSite=Lax';
+    });
+  }catch(e){}
+})();
+// 2) Carga la etiqueta de Google. El ID (AW-...) vive en las variables del
+//    servidor, no en este archivo, para poder cambiarlo sin volver a
+//    desplegar el sitio. Si no hay ID configurado, no se carga nada.
+window.dataLayer = window.dataLayer || [];
+function gtag(){ dataLayer.push(arguments); }
+window.MEDICION = fetch('/api/medicion')
+  .then(function(r){ return r.json(); })
+  .then(function(cfg){
+    if(!cfg || !cfg.googleAdsId) return cfg || {};
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(cfg.googleAdsId);
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', cfg.googleAdsId);
+    return cfg;
+  })
+  .catch(function(){ return {}; });
+</script>
+<!-- Fin etiqueta de Google -->
 </head>
 <body class="font-cuerpo text-carbon antialiased">
 
@@ -156,13 +193,29 @@ let comprasDisparada = false;
 function dispararPurchase(pedido){
   if(comprasDisparada) return;
   comprasDisparada = true;
-  if(typeof fbq !== 'function') return;
-  fbq('track', 'Purchase', {
-    value: parseFloat(String(pedido.total).replace(/,/g,'')) || 0,
-    currency: 'MXN',
-    content_ids: pedido.items.map(i => String(i.itemId)),
-    content_type: 'product',
-  }, { eventID: `orden-${ordenId}` });
+  const valor = parseFloat(String(pedido.total).replace(/,/g,'')) || 0;
+
+  if(typeof fbq === 'function'){
+    fbq('track', 'Purchase', {
+      value: valor,
+      currency: 'MXN',
+      content_ids: pedido.items.map(i => String(i.itemId)),
+      content_type: 'product',
+    }, { eventID: `orden-${ordenId}` });
+  }
+
+  // Google Ads. El servidor manda esta misma compra por su cuenta (ver
+  // src/googleAds/conversiones.js); Google las une con el mismo
+  // transaction_id, asi que cuenta una sola venta, no dos.
+  window.MEDICION && window.MEDICION.then(function(cfg){
+    if(!cfg || !cfg.conversionCompra || typeof gtag !== 'function') return;
+    gtag('event', 'conversion', {
+      send_to: cfg.conversionCompra,
+      value: valor,
+      currency: 'MXN',
+      transaction_id: `orden-${ordenId}`,
+    });
+  });
 }
 
 function pintarDescargas(pedido){

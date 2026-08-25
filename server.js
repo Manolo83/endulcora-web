@@ -15,6 +15,7 @@ const adminRoutes = require('./src/routes/admin');
 const checkoutRoutes = require('./src/routes/checkout');
 const authRoutes = require('./src/routes/auth');
 const asistenteRoutes = require('./src/routes/asistente');
+const googleAdsRoutes = require('./src/routes/googleAds');
 const membresiaRoutes = require('./src/routes/membresia');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -104,6 +105,17 @@ const comunidadLimiter = rateLimit({
   message: { error: 'Escribiste muchos mensajes muy rápido. Espera unos minutos.' },
 });
 app.use('/api/comunidad/publicaciones', (req, res, next) => (req.method === 'POST' && req.path.endsWith('/mensajes') ? comunidadLimiter(req, res, next) : next()));
+
+// Panel de Google Ads: protegido por token propio (GOOGLE_ADS_ADMIN_TOKEN) y
+// limitado, porque desde ahi se pueden crear cuentas y mover conversiones.
+const googleAdsLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas peticiones al panel de Google Ads. Espera unos minutos.' },
+});
+app.use('/api/google-ads', googleAdsLimiter, googleAdsRoutes);
 
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
 // El contenido de /api cambia en cualquier momento desde /admin (precios,
