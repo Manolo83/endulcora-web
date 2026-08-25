@@ -38,8 +38,11 @@ Google Ads - administracion de los cuatro negocios
   node scripts/google-ads.js <comando> [opciones]
 
 Permisos (solo la primera vez)
-  url-permiso                 Imprime el enlace para autorizar el acceso a Google Ads.
-  refresh-token <codigo>      Cambia el codigo del paso anterior por el GOOGLE_ADS_REFRESH_TOKEN.
+  permiso                     Imprime el enlace para conceder el acceso. Se abre, se acepta,
+                              y el servidor guarda el permiso solo.
+  olvidar-permiso             Borra el permiso guardado.
+  url-permiso                 Variante manual (cliente OAuth de escritorio).
+  refresh-token <codigo>      Completa la variante manual.
 
 Cuentas
   estado                      Que negocio ya tiene cuenta y cual falta.
@@ -117,12 +120,44 @@ No caduca; tratalo como una contrasena.
 `);
 }
 
+// Imprime el enlace que hay que abrir una sola vez para conceder el permiso.
+async function comandoPermiso() {
+  const store = require('../src/store');
+  const permiso = require('../src/googleAds/permiso');
+
+  const { url, redirectUri, vigenciaMinutos } = permiso.generarEnlace();
+  await store.flush(); // que el "state" quede guardado antes de salir
+
+  console.log(`
+Abre este enlace con la cuenta de Google duenia de la administradora y dale
+"Permitir". El servidor guarda el permiso solo: no hay que copiar nada de vuelta.
+
+${url}
+
+Dura ${vigenciaMinutos} minutos y sirve una sola vez.
+Regresa a: ${redirectUri}
+`);
+}
+
+async function comandoOlvidarPermiso() {
+  const store = require('../src/store');
+  require('../src/googleAds/permiso').olvidarPermiso();
+  await store.flush();
+  console.log('\nPermiso borrado. Habra que volver a concederlo con "permiso" para operar las cuentas.\n');
+}
+
 async function comandoEstado() {
   const falta = api.faltantes();
   console.log('\nCredenciales');
   console.log(falta.length ? `  Faltan: ${falta.join(', ')}` : '  Completas.');
   console.log(`  Cuenta administradora (MCC): ${GOOGLE_ADS.managerId || '(sin configurar)'}`);
   console.log(`  Version de la API: ${GOOGLE_ADS.apiVersion}`);
+  try {
+    const permiso = require('../src/googleAds/permiso');
+    console.log(`  Permiso de Google: ${permiso.permisoGuardado() ? 'concedido' : 'pendiente (corre "permiso")'}`);
+  } catch {
+    console.log('  Permiso de Google: no se pudo leer (sin base de datos)');
+  }
 
   console.log('\nNegocios');
   if (falta.length) {
@@ -240,7 +275,20 @@ async function comandoReporte(clave, dias) {
 
 async function main() {
   const [comando, ...args] = process.argv.slice(2);
+
+  // El permiso vive en la base de datos, asi que se carga antes de nada. Si no
+  // hay base de datos (por ejemplo al correr esto fuera del servidor), se sigue
+  // adelante con lo que haya en las variables de entorno.
+  try {
+    await require('../src/store').init();
+  } catch (err) {
+    if (!['ayuda', '--help', '-h', undefined].includes(comando)) {
+      console.log(`[aviso] Sin base de datos (${err.message.split('\n')[0]}); solo se usaran las variables de entorno.\n`);
+    }
+  }
   switch ((comando || 'ayuda').toLowerCase()) {
+    case 'permiso': return comandoPermiso();
+    case 'olvidar-permiso': return comandoOlvidarPermiso();
     case 'url-permiso': return comandoUrlPermiso();
     case 'refresh-token': return comandoRefreshToken(args[0]);
     case 'estado': return comandoEstado();

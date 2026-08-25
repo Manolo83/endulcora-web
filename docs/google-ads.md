@@ -77,17 +77,26 @@ GOOGLE_ADS_MANAGER_ID=8949459356   # ID del MCC, sin guiones
 
 Luego el permiso permanente. Hay dos formas; la primera no exige copiar nada:
 
-**A. Un clic (recomendada).** Con `GOOGLE_ADS_ADMIN_TOKEN` ya puesto:
+**A. Un clic (recomendada).** Desde la consola del servidor (en Railway,
+pestania Console del servicio):
+
+```bash
+npm run ads permiso
+```
+
+Imprime un enlace de Google. Lo abre el duenio de la cuenta administradora,
+acepta, y el servidor guarda el permiso solo, en la base de datos. El enlace
+dura 15 minutos y sirve una sola vez. Para comprobar o borrar:
+
+```bash
+npm run ads estado
+npm run ads olvidar-permiso
+```
+
+Lo mismo por HTTP, con `GOOGLE_ADS_ADMIN_TOKEN`:
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" $BASE/oauth/inicio
-```
-
-Devuelve un enlace de Google. Lo abre el duenio de la cuenta administradora,
-acepta, y el servidor guarda el permiso solo, en la base de datos. El enlace
-dura 15 minutos y sirve una sola vez. Para comprobar o revocar:
-
-```bash
 curl -s -H "Authorization: Bearer $TOKEN" $BASE/oauth/estado
 curl -s -X DELETE -H "Authorization: Bearer $TOKEN" $BASE/oauth
 ```
