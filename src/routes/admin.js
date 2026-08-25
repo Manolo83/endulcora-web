@@ -7,8 +7,9 @@ const bcrypt = require('bcryptjs');
 const sharp = require('sharp');
 const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
-const { UPLOAD_DIR } = require('../config');
+const { UPLOAD_DIR, SITE_URL } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
+const { enviarCorreoRecetarioMes } = require('../email');
 
 const router = express.Router();
 
@@ -592,7 +593,7 @@ router.delete('/api/comunidad/mensajes/:id', requireAdmin, (req, res) => {
 router.get('/api/users/buscar', requireAdmin, (req, res) => {
   const user = store.getUserByEmail(req.query.email || '');
   if (!user) return res.status(404).json({ error: 'No hay ninguna cuenta con ese correo.' });
-  res.json({ id: user.id, email: user.email, nombre: user.nombre });
+  res.json({ id: user.id, email: user.email, nombre: user.nombre, telefono: user.telefono || '' });
 });
 
 router.post('/api/users/:id/reset-password', requireAdmin, (req, res) => {
@@ -604,6 +605,28 @@ router.post('/api/users/:id/reset-password', requireAdmin, (req, res) => {
   if (!user) return res.status(404).json({ error: 'No encontrado' });
   store.updateUser(user.id, { passwordHash: bcrypt.hashSync(String(password), 10) });
   res.json({ ok: true });
+});
+
+// ---- Regalo mensual: recetario del mes por correo a todos los clientes ----
+router.post('/api/regalo-mensual/enviar', requireAdmin, uploadDocumento.single('file'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo del recetario.' });
+  const mes = String((req.body && req.body.mes) || '').trim() || 'este mes';
+  const url = `${SITE_URL}/uploads/${req.file.filename}`;
+  const usuarios = store.getUsers();
+  let enviados = 0;
+  const fallidos = [];
+  for (const u of usuarios) {
+    if (!u.email) continue;
+    try {
+      await enviarCorreoRecetarioMes({ to: u.email, nombre: u.nombre, url, mes });
+      enviados++;
+    } catch (e) {
+      fallidos.push(u.email);
+    }
+    // Pausa breve entre envios para no chocar con el limite de tasa de Resend.
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  res.json({ total: usuarios.length, enviados, fallidos });
 });
 
 // ---- Manejo de errores (ej. archivo demasiado grande, tipo no permitido) ----

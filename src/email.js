@@ -56,4 +56,26 @@ async function enviarCorreoConfirmacionCompra({ to, order, siteUrl, numeroWhatsa
   });
 }
 
-module.exports = { enviarCorreoConfirmacionCompra };
+async function enviarCorreoRecetarioMes({ to, nombre, url, mes }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+
+  await client.emails.send({
+    from,
+    to,
+    subject: `Tu recetario de regalo de ${mes} · Endulcora`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">¡Gracias por ser parte de nuestra comunidad!</h1>
+        <p style="font-size:14px;line-height:1.6;">Hola${nombre ? ` ${nombre}` : ''}, como agradecimiento por tener tu cuenta con nosotros te regalamos tu recetario de <strong>${mes}</strong>, completamente gratis.</p>
+        <p style="margin-top:16px;"><a href="${url}" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Descargar recetario</a></p>
+        <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">Recibes este correo porque tienes una cuenta en endulcora.com.</p>
+      </div>
+    `,
+  });
+}
+
+module.exports = { enviarCorreoConfirmacionCompra, enviarCorreoRecetarioMes };

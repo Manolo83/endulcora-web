@@ -812,12 +812,14 @@ function vistaLogin(){
 
 function vistaRegistro(){
   return { titulo: 'Crear cuenta', html: `
-    <p class="text-sm text-carbon/70">Crea tu cuenta para ver el historial de tus compras cuando quieras.</p>
+    <p class="text-sm text-carbon/70">Crea tu cuenta para ver el historial de tus compras y recibir cada mes un recetario de regalo por ser parte de la comunidad.</p>
     <form id="formRegistroCliente" class="mt-4 space-y-4">
       <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nombre</span>
       <input id="registroNombre" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
       <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Correo</span>
       <input id="registroEmail" type="email" required placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
+      <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Teléfono (10 dígitos)</span>
+      <input id="registroTelefono" type="tel" required inputmode="numeric" placeholder="55 1234 5678" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
       <label class="block"><span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Contraseña (mínimo 6 caracteres)</span>
       <input id="registroPassword" type="password" required minlength="6" placeholder="••••••••" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></label>
       <p id="registroClienteError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
@@ -991,6 +993,7 @@ function iniciarModalAcceso(){
         body: JSON.stringify({
           nombre: document.getElementById('registroNombre').value.trim(),
           email: document.getElementById('registroEmail').value.trim(),
+          telefono: document.getElementById('registroTelefono').value.trim(),
           password: document.getElementById('registroPassword').value,
         }),
       });

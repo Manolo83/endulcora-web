@@ -214,6 +214,9 @@ async function init() {
         changed = true;
       }
     });
+    (data.users || []).forEach((u) => {
+      if (typeof u.telefono !== 'string') { u.telefono = ''; changed = true; }
+    });
     // Reemplaza un producto "paquete completo" antiguo (un solo articulo)
     // por una familia de 4: eBook (principal, visible en el catalogo) +
     // Anexo Excel + App + Paquete completo (estos 3 ocultos del catalogo,
@@ -855,13 +858,17 @@ module.exports = {
   getUserById(id) {
     return load().users.find((u) => u.id === Number(id)) || null;
   },
-  addUser({ email, passwordHash, nombre }) {
+  getUsers() {
+    return [...load().users];
+  },
+  addUser({ email, passwordHash, nombre, telefono }) {
     const data = load();
     const item = {
       id: nextId(data.users),
       email: String(email).trim().toLowerCase(),
       passwordHash,
       nombre: nombre || '',
+      telefono: telefono || '',
       createdAt: new Date().toISOString(),
     };
     data.users.push(item);

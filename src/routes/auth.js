@@ -7,7 +7,7 @@ const router = express.Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function usuarioPublico(u) {
-  return { id: u.id, email: u.email, nombre: u.nombre };
+  return { id: u.id, email: u.email, nombre: u.nombre, telefono: u.telefono || '' };
 }
 
 function requireCliente(req, res, next) {
@@ -16,7 +16,7 @@ function requireCliente(req, res, next) {
 }
 
 router.post('/register', (req, res) => {
-  const { email, password, nombre } = req.body || {};
+  const { email, password, nombre, telefono } = req.body || {};
   if (!email || !EMAIL_RE.test(String(email).trim())) {
     return res.status(400).json({ error: 'Escribe un correo válido.' });
   }
@@ -26,12 +26,16 @@ router.post('/register', (req, res) => {
   if (!nombre || !String(nombre).trim()) {
     return res.status(400).json({ error: 'Escribe tu nombre.' });
   }
+  const telefonoDigitos = String(telefono || '').replace(/\D/g, '');
+  if (telefonoDigitos.length < 10) {
+    return res.status(400).json({ error: 'Escribe un número de teléfono válido (10 dígitos).' });
+  }
   if (store.getUserByEmail(email)) {
     return res.status(409).json({ error: 'Ya existe una cuenta con ese correo. Inicia sesión.' });
   }
 
   const passwordHash = bcrypt.hashSync(String(password), 10);
-  const user = store.addUser({ email, passwordHash, nombre: String(nombre).trim() });
+  const user = store.addUser({ email, passwordHash, nombre: String(nombre).trim(), telefono: telefonoDigitos });
   req.session.userId = user.id;
   res.status(201).json({ user: usuarioPublico(user) });
 });

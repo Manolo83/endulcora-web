@@ -504,6 +504,25 @@
         </form>
         <div id="clienteResultado" class="mt-5"></div>
       </div>
+
+      <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Regalo mensual: recetario del mes</h3>
+        <p class="mt-1 text-xs text-carbon/50">Sube el PDF del recetario de este mes y se lo mandamos por correo, automáticamente, a todos los clientes con cuenta (gratis, vía Resend).</p>
+        <form id="formRegaloMensual" class="mt-4 space-y-3">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mes (ej. Marzo 2026)</span>
+            <input id="regaloMes" type="text" required placeholder="Marzo 2026" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">PDF del recetario</span>
+            <input id="regaloArchivo" type="file" accept="application/pdf,.pdf" required class="mt-1.5 w-full text-sm">
+          </label>
+          <button type="submit" id="btnEnviarRegaloMensual" class="w-full rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+            Enviar a todos los clientes
+          </button>
+        </form>
+        <div id="regaloMensualResultado" class="mt-4"></div>
+      </div>
     </section>
 
     <!-- SUSCRIPTORES -->
@@ -1951,6 +1970,7 @@ $('formBuscarCliente').addEventListener('submit', async (e) => {
       <div class="rounded-xl border border-vino/10 p-4">
         <p class="font-titulo text-lg text-vino">${escapeHtml(user.nombre)}</p>
         <p class="text-sm text-carbon/60">${escapeHtml(user.email)}</p>
+        <p class="text-sm text-carbon/60">${escapeHtml(user.telefono || 'Sin teléfono registrado')}</p>
         <form id="formResetClientePassword" class="mt-4 flex flex-wrap gap-3">
           <input id="clienteNuevaPassword" type="text" required minlength="6" placeholder="Nueva contraseña (mínimo 6 caracteres)" class="min-w-[220px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar nueva contraseña</button>
@@ -1972,6 +1992,32 @@ $('formBuscarCliente').addEventListener('submit', async (e) => {
     });
   }catch(e){
     cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+});
+
+$('formRegaloMensual').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = $('regaloArchivo').files[0];
+  if(!file){ toast('Elige el PDF del recetario'); return; }
+  const mes = $('regaloMes').value.trim();
+  const btn = $('btnEnviarRegaloMensual');
+  const resultado = $('regaloMensualResultado');
+  btn.disabled = true;
+  resultado.innerHTML = '<p class="text-sm text-carbon/50">Enviando… esto puede tardar unos minutos si tienes muchos clientes.</p>';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('mes', mes);
+  try{
+    const res = await fetch('/admin/api/regalo-mensual/enviar', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo enviar el regalo mensual');
+    resultado.innerHTML = `<p class="text-sm text-green-700">✓ Enviado a ${data.enviados} de ${data.total} clientes.</p>` +
+      (data.fallidos && data.fallidos.length ? `<p class="mt-1 text-sm text-red-600">No se pudo enviar a: ${escapeHtml(data.fallidos.join(', '))}</p>` : '');
+    $('formRegaloMensual').reset();
+  }catch(err){
+    resultado.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(err.message)}</p>`;
+  }finally{
+    btn.disabled = false;
   }
 });
 
