@@ -16,7 +16,7 @@ try {
   /* sin dotenv: seguimos con process.env */
 }
 
-const { GOOGLE_ADS } = require('../src/config');
+const { GOOGLE_ADS, SITE_URL } = require('../src/config');
 const api = require('../src/googleAds/api');
 const negocios = require('../src/googleAds/negocios');
 const cuentas = require('../src/googleAds/cuentas');
@@ -121,34 +121,81 @@ No caduca; tratalo como una contrasena.
 }
 
 // Imprime el enlace que hay que abrir una sola vez para conceder el permiso.
+//
+// El enlace lo pide al SERVIDOR QUE ESTA CORRIENDO, no lo genera aqui: el
+// servidor guarda los datos en memoria y solo los escribe en la base, asi que
+// si esta herramienta guardara el atajo por su cuenta, el servidor seguiria sin
+// verlo y la pagina contestaria "ese enlace ya no sirve".
 async function comandoPermiso() {
-  const store = require('../src/store');
-  const permiso = require('../src/googleAds/permiso');
+  const token = process.env.GOOGLE_ADS_ADMIN_TOKEN || '';
+  if (!token) {
+    console.error('Falta GOOGLE_ADS_ADMIN_TOKEN: es el que deja pedirle el enlace al servidor.');
+    process.exitCode = 1;
+    return;
+  }
 
-  const { url, enlaceCorto, redirectUri, vigenciaMinutos } = permiso.generarEnlace();
-  await store.flush(); // que el "state" quede guardado antes de salir
+  const candidatas = [
+    `${SITE_URL}/api/google-ads/oauth/inicio`,
+    `http://127.0.0.1:${process.env.PORT || 3000}/api/google-ads/oauth/inicio`,
+  ];
+
+  let datos = null;
+  let ultimoError = '';
+  for (const url of candidatas) {
+    try {
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const cuerpo = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        ultimoError = `${url} respondio ${res.status}: ${cuerpo.error || ''}`;
+        continue;
+      }
+      datos = cuerpo;
+      break;
+    } catch (err) {
+      ultimoError = `${url}: ${err.message}`;
+    }
+  }
+
+  if (!datos) {
+    console.error(`
+No pude pedirle el enlace al servidor. Ultimo intento: ${ultimoError}
+
+Revisa que el sitio este arriba y que GOOGLE_ADS_ADMIN_TOKEN sea el mismo que
+tiene el servidor.
+`);
+    process.exitCode = 1;
+    return;
+  }
 
   console.log(`
 Escribe esta direccion en el navegador, con la sesion de la cuenta duenia de la
 administradora, y dale "Permitir". El servidor guarda el permiso solo.
 
-   ${enlaceCorto}
+   ${datos.enlaceCorto}
 
-Dura ${vigenciaMinutos} minutos y sirve una sola vez.
+Dura ${datos.vigenciaMinutos} minutos y sirve una sola vez.
 
 Si prefieres el enlace largo de Google (por ejemplo para pegarlo en una ventana
 de incognito), es este:
 
-${url}
+${datos.url}
 
-Google regresa a: ${redirectUri}
+Google regresa a: ${datos.redirectUri}
 `);
 }
 
 async function comandoOlvidarPermiso() {
-  const store = require('../src/store');
-  require('../src/googleAds/permiso').olvidarPermiso();
-  await store.flush();
+  const token = process.env.GOOGLE_ADS_ADMIN_TOKEN || '';
+  const res = await fetch(`${SITE_URL}/api/google-ads/oauth`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  }).catch((err) => ({ ok: false, status: 0, mensaje: err.message }));
+
+  if (!res.ok) {
+    console.error(`\nNo se pudo borrar el permiso (${res.status || res.mensaje}).\n`);
+    process.exitCode = 1;
+    return;
+  }
   console.log('\nPermiso borrado. Habra que volver a concederlo con "permiso" para operar las cuentas.\n');
 }
 
