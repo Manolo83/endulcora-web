@@ -672,6 +672,8 @@ router.post('/api/membresia/recetario', requireAdmin, uploadDocumento.single('fi
 router.get('/api/membresia/test-sandbox', requireAdmin, async (req, res) => {
   const accessToken = process.env.MP_ACCESS_TOKEN_TEST;
   if (!accessToken) return res.status(503).json({ error: 'Falta la variable MP_ACCESS_TOKEN_TEST en Railway.' });
+  const payerEmail = typeof req.query.email === 'string' ? req.query.email.trim() : '';
+  if (!payerEmail) return res.status(400).json({ error: 'Falta ?email= con el correo del comprador de prueba.' });
   try {
     const { MercadoPagoConfig, PreApproval } = require('mercadopago');
     const client = new MercadoPagoConfig({ accessToken });
@@ -685,6 +687,7 @@ router.get('/api/membresia/test-sandbox', requireAdmin, async (req, res) => {
           transaction_amount: 50,
           currency_id: 'MXN',
         },
+        payer_email: payerEmail,
         external_reference: 'test-diagnostico-1',
         back_url: `${SITE_URL}/membresia`,
         status: 'pending',
