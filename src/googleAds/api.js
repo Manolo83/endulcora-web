@@ -8,7 +8,14 @@ const { GOOGLE_ADS } = require('../config');
 
 const BASE = 'https://googleads.googleapis.com';
 
+// Google retira cada version de la API mas o menos al anio, asi que en vez de
+// fijar una a mano se prueban de la mas nueva a la mas vieja y se usa la
+// primera que exista. Una version retirada contesta 404 con una pagina HTML.
+// Con GOOGLE_ADS_API_VERSION puesta, se respeta esa y no se prueba nada.
+const VERSIONES_CONOCIDAS = ['v23', 'v22', 'v21', 'v20', 'v19', 'v18', 'v17'];
+
 let tokenEnCache = { valor: '', expiraEn: 0 };
+let versionEnCache = '';
 
 // El permiso permanente puede venir de dos lados: de una variable de entorno
 // (si se pego a mano) o de la base de datos, cuando lo consiguio el propio
@@ -77,9 +84,7 @@ async function accessToken() {
   return tokenEnCache.valor;
 }
 
-// Llamada cruda a la API. `ruta` va sin la version: por ejemplo
-// "customers/1234567890/googleAds:search".
-async function llamar(ruta, { method = 'POST', body, loginCustomerId } = {}) {
+async function encabezados(loginCustomerId) {
   const token = await accessToken();
   const login = String(loginCustomerId || GOOGLE_ADS.managerId || '').replace(/\D/g, '');
 
@@ -89,8 +94,38 @@ async function llamar(ruta, { method = 'POST', body, loginCustomerId } = {}) {
     'Content-Type': 'application/json',
   };
   if (login) headers['login-customer-id'] = login;
+  return headers;
+}
 
-  const res = await fetch(`${BASE}/${GOOGLE_ADS.apiVersion}/${ruta}`, {
+// Version de la API que de verdad esta viva. Se averigua una sola vez por
+// proceso preguntando por la lista de cuentas accesibles: cualquier respuesta
+// que no sea 404 significa que esa version existe (un 401 o un 403 tambien
+// sirven de prueba, porque para contestarlos hubo que reconocer la ruta).
+async function versionApi() {
+  if (GOOGLE_ADS.apiVersion) return GOOGLE_ADS.apiVersion;
+  if (versionEnCache) return versionEnCache;
+
+  const headers = await encabezados();
+  const intentos = [];
+  for (const version of VERSIONES_CONOCIDAS) {
+    const res = await fetch(`${BASE}/${version}/customers:listAccessibleCustomers`, { method: 'GET', headers });
+    if (res.status !== 404) {
+      versionEnCache = version;
+      console.log(`[google-ads] Usando la version ${version} de la API.`);
+      return version;
+    }
+    intentos.push(version);
+  }
+  throw new Error(`Ninguna version de la API respondio (probe ${intentos.join(', ')}). Fija GOOGLE_ADS_API_VERSION con la que aparezca en la documentacion de Google.`);
+}
+
+// Llamada cruda a la API. `ruta` va sin la version: por ejemplo
+// "customers/1234567890/googleAds:search".
+async function llamar(ruta, { method = 'POST', body, loginCustomerId } = {}) {
+  const headers = await encabezados(loginCustomerId);
+  const version = await versionApi();
+
+  const res = await fetch(`${BASE}/${version}/${ruta}`, {
     method,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -140,4 +175,16 @@ async function buscar(customerId, query, { pageSize = 1000 } = {}) {
   return filas;
 }
 
-module.exports = { configurado, faltantes, accessToken, llamar, buscar, resumirError, refreshToken, SECRETO_REFRESH, BASE };
+module.exports = {
+  configurado,
+  faltantes,
+  accessToken,
+  llamar,
+  buscar,
+  resumirError,
+  refreshToken,
+  versionApi,
+  VERSIONES_CONOCIDAS,
+  SECRETO_REFRESH,
+  BASE,
+};

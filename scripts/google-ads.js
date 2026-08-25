@@ -204,7 +204,7 @@ async function comandoEstado() {
   console.log('\nCredenciales');
   console.log(falta.length ? `  Faltan: ${falta.join(', ')}` : '  Completas.');
   console.log(`  Cuenta administradora (MCC): ${GOOGLE_ADS.managerId || '(sin configurar)'}`);
-  console.log(`  Version de la API: ${GOOGLE_ADS.apiVersion}`);
+  console.log(`  Version de la API: ${GOOGLE_ADS.apiVersion || 'automatica (la mas nueva que responda)'}`);
   try {
     const permiso = require('../src/googleAds/permiso');
     console.log(`  Permiso de Google: ${permiso.permisoGuardado() ? 'concedido' : 'pendiente (corre "permiso")'}`);
