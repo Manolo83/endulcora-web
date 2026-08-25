@@ -17,8 +17,11 @@ const GOOGLE_ADS = {
   clientSecret: process.env.GOOGLE_ADS_CLIENT_SECRET || '',
   refreshToken: process.env.GOOGLE_ADS_REFRESH_TOKEN || '',
   developerToken: process.env.GOOGLE_ADS_DEVELOPER_TOKEN || '',
-  // ID de la cuenta administradora (MCC), 10 digitos sin guiones.
-  managerId: String(process.env.GOOGLE_ADS_MANAGER_ID || '').replace(/\D/g, ''),
+  // ID de la cuenta administradora (MCC), 10 digitos sin guiones. Viene de
+  // fabrica con la nuestra (894-945-9356), igual que los IDs de las cuatro
+  // cuentas en src/googleAds/negocios.js: no es un secreto, es el numero que
+  // se ve en la interfaz. La variable de entorno, si existe, manda.
+  managerId: String(process.env.GOOGLE_ADS_MANAGER_ID || '8949459356').replace(/\D/g, ''),
   apiVersion: process.env.GOOGLE_ADS_API_VERSION || 'v21',
   // Etiqueta de Google (AW-XXXXXXXXXX) que carga el sitio de Endulcora.
   medicionId: process.env.GOOGLE_ADS_ID || '',
