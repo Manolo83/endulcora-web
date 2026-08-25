@@ -166,6 +166,8 @@ function datosPorDefecto() {
     resenas: [],
     publicacionesComunidad: [],
     mensajesComunidad: [],
+    contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '' },
+    membresiaPlanId: '',
   };
 }
 
@@ -213,6 +215,11 @@ async function init() {
         p.slug = slugUnico(p.titulo, data.products, p.id);
         changed = true;
       }
+    });
+    (data.users || []).forEach((u) => {
+      if (typeof u.telefono !== 'string') { u.telefono = ''; changed = true; }
+      if (typeof u.membresiaEstado !== 'string') { u.membresiaEstado = 'ninguna'; changed = true; }
+      if (typeof u.membresiaPreapprovalId !== 'string') { u.membresiaPreapprovalId = ''; changed = true; }
     });
     // Reemplaza un producto "paquete completo" antiguo (un solo articulo)
     // por una familia de 4: eBook (principal, visible en el catalogo) +
@@ -603,6 +610,26 @@ module.exports = {
     return valor;
   },
 
+  // ---- Membresia mensual ($50 MXN, recetario + video de taller exclusivos) ----
+  getContenidoMembresia() {
+    return load().contenidoMembresia;
+  },
+  updateContenidoMembresia(patch) {
+    const data = load();
+    Object.assign(data.contenidoMembresia, patch);
+    save(data);
+    return data.contenidoMembresia;
+  },
+  getMembresiaPlanId() {
+    return load().membresiaPlanId || '';
+  },
+  setMembresiaPlanId(planId) {
+    const data = load();
+    data.membresiaPlanId = planId || '';
+    save(data);
+    return data.membresiaPlanId;
+  },
+
   // ---- Contenido general del sitio (clave/valor) ----
   getContent() {
     return load().content;
@@ -875,13 +902,23 @@ module.exports = {
   getUserById(id) {
     return load().users.find((u) => u.id === Number(id)) || null;
   },
-  addUser({ email, passwordHash, nombre }) {
+  getUsers() {
+    return [...load().users];
+  },
+  getUserByPreapprovalId(preapprovalId) {
+    if (!preapprovalId) return null;
+    return load().users.find((u) => u.membresiaPreapprovalId === preapprovalId) || null;
+  },
+  addUser({ email, passwordHash, nombre, telefono }) {
     const data = load();
     const item = {
       id: nextId(data.users),
       email: String(email).trim().toLowerCase(),
       passwordHash,
       nombre: nombre || '',
+      telefono: telefono || '',
+      membresiaEstado: 'ninguna',
+      membresiaPreapprovalId: '',
       createdAt: new Date().toISOString(),
     };
     data.users.push(item);

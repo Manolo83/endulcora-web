@@ -66,6 +66,7 @@
       <a href="#seccionLegales" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Legales</a>
       <a href="#seccionVentas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Ventas</a>
       <a href="#seccionClientes" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clientes</a>
+      <a href="#seccionMembresia" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Membresía</a>
       <a href="#seccionSuscriptores" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Suscriptores</a>
       <a href="#seccionResenas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Reseñas</a>
       <a href="#seccionComunidad" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Comunidad</a>
@@ -503,6 +504,77 @@
           <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Buscar</button>
         </form>
         <div id="clienteResultado" class="mt-5"></div>
+      </div>
+
+      <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Audiencia para Meta Ads</h3>
+        <p class="mt-1 text-xs text-carbon/50">Descarga un CSV con el correo, nombre y teléfono de tus clientes con cuenta, listo para subir en Meta Ads Manager (Audiencias → Crear audiencia → Lista de clientes) y anunciarles talleres, eBooks, etc. directamente a ellos.</p>
+        <button id="btnExportarAudienciaMeta" class="mt-4 w-full rounded-full border border-vino/25 px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+          Descargar CSV para Meta Ads
+        </button>
+      </div>
+
+      <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Regalo mensual: revista mensual</h3>
+        <p class="mt-1 text-xs text-carbon/50">Sube el PDF de la revista de este mes y se lo mandamos por correo, automáticamente, a todos los clientes con cuenta (gratis, vía Resend).</p>
+        <form id="formRegaloMensual" class="mt-4 space-y-3">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mes (ej. Marzo 2026)</span>
+            <input id="regaloMes" type="text" required placeholder="Marzo 2026" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">PDF de la revista mensual</span>
+            <input id="regaloArchivo" type="file" accept="application/pdf,.pdf" required class="mt-1.5 w-full text-sm">
+          </label>
+          <button type="submit" id="btnEnviarRegaloMensual" class="w-full rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+            Enviar a todos los clientes
+          </button>
+        </form>
+        <div id="regaloMensualResultado" class="mt-4"></div>
+      </div>
+    </section>
+
+    <!-- MEMBRESIA -->
+    <section id="seccionMembresia" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Membresía ($50 MXN/mes)</h2>
+      <p class="mt-1 text-sm text-carbon/60">Contenido exclusivo del mes para quienes pagan la membresía: recetario y video del taller (canal de YouTube, no listado). Se ve en <a href="/membresia" target="_blank" class="text-vino hover:underline">/membresia</a>. El cobro y la cancelación automática ya están conectados con Mercado Pago; aquí solo actualizas el contenido de cada mes.</p>
+
+      <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Recetario del mes</h3>
+        <form id="formRecetarioMembresia" class="mt-4 space-y-3">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mes (ej. Marzo 2026)</span>
+            <input id="membresiaRecetarioMes" type="text" placeholder="Marzo 2026" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">PDF del recetario (opcional, solo si vas a reemplazarlo)</span>
+            <input id="membresiaRecetarioArchivo" type="file" accept="application/pdf,.pdf" class="mt-1.5 w-full text-sm">
+          </label>
+          <p id="membresiaRecetarioActual" class="text-xs text-carbon/50"></p>
+          <button type="submit" class="w-full rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar recetario</button>
+        </form>
+        <div id="membresiaRecetarioResultado" class="mt-3"></div>
+      </div>
+
+      <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Video del taller del mes</h3>
+        <p class="mt-1 text-xs text-carbon/50">Sube el video a YouTube como "No listado" (no aparece en búsquedas ni en tu canal público) y pega aquí solo el ID del video — el que va después de "v=" en la liga, por ejemplo en youtube.com/watch?v=<strong>abc123XYZ</strong> el ID es "abc123XYZ".</p>
+        <form id="formVideoMembresia" class="mt-4 space-y-3">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mes (ej. Marzo 2026)</span>
+            <input id="membresiaVideoMes" type="text" placeholder="Marzo 2026" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título del taller</span>
+            <input id="membresiaVideoTitulo" type="text" placeholder="Ej. Cómo costear tu menú de temporada" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">ID del video de YouTube</span>
+            <input id="membresiaVideoId" type="text" placeholder="abc123XYZ" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <button type="submit" class="w-full rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar video</button>
+        </form>
+        <div id="membresiaVideoResultado" class="mt-3"></div>
       </div>
     </section>
 
@@ -1951,6 +2023,7 @@ $('formBuscarCliente').addEventListener('submit', async (e) => {
       <div class="rounded-xl border border-vino/10 p-4">
         <p class="font-titulo text-lg text-vino">${escapeHtml(user.nombre)}</p>
         <p class="text-sm text-carbon/60">${escapeHtml(user.email)}</p>
+        <p class="text-sm text-carbon/60">${escapeHtml(user.telefono || 'Sin teléfono registrado')}</p>
         <form id="formResetClientePassword" class="mt-4 flex flex-wrap gap-3">
           <input id="clienteNuevaPassword" type="text" required minlength="6" placeholder="Nueva contraseña (mínimo 6 caracteres)" class="min-w-[220px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar nueva contraseña</button>
@@ -1972,6 +2045,110 @@ $('formBuscarCliente').addEventListener('submit', async (e) => {
     });
   }catch(e){
     cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+});
+
+$('btnExportarAudienciaMeta').addEventListener('click', async () => {
+  const btn = $('btnExportarAudienciaMeta');
+  btn.disabled = true;
+  try{
+    const usuarios = await api('/admin/api/users');
+    if(!usuarios.length){ toast('No hay clientes registrados todavía'); return; }
+    const celdaSegura = (v) => /^[=+\-@]/.test(v) ? `'${v}` : v;
+    const filas = ['email,phone,fn', ...usuarios.map(u => {
+      const primerNombre = celdaSegura((u.nombre || '').trim().split(/\s+/)[0] || '');
+      return `${u.email},${u.telefono || ''},${primerNombre}`;
+    })];
+    const blob = new Blob([filas.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'audiencia-clientes-endulcora.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }catch(e){
+    toast(e.message);
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+$('formRegaloMensual').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = $('regaloArchivo').files[0];
+  if(!file){ toast('Elige el PDF de la revista'); return; }
+  const mes = $('regaloMes').value.trim();
+  const btn = $('btnEnviarRegaloMensual');
+  const resultado = $('regaloMensualResultado');
+  btn.disabled = true;
+  resultado.innerHTML = '<p class="text-sm text-carbon/50">Enviando… esto puede tardar unos minutos si tienes muchos clientes.</p>';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('mes', mes);
+  try{
+    const res = await fetch('/admin/api/regalo-mensual/enviar', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo enviar el regalo mensual');
+    resultado.innerHTML = `<p class="text-sm text-green-700">✓ Enviado a ${data.enviados} de ${data.total} clientes.</p>` +
+      (data.fallidos && data.fallidos.length ? `<p class="mt-1 text-sm text-red-600">No se pudo enviar a: ${escapeHtml(data.fallidos.join(', '))}</p>` : '');
+    $('formRegaloMensual').reset();
+  }catch(err){
+    resultado.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(err.message)}</p>`;
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+async function cargarMembresiaAdmin(){
+  try{
+    const c = await api('/admin/api/membresia/contenido');
+    $('membresiaRecetarioMes').value = c.recetarioMes || '';
+    $('membresiaRecetarioActual').textContent = c.recetarioNombre ? `Archivo actual: ${c.recetarioNombre}` : 'Todavía no has subido un recetario.';
+    $('membresiaVideoMes').value = c.videoMes || '';
+    $('membresiaVideoTitulo').value = c.videoTitulo || '';
+    $('membresiaVideoId').value = c.videoYoutubeId || '';
+  }catch(e){
+    toast(e.message);
+  }
+}
+cargarMembresiaAdmin();
+
+$('formRecetarioMembresia').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const resultado = $('membresiaRecetarioResultado');
+  const mes = $('membresiaRecetarioMes').value.trim();
+  const file = $('membresiaRecetarioArchivo').files[0];
+  try{
+    await api('/admin/api/membresia/contenido', { method: 'POST', body: JSON.stringify({ recetarioMes: mes }) });
+    if(file){
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/admin/api/membresia/recetario', { method: 'POST', body: fd });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'No se pudo subir el recetario');
+    }
+    resultado.innerHTML = '<p class="text-sm text-green-700">✓ Recetario del mes guardado.</p>';
+    cargarMembresiaAdmin();
+  }catch(err){
+    resultado.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(err.message)}</p>`;
+  }
+});
+
+$('formVideoMembresia').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const resultado = $('membresiaVideoResultado');
+  try{
+    await api('/admin/api/membresia/contenido', {
+      method: 'POST',
+      body: JSON.stringify({
+        videoMes: $('membresiaVideoMes').value.trim(),
+        videoTitulo: $('membresiaVideoTitulo').value.trim(),
+        videoYoutubeId: $('membresiaVideoId').value.trim(),
+      }),
+    });
+    resultado.innerHTML = '<p class="text-sm text-green-700">✓ Video del taller guardado.</p>';
+  }catch(err){
+    resultado.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(err.message)}</p>`;
   }
 });
 

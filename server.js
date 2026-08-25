@@ -16,6 +16,7 @@ const checkoutRoutes = require('./src/routes/checkout');
 const authRoutes = require('./src/routes/auth');
 const asistenteRoutes = require('./src/routes/asistente');
 const googleAdsRoutes = require('./src/routes/googleAds');
+const membresiaRoutes = require('./src/routes/membresia');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 console.log(`[uploads] Los archivos subidos se guardan en: ${UPLOAD_DIR}`);
@@ -127,6 +128,7 @@ app.use('/api', (req, res, next) => {
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/asistente', asistenteRoutes);
+app.use('/api/membresia', membresiaRoutes);
 app.use('/api', apiRoutes);
 app.use('/admin', adminRoutes);
 
@@ -181,6 +183,10 @@ app.get('/calendario', (req, res) => {
 
 app.get('/galeria', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'galeria.html'));
+});
+
+app.get('/membresia', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'membresia.html'));
 });
 
 // Secciones que se quedan dentro de la pagina principal, pero con URL propia

@@ -273,7 +273,70 @@ link `/gracias?orden=<id>&token=<token>` de un pedido ya aprobado) y
 confirma que el `Purchase` aparece marcado como recibido por **servidor**
 en esa pantalla. Borra `META_CAPI_TEST_CODE` de Railway cuando termines.
 
-## 13. Google Ads (los cuatro negocios desde un solo lugar)
+## 13. Audiencia de clientes en Meta Ads
+
+Para anunciarle talleres, eBooks, etc. directamente a los clientes que ya
+tienen cuenta en el sitio, existe una Audiencia personalizada (tipo "Lista de
+clientes") ya creada en Meta Ads:
+
+- **Cuenta de anuncios:** `75151654` (negocio "Endulcora" — no la cuenta
+  personal "Luis Jm" `541486784443144`, esa no está dentro de un portafolio
+  comercial y Meta no deja crear/editar audiencias de lista de clientes ahí).
+- **Audiencia:** "Clientes con cuenta · Endulcora", ID `52504678496591`.
+- Se creó vacía (todavía no hay clientes con cuenta) el 25 de agosto de 2026,
+  lista para llenarse en cuanto los haya.
+
+Para actualizarla cuando ya haya clientes registrados: en `/admin` →
+Clientes → "Descargar CSV para Meta Ads" y, en un chat de Claude con el
+conector de Facebook Ads activado, pide que suba ese CSV a la audiencia
+`52504678496591` de la cuenta `75151654` (por la API, con
+`ads_update_custom_audience_users`) — no hace falta subirlo a mano en Meta
+Ads Manager. Repite cuando quieras sumar clientes nuevos.
+
+## 14. Membresía mensual ($50 MXN, cobro recurrente)
+
+Los clientes con cuenta pueden suscribirse a la Membresía Endulcora en
+`/membresia`: $50 MXN al mes, cobro automático (domiciliado) vía **Mercado
+Pago Suscripciones**, sin que tengas que recordarles renovarla. Mientras
+esté activa, tienen acceso a:
+
+- El **recetario del mes** (distinto de la "revista mensual" gratis que
+  reciben todos los clientes con cuenta — el recetario es exclusivo de
+  membresía).
+- El **video del taller online del mes**, alojado como video de YouTube
+  "No listado" y mostrado dentro de `/membresia` en un reproductor
+  embebido (no se muestra el enlace directo de YouTube en ningún lado del
+  sitio, así que no es tan fácil de compartir por accidente — pero, como
+  con cualquier video en una página web, alguien con conocimientos
+  técnicos podría encontrar el enlace real revisando el código de la
+  página; no hay una forma 100% infalible de impedirlo sin usar un
+  servicio de streaming con DRM, que es otro nivel de complejidad y costo).
+
+Si un cliente cancela su suscripción (desde `/membresia` o directamente en
+Mercado Pago), Mercado Pago le avisa al sitio por webhook y pierde el
+acceso al recetario y al video de inmediato — no hace falta que tú hagas
+nada a mano.
+
+**Configuración necesaria:**
+
+1. Usa las mismas `MP_ACCESS_TOKEN`/`MP_PUBLIC_KEY` que ya tienes para los
+   pagos de la tienda — Suscripciones usa las mismas credenciales, no
+   necesitas una cuenta ni una app aparte.
+2. En [mercadopago.com.mx/developers/panel](https://www.mercadopago.com.mx/developers/panel) →
+   tu aplicación → **Webhooks**, agrega (o confirma que ya tienes) una URL
+   de notificaciones apuntando a `https://www.endulcora.com/api/membresia/webhook`,
+   suscrita al tema **"Suscripciones" (subscription_preapproval)**. Sin
+   esto, el sitio nunca se entera cuando alguien se suscribe, paga o
+   cancela.
+3. El plan de membresía se crea solo, automáticamente, la primera vez que
+   alguien le da clic a "Suscribirme" — no hay que crearlo a mano.
+
+**Contenido de cada mes:** en `/admin` → **Membresía**, sube el PDF del
+recetario del mes y captura el ID del video de YouTube del taller (la
+parte de la liga después de `v=`). Sube el video a YouTube como "No
+listado" antes de pegar el ID aquí.
+
+## 15. Google Ads (los cuatro negocios desde un solo lugar)
 
 Endulcora, CRENEF, LEVENT e Instituto Justo tienen **cada uno su propia cuenta
 de Google Ads** — presupuesto, facturación y datos separados — pero las cuatro
@@ -309,7 +372,7 @@ el permiso OAuth y qué variables poner en Railway) está en
 Lo único que sigue siendo manual, porque Google no lo permite por API: crear el
 MCC, meter la forma de pago de cada cuenta y la verificación del anunciante.
 
-## 14. Notas técnicas y mejoras futuras (opcionales)
+## 16. Notas técnicas y mejoras futuras (opcionales)
 
 - El sitio usa Tailwind CSS por CDN para mantener el HTML original tal cual
   — funciona perfecto para el tráfico de un sitio personal/pequeño negocio.

@@ -7,8 +7,9 @@ const bcrypt = require('bcryptjs');
 const sharp = require('sharp');
 const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
-const { UPLOAD_DIR } = require('../config');
+const { UPLOAD_DIR, SITE_URL } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
+const { enviarCorreoRevistaMensual } = require('../email');
 
 const router = express.Router();
 
@@ -588,11 +589,22 @@ router.delete('/api/comunidad/mensajes/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- Clientes: lista basica para exportar audiencia (Meta Ads, etc.) ----
+router.get('/api/users', requireAdmin, (req, res) => {
+  const usuarios = store.getUsers().map((u) => {
+    const digitos = String(u.telefono || '').replace(/\D/g, '');
+    // Antepone el codigo de pais (52, Mexico) para mejorar el match en Meta.
+    const telefonoConLada = digitos.length === 10 ? `52${digitos}` : digitos;
+    return { email: u.email, nombre: u.nombre || '', telefono: telefonoConLada };
+  });
+  res.json(usuarios);
+});
+
 // ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----
 router.get('/api/users/buscar', requireAdmin, (req, res) => {
   const user = store.getUserByEmail(req.query.email || '');
   if (!user) return res.status(404).json({ error: 'No hay ninguna cuenta con ese correo.' });
-  res.json({ id: user.id, email: user.email, nombre: user.nombre });
+  res.json({ id: user.id, email: user.email, nombre: user.nombre, telefono: user.telefono || '' });
 });
 
 router.post('/api/users/:id/reset-password', requireAdmin, (req, res) => {
@@ -604,6 +616,54 @@ router.post('/api/users/:id/reset-password', requireAdmin, (req, res) => {
   if (!user) return res.status(404).json({ error: 'No encontrado' });
   store.updateUser(user.id, { passwordHash: bcrypt.hashSync(String(password), 10) });
   res.json({ ok: true });
+});
+
+// ---- Regalo mensual: revista mensual por correo a todos los clientes ----
+router.post('/api/regalo-mensual/enviar', requireAdmin, uploadDocumento.single('file'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo de la revista.' });
+  const mes = String((req.body && req.body.mes) || '').trim() || 'este mes';
+  const url = `${SITE_URL}/uploads/${req.file.filename}`;
+  const usuarios = store.getUsers();
+  let enviados = 0;
+  const fallidos = [];
+  for (const u of usuarios) {
+    if (!u.email) continue;
+    try {
+      await enviarCorreoRevistaMensual({ to: u.email, nombre: u.nombre, url, mes });
+      enviados++;
+    } catch (e) {
+      fallidos.push(u.email);
+    }
+    // Pausa breve entre envios para no chocar con el limite de tasa de Resend.
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  res.json({ total: usuarios.length, enviados, fallidos });
+});
+
+// ---- Membresia: recetario del mes + video del taller (contenido exclusivo) ----
+router.get('/api/membresia/contenido', requireAdmin, (req, res) => {
+  res.json(store.getContenidoMembresia());
+});
+
+router.post('/api/membresia/contenido', requireAdmin, (req, res) => {
+  const { recetarioMes, videoYoutubeId, videoTitulo, videoMes } = req.body || {};
+  const patch = {};
+  if (typeof recetarioMes === 'string') patch.recetarioMes = recetarioMes.trim();
+  if (typeof videoYoutubeId === 'string') patch.videoYoutubeId = videoYoutubeId.trim();
+  if (typeof videoTitulo === 'string') patch.videoTitulo = videoTitulo.trim();
+  if (typeof videoMes === 'string') patch.videoMes = videoMes.trim();
+  res.json(store.updateContenidoMembresia(patch));
+});
+
+router.post('/api/membresia/recetario', requireAdmin, uploadDocumento.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo del recetario.' });
+  const anterior = store.getContenidoMembresia().recetarioUrl;
+  const item = store.updateContenidoMembresia({
+    recetarioUrl: `/uploads/${req.file.filename}`,
+    recetarioNombre: req.file.originalname,
+  });
+  borrarSiEsSubida(anterior);
+  res.json(item);
 });
 
 // ---- Manejo de errores (ej. archivo demasiado grande, tipo no permitido) ----
