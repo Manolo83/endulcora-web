@@ -1,5 +1,5 @@
 const express = require('express');
-const { MercadoPagoConfig, PreApproval, PreApprovalPlan } = require('mercadopago');
+const { MercadoPagoConfig, PreApproval } = require('mercadopago');
 const store = require('../store');
 const { SITE_URL } = require('../config');
 const { requireCliente } = require('./auth');
@@ -14,28 +14,6 @@ function mpClient() {
   return new MercadoPagoConfig({ accessToken });
 }
 
-// Crea el plan de membresia en Mercado Pago la primera vez que alguien se
-// suscribe (una sola vez para todo el sitio), y reutiliza su id despues.
-async function obtenerOCrearPlan(client) {
-  const planId = store.getMembresiaPlanId();
-  if (planId) return planId;
-  const plan = new PreApprovalPlan(client);
-  const creado = await plan.create({
-    body: {
-      reason: 'Membresía Endulcora',
-      back_url: `${SITE_URL}/membresia`,
-      auto_recurring: {
-        frequency: 1,
-        frequency_type: 'months',
-        transaction_amount: PRECIO_MEMBRESIA,
-        currency_id: 'MXN',
-      },
-    },
-  });
-  store.setMembresiaPlanId(creado.id);
-  return creado.id;
-}
-
 router.post('/suscribirse', requireCliente, async (req, res) => {
   const client = mpClient();
   if (!client) return res.status(503).json({ error: 'Los pagos todavía no están configurados.' });
@@ -47,15 +25,20 @@ router.post('/suscribirse', requireCliente, async (req, res) => {
   }
 
   try {
-    const planId = await obtenerOCrearPlan(client);
     const preapproval = new PreApproval(client);
     const creado = await preapproval.create({
       body: {
-        preapproval_plan_id: planId,
+        reason: 'Membresía Endulcora',
+        auto_recurring: {
+          frequency: 1,
+          frequency_type: 'months',
+          transaction_amount: PRECIO_MEMBRESIA,
+          currency_id: 'MXN',
+        },
         payer_email: usuario.email,
         external_reference: String(usuario.id),
         back_url: `${SITE_URL}/membresia`,
-        reason: 'Membresía Endulcora',
+        status: 'pending',
       },
     });
     store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id });

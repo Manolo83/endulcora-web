@@ -167,7 +167,6 @@ function datosPorDefecto() {
     publicacionesComunidad: [],
     mensajesComunidad: [],
     contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '' },
-    membresiaPlanId: '',
   };
 }
 
@@ -620,16 +619,6 @@ module.exports = {
     save(data);
     return data.contenidoMembresia;
   },
-  getMembresiaPlanId() {
-    return load().membresiaPlanId || '';
-  },
-  setMembresiaPlanId(planId) {
-    const data = load();
-    data.membresiaPlanId = planId || '';
-    save(data);
-    return data.membresiaPlanId;
-  },
-
   // ---- Contenido general del sitio (clave/valor) ----
   getContent() {
     return load().content;
