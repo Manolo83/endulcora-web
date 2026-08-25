@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comunidad · Endulcora</title>
-<meta name="description" content="Publicaciones de Endulcora: comenta y platica con el equipo y otros clientes.">
+<title>Membresía · Endulcora</title>
+<meta name="description" content="Membresía Endulcora: recetario del mes y taller online mensual exclusivos para miembros.">
 <meta name="robots" content="noindex, follow">
-<link rel="canonical" href="https://www.endulcora.com/comunidad">
+<link rel="canonical" href="https://www.endulcora.com/membresia">
 <meta name="theme-color" content="#1B0720">
 
 <!-- Meta Pixel Code -->
@@ -78,18 +78,19 @@ body { background: #FBF4E9; }
 </header>
 
 <main class="mx-auto max-w-3xl px-5 py-10">
-  <p class="font-titulo text-[11px] tracking-[.3em] text-flama">COMUNIDAD</p>
-  <h1 class="mt-2 font-display text-3xl text-vino sm:text-4xl">Publicaciones de Endulcora</h1>
-  <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-carbon/70">Comenta las publicaciones del equipo, comparte tus dudas o tus resultados. Solo clientes con cuenta pueden comentar; cualquiera puede leer.</p>
+  <p class="font-titulo text-[11px] tracking-[.3em] text-flama">MEMBRESÍA</p>
+  <h1 class="mt-2 font-display text-3xl text-vino sm:text-4xl">Membresía Endulcora</h1>
+  <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-carbon/70">Recetario del mes y taller online mensual, exclusivos para miembros, por $50 MXN al mes. Cobro automático cada mes — cancela cuando quieras y pierdes el acceso de inmediato.</p>
 
+  <!-- Invitado: login/registro -->
   <div id="bloqueInvitado" class="mt-8 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
-    <p class="mb-4 text-sm text-carbon/70">Inicia sesión o crea tu cuenta para poder comentar.</p>
+    <p class="mb-4 text-sm text-carbon/70">Inicia sesión o crea tu cuenta para hacerte miembro.</p>
     <div class="flex gap-2 border-b border-vino/10">
       <button type="button" id="tabLogin" class="border-b-2 border-vino px-1 pb-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino">Iniciar sesión</button>
       <button type="button" id="tabRegistro" class="border-b-2 border-transparent px-1 pb-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon/50">Crear cuenta</button>
     </div>
 
-    <form id="formLoginComunidad" class="mt-5 grid gap-3">
+    <form id="formLoginMembresia" class="mt-5 grid gap-3">
       <input id="loginEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
       <input id="loginPassword" type="password" required placeholder="Contraseña" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
       <p id="loginError" class="hidden text-xs text-red-600"></p>
@@ -98,24 +99,57 @@ body { background: #FBF4E9; }
       </button>
     </form>
 
-    <form id="formRegistroComunidad" class="mt-5 hidden grid gap-3">
+    <form id="formRegistroMembresia" class="mt-5 hidden grid gap-3">
       <input id="registroNombre" type="text" required placeholder="Tu nombre" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
       <input id="registroEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
       <input id="registroTelefono" type="tel" required inputmode="numeric" placeholder="Teléfono (10 dígitos)" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
       <input id="registroPassword" type="password" required minlength="6" placeholder="Contraseña (mínimo 6 caracteres)" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
       <p id="registroError" class="hidden text-xs text-red-600"></p>
       <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
-        <span id="registroSpinner" class="spinner hidden"></span> Crear cuenta y entrar
+        <span id="registroSpinner" class="spinner hidden"></span> Crear cuenta
       </button>
     </form>
   </div>
 
-  <div id="bloqueSesion" class="mt-8 hidden items-center justify-between rounded-2xl bg-white px-5 py-3 ring-1 ring-vino/10">
-    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/50">Sesión iniciada como <span id="nombreUsuarioComunidad" class="text-vino"></span></p>
-    <button type="button" id="btnCerrarSesionComunidad" class="font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cerrar sesión</button>
+  <!-- Con sesion, sin membresia activa: oferta -->
+  <div id="bloqueOferta" class="mt-8 hidden rounded-3xl bg-vino p-6 text-crema sm:p-8">
+    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">$50 MXN / mes</p>
+    <h2 class="mt-2 font-display text-2xl">Hazte miembro</h2>
+    <ul class="mt-4 space-y-2 text-sm text-crema/85">
+      <li class="flex gap-2"><span class="text-flama">▸</span> Recetario del mes, exclusivo para miembros</li>
+      <li class="flex gap-2"><span class="text-flama">▸</span> Taller online mensual (video privado en nuestro canal de YouTube)</li>
+      <li class="flex gap-2"><span class="text-flama">▸</span> Cobro automático mensual — cancela cuando quieras</li>
+    </ul>
+    <p id="ofertaError" class="mt-4 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+    <button type="button" id="btnSuscribirse" class="mt-5 inline-flex items-center justify-center gap-2 rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
+      <span id="suscribirseSpinner" class="spinner hidden" style="border-top-color:#1B0720"></span> Suscribirme
+    </button>
   </div>
 
-  <div id="publicacionesComunidad" class="mt-8 flex flex-col gap-6"></div>
+  <!-- Con membresia activa: contenido -->
+  <div id="bloqueMiembro" class="mt-8 hidden">
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white px-5 py-3 ring-1 ring-vino/10">
+      <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/50">Membresía activa · <span id="nombreUsuarioMembresia" class="text-vino"></span></p>
+      <button type="button" id="btnCancelarMembresia" class="font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cancelar membresía</button>
+    </div>
+
+    <div id="bloqueRecetarioMes" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Recetario de <span id="recetarioMesEtiqueta"></span></p>
+      <a id="linkRecetarioMes" href="#" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        Descargar recetario
+      </a>
+    </div>
+
+    <div id="bloqueVideoMes" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Taller de <span id="videoMesEtiqueta"></span></p>
+      <h3 id="videoTitulo" class="mt-1 font-titulo text-lg text-vino"></h3>
+      <div class="mt-4 aspect-video w-full overflow-hidden rounded-2xl bg-carbon" oncontextmenu="return false">
+        <iframe id="iframeVideoMes" class="h-full w-full" src="" title="Taller mensual" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <p id="sinContenidoAviso" class="mt-6 hidden rounded-2xl bg-white p-6 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Todavía no hay recetario ni video publicados este mes. Vuelve pronto.</p>
+  </div>
 </main>
 
 <footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
@@ -137,110 +171,55 @@ document.getElementById('anioFooter').textContent = new Date().getFullYear();
 
 let SESION = { isLoggedIn: false, user: null };
 
-function formatoFecha(iso){
-  return new Date(iso).toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+function mostrarVista(nombre){
+  const bloques = { invitado: 'bloqueInvitado', oferta: 'bloqueOferta', miembro: 'bloqueMiembro' };
+  Object.values(bloques).forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById(bloques[nombre]).classList.remove('hidden');
 }
 
-function tarjetaPublicacion(p){
-  const imagenHtml = p.imagen ? `<img src="${p.imagen}" alt="${escapeHtml(p.titulo || '')}" loading="lazy" class="aspect-video w-full object-cover">` : '';
-  return `
-    <article class="overflow-hidden rounded-3xl bg-white ring-1 ring-vino/10" data-publicacion-id="${p.id}">
-      ${imagenHtml}
-      <div class="p-5">
-        <p class="font-ui text-[11px] uppercase tracking-widest text-humo">${formatoFecha(p.createdAt)}</p>
-        <h2 class="mt-1 font-titulo text-xl text-vino">${escapeHtml(p.titulo || '')}</h2>
-        ${p.texto ? `<p class="mt-2 whitespace-pre-line text-[15px] text-carbon/80">${escapeHtml(p.texto)}</p>` : ''}
+async function cargarContenidoMembresia(){
+  try{
+    const res = await fetch('/api/membresia/contenido');
+    if(!res.ok) throw new Error('No se pudo cargar el contenido');
+    const c = await res.json();
 
-        <div class="mt-5 border-t border-vino/10 pt-4">
-          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Comentarios</p>
-          <div class="comentariosPublicacion mt-3 flex flex-col gap-2.5"></div>
-          <form class="formComentario mt-3 hidden gap-2 sm:flex">
-            <input type="text" maxlength="1000" placeholder="Escribe un comentario…" class="campoComentario w-full rounded-full border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
-            <button type="submit" class="shrink-0 rounded-full boton-vivo bg-vino px-5 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Comentar</button>
-          </form>
-        </div>
-      </div>
-    </article>`;
+    if(c.recetarioUrl){
+      document.getElementById('bloqueRecetarioMes').classList.remove('hidden');
+      document.getElementById('recetarioMesEtiqueta').textContent = c.recetarioMes || 'este mes';
+      document.getElementById('linkRecetarioMes').href = c.recetarioUrl;
+    }
+    if(c.videoYoutubeId){
+      document.getElementById('bloqueVideoMes').classList.remove('hidden');
+      document.getElementById('videoMesEtiqueta').textContent = c.videoMes || 'este mes';
+      document.getElementById('videoTitulo').textContent = c.videoTitulo || '';
+      document.getElementById('iframeVideoMes').src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(c.videoYoutubeId)}?modestbranding=1&rel=0`;
+    }
+    if(!c.recetarioUrl && !c.videoYoutubeId){
+      document.getElementById('sinContenidoAviso').classList.remove('hidden');
+    }
+  }catch(e){
+    document.getElementById('sinContenidoAviso').classList.remove('hidden');
+  }
 }
 
-function pintarComentarios(cont, items){
-  if(!items.length){
-    cont.innerHTML = '<p class="text-xs text-carbon/40">Todavía no hay comentarios.</p>';
+async function cargarVistaMembresia(){
+  if(!SESION.isLoggedIn){
+    mostrarVista('invitado');
     return;
   }
-  cont.innerHTML = items.map(m => `
-    <div class="rounded-xl bg-crema/60 px-4 py-2.5">
-      <p class="font-ui text-[10px] uppercase tracking-widest text-humo">${escapeHtml(m.nombre)} · ${formatoFecha(m.createdAt)}</p>
-      <p class="mt-0.5 whitespace-pre-line text-sm text-carbon/85">${escapeHtml(m.texto)}</p>
-    </div>
-  `).join('');
-}
-
-async function cargarComentarios(publicacionId, cont){
   try{
-    const res = await fetch(`/api/comunidad/publicaciones/${publicacionId}/mensajes`);
-    const items = await res.json();
-    pintarComentarios(cont, items);
-  }catch(e){
-    cont.innerHTML = '<p class="text-xs text-carbon/40">No se pudieron cargar los comentarios.</p>';
-  }
-}
-
-async function cargarPublicaciones(){
-  const cont = document.getElementById('publicacionesComunidad');
-  try{
-    const res = await fetch('/api/comunidad/publicaciones');
-    const items = await res.json();
-    if(!items.length){
-      cont.innerHTML = '<p class="rounded-2xl bg-white p-6 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Todavía no hay publicaciones.</p>';
-      return;
+    const res = await fetch('/api/membresia/estado');
+    const data = await res.json();
+    if(data.activa){
+      mostrarVista('miembro');
+      document.getElementById('nombreUsuarioMembresia').textContent = SESION.user.nombre;
+      cargarContenidoMembresia();
+    }else{
+      mostrarVista('oferta');
     }
-    cont.innerHTML = items.map(tarjetaPublicacion).join('');
-    cont.querySelectorAll('[data-publicacion-id]').forEach(art => {
-      const publicacionId = art.dataset.publicacionId;
-      const comentariosCont = art.querySelector('.comentariosPublicacion');
-      cargarComentarios(publicacionId, comentariosCont);
-
-      const form = art.querySelector('.formComentario');
-      form.classList.toggle('hidden', !SESION.isLoggedIn);
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const campo = form.querySelector('.campoComentario');
-        const texto = campo.value.trim();
-        if(!texto) return;
-        try{
-          const res = await fetch(`/api/comunidad/publicaciones/${publicacionId}/mensajes`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texto }),
-          });
-          const data = await res.json();
-          if(!res.ok) throw new Error(data.error || 'No se pudo publicar tu comentario');
-          campo.value = '';
-          await cargarComentarios(publicacionId, comentariosCont);
-        }catch(err){
-          alert(err.message);
-        }
-      });
-    });
   }catch(e){
-    cont.innerHTML = '<p class="rounded-2xl bg-white p-6 text-center text-sm text-red-600 ring-1 ring-vino/10">No se pudieron cargar las publicaciones.</p>';
+    mostrarVista('oferta');
   }
-}
-
-function actualizarVistaSesion(){
-  const bloqueInvitado = document.getElementById('bloqueInvitado');
-  const bloqueSesion = document.getElementById('bloqueSesion');
-  if(SESION.isLoggedIn){
-    bloqueInvitado.classList.add('hidden');
-    bloqueSesion.classList.remove('hidden');
-    bloqueSesion.classList.add('flex');
-    document.getElementById('nombreUsuarioComunidad').textContent = SESION.user.nombre;
-  }else{
-    bloqueInvitado.classList.remove('hidden');
-    bloqueSesion.classList.add('hidden');
-    bloqueSesion.classList.remove('flex');
-  }
-  document.querySelectorAll('.formComentario').forEach(f => f.classList.toggle('hidden', !SESION.isLoggedIn));
 }
 
 async function cargarSesion(){
@@ -251,7 +230,7 @@ async function cargarSesion(){
   }catch(e){
     SESION = { isLoggedIn: false, user: null };
   }
-  actualizarVistaSesion();
+  cargarVistaMembresia();
 }
 
 document.getElementById('tabLogin').addEventListener('click', () => {
@@ -259,19 +238,19 @@ document.getElementById('tabLogin').addEventListener('click', () => {
   document.getElementById('tabLogin').classList.remove('border-transparent', 'text-carbon/50');
   document.getElementById('tabRegistro').classList.remove('border-vino', 'text-vino');
   document.getElementById('tabRegistro').classList.add('border-transparent', 'text-carbon/50');
-  document.getElementById('formLoginComunidad').classList.remove('hidden');
-  document.getElementById('formRegistroComunidad').classList.add('hidden');
+  document.getElementById('formLoginMembresia').classList.remove('hidden');
+  document.getElementById('formRegistroMembresia').classList.add('hidden');
 });
 document.getElementById('tabRegistro').addEventListener('click', () => {
   document.getElementById('tabRegistro').classList.add('border-vino', 'text-vino');
   document.getElementById('tabRegistro').classList.remove('border-transparent', 'text-carbon/50');
   document.getElementById('tabLogin').classList.remove('border-vino', 'text-vino');
   document.getElementById('tabLogin').classList.add('border-transparent', 'text-carbon/50');
-  document.getElementById('formRegistroComunidad').classList.remove('hidden');
-  document.getElementById('formLoginComunidad').classList.add('hidden');
+  document.getElementById('formRegistroMembresia').classList.remove('hidden');
+  document.getElementById('formLoginMembresia').classList.add('hidden');
 });
 
-document.getElementById('formLoginComunidad').addEventListener('submit', async (e) => {
+document.getElementById('formLoginMembresia').addEventListener('submit', async (e) => {
   e.preventDefault();
   const err = document.getElementById('loginError');
   const spinner = document.getElementById('loginSpinner');
@@ -288,7 +267,7 @@ document.getElementById('formLoginComunidad').addEventListener('submit', async (
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo iniciar sesión');
     SESION = { isLoggedIn: true, user: data.user };
-    actualizarVistaSesion();
+    cargarVistaMembresia();
   }catch(err2){
     err.textContent = err2.message;
     err.classList.remove('hidden');
@@ -297,7 +276,7 @@ document.getElementById('formLoginComunidad').addEventListener('submit', async (
   }
 });
 
-document.getElementById('formRegistroComunidad').addEventListener('submit', async (e) => {
+document.getElementById('formRegistroMembresia').addEventListener('submit', async (e) => {
   e.preventDefault();
   const err = document.getElementById('registroError');
   const spinner = document.getElementById('registroSpinner');
@@ -316,7 +295,7 @@ document.getElementById('formRegistroComunidad').addEventListener('submit', asyn
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo crear la cuenta');
     SESION = { isLoggedIn: true, user: data.user };
-    actualizarVistaSesion();
+    cargarVistaMembresia();
   }catch(err2){
     err.textContent = err2.message;
     err.classList.remove('hidden');
@@ -325,13 +304,38 @@ document.getElementById('formRegistroComunidad').addEventListener('submit', asyn
   }
 });
 
-document.getElementById('btnCerrarSesionComunidad').addEventListener('click', async () => {
-  try{ await fetch('/api/auth/logout', { method: 'POST' }); }catch(e){}
-  SESION = { isLoggedIn: false, user: null };
-  actualizarVistaSesion();
+document.getElementById('btnSuscribirse').addEventListener('click', async () => {
+  const err = document.getElementById('ofertaError');
+  const spinner = document.getElementById('suscribirseSpinner');
+  const btn = document.getElementById('btnSuscribirse');
+  err.classList.add('hidden');
+  spinner.classList.remove('hidden');
+  btn.disabled = true;
+  try{
+    const res = await fetch('/api/membresia/suscribirse', { method: 'POST' });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar la suscripción');
+    window.location.href = data.url;
+  }catch(e){
+    err.textContent = e.message;
+    err.classList.remove('hidden');
+    spinner.classList.add('hidden');
+    btn.disabled = false;
+  }
 });
 
-cargarPublicaciones();
+document.getElementById('btnCancelarMembresia').addEventListener('click', async () => {
+  if(!confirm('¿Seguro que quieres cancelar tu membresía? Perderás el acceso al recetario y al taller del mes de inmediato.')) return;
+  try{
+    const res = await fetch('/api/membresia/cancelar', { method: 'POST' });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo cancelar la membresía');
+    mostrarVista('oferta');
+  }catch(e){
+    alert(e.message);
+  }
+});
+
 cargarSesion();
 </script>
 </body>

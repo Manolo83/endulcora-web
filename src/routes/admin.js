@@ -640,6 +640,32 @@ router.post('/api/regalo-mensual/enviar', requireAdmin, uploadDocumento.single('
   res.json({ total: usuarios.length, enviados, fallidos });
 });
 
+// ---- Membresia: recetario del mes + video del taller (contenido exclusivo) ----
+router.get('/api/membresia/contenido', requireAdmin, (req, res) => {
+  res.json(store.getContenidoMembresia());
+});
+
+router.post('/api/membresia/contenido', requireAdmin, (req, res) => {
+  const { recetarioMes, videoYoutubeId, videoTitulo, videoMes } = req.body || {};
+  const patch = {};
+  if (typeof recetarioMes === 'string') patch.recetarioMes = recetarioMes.trim();
+  if (typeof videoYoutubeId === 'string') patch.videoYoutubeId = videoYoutubeId.trim();
+  if (typeof videoTitulo === 'string') patch.videoTitulo = videoTitulo.trim();
+  if (typeof videoMes === 'string') patch.videoMes = videoMes.trim();
+  res.json(store.updateContenidoMembresia(patch));
+});
+
+router.post('/api/membresia/recetario', requireAdmin, uploadDocumento.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo del recetario.' });
+  const anterior = store.getContenidoMembresia().recetarioUrl;
+  const item = store.updateContenidoMembresia({
+    recetarioUrl: `/uploads/${req.file.filename}`,
+    recetarioNombre: req.file.originalname,
+  });
+  borrarSiEsSubida(anterior);
+  res.json(item);
+});
+
 // ---- Manejo de errores (ej. archivo demasiado grande, tipo no permitido) ----
 router.use((err, req, res, next) => {
   res.status(400).json({ error: err.message || 'Error al procesar la solicitud' });
