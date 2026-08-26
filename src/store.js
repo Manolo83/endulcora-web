@@ -252,6 +252,7 @@ async function init() {
           bullets: [],
           precio,
           precioAnterior: '',
+          precioMembresia: '',
           boton,
           imagen: '',
           galeria: [],
@@ -282,6 +283,7 @@ async function init() {
       const paquete = nuevoProducto(`${tituloBase} · Paquete completo`, categoria, PRECIOS_LINEA_EBOOKS.paquete, 'Comprar paquete completo', archivos.paquete || null);
       paquete.esPaquete = true;
       paquete.ocultoEnCatalogo = true;
+      paquete.precioMembresia = '100';
       const ebook = nuevoProducto(tituloBase, categoria, PRECIOS_LINEA_EBOOKS.ebook, 'Agregar al carrito', archivos.ebook);
       ebook.productosRelacionados = [anexo.id, app.id, paquete.id];
     }
@@ -319,6 +321,18 @@ async function init() {
         categoria: 'ebook',
         carpetaSeed: 'tamales-regionales',
         archivos: { ebook: 'Endulcora_Tamales_Regionales_eBook.pdf', anexo: 'Endulcora_Tamales_Regionales_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tamales_Regionales_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'Panadería Mexicana Salada',
+        categoria: 'ebook',
+        carpetaSeed: 'panaderia-mexicana-salada',
+        archivos: { ebook: 'Endulcora_Panaderia_Mexicana_Salada_eBook.pdf', anexo: 'Endulcora_Panaderia_Mexicana_Salada_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Panaderia_Mexicana_Salada_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'Nogada de Autor',
+        categoria: 'ebook',
+        carpetaSeed: 'nogada-de-autor',
+        archivos: { ebook: 'Endulcora_Nogada_de_Autor_eBook.pdf', anexo: 'Endulcora_Nogada_de_Autor_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Nogada_de_Autor_APP.html', paquete: 'Paquete_Completo.zip' },
       },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
