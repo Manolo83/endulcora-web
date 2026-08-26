@@ -385,6 +385,11 @@
           <input id="prodPrecioAnterior" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
         </label>
         <label class="block sm:col-span-2">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio para miembros (opcional)</span>
+          <input id="prodPrecioMembresia" type="text" placeholder="Ej. 100" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          <span class="mt-1 block text-xs text-carbon/50">Si lo llenas, los clientes con membresía activa ($50 MXN/mes) ven y pagan este precio en vez del normal. Déjalo vacío para que todos paguen el precio de arriba.</span>
+        </label>
+        <label class="block sm:col-span-2">
           <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Texto del botón</span>
           <input id="prodBoton" type="text" placeholder="Comprar" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
         </label>
@@ -1406,6 +1411,7 @@ async function cargarProductosAdmin(){
         $('prodDescripcionLarga').value = p.descripcionLarga || '';
         $('prodPrecio').value = p.precio || '';
         $('prodPrecioAnterior').value = p.precioAnterior || '';
+        $('prodPrecioMembresia').value = p.precioMembresia || '';
         $('prodBoton').value = p.boton || '';
         $('prodArchivoEstado').textContent = p.archivo ? `Archivo actual: ${p.archivoNombre || 'adjunto'}` : 'Todavía no tiene archivo para entregar.';
         if(p.slug){
@@ -1528,6 +1534,7 @@ $('formProducto').addEventListener('submit', async (e) => {
     descripcionLarga: $('prodDescripcionLarga').value.trim(),
     precio: $('prodPrecio').value.trim(),
     precioAnterior: $('prodPrecioAnterior').value.trim(),
+    precioMembresia: $('prodPrecioMembresia').value.trim(),
     boton: $('prodBoton').value.trim() || 'Comprar',
     productosRelacionados: [...document.querySelectorAll('.chkProductoRelacionado:checked')].map(chk => Number(chk.value)),
   };

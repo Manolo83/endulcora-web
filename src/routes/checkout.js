@@ -37,6 +37,10 @@ router.post('/preference', async (req, res) => {
     return res.status(400).json({ error: 'Demasiados artículos distintos en un solo pedido.' });
   }
 
+  const userId = req.session && req.session.userId ? req.session.userId : null;
+  const usuario = userId ? store.getUserById(userId) : null;
+  const esMiembroActivo = !!(usuario && usuario.membresiaEstado === 'activa');
+
   const resueltos = [];
   for (const linea of pedido) {
     if (!['producto', 'curso'].includes(linea.tipo) || !linea.id) {
@@ -47,7 +51,11 @@ router.post('/preference', async (req, res) => {
     if (!item) {
       return res.status(404).json({ error: `"${linea.titulo || 'Un artículo'}" ya no esta disponible.` });
     }
-    const precio = parsePrecio(item.precio);
+    // El precio de membresia (si el producto tiene uno) solo se usa cuando
+    // la sesion actual es realmente de un cliente con membresia activa —
+    // nunca se confia en nada que mande el carrito del navegador.
+    const usarPrecioMiembro = esMiembroActivo && item.precioMembresia && parsePrecio(item.precioMembresia) > 0;
+    const precio = usarPrecioMiembro ? parsePrecio(item.precioMembresia) : parsePrecio(item.precio);
     if (precio <= 0) continue;
     resueltos.push({ tipo: linea.tipo, itemId: item.id, titulo: item.titulo, precio, cantidad });
   }
@@ -57,8 +65,6 @@ router.post('/preference', async (req, res) => {
   }
 
   const total = resueltos.reduce((acc, r) => acc + r.precio * r.cantidad, 0);
-  const userId = req.session && req.session.userId ? req.session.userId : null;
-  const usuario = userId ? store.getUserById(userId) : null;
   const viewToken = crypto.randomBytes(24).toString('hex');
   const order = store.addOrder({
     items: resueltos,

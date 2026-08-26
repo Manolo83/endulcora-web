@@ -211,6 +211,12 @@ async function init() {
       }
       if (typeof p.esPaquete !== 'boolean') { p.esPaquete = false; changed = true; }
       if (typeof p.ocultoEnCatalogo !== 'boolean') { p.ocultoEnCatalogo = false; changed = true; }
+      if (typeof p.precioMembresia !== 'string') {
+        // Los paquetes completos ya existentes arrancan con $100 para clientes
+        // con membresia activa; los demas productos quedan sin descuento.
+        p.precioMembresia = p.esPaquete ? '100' : '';
+        changed = true;
+      }
       if (!p.slug) {
         p.slug = slugUnico(p.titulo, data.products, p.id);
         changed = true;
@@ -687,6 +693,7 @@ module.exports = {
       bullets: [],
       precio: '',
       precioAnterior: '',
+      precioMembresia: '',
       boton: 'Comprar',
       imagen: '',
       galeria: [],

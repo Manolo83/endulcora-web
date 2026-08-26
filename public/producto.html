@@ -144,10 +144,11 @@ body { background: #FBF4E9; }
 
         <ul id="pBullets" class="mt-6 space-y-2.5 text-sm text-carbon/75"></ul>
 
-        <div class="mt-7 flex items-end gap-3">
+        <div class="mt-7 flex flex-wrap items-end gap-3">
           <span id="pPrecio" class="font-display text-4xl text-vino"></span>
           <span id="pPrecioAnterior" class="hidden pb-1.5 text-base text-humo line-through"></span>
           <span class="pb-1.5 font-ui text-[11px] uppercase tracking-wider text-humo">MXN</span>
+          <span id="pBadgeMiembro" class="hidden rounded-full bg-flama px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-wider text-carbon">Precio de membresía</span>
         </div>
 
         <div class="mt-7 flex flex-wrap gap-3">
@@ -322,10 +323,25 @@ function agregarAlCarritoLocal(item){
 
 const slug = decodeURIComponent(window.location.pathname.replace(/^\/(ebooks|anexos|recetarios)\//, '').replace(/\/$/, ''));
 
+let ESTADO_MEMBRESIA = { activa: false };
+
+function precioParaMostrar(item){
+  const membresiaNum = parseFloat(String(item.precioMembresia || '').replace(/,/g, ''));
+  if(ESTADO_MEMBRESIA.activa && item.esPaquete && Number.isFinite(membresiaNum) && membresiaNum > 0){
+    return { precio: membresiaNum, esPrecioMiembro: true, precioNormal: parseFloat(String(item.precio || '0').replace(/,/g, '')) || 0 };
+  }
+  return { precio: parseFloat(String(item.precio || '0').replace(/,/g, '')) || 0, esPrecioMiembro: false, precioNormal: null };
+}
+
 async function cargarProducto(){
   let contenido = {};
   try{ contenido = await (await fetch('/api/content')).json(); }catch(e){}
   const numero = numeroWhatsapp(contenido);
+
+  try{
+    const resEstado = await fetch('/api/membresia/estado');
+    if(resEstado.ok) ESTADO_MEMBRESIA = await resEstado.json();
+  }catch(e){}
 
   let p;
   try{
@@ -366,12 +382,20 @@ async function cargarProducto(){
   const bullets = document.getElementById('pBullets');
   bullets.innerHTML = (p.bullets || []).map(b => `<li class="flex gap-2.5"><span class="text-flama">▸</span> ${escapeHtml(b)}</li>`).join('');
 
-  document.getElementById('pPrecio').textContent = `$${formatoMonto(p.precio || '0')}`;
-  const anteriorNum = parseFloat(String(p.precioAnterior || '').replace(/,/g, ''));
-  if(Number.isFinite(anteriorNum) && anteriorNum > 0){
+  const precioPrincipal = precioParaMostrar(p);
+  document.getElementById('pPrecio').textContent = `$${formatoMonto(precioPrincipal.precio)}`;
+  if(precioPrincipal.esPrecioMiembro){
     const el = document.getElementById('pPrecioAnterior');
-    el.textContent = `$${formatoMonto(anteriorNum)}`;
+    el.textContent = `$${formatoMonto(precioPrincipal.precioNormal)}`;
     el.classList.remove('hidden');
+    document.getElementById('pBadgeMiembro').classList.remove('hidden');
+  }else{
+    const anteriorNum = parseFloat(String(p.precioAnterior || '').replace(/,/g, ''));
+    if(Number.isFinite(anteriorNum) && anteriorNum > 0){
+      const el = document.getElementById('pPrecioAnterior');
+      el.textContent = `$${formatoMonto(anteriorNum)}`;
+      el.classList.remove('hidden');
+    }
   }
 
   if(p.descripcionLarga){
@@ -389,19 +413,25 @@ async function cargarProducto(){
     const individuales = relacionados.filter(r => !r.esPaquete);
 
     if(paquetes.length){
-      document.getElementById('pPaquete').innerHTML = paquetes.map(r => `
+      document.getElementById('pPaquete').innerHTML = paquetes.map(r => {
+        const precioMostrar = precioParaMostrar(r);
+        const precioHtml = precioMostrar.esPrecioMiembro
+          ? `<span class="font-ui text-base font-700 text-flama">$${formatoMonto(precioMostrar.precio)} MXN</span> <span class="ml-1 text-sm text-crema/60 line-through">$${formatoMonto(precioMostrar.precioNormal)}</span> <span class="ml-1 rounded-full bg-flama px-2 py-0.5 text-[9px] font-700 uppercase tracking-wider text-carbon">Precio de membresía</span>`
+          : `<span class="font-ui text-base font-700 text-flama">$${formatoMonto(precioMostrar.precio)} MXN</span>`;
+        return `
         <div class="flex flex-col gap-3 rounded-2xl bg-white/10 p-4 ring-1 ring-white/15">
           <div class="min-w-0">
             <a href="/${r.prefijo}/${r.slug}" class="font-titulo text-base text-crema hover:underline">${escapeHtml(r.titulo || '')}</a>
             <p class="mt-1 text-sm text-crema/70">${escapeHtml(r.descripcionCorta || '')}</p>
-            <p class="mt-1.5 font-ui text-base font-700 text-flama">$${formatoMonto(r.precio || '0')} MXN</p>
+            <p class="mt-1.5">${precioHtml}</p>
           </div>
-          <button type="button" data-id="${r.id}" data-titulo="${escapeHtml(r.titulo || '')}" data-precio="${r.precio || '0'}"
+          <button type="button" data-id="${r.id}" data-titulo="${escapeHtml(r.titulo || '')}" data-precio="${precioMostrar.precio}"
             class="btnAgregarRelacionado w-full rounded-full boton-vivo bg-flama px-4 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
             ${escapeHtml(r.boton || 'Agregar paquete')}
           </button>
         </div>
-      `).join('');
+      `;
+      }).join('');
       document.getElementById('bloquePaquete').classList.remove('hidden');
     }
 
@@ -452,7 +482,7 @@ async function cargarProducto(){
       tipo: 'producto',
       id: p.id,
       titulo: p.titulo || '',
-      precio: parseFloat(String(p.precio || '0').replace(/,/g,'')) || 0,
+      precio: precioParaMostrar(p).precio,
     });
     window.location.href = '/?verCarrito=1#tienda';
   });

@@ -45,6 +45,7 @@ function resumenProducto(r) {
     titulo: r.titulo,
     descripcionCorta: r.descripcionCorta,
     precio: r.precio,
+    precioMembresia: r.precioMembresia || '',
     imagen: r.imagen,
     esPaquete: !!r.esPaquete,
     boton: r.boton || '',
