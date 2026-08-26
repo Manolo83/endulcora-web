@@ -369,6 +369,19 @@ async function init() {
       paquete.archivoNombre = familia.archivos.paquete;
       changed = true;
     }
+    // Pone la foto de portada (seed-archivos/<carpeta>/portada.jpg) al eBook
+    // principal de cada familia, si todavia no tiene una. No pisa una
+    // portada que ya se haya subido a mano desde /admin.
+    for (const familia of FAMILIAS_A_DESGLOSAR) {
+      const ebookPrincipal = data.products.find((p) => p.titulo === familia.tituloBase);
+      if (!ebookPrincipal || ebookPrincipal.imagen) continue;
+      const origen = path.join(__dirname, '..', 'seed-archivos', familia.carpetaSeed, 'portada.jpg');
+      if (!fs.existsSync(origen)) continue;
+      const destino = `${crypto.randomUUID()}.jpg`;
+      fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+      ebookPrincipal.imagen = `/uploads/${destino}`;
+      changed = true;
+    }
     // Corrige el enlace del "paquete completo" en la pagina del eBook de
     // Velas Comestibles: por un producto duplicado que ya existia de antes
     // (mismo nombre, distinto id), la migracion original engancho el
