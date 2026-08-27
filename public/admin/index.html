@@ -2141,7 +2141,27 @@ async function buscarCliente(email){
         <p class="font-titulo text-lg text-vino">${escapeHtml(user.nombre)}</p>
         <p class="text-sm text-carbon/60">${escapeHtml(user.email)}</p>
         <p class="text-sm text-carbon/60">${escapeHtml(user.telefono || 'Sin teléfono registrado')}</p>
-        <form id="formResetClientePassword" class="mt-4 flex flex-wrap gap-3">
+
+        <div class="mt-5 border-t border-vino/10 pt-4">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Datos del cliente</span>
+          <form id="formDatosCliente" class="mt-3 grid gap-3">
+            <label class="block">
+              <span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Nombre</span>
+              <input id="clienteEditNombre" type="text" required value="${escapeHtml(user.nombre)}" class="mt-1 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Correo</span>
+              <input id="clienteEditEmail" type="email" required value="${escapeHtml(user.email)}" class="mt-1 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Teléfono (10 dígitos, opcional)</span>
+              <input id="clienteEditTelefono" type="tel" inputmode="numeric" value="${escapeHtml(user.telefono || '')}" class="mt-1 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar datos</button>
+          </form>
+        </div>
+
+        <form id="formResetClientePassword" class="mt-5 flex flex-wrap gap-3 border-t border-vino/10 pt-4">
           <input id="clienteNuevaPassword" type="text" required minlength="6" placeholder="Nueva contraseña (mínimo 6 caracteres)" class="min-w-[220px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar nueva contraseña</button>
         </form>
@@ -2159,6 +2179,25 @@ async function buscarCliente(email){
           </form>
         </div>
       </div>`;
+    $('formDatosCliente').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      try{
+        const actualizado = await api(`/admin/api/users/${user.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            nombre: $('clienteEditNombre').value,
+            email: $('clienteEditEmail').value,
+            telefono: $('clienteEditTelefono').value,
+          }),
+        });
+        toast('Datos del cliente actualizados.');
+        $('clienteBuscarEmail').value = actualizado.email;
+        cargarClientesLista();
+        buscarCliente(actualizado.email);
+      }catch(err){
+        toast(err.message);
+      }
+    });
     $('formResetClientePassword').addEventListener('submit', async (ev) => {
       ev.preventDefault();
       try{

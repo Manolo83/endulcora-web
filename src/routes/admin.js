@@ -657,6 +657,48 @@ router.post('/api/users/:id/membresia', requireAdmin, (req, res) => {
   res.json({ id: actualizado.id, membresiaEstado: actualizado.membresiaEstado });
 });
 
+// ---- Clientes: editar sus datos (nombre, correo, telefono) ----
+const EMAIL_RE_ADMIN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+router.patch('/api/users/:id', requireAdmin, (req, res) => {
+  const user = store.getUserById(req.params.id);
+  if (!user) return res.status(404).json({ error: 'No encontrado' });
+
+  const { nombre, email, telefono } = req.body || {};
+  const patch = {};
+
+  if (typeof nombre === 'string') {
+    if (!nombre.trim()) return res.status(400).json({ error: 'El nombre no puede quedar vacío.' });
+    patch.nombre = nombre.trim();
+  }
+  if (typeof email === 'string' && email.trim()) {
+    const nuevoEmail = email.trim().toLowerCase();
+    if (!EMAIL_RE_ADMIN.test(nuevoEmail)) return res.status(400).json({ error: 'Escribe un correo válido.' });
+    if (nuevoEmail !== user.email) {
+      const existente = store.getUserByEmail(nuevoEmail);
+      if (existente && existente.id !== user.id) {
+        return res.status(409).json({ error: 'Ya hay otra cuenta con ese correo.' });
+      }
+      patch.email = nuevoEmail;
+    }
+  }
+  if (typeof telefono === 'string') {
+    const digitos = telefono.replace(/\D/g, '');
+    if (digitos && digitos.length !== 10) {
+      return res.status(400).json({ error: 'El teléfono debe tener 10 dígitos (o déjalo vacío).' });
+    }
+    patch.telefono = digitos;
+  }
+
+  const actualizado = store.updateUser(user.id, patch);
+  res.json({
+    id: actualizado.id,
+    email: actualizado.email,
+    nombre: actualizado.nombre,
+    telefono: actualizado.telefono || '',
+    membresiaEstado: actualizado.membresiaEstado || 'ninguna',
+  });
+});
+
 router.post('/api/users/:id/reset-password', requireAdmin, (req, res) => {
   const { password } = req.body || {};
   if (!password || String(password).length < 6) {
