@@ -186,6 +186,11 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 @keyframes flotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 .flotar { animation: flotar 3.4s ease-in-out infinite; }
 
+/* ---- Post-it: se balancea solito, como recien pegado ---- */
+@keyframes postitVivo { 0%,100% { transform: rotate(4deg); } 50% { transform: rotate(-2deg); } }
+.postit-vivo { animation: postitVivo 4.5s ease-in-out infinite; }
+.postit-vivo:hover { animation-play-state: paused; transform: rotate(0deg) scale(1.06); }
+
 /* ---- Entrada con rebote, para burbujas y botones flotantes ---- */
 @keyframes entradaRebote { 0% { opacity:0; transform: translateY(24px) scale(.85); } 60% { opacity:1; transform: translateY(-6px) scale(1.03); } 100% { opacity:1; transform: translateY(0) scale(1); } }
 .entrada-rebote { animation: entradaRebote .55s cubic-bezier(.34,1.56,.64,1) both; }
@@ -195,10 +200,11 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .flama-svg, .halo, .gota, .flotar, .entrada-rebote { animation: none !important; }
+  .flama-svg, .halo, .gota, .flotar, .entrada-rebote, .postit-vivo { animation: none !important; }
   .reveal { opacity:1 !important; transform:none !important; transition:none; }
   .tarjeta-viva:hover { transform:none; }
   .boton-vivo:hover, .boton-vivo:active { transform:none; }
+  .postit-vivo { transform: rotate(3deg) !important; }
 }
 </style>
 </head>
@@ -253,6 +259,18 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
   <div class="pointer-events-none absolute -left-32 -top-20 h-[460px] w-[460px] rounded-full bg-[#A9D9BE] opacity-40 blur-[110px]"></div>
   <div class="pointer-events-none absolute right-[-60px] top-1/4 h-[480px] w-[480px] rounded-full bg-morado/40 opacity-40 blur-[120px]"></div>
   <div class="pointer-events-none absolute -left-10 bottom-[-160px] h-[420px] w-[420px] rounded-full bg-flama/45 opacity-45 blur-[120px]"></div>
+
+  <!-- Post-it: recetario del mes, gratis con membresía o por $100 -->
+  <div id="promoRecetarioMes" class="postit-vivo hidden absolute right-3 top-3 z-20 w-[168px] origin-top rounded-md bg-flama px-3.5 pb-3.5 pt-6 text-carbon shadow-2xl sm:right-8 sm:top-8 sm:w-[210px] sm:px-4 sm:pt-7">
+    <span class="absolute left-1/2 top-1.5 h-4 w-4 -translate-x-1/2 rounded-full bg-vino shadow ring-2 ring-white/70 sm:h-5 sm:w-5"></span>
+    <p class="font-titulo text-[13px] font-800 leading-tight text-vino sm:text-base">¡Recetario del mes!</p>
+    <p class="mt-1.5 text-[10.5px] leading-snug text-carbon/80 sm:text-xs">Gratis con tu membresía Endulcora, o por solo $100 aquí mismo.</p>
+    <div class="mt-3 flex flex-col gap-1.5">
+      <a href="/membresia" class="rounded-full bg-vino px-3 py-2 text-center font-ui text-[9.5px] font-700 uppercase tracking-wider text-crema transition hover:bg-morado sm:text-[10px]">Quiero la membresía</a>
+      <button type="button" id="btnComprarRecetarioMes" class="rounded-full border border-carbon/25 bg-white/70 px-3 py-2 font-ui text-[9.5px] font-700 uppercase tracking-wider text-vino transition hover:bg-white sm:text-[10px]">Quiero el recetario</button>
+    </div>
+  </div>
+
   <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:py-20 lg:grid-cols-[.95fr_1.05fr] lg:px-8 lg:py-28">
     <div>
       <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-morado/30 bg-white/60 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-vino">
@@ -331,19 +349,6 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       </div>
       <p id="heroCaption" class="mt-6 text-center font-firma text-2xl text-vino">se enciende, se derrite, se come</p>
       <p id="heroCaptionSub" class="mt-1 text-center font-ui text-[11px] uppercase tracking-[.25em] text-carbon/45">Receta 01 · Sección gourmet</p>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════ RECETARIO DEL MES: MEMBRESÍA O $100 ══════════════ -->
-<section id="promoRecetarioMes" class="hidden relative overflow-hidden bg-vino py-14">
-  <div class="pointer-events-none absolute -left-20 -top-16 h-72 w-72 rounded-full bg-flama/10 blur-[110px]"></div>
-  <div class="relative mx-auto max-w-3xl px-5 text-center text-crema lg:px-8">
-    <p class="font-titulo text-[11px] tracking-[.3em] text-flama">RECETARIO DEL MES</p>
-    <h2 class="mt-2 font-display text-2xl leading-snug sm:text-3xl">Adquiere tu recetario gratis con tu membresía Endulcora o por solo $100 aquí mismo</h2>
-    <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
-      <a href="/membresia" class="rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">Quiero la membresía</a>
-      <button type="button" id="btnComprarRecetarioMes" class="rounded-full boton-vivo border border-crema/40 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">Quiero el recetario</button>
     </div>
   </div>
 </section>
