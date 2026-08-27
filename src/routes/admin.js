@@ -628,7 +628,27 @@ router.get('/api/users', requireAdmin, (req, res) => {
 router.get('/api/users/buscar', requireAdmin, (req, res) => {
   const user = store.getUserByEmail(req.query.email || '');
   if (!user) return res.status(404).json({ error: 'No hay ninguna cuenta con ese correo.' });
-  res.json({ id: user.id, email: user.email, nombre: user.nombre, telefono: user.telefono || '' });
+  res.json({
+    id: user.id,
+    email: user.email,
+    nombre: user.nombre,
+    telefono: user.telefono || '',
+    membresiaEstado: user.membresiaEstado || 'ninguna',
+  });
+});
+
+// ---- Clientes: dar o quitar membresia a mano (fuera del cobro de Mercado
+// Pago) — por ejemplo, cortesias o pagos que el cliente hizo por otro medio.
+const ESTADOS_MEMBRESIA_VALIDOS = ['ninguna', 'activa', 'pausada', 'cancelada'];
+router.post('/api/users/:id/membresia', requireAdmin, (req, res) => {
+  const { estado } = req.body || {};
+  if (!ESTADOS_MEMBRESIA_VALIDOS.includes(estado)) {
+    return res.status(400).json({ error: 'Estado de membresía no válido.' });
+  }
+  const user = store.getUserById(req.params.id);
+  if (!user) return res.status(404).json({ error: 'No encontrado' });
+  const actualizado = store.updateUser(user.id, { membresiaEstado: estado });
+  res.json({ id: actualizado.id, membresiaEstado: actualizado.membresiaEstado });
 });
 
 router.post('/api/users/:id/reset-password', requireAdmin, (req, res) => {

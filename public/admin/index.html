@@ -2082,6 +2082,7 @@ $('formBuscarCliente').addEventListener('submit', async (e) => {
   try{
     const email = $('clienteBuscarEmail').value.trim();
     const user = await api(`/admin/api/users/buscar?email=${encodeURIComponent(email)}`);
+    const ETIQUETA_MEMBRESIA = { ninguna: 'Sin membresía', activa: 'Activa', pausada: 'Pausada', cancelada: 'Cancelada' };
     cont.innerHTML = `
       <div class="rounded-xl border border-vino/10 p-4">
         <p class="font-titulo text-lg text-vino">${escapeHtml(user.nombre)}</p>
@@ -2091,6 +2092,19 @@ $('formBuscarCliente').addEventListener('submit', async (e) => {
           <input id="clienteNuevaPassword" type="text" required minlength="6" placeholder="Nueva contraseña (mínimo 6 caracteres)" class="min-w-[220px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar nueva contraseña</button>
         </form>
+        <div class="mt-5 border-t border-vino/10 pt-4">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Membresía (a mano, sin pasar por Mercado Pago)</span>
+          <p class="mt-1 text-xs text-carbon/50">Estado actual: <strong>${escapeHtml(ETIQUETA_MEMBRESIA[user.membresiaEstado] || user.membresiaEstado)}</strong>. Si la pones "Activa" a mano (sin que se haya suscrito), el cliente no tiene un cobro recurrente real — tendrás que quitarle el acceso tú mismo cuando corresponda.</p>
+          <form id="formMembresiaCliente" class="mt-3 flex flex-wrap gap-3">
+            <select id="clienteMembresiaEstado" class="min-w-[180px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <option value="ninguna" ${user.membresiaEstado === 'ninguna' ? 'selected' : ''}>Sin membresía</option>
+              <option value="activa" ${user.membresiaEstado === 'activa' ? 'selected' : ''}>Activa</option>
+              <option value="pausada" ${user.membresiaEstado === 'pausada' ? 'selected' : ''}>Pausada</option>
+              <option value="cancelada" ${user.membresiaEstado === 'cancelada' ? 'selected' : ''}>Cancelada</option>
+            </select>
+            <button type="submit" class="rounded-full border border-vino/25 px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Guardar membresía</button>
+          </form>
+        </div>
       </div>`;
     $('formResetClientePassword').addEventListener('submit', async (ev) => {
       ev.preventDefault();
@@ -2102,6 +2116,19 @@ $('formBuscarCliente').addEventListener('submit', async (e) => {
         toast(`Contraseña actualizada para ${user.email}. Avísale al cliente por WhatsApp.`);
         $('formBuscarCliente').reset();
         cont.innerHTML = '';
+      }catch(err){
+        toast(err.message);
+      }
+    });
+    $('formMembresiaCliente').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      try{
+        const estado = $('clienteMembresiaEstado').value;
+        await api(`/admin/api/users/${user.id}/membresia`, {
+          method: 'POST',
+          body: JSON.stringify({ estado }),
+        });
+        toast(`Membresía de ${user.email} actualizada a "${ETIQUETA_MEMBRESIA[estado]}".`);
       }catch(err){
         toast(err.message);
       }

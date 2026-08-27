@@ -150,14 +150,21 @@ router.post('/webhook', async (req, res) => {
 });
 
 router.post('/cancelar', requireCliente, async (req, res) => {
-  const client = mpClient();
-  if (!client) return res.status(503).json({ error: 'Los pagos todavía no están configurados.' });
-
   const usuario = store.getUserById(req.session.userId);
   if (!usuario) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
-  if (!usuario.membresiaPreapprovalId) {
+  if (usuario.membresiaEstado !== 'activa') {
     return res.status(400).json({ error: 'No tienes una membresía activa que cancelar.' });
   }
+  // Membresias activadas a mano desde /admin (sin suscripcion real en
+  // Mercado Pago) no tienen preapproval que cancelar ahi: solo se le quita
+  // el acceso localmente.
+  if (!usuario.membresiaPreapprovalId) {
+    store.updateUser(usuario.id, { membresiaEstado: 'cancelada' });
+    return res.json({ ok: true });
+  }
+
+  const client = mpClient();
+  if (!client) return res.status(503).json({ error: 'Los pagos todavía no están configurados.' });
   try {
     const preapproval = new PreApproval(client);
     await preapproval.update({ id: usuario.membresiaPreapprovalId, body: { status: 'cancelled' } });
