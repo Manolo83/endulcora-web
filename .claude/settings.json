@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__facebook_ads",
+      "mcp__Google_Drive"
+    ]
+  }
+}
