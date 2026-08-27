@@ -511,6 +511,38 @@ async function init() {
       mensajesSinPublicacion.forEach((m) => { m.publicacionId = publicacionGeneral.id; });
       changed = true;
     }
+    // Crea el producto "Recetario del mes" ($100), para que cualquiera lo
+    // compre en /inicio sin necesidad de membresia. Su archivo se mantiene
+    // sincronizado con el que se sube en /admin > Membresia (mismo PDF que
+    // reciben los miembros gratis) cada vez que se actualiza ahi.
+    if (!data.products.find((p) => p.slug === 'recetario-del-mes')) {
+      const item = {
+        id: nextId(data.products),
+        orden: data.products.length,
+        categoria: 'ebook',
+        etiqueta: 'Regalo del mes',
+        destacado: '',
+        titulo: 'Recetario del mes',
+        subtitulo: '',
+        descripcionCorta: 'El recetario de regalo de este mes — gratis con tu membresía, o disponible aquí por separado.',
+        descripcionLarga: '',
+        bullets: [],
+        precio: '100',
+        precioAnterior: '',
+        precioMembresia: '',
+        boton: 'Quiero el recetario',
+        imagen: '',
+        galeria: [],
+        archivo: data.contenidoMembresia.recetarioUrl || '',
+        archivoNombre: data.contenidoMembresia.recetarioNombre || '',
+        slug: 'recetario-del-mes',
+        productosRelacionados: [],
+        esPaquete: false,
+        ocultoEnCatalogo: true,
+      };
+      data.products.push(item);
+      changed = true;
+    }
     if (changed) await persistirAhora();
   } else {
     data = datosPorDefecto();

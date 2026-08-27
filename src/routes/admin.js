@@ -763,6 +763,15 @@ router.post('/api/membresia/recetario', requireAdmin, uploadDocumento.single('fi
     recetarioNombre: req.file.originalname,
   });
   borrarSiEsSubida(anterior);
+  // Mismo archivo para el producto "Recetario del mes" ($100, en /inicio):
+  // se mantiene sincronizado con lo que se sube aqui, sin subirlo dos veces.
+  const productoRecetario = store.getProductBySlug('recetario-del-mes');
+  if (productoRecetario) {
+    store.updateProduct(productoRecetario.id, {
+      archivo: item.recetarioUrl,
+      archivoNombre: item.recetarioNombre,
+    });
+  }
   res.json(item);
 });
 

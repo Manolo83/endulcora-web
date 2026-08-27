@@ -335,6 +335,19 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
   </div>
 </section>
 
+<!-- ══════════════ RECETARIO DEL MES: MEMBRESÍA O $100 ══════════════ -->
+<section id="promoRecetarioMes" class="hidden relative overflow-hidden bg-vino py-14">
+  <div class="pointer-events-none absolute -left-20 -top-16 h-72 w-72 rounded-full bg-flama/10 blur-[110px]"></div>
+  <div class="relative mx-auto max-w-3xl px-5 text-center text-crema lg:px-8">
+    <p class="font-titulo text-[11px] tracking-[.3em] text-flama">RECETARIO DEL MES</p>
+    <h2 class="mt-2 font-display text-2xl leading-snug sm:text-3xl">Adquiere tu recetario gratis con tu membresía Endulcora o por solo $100 aquí mismo</h2>
+    <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
+      <a href="/membresia" class="rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">Quiero la membresía</a>
+      <button type="button" id="btnComprarRecetarioMes" class="rounded-full boton-vivo border border-crema/40 px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-flama hover:text-flama transition">Quiero el recetario</button>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════ PROMOS DE TALLERES (semanal) ══════════════ -->
 <section id="seccionPromosTaller" class="hidden relative overflow-hidden bg-carbon">
   <div class="relative aspect-[4/5] w-full sm:aspect-[16/9] lg:aspect-[3/1]">
@@ -2244,6 +2257,25 @@ abrirCarritoSiSeSolicito();
 cargarSesion();
 cargarHeroCarrusel();
 cargarPromosTaller();
+cargarPromoRecetarioMes();
+
+async function cargarPromoRecetarioMes(){
+  try{
+    const productos = await (await fetch('/api/products')).json();
+    const recetario = productos.find(p => p.slug === 'recetario-del-mes');
+    if(!recetario || !recetario.archivo) return;
+    document.getElementById('promoRecetarioMes').classList.remove('hidden');
+    document.getElementById('btnComprarRecetarioMes').addEventListener('click', () => {
+      agregarAlCarrito({
+        tipo: 'producto',
+        id: recetario.id,
+        titulo: recetario.titulo,
+        precio: parseFloat(String(recetario.precio).replace(/,/g, '')) || 0,
+      });
+      abrirModal('carrito');
+    });
+  }catch(e){}
+}
 
 function manejarRegresoDePago(){
   const params = new URLSearchParams(window.location.search);
