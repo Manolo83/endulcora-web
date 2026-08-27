@@ -2178,6 +2178,11 @@ async function buscarCliente(email){
             <button type="submit" class="rounded-full border border-vino/25 px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Guardar membresía</button>
           </form>
         </div>
+
+        <div class="mt-5 border-t border-vino/10 pt-4">
+          <button type="button" id="btnEliminarCliente" class="w-full rounded-full border border-red-200 px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-red-600 hover:bg-red-50 transition">Eliminar cuenta</button>
+          <p class="mt-1 text-xs text-carbon/50">Borra su acceso al sitio (no podrá volver a iniciar sesión). No borra su historial de compras ni de cobros de membresía, que se quedan para tu contabilidad.</p>
+        </div>
       </div>`;
     $('formDatosCliente').addEventListener('submit', async (ev) => {
       ev.preventDefault();
@@ -2194,6 +2199,18 @@ async function buscarCliente(email){
         $('clienteBuscarEmail').value = actualizado.email;
         cargarClientesLista();
         buscarCliente(actualizado.email);
+      }catch(err){
+        toast(err.message);
+      }
+    });
+    $('btnEliminarCliente').addEventListener('click', async () => {
+      if(!confirm(`¿Seguro que quieres eliminar la cuenta de ${user.email}? Ya no podrá iniciar sesión. Su historial de compras y de cobros de membresía se conserva.`)) return;
+      try{
+        await api(`/admin/api/users/${user.id}`, { method: 'DELETE' });
+        toast(`Cuenta de ${user.email} eliminada.`);
+        $('formBuscarCliente').reset();
+        cont.innerHTML = '';
+        cargarClientesLista();
       }catch(err){
         toast(err.message);
       }

@@ -699,6 +699,14 @@ router.patch('/api/users/:id', requireAdmin, (req, res) => {
   });
 });
 
+// Borra la cuenta del cliente (login + acceso). No borra su historial de
+// pedidos ni de cobros de membresia, que quedan para la contabilidad.
+router.delete('/api/users/:id', requireAdmin, (req, res) => {
+  const item = store.deleteUser(req.params.id);
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json({ ok: true });
+});
+
 router.post('/api/users/:id/reset-password', requireAdmin, (req, res) => {
   const { password } = req.body || {};
   if (!password || String(password).length < 6) {

@@ -983,6 +983,17 @@ module.exports = {
     save(data);
     return item;
   },
+  // Borra la cuenta (login/membresia) pero deja intacto su historial de
+  // pedidos y cobros de membresia para la contabilidad — esos registros ya
+  // guardan el correo por separado, no dependen de que el usuario exista.
+  deleteUser(id) {
+    const data = load();
+    const item = data.users.find((u) => u.id === Number(id));
+    if (!item) return null;
+    data.users = data.users.filter((u) => u.id !== Number(id));
+    save(data);
+    return item;
+  },
 
   // ---- Suscriptores del correo (footer) ----
   getSubscribers() {
