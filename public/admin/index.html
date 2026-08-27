@@ -548,6 +548,14 @@
         <div id="clienteResultado" class="mt-5"></div>
       </div>
 
+      <div class="mt-6 rounded-2xl bg-white ring-1 ring-vino/10">
+        <div class="flex flex-wrap items-center justify-between gap-3 p-6 pb-0">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Todos los clientes con cuenta</h3>
+          <button id="btnRefrescarClientes" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Actualizar</button>
+        </div>
+        <div id="listaClientes" class="mt-4 overflow-x-auto"></div>
+      </div>
+
       <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Audiencia para Meta Ads</h3>
         <p class="mt-1 text-xs text-carbon/50">Descarga un CSV con el correo, nombre y teléfono de tus clientes con cuenta, listo para subir en Meta Ads Manager (Audiencias → Crear audiencia → Lista de clientes) y anunciarles talleres, eBooks, etc. directamente a ellos.</p>
@@ -801,6 +809,7 @@ function mostrarDashboard(mostrar){
     cargarProductosAdmin();
     cargarSedes();
     cargarVentas();
+    cargarClientesLista();
     cargarSuscriptores();
     cargarResenas();
     cargarComunidadAdmin();
@@ -2074,15 +2083,59 @@ $('formPublicacionComunidad').addEventListener('submit', async (e) => {
   }
 });
 
-/* ---------- Clientes: restablecer contraseña ---------- */
-$('formBuscarCliente').addEventListener('submit', async (e) => {
-  e.preventDefault();
+/* ---------- Clientes: lista, búsqueda y restablecer contraseña ---------- */
+const ETIQUETA_MEMBRESIA = { ninguna: 'Sin membresía', activa: 'Activa', pausada: 'Pausada', cancelada: 'Cancelada' };
+
+async function cargarClientesLista(){
+  const cont = $('listaClientes');
+  cont.innerHTML = '<p class="p-6 text-sm text-carbon/50">Cargando…</p>';
+  try{
+    const usuarios = await api('/admin/api/users');
+    if(!usuarios.length){
+      cont.innerHTML = '<p class="p-6 text-sm text-carbon/50">Todavía no hay clientes con cuenta.</p>';
+      return;
+    }
+    cont.innerHTML = `<table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-vino/10 text-left font-ui text-[10px] uppercase tracking-widest text-carbon/40">
+          <th class="px-6 py-3">Nombre</th>
+          <th class="px-3 py-3">Correo</th>
+          <th class="px-3 py-3">Teléfono</th>
+          <th class="px-3 py-3">Membresía</th>
+          <th class="px-6 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${usuarios.map(u => `
+          <tr class="border-b border-vino/10 last:border-0">
+            <td class="px-6 py-3 text-carbon/80">${escapeHtml(u.nombre || '—')}</td>
+            <td class="px-3 py-3 text-carbon/70">${escapeHtml(u.email)}</td>
+            <td class="px-3 py-3 text-carbon/60">${escapeHtml(u.telefono || '—')}</td>
+            <td class="px-3 py-3 text-carbon/70">${escapeHtml(ETIQUETA_MEMBRESIA[u.membresiaEstado] || u.membresiaEstado)}</td>
+            <td class="px-6 py-3 text-right">
+              <button type="button" class="btnVerCliente rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[10px] font-700 uppercase tracking-wider text-vino hover:border-vino transition" data-email="${escapeHtml(u.email)}">Ver</button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+    cont.querySelectorAll('.btnVerCliente').forEach(btn => {
+      btn.addEventListener('click', () => {
+        $('clienteBuscarEmail').value = btn.dataset.email;
+        buscarCliente(btn.dataset.email);
+        document.getElementById('clienteResultado').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="p-6 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+$('btnRefrescarClientes').addEventListener('click', cargarClientesLista);
+
+async function buscarCliente(email){
   const cont = $('clienteResultado');
   cont.innerHTML = '<p class="text-sm text-carbon/50">Buscando…</p>';
   try{
-    const email = $('clienteBuscarEmail').value.trim();
     const user = await api(`/admin/api/users/buscar?email=${encodeURIComponent(email)}`);
-    const ETIQUETA_MEMBRESIA = { ninguna: 'Sin membresía', activa: 'Activa', pausada: 'Pausada', cancelada: 'Cancelada' };
     cont.innerHTML = `
       <div class="rounded-xl border border-vino/10 p-4">
         <p class="font-titulo text-lg text-vino">${escapeHtml(user.nombre)}</p>
@@ -2129,6 +2182,7 @@ $('formBuscarCliente').addEventListener('submit', async (e) => {
           body: JSON.stringify({ estado }),
         });
         toast(`Membresía de ${user.email} actualizada a "${ETIQUETA_MEMBRESIA[estado]}".`);
+        cargarClientesLista();
       }catch(err){
         toast(err.message);
       }
@@ -2136,6 +2190,11 @@ $('formBuscarCliente').addEventListener('submit', async (e) => {
   }catch(e){
     cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
   }
+}
+
+$('formBuscarCliente').addEventListener('submit', (e) => {
+  e.preventDefault();
+  buscarCliente($('clienteBuscarEmail').value.trim());
 });
 
 $('btnExportarAudienciaMeta').addEventListener('click', async () => {

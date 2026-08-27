@@ -613,13 +613,19 @@ router.delete('/api/comunidad/mensajes/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- Clientes: lista basica para exportar audiencia (Meta Ads, etc.) ----
+// ---- Clientes: lista para /admin (tabla) y para exportar audiencia (Meta Ads) ----
 router.get('/api/users', requireAdmin, (req, res) => {
   const usuarios = store.getUsers().map((u) => {
     const digitos = String(u.telefono || '').replace(/\D/g, '');
     // Antepone el codigo de pais (52, Mexico) para mejorar el match en Meta.
     const telefonoConLada = digitos.length === 10 ? `52${digitos}` : digitos;
-    return { email: u.email, nombre: u.nombre || '', telefono: telefonoConLada };
+    return {
+      id: u.id,
+      email: u.email,
+      nombre: u.nombre || '',
+      telefono: telefonoConLada,
+      membresiaEstado: u.membresiaEstado || 'ninguna',
+    };
   });
   res.json(usuarios);
 });
