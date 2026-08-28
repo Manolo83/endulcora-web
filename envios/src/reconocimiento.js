@@ -85,9 +85,10 @@ const RUTA_LOGO = path.join(__dirname, '..', 'marca', 'logo-endulcora.png');
 const RUTA_FIRMA = path.join(__dirname, '..', 'marca', 'firma-chef.png');
 
 const FIRMA_POR_DEFECTO = {
-  tapar: { x: 0.360, y: 0.690, w: 0.330, h: 0.102, fondo: '#FFFFFF' },
-  // La firma se apoya sobre la raya que ya trae la plantilla.
-  poner: { x: 0.385, y: 0.700, w: 0.280, h: 0.098 },
+  tapar: { x: 0.355, y: 0.645, w: 0.340, h: 0.150, fondo: '#FFFFFF' },
+  // La caja termina justo en la raya que ya trae la plantilla (y = 0.798), para
+  // que la firma se apoye sobre ella como si estuviera escrita ahi.
+  poner: { x: 0.395, y: 0.652, w: 0.260, h: 0.146 },
 };
 
 const MESES = [

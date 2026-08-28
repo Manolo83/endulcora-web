@@ -79,37 +79,31 @@ Conviene que el remitente de los correos salga de un subdominio propio
 llegara a afectar la reputación del remitente, no arrastra al correo de la
 tienda.
 
-## Lo único que falta para poder enviar: la firma del Chef
+## La app ya viene armada
 
-La app ya trae puesta la plantilla del reconocimiento, con el logotipo actual.
-No hay que subir nada... salvo la firma.
+No hay que subir nada para empezar: la plantilla del reconocimiento, el
+logotipo actual y la firma del Chef Luis Alfonso ya vienen puestos.
 
-La firma va aparte porque es lo único que la app no puede traer de fábrica. En
-**Ajustes ▸ Firma del Chef** subes la imagen y listo. Mientras falte, el envío
-queda **bloqueado a propósito**: un reconocimiento con el espacio de la firma en
-blanco, junto a un número de permiso, es peor que no mandarlo.
+Al generar, la app toma la plantilla y escribe encima lo que cambia de persona
+a persona — nombre, taller, folio y mes — respetando todo lo demás: la línea
+dorada, el óvalo del folio, el renglón del permiso y los adornos.
 
-El archivo debe ir:
+### Cambiar alguna pieza
 
-- **Sin la raya de abajo.** Esa raya ya está dibujada en la plantilla y la firma
-  se apoya sobre ella. Si la imagen trae su propia raya, salen dos encimadas.
-- Con fondo transparente (PNG), para que no tape la raya con un rectángulo blanco.
+Todo vive en `marca/` y se reemplaza cambiando el archivo, sin tocar código:
 
-### Si tu plantilla ya trae la firma
+| Archivo | Qué es |
+|---|---|
+| `plantilla-reconocimiento.png` | La hoja base. También se puede cambiar desde *Ajustes ▸ Plantilla*. |
+| `logo-endulcora.png` | El logotipo. |
+| `firma-chef.png` | La firma. También se sube desde *Ajustes ▸ Firma del Chef*. |
 
-Es lo más común cuando la plantilla se exporta de Canva: la firma ya viene
-dibujada dentro y no hace falta subirla aparte. En ese caso, en
-**Ajustes ▸ Firma del Chef** marca la casilla
-*"Mi plantilla ya trae la firma dibujada dentro"* y el envío se desbloquea.
+La firma debe ir **sin la raya de abajo** (esa ya está en la plantilla, la firma
+se apoya sobre ella) y con fondo transparente.
 
-No se puede detectar solo mirando la imagen si una plantilla trae firma o no, por
-eso se pregunta una vez y queda guardado.
-
-### Cambiar la plantilla (opcional)
-
-En **Ajustes ▸ Plantilla** puedes reemplazarla por otra, por ejemplo una página
-exportada de Canva. No importa que traiga los datos de otra persona: la app borra
-el nombre, el taller, el folio y el mes, y escribe los nuevos encima.
+Si subes una plantilla que ya trae la firma dibujada dentro — por ejemplo una
+página exportada de Canva — marca la casilla *"Mi plantilla ya trae la firma"*
+en Ajustes para que no se dibuje encima.
 
 ### Cargar los contactos
 

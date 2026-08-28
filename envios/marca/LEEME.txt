@@ -3,20 +3,19 @@ ARCHIVOS DE MARCA
 
 logo-endulcora.png
   El logotipo que la app dibuja en el reconocimiento, tapando el banderin
-  morado viejo de la plantilla. Para cambiarlo, reemplaza este archivo.
-  Se genera con: node scripts/logo-apilado.js
+  morado viejo si la plantilla lo trae. Version apilada, armada a partir del
+  logotipo horizontal con: node scripts/logo-apilado.js
 
-firma-chef.png   (opcional, NO existe por defecto)
-  NORMALMENTE NO HACE FALTA. La firma del Chef ya viene dibujada en la
-  plantilla y la app no toca esa zona, asi que pasa intacta.
+firma-chef.png
+  La firma del Chef Luis Alfonso, recortada y con el fondo blanco convertido
+  en transparencia. Va SIN la raya de abajo a proposito: esa raya ya esta
+  dibujada en la plantilla y la firma se apoya sobre ella.
 
-  Pon aqui un archivo con ese nombre solo si hay que REEMPLAZAR la firma
-  sin rehacer el Canva. Debe venir:
-    - sin la raya de abajo (esa ya esta en la plantilla; la firma se
-      apoya sobre ella)
-    - con fondo transparente
-  Si el archivo no existe, no pasa nada: manda la firma de la plantilla.
+plantilla-reconocimiento.png
+  La hoja base. Trae el logotipo puesto y deja libres las zonas que cambian
+  en cada reconocimiento: taller, nombre, nota, folio y firma.
+  Se regenera con: node scripts/plantilla.js marca/plantilla-reconocimiento.png
 
 machote-reconocimiento.png
-  Muestra de como queda un reconocimiento. Es una reconstruccion, no la
-  plantilla original: la tipografia y la firma son de relleno.
+  Como queda un reconocimiento ya armado, con los espacios marcados. Es una
+  muestra para revisar, la app no lo usa.
