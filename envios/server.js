@@ -55,6 +55,7 @@ app.get('/api/sesion', (req, res) => {
     correoListo: estaConfigurado(),
     plantillaLista: Boolean(almacen.getPlantilla()),
     firmaLista: almacen.hayFirma(),
+    plantillaTraeFirma: almacen.getPlantillaTraeFirma(),
     folioSiguiente: almacen.getFolioSiguiente(),
   });
 });
@@ -135,6 +136,11 @@ app.post('/api/firma', pedirAcceso, subir.single('archivo'), (req, res) => {
   res.json(almacen.guardarFirma(req.file.path));
 });
 
+// Para plantillas que ya traen la firma dibujada dentro.
+app.post('/api/plantilla-trae-firma', pedirAcceso, (req, res) => {
+  res.json({ plantillaTraeFirma: almacen.setPlantillaTraeFirma(req.body && req.body.valor) });
+});
+
 // Vista previa: muestra como quedaria el reconocimiento antes de mandarlo.
 app.get('/api/vista-previa', pedirAcceso, async (req, res) => {
   const plantilla = almacen.getPlantilla();
@@ -160,7 +166,7 @@ app.post('/api/enviar', pedirAcceso, async (req, res) => {
 
   if (!almacen.hayFirma()) {
     return res.status(400).json({
-      error: 'Falta subir la firma del Chef. Sin ella los reconocimientos saldrían con el espacio de la firma en blanco.',
+      error: 'Falta la firma del Chef. Súbela en Ajustes, o marca ahí que tu plantilla ya la trae dibujada.',
     });
   }
 

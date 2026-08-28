@@ -235,8 +235,23 @@ function getPlantilla() {
 // ---- Firma del chef ----
 const RUTA_FIRMA = path.join(__dirname, '..', 'marca', 'firma-chef.png');
 
+// La firma puede venir de dos lados: como archivo aparte, o ya dibujada dentro
+// de la plantilla. El segundo caso es el normal cuando la plantilla se exporta
+// de Canva, y no hay forma de detectarlo mirando la imagen, asi que se pregunta
+// una vez y se recuerda.
 function hayFirma() {
-  return fs.existsSync(RUTA_FIRMA);
+  return fs.existsSync(RUTA_FIRMA) || leer().plantillaTraeFirma === true;
+}
+
+function getPlantillaTraeFirma() {
+  return leer().plantillaTraeFirma === true;
+}
+
+function setPlantillaTraeFirma(valor) {
+  const d = leer();
+  d.plantillaTraeFirma = Boolean(valor);
+  guardar();
+  return d.plantillaTraeFirma;
 }
 
 function guardarFirma(rutaTemporal) {
@@ -293,6 +308,8 @@ module.exports = {
   setPlantilla,
   hayFirma,
   guardarFirma,
+  getPlantillaTraeFirma,
+  setPlantillaTraeFirma,
   getEnvios,
   crearEnvio,
   actualizarEnvio,

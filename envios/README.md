@@ -95,6 +95,16 @@ El archivo debe ir:
   se apoya sobre ella. Si la imagen trae su propia raya, salen dos encimadas.
 - Con fondo transparente (PNG), para que no tape la raya con un rectángulo blanco.
 
+### Si tu plantilla ya trae la firma
+
+Es lo más común cuando la plantilla se exporta de Canva: la firma ya viene
+dibujada dentro y no hace falta subirla aparte. En ese caso, en
+**Ajustes ▸ Firma del Chef** marca la casilla
+*"Mi plantilla ya trae la firma dibujada dentro"* y el envío se desbloquea.
+
+No se puede detectar solo mirando la imagen si una plantilla trae firma o no, por
+eso se pregunta una vez y queda guardado.
+
 ### Cambiar la plantilla (opcional)
 
 En **Ajustes ▸ Plantilla** puedes reemplazarla por otra, por ejemplo una página

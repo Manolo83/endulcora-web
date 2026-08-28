@@ -224,13 +224,25 @@ async function cargarHistorial() {
 // Es la unica pieza que la app no trae de fabrica, asi que se avisa fuerte
 // mientras falte y no se deja enviar nada.
 function pintarEstadoFirma() {
+  $('#traeFirma').checked = Boolean(SESION.plantillaTraeFirma);
   const falta = !SESION.firmaLista;
   $('#avisoFirma').classList.toggle('oculto', !falta);
   $('#estadoFirma').innerHTML = falta
     ? '<span class="et mal">falta</span>'
-    : '<span class="et ok">puesta</span>';
+    : `<span class="et ok">${SESION.plantillaTraeFirma ? 'viene en la plantilla' : 'puesta'}</span>`;
   revisarListo();
 }
+
+$('#traeFirma').addEventListener('change', async (e) => {
+  try {
+    const r = await api('/api/plantilla-trae-firma', {
+      metodo: 'POST', cuerpo: { valor: e.target.checked },
+    });
+    SESION.plantillaTraeFirma = r.plantillaTraeFirma;
+    SESION = await api('/api/sesion');
+    pintarEstadoFirma();
+  } catch (err) { aviso('#avisoFirmaSubir', err.message, 'mal'); }
+});
 
 $('#btnFirma').addEventListener('click', async () => {
   const f = $('#archivoFirma').files[0];
