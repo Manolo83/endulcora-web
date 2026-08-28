@@ -23,25 +23,66 @@ const DIR_FUENTES = path.join(__dirname, '..', 'fuentes');
 let FAMILIA_TITULO = 'Liberation Sans';
 let FAMILIA_NOMBRE = 'Liberation Sans';
 
+// Las tipografias viajan DENTRO del proyecto, en la carpeta fuentes/, y no se
+// dan por sentadas en el sistema.
+//
+// Esto no es un detalle: un servidor de despliegue arranca de una imagen
+// minima que normalmente NO trae ninguna tipografia instalada. Sin fuente, el
+// canvas no truena — dibuja el texto y no se ve nada. El reconocimiento sale
+// con el logo, la firma y los adornos (que son imagen) pero sin el nombre, el
+// taller ni el folio, y parece que la app "no personaliza" cuando en realidad
+// no tiene con que escribir.
 function cargarFuentes() {
-  if (!fs.existsSync(DIR_FUENTES)) return;
-  for (const archivo of fs.readdirSync(DIR_FUENTES)) {
-    if (!/\.(ttf|otf)$/i.test(archivo)) continue;
-    try {
-      GlobalFonts.registerFromPath(path.join(DIR_FUENTES, archivo));
-    } catch (e) {
-      console.error('No se pudo cargar la fuente', archivo, e.message);
+  let cargadas = 0;
+  if (fs.existsSync(DIR_FUENTES)) {
+    for (const archivo of fs.readdirSync(DIR_FUENTES)) {
+      if (!/\.(ttf|otf)$/i.test(archivo)) continue;
+      try {
+        GlobalFonts.registerFromPath(path.join(DIR_FUENTES, archivo));
+        cargadas++;
+      } catch (e) {
+        console.error('No se pudo cargar la fuente', archivo, e.message);
+      }
     }
   }
+
   const familias = GlobalFonts.families.map((f) => f.family);
-  const preferidas = ['Montserrat', 'Poppins', 'Raleway', 'Lato', 'Open Sans'];
-  const encontrada = preferidas.find((p) => familias.includes(p));
-  if (encontrada) {
-    FAMILIA_TITULO = encontrada;
-    FAMILIA_NOMBRE = encontrada;
+
+  // Se usa la primera de la lista que exista de verdad. Si un dia se agrega la
+  // tipografia de la marca a fuentes/, se toma sola sin tocar codigo.
+  const preferidas = [
+    'Montserrat', 'Poppins', 'Raleway', 'Lato', 'Open Sans',
+    'Liberation Sans', 'DejaVu Sans', 'Arial', 'Helvetica',
+  ];
+  const elegida = preferidas.find((f) => familias.includes(f)) || familias[0];
+
+  if (!elegida) {
+    console.error(
+      '[reconocimiento] No hay NINGUNA tipografía disponible. Los reconocimientos ' +
+      'saldrían sin nombre, taller ni folio. Revisa que la carpeta fuentes/ tenga ' +
+      'los archivos .ttf.'
+    );
+  } else {
+    FAMILIA_TITULO = elegida;
+    FAMILIA_NOMBRE = elegida;
+    console.log(`[reconocimiento] Tipografía: ${elegida} (${cargadas} archivo(s) propios, ${familias.length} familias disponibles)`);
   }
 }
 cargarFuentes();
+
+// Para poder revisar desde fuera con que tipografia esta escribiendo el
+// servidor, sin tener que entrar a los registros.
+function diagnosticoFuentes() {
+  const familias = GlobalFonts.families.map((f) => f.family);
+  return {
+    usando: FAMILIA_TITULO,
+    disponibles: familias.length,
+    familias: familias.slice(0, 40),
+    propias: fs.existsSync(DIR_FUENTES)
+      ? fs.readdirSync(DIR_FUENTES).filter((a) => /\.(ttf|otf)$/i.test(a))
+      : [],
+  };
+}
 
 // Posiciones expresadas como fraccion del ancho y alto de la hoja, para que
 // funcionen igual sin importar a que resolucion se exporte la pagina de Canva.
@@ -377,7 +418,7 @@ async function generarPDF(opciones) {
 }
 
 module.exports = {
-  generarPNG, generarPDF,
+  generarPNG, generarPDF, diagnosticoFuentes,
   ZONAS_POR_DEFECTO, LOGO_POR_DEFECTO, FIRMA_POR_DEFECTO,
   mesEnPalabras,
 };

@@ -1,3 +1,24 @@
-Pon aqui los archivos .ttf u .otf de la tipografia del diseno de Canva
-(por ejemplo Montserrat) para que el texto del reconocimiento quede identico.
-La app los carga sola al arrancar.
+TIPOGRAFIAS
+===========
+
+Estos archivos VIAJAN CON LA APP a proposito. No se dan por sentadas las
+tipografias del servidor.
+
+Por que: un servidor de despliegue arranca de una imagen minima que
+normalmente no trae ninguna tipografia instalada. Sin fuente, el canvas no
+falla — dibuja el texto y no se ve nada. El reconocimiento sale con el logo,
+la firma y los adornos (que son imagen) pero SIN el nombre, el taller ni el
+folio. Parece que la app no personaliza, cuando lo que pasa es que no tiene
+con que escribir.
+
+  LiberationSans-Regular.ttf   texto normal
+  LiberationSans-Bold.ttf      nombre y taller
+  LiberationSerif-Italic.ttf   respaldo
+
+Licencia SIL Open Font License 1.1: se pueden redistribuir.
+
+Para usar la tipografia de la marca, pon aqui su .ttf y agrega el nombre de
+la familia a la lista "preferidas" en src/reconocimiento.js. Se toma sola.
+
+Para revisar que tipografia esta usando el servidor: entra a la app y abre
+/api/diagnostico

@@ -10,7 +10,7 @@ const { UPLOAD_DIR, APP_PASSWORD } = require('./src/config');
 const almacen = require('./src/almacen');
 const { normalizarFilas } = require('./src/normalizar');
 const { buscarPersona } = require('./src/buscar');
-const { generarPDF, generarPNG } = require('./src/reconocimiento');
+const { generarPDF, generarPNG, diagnosticoFuentes } = require('./src/reconocimiento');
 const { enviarReconocimiento, estaConfigurado } = require('./src/correo');
 
 const app = express();
@@ -199,6 +199,12 @@ app.post('/api/firma', pedirAcceso, subir.single('archivo'), (req, res) => {
 // Para plantillas que ya traen la firma dibujada dentro.
 app.post('/api/plantilla-trae-firma', pedirAcceso, (req, res) => {
   res.json({ plantillaTraeFirma: almacen.setPlantillaTraeFirma(req.body && req.body.valor) });
+});
+
+// Para revisar desde el navegador con que tipografia esta escribiendo el
+// servidor. Si "disponibles" es 0, los reconocimientos salen sin texto.
+app.get('/api/diagnostico', pedirAcceso, (req, res) => {
+  res.json({ fuentes: diagnosticoFuentes() });
 });
 
 // Vista previa: muestra como quedaria el reconocimiento antes de mandarlo.
