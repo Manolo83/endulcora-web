@@ -219,8 +219,29 @@ function setFolioSiguiente(n) {
 }
 
 // ---- Plantilla del reconocimiento ----
+// La app trae una plantilla de fabrica en marca/, asi que funciona desde el
+// primer arranque sin tener que subir nada. Si alguien sube otra, esa manda.
+const PLANTILLA_DE_FABRICA = path.join(__dirname, '..', 'marca', 'plantilla-reconocimiento.png');
+
 function getPlantilla() {
-  return leer().plantilla;
+  const propia = leer().plantilla;
+  if (propia && fs.existsSync(propia.archivo)) return propia;
+  if (fs.existsSync(PLANTILLA_DE_FABRICA)) {
+    return { archivo: PLANTILLA_DE_FABRICA, deFabrica: true };
+  }
+  return null;
+}
+
+// ---- Firma del chef ----
+const RUTA_FIRMA = path.join(__dirname, '..', 'marca', 'firma-chef.png');
+
+function hayFirma() {
+  return fs.existsSync(RUTA_FIRMA);
+}
+
+function guardarFirma(rutaTemporal) {
+  fs.renameSync(rutaTemporal, RUTA_FIRMA);
+  return { archivo: RUTA_FIRMA, subida: new Date().toISOString() };
 }
 
 function setPlantilla(p) {
@@ -270,6 +291,8 @@ module.exports = {
   setFolioSiguiente,
   getPlantilla,
   setPlantilla,
+  hayFirma,
+  guardarFirma,
   getEnvios,
   crearEnvio,
   actualizarEnvio,

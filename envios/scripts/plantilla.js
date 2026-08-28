@@ -1,7 +1,8 @@
-// Genera una hoja de ejemplo que copia la geometria de la plantilla real de
-// Endulcora (la que trae "NOMBRE TALLER" y "NOMBRE ALUMNO"), incluido el
-// banderin morado del logotipo viejo. Sirve para probar el generador sin tener
-// que exportar el Canva.
+// Genera la plantilla del reconocimiento: la hoja base sobre la que la app
+// escribe el nombre, el taller, el folio y el mes de cada persona.
+//
+// Trae ya el logotipo actual y deja vacio el espacio de la firma, que se pone
+// aparte subiendo marca/firma-chef.png desde la app.
 const { createCanvas } = require('@napi-rs/canvas');
 const fs = require('fs');
 
@@ -71,8 +72,11 @@ x.font = `${0.0135 * H}px "Liberation Sans"`;
 x.fillText('PERMISO ST Y PS – CNI – 4509280013', 0.113 * W, 0.879 * H);
 
 // --- firma y cargo (fijos) ---
-x.font = `italic ${0.075 * H}px "Liberation Serif"`;
-x.fillText('Luis J.', 0.525 * W, 0.745 * H);
+// El espacio de la firma se deja EN BLANCO a proposito. Antes iba aqui un
+// garabato de relleno, pero esta hoja es la plantilla de la que salen los
+// reconocimientos de verdad: una firma inventada impresa junto a un numero de
+// permiso es peor que un espacio vacio. La firma real se pone desde la app,
+// subiendo marca/firma-chef.png.
 x.strokeStyle = '#2B2B2B'; x.lineWidth = 3;
 x.beginPath(); x.moveTo(0.390 * W, 0.798 * H); x.lineTo(0.660 * W, 0.798 * H); x.stroke();
 x.font = `bold ${0.024 * H}px "Liberation Sans"`;

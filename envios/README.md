@@ -79,34 +79,29 @@ Conviene que el remitente de los correos salga de un subdominio propio
 llegara a afectar la reputación del remitente, no arrastra al correo de la
 tienda.
 
-## Los dos pasos que hay que hacer una sola vez
+## Lo único que falta para poder enviar: la firma del Chef
 
-### 1. Subir la plantilla del reconocimiento
+La app ya trae puesta la plantilla del reconocimiento, con el logotipo actual.
+No hay que subir nada... salvo la firma.
 
-> **El logotipo se cambia solo.** La plantilla trae el logotipo viejo (el
-> banderín morado con ENDULCORA en blanco). La app lo tapa y dibuja encima el
-> que esté en `marca/logo-endulcora.png`. Por eso no hay que editar el PNG a
-> mano, y por eso también quedan corregidas las páginas viejas del Canva.
-> Para cambiar de logotipo, reemplaza ese archivo y ya; no se toca código.
+La firma va aparte porque es lo único que la app no puede traer de fábrica. En
+**Ajustes ▸ Firma del Chef** subes la imagen y listo. Mientras falte, el envío
+queda **bloqueado a propósito**: un reconocimiento con el espacio de la firma en
+blanco, junto a un número de permiso, es peor que no mandarlo.
 
+El archivo debe ir:
 
-En Canva abre **RECONOCIMIENTOS 7**, exporta **una** página como PNG y súbela en
-la pestaña *Ajustes*. No importa que traiga el nombre de otra persona: la app
-borra el nombre, el taller, el folio y el mes, y escribe los nuevos encima
-respetando el diseño (el óvalo beige, el logo, la firma y la línea del permiso
-se quedan intactos).
+- **Sin la raya de abajo.** Esa raya ya está dibujada en la plantilla y la firma
+  se apoya sobre ella. Si la imagen trae su propia raya, salen dos encimadas.
+- Con fondo transparente (PNG), para que no tape la raya con un rectángulo blanco.
 
-### La firma del Chef
+### Cambiar la plantilla (opcional)
 
-No hay que hacer nada: ya viene dibujada en la plantilla y la app no toca esa
-zona, así que pasa intacta. (La zona del logotipo llega hasta el 24,5% del
-ancho; la firma vive entre el 39% y el 66%, así que no se cruzan.)
+En **Ajustes ▸ Plantilla** puedes reemplazarla por otra, por ejemplo una página
+exportada de Canva. No importa que traiga los datos de otra persona: la app borra
+el nombre, el taller, el folio y el mes, y escribe los nuevos encima.
 
-Solo si algún día hay que reemplazarla sin rehacer el Canva, pon el archivo en
-`marca/firma-chef.png`, **sin la raya de abajo** (esa ya está en la plantilla) y
-con fondo transparente. Si el archivo no existe, no pasa nada.
-
-### 2. Cargar los contactos
+### Cargar los contactos
 
 En Google Sheets abre **Base de Datos Endulcora (respuestas)** y usa
 *Archivo ▸ Descargar ▸ CSV*. Sube ese archivo en *Ajustes*.

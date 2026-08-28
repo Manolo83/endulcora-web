@@ -66,7 +66,7 @@ async function arrancar() {
   $('#app').classList.remove('oculto');
   $('#etQuien').textContent = SESION.quien;
   $('#folioActual').textContent = `Siguiente folio: ${SESION.folioSiguiente}`;
-  if (!SESION.plantillaLista) $('#avisoPlantilla').classList.remove('oculto');
+  pintarEstadoFirma();
   $('#fechaTaller').value = new Date().toISOString().slice(0, 10);
 
   await cargarTablero();
@@ -147,7 +147,8 @@ $('#btnRevisar').addEventListener('click', () => {
 
 // ---------- paso 3: vista previa y envio ----------
 function revisarListo() {
-  const listo = Boolean($('#tallerElegido').value.trim()) && PERSONAS.length > 0 && SESION.plantillaLista;
+  const listo = Boolean($('#tallerElegido').value.trim()) && PERSONAS.length > 0
+    && SESION.plantillaLista && SESION.firmaLista;
   $('#btnEnviar').disabled = !listo;
   $('#btnEnviar').textContent = PERSONAS.length
     ? `Enviar ${PERSONAS.length} reconocimiento${PERSONAS.length > 1 ? 's' : ''}`
@@ -157,6 +158,7 @@ function revisarListo() {
 function pintarVistaPrevia() {
   const taller = $('#tallerElegido').value.trim();
   if (!taller || !PERSONAS.length || !SESION.plantillaLista) return;
+
   const p = PERSONAS[0];
   const url = `/api/vista-previa?nombre=${encodeURIComponent(p.nombre)}` +
               `&taller=${encodeURIComponent(taller)}&fecha=${encodeURIComponent($('#fechaTaller').value)}&t=${Date.now()}`;
@@ -217,6 +219,32 @@ async function cargarHistorial() {
   }
 }
 
+
+// ---------- firma del chef ----------
+// Es la unica pieza que la app no trae de fabrica, asi que se avisa fuerte
+// mientras falte y no se deja enviar nada.
+function pintarEstadoFirma() {
+  const falta = !SESION.firmaLista;
+  $('#avisoFirma').classList.toggle('oculto', !falta);
+  $('#estadoFirma').innerHTML = falta
+    ? '<span class="et mal">falta</span>'
+    : '<span class="et ok">puesta</span>';
+  revisarListo();
+}
+
+$('#btnFirma').addEventListener('click', async () => {
+  const f = $('#archivoFirma').files[0];
+  if (!f) return aviso('#avisoFirmaSubir', 'Primero elige la imagen de la firma.', 'mal');
+  const fd = new FormData(); fd.append('archivo', f);
+  try {
+    await api('/api/firma', { metodo: 'POST', form: fd });
+    SESION.firmaLista = true;
+    pintarEstadoFirma();
+    aviso('#avisoFirmaSubir', 'Firma puesta. Ya se pueden enviar reconocimientos.', 'ok');
+    $('#previaFirma').innerHTML =
+      `<img class="previa" src="/api/vista-previa?nombre=Nombre%20de%20ejemplo&taller=Taller%20de%20ejemplo&t=${Date.now()}" alt="Vista previa con la firma">`;
+  } catch (e) { aviso('#avisoFirmaSubir', e.message, 'mal'); }
+});
 
 // ---------- tablero de inicio ----------
 async function cargarTablero() {
@@ -394,7 +422,6 @@ $('#btnPlantilla').addEventListener('click', async () => {
     await api('/api/plantilla', { metodo: 'POST', form: fd });
     aviso('#avisoPlantillaSubir', 'Plantilla lista. Ya puedes generar reconocimientos.', 'ok');
     SESION.plantillaLista = true;
-    $('#avisoPlantilla').classList.add('oculto');
     revisarListo();
   } catch (e) { aviso('#avisoPlantillaSubir', e.message, 'mal'); }
 });

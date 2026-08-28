@@ -54,6 +54,7 @@ app.get('/api/sesion', (req, res) => {
     quien: (req.session && req.session.quien) || '',
     correoListo: estaConfigurado(),
     plantillaLista: Boolean(almacen.getPlantilla()),
+    firmaLista: almacen.hayFirma(),
     folioSiguiente: almacen.getFolioSiguiente(),
   });
 });
@@ -127,6 +128,13 @@ app.post('/api/plantilla', pedirAcceso, subir.single('archivo'), (req, res) => {
   res.json(almacen.setPlantilla({ archivo: destino, subida: new Date().toISOString() }));
 });
 
+// La firma del Chef. Va aparte de la plantilla porque es lo unico que la app
+// no puede traer de fabrica: tiene que subirla alguien de Endulcora.
+app.post('/api/firma', pedirAcceso, subir.single('archivo'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta la imagen de la firma.' });
+  res.json(almacen.guardarFirma(req.file.path));
+});
+
 // Vista previa: muestra como quedaria el reconocimiento antes de mandarlo.
 app.get('/api/vista-previa', pedirAcceso, async (req, res) => {
   const plantilla = almacen.getPlantilla();
@@ -149,6 +157,12 @@ app.get('/api/vista-previa', pedirAcceso, async (req, res) => {
 app.post('/api/enviar', pedirAcceso, async (req, res) => {
   const plantilla = almacen.getPlantilla();
   if (!plantilla) return res.status(400).json({ error: 'Falta subir la plantilla del reconocimiento.' });
+
+  if (!almacen.hayFirma()) {
+    return res.status(400).json({
+      error: 'Falta subir la firma del Chef. Sin ella los reconocimientos saldrían con el espacio de la firma en blanco.',
+    });
+  }
 
   const { taller, fecha, participantes } = req.body || {};
   if (!String(taller || '').trim()) return res.status(400).json({ error: 'Falta el nombre del taller.' });

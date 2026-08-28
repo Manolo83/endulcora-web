@@ -143,8 +143,9 @@
 
   <!-- ===== ENVIAR ===== -->
   <section id="tab-enviar" class="oculto">
-    <div id="avisoPlantilla" class="aviso info oculto">
-      Todavía no subes la plantilla del reconocimiento. Ve a <strong>Ajustes</strong> para subirla; sin ella no se puede generar nada.
+    <div id="avisoFirma" class="aviso info oculto">
+      <strong>Falta la firma del Chef.</strong> Los reconocimientos saldrían con ese espacio en blanco,
+      así que el envío está bloqueado hasta que la subas. Ve a <strong>Ajustes ▸ Firma del Chef</strong>.
     </div>
 
     <div class="tarjeta">
@@ -219,11 +220,25 @@ Erika Amador Rocha"></textarea>
   <!-- ===== AJUSTES ===== -->
   <section id="tab-ajustes" class="oculto">
     <div class="tarjeta">
+      <h2 style="margin:0 0 4px;font-size:16px">Firma del Chef <span id="estadoFirma"></span></h2>
+      <p class="chico" style="margin:0 0 12px">
+        Es lo único que la app no puede traer puesto. Sube aquí la imagen de la firma
+        del Chef Luis Alfonso: <strong>sin la raya de abajo</strong> (esa ya está en la
+        plantilla, la firma se apoya sobre ella) y de preferencia con fondo transparente.
+        Hasta que la subas, el envío queda bloqueado.
+      </p>
+      <input type="file" id="archivoFirma" accept="image/png,image/jpeg">
+      <button class="btn" id="btnFirma" style="margin-top:12px">Subir firma</button>
+      <div id="avisoFirmaSubir"></div>
+      <div id="previaFirma"></div>
+    </div>
+
+    <div class="tarjeta">
       <h2 style="margin:0 0 4px;font-size:16px">Plantilla del reconocimiento</h2>
       <p class="chico" style="margin:0 0 12px">
-        Sube <strong>una página</strong> del Canva "RECONOCIMIENTOS 7" exportada como PNG.
-        No importa que traiga el nombre de otra persona: la app borra el nombre, el taller,
-        el folio y el mes, y escribe los nuevos encima.
+        La app ya trae la plantilla puesta, con el logotipo actual: no hace falta subir nada.
+        Solo usa esto si quieres cambiarla por otra — por ejemplo una página exportada de Canva.
+        No importa que traiga los datos de otra persona: la app los borra y escribe los nuevos.
       </p>
       <input type="file" id="archivoPlantilla" accept="image/png,image/jpeg">
       <button class="btn" id="btnPlantilla" style="margin-top:12px">Subir plantilla</button>
