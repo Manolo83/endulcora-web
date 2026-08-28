@@ -47,11 +47,32 @@ cargarFuentes();
 // funcionen igual sin importar a que resolucion se exporte la pagina de Canva.
 // Se pueden ajustar desde la pantalla de Plantilla sin tocar este archivo.
 const ZONAS_POR_DEFECTO = {
-  taller: { x: 0.12, y: 0.272, w: 0.76, h: 0.062, tam: 0.030, peso: 'bold', mayusculas: true },
-  nombre: { x: 0.12, y: 0.425, w: 0.76, h: 0.105, tam: 0.052, peso: 'normal', mayusculas: false },
-  texto: { x: 0.15, y: 0.552, w: 0.70, h: 0.088, tam: 0.0165, peso: 'normal', mayusculas: false },
-  folio: { x: 0.034, y: 0.851, w: 0.142, h: 0.024, tam: 0.0125, peso: 'normal', mayusculas: false },
+  // Medidas tomadas de la plantilla limpia (la que trae "NOMBRE TALLER" y
+  // "NOMBRE ALUMNO"). Cada zona se queda corta a proposito para no morder los
+  // elementos fijos de alrededor:
+  //   - "nombre" termina antes de la linea dorada que va debajo del nombre.
+  //     Esa linea es mas oscura que el blanco, asi que si entrara en la zona el
+  //     borrado se la llevaria.
+  //   - "folio" termina antes del renglon del permiso, que no cambia nunca.
+  taller: { x: 0.12, y: 0.298, w: 0.76, h: 0.055, tam: 0.030, peso: 'bold', mayusculas: true },
+  nombre: { x: 0.12, y: 0.460, w: 0.76, h: 0.070, tam: 0.045, peso: 'bold', mayusculas: true },
+  texto: { x: 0.16, y: 0.556, w: 0.68, h: 0.078, tam: 0.0165, peso: 'normal', mayusculas: false },
+  folio: { x: 0.034, y: 0.825, w: 0.142, h: 0.026, tam: 0.0125, peso: 'normal', mayusculas: false },
 };
+
+// El logotipo viejo de la plantilla (el banderin morado con ENDULCORA en
+// blanco) se tapa y encima se dibuja el logotipo actual. Se hace aqui y no
+// editando el PNG a mano para que tambien queden corregidas las paginas
+// antiguas del Canva, y para que un cambio de marca sea cambiar un archivo.
+//
+//   tapar  = el pedazo de hoja que ocupa el logotipo viejo
+//   poner  = donde se acomoda el nuevo; se ajusta solo sin deformarse
+const LOGO_POR_DEFECTO = {
+  tapar: { x: 0, y: 0.610, w: 0.245, h: 0.200, fondo: '#FFFFFF' },
+  poner: { x: 0.022, y: 0.640, w: 0.205, h: 0.140 },
+};
+
+const RUTA_LOGO = path.join(__dirname, '..', 'marca', 'logo-endulcora.png');
 
 const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -90,6 +111,43 @@ function colorDeFondo(ctx, x, y, w, h) {
     if (n > max) { max = n; mejor = clave; }
   }
   return `rgb(${mejor})`;
+}
+
+
+// Tapa el logotipo viejo y dibuja encima el actual, ajustandolo dentro de su
+// espacio sin deformarlo (se respeta su proporcion y se centra).
+async function ponerLogo(ctx, W, H, config) {
+  const cfg = {
+    tapar: { ...LOGO_POR_DEFECTO.tapar, ...((config && config.tapar) || {}) },
+    poner: { ...LOGO_POR_DEFECTO.poner, ...((config && config.poner) || {}) },
+  };
+  if (config === false) return;
+  if (!fs.existsSync(RUTA_LOGO)) {
+    console.error('No encontré el logotipo en', RUTA_LOGO, '— se deja el de la plantilla.');
+    return;
+  }
+
+  // Se tapa con un rectangulo liso, no borrando pixel por pixel: el logotipo
+  // viejo es una figura morada grande, no texto sobre un fondo parejo.
+  const t = cfg.tapar;
+  ctx.fillStyle = t.fondo || '#FFFFFF';
+  ctx.fillRect(t.x * W, t.y * H, t.w * W, t.h * H);
+
+  const imagen = await loadImage(fs.readFileSync(RUTA_LOGO));
+  const caja = cfg.poner;
+  const cajaW = caja.w * W;
+  const cajaH = caja.h * H;
+  const escala = Math.min(cajaW / imagen.width, cajaH / imagen.height);
+  const anchoFinal = imagen.width * escala;
+  const altoFinal = imagen.height * escala;
+
+  ctx.drawImage(
+    imagen,
+    caja.x * W + (cajaW - anchoFinal) / 2,
+    caja.y * H + (cajaH - altoFinal) / 2,
+    anchoFinal,
+    altoFinal
+  );
 }
 
 // Borra el texto de una zona sin destruir la figura que tiene detras.
@@ -181,7 +239,7 @@ function partirEnLineas(ctx, texto, anchoMax) {
  * @param {string|Date} opciones.fecha     fecha del taller (para el mes y anio)
  * @param {object} [opciones.zonas]        posiciones personalizadas
  */
-async function dibujar({ rutaPlantilla, nombre, taller, folio, fecha, zonas }) {
+async function dibujar({ rutaPlantilla, nombre, taller, folio, fecha, zonas, logo }) {
   // loadImage no acepta una ruta suelta, hay que pasarle el archivo ya leido.
   const imagen = await loadImage(
     Buffer.isBuffer(rutaPlantilla) ? rutaPlantilla : fs.readFileSync(rutaPlantilla)
@@ -193,6 +251,7 @@ async function dibujar({ rutaPlantilla, nombre, taller, folio, fecha, zonas }) {
   ctx.drawImage(imagen, 0, 0);
 
   const z = { ...ZONAS_POR_DEFECTO, ...(zonas || {}) };
+  await ponerLogo(ctx, W, H, logo);
   const { mes, anio } = mesEnPalabras(fecha || new Date());
 
   const tallerLimpio = String(taller || '').trim();
@@ -265,4 +324,4 @@ async function generarPDF(opciones) {
   });
 }
 
-module.exports = { generarPNG, generarPDF, ZONAS_POR_DEFECTO, mesEnPalabras };
+module.exports = { generarPNG, generarPDF, ZONAS_POR_DEFECTO, LOGO_POR_DEFECTO, mesEnPalabras };

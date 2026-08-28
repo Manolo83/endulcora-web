@@ -83,6 +83,13 @@ tienda.
 
 ### 1. Subir la plantilla del reconocimiento
 
+> **El logotipo se cambia solo.** La plantilla trae el logotipo viejo (el
+> banderín morado con ENDULCORA en blanco). La app lo tapa y dibuja encima el
+> que esté en `marca/logo-endulcora.png`. Por eso no hay que editar el PNG a
+> mano, y por eso también quedan corregidas las páginas viejas del Canva.
+> Para cambiar de logotipo, reemplaza ese archivo y ya; no se toca código.
+
+
 En Canva abre **RECONOCIMIENTOS 7**, exporta **una** página como PNG y súbela en
 la pestaña *Ajustes*. No importa que traiga el nombre de otra persona: la app
 borra el nombre, el taller, el folio y el mes, y escribe los nuevos encima
@@ -122,8 +129,14 @@ archivo `.ttf` de la fuente del diseño en la carpeta `fuentes/` y reinicia; se
 carga sola.
 
 Las posiciones del nombre, el taller, el folio y la línea descriptiva están en
-`src/reconocimiento.js`, en `ZONAS_POR_DEFECTO`, expresadas como fracción de la
-hoja para que funcionen a cualquier resolución de exportación.
+`src/reconocimiento.js`, en `ZONAS_POR_DEFECTO`; las del logotipo, en
+`LOGO_POR_DEFECTO`. Van como fracción de la hoja para que funcionen a cualquier
+resolución de exportación.
+
+Cada zona se queda corta a propósito para no morder lo que no cambia: la de
+`nombre` termina antes de la línea dorada, y la de `folio` antes del renglón del
+permiso. El borrado quita solo los píxeles más oscuros que el fondo, así que el
+óvalo beige y los adornos de las esquinas se quedan intactos.
 
 ## Todavía no está hecho
 
