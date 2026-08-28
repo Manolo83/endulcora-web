@@ -8,6 +8,34 @@ fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const ARCHIVO = path.join(DATA_DIR, 'endulcora-envios.json');
 
+// ¿Los datos estan en un disco que sobrevive a los redespliegues?
+//
+// En un servidor, un volumen se monta como un sistema de archivos aparte. Si
+// DATA_DIR vive en el mismo disco que la raiz, entonces NO hay volumen: los
+// datos estan dentro del contenedor y se borran enteros en cada actualizacion.
+//
+// Se comprueba comparando el identificador de dispositivo de las dos rutas.
+// Sin esto el fallo es mudo: la app funciona, se importan miles de contactos,
+// y desaparecen en el siguiente despliegue sin que nada lo haya advertido.
+function datosSonPermanentes() {
+  // En una computadora personal no hay volumen que valga: siempre es permanente.
+  if (!process.env.RAILWAY_ENVIRONMENT && !process.env.PORT) return true;
+  try {
+    return fs.statSync(DATA_DIR).dev !== fs.statSync('/').dev;
+  } catch (e) {
+    return true; // Ante la duda no se alarma.
+  }
+}
+
+const DATOS_PERMANENTES = datosSonPermanentes();
+if (!DATOS_PERMANENTES) {
+  console.error(
+    '[almacen] ATENCIÓN: ' + DATA_DIR + ' no está en un volumen. Todo lo que se ' +
+    'guarde (contactos, historial, folios) se BORRARÁ en el próximo despliegue. ' +
+    'En Railway: clic derecho en el servicio → Attach Volume → ruta ' + DATA_DIR
+  );
+}
+
 // Estructura inicial. El folio arranca donde va tu hoja "RECONOCIMIENTOS HECHOS"
 // para que la numeracion siga siendo continua y no se repita ningun folio.
 function datosPorDefecto() {
@@ -290,6 +318,7 @@ function actualizarEnvio(idEnvio, cambios) {
 
 module.exports = {
   DATA_DIR,
+  DATOS_PERMANENTES,
   UPLOAD_DIR,
   catalogo,
   getContactos,

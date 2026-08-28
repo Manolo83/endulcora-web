@@ -57,6 +57,7 @@ app.get('/api/sesion', (req, res) => {
     plantillaLista: Boolean(almacen.getPlantilla()),
     firmaLista: almacen.hayFirma(),
     plantillaTraeFirma: almacen.getPlantillaTraeFirma(),
+    datosPermanentes: almacen.DATOS_PERMANENTES,
     folioSiguiente: almacen.getFolioSiguiente(),
   });
 });

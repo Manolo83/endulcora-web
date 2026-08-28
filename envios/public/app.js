@@ -68,6 +68,9 @@ async function arrancar() {
   $('#etQuien').textContent = SESION.quien;
   $('#folioActual').textContent = `Siguiente folio: ${SESION.folioSiguiente}`;
   pintarEstadoFirma();
+  // Si los datos no van a sobrevivir al siguiente despliegue, hay que decirlo
+  // antes de que alguien importe miles de contactos y los pierda.
+  $('#avisoVolumen').classList.toggle('oculto', SESION.datosPermanentes !== false);
   $('#fechaTaller').value = new Date().toISOString().slice(0, 10);
 
   await cargarTablero();
