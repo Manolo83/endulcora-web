@@ -96,6 +96,16 @@ borra el nombre, el taller, el folio y el mes, y escribe los nuevos encima
 respetando el diseño (el óvalo beige, el logo, la firma y la línea del permiso
 se quedan intactos).
 
+### La firma del Chef
+
+No hay que hacer nada: ya viene dibujada en la plantilla y la app no toca esa
+zona, así que pasa intacta. (La zona del logotipo llega hasta el 24,5% del
+ancho; la firma vive entre el 39% y el 66%, así que no se cruzan.)
+
+Solo si algún día hay que reemplazarla sin rehacer el Canva, pon el archivo en
+`marca/firma-chef.png`, **sin la raya de abajo** (esa ya está en la plantilla) y
+con fondo transparente. Si el archivo no existe, no pasa nada.
+
 ### 2. Cargar los contactos
 
 En Google Sheets abre **Base de Datos Endulcora (respuestas)** y usa

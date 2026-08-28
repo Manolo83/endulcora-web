@@ -74,6 +74,22 @@ const LOGO_POR_DEFECTO = {
 
 const RUTA_LOGO = path.join(__dirname, '..', 'marca', 'logo-endulcora.png');
 
+// La firma del chef normalmente NO hace falta ponerla: ya viene dibujada en la
+// plantilla y ninguna zona la toca, asi que pasa intacta. Esto es por si algun
+// dia hay que reemplazarla sin rehacer el Canva: si existe el archivo
+// marca/firma-chef.png, se tapa la firma vieja y se dibuja la nueva; si no
+// existe, no se hace nada y se respeta la de la plantilla.
+//
+// El archivo debe venir SIN la raya de abajo: esa raya ya esta en la plantilla
+// y la firma se apoya sobre ella.
+const RUTA_FIRMA = path.join(__dirname, '..', 'marca', 'firma-chef.png');
+
+const FIRMA_POR_DEFECTO = {
+  tapar: { x: 0.360, y: 0.690, w: 0.330, h: 0.102, fondo: '#FFFFFF' },
+  // La firma se apoya sobre la raya que ya trae la plantilla.
+  poner: { x: 0.385, y: 0.700, w: 0.280, h: 0.098 },
+};
+
 const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
@@ -147,6 +163,40 @@ async function ponerLogo(ctx, W, H, config) {
     caja.y * H + (cajaH - altoFinal) / 2,
     anchoFinal,
     altoFinal
+  );
+}
+
+
+// Reemplaza la firma del chef, solo si hay un archivo que poner. Sin archivo no
+// toca nada: la plantilla ya trae la firma y esa es la que vale.
+async function ponerFirma(ctx, W, H, config) {
+  if (config === false) return;
+  if (!fs.existsSync(RUTA_FIRMA)) return;
+
+  const cfg = {
+    tapar: { ...FIRMA_POR_DEFECTO.tapar, ...((config && config.tapar) || {}) },
+    poner: { ...FIRMA_POR_DEFECTO.poner, ...((config && config.poner) || {}) },
+  };
+
+  const t = cfg.tapar;
+  ctx.fillStyle = t.fondo || '#FFFFFF';
+  ctx.fillRect(t.x * W, t.y * H, t.w * W, t.h * H);
+
+  const imagen = await loadImage(fs.readFileSync(RUTA_FIRMA));
+  const caja = cfg.poner;
+  const cajaW = caja.w * W;
+  const cajaH = caja.h * H;
+  const escala = Math.min(cajaW / imagen.width, cajaH / imagen.height);
+  const ancho = imagen.width * escala;
+  const alto = imagen.height * escala;
+
+  // Centrada de lado a lado y pegada abajo, para que se apoye en la raya.
+  ctx.drawImage(
+    imagen,
+    caja.x * W + (cajaW - ancho) / 2,
+    caja.y * H + (cajaH - alto),
+    ancho,
+    alto
   );
 }
 
@@ -239,7 +289,7 @@ function partirEnLineas(ctx, texto, anchoMax) {
  * @param {string|Date} opciones.fecha     fecha del taller (para el mes y anio)
  * @param {object} [opciones.zonas]        posiciones personalizadas
  */
-async function dibujar({ rutaPlantilla, nombre, taller, folio, fecha, zonas, logo }) {
+async function dibujar({ rutaPlantilla, nombre, taller, folio, fecha, zonas, logo, firma }) {
   // loadImage no acepta una ruta suelta, hay que pasarle el archivo ya leido.
   const imagen = await loadImage(
     Buffer.isBuffer(rutaPlantilla) ? rutaPlantilla : fs.readFileSync(rutaPlantilla)
@@ -252,6 +302,7 @@ async function dibujar({ rutaPlantilla, nombre, taller, folio, fecha, zonas, log
 
   const z = { ...ZONAS_POR_DEFECTO, ...(zonas || {}) };
   await ponerLogo(ctx, W, H, logo);
+  await ponerFirma(ctx, W, H, firma);
   const { mes, anio } = mesEnPalabras(fecha || new Date());
 
   const tallerLimpio = String(taller || '').trim();
@@ -324,4 +375,8 @@ async function generarPDF(opciones) {
   });
 }
 
-module.exports = { generarPNG, generarPDF, ZONAS_POR_DEFECTO, LOGO_POR_DEFECTO, mesEnPalabras };
+module.exports = {
+  generarPNG, generarPDF,
+  ZONAS_POR_DEFECTO, LOGO_POR_DEFECTO, FIRMA_POR_DEFECTO,
+  mesEnPalabras,
+};
