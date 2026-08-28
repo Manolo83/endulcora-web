@@ -127,14 +127,29 @@ $('#btnRevisar').addEventListener('click', async () => {
 function pintarRevision() {
   const listas = RESUELTOS.filter((x) => x.estado === 'encontrada');
   const pendientes = RESUELTOS.filter((x) => x.estado !== 'encontrada');
-  PERSONAS = listas.map((x) => ({ nombre: x.nombre, email: x.email, contactoId: x.contactoId }));
+  // Todas entran palomeadas; quitar a alguien es un clic.
+  listas.forEach((x) => { if (x.enviar === undefined) x.enviar = true; });
+  PERSONAS = listas.filter((x) => x.enviar)
+    .map((x) => ({ nombre: x.nombre, email: x.email, contactoId: x.contactoId }));
 
   let html = '';
 
   if (listas.length) {
-    html += `<div class="aviso ok">Encontré a <strong>${listas.length}</strong> de ${RESUELTOS.length}.</div>
-      <table><thead><tr><th>Escribiste</th><th>Es</th><th>Correo</th></tr></thead><tbody>` +
-      listas.map((x) => `<tr>
+    const marcadas = listas.filter((x) => x.enviar).length;
+    html += `<div class="aviso ok">
+        Encontré a <strong>${listas.length}</strong> de ${RESUELTOS.length}.
+        ${marcadas === listas.length
+          ? 'Quita la palomita a quien no deba recibirlo.'
+          : `<strong>${marcadas}</strong> van a recibirlo.`}
+      </div>
+      <table><thead><tr>
+        <th style="width:34px"><input type="checkbox" id="todas" ${marcadas === listas.length ? 'checked' : ''}
+          aria-label="Marcar o desmarcar a todas"></th>
+        <th>Escribiste</th><th>Es</th><th>Correo</th>
+      </tr></thead><tbody>` +
+      listas.map((x) => `<tr class="${x.enviar ? '' : 'apagada'}">
+        <td><input type="checkbox" data-marca="${escapar(x.escrito)}" ${x.enviar ? 'checked' : ''}
+          aria-label="Enviar a ${escapar(x.nombre)}"></td>
         <td class="chico">${escapar(x.escrito)}</td>
         <td>${escapar(x.nombre)}${x.origen === 'escrito' ? ' <span class="et ok">a mano</span>' : ''}</td>
         <td class="chico">${escapar(x.email)}</td>
@@ -168,6 +183,18 @@ function pintarRevision() {
   }
 
   $('#resultadoRevision').innerHTML = html;
+
+  $('#resultadoRevision').querySelectorAll('[data-marca]').forEach((casilla) => {
+    casilla.addEventListener('change', () => {
+      const p = RESUELTOS.find((x) => x.escrito === casilla.dataset.marca);
+      if (p) { p.enviar = casilla.checked; pintarRevision(); }
+    });
+  });
+  const todas = $('#todas');
+  if (todas) todas.addEventListener('change', () => {
+    RESUELTOS.filter((x) => x.estado === 'encontrada').forEach((x) => { x.enviar = todas.checked; });
+    pintarRevision();
+  });
 
   $('#resultadoRevision').querySelectorAll('[data-elegir]').forEach((fila) => {
     fila.addEventListener('click', () => {

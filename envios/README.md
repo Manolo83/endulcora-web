@@ -50,14 +50,22 @@ npm start                 # queda en http://localhost:3100
    nombre esté completo: la app busca entre las 3,396 clientas y lo saca sola.
    Con *"Elsa Judith Lorenzana"* encuentra a *"Elsa Judith Lorenzana Basaldúa"*,
    sin importar acentos ni mayúsculas.
-3. **Resuelves lo que quede dudoso.** Si varias se parecen — escribir "Maria"
+3. **Eliges a quién sí.** Todas entran palomeadas; quitarle la palomita a
+   alguien lo saca del envío. También hay una palomita arriba para marcar o
+   desmarcar a todas de un golpe.
+4. **Resuelves lo que quede dudoso.** Si varias se parecen — escribir "Maria"
    da muchas — la app las muestra y eliges. Si alguien no está en la base, se lo
    dices con `Nombre, sucorreo@ejemplo.com` y se da de alta sola al enviar.
-4. **Revisas la vista previa** con el reconocimiento real de la primera persona.
-5. **Envías.** Cada quien recibe su PDF con su folio, y queda en el historial.
+5. **Revisas la vista previa** con el reconocimiento real de la primera persona.
+6. **Envías.** Cada quien recibe su PDF con su folio, y queda en el historial.
 
 La búsqueda corre en el servidor, contra la base completa. Nunca se manda la
 lista de clientas al navegador.
+
+El envío es uno por uno con una pausa de 350 ms entre correos, para no pegarle
+al límite de Resend. Cada quien recibe **su propio PDF**, con su nombre y su
+folio. Si uno rebota, los demás siguen y ese folio no se gasta: queda libre
+para el reintento.
 
 ## Publicarla para que Lex y Alek entren desde su compu
 
