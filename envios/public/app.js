@@ -6,7 +6,8 @@ const $$ = (s) => document.querySelectorAll(s);
 
 let TALLERES = [];
 let PERSONAS = [];      // lista ya revisada, lista para enviar
-let CONTACTOS = [];     // cache de la base, para emparejar por nombre
+let RESUELTOS = [];     // lo que la base encontro para cada nombre escrito
+let CONTACTOS = [];     // cache para la pantalla de contactos
 let SESION = {};
 
 // ---------- utilidades ----------
@@ -72,9 +73,10 @@ async function arrancar() {
   await cargarTablero();
   TALLERES = await api('/api/talleres');
   pintarVinetas('');
-  const c = await api('/api/contactos');
-  CONTACTOS = c.resultados;
-  $('#totalContactos').textContent = `(${c.total} personas)`;
+  // Ya no se precarga la base al entrar: antes se traian 200 contactos para
+  // emparejar nombres en el navegador, pero eso dejaba fuera al 94% de las
+  // 3,396 personas. Ahora la busqueda la hace el servidor contra la base
+  // completa, en /api/resolver.
 }
 
 // ---------- paso 1: vinetas de talleres ----------
@@ -100,50 +102,94 @@ $('#buscaTaller').addEventListener('input', (e) => pintarVinetas(e.target.value)
 $('#tallerElegido').addEventListener('input', revisarListo);
 
 // ---------- paso 2: revisar la lista de personas ----------
-$('#btnRevisar').addEventListener('click', () => {
+$('#btnRevisar').addEventListener('click', async () => {
   const renglones = $('#listaPersonas').value.split('\n').map((r) => r.trim()).filter(Boolean);
-  PERSONAS = [];
-  const problemas = [];
-
-  for (const renglon of renglones) {
-    // Se acepta "Nombre, correo" o solo "Nombre" (se busca en la base).
-    const partes = renglon.split(',').map((p) => p.trim());
-    let nombre = partes[0];
-    let email = partes.slice(1).find((p) => p.includes('@')) || '';
-
-    if (!email) {
-      const hallado = CONTACTOS.find((c) => sinAcentos(c.nombre) === sinAcentos(nombre));
-      if (hallado) email = hallado.email;
-    }
-    if (!nombre) continue;
-    if (!email) {
-      problemas.push(`<strong>${nombre}</strong> — no encontré su correo. Escríbelo después de una coma.`);
-      continue;
-    }
-    if (!/^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/.test(email)) {
-      problemas.push(`<strong>${nombre}</strong> — el correo <em>${email}</em> no se ve bien escrito.`);
-      continue;
-    }
-    PERSONAS.push({ nombre, email });
+  if (!renglones.length) {
+    $('#resultadoRevision').innerHTML = '<div class="aviso info">Todavía no escribes a nadie.</div>';
+    return;
   }
+
+  $('#btnRevisar').disabled = true;
+  $('#resultadoRevision').innerHTML = '<p class="chico">Buscando en la base…</p>';
+  try {
+    const r = await api('/api/resolver', { metodo: 'POST', cuerpo: { nombres: renglones } });
+    RESUELTOS = r.resultados;
+    pintarRevision();
+  } catch (e) {
+    $('#resultadoRevision').innerHTML = `<div class="aviso mal">${e.message}</div>`;
+  } finally {
+    $('#btnRevisar').disabled = false;
+  }
+});
+
+// Dibuja el resultado de la busqueda en tres grupos, para que se vea de un
+// vistazo que esta resuelto y que falta por decidir.
+function pintarRevision() {
+  const listas = RESUELTOS.filter((x) => x.estado === 'encontrada');
+  const pendientes = RESUELTOS.filter((x) => x.estado !== 'encontrada');
+  PERSONAS = listas.map((x) => ({ nombre: x.nombre, email: x.email, contactoId: x.contactoId }));
 
   let html = '';
-  if (PERSONAS.length) {
-    html += `<div class="aviso ok">Listas para enviar: <strong>${PERSONAS.length}</strong></div>
-      <table><thead><tr><th>Nombre</th><th>Correo</th></tr></thead><tbody>` +
-      PERSONAS.map((p) => `<tr><td>${p.nombre}</td><td class="chico">${p.email}</td></tr>`).join('') +
-      `</tbody></table>`;
+
+  if (listas.length) {
+    html += `<div class="aviso ok">Encontré a <strong>${listas.length}</strong> de ${RESUELTOS.length}.</div>
+      <table><thead><tr><th>Escribiste</th><th>Es</th><th>Correo</th></tr></thead><tbody>` +
+      listas.map((x) => `<tr>
+        <td class="chico">${escapar(x.escrito)}</td>
+        <td>${escapar(x.nombre)}${x.origen === 'escrito' ? ' <span class="et ok">a mano</span>' : ''}</td>
+        <td class="chico">${escapar(x.email)}</td>
+      </tr>`).join('') + `</tbody></table>`;
   }
-  if (problemas.length) {
-    html += `<div class="aviso mal"><strong>Revisa ${problemas.length}:</strong><br>${problemas.join('<br>')}</div>`;
+
+  for (const p of pendientes) {
+    if (p.estado === 'ambigua') {
+      html += `<div class="aviso info" style="margin-bottom:0">
+        Escribiste <strong>${escapar(p.escrito)}</strong> y hay varias parecidas. ¿Cuál es?
+      </div><table><tbody>` +
+        p.candidatas.map((c) => `<tr class="clic" data-elegir="${c.id}" data-escrito="${escapar(p.escrito)}">
+          <td>${escapar(c.nombre)}</td>
+          <td class="chico">${escapar(c.email || 'sin correo')}</td>
+          <td class="chico">${escapar(c.telefono || '')}</td>
+        </tr>`).join('') +
+        `<tr class="clic" data-ninguna="${escapar(p.escrito)}">
+          <td colspan="3" class="chico">Ninguna de estas — la escribo a mano</td></tr>` +
+        `</tbody></table>`;
+    } else if (p.estado === 'sin-datos') {
+      html += `<div class="aviso mal"><strong>${escapar(p.nombre)}</strong> está en la base pero
+        no tiene correo. Escríbelo así: <em>${escapar(p.escrito)}, sucorreo@ejemplo.com</em></div>`;
+    } else if (p.estado === 'repetida') {
+      html += `<div class="aviso mal">Escribiste <strong>${escapar(p.escrito)}</strong> dos veces
+        (ambas apuntan a ${escapar(p.nombre)}). Quita una.</div>`;
+    } else {
+      html += `<div class="aviso mal">No encontré a <strong>${escapar(p.escrito)}</strong> en la base.
+        Agrégale el correo así: <em>${escapar(p.escrito)}, sucorreo@ejemplo.com</em>
+        — y se dará de alta sola al enviar.</div>`;
+    }
   }
-  if (!PERSONAS.length && !problemas.length) {
-    html = `<div class="aviso info">Todavía no escribes a nadie.</div>`;
-  }
+
   $('#resultadoRevision').innerHTML = html;
+
+  $('#resultadoRevision').querySelectorAll('[data-elegir]').forEach((fila) => {
+    fila.addEventListener('click', () => {
+      const p = RESUELTOS.find((x) => x.escrito === fila.dataset.escrito);
+      const c = p && p.candidatas.find((y) => y.id === fila.dataset.elegir);
+      if (!c) return;
+      if (!c.email) { alert(`${c.nombre} no tiene correo guardado. Escríbelo a mano después de una coma.`); return; }
+      p.estado = 'encontrada';
+      p.contactoId = c.id; p.nombre = c.nombre; p.email = c.email; p.origen = 'base';
+      pintarRevision();
+    });
+  });
+  $('#resultadoRevision').querySelectorAll('[data-ninguna]').forEach((fila) => {
+    fila.addEventListener('click', () => {
+      const p = RESUELTOS.find((x) => x.escrito === fila.dataset.ninguna);
+      if (p) { p.estado = 'no-esta'; p.candidatas = []; pintarRevision(); }
+    });
+  });
+
   revisarListo();
   if (PERSONAS.length) pintarVistaPrevia();
-});
+}
 
 // ---------- paso 3: vista previa y envio ----------
 function revisarListo() {
@@ -413,6 +459,7 @@ $('#buscaContacto').addEventListener('input', () => {
 async function buscarContactos() {
   const q = $('#buscaContacto').value.trim();
   const r = await api(`/api/contactos?buscar=${encodeURIComponent(q)}`);
+  $('#totalContactos').textContent = `(${r.total} personas)`;
   CONTACTOS = r.resultados;
   $('#totalContactos').textContent = `(${r.total} personas)`;
   if (!r.resultados.length) { $('#tablaContactos').innerHTML = `<p class="chico">Sin resultados.</p>`; return; }

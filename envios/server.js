@@ -9,6 +9,7 @@ const cookieSession = require('cookie-session');
 const { UPLOAD_DIR, APP_PASSWORD } = require('./src/config');
 const almacen = require('./src/almacen');
 const { normalizarFilas } = require('./src/normalizar');
+const { buscarPersona } = require('./src/buscar');
 const { generarPDF, generarPNG } = require('./src/reconocimiento');
 const { enviarReconocimiento, estaConfigurado } = require('./src/correo');
 
@@ -75,6 +76,65 @@ app.get('/api/contactos', pedirAcceso, (req, res) => {
     );
   }
   res.json({ total: almacen.getContactos().length, resultados: lista.slice(0, 200) });
+});
+
+// Le pasa a la base los nombres que escribio Lex y devuelve a quien encontro.
+// La busqueda se hace aqui y no en el navegador porque son 3,396 contactos: al
+// navegador solo se le mandan los que hacen falta, no la base entera.
+app.post('/api/resolver', pedirAcceso, (req, res) => {
+  const nombres = Array.isArray(req.body && req.body.nombres) ? req.body.nombres : [];
+  if (!nombres.length) return res.status(400).json({ error: 'No escribiste ningún nombre.' });
+
+  const contactos = almacen.getContactos();
+  const yaUsados = new Set();
+  const resultados = [];
+
+  for (const crudo of nombres) {
+    const escrito = String(crudo || '').trim();
+    if (!escrito) continue;
+
+    // Si trae el correo pegado ("Nombre, correo@..."), esa es la respuesta y no
+    // hay nada que buscar.
+    const partes = escrito.split(',').map((x) => x.trim());
+    const correoEscrito = partes.slice(1).find((x) => x.includes('@'));
+    const soloNombre = partes[0];
+
+    if (correoEscrito) {
+      resultados.push({
+        escrito: soloNombre, estado: 'encontrada',
+        nombre: soloNombre, email: correoEscrito.toLowerCase(), origen: 'escrito',
+      });
+      continue;
+    }
+
+    const hallazgo = buscarPersona(soloNombre, contactos);
+
+    if (hallazgo.estado === 'encontrada') {
+      // Dos renglones no pueden apuntar a la misma persona: casi siempre es que
+      // el segundo es alguien mas con nombre parecido.
+      if (yaUsados.has(hallazgo.contacto.id)) {
+        resultados.push({ escrito: soloNombre, estado: 'repetida', nombre: hallazgo.contacto.nombre });
+        continue;
+      }
+      yaUsados.add(hallazgo.contacto.id);
+      resultados.push({
+        escrito: soloNombre, estado: 'encontrada', contactoId: hallazgo.contacto.id,
+        nombre: hallazgo.contacto.nombre, email: hallazgo.contacto.email, origen: 'base',
+      });
+      continue;
+    }
+
+    resultados.push({
+      escrito: soloNombre,
+      estado: hallazgo.estado,
+      nombre: hallazgo.contacto ? hallazgo.contacto.nombre : soloNombre,
+      candidatas: (hallazgo.candidatas || []).map((c) => ({
+        id: c.id, nombre: c.nombre, email: c.email, telefono: c.telefono,
+      })),
+    });
+  }
+
+  res.json({ resultados, total: contactos.length });
 });
 
 // Tablero de inicio: los numeros de un vistazo.

@@ -43,6 +43,22 @@ npm start                 # queda en http://localhost:3100
 | `DATA_DIR` | Carpeta de datos. En Railway apúntala a un volumen. |
 
 
+## Cómo se manda un reconocimiento
+
+1. **Eliges el taller** de la lista con buscador (138 cargados).
+2. **Escribes los nombres**, uno por renglón. No hace falta el correo ni que el
+   nombre esté completo: la app busca entre las 3,396 clientas y lo saca sola.
+   Con *"Elsa Judith Lorenzana"* encuentra a *"Elsa Judith Lorenzana Basaldúa"*,
+   sin importar acentos ni mayúsculas.
+3. **Resuelves lo que quede dudoso.** Si varias se parecen — escribir "Maria"
+   da muchas — la app las muestra y eliges. Si alguien no está en la base, se lo
+   dices con `Nombre, sucorreo@ejemplo.com` y se da de alta sola al enviar.
+4. **Revisas la vista previa** con el reconocimiento real de la primera persona.
+5. **Envías.** Cada quien recibe su PDF con su folio, y queda en el historial.
+
+La búsqueda corre en el servidor, contra la base completa. Nunca se manda la
+lista de clientas al navegador.
+
 ## Publicarla para que Lex y Alek entren desde su compu
 
 Mientras corra solo en una computadora, nadie más la alcanza. Hay que
