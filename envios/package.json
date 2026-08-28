@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "App interna de Endulcora para enviar recetarios y reconocimientos a las participantes de cada taller.",
   "private": true,
-  "engines": { "node": ">=20.9.0" },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
@@ -15,6 +17,7 @@
     "express": "^4.19.2",
     "multer": "^2.0.0",
     "pdfkit": "^0.15.0",
+    "pg": "^8.13.1",
     "resend": "^4.0.0"
   }
 }

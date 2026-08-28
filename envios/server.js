@@ -58,6 +58,7 @@ app.get('/api/sesion', (req, res) => {
     firmaLista: almacen.hayFirma(),
     plantillaTraeFirma: almacen.getPlantillaTraeFirma(),
     datosPermanentes: almacen.DATOS_PERMANENTES,
+    guardadoEn: almacen.HAY_BASE ? 'base de datos' : 'archivo',
     folioSiguiente: almacen.getFolioSiguiente(),
   });
 });
@@ -326,8 +327,21 @@ function leerCSV(texto) {
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3100;
-// Se escucha en 0.0.0.0 y no solo en localhost: es lo que necesita Railway (o
-// cualquier hosting) para poder alcanzar la app desde fuera del contenedor.
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`App de envíos de Endulcora escuchando en el puerto ${PORT}`);
-});
+
+// Primero se cargan los datos, y solo entonces se abre la puerta: si alguien
+// entrara antes, veria la base vacia y podria importar encima.
+almacen.prepararBase()
+  .then((info) => {
+    console.log(info.modo === 'postgres'
+      ? `[almacen] Guardando en la base de datos (${info.contactos} contactos cargados)`
+      : '[almacen] Guardando en archivo');
+    // Se escucha en 0.0.0.0 y no solo en localhost: es lo que necesita Railway
+    // (o cualquier hosting) para alcanzar la app desde fuera del contenedor.
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`App de envíos de Endulcora escuchando en el puerto ${PORT}`);
+    });
+  })
+  .catch((e) => {
+    console.error('[almacen] No se pudo abrir la base de datos:', e.message);
+    process.exit(1);
+  });

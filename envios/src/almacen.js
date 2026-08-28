@@ -18,6 +18,8 @@ const ARCHIVO = path.join(DATA_DIR, 'endulcora-envios.json');
 // Sin esto el fallo es mudo: la app funciona, se importan miles de contactos,
 // y desaparecen en el siguiente despliegue sin que nada lo haya advertido.
 function datosSonPermanentes() {
+  // Con base de datos los datos ya viven fuera del contenedor: no hace falta volumen.
+  if (process.env.DATABASE_URL) return true;
   // En una computadora personal no hay volumen que valga: siempre es permanente.
   if (!process.env.RAILWAY_ENVIRONMENT && !process.env.PORT) return true;
   try {
@@ -49,7 +51,53 @@ function datosPorDefecto() {
   };
 }
 
+// ---- Donde viven los datos ----
+//
+// Si el servicio tiene una base Postgres (DATABASE_URL), ahi se guardan. Es
+// mas seguro que un archivo: la base vive fuera del contenedor, asi que
+// sobrevive a los despliegues sin depender de que alguien recuerde adjuntar
+// un volumen.
+//
+// Sin DATABASE_URL se sigue usando el archivo, que es lo que sirve cuando la
+// app corre en una computadora.
+const { Pool } = require('pg');
+const HAY_BASE = Boolean(process.env.DATABASE_URL);
+const pool = HAY_BASE
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: /\bsslmode=require\b/.test(process.env.DATABASE_URL) ? { rejectUnauthorized: false } : undefined,
+    })
+  : null;
+
 let cache = null;
+
+// Se carga una sola vez al arrancar, antes de atender a nadie. De ahi en
+// adelante todo se lee de memoria, para no volver asincrono el resto del
+// codigo, y cada cambio se escribe de vuelta.
+async function prepararBase() {
+  if (!HAY_BASE) return { modo: 'archivo' };
+  await pool.query('CREATE TABLE IF NOT EXISTS envios_datos (id int PRIMARY KEY, datos jsonb NOT NULL)');
+  const r = await pool.query('SELECT datos FROM envios_datos WHERE id = 1');
+  if (r.rows.length) {
+    cache = { ...datosPorDefecto(), ...r.rows[0].datos };
+  } else {
+    // Primera vez: si habia datos en archivo, se suben a la base para no perderlos.
+    let previos = null;
+    try { previos = JSON.parse(fs.readFileSync(ARCHIVO, 'utf8')); } catch (e) { /* no habia */ }
+    cache = { ...datosPorDefecto(), ...(previos || {}) };
+    await pool.query('INSERT INTO envios_datos (id, datos) VALUES (1, $1)', [JSON.stringify(cache)]);
+  }
+  return { modo: 'postgres', contactos: cache.contactos.length };
+}
+
+function guardarEnBase() {
+  if (!HAY_BASE) return;
+  // No se espera la escritura para no frenar la pantalla; si algo falla, se
+  // registra, porque un guardado perdido en silencio es justo lo que hay que
+  // evitar aqui.
+  pool.query('UPDATE envios_datos SET datos = $1 WHERE id = 1', [JSON.stringify(cache)])
+    .catch((e) => console.error('[almacen] No se pudo guardar en la base:', e.message));
+}
 
 function leer() {
   if (cache) return cache;
@@ -62,6 +110,7 @@ function leer() {
 }
 
 function guardar() {
+  if (HAY_BASE) return guardarEnBase();
   // Se escribe primero a un temporal y luego se renombra, para que un corte de
   // luz a media escritura no deje el archivo de datos a medias.
   const tmp = ARCHIVO + '.tmp';
@@ -319,6 +368,8 @@ function actualizarEnvio(idEnvio, cambios) {
 module.exports = {
   DATA_DIR,
   DATOS_PERMANENTES,
+  HAY_BASE,
+  prepararBase,
   UPLOAD_DIR,
   catalogo,
   getContactos,

@@ -40,7 +40,8 @@ npm start                 # queda en http://localhost:3100
 | `SESSION_SECRET` | Cualquier texto largo al azar, para firmar la sesión. |
 | `RESEND_API_KEY` | Llave de Resend, para poder enviar los correos. |
 | `RESEND_FROM` | Remitente. El dominio debe estar verificado en Resend. |
-| `DATA_DIR` | Carpeta de datos. En Railway apúntala a un volumen. |
+| `DATABASE_URL` | Base Postgres donde se guardan los datos. **Es lo que hace que no se borren.** |
+| `DATA_DIR` | Carpeta para los archivos que se suban. |
 
 
 ## Cómo se manda un reconocimiento
@@ -89,8 +90,12 @@ dirección, distinta contraseña, distintos datos.
    | `DATA_DIR` | `/datos` |
 
    `PORT` lo pone Railway solo.
-4. **Volumes → New Volume**, con ruta `/datos`. Ahí viven los contactos, el
-   historial y la plantilla. Sin volumen se borra todo en cada despliegue.
+4. **Conecta la base de datos.** En Variables agrega
+   `DATABASE_URL = ${{Postgres.DATABASE_URL}}`, apuntando al Postgres del
+   proyecto. Ahí se guardan los contactos, el historial y los folios.
+
+   Sin esto, los datos viven dentro del contenedor y **se borran enteros en
+   cada despliegue**. La app lo detecta sola y lo avisa con una franja roja.
 5. Railway te da una dirección tipo
    `endulcora-envios-production.up.railway.app`. Con esa ya pueden entrar.
 6. Opcional, para que sea fácil de recordar: **Settings → Networking → Custom
