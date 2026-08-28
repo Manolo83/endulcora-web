@@ -75,6 +75,18 @@ app.get('/api/contactos', pedirAcceso, (req, res) => {
   res.json({ total: almacen.getContactos().length, resultados: lista.slice(0, 200) });
 });
 
+// Tablero de inicio: los numeros de un vistazo.
+app.get('/api/resumen', pedirAcceso, (req, res) => {
+  res.json(almacen.resumen());
+});
+
+// Ficha de una persona: sus datos mas todo lo que se le ha enviado.
+app.get('/api/contactos/:id', pedirAcceso, (req, res) => {
+  const contacto = almacen.getContactoPorId(req.params.id);
+  if (!contacto) return res.status(404).json({ error: 'No encontrado.' });
+  res.json({ contacto, historial: almacen.historialDeContacto(contacto.id) });
+});
+
 app.post('/api/contactos', pedirAcceso, (req, res) => {
   const { nombre, email, telefono } = req.body || {};
   if (!String(nombre || '').trim()) return res.status(400).json({ error: 'Falta el nombre.' });
@@ -146,6 +158,12 @@ app.post('/api/enviar', pedirAcceso, async (req, res) => {
 
   const resultados = [];
   for (const p of participantes) {
+    // Se enlaza con su ficha para que el envio aparezca en su historial. Si es
+    // alguien nuevo, se da de alta aqui mismo y no se queda fuera del CRM.
+    let ficha = almacen.buscarPorEmail(p.email);
+    if (!ficha) {
+      ficha = almacen.agregarContacto({ nombre: p.nombre, email: p.email, origen: 'envío' });
+    }
     // El folio se APARTA para armar el PDF, pero solo se da por consumido si el
     // correo sale. Asi un rebote no deja huecos en la numeracion oficial: el
     // siguiente intento reutiliza ese mismo folio.
@@ -166,10 +184,10 @@ app.post('/api/enviar', pedirAcceso, async (req, res) => {
         nombreArchivo: `Reconocimiento ${taller} - ${p.nombre}.pdf`,
       });
       almacen.setFolioSiguiente(folio + 1);
-      resultados.push({ nombre: p.nombre, email: p.email, folio, estado: 'enviado' });
+      resultados.push({ contactoId: ficha.id, nombre: p.nombre, email: p.email, folio, estado: 'enviado' });
     } catch (e) {
       // No se avanza el folio: queda libre para el reintento.
-      resultados.push({ nombre: p.nombre, email: p.email, folio: null, estado: 'falló', error: e.message });
+      resultados.push({ contactoId: ficha.id, nombre: p.nombre, email: p.email, folio: null, estado: 'falló', error: e.message });
     }
     // Pausa breve entre correos para no pegarle al limite de Resend.
     await new Promise((r) => setTimeout(r, 350));
@@ -221,6 +239,8 @@ function leerCSV(texto) {
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3100;
-app.listen(PORT, () => {
-  console.log(`App de envíos de Endulcora escuchando en http://localhost:${PORT}`);
+// Se escucha en 0.0.0.0 y no solo en localhost: es lo que necesita Railway (o
+// cualquier hosting) para poder alcanzar la app desde fuera del contenedor.
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`App de envíos de Endulcora escuchando en el puerto ${PORT}`);
 });

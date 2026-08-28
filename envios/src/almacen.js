@@ -66,6 +66,7 @@ function agregarContacto({ nombre, email, telefono, origen }) {
     nombre: String(nombre || '').trim(),
     email: String(email || '').trim().toLowerCase(),
     telefono: String(telefono || '').trim(),
+    notas: '',
     origen: origen || 'manual',
     creado: new Date().toISOString(),
   };
@@ -93,6 +94,7 @@ function importarContactos(lista) {
         nombre: item.nombre || '',
         email,
         telefono: item.telefono || '',
+        notas: '',
         origen: item.origen || 'drive',
         creado: new Date().toISOString(),
       };
@@ -120,7 +122,7 @@ function actualizarContacto(idContacto, cambios) {
   const d = leer();
   const c = d.contactos.find((x) => x.id === idContacto);
   if (!c) return null;
-  for (const campo of ['nombre', 'email', 'telefono']) {
+  for (const campo of ['nombre', 'email', 'telefono', 'notas']) {
     if (cambios[campo] !== undefined) c[campo] = String(cambios[campo]).trim();
   }
   guardar();
@@ -134,6 +136,66 @@ function borrarContacto(idContacto) {
   d.contactos.splice(i, 1);
   guardar();
   return true;
+}
+
+
+// ---- Ficha de cliente ----
+function getContactoPorId(idContacto) {
+  return leer().contactos.find((c) => c.id === idContacto) || null;
+}
+
+function buscarPorEmail(email) {
+  const buscado = String(email || '').trim().toLowerCase();
+  if (!buscado) return null;
+  return leer().contactos.find((c) => c.email === buscado) || null;
+}
+
+// Reune todo lo que se le ha mandado a una persona, sacandolo del historial de
+// envios. No se guarda por duplicado en el contacto: si un envio se corrige, la
+// ficha se corrige sola.
+function historialDeContacto(idContacto) {
+  const contacto = getContactoPorId(idContacto);
+  if (!contacto) return [];
+  const linea = [];
+  for (const envio of leer().envios) {
+    for (const r of envio.resultados || []) {
+      const esSuyo = r.contactoId
+        ? r.contactoId === idContacto
+        : String(r.email || '').toLowerCase() === contacto.email;
+      if (!esSuyo) continue;
+      linea.push({
+        envioId: envio.id,
+        taller: envio.taller,
+        fechaTaller: envio.fecha,
+        enviado: envio.creado,
+        quien: envio.quien,
+        folio: r.folio,
+        estado: r.estado,
+        error: r.error || '',
+      });
+    }
+  }
+  return linea;
+}
+
+// Numeros para el tablero de inicio.
+function resumen() {
+  const d = leer();
+  const enviados = d.envios.reduce((n, e) => n + (e.enviados || 0), 0);
+  const fallidos = d.envios.reduce((n, e) => n + (e.fallidos || 0), 0);
+  const talleresDados = new Set(d.envios.map((e) => e.taller)).size;
+  return {
+    contactos: d.contactos.length,
+    envios: d.envios.length,
+    reconocimientosEnviados: enviados,
+    reconocimientosFallidos: fallidos,
+    talleresDados,
+    folioSiguiente: d.folioSiguiente,
+    ultimos: d.envios.slice(0, 5).map((e) => ({
+      id: e.id, taller: e.taller, creado: e.creado,
+      enviados: e.enviados, fallidos: e.fallidos, quien: e.quien,
+    })),
+  };
 }
 
 // ---- Folios ----
@@ -199,6 +261,10 @@ module.exports = {
   importarContactos,
   actualizarContacto,
   borrarContacto,
+  getContactoPorId,
+  buscarPorEmail,
+  historialDeContacto,
+  resumen,
   tomarFolio,
   getFolioSiguiente,
   setFolioSiguiente,

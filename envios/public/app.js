@@ -53,6 +53,7 @@ $$('nav button').forEach((b) => b.addEventListener('click', () => {
   b.classList.add('activa');
   $$('main section').forEach((s) => s.classList.add('oculto'));
   $(`#tab-${b.dataset.t}`).classList.remove('oculto');
+  if (b.dataset.t === 'inicio') cargarTablero();
   if (b.dataset.t === 'historial') cargarHistorial();
   if (b.dataset.t === 'contactos') buscarContactos();
 }));
@@ -68,6 +69,7 @@ async function arrancar() {
   if (!SESION.plantillaLista) $('#avisoPlantilla').classList.remove('oculto');
   $('#fechaTaller').value = new Date().toISOString().slice(0, 10);
 
+  await cargarTablero();
   TALLERES = await api('/api/talleres');
   pintarVinetas('');
   const c = await api('/api/contactos');
@@ -215,6 +217,138 @@ async function cargarHistorial() {
   }
 }
 
+
+// ---------- tablero de inicio ----------
+async function cargarTablero() {
+  try {
+    const r = await api('/api/resumen');
+    $('#numeros').innerHTML = [
+      [r.contactos.toLocaleString('es-MX'), 'clientas en la base'],
+      [r.reconocimientosEnviados.toLocaleString('es-MX'), 'reconocimientos enviados'],
+      [r.talleresDados, 'talleres con envío'],
+      [r.folioSiguiente, 'siguiente folio'],
+    ].map(([n, t]) => `<div class="num-caja"><b>${n}</b><span>${t}</span></div>`).join('');
+
+    if (!r.ultimos.length) {
+      $('#ultimosEnvios').innerHTML = `<p class="chico">Todavía no hay envíos. Ve a <strong>Generar y enviar</strong> para hacer el primero.</p>`;
+    } else {
+      $('#ultimosEnvios').innerHTML = r.ultimos.map((e) => {
+        const f = new Date(e.creado).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
+        return `<div style="border-bottom:1px solid var(--linea);padding:10px 0">
+          <strong>${e.taller}</strong>
+          <span class="et ${e.fallidos ? 'mal' : 'ok'}">${e.enviados} enviados${e.fallidos ? ` · ${e.fallidos} fallaron` : ''}</span>
+          <div class="chico">${f} · ${e.quien}</div></div>`;
+      }).join('');
+    }
+  } catch (e) {
+    $('#numeros').innerHTML = `<div class="aviso mal">${e.message}</div>`;
+  }
+}
+
+let tiempoRapido;
+$('#buscaRapida').addEventListener('input', () => {
+  clearTimeout(tiempoRapido);
+  tiempoRapido = setTimeout(async () => {
+    const q = $('#buscaRapida').value.trim();
+    if (q.length < 2) { $('#resultadoRapido').innerHTML = ''; return; }
+    const r = await api(`/api/contactos?buscar=${encodeURIComponent(q)}`);
+    if (!r.resultados.length) { $('#resultadoRapido').innerHTML = `<p class="chico">Nadie con ese nombre.</p>`; return; }
+    $('#resultadoRapido').innerHTML = `<table><tbody>` + r.resultados.slice(0, 8).map((c) =>
+      `<tr class="clic" data-id="${c.id}"><td>${c.nombre}</td><td class="chico">${c.email}</td></tr>`
+    ).join('') + `</tbody></table>`;
+    $('#resultadoRapido').querySelectorAll('tr').forEach((t) =>
+      t.addEventListener('click', () => abrirFicha(t.dataset.id)));
+  }, 250);
+});
+
+// ---------- ficha de cliente ----------
+async function abrirFicha(idContacto) {
+  $('#capaFicha').classList.remove('oculto');
+  $('#fichaCuerpo').innerHTML = `<p class="chico">Cargando…</p>`;
+  try {
+    const { contacto, historial } = await api(`/api/contactos/${idContacto}`);
+    $('#fichaNombre').textContent = contacto.nombre;
+
+    const enviados = historial.filter((h) => h.estado === 'enviado');
+    const talleres = [...new Set(enviados.map((h) => h.taller))];
+
+    let hist = '';
+    if (!historial.length) {
+      hist = `<p class="chico">Todavía no se le ha enviado nada.</p>`;
+    } else {
+      hist = `<table><thead><tr><th>Taller</th><th>Folio</th><th>Cuándo</th></tr></thead><tbody>` +
+        historial.map((h) => {
+          const f = new Date(h.enviado).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+          return `<tr><td>${h.taller}<br><span class="et ${h.estado === 'enviado' ? 'ok' : 'mal'}">${h.estado}</span></td>
+            <td class="chico">${h.folio || '—'}</td>
+            <td class="chico">${f}<br>${h.quien}</td></tr>`;
+        }).join('') + `</tbody></table>`;
+    }
+
+    $('#fichaCuerpo').innerHTML = `
+      <div class="tarjeta">
+        <label>Nombre completo</label>
+        <input type="text" id="fNombre" value="${escapar(contacto.nombre)}">
+        <div class="fila" style="margin-top:12px">
+          <div><label>Correo</label><input type="email" id="fEmail" value="${escapar(contacto.email)}"></div>
+          <div><label>WhatsApp</label><input type="text" id="fTel" value="${escapar(contacto.telefono || '')}"></div>
+        </div>
+        <label style="margin-top:12px">Notas</label>
+        <textarea id="fNotas" style="min-height:80px" placeholder="Lo que quieras recordar de esta clienta…">${escapar(contacto.notas || '')}</textarea>
+        <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+          <button class="btn" id="btnGuardarFicha">Guardar cambios</button>
+          <button class="btn-lin" id="btnBorrarFicha">Borrar</button>
+        </div>
+        <div id="avisoFicha"></div>
+      </div>
+      <div class="tarjeta">
+        <h3 style="margin:0 0 4px;font-size:15px">Historial</h3>
+        <p class="chico" style="margin:0 0 12px">
+          ${enviados.length} reconocimiento${enviados.length === 1 ? '' : 's'}
+          ${talleres.length ? ` · ${talleres.length} taller${talleres.length === 1 ? '' : 'es'}` : ''}
+        </p>
+        ${hist}
+      </div>`;
+
+    $('#btnGuardarFicha').addEventListener('click', async () => {
+      try {
+        await api(`/api/contactos/${idContacto}`, {
+          metodo: 'PUT',
+          cuerpo: {
+            nombre: $('#fNombre').value, email: $('#fEmail').value,
+            telefono: $('#fTel').value, notas: $('#fNotas').value,
+          },
+        });
+        aviso('#avisoFicha', 'Guardado.', 'ok');
+        $('#fichaNombre').textContent = $('#fNombre').value;
+        buscarContactos();
+      } catch (e) { aviso('#avisoFicha', e.message, 'mal'); }
+    });
+
+    $('#btnBorrarFicha').addEventListener('click', async () => {
+      if (!confirm(`¿Borrar a ${contacto.nombre} de la base? Su historial de envíos no se borra.`)) return;
+      await api(`/api/contactos/${idContacto}`, { metodo: 'DELETE' });
+      cerrarFicha();
+      buscarContactos();
+      cargarTablero();
+    });
+  } catch (e) {
+    $('#fichaCuerpo').innerHTML = `<div class="aviso mal">${e.message}</div>`;
+  }
+}
+
+function cerrarFicha() { $('#capaFicha').classList.add('oculto'); }
+$('#btnCerrarFicha').addEventListener('click', cerrarFicha);
+$('#capaFicha').addEventListener('click', (e) => { if (e.target.id === 'capaFicha') cerrarFicha(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarFicha(); });
+
+// Evita que un nombre con comillas rompa el HTML de la ficha.
+function escapar(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 // ---------- contactos ----------
 $('#btnAgregarContacto').addEventListener('click', async () => {
   try {
@@ -244,8 +378,11 @@ async function buscarContactos() {
   if (!r.resultados.length) { $('#tablaContactos').innerHTML = `<p class="chico">Sin resultados.</p>`; return; }
   $('#tablaContactos').innerHTML =
     `<table><thead><tr><th>Nombre</th><th>Correo</th><th>WhatsApp</th></tr></thead><tbody>` +
-    r.resultados.map((c) => `<tr><td>${c.nombre}</td><td class="chico">${c.email}</td><td class="chico">${c.telefono || '—'}</td></tr>`).join('') +
-    `</tbody></table>`;
+    r.resultados.map((c) =>
+      `<tr class="clic" data-id="${c.id}"><td>${c.nombre}</td><td class="chico">${c.email}</td><td class="chico">${c.telefono || '—'}</td></tr>`
+    ).join('') + `</tbody></table>`;
+  $('#tablaContactos').querySelectorAll('tr[data-id]').forEach((t) =>
+    t.addEventListener('click', () => abrirFicha(t.dataset.id)));
 }
 
 // ---------- ajustes ----------

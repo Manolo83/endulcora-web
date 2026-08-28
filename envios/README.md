@@ -1,8 +1,12 @@
 # Reconocimientos Endulcora
 
-App interna para generar y enviar los reconocimientos de cada taller. Es
-independiente de endulcora.com: vive en su propio servidor, con su propia
-contraseña, y la usan Lex y Alek.
+CRM interno para generar y enviar los reconocimientos de cada taller.
+
+**Es independiente de endulcora.com.** No es una sección de `/admin`: es otro
+programa, en otro servidor, con otra dirección y otra contraseña. Lex y Alek
+la abren desde su propia computadora como cualquier página, sin tocar el sitio
+público ni su panel de administración. Si el sitio se cae, esto sigue; si aquí
+se equivocan, el sitio no se entera.
 
 ## Qué hace
 
@@ -14,6 +18,10 @@ contraseña, y la usan Lex y Alek.
 
 El taller, el folio consecutivo y el mes se llenan solos: tú nada más capturas
 el nombre.
+
+Además guarda la ficha de cada clienta: sus datos, tus notas sobre ella y el
+historial de todo lo que se le ha enviado, con folio y fecha. Se abre haciendo
+clic en cualquier renglón de la lista de contactos o buscándola desde Inicio.
 
 ## Poner a andar el proyecto
 
@@ -33,6 +41,43 @@ npm start                 # queda en http://localhost:3100
 | `RESEND_API_KEY` | Llave de Resend, para poder enviar los correos. |
 | `RESEND_FROM` | Remitente. El dominio debe estar verificado en Resend. |
 | `DATA_DIR` | Carpeta de datos. En Railway apúntala a un volumen. |
+
+
+## Publicarla para que Lex y Alek entren desde su compu
+
+Mientras corra solo en una computadora, nadie más la alcanza. Hay que
+publicarla, y se hace como **un segundo servicio en Railway**, aparte del de
+endulcora.com. Comparten repositorio pero no comparten nada más: distinta
+dirección, distinta contraseña, distintos datos.
+
+1. En [railway.app](https://railway.app), dentro del mismo proyecto:
+   **New → GitHub Repo → `Manolo83/endulcora-web`**.
+2. En el servicio nuevo, **Settings → Root Directory**, escribe `envios`.
+   Sin esto Railway construiría el sitio público otra vez.
+3. **Variables**, agrega:
+
+   | Variable | Qué poner |
+   |---|---|
+   | `APP_PASSWORD` | La contraseña que van a usar Lex y Alek. |
+   | `SESSION_SECRET` | Un texto largo al azar. |
+   | `RESEND_API_KEY` | Tu llave de Resend. |
+   | `RESEND_FROM` | `Endulcora <reconocimientos@envios.endulcora.com>` |
+   | `DATA_DIR` | `/datos` |
+
+   `PORT` lo pone Railway solo.
+4. **Volumes → New Volume**, con ruta `/datos`. Ahí viven los contactos, el
+   historial y la plantilla. Sin volumen se borra todo en cada despliegue.
+5. Railway te da una dirección tipo
+   `endulcora-envios-production.up.railway.app`. Con esa ya pueden entrar.
+6. Opcional, para que sea fácil de recordar: **Settings → Networking → Custom
+   Domain** y usa un subdominio, por ejemplo `reconocimientos.endulcora.com`.
+
+### Que no se confunda con el sitio
+
+Conviene que el remitente de los correos salga de un subdominio propio
+(`envios.endulcora.com`), verificado aparte en Resend. Así, si un envío masivo
+llegara a afectar la reputación del remitente, no arrastra al correo de la
+tienda.
 
 ## Los dos pasos que hay que hacer una sola vez
 
@@ -84,3 +129,6 @@ hoja para que funcionen a cualquier resolución de exportación.
 
 - Envío de los ebooks de cada taller (queda para una segunda etapa).
 - Lectura directa de Google Drive sin pasar por el CSV.
+- Cada quien con su propio usuario: hoy la contraseña es una sola y
+  compartida; al entrar cada quien dice si es Lex o Alek, y eso es lo que
+  queda registrado en el historial.

@@ -59,13 +59,34 @@
   .previa{width:100%;border:1px solid var(--linea);border-radius:10px;margin-top:12px;display:block}
   .fila{display:flex;gap:12px;flex-wrap:wrap}
   .fila>*{flex:1;min-width:190px}
-  .oculto{display:none}
+  /* Lleva !important porque .capa (el panel de la ficha) define display:flex
+     mas abajo con la misma especificidad y, si no, gana la regla de abajo:
+     el panel invisible se quedaba encima tapando los clics de toda la app. */
+  .oculto{display:none !important}
   .centro{max-width:380px;margin:70px auto}
   .barra{height:9px;background:var(--linea);border-radius:999px;overflow:hidden;margin:12px 0}
   .barra i{display:block;height:100%;background:var(--oro);width:0;transition:width .25s}
   .et{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;font-weight:600}
   .et.ok{background:#E9F6EF;color:var(--verde-ok)}
   .et.mal{background:#FCEBEA;color:var(--rojo)}
+  /* Tablero */
+  .numeros{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+  .num-caja{background:#fff;border:1px solid var(--linea);border-radius:14px;padding:16px}
+  .num-caja b{display:block;font-size:26px;color:var(--morado);line-height:1.2}
+  .num-caja span{font-size:13px;color:var(--gris)}
+  /* Ficha de cliente */
+  .capa{position:fixed;inset:0;background:rgba(27,7,32,.45);display:flex;
+        justify-content:flex-end;z-index:50}
+  .panel{background:var(--fondo);width:min(560px,100%);height:100%;overflow-y:auto;
+         box-shadow:-4px 0 24px rgba(0,0,0,.18)}
+  .panel-cab{position:sticky;top:0;background:var(--morado);color:#fff;padding:16px 20px;
+             display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .panel-cab h2{margin:0;font-size:17px}
+  .cerrar{background:none;border:none;color:#fff;font-size:28px;line-height:1;cursor:pointer;padding:0 4px}
+  .panel-cuerpo{padding:18px}
+  .clic{cursor:pointer}
+  .clic:hover{background:#FFF9F0}
+
 </style>
 </head>
 <body>
@@ -96,15 +117,32 @@
   </div>
 </header>
 <nav>
-  <button data-t="enviar" class="activa">Generar y enviar</button>
+  <button data-t="inicio" class="activa">Inicio</button>
+  <button data-t="enviar">Generar y enviar</button>
   <button data-t="historial">Historial</button>
   <button data-t="contactos">Contactos</button>
   <button data-t="ajustes">Ajustes</button>
 </nav>
 <main>
 
+
+  <!-- ===== INICIO ===== -->
+  <section id="tab-inicio">
+    <div class="numeros" id="numeros"></div>
+    <div class="tarjeta">
+      <h2 style="margin:0 0 12px;font-size:16px">Últimos envíos</h2>
+      <div id="ultimosEnvios"><p class="chico">Cargando…</p></div>
+    </div>
+    <div class="tarjeta">
+      <h2 style="margin:0 0 6px;font-size:16px">Buscar una clienta</h2>
+      <p class="chico" style="margin:0 0 12px">Escribe su nombre o correo para ver su ficha y todo lo que se le ha enviado.</p>
+      <input type="text" id="buscaRapida" placeholder="Por ejemplo: Elsa Judith…">
+      <div id="resultadoRapido" style="margin-top:12px"></div>
+    </div>
+  </section>
+
   <!-- ===== ENVIAR ===== -->
-  <section id="tab-enviar">
+  <section id="tab-enviar" class="oculto">
     <div id="avisoPlantilla" class="aviso info oculto">
       Todavía no subes la plantilla del reconocimiento. Ve a <strong>Ajustes</strong> para subirla; sin ella no se puede generar nada.
     </div>
@@ -173,6 +211,7 @@ Erika Amador Rocha"></textarea>
     <div class="tarjeta">
       <h2 style="margin:0 0 12px;font-size:16px">Buscar en la base <span class="chico" id="totalContactos"></span></h2>
       <input type="text" id="buscaContacto" placeholder="Busca por nombre o correo…">
+      <p class="chico" style="margin:8px 0 0">Haz clic en cualquier renglón para abrir su ficha.</p>
       <div id="tablaContactos" style="margin-top:12px"></div>
     </div>
   </section>
@@ -211,6 +250,18 @@ Erika Amador Rocha"></textarea>
 
 </main>
 </div>
+
+<!-- ===== FICHA DE CLIENTE ===== -->
+<div id="capaFicha" class="capa oculto">
+  <div class="panel">
+    <div class="panel-cab">
+      <h2 id="fichaNombre">—</h2>
+      <button class="cerrar" id="btnCerrarFicha" title="Cerrar">&times;</button>
+    </div>
+    <div class="panel-cuerpo" id="fichaCuerpo"></div>
+  </div>
+</div>
+
 <script src="app.js"></script>
 </body>
 </html>
