@@ -1,0 +1,3 @@
+Pon aqui los archivos .ttf u .otf de la tipografia del diseno de Canva
+(por ejemplo Montserrat) para que el texto del reconocimiento quede identico.
+La app los carga sola al arrancar.

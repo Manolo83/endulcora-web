@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Endulcora · Reconocimientos</title>
+<style>
+  :root{
+    --morado:#4E1454; --morado-claro:#7A2E7E; --oro:#F5A623;
+    --tinta:#1B0720; --gris:#8A8A8A; --linea:#EFE6DA; --fondo:#FBF8F4;
+    --verde-ok:#17794E; --rojo:#B3261E;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+       background:var(--fondo);color:var(--tinta);font-size:15px;line-height:1.5}
+  header{background:var(--morado);color:#fff;padding:14px 20px;display:flex;
+         align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  header h1{font-size:17px;margin:0;letter-spacing:.02em}
+  header .quien{font-size:13px;opacity:.85}
+  header button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;
+                border-radius:999px;padding:5px 14px;font-size:13px;cursor:pointer}
+  nav{display:flex;gap:4px;background:#fff;border-bottom:1px solid var(--linea);padding:0 16px;overflow-x:auto}
+  nav button{background:none;border:none;border-bottom:3px solid transparent;padding:13px 16px;
+             font-size:14px;font-weight:600;color:var(--gris);cursor:pointer;white-space:nowrap}
+  nav button.activa{color:var(--morado);border-bottom-color:var(--oro)}
+  main{max-width:900px;margin:0 auto;padding:22px 16px 60px}
+  .tarjeta{background:#fff;border:1px solid var(--linea);border-radius:14px;padding:20px;margin-bottom:18px}
+  .paso{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+  .num{background:var(--morado);color:#fff;width:26px;height:26px;border-radius:50%;
+       display:grid;place-items:center;font-size:13px;font-weight:700;flex:none}
+  .paso h2{font-size:16px;margin:0}
+  label{display:block;font-size:13px;font-weight:600;color:var(--morado-claro);margin:0 0 5px}
+  input[type=text],input[type=email],input[type=date],input[type=password],textarea,select{
+    width:100%;padding:10px 12px;border:1px solid #DDD2C4;border-radius:9px;font-size:15px;
+    font-family:inherit;background:#fff}
+  textarea{min-height:130px;resize:vertical;line-height:1.6}
+  .btn{background:var(--oro);color:#1B0720;border:none;border-radius:999px;padding:11px 24px;
+       font-size:15px;font-weight:700;cursor:pointer}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn-lin{background:#fff;border:1px solid #DDD2C4;color:var(--tinta);border-radius:999px;
+           padding:8px 16px;font-size:14px;cursor:pointer}
+  .btn-grande{width:100%;padding:15px;font-size:16px;margin-top:6px}
+  /* Vinetas de talleres */
+  .vinetas{display:flex;flex-wrap:wrap;gap:8px;max-height:230px;overflow-y:auto;padding:4px 2px}
+  .vineta{border:1px solid #DDD2C4;background:#fff;border-radius:999px;padding:7px 14px;
+          font-size:14px;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .vineta:hover{border-color:var(--morado-claro)}
+  .vineta.sel{background:var(--morado);border-color:var(--morado);color:#fff}
+  .vineta .punto{width:7px;height:7px;border-radius:50%;background:var(--oro);flex:none}
+  .vineta.sel .punto{background:#fff}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--linea);vertical-align:middle}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--gris)}
+  .aviso{padding:11px 14px;border-radius:9px;font-size:14px;margin:12px 0}
+  .aviso.ok{background:#E9F6EF;color:var(--verde-ok)}
+  .aviso.mal{background:#FCEBEA;color:var(--rojo)}
+  .aviso.info{background:#FFF6E3;color:#8A5B00}
+  .chico{font-size:13px;color:var(--gris)}
+  .previa{width:100%;border:1px solid var(--linea);border-radius:10px;margin-top:12px;display:block}
+  .fila{display:flex;gap:12px;flex-wrap:wrap}
+  .fila>*{flex:1;min-width:190px}
+  .oculto{display:none}
+  .centro{max-width:380px;margin:70px auto}
+  .barra{height:9px;background:var(--linea);border-radius:999px;overflow:hidden;margin:12px 0}
+  .barra i{display:block;height:100%;background:var(--oro);width:0;transition:width .25s}
+  .et{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;font-weight:600}
+  .et.ok{background:#E9F6EF;color:var(--verde-ok)}
+  .et.mal{background:#FCEBEA;color:var(--rojo)}
+</style>
+</head>
+<body>
+
+<!-- ENTRAR -->
+<div id="pantallaEntrar" class="centro">
+  <div class="tarjeta">
+    <h1 style="font-size:19px;margin:0 0 4px;color:var(--morado)">Reconocimientos Endulcora</h1>
+    <p class="chico" style="margin:0 0 18px">Entra para generar y enviar los reconocimientos de un taller.</p>
+    <label>¿Quién eres?</label>
+    <select id="quien" style="margin-bottom:12px">
+      <option>Lex</option><option>Alek</option><option>Otra persona</option>
+    </select>
+    <label>Contraseña</label>
+    <input type="password" id="clave" placeholder="Contraseña del equipo">
+    <div id="errorEntrar" class="aviso mal oculto"></div>
+    <button class="btn btn-grande" id="btnEntrar" style="margin-top:14px">Entrar</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="oculto">
+<header>
+  <h1>Reconocimientos Endulcora</h1>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="quien" id="etQuien"></span>
+    <button id="btnSalir">Salir</button>
+  </div>
+</header>
+<nav>
+  <button data-t="enviar" class="activa">Generar y enviar</button>
+  <button data-t="historial">Historial</button>
+  <button data-t="contactos">Contactos</button>
+  <button data-t="ajustes">Ajustes</button>
+</nav>
+<main>
+
+  <!-- ===== ENVIAR ===== -->
+  <section id="tab-enviar">
+    <div id="avisoPlantilla" class="aviso info oculto">
+      Todavía no subes la plantilla del reconocimiento. Ve a <strong>Ajustes</strong> para subirla; sin ella no se puede generar nada.
+    </div>
+
+    <div class="tarjeta">
+      <div class="paso"><span class="num">1</span><h2>¿De qué taller?</h2></div>
+      <input type="text" id="buscaTaller" placeholder="Escribe para buscar entre tus talleres…">
+      <div class="vinetas" id="vinetasTaller" style="margin-top:12px"></div>
+      <div class="fila" style="margin-top:14px">
+        <div>
+          <label>Taller seleccionado</label>
+          <input type="text" id="tallerElegido" placeholder="Ninguno todavía">
+        </div>
+        <div>
+          <label>Fecha del taller</label>
+          <input type="date" id="fechaTaller">
+        </div>
+      </div>
+      <p class="chico" style="margin:8px 0 0">El mes que sale impreso en el reconocimiento se toma de esta fecha.</p>
+    </div>
+
+    <div class="tarjeta">
+      <div class="paso"><span class="num">2</span><h2>¿Quiénes asistieron?</h2></div>
+      <p class="chico" style="margin:0 0 10px">
+        Escribe una persona por renglón, con el formato <strong>Nombre completo, correo</strong>.
+        Si la persona ya está en tus contactos, basta con su nombre y la app le encuentra el correo.
+      </p>
+      <textarea id="listaPersonas" placeholder="María Fernanda González Hernández, mafer@gmail.com
+Juan Manuel Álvaro Ruiz, juanma@gmail.com
+Erika Amador Rocha"></textarea>
+      <button class="btn-lin" id="btnRevisar" style="margin-top:12px">Revisar la lista</button>
+      <div id="resultadoRevision"></div>
+    </div>
+
+    <div class="tarjeta" id="tarjetaPrevia">
+      <div class="paso"><span class="num">3</span><h2>Revisa antes de enviar</h2></div>
+      <p class="chico" style="margin:0">Así le va a llegar el reconocimiento a la primera persona de tu lista.</p>
+      <div id="cajaPrevia"></div>
+      <div id="avisoEnvio"></div>
+      <div class="barra oculto" id="barra"><i></i></div>
+      <button class="btn btn-grande" id="btnEnviar" disabled>Enviar reconocimientos</button>
+    </div>
+  </section>
+
+  <!-- ===== HISTORIAL ===== -->
+  <section id="tab-historial" class="oculto">
+    <div class="tarjeta">
+      <h2 style="margin:0 0 12px;font-size:16px">Envíos hechos</h2>
+      <div id="listaHistorial"><p class="chico">Cargando…</p></div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACTOS ===== -->
+  <section id="tab-contactos" class="oculto">
+    <div class="tarjeta">
+      <h2 style="margin:0 0 4px;font-size:16px">Agregar un contacto</h2>
+      <p class="chico" style="margin:0 0 12px">Para alguien que no venía en la base de Drive.</p>
+      <div class="fila">
+        <div><label>Nombre completo</label><input type="text" id="nContacto"></div>
+        <div><label>Correo</label><input type="email" id="eContacto"></div>
+        <div><label>WhatsApp</label><input type="text" id="tContacto"></div>
+      </div>
+      <button class="btn" id="btnAgregarContacto" style="margin-top:14px">Agregar</button>
+      <div id="avisoContacto"></div>
+    </div>
+    <div class="tarjeta">
+      <h2 style="margin:0 0 12px;font-size:16px">Buscar en la base <span class="chico" id="totalContactos"></span></h2>
+      <input type="text" id="buscaContacto" placeholder="Busca por nombre o correo…">
+      <div id="tablaContactos" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <!-- ===== AJUSTES ===== -->
+  <section id="tab-ajustes" class="oculto">
+    <div class="tarjeta">
+      <h2 style="margin:0 0 4px;font-size:16px">Plantilla del reconocimiento</h2>
+      <p class="chico" style="margin:0 0 12px">
+        Sube <strong>una página</strong> del Canva "RECONOCIMIENTOS 7" exportada como PNG.
+        No importa que traiga el nombre de otra persona: la app borra el nombre, el taller,
+        el folio y el mes, y escribe los nuevos encima.
+      </p>
+      <input type="file" id="archivoPlantilla" accept="image/png,image/jpeg">
+      <button class="btn" id="btnPlantilla" style="margin-top:12px">Subir plantilla</button>
+      <div id="avisoPlantillaSubir"></div>
+    </div>
+    <div class="tarjeta">
+      <h2 style="margin:0 0 4px;font-size:16px">Importar contactos desde Drive</h2>
+      <p class="chico" style="margin:0 0 12px">
+        En Google Sheets abre "Base de Datos Endulcora (respuestas)" y usa
+        <strong>Archivo ▸ Descargar ▸ CSV</strong>. Sube aquí ese archivo.
+        La app junta los nombres partidos en varias columnas, empareja los repetidos
+        y avisa de los correos con errores de dedo.
+      </p>
+      <input type="file" id="archivoCSV" accept=".csv,text/csv">
+      <button class="btn" id="btnCSV" style="margin-top:12px">Importar</button>
+      <div id="avisoCSV"></div>
+    </div>
+    <div class="tarjeta">
+      <h2 style="margin:0 0 4px;font-size:16px">Folio</h2>
+      <p class="chico" style="margin:0 0 8px">El siguiente reconocimiento llevará este folio, y de ahí sigue subiendo solo.</p>
+      <div id="folioActual" class="chico"></div>
+    </div>
+  </section>
+
+</main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

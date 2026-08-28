@@ -1,0 +1,557 @@
+[
+  {
+    "nombre": "AGUAS FRESCAS",
+    "canva": "https://www.canva.com/design/DAGJMffAHKY/MEUYcg6-HDTMB4tmlfsLZw/edit",
+    "id": "rec-001"
+  },
+  {
+    "nombre": "ALITAS",
+    "canva": "https://www.canva.com/design/DAGIWY4lpIs/_sv-QWs0cEuFOk-Wr4pJkg/edit",
+    "id": "rec-002"
+  },
+  {
+    "nombre": "ARROZADA",
+    "canva": "https://www.canva.com/design/DAGJD4eiTdY/0lrO7NhUEv05qAiHh0Qq2w/edit",
+    "id": "rec-003"
+  },
+  {
+    "nombre": "ATOLES GOURMET",
+    "canva": "https://www.canva.com/design/DAGORXiwZAY/amoFPUJ2rezql-IJRtZ-ag/edit",
+    "id": "rec-004"
+  },
+  {
+    "nombre": "BANDERILLAS CORENAS",
+    "canva": "https://www.canva.com/design/DAGWTmfU6UI/1Mul4h_PmMCJmyeyZ_QXUA/edit",
+    "id": "rec-005"
+  },
+  {
+    "nombre": "BIZCOCHOS PASTELERIA",
+    "canva": "https://www.canva.com/design/DAGJ63oKORQ/PffJKe-U--XF2wczWtEv4g/edit",
+    "id": "rec-006"
+  },
+  {
+    "nombre": "BLONDIES Y BROWNES",
+    "canva": "https://www.canva.com/design/DAGZHXp4OLo/AMhl42b6OkkvI2qRMngDTw/edit",
+    "id": "rec-007"
+  },
+  {
+    "nombre": "BOCADILLOS Y CANAPÉS",
+    "canva": "https://www.canva.com/design/DAGZIlF7iL8/IHBYDS2J7uYh2kOCUMoKig/edit",
+    "id": "rec-008"
+  },
+  {
+    "nombre": "BOLIS GOURMET",
+    "canva": "https://www.canva.com/design/DAGLCrsr4t8/L_zqq6qzn-IolJAEJhrCow/edit",
+    "id": "rec-009"
+  },
+  {
+    "nombre": "BOLLOS DE PANADERÍA",
+    "canva": "https://www.canva.com/design/DAGRb3hsDPE/inhOpMlnehsGQh7RAsJRPw/edit",
+    "id": "rec-010"
+  },
+  {
+    "nombre": "BOMBAS CHOCOLATOSAS",
+    "canva": "https://www.canva.com/design/DAGY2SGHzjY/nvkCeJHLyiNgE-KUef6wQg/edit",
+    "id": "rec-011"
+  },
+  {
+    "nombre": "BOMBONERIA",
+    "canva": "https://www.canva.com/design/DAGMFU0WuWc/ATH8atd23fF6cI03j8xDnw/edit",
+    "id": "rec-012"
+  },
+  {
+    "nombre": "CAKE BOX LUNCH",
+    "canva": "https://www.canva.com/design/DAGHSn6vWuQ/QVIzq2pmcoVb-PH-HDW0Hg/edit",
+    "id": "rec-013"
+  },
+  {
+    "nombre": "CEVICHES",
+    "canva": "https://www.canva.com/design/DAGmH_jH6AA/O-cArA8f3oZMkoH3OBphYw/edit?utm_content=DAGmH_jH6AA\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-014"
+  },
+  {
+    "nombre": "CHEESCAKE SIN HORNO",
+    "canva": "https://www.canva.com/design/DAGj7EGVE_s/m8wn9uQ8FDB7HU-Wfl2wSQ/edit?utm_content=DAGj7EGVE_s\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-015"
+  },
+  {
+    "nombre": "CHESSCAKE FRIOS",
+    "canva": "https://www.canva.com/design/DAGWDJq2cjA/UCZqBmp2dZtGvQeDKBdaLg/edit",
+    "id": "rec-016"
+  },
+  {
+    "nombre": "CHILES ENOGADA",
+    "canva": "https://www.canva.com/design/DAGPcyXYkHQ/Dn3oc1a41pSVHP7RfO3ZfA/edit",
+    "id": "rec-017"
+  },
+  {
+    "nombre": "COCINA YUCATECA",
+    "canva": "https://www.canva.com/design/DAGlPck7rrg/DWQZq09oHR3w8OFc5wlVQA/edit?utm_content=DAGlPck7rrg\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-018"
+  },
+  {
+    "nombre": "COCTELERIA DE BARRIO",
+    "canva": "https://www.canva.com/design/DAGmOMwArHc/_Xe4bpa0e8tklYYIDAR7jA/edit?utm_content=DAGmOMwArHc\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-019"
+  },
+  {
+    "nombre": "COCTELERÍA",
+    "canva": "https://www.canva.com/design/DAGjDCl4Usg/C8PJ504q4KROSu-bbcXSlA/edit",
+    "id": "rec-020"
+  },
+  {
+    "nombre": "COMIDA CHINA",
+    "canva": "https://www.canva.com/design/DAGlVjV7jXA/6kreqGaz_p4MioxBnhwVzw/edit?utm_content=DAGlVjV7jXA\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-021"
+  },
+  {
+    "nombre": "COMIDA JAPONESA",
+    "canva": "https://www.canva.com/design/DAGhBMMhca8/s6P6MoInd9ceBA32CG_ZoA/edit",
+    "id": "rec-022"
+  },
+  {
+    "nombre": "CONCHAS GOURMET",
+    "canva": "https://www.canva.com/design/DAGdcs9Z74Q/tljCx0eqi1g6_OOg10eoTw/edit",
+    "id": "rec-023"
+  },
+  {
+    "nombre": "CONCHAS Y ROLES",
+    "canva": "https://www.canva.com/design/DAGJ6vvIkg0/WO9QD9iPTcVHQDwUJUvyyA/edit",
+    "id": "rec-024"
+  },
+  {
+    "nombre": "CONSERVAS",
+    "canva": "https://www.canva.com/design/DAGUgBFk-g0/lv85IMzxGbIsrOwh_pzZrg/edit",
+    "id": "rec-025"
+  },
+  {
+    "nombre": "COSTCO",
+    "canva": "https://www.canva.com/design/DAGoGg9r-7k/eeJCWPt7sIXT_EKyN5E_nA/edit?utm_content=DAGoGg9r-7k\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-026"
+  },
+  {
+    "nombre": "COTSCO",
+    "canva": "https://www.canva.com/design/DAGoGg9r-7k/eeJCWPt7sIXT_EKyN5E_nA/edit?utm_content=DAGoGg9r-7k\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-027"
+  },
+  {
+    "nombre": "CREPAS GOURMET",
+    "canva": "https://www.canva.com/design/DAGdsbuhliw/Bj3CyzVX0ho2LFhBnJC4iQ/edit",
+    "id": "rec-028"
+  },
+  {
+    "nombre": "CUPCAKES",
+    "canva": "https://www.canva.com/design/DAGJcaYyqCU/l23mFashc17Fubg0OuQGIg/edit",
+    "id": "rec-029"
+  },
+  {
+    "nombre": "CUPCAKES GOURMET",
+    "canva": "https://www.canva.com/design/DAGJcaYyqCU/l23mFashc17Fubg0OuQGIg/edit?utm_content=DAGJcaYyqCU\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-030"
+  },
+  {
+    "nombre": "CUPCAKES SALADOS",
+    "canva": "https://www.canva.com/design/DAGWx8TCXGM/dobmUEKuX-Tm5YDmxpusQQ/edit",
+    "id": "rec-031"
+  },
+  {
+    "nombre": "DONAS GOURMET COBERTURAS GOURMET",
+    "canva": "https://www.canva.com/design/DAGLmjuZsCI/fVX6NUZDAaEh4wJP4yH4-A/edit",
+    "id": "rec-032"
+  },
+  {
+    "nombre": "DULCES TIPICOS MEXICANOS",
+    "canva": "https://www.canva.com/design/DAGQVCGwWoM/cw2x9dix-QvTba2sQjuPIw/edit",
+    "id": "rec-033"
+  },
+  {
+    "nombre": "ELOTADA",
+    "canva": "https://www.canva.com/design/DAGXcNBO57c/mUV_bb3mESR7ACh6Qa6yVw/edit",
+    "id": "rec-034"
+  },
+  {
+    "nombre": "ENSALADAS Y ADEREZOS",
+    "canva": "https://www.canva.com/design/DAGRn5pVA6g/EzExt6zwaVxogmDReYy7KA/edit",
+    "id": "rec-035"
+  },
+  {
+    "nombre": "GALLETAS FINAS",
+    "canva": "https://www.canva.com/design/DAGJFS0YIsw/SKCtghCrb3eBDEuLfVSp8Q/edit",
+    "id": "rec-036"
+  },
+  {
+    "nombre": "GALLETAS TIPO CRUMBL",
+    "canva": "https://www.canva.com/design/DAGboq6k_iY/ft0egGv79geVppjOLUUyvQ/edit",
+    "id": "rec-037"
+  },
+  {
+    "nombre": "GALLETAS TIPO NEYORK",
+    "canva": "https://www.canva.com/design/DAGcBCTyZ38/cB3n04Z5fMPCUpujlb_UEQ/edit",
+    "id": "rec-038"
+  },
+  {
+    "nombre": "GALLETAS TIPO PALACIO",
+    "canva": "https://www.canva.com/design/DAGcNn5zFGA/ViltHC9NO-bFF4mWexZ6dQ/edit",
+    "id": "rec-039"
+  },
+  {
+    "nombre": "GASTROEMP PASTELERIA INTERNACIONAL",
+    "canva": "https://www.canva.com/design/DAGnRk-oHg0/kR9yVyW8nNq7o9LLtFlEJA/edit?utm_content=DAGnRk-oHg0\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-040"
+  },
+  {
+    "nombre": "GASTROEMP SANDWICHES CREATIVOS Y RENTABLES",
+    "canva": "https://www.canva.com/design/DAGne8WloQk/kzqbGtE1VzZuBugt9gvRTg/edit?utm_content=DAGne8WloQk\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-041"
+  },
+  {
+    "nombre": "GELATINAS",
+    "canva": "https://www.canva.com/design/DAGHGFO3F3g/43LrgBdz64s7RzGazIUwrg/edit",
+    "id": "rec-042"
+  },
+  {
+    "nombre": "GELATINAS DE MARCA",
+    "canva": "https://www.canva.com/design/DAGVp4UBXcQ/MYxL3hRBM4lCRYO-zbBPOw/edit",
+    "id": "rec-043"
+  },
+  {
+    "nombre": "GOMITAS",
+    "canva": "https://www.canva.com/design/DAGp_JRxQEw/zH1aXyHUrIHs7ScJ93GZPA/edit?utm_content=DAGp_JRxQEw\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-044"
+  },
+  {
+    "nombre": "GUISADOS TAQUEROS",
+    "canva": "https://www.canva.com/design/DAGNBlqVCXE/hsworTeTDhGQe4fAVUtZlA/edit",
+    "id": "rec-045"
+  },
+  {
+    "nombre": "GUISADOS TAQUEROS SE ENVIA TACOS CANASTA",
+    "canva": "https://www.canva.com/design/DAGNBlqVCXE/hsworTeTDhGQe4fAVUtZlA/edit?utm_content=DAGNBlqVCXE\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-046"
+  },
+  {
+    "nombre": "HAMBURGESAS",
+    "canva": "https://www.canva.com/design/DAGlTmlLwqY/96LHoH1SyFUdu6kzsPQ63A/edit?utm_content=DAGlTmlLwqY\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-047"
+  },
+  {
+    "nombre": "LATTES",
+    "canva": "https://www.canva.com/design/DAGWINAHjrY/54DHJA1olcOr6OVIvVTo2A/edit",
+    "id": "rec-048"
+  },
+  {
+    "nombre": "MANZANAS CUBIERTAS COMERCIALES",
+    "canva": "https://www.canva.com/design/DAGoO-KG-1c/DQyP3QfdnuM1ljBx4-icpA/edit?utm_content=DAGoO-KG-1c\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-049"
+  },
+  {
+    "nombre": "MASAS BATIDAS",
+    "canva": "https://www.canva.com/design/DAGRbIIUMd0/29dUZ2OCoBqLh-QtJOdqDA/edit",
+    "id": "rec-050"
+  },
+  {
+    "nombre": "MATCHA LOVERS",
+    "canva": "https://www.canva.com/design/DAGQ9T_ZoGc/6QHh04I3O3roLo4SCnDpew/edit",
+    "id": "rec-051"
+  },
+  {
+    "nombre": "MERMELADAS GOURMET",
+    "canva": "https://www.canva.com/design/DAGTHmzBSmQ/XdPf3v_HW_uOH75TT3TtZQ/edit",
+    "id": "rec-052"
+  },
+  {
+    "nombre": "MESA DE POSTRES",
+    "canva": "https://www.canva.com/design/DAGmFZ2joCE/mofDNoA2R1U2wTBnO4UVWQ/edit?utm_content=DAGmFZ2joCE\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-053"
+  },
+  {
+    "nombre": "MESAS DE POSTRES NAVIDEÑOS",
+    "canva": "https://www.canva.com/design/DAGaCg7oyDk/NVAFl6VtgGgOE5E5KYyWAg/edit",
+    "id": "rec-054"
+  },
+  {
+    "nombre": "MOCHIS",
+    "canva": "https://www.canva.com/design/DAGSHIWVW-I/khx7AcRIsJc6s0ck-ENmoA/edit?utm_content=DAGSHIWVW-I\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-055"
+  },
+  {
+    "nombre": "MOLES",
+    "canva": "https://www.canva.com/design/DAGQSq4q_qU/bqaFzAz4YTaIEmI-0G2fsQ/edit",
+    "id": "rec-056"
+  },
+  {
+    "nombre": "PAELLAS",
+    "canva": "https://www.canva.com/design/DAGkklC44BI/5Z0RgNAbH14FA5Qhik-7Ug/edit?utm_content=DAGkklC44BI\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-057"
+  },
+  {
+    "nombre": "PALOMITAS DE SABORES",
+    "canva": "https://www.canva.com/design/DAGklEPjf0U/-7KDFL1m-wnUfMDc-T39mg/edit?utm_content=DAGklEPjf0U\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-058"
+  },
+  {
+    "nombre": "PAN BLANCO",
+    "canva": "https://www.canva.com/design/DAGQkw6ZUUY/QkiZ3Yw6zfMMw1G5n1rrXA/edit",
+    "id": "rec-059"
+  },
+  {
+    "nombre": "PAN DE MUERTO",
+    "canva": "https://www.canva.com/design/DAGScaEtHeo/2Zy0wJ6cI-P8UiEeR78tZw/edit",
+    "id": "rec-060"
+  },
+  {
+    "nombre": "PAN DULCE",
+    "canva": "https://www.canva.com/design/DAGPeLsKpQQ/R8njoRCnub_eK_yof4GU7Q/edit",
+    "id": "rec-061"
+  },
+  {
+    "nombre": "PAN DULCE 2 DANESAS Y HOJALDRAS",
+    "canva": "https://www.canva.com/design/DAGUDNgM2sg/3x1BD-cJ_GFIiZJmRO_51w/edit",
+    "id": "rec-062"
+  },
+  {
+    "nombre": "PAN DULCE MEXICANO",
+    "canva": "https://www.canva.com/design/DAGRckA6ME8/cWyNXXbprHF1wlvtLTd8pw/edit",
+    "id": "rec-063"
+  },
+  {
+    "nombre": "PANADERIA CON MASA MADRE",
+    "canva": "https://www.canva.com/design/DAGg4kQY87s/rj_TR9xl7KiEsxxmvXs-hQ/edit",
+    "id": "rec-064"
+  },
+  {
+    "nombre": "PANADERIA FRITA",
+    "canva": "https://www.canva.com/design/DAGRbEH4cOg/w070aXXpOz01FbCLpguRJw/edit",
+    "id": "rec-065"
+  },
+  {
+    "nombre": "PANADERIA FUNCIONAL",
+    "canva": "https://www.canva.com/design/DAGGotrydr8/JR41-mQ9uyzRpOyAjJwf_Q/edit",
+    "id": "rec-066"
+  },
+  {
+    "nombre": "PANADERÍA EUROPEA",
+    "canva": "https://www.canva.com/design/DAGjRLr8iLs/TiXi8GHW4c-XYs4CHqNn_A/edit",
+    "id": "rec-067"
+  },
+  {
+    "nombre": "PANES OTOÑALES",
+    "canva": "https://www.canva.com/design/DAGVAbagEk0/lieuxXXKZk8mhn0TtlLTlg/edit",
+    "id": "rec-068"
+  },
+  {
+    "nombre": "PANQUÉ GOURMET",
+    "canva": "https://www.canva.com/design/DAGPKMebUDw/dv9JHcKTEtbYjjvnkIemAA/edit",
+    "id": "rec-069"
+  },
+  {
+    "nombre": "PANQUÉS NAVIDEÑOS",
+    "canva": "https://www.canva.com/design/DAGZxDIRCMQ/C4-5dcFqzEP7qJBp0As11A/edit",
+    "id": "rec-070"
+  },
+  {
+    "nombre": "PANZEROTTI",
+    "canva": "https://www.canva.com/design/DAGLK5KmgS8/ytc2P452ZaEHX94zitKhQw/edit",
+    "id": "rec-071"
+  },
+  {
+    "nombre": "PASTAS ITALIANAS",
+    "canva": "https://www.canva.com/design/DAGJeeXw2lA/o1votOt8_ovrV1GP_mDMgQ/edit",
+    "id": "rec-072"
+  },
+  {
+    "nombre": "PASTEL DE 3 LECHES",
+    "canva": "https://www.canva.com/design/DAGlmcZuehQ/jMS_xBTWG85MgX_UcTD1fg/edit?utm_content=DAGlmcZuehQ\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-073"
+  },
+  {
+    "nombre": "PASTELERIA",
+    "canva": "https://www.canva.com/design/DAGIEQWuqbM/7Hj4-_pekt1TA0iUp5aRaw/edit",
+    "id": "rec-074"
+  },
+  {
+    "nombre": "PASTELERIA RELLENOS",
+    "canva": "https://www.canva.com/design/DAGIEQWuqbM/7Hj4-_pekt1TA0iUp5aRaw/edit?utm_content=DAGIEQWuqbM\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-075"
+  },
+  {
+    "nombre": "PASTELES",
+    "canva": "https://www.canva.com/design/DAGJ63oKORQ/PffJKe-U--XF2wczWtEv4g/edit?utm_content=DAGJ63oKORQ\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-076"
+  },
+  {
+    "nombre": "PASTELES DE CREPA",
+    "canva": "https://www.canva.com/design/DAGj621nPnQ/ii9ixGCpjS3N-8qYLDRstg/edit?utm_content=DAGj621nPnQ\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-077"
+  },
+  {
+    "nombre": "PAVOS Y RELLENOS",
+    "canva": "https://www.canva.com/design/DAGazawoR4s/iwwe0bTU8F5hjE2qEADahw/edit",
+    "id": "rec-078"
+  },
+  {
+    "nombre": "PAYS Y TARTAS",
+    "canva": "https://www.canva.com/design/DAGJuToQZ6Y/EobdhxI9wqsQ8N_stbvfQw/edit",
+    "id": "rec-079"
+  },
+  {
+    "nombre": "PIERNAS LOMOS Y PASTAS",
+    "canva": "https://www.canva.com/design/DAGazSkoAnY/aHDe9E3j4XIcEVW1qyXB1w/edit",
+    "id": "rec-080"
+  },
+  {
+    "nombre": "PIZZAS DULCES",
+    "canva": "https://www.canva.com/design/DAGW22FLNu0/kw033tnAEXWeP4TragfpMw/edit",
+    "id": "rec-081"
+  },
+  {
+    "nombre": "PIZZAS GOURMET",
+    "canva": "https://www.canva.com/design/DAGZyR4TCB4/bkFq4X_hI-SrZ9HzmZQdXg/edit",
+    "id": "rec-082"
+  },
+  {
+    "nombre": "PIZZAS SALSAS Y TOPINGS",
+    "canva": "https://www.canva.com/design/DAGJMPujf6Y/iXMRul5Tw2Xg6nrKA3d9mQ/edit",
+    "id": "rec-083"
+  },
+  {
+    "nombre": "POSTRES EN VASO",
+    "canva": "https://www.canva.com/design/DAGGEB6i8XQ/LBEEkcpw6wrHJYArBUed3w/edit",
+    "id": "rec-084"
+  },
+  {
+    "nombre": "POSTRES HALLOWEN",
+    "canva": "https://www.canva.com/design/DAGRx8GK5fk/7RkjDGXENQh79OPjyNikyg/edit",
+    "id": "rec-085"
+  },
+  {
+    "nombre": "POSTRES NAVIDEÑOS",
+    "canva": "https://www.canva.com/design/DAGZgFRwSe0/2Zyvtd8KVUFJvsNSPkLEBA/edit",
+    "id": "rec-086"
+  },
+  {
+    "nombre": "POSTRES PARA DIABETICOS",
+    "canva": "https://www.canva.com/design/DAGoOoKpxrE/GvlYNoJjv0mKuZ_nTo8VUg/edit?utm_content=DAGoOoKpxrE\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-087"
+  },
+  {
+    "nombre": "POSTRES RED VELVET",
+    "canva": "https://www.canva.com/design/DAGf9yxBniI/s_3iUqB1jj04mlnAIEGVvg/edit",
+    "id": "rec-088"
+  },
+  {
+    "nombre": "POSTRES SIN AZÚCAR",
+    "canva": "https://www.canva.com/design/DAGg1rckXeU/xSmSEXsu73G9AYQeHioaDQ/edit",
+    "id": "rec-089"
+  },
+  {
+    "nombre": "POSTRES SIN HORNO",
+    "canva": "https://www.canva.com/design/DAGVuliYZEk/FSnXQM09rRmcop4Iul8xXg/edit",
+    "id": "rec-090"
+  },
+  {
+    "nombre": "PUNKIM SPAICE",
+    "canva": "https://www.canva.com/design/DAGU58LPuxM/JD5YDCm0abWNtM5LiNRK2A/edit",
+    "id": "rec-091"
+  },
+  {
+    "nombre": "RAMEN",
+    "canva": "https://www.canva.com/design/DAGL-4-q3YU/6WElpGwu4fKGX9dmxWDEaw/edit",
+    "id": "rec-092"
+  },
+  {
+    "nombre": "Recetario Gastroemp de Sándwiches Gourmet",
+    "canva": "https://www.canva.com/design/DAGoC66OVnw/EpGzJl5XN7VoHtC5oKMQ4A/edit?utm_content=DAGoC66OVnw\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-093"
+  },
+  {
+    "nombre": "RELLENOS EMPANADAS ARGENTINAS",
+    "canva": "https://www.canva.com/design/DAGizDf5TRw/bvWeNRllOW1",
+    "id": "rec-094"
+  },
+  {
+    "nombre": "RELLENOS PAN AL VAPOR",
+    "canva": "https://www.canva.com/design/DAGPEEZlZFQ/1Rl0lpZltqLJ3WZO4hqM7Q/edit",
+    "id": "rec-095"
+  },
+  {
+    "nombre": "RELLENOS PARA MOCHIS",
+    "canva": "https://www.canva.com/design/DAGSHIWVW-I/khx7AcRIsJc6s0ck-ENmoA/edit",
+    "id": "rec-096"
+  },
+  {
+    "nombre": "RELLENOS PASTELEROS Y PANADEROS",
+    "canva": "https://www.canva.com/design/DAGY7fzsBz4/sgT5LN-X_UzApRG4DRxJ6A/edit",
+    "id": "rec-097"
+  },
+  {
+    "nombre": "REPLICA KFC",
+    "canva": "https://www.canva.com/design/DAGg4BE8I-U/B6l3PfQAP_yV7HwRUsRRCA/edit",
+    "id": "rec-098"
+  },
+  {
+    "nombre": "REPOSTERIA CANNÁBICA",
+    "canva": "https://www.canva.com/design/DAGjQaobCUQ/lOvmFKr4njaMGCmQnY9PBw/edit",
+    "id": "rec-099"
+  },
+  {
+    "nombre": "REPOSTERÍA FELINA Y CANINA",
+    "canva": "https://www.canva.com/design/DAGRhD_O7HU/R68c7fJ2iwgxy2Gqxdelpg/edit",
+    "id": "rec-100"
+  },
+  {
+    "nombre": "ROLES GOURMET",
+    "canva": "https://www.canva.com/design/DAGcw7frwsA/KQesegW7IPc3s03talT85w/edit",
+    "id": "rec-101"
+  },
+  {
+    "nombre": "ROSCA DE REYES",
+    "canva": "https://www.canva.com/design/DAGZS7WGsl0/V93YfutSSn_84-h-FRsBHA/edit",
+    "id": "rec-102"
+  },
+  {
+    "nombre": "SALSA TAQUERAS",
+    "canva": "https://www.canva.com/design/DAGLgUgBgdc/CDp3GLkMRGZR-GIC2-RtLQ/edit",
+    "id": "rec-103"
+  },
+  {
+    "nombre": "SALSAS MACHA GOURMET",
+    "canva": "https://www.canva.com/design/DAGiM2gTKaY/C4G4pZfEGqEImMrNM07m_w/edit",
+    "id": "rec-104"
+  },
+  {
+    "nombre": "SALSAS PARA SUSHI",
+    "canva": "https://www.canva.com/design/DAGWxWtdmL4/7ZN0VjUcU8CO__M2aeX3Rw/edit",
+    "id": "rec-105"
+  },
+  {
+    "nombre": "SUSHI",
+    "canva": "https://www.canva.com/design/DAGIiQMuQ2w/B1BNfdii0QVOY3-e78e4sg/edit",
+    "id": "rec-106"
+  },
+  {
+    "nombre": "TAMALES GOURMET",
+    "canva": "https://www.canva.com/design/DAGOQ3Ty-N4/LcsE8TYHxpzkImKyfC_zZw/edit",
+    "id": "rec-107"
+  },
+  {
+    "nombre": "TARTAS SALADAS",
+    "canva": "https://www.canva.com/design/DAGWxyzO1mw/oww19ZCzxko_YxQTbR8VfQ/edit",
+    "id": "rec-108"
+  },
+  {
+    "nombre": "TRILOGIA POZOLES",
+    "canva": "https://www.canva.com/design/DAGREBsPoBc/jYGs5wwAv-bCVWPFuvo7Ag/edit",
+    "id": "rec-109"
+  },
+  {
+    "nombre": "TRUFAS",
+    "canva": "https://www.canva.com/design/DAGH8P-34E0/l08s4UQzq705MZmelIQcWQ/edit",
+    "id": "rec-110"
+  },
+  {
+    "nombre": "VINOTERAPIA",
+    "canva": "https://www.canva.com/design/DAGmW_fp4u0/UMRD_nciacCQ56Dd_ppoxA/edit?utm_content=DAGmW_fp4u0\\&utm_campaign=designshare\\&utm_medium=link2\\&utm_source=sharebutton",
+    "id": "rec-111"
+  }
+]
