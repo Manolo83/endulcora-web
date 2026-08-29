@@ -886,13 +886,41 @@ router.delete('/api/campanas/contactos/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- Adjuntos de campaña (imagen incrustada + archivo adjunto) ----
+// Los videos NO se suben aqui: un video pesa demasiado para mandarlo de
+// verdad a miles de correos (la mayoria de los clientes de correo ni
+// siquiera lo reproducen adjunto) y arriesga que el correo caiga en spam.
+// En vez de eso, la campaña solo guarda un link (YouTube, o una pagina del
+// sitio) y en el correo aparece como un boton "Ver video".
+const uploadAdjuntoArchivo = multer({
+  storage,
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8MB: ya es un archivo pesado para mandarlo a miles de correos
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_DOCUMENTO.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Tipo de archivo no permitido. Usa PDF, Excel, ZIP o HTML.'));
+  },
+});
+
+router.post('/api/campanas/adjuntos/imagen', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo.' });
+  res.status(201).json({ url: `/uploads/${req.file.filename}` });
+});
+
+router.post('/api/campanas/adjuntos/archivo', requireAdmin, uploadAdjuntoArchivo.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo.' });
+  res.status(201).json({ url: `/uploads/${req.file.filename}`, nombre: req.file.originalname });
+});
+
 // El envio se hace en segundo plano (puede tardar varios minutos con miles
 // de contactos): la respuesta regresa de inmediato con el id de la campaña,
 // y /admin consulta el progreso con GET /api/campanas.
 router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
-  const { asunto, cuerpo, contactoIds } = req.body || {};
+  const { asunto, cuerpo, contactoIds, imagenUrl, archivoUrl, archivoNombre, videoUrl } = req.body || {};
   if (!asunto || !String(asunto).trim()) return res.status(400).json({ error: 'Ponle un asunto al correo.' });
   if (!cuerpo || !String(cuerpo).trim()) return res.status(400).json({ error: 'Escribe el contenido del correo.' });
+  if (videoUrl && !/^https?:\/\//i.test(String(videoUrl).trim())) {
+    return res.status(400).json({ error: 'El link del video debe empezar con http:// o https://' });
+  }
 
   let destinatarios = store.getContactosCampana().filter((c) => c.activo !== false);
   if (Array.isArray(contactoIds)) {
@@ -906,6 +934,11 @@ router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
     .split(/\n{2,}/)
     .map((parrafo) => `<p style="margin:0 0 14px;">${escapeHtmlAdmin(parrafo).replace(/\n/g, '<br>')}</p>`)
     .join('');
+  // Las imagenes/archivos suben como ruta relativa (/uploads/...); el correo
+  // necesita la URL completa para que se vea/descargue fuera del sitio.
+  const imagenUrlCompleta = imagenUrl ? `${SITE_URL}${imagenUrl}` : '';
+  const archivoUrlCompleta = archivoUrl ? `${SITE_URL}${archivoUrl}` : '';
+  const videoUrlLimpia = videoUrl ? String(videoUrl).trim() : '';
 
   const campana = store.addCampanaCorreo({ asunto: asuntoLimpio, total: destinatarios.length });
   res.status(202).json(campana);
@@ -916,7 +949,17 @@ router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
     for (const contacto of destinatarios) {
       try {
         const unsubscribeUrl = `${SITE_URL}/desuscribir?id=${contacto.id}&token=${contacto.unsubToken}`;
-        await enviarCorreoCampana({ to: contacto.email, nombre: contacto.nombre, asunto: asuntoLimpio, cuerpoHtml, unsubscribeUrl });
+        await enviarCorreoCampana({
+          to: contacto.email,
+          nombre: contacto.nombre,
+          asunto: asuntoLimpio,
+          cuerpoHtml,
+          unsubscribeUrl,
+          imagenUrl: imagenUrlCompleta,
+          archivoUrl: archivoUrlCompleta,
+          archivoNombre,
+          videoUrl: videoUrlLimpia,
+        });
         enviados += 1;
       } catch (e) {
         fallidos += 1;

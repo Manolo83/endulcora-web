@@ -87,11 +87,21 @@ function escapeHtml(s) {
 // Gmail y Yahoo exigen esto para no marcar como spam a quien manda correo en
 // volumen, y con eso el "darse de baja" es de un clic, sin que el cliente de
 // correo tenga que abrir el link.
-async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribeUrl }) {
+async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribeUrl, imagenUrl, archivoUrl, archivoNombre, videoUrl }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
 
   const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+
+  const imagenHtml = imagenUrl
+    ? `<img src="${imagenUrl}" alt="" style="display:block;width:100%;max-width:480px;border-radius:14px;margin-bottom:20px;">`
+    : '';
+  const videoHtml = videoUrl
+    ? `<p style="margin-top:22px;"><a href="${videoUrl}" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;display:inline-block;">▶ Ver video</a></p>`
+    : '';
+  // path: Resend descarga el archivo de esa URL una sola vez y lo adjunta;
+  // asi no hay que mandar el archivo completo en cada peticion a la API.
+  const attachments = archivoUrl ? [{ filename: archivoNombre || 'archivo', path: archivoUrl }] : undefined;
 
   await client.emails.send({
     from,
@@ -100,11 +110,14 @@ async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribe
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
         <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        ${imagenHtml}
         ${nombre ? `<p style="font-size:14px;">Hola ${escapeHtml(nombre)},</p>` : ''}
         <div style="font-size:14px;line-height:1.6;">${cuerpoHtml}</div>
+        ${videoHtml}
         <p style="margin-top:28px;font-size:11px;color:#9C9C9C;">Recibiste este correo porque estás en la lista de contactos de Endulcora.<br><a href="${unsubscribeUrl}" style="color:#9C9C9C;">Dejar de recibir estos correos</a></p>
       </div>
     `,
+    ...(attachments ? { attachments } : {}),
     headers: {
       'List-Unsubscribe': `<${unsubscribeUrl}>`,
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',

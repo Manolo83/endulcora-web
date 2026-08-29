@@ -710,6 +710,35 @@
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mensaje (deja una línea en blanco entre párrafos)</span>
             <textarea id="campanaCuerpo" rows="8" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
           </label>
+
+          <div class="grid gap-4 rounded-xl bg-crema/40 p-4 sm:grid-cols-2">
+            <div>
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Foto para el correo (opcional)</span>
+              <p class="mt-1 text-[11px] text-carbon/40">Aparece arriba del mensaje.</p>
+              <input id="campanaImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="mt-2 w-full text-xs">
+              <div id="campanaImagenPreview" class="mt-2 hidden">
+                <img class="h-20 w-32 rounded-lg object-cover ring-1 ring-vino/10">
+                <button type="button" id="btnQuitarCampanaImagen" class="mt-1 block font-ui text-[10px] font-600 uppercase tracking-wider text-red-600">Quitar foto</button>
+              </div>
+              <p id="campanaImagenError" class="hidden mt-1 text-[11px] text-red-600"></p>
+            </div>
+            <div>
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Archivo adjunto (opcional)</span>
+              <p class="mt-1 text-[11px] text-carbon/40">PDF, Excel, ZIP o HTML — máximo 8MB (se manda a todos, entre más pesado, más tarda el envío).</p>
+              <input id="campanaArchivoInput" type="file" accept=".pdf,.zip,.xls,.xlsx,.html" class="mt-2 w-full text-xs">
+              <div id="campanaArchivoPreview" class="mt-2 hidden">
+                <p class="truncate text-xs text-carbon/70"><span id="campanaArchivoNombreTexto"></span></p>
+                <button type="button" id="btnQuitarCampanaArchivo" class="mt-1 block font-ui text-[10px] font-600 uppercase tracking-wider text-red-600">Quitar archivo</button>
+              </div>
+              <p id="campanaArchivoError" class="hidden mt-1 text-[11px] text-red-600"></p>
+            </div>
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link de video (opcional)</span>
+              <p class="mt-1 text-[11px] text-carbon/40">Pega el link de YouTube (u otro) del video. No se adjunta el video en sí — pesaría demasiado y el correo caería en spam — en su lugar el correo trae un botón "Ver video" hacia ese link.</p>
+              <input id="campanaVideoUrl" type="url" placeholder="https://youtu.be/..." class="mt-2 w-full rounded-xl border border-vino/15 bg-white px-4 py-2.5 text-sm">
+            </label>
+          </div>
+
           <button type="submit" id="btnEnviarCampana" class="rounded-full bg-vino px-8 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition sm:justify-self-start">Enviar a los seleccionados</button>
           <p id="campanaEnviarError" class="hidden text-sm text-red-600"></p>
         </form>
@@ -1414,6 +1443,65 @@ async function cargarCampanasEnviadas(){
   }
 }
 
+/* ---------- Adjuntos de la campaña (foto + archivo) ---------- */
+let campanaImagenUrl = '';
+let campanaArchivoUrl = '';
+let campanaArchivoNombreVal = '';
+
+$('campanaImagenInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  const err = $('campanaImagenError');
+  err.classList.add('hidden');
+  if(!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  try{
+    const res = await fetch('/admin/api/campanas/adjuntos/imagen', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir la foto');
+    campanaImagenUrl = data.url;
+    $('campanaImagenPreview').querySelector('img').src = data.url;
+    $('campanaImagenPreview').classList.remove('hidden');
+  }catch(e2){
+    err.textContent = e2.message;
+    err.classList.remove('hidden');
+    $('campanaImagenInput').value = '';
+  }
+});
+$('btnQuitarCampanaImagen').addEventListener('click', () => {
+  campanaImagenUrl = '';
+  $('campanaImagenInput').value = '';
+  $('campanaImagenPreview').classList.add('hidden');
+});
+
+$('campanaArchivoInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  const err = $('campanaArchivoError');
+  err.classList.add('hidden');
+  if(!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  try{
+    const res = await fetch('/admin/api/campanas/adjuntos/archivo', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir el archivo');
+    campanaArchivoUrl = data.url;
+    campanaArchivoNombreVal = data.nombre;
+    $('campanaArchivoNombreTexto').textContent = data.nombre;
+    $('campanaArchivoPreview').classList.remove('hidden');
+  }catch(e2){
+    err.textContent = e2.message;
+    err.classList.remove('hidden');
+    $('campanaArchivoInput').value = '';
+  }
+});
+$('btnQuitarCampanaArchivo').addEventListener('click', () => {
+  campanaArchivoUrl = '';
+  campanaArchivoNombreVal = '';
+  $('campanaArchivoInput').value = '';
+  $('campanaArchivoPreview').classList.add('hidden');
+});
+
 $('formEnviarCampana').addEventListener('submit', async (e) => {
   e.preventDefault();
   const err = $('campanaEnviarError');
@@ -1425,7 +1513,15 @@ $('formEnviarCampana').addEventListener('submit', async (e) => {
   try{
     const campana = await api('/admin/api/campanas/enviar', {
       method: 'POST',
-      body: JSON.stringify({ asunto: $('campanaAsunto').value.trim(), cuerpo: $('campanaCuerpo').value.trim(), contactoIds }),
+      body: JSON.stringify({
+        asunto: $('campanaAsunto').value.trim(),
+        cuerpo: $('campanaCuerpo').value.trim(),
+        contactoIds,
+        imagenUrl: campanaImagenUrl,
+        archivoUrl: campanaArchivoUrl,
+        archivoNombre: campanaArchivoNombreVal,
+        videoUrl: $('campanaVideoUrl').value.trim(),
+      }),
     });
     $('campanaProgreso').classList.remove('hidden');
     $('campanaProgresoBarra').style.width = '0%';
