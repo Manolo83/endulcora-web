@@ -711,9 +711,13 @@
           <p id="campanaContactosResumen" class="font-ui text-[11px] uppercase tracking-widest text-carbon/50">Cargando…</p>
         </div>
         <input id="campanaContactosBuscador" type="search" placeholder="Buscar por correo o nombre…" class="mt-3 w-full max-w-sm rounded-full border border-vino/15 bg-crema/60 px-4 py-2 text-sm outline-none focus:border-vino/40">
+        <div class="mt-3 flex flex-wrap items-center gap-3">
+          <button type="button" id="btnSeleccionarTodosContactos" class="rounded-full border border-vino/25 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Seleccionar TODOS los contactos activos</button>
+          <button type="button" id="btnQuitarSeleccionContactos" class="rounded-full border border-carbon/15 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-carbon/50 hover:border-carbon/40 transition">Quitar toda la selección</button>
+        </div>
         <label class="mt-3 flex items-center gap-2 text-sm text-carbon/70">
           <input type="checkbox" id="chkSeleccionarTodos" class="h-4 w-4 rounded border-vino/25">
-          Seleccionar todos los que se ven abajo
+          Seleccionar solo los que se ven abajo (según tu búsqueda)
         </label>
         <div id="listaContactosCampana" class="mt-2 max-h-96 overflow-y-auto rounded-xl border border-vino/10"></div>
       </div>
@@ -1310,9 +1314,10 @@ async function cargarContactosCampana(){
   const cont = $('listaContactosCampana');
   try{
     CONTACTOS_CAMPANA = await api('/admin/api/campanas/contactos');
-    // Por defecto se seleccionan todos los activos, para que "Enviar" mande a
-    // todos sin que tengas que marcarlos uno por uno.
-    SELECCIONADOS_CAMPANA = new Set(CONTACTOS_CAMPANA.filter(c => c.activo !== false).map(c => c.id));
+    // Nada viene seleccionado por default: hay que elegir a propósito a
+    // quién se le manda (con el buscador + casilla, o con el botón de
+    // "Seleccionar TODOS"), para no arriesgarse a mandarle a todos por error.
+    SELECCIONADOS_CAMPANA = new Set();
     pintarContactosCampana(CONTACTOS_CAMPANA);
   }catch(e){
     cont.innerHTML = '<p class="p-4 text-sm text-red-600">No se pudo cargar la lista de contactos.</p>';
@@ -1367,6 +1372,18 @@ function pintarContactosCampana(lista){
     });
   });
 }
+
+$('btnSeleccionarTodosContactos').addEventListener('click', () => {
+  const activos = CONTACTOS_CAMPANA.filter(c => c.activo !== false);
+  if(!confirm(`¿Seleccionar los ${activos.length} contactos activos? Se les mandará el correo a todos ellos.`)) return;
+  SELECCIONADOS_CAMPANA = new Set(activos.map(c => c.id));
+  pintarContactosCampana(ULTIMA_LISTA_MOSTRADA.length ? ULTIMA_LISTA_MOSTRADA : CONTACTOS_CAMPANA);
+});
+
+$('btnQuitarSeleccionContactos').addEventListener('click', () => {
+  SELECCIONADOS_CAMPANA = new Set();
+  pintarContactosCampana(ULTIMA_LISTA_MOSTRADA.length ? ULTIMA_LISTA_MOSTRADA : CONTACTOS_CAMPANA);
+});
 
 $('chkSeleccionarTodos').addEventListener('change', (e) => {
   const marcar = e.target.checked;
@@ -1445,27 +1462,47 @@ async function cargarCampanasEnviadas(){
       cont.innerHTML = '<p class="text-sm text-carbon/40">Todavía no has enviado ninguna campaña.</p>';
     }else{
       cont.innerHTML = campanas.map(c => {
-        const enCurso = c.estado !== 'terminada';
+        const enCurso = c.estado === 'enviando';
+        const cancelada = c.estado === 'cancelada';
+        const estadoTexto = enCurso ? 'Enviando…' : (cancelada ? 'Cancelada' : 'Terminada');
         const pct = c.total ? Math.round(((c.enviados + c.fallidos) / c.total) * 100) : 100;
         return `
         <div class="rounded-xl border border-vino/10 px-4 py-3">
-          <p class="text-sm font-600 text-carbon/80">${escapeHtml(c.asunto)}</p>
-          <p class="text-xs text-carbon/40">${new Date(c.createdAt).toLocaleString('es-MX')} · ${c.enviados} enviados, ${c.fallidos} fallidos de ${c.total} · ${enCurso ? 'Enviando…' : 'Terminada'}</p>
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-sm font-600 text-carbon/80">${escapeHtml(c.asunto)}</p>
+              <p class="text-xs text-carbon/40">${new Date(c.createdAt).toLocaleString('es-MX')} · ${c.enviados} enviados, ${c.fallidos} fallidos de ${c.total} · ${estadoTexto}</p>
+            </div>
+            ${enCurso ? `<button type="button" data-id="${c.id}" class="btnCancelarCampana shrink-0 rounded-full border border-red-200 px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Cancelar envío</button>` : ''}
+          </div>
           ${enCurso ? `
             <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-vino/10">
               <div class="h-full rounded-full bg-vino transition-all" style="width:${pct}%"></div>
             </div>
             <p class="mt-1 text-right font-ui text-[10px] uppercase tracking-widest text-carbon/40">${pct}%</p>
+            ${c.total > 1000 ? '<p class="mt-1 text-[11px] text-carbon/40">Se reparte en varios días (1,000 → 2,000 → 4,000 → resto) para cuidar la reputación del dominio; continúa solo.</p>' : ''}
           ` : ''}
           ${c.fallidos > 0 && c.ultimoError ? `<p class="mt-2 text-xs text-red-600">Motivo de los fallos: ${escapeHtml(c.ultimoError)}</p>` : ''}
         </div>`;
       }).join('');
+      cont.querySelectorAll('.btnCancelarCampana').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if(!confirm('¿Cancelar este envío? Ya no se le mandará a nadie más (a quien ya se le mandó, no se puede deshacer).')) return;
+          try{
+            await api(`/admin/api/campanas/${btn.dataset.id}/cancelar`, { method: 'POST' });
+            toast('Envío cancelado');
+            cargarCampanasEnviadas();
+          }catch(err){
+            toast(err.message);
+          }
+        });
+      });
     }
   }catch(e){
     cont.innerHTML = '<p class="text-sm text-red-600">No se pudieron cargar las campañas.</p>';
   }
   clearTimeout(campanasPollTimer);
-  if(campanas.some(c => c.estado !== 'terminada')){
+  if(campanas.some(c => c.estado === 'enviando')){
     campanasPollTimer = setTimeout(cargarCampanasEnviadas, 2000);
   }
 }

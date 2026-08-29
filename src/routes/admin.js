@@ -990,6 +990,17 @@ router.get('/api/campanas', requireAdmin, (req, res) => {
   res.json(store.getCampanasCorreo());
 });
 
+// Detiene una campaña que sigue en curso (ej. se mandó por error a más
+// contactos de los que se querían). Ya no se le manda a nadie más; a quien
+// ya se le mandó, se le mandó — eso no se puede deshacer.
+router.post('/api/campanas/:id/cancelar', requireAdmin, (req, res) => {
+  const campana = store.getCampanaCorreo(req.params.id);
+  if (!campana) return res.status(404).json({ error: 'No encontrada' });
+  if (campana.estado === 'terminada') return res.status(400).json({ error: 'Esta campaña ya había terminado.' });
+  const actualizada = store.actualizarCampanaCorreo(campana.id, { estado: 'cancelada', terminadaAt: new Date().toISOString() });
+  res.json(actualizada);
+});
+
 // ---- Manejo de errores (ej. archivo demasiado grande, tipo no permitido) ----
 router.use((err, req, res, next) => {
   res.status(400).json({ error: err.message || 'Error al procesar la solicitud' });
