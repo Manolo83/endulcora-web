@@ -78,4 +78,38 @@ async function enviarCorreoRevistaMensual({ to, nombre, url, mes }) {
   });
 }
 
-module.exports = { enviarCorreoConfirmacionCompra, enviarCorreoRevistaMensual };
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Correo de campaña masiva (a la lista de contactos importada en /admin).
+// Incluye los headers List-Unsubscribe / List-Unsubscribe-Post (RFC 8058):
+// Gmail y Yahoo exigen esto para no marcar como spam a quien manda correo en
+// volumen, y con eso el "darse de baja" es de un clic, sin que el cliente de
+// correo tenga que abrir el link.
+async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribeUrl }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+
+  await client.emails.send({
+    from,
+    to,
+    subject: asunto,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        ${nombre ? `<p style="font-size:14px;">Hola ${escapeHtml(nombre)},</p>` : ''}
+        <div style="font-size:14px;line-height:1.6;">${cuerpoHtml}</div>
+        <p style="margin-top:28px;font-size:11px;color:#9C9C9C;">Recibiste este correo porque estás en la lista de contactos de Endulcora.<br><a href="${unsubscribeUrl}" style="color:#9C9C9C;">Dejar de recibir estos correos</a></p>
+      </div>
+    `,
+    headers: {
+      'List-Unsubscribe': `<${unsubscribeUrl}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    },
+  });
+}
+
+module.exports = { enviarCorreoConfirmacionCompra, enviarCorreoRevistaMensual, enviarCorreoCampana };

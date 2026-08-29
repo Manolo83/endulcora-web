@@ -69,6 +69,7 @@
       <a href="#seccionClientes" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clientes</a>
       <a href="#seccionMembresia" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Membresía</a>
       <a href="#seccionSuscriptores" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Suscriptores</a>
+      <a href="#seccionCampanas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Campañas de correo</a>
       <a href="#seccionResenas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Reseñas</a>
       <a href="#seccionComunidad" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Comunidad</a>
       <a href="#seccionPromosTaller" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Promos de talleres</a>
@@ -666,6 +667,64 @@
       <div id="listaSuscriptores" class="mt-6 overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10"></div>
     </section>
 
+    <!-- CAMPAÑAS DE CORREO -->
+    <section id="seccionCampanas" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Campañas de correo masivo</h2>
+      <p class="mt-1 text-sm text-carbon/60">Importa una lista de contactos y mándales un correo a todos desde tu dominio propio, sin usar Gmail (evita que baneen la cuenta por enviar en volumen).</p>
+      <div class="mt-3 rounded-2xl bg-flama/10 p-4 text-xs leading-relaxed text-vino ring-1 ring-flama/30">
+        <strong>Antes de tu primer envío:</strong> en <a href="https://resend.com" target="_blank" class="underline">resend.com</a> → Domains, agrega y verifica <code>endulcora.com</code> (o un subdominio como <code>correo.endulcora.com</code>) con los registros DNS que te den, y pon la variable <code>RESEND_FROM</code> en Railway como <code>Endulcora &lt;noticias@endulcora.com&gt;</code>. Sin el dominio verificado, Resend no te dejará mandar correo masivo de verdad.
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Importar contactos</h3>
+        <p class="mt-1 text-xs text-carbon/50">Sube un archivo .csv con una columna "email" (o "correo") y, si quieres, "nombre" y "telefono". Puedes importar varias veces: los correos repetidos solo se actualizan, no se duplican.</p>
+        <form id="formImportarContactos" class="mt-4 flex flex-wrap items-center gap-3">
+          <input id="campanaCsvInput" type="file" accept=".csv,text/csv" required class="text-sm">
+          <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Importar</button>
+        </form>
+        <p id="campanaImportarResultado" class="mt-3 hidden text-sm"></p>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Contactos</h3>
+          <p id="campanaContactosResumen" class="font-ui text-[11px] uppercase tracking-widest text-carbon/50">Cargando…</p>
+        </div>
+        <input id="campanaContactosBuscador" type="search" placeholder="Buscar por correo o nombre…" class="mt-3 w-full max-w-sm rounded-full border border-vino/15 bg-crema/60 px-4 py-2 text-sm outline-none focus:border-vino/40">
+        <div id="listaContactosCampana" class="mt-4 max-h-96 overflow-y-auto rounded-xl border border-vino/10"></div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Escribir y enviar campaña</h3>
+        <form id="formEnviarCampana" class="mt-4 grid gap-4">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Asunto</span>
+            <input id="campanaAsunto" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mensaje (deja una línea en blanco entre párrafos)</span>
+            <textarea id="campanaCuerpo" rows="8" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+          </label>
+          <button type="submit" id="btnEnviarCampana" class="rounded-full bg-vino px-8 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition sm:justify-self-start">Enviar campaña</button>
+          <p id="campanaEnviarError" class="hidden text-sm text-red-600"></p>
+        </form>
+        <div id="campanaProgreso" class="mt-5 hidden rounded-xl bg-crema/60 p-4">
+          <div class="flex justify-between font-ui text-[11px] uppercase tracking-widest text-carbon/60">
+            <span id="campanaProgresoTexto">Enviando…</span>
+            <span id="campanaProgresoPorcentaje">0%</span>
+          </div>
+          <div class="mt-2 h-2 overflow-hidden rounded-full bg-vino/10">
+            <div id="campanaProgresoBarra" class="h-full rounded-full bg-vino transition-all" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Campañas enviadas</h3>
+        <div id="listaCampanasEnviadas" class="mt-4 space-y-2"></div>
+      </div>
+    </section>
+
     <!-- RESEÑAS -->
     <section id="seccionResenas" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Reseñas</h2>
@@ -832,6 +891,8 @@ function mostrarDashboard(mostrar){
     cargarContenidoAdmin();
     cargarHeroCarrusel();
     cargarBibliotecaClasesAdmin();
+    cargarContactosCampana();
+    cargarCampanasEnviadas();
     cargarPromosTallerAdmin();
     cargarProductosAdmin();
     cargarSedes();
@@ -1197,6 +1258,141 @@ $('formClaseBiblioteca').addEventListener('submit', async (e) => {
   }catch(e2){
     err.textContent = e2.message || 'No se pudo agregar la clase.';
     err.classList.remove('hidden');
+  }
+});
+
+/* ---------- Campañas de correo masivo ---------- */
+let CONTACTOS_CAMPANA = [];
+
+async function cargarContactosCampana(){
+  const cont = $('listaContactosCampana');
+  try{
+    CONTACTOS_CAMPANA = await api('/admin/api/campanas/contactos');
+    pintarContactosCampana(CONTACTOS_CAMPANA);
+  }catch(e){
+    cont.innerHTML = '<p class="p-4 text-sm text-red-600">No se pudo cargar la lista de contactos.</p>';
+  }
+}
+
+function pintarContactosCampana(lista){
+  const cont = $('listaContactosCampana');
+  const activos = CONTACTOS_CAMPANA.filter(c => c.activo !== false).length;
+  $('campanaContactosResumen').textContent = `${activos} activos de ${CONTACTOS_CAMPANA.length} en total`;
+  if(!lista.length){
+    cont.innerHTML = '<p class="p-4 text-sm text-carbon/40">Todavía no has importado ningún contacto.</p>';
+    return;
+  }
+  cont.innerHTML = lista.map(c => `
+    <div class="flex items-center justify-between gap-3 border-b border-vino/5 px-4 py-2.5 last:border-0">
+      <div class="min-w-0">
+        <p class="truncate text-sm text-carbon/80">${escapeHtml(c.email)}${c.nombre ? ` · ${escapeHtml(c.nombre)}` : ''}</p>
+        ${c.activo === false ? '<p class="text-[11px] uppercase tracking-widest text-carbon/40">Dado de baja</p>' : ''}
+      </div>
+      <button type="button" data-id="${c.id}" class="btnBorrarContactoCampana shrink-0 rounded-full border border-red-200 px-3 py-1 font-ui text-[10px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+    </div>`).join('');
+  cont.querySelectorAll('.btnBorrarContactoCampana').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if(!confirm('¿Borrar este contacto de la lista?')) return;
+      await api(`/admin/api/campanas/contactos/${btn.dataset.id}`, { method: 'DELETE' });
+      cargarContactosCampana();
+    });
+  });
+}
+
+$('campanaContactosBuscador').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  const filtrada = !q ? CONTACTOS_CAMPANA : CONTACTOS_CAMPANA.filter(c => (c.email||'').toLowerCase().includes(q) || (c.nombre||'').toLowerCase().includes(q));
+  pintarContactosCampana(filtrada);
+});
+
+$('formImportarContactos').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = $('campanaCsvInput').files[0];
+  const resultado = $('campanaImportarResultado');
+  if(!file){ toast('Elige un archivo CSV'); return; }
+  const fd = new FormData();
+  fd.append('file', file);
+  resultado.classList.add('hidden');
+  try{
+    const res = await fetch('/admin/api/campanas/importar', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo importar el archivo');
+    $('formImportarContactos').reset();
+    resultado.textContent = `${data.agregados} contacto(s) nuevo(s), ${data.actualizados} actualizado(s). Total: ${data.total}.`;
+    resultado.classList.remove('hidden', 'text-red-600');
+    resultado.classList.add('text-vino');
+    cargarContactosCampana();
+  }catch(e2){
+    resultado.textContent = e2.message;
+    resultado.classList.remove('hidden');
+    resultado.classList.add('text-red-600');
+  }
+});
+
+let campanaPolling = null;
+function detenerPollingCampana(){
+  if(campanaPolling){ clearInterval(campanaPolling); campanaPolling = null; }
+}
+
+async function pollCampana(id){
+  try{
+    const campanas = await api('/admin/api/campanas');
+    const campana = campanas.find(c => c.id === id);
+    if(!campana) return;
+    const pct = campana.total ? Math.round(((campana.enviados + campana.fallidos) / campana.total) * 100) : 100;
+    $('campanaProgresoBarra').style.width = pct + '%';
+    $('campanaProgresoPorcentaje').textContent = pct + '%';
+    $('campanaProgresoTexto').textContent = campana.estado === 'terminada'
+      ? `Terminado: ${campana.enviados} enviados, ${campana.fallidos} fallidos`
+      : `Enviando… ${campana.enviados} enviados, ${campana.fallidos} fallidos de ${campana.total}`;
+    if(campana.estado === 'terminada'){
+      detenerPollingCampana();
+      $('btnEnviarCampana').disabled = false;
+      cargarCampanasEnviadas();
+    }
+  }catch(e){}
+}
+
+async function cargarCampanasEnviadas(){
+  const cont = $('listaCampanasEnviadas');
+  try{
+    const campanas = await api('/admin/api/campanas');
+    if(!campanas.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/40">Todavía no has enviado ninguna campaña.</p>';
+      return;
+    }
+    cont.innerHTML = campanas.map(c => `
+      <div class="rounded-xl border border-vino/10 px-4 py-3">
+        <p class="text-sm font-600 text-carbon/80">${escapeHtml(c.asunto)}</p>
+        <p class="text-xs text-carbon/40">${new Date(c.createdAt).toLocaleString('es-MX')} · ${c.enviados} enviados, ${c.fallidos} fallidos de ${c.total} · ${c.estado === 'terminada' ? 'Terminada' : 'Enviando…'}</p>
+      </div>`).join('');
+  }catch(e){
+    cont.innerHTML = '<p class="text-sm text-red-600">No se pudieron cargar las campañas.</p>';
+  }
+}
+
+$('formEnviarCampana').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = $('campanaEnviarError');
+  err.classList.add('hidden');
+  const activos = CONTACTOS_CAMPANA.filter(c => c.activo !== false).length;
+  if(!confirm(`¿Enviar este correo a ${activos} contacto(s) activo(s)? Esta acción no se puede deshacer.`)) return;
+  $('btnEnviarCampana').disabled = true;
+  try{
+    const campana = await api('/admin/api/campanas/enviar', {
+      method: 'POST',
+      body: JSON.stringify({ asunto: $('campanaAsunto').value.trim(), cuerpo: $('campanaCuerpo').value.trim() }),
+    });
+    $('campanaProgreso').classList.remove('hidden');
+    $('campanaProgresoBarra').style.width = '0%';
+    $('campanaProgresoPorcentaje').textContent = '0%';
+    $('campanaProgresoTexto').textContent = 'Enviando…';
+    detenerPollingCampana();
+    campanaPolling = setInterval(() => pollCampana(campana.id), 2000);
+  }catch(e2){
+    err.textContent = e2.message;
+    err.classList.remove('hidden');
+    $('btnEnviarCampana').disabled = false;
   }
 });
 

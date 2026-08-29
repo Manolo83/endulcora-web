@@ -165,6 +165,8 @@ function datosPorDefecto() {
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
     sesionesTaller: [],
     bibliotecaClases: [],
+    contactosCampana: [],
+    campanasCorreo: [],
     resenas: [],
     publicacionesComunidad: [],
     mensajesComunidad: [],
@@ -1130,6 +1132,88 @@ module.exports = {
     const data = load();
     data.bibliotecaClases = data.bibliotecaClases.filter((c) => c.id !== Number(id));
     save(data);
+  },
+
+  // ---- Contactos para campañas de correo masivo (lista propia, separada de
+  // "subscribers"/"users") ----
+  getContactosCampana() {
+    return [...load().contactosCampana].sort((a, b) => b.id - a.id);
+  },
+  importarContactosCampana(lista) {
+    const data = load();
+    let agregados = 0;
+    let actualizados = 0;
+    for (const fila of lista) {
+      const email = String(fila.email || '').trim().toLowerCase();
+      if (!email || !email.includes('@')) continue;
+      const existente = data.contactosCampana.find((c) => c.email === email);
+      if (existente) {
+        if (fila.nombre) existente.nombre = String(fila.nombre).trim();
+        if (fila.telefono) existente.telefono = String(fila.telefono).trim();
+        actualizados += 1;
+      } else {
+        data.contactosCampana.push({
+          id: nextId(data.contactosCampana),
+          email,
+          nombre: String(fila.nombre || '').trim(),
+          telefono: String(fila.telefono || '').trim(),
+          activo: true,
+          unsubToken: crypto.randomUUID(),
+          createdAt: new Date().toISOString(),
+        });
+        agregados += 1;
+      }
+    }
+    save(data);
+    return { agregados, actualizados, total: data.contactosCampana.length };
+  },
+  deleteContactoCampana(id) {
+    const data = load();
+    data.contactosCampana = data.contactosCampana.filter((c) => c.id !== Number(id));
+    save(data);
+  },
+  // Se usa desde el link "dejar de recibir correos" al final de cada
+  // campaña: el token evita que cualquiera pueda desactivar el correo de
+  // otra persona solo adivinando su id.
+  desuscribirContactoCampanaPorToken(id, token) {
+    const data = load();
+    const item = data.contactosCampana.find((c) => c.id === Number(id) && c.unsubToken === token);
+    if (!item) return null;
+    item.activo = false;
+    save(data);
+    return item;
+  },
+
+  // ---- Historial de campañas de correo enviadas ----
+  getCampanasCorreo() {
+    return [...load().campanasCorreo].sort((a, b) => b.id - a.id);
+  },
+  getCampanaCorreo(id) {
+    return load().campanasCorreo.find((c) => c.id === Number(id)) || null;
+  },
+  addCampanaCorreo({ asunto, total }) {
+    const data = load();
+    const item = {
+      id: nextId(data.campanasCorreo),
+      asunto,
+      total,
+      enviados: 0,
+      fallidos: 0,
+      estado: 'enviando',
+      createdAt: new Date().toISOString(),
+      terminadaAt: null,
+    };
+    data.campanasCorreo.push(item);
+    save(data);
+    return item;
+  },
+  actualizarCampanaCorreo(id, patch) {
+    const data = load();
+    const item = data.campanasCorreo.find((c) => c.id === Number(id));
+    if (!item) return null;
+    Object.assign(item, patch);
+    save(data);
+    return item;
   },
 
   // ---- Reseñas de alumnos ----

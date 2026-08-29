@@ -203,6 +203,24 @@ app.get('/biblioteca-clases', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'biblioteca-clases.html'));
 });
 
+// Baja de la lista de campañas de correo. Sirve el link visible al final de
+// cada correo (GET, para que la persona vea la confirmación) y también
+// responde a POST: los clientes de correo que soportan "un clic para darse
+// de baja" (Gmail, Yahoo) lo hacen con un POST silencioso, sin abrir nada.
+function manejarDesuscripcion(req, res) {
+  const { id, token } = req.method === 'POST' ? req.body || {} : req.query;
+  const item = store.desuscribirContactoCampanaPorToken(id, token);
+  if (req.method === 'POST') return res.status(200).end();
+  res.set('Content-Type', 'text/html; charset=utf-8');
+  if (!item) {
+    return res.status(400).send('<!DOCTYPE html><html lang="es-MX"><meta charset="utf-8"><body style="font-family:Arial,sans-serif;max-width:420px;margin:80px auto;text-align:center;color:#1B0720;"><h1>Enlace no válido</h1><p>Este enlace para dejar de recibir correos ya no es válido.</p></body></html>');
+  }
+  const correoSeguro = String(item.email).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  res.send(`<!DOCTYPE html><html lang="es-MX"><meta charset="utf-8"><body style="font-family:Arial,sans-serif;max-width:420px;margin:80px auto;text-align:center;color:#1B0720;"><h1>Listo</h1><p>${correoSeguro} ya no recibirá correos de Endulcora.</p></body></html>`);
+}
+app.get('/desuscribir', manejarDesuscripcion);
+app.post('/desuscribir', express.urlencoded({ extended: false }), manejarDesuscripcion);
+
 // Secciones que se quedan dentro de la pagina principal, pero con URL propia
 // ademas de las anclas #seccion. Sirven la misma index.html; el script del
 // cliente hace scroll a la seccion segun la ruta.

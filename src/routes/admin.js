@@ -9,7 +9,7 @@ const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
-const { enviarCorreoRevistaMensual } = require('../email');
+const { enviarCorreoRevistaMensual, enviarCorreoCampana } = require('../email');
 const { sincronizarPagosDePreapproval } = require('./membresia');
 
 const router = express.Router();
@@ -802,6 +802,131 @@ router.post('/api/clases/biblioteca', requireAdmin, (req, res) => {
 router.delete('/api/clases/biblioteca/:id', requireAdmin, (req, res) => {
   store.deleteClaseBiblioteca(req.params.id);
   res.json({ ok: true });
+});
+
+// ---- Campañas de correo masivo (lista propia de contactos, vía Resend) ----
+function escapeHtmlAdmin(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Parser de CSV sin depender de una librería externa: soporta campos entre
+// comillas (con comas o comillas escapadas adentro), que es lo único que
+// necesitamos para un archivo de contactos exportado de Excel/Sheets.
+function parseCSV(texto) {
+  const filas = [];
+  let fila = [];
+  let campo = '';
+  let dentroComillas = false;
+  const limpio = String(texto || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  for (let i = 0; i < limpio.length; i++) {
+    const ch = limpio[i];
+    if (dentroComillas) {
+      if (ch === '"') {
+        if (limpio[i + 1] === '"') { campo += '"'; i++; } else dentroComillas = false;
+      } else {
+        campo += ch;
+      }
+    } else if (ch === '"') {
+      dentroComillas = true;
+    } else if (ch === ',') {
+      fila.push(campo); campo = '';
+    } else if (ch === '\n') {
+      fila.push(campo); campo = '';
+      filas.push(fila); fila = [];
+    } else {
+      campo += ch;
+    }
+  }
+  if (campo || fila.length) { fila.push(campo); filas.push(fila); }
+  return filas.filter((f) => f.some((c) => c.trim() !== ''));
+}
+
+// Acepta encabezados en español o inglés, en cualquier orden. Regresa null
+// si no encuentra una columna de correo (la única obligatoria).
+function filasAContactos(filas) {
+  if (!filas.length) return null;
+  const encabezado = filas[0].map((h) => h.trim().toLowerCase());
+  const idxEmail = encabezado.findIndex((h) => ['email', 'correo', 'mail', 'e-mail', 'correo electronico', 'correo electrónico'].includes(h));
+  if (idxEmail === -1) return null;
+  const idxNombre = encabezado.findIndex((h) => ['nombre', 'name', 'nombre completo'].includes(h));
+  const idxTelefono = encabezado.findIndex((h) => ['telefono', 'teléfono', 'phone', 'celular', 'whatsapp'].includes(h));
+  return filas.slice(1).map((fila) => ({
+    email: fila[idxEmail] || '',
+    nombre: idxNombre !== -1 ? fila[idxNombre] || '' : '',
+    telefono: idxTelefono !== -1 ? fila[idxTelefono] || '' : '',
+  }));
+}
+
+const uploadCSV = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB, de sobra para varios miles de contactos
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/csv' || file.mimetype === 'application/vnd.ms-excel' || /\.csv$/i.test(file.originalname)) cb(null, true);
+    else cb(new Error('Sube un archivo .csv (en Excel o Google Sheets: Archivo > Descargar/Exportar > CSV).'));
+  },
+});
+
+router.post('/api/campanas/importar', requireAdmin, uploadCSV.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo CSV.' });
+  const filas = parseCSV(req.file.buffer.toString('utf-8'));
+  const contactos = filasAContactos(filas);
+  if (contactos === null) {
+    return res.status(400).json({ error: 'No encontré una columna de correo. Pon un encabezado "email" o "correo" en la primera fila.' });
+  }
+  const resultado = store.importarContactosCampana(contactos);
+  res.status(201).json(resultado);
+});
+
+router.get('/api/campanas/contactos', requireAdmin, (req, res) => {
+  res.json(store.getContactosCampana());
+});
+
+router.delete('/api/campanas/contactos/:id', requireAdmin, (req, res) => {
+  store.deleteContactoCampana(req.params.id);
+  res.json({ ok: true });
+});
+
+// El envio se hace en segundo plano (puede tardar varios minutos con miles
+// de contactos): la respuesta regresa de inmediato con el id de la campaña,
+// y /admin consulta el progreso con GET /api/campanas.
+router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
+  const { asunto, cuerpo } = req.body || {};
+  if (!asunto || !String(asunto).trim()) return res.status(400).json({ error: 'Ponle un asunto al correo.' });
+  if (!cuerpo || !String(cuerpo).trim()) return res.status(400).json({ error: 'Escribe el contenido del correo.' });
+
+  const destinatarios = store.getContactosCampana().filter((c) => c.activo !== false);
+  if (!destinatarios.length) return res.status(400).json({ error: 'No hay contactos activos a quién enviarle.' });
+
+  const asuntoLimpio = String(asunto).trim();
+  const cuerpoHtml = String(cuerpo).trim()
+    .split(/\n{2,}/)
+    .map((parrafo) => `<p style="margin:0 0 14px;">${escapeHtmlAdmin(parrafo).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+
+  const campana = store.addCampanaCorreo({ asunto: asuntoLimpio, total: destinatarios.length });
+  res.status(202).json(campana);
+
+  (async () => {
+    let enviados = 0;
+    let fallidos = 0;
+    for (const contacto of destinatarios) {
+      try {
+        const unsubscribeUrl = `${SITE_URL}/desuscribir?id=${contacto.id}&token=${contacto.unsubToken}`;
+        await enviarCorreoCampana({ to: contacto.email, nombre: contacto.nombre, asunto: asuntoLimpio, cuerpoHtml, unsubscribeUrl });
+        enviados += 1;
+      } catch (e) {
+        fallidos += 1;
+      }
+      store.actualizarCampanaCorreo(campana.id, { enviados, fallidos });
+      // Pausa entre envios para respetar el ritmo de la API de Resend.
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+    store.actualizarCampanaCorreo(campana.id, { estado: 'terminada', terminadaAt: new Date().toISOString() });
+  })();
+});
+
+router.get('/api/campanas', requireAdmin, (req, res) => {
+  res.json(store.getCampanasCorreo());
 });
 
 // ---- Manejo de errores (ej. archivo demasiado grande, tipo no permitido) ----
