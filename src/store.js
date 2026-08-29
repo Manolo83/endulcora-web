@@ -1218,6 +1218,7 @@ module.exports = {
       total: (contactoIds || []).length,
       enviados: 0,
       fallidos: 0,
+      ultimoError: '',
       estado: 'enviando',
       createdAt: new Date().toISOString(),
       terminadaAt: null,
@@ -1228,12 +1229,16 @@ module.exports = {
   },
   // Se llama una vez por cada contacto procesado, para que quede guardado de
   // inmediato quien ya recibio su correo (o fallo) y no se repita al retomar.
-  registrarResultadoCampana(id, contactoId, exito) {
+  registrarResultadoCampana(id, contactoId, exito, errorMsg) {
     const data = load();
     const item = data.campanasCorreo.find((c) => c.id === Number(id));
     if (!item) return null;
-    if (exito) item.enviadosIds.push(contactoId);
-    else item.fallidosIds.push(contactoId);
+    if (exito) {
+      item.enviadosIds.push(contactoId);
+    } else {
+      item.fallidosIds.push(contactoId);
+      if (errorMsg) item.ultimoError = String(errorMsg);
+    }
     item.enviados = item.enviadosIds.length;
     item.fallidos = item.fallidosIds.length;
     save(data);

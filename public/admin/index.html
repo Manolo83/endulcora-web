@@ -1457,6 +1457,7 @@ async function cargarCampanasEnviadas(){
             </div>
             <p class="mt-1 text-right font-ui text-[10px] uppercase tracking-widest text-carbon/40">${pct}%</p>
           ` : ''}
+          ${c.fallidos > 0 && c.ultimoError ? `<p class="mt-2 text-xs text-red-600">Motivo de los fallos: ${escapeHtml(c.ultimoError)}</p>` : ''}
         </div>`;
       }).join('');
     }

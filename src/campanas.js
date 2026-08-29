@@ -19,6 +19,7 @@ async function procesarCampana(campanaId) {
 
   for (const contacto of pendientes) {
     let exito = false;
+    let errorMsg = '';
     try {
       const unsubscribeUrl = `${SITE_URL}/desuscribir?id=${contacto.id}&token=${contacto.unsubToken}`;
       await enviarCorreoCampana({
@@ -34,8 +35,10 @@ async function procesarCampana(campanaId) {
       exito = true;
     } catch (e) {
       exito = false;
+      errorMsg = e.message || String(e);
+      console.error(`[campanas] Fallo al enviar a ${contacto.email}:`, errorMsg);
     }
-    store.registrarResultadoCampana(campanaId, contacto.id, exito);
+    store.registrarResultadoCampana(campanaId, contacto.id, exito, errorMsg);
     // Pausa entre envios para respetar el ritmo de la API de Resend.
     await new Promise((resolve) => setTimeout(resolve, 300));
   }

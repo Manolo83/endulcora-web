@@ -40,7 +40,7 @@ async function enviarCorreoConfirmacionCompra({ to, order, siteUrl, numeroWhatsa
     })
     .join('');
 
-  await client.emails.send({
+  const { error } = await client.emails.send({
     from,
     to,
     subject: '¡Tu pago fue confirmado! · Endulcora',
@@ -54,6 +54,10 @@ async function enviarCorreoConfirmacionCompra({ to, order, siteUrl, numeroWhatsa
       </div>
     `,
   });
+  // Resend no lanza una excepcion cuando el envio falla: regresa
+  // { data: null, error }. Sin este chequeo, un correo rechazado se veia
+  // como "enviado" (nunca se detectaba el error).
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
 async function enviarCorreoRevistaMensual({ to, nombre, url, mes }) {
@@ -62,7 +66,7 @@ async function enviarCorreoRevistaMensual({ to, nombre, url, mes }) {
 
   const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
 
-  await client.emails.send({
+  const { error } = await client.emails.send({
     from,
     to,
     subject: `Tu revista mensual de regalo de ${mes} · Endulcora`,
@@ -76,6 +80,7 @@ async function enviarCorreoRevistaMensual({ to, nombre, url, mes }) {
       </div>
     `,
   });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
 function escapeHtml(s) {
@@ -103,7 +108,7 @@ async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribe
   // asi no hay que mandar los archivos completos en cada peticion a la API.
   const attachments = archivos && archivos.length ? archivos : undefined;
 
-  await client.emails.send({
+  const { error } = await client.emails.send({
     from,
     to,
     subject: asunto,
@@ -123,6 +128,7 @@ async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribe
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     },
   });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
 module.exports = { enviarCorreoConfirmacionCompra, enviarCorreoRevistaMensual, enviarCorreoCampana };
