@@ -9,7 +9,8 @@ const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
-const { enviarCorreoRevistaMensual, enviarCorreoCampana } = require('../email');
+const { enviarCorreoRevistaMensual } = require('../email');
+const { procesarCampana } = require('../campanas');
 const { sincronizarPagosDePreapproval } = require('./membresia');
 
 const router = express.Router();
@@ -931,7 +932,10 @@ router.post('/api/campanas/adjuntos/archivos', requireAdmin, uploadAdjuntoArchiv
 
 // El envio se hace en segundo plano (puede tardar varios minutos con miles
 // de contactos): la respuesta regresa de inmediato con el id de la campaña,
-// y /admin consulta el progreso con GET /api/campanas.
+// y /admin consulta el progreso con GET /api/campanas. Todo el contenido y
+// la lista de destinatarios se guardan en la campaña ANTES de mandar nada,
+// para que si el servidor se reinicia a la mitad (ej. un deploy), se pueda
+// retomar exactamente donde se quedo en vez de perderse (ver src/campanas.js).
 router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
   const { asunto, cuerpo, contactoIds, imagenes, archivos, videoUrl } = req.body || {};
   if (!asunto || !String(asunto).trim()) return res.status(400).json({ error: 'Ponle un asunto al correo.' });
@@ -960,35 +964,16 @@ router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
     : [];
   const videoUrlLimpia = videoUrl ? String(videoUrl).trim() : '';
 
-  const campana = store.addCampanaCorreo({ asunto: asuntoLimpio, total: destinatarios.length });
+  const campana = store.addCampanaCorreo({
+    asunto: asuntoLimpio,
+    cuerpoHtml,
+    imagenes: imagenesCompletas,
+    archivos: archivosCompletos,
+    videoUrl: videoUrlLimpia,
+    contactoIds: destinatarios.map((c) => c.id),
+  });
   res.status(202).json(campana);
-
-  (async () => {
-    let enviados = 0;
-    let fallidos = 0;
-    for (const contacto of destinatarios) {
-      try {
-        const unsubscribeUrl = `${SITE_URL}/desuscribir?id=${contacto.id}&token=${contacto.unsubToken}`;
-        await enviarCorreoCampana({
-          to: contacto.email,
-          nombre: contacto.nombre,
-          asunto: asuntoLimpio,
-          cuerpoHtml,
-          unsubscribeUrl,
-          imagenes: imagenesCompletas,
-          archivos: archivosCompletos,
-          videoUrl: videoUrlLimpia,
-        });
-        enviados += 1;
-      } catch (e) {
-        fallidos += 1;
-      }
-      store.actualizarCampanaCorreo(campana.id, { enviados, fallidos });
-      // Pausa entre envios para respetar el ritmo de la API de Resend.
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    }
-    store.actualizarCampanaCorreo(campana.id, { estado: 'terminada', terminadaAt: new Date().toISOString() });
-  })();
+  procesarCampana(campana.id).catch(() => {});
 });
 
 router.get('/api/campanas', requireAdmin, (req, res) => {

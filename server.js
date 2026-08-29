@@ -248,6 +248,9 @@ store.init()
     servidor = app.listen(PORT, () => {
       console.log(`Endulcora escuchando en el puerto ${PORT}`);
     });
+    // Si un deploy o reinicio interrumpio una campaña de correo a la mitad,
+    // la retoma automaticamente en vez de dejarla congelada para siempre.
+    require('./src/campanas').reanudarCampanasPendientes();
   })
   .catch((err) => {
     console.error('No se pudo conectar a la base de datos, el servidor no arranco:', err.message);

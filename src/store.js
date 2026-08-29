@@ -1185,18 +1185,29 @@ module.exports = {
   },
 
   // ---- Historial de campañas de correo enviadas ----
+  // Guarda el contenido completo y la lista de a quien le toca (contactoIds)
+  // junto con quien ya quedo procesado (enviadosIds/fallidosIds), para poder
+  // retomar el envio exactamente donde se quedo si el servidor se reinicia
+  // a la mitad (ej. un deploy) en vez de perder el resto de la campaña.
   getCampanasCorreo() {
     return [...load().campanasCorreo].sort((a, b) => b.id - a.id);
   },
   getCampanaCorreo(id) {
     return load().campanasCorreo.find((c) => c.id === Number(id)) || null;
   },
-  addCampanaCorreo({ asunto, total }) {
+  addCampanaCorreo({ asunto, cuerpoHtml, imagenes, archivos, videoUrl, contactoIds }) {
     const data = load();
     const item = {
       id: nextId(data.campanasCorreo),
       asunto,
-      total,
+      cuerpoHtml,
+      imagenes: imagenes || [],
+      archivos: archivos || [],
+      videoUrl: videoUrl || '',
+      contactoIds: contactoIds || [],
+      enviadosIds: [],
+      fallidosIds: [],
+      total: (contactoIds || []).length,
       enviados: 0,
       fallidos: 0,
       estado: 'enviando',
@@ -1204,6 +1215,19 @@ module.exports = {
       terminadaAt: null,
     };
     data.campanasCorreo.push(item);
+    save(data);
+    return item;
+  },
+  // Se llama una vez por cada contacto procesado, para que quede guardado de
+  // inmediato quien ya recibio su correo (o fallo) y no se repita al retomar.
+  registrarResultadoCampana(id, contactoId, exito) {
+    const data = load();
+    const item = data.campanasCorreo.find((c) => c.id === Number(id));
+    if (!item) return null;
+    if (exito) item.enviadosIds.push(contactoId);
+    else item.fallidosIds.push(contactoId);
+    item.enviados = item.enviadosIds.length;
+    item.fallidos = item.fallidosIds.length;
     save(data);
     return item;
   },
