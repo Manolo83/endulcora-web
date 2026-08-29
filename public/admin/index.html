@@ -565,11 +565,11 @@
     <!-- CLIENTES -->
     <section id="seccionClientes" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Clientes</h2>
-      <p class="mt-1 text-sm text-carbon/60">Si un cliente te escribe por WhatsApp porque olvidó su contraseña, búscalo por su correo y asígnale una nueva.</p>
+      <p class="mt-1 text-sm text-carbon/60">Si un cliente te escribe por WhatsApp porque olvidó su contraseña, búscalo por su correo o nombre y asígnale una nueva.</p>
 
       <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <form id="formBuscarCliente" class="flex flex-wrap gap-3">
-          <input id="clienteBuscarEmail" type="email" required placeholder="correo@delcliente.com" class="min-w-[220px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          <input id="clienteBuscarEmail" type="text" required placeholder="Correo o nombre del cliente" class="min-w-[220px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Buscar</button>
         </form>
         <div id="clienteResultado" class="mt-5"></div>
@@ -2575,15 +2575,17 @@ async function cargarClientesLista(){
             <td class="px-3 py-3 text-carbon/60">${escapeHtml(u.telefono || '—')}</td>
             <td class="px-3 py-3 text-carbon/70">${escapeHtml(ETIQUETA_MEMBRESIA[u.membresiaEstado] || u.membresiaEstado)}</td>
             <td class="px-6 py-3 text-right">
-              <button type="button" class="btnVerCliente rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[10px] font-700 uppercase tracking-wider text-vino hover:border-vino transition" data-email="${escapeHtml(u.email)}">Ver</button>
+              <button type="button" class="btnVerCliente rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[10px] font-700 uppercase tracking-wider text-vino hover:border-vino transition" data-id="${u.id}">Ver</button>
             </td>
           </tr>`).join('')}
       </tbody>
     </table>`;
     cont.querySelectorAll('.btnVerCliente').forEach(btn => {
       btn.addEventListener('click', () => {
-        $('clienteBuscarEmail').value = btn.dataset.email;
-        buscarCliente(btn.dataset.email);
+        const user = usuarios.find(u => u.id === Number(btn.dataset.id));
+        if(!user) return;
+        $('clienteBuscarEmail').value = user.email;
+        mostrarDetalleCliente(user);
         document.getElementById('clienteResultado').scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
     });
@@ -2593,11 +2595,37 @@ async function cargarClientesLista(){
 }
 $('btnRefrescarClientes').addEventListener('click', cargarClientesLista);
 
-async function buscarCliente(email){
+async function buscarClientes(query){
   const cont = $('clienteResultado');
   cont.innerHTML = '<p class="text-sm text-carbon/50">Buscando…</p>';
   try{
-    const user = await api(`/admin/api/users/buscar?email=${encodeURIComponent(email)}`);
+    const resultados = await api(`/admin/api/users/buscar?q=${encodeURIComponent(query)}`);
+    if(resultados.length === 1){
+      mostrarDetalleCliente(resultados[0]);
+      return;
+    }
+    cont.innerHTML = `<p class="mb-3 text-sm text-carbon/60">${resultados.length} coincidencias:</p>` + resultados.map(u => `
+      <div class="mb-2 flex items-center justify-between gap-3 rounded-xl border border-vino/10 p-3">
+        <div class="min-w-0">
+          <p class="truncate text-sm font-600 text-carbon/80">${escapeHtml(u.nombre || '—')}</p>
+          <p class="truncate text-xs text-carbon/50">${escapeHtml(u.email)}</p>
+        </div>
+        <button type="button" data-id="${u.id}" class="btnVerCoincidenciaCliente shrink-0 rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[10px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Ver</button>
+      </div>`).join('');
+    cont.querySelectorAll('.btnVerCoincidenciaCliente').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const user = resultados.find(u => u.id === Number(btn.dataset.id));
+        if(user) mostrarDetalleCliente(user);
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function mostrarDetalleCliente(user){
+  const cont = $('clienteResultado');
+  {
     cont.innerHTML = `
       <div class="rounded-xl border border-vino/10 p-4">
         <p class="font-titulo text-lg text-vino">${escapeHtml(user.nombre)}</p>
@@ -2660,7 +2688,7 @@ async function buscarCliente(email){
         toast('Datos del cliente actualizados.');
         $('clienteBuscarEmail').value = actualizado.email;
         cargarClientesLista();
-        buscarCliente(actualizado.email);
+        mostrarDetalleCliente(actualizado);
       }catch(err){
         toast(err.message);
       }
@@ -2705,14 +2733,12 @@ async function buscarCliente(email){
         toast(err.message);
       }
     });
-  }catch(e){
-    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
   }
 }
 
 $('formBuscarCliente').addEventListener('submit', (e) => {
   e.preventDefault();
-  buscarCliente($('clienteBuscarEmail').value.trim());
+  buscarClientes($('clienteBuscarEmail').value.trim());
 });
 
 $('btnExportarAudienciaMeta').addEventListener('click', async () => {

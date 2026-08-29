@@ -633,15 +633,19 @@ router.get('/api/users', requireAdmin, (req, res) => {
 
 // ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----
 router.get('/api/users/buscar', requireAdmin, (req, res) => {
-  const user = store.getUserByEmail(req.query.email || '');
-  if (!user) return res.status(404).json({ error: 'No hay ninguna cuenta con ese correo.' });
-  res.json({
+  const q = String(req.query.q || req.query.email || '').trim().toLowerCase();
+  if (!q) return res.status(400).json({ error: 'Escribe un correo o nombre para buscar.' });
+  const coincidencias = store.getUsers().filter((u) =>
+    u.email.toLowerCase().includes(q) || (u.nombre || '').toLowerCase().includes(q)
+  );
+  if (!coincidencias.length) return res.status(404).json({ error: 'No encontré ninguna cuenta con ese correo o nombre.' });
+  res.json(coincidencias.slice(0, 20).map((user) => ({
     id: user.id,
     email: user.email,
     nombre: user.nombre,
     telefono: user.telefono || '',
     membresiaEstado: user.membresiaEstado || 'ninguna',
-  });
+  })));
 });
 
 // ---- Clientes: dar o quitar membresia a mano (fuera del cobro de Mercado
