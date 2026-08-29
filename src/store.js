@@ -229,6 +229,13 @@ async function init() {
       if (typeof u.telefono !== 'string') { u.telefono = ''; changed = true; }
       if (typeof u.membresiaEstado !== 'string') { u.membresiaEstado = 'ninguna'; changed = true; }
       if (typeof u.membresiaPreapprovalId !== 'string') { u.membresiaPreapprovalId = ''; changed = true; }
+      // Vacio = sin fecha de corte (a los miembros que ya estaban activos
+      // antes de este campo no se les oculta nada retroactivamente). De aqui
+      // en adelante, cada vez que una membresia pasa a "activa" se guarda la
+      // fecha, para que la biblioteca de clases solo muestre grabaciones
+      // desde ese momento en adelante ("borron y cuenta nueva" si cancela y
+      // se vuelve a suscribir despues).
+      if (typeof u.membresiaActivaDesde !== 'string') { u.membresiaActivaDesde = ''; changed = true; }
     });
     // Reemplaza un producto "paquete completo" antiguo (un solo articulo)
     // por una familia de 4: eBook (principal, visible en el catalogo) +
@@ -1004,6 +1011,7 @@ module.exports = {
       telefono: telefono || '',
       membresiaEstado: 'ninguna',
       membresiaPreapprovalId: '',
+      membresiaActivaDesde: '',
       createdAt: new Date().toISOString(),
     };
     data.users.push(item);

@@ -143,7 +143,14 @@ router.post('/webhook', async (req, res) => {
       pending: 'pendiente',
     };
     const nuevoEstado = mapaEstado[info.status] || info.status;
-    store.updateUser(usuario.id, { membresiaEstado: nuevoEstado, membresiaPreapprovalId: String(info.id) });
+    const patch = { membresiaEstado: nuevoEstado, membresiaPreapprovalId: String(info.id) };
+    // Solo se reinicia el "reloj" de la biblioteca de clases cuando de
+    // verdad se activa desde un estado que no era activo (alta nueva o
+    // reactivacion) — no en cada cobro mensual de quien ya seguia activo.
+    if (nuevoEstado === 'activa' && usuario.membresiaEstado !== 'activa') {
+      patch.membresiaActivaDesde = new Date().toISOString().slice(0, 10);
+    }
+    store.updateUser(usuario.id, patch);
   } catch (err) {
     // Si Mercado Pago reintenta despues, se procesa en el proximo intento.
   }
@@ -203,13 +210,17 @@ router.get('/contenido', (req, res) => {
 // Biblioteca de clases en vivo grabadas: exclusiva para miembros con
 // membresia activa (o el admin, para revisarla sin pagar).
 router.get('/biblioteca-clases', (req, res) => {
-  if (!esAdmin(req)) {
-    const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
-    if (!usuario || usuario.membresiaEstado !== 'activa') {
-      return res.status(403).json({ error: 'Necesitas una membresía activa para ver la biblioteca de clases.' });
-    }
+  if (esAdmin(req)) return res.json(store.getBibliotecaClases());
+  const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+  if (!usuario || usuario.membresiaEstado !== 'activa') {
+    return res.status(403).json({ error: 'Necesitas una membresía activa para ver la biblioteca de clases.' });
   }
-  res.json(store.getBibliotecaClases());
+  // "Borron y cuenta nueva": si tiene fecha de corte guardada (se puso la
+  // ultima vez que se activo su membresia), solo ve clases grabadas desde
+  // ese dia en adelante — no las de antes de que se hiciera miembro.
+  const desde = usuario.membresiaActivaDesde || '';
+  const lista = desde ? store.getBibliotecaClases().filter((c) => (c.fecha || '') >= desde) : store.getBibliotecaClases();
+  res.json(lista);
 });
 
 // Descarga del recetario del mes: revisa la membresia en cada solicitud

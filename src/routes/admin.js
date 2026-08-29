@@ -654,7 +654,13 @@ router.post('/api/users/:id/membresia', requireAdmin, (req, res) => {
   }
   const user = store.getUserById(req.params.id);
   if (!user) return res.status(404).json({ error: 'No encontrado' });
-  const actualizado = store.updateUser(user.id, { membresiaEstado: estado });
+  const patch = { membresiaEstado: estado };
+  // Igual que en el webhook de Mercado Pago: solo reinicia el "reloj" de la
+  // biblioteca de clases si de verdad estaba inactiva antes.
+  if (estado === 'activa' && user.membresiaEstado !== 'activa') {
+    patch.membresiaActivaDesde = new Date().toISOString().slice(0, 10);
+  }
+  const actualizado = store.updateUser(user.id, patch);
   res.json({ id: actualizado.id, membresiaEstado: actualizado.membresiaEstado });
 });
 
