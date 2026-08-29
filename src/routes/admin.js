@@ -775,6 +775,35 @@ router.post('/api/membresia/recetario', requireAdmin, uploadDocumento.single('fi
   res.json(item);
 });
 
+// ---- Biblioteca de clases en vivo grabadas (exclusiva para miembros) ----
+// El admin pega el link de YouTube de la grabacion y aqui se extrae solo el
+// ID del video (lo que necesita el reproductor), sea cual sea el formato del
+// link que haya copiado (youtu.be, watch?v=, live/, etc.).
+function extraerIdYoutube(texto) {
+  const m = String(texto || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|live\/|shorts\/))([a-zA-Z0-9_-]{6,})/);
+  if (m) return m[1];
+  if (/^[a-zA-Z0-9_-]{6,20}$/.test(String(texto || '').trim())) return String(texto).trim();
+  return '';
+}
+
+router.get('/api/clases/biblioteca', requireAdmin, (req, res) => {
+  res.json(store.getBibliotecaClases());
+});
+
+router.post('/api/clases/biblioteca', requireAdmin, (req, res) => {
+  const { titulo, descripcion, youtubeUrl, fecha } = req.body || {};
+  if (!titulo || !String(titulo).trim()) return res.status(400).json({ error: 'Ponle un título a la clase.' });
+  const youtubeId = extraerIdYoutube(youtubeUrl);
+  if (!youtubeId) return res.status(400).json({ error: 'Pega un link válido de YouTube.' });
+  const item = store.addClaseBiblioteca({ titulo, descripcion, youtubeId, fecha });
+  res.status(201).json(item);
+});
+
+router.delete('/api/clases/biblioteca/:id', requireAdmin, (req, res) => {
+  store.deleteClaseBiblioteca(req.params.id);
+  res.json({ ok: true });
+});
+
 // ---- Manejo de errores (ej. archivo demasiado grande, tipo no permitido) ----
 router.use((err, req, res, next) => {
   res.status(400).json({ error: err.message || 'Error al procesar la solicitud' });

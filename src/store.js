@@ -164,6 +164,7 @@ function datosPorDefecto() {
     subscribers: [],
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
     sesionesTaller: [],
+    bibliotecaClases: [],
     resenas: [],
     publicacionesComunidad: [],
     mensajesComunidad: [],
@@ -1104,6 +1105,30 @@ module.exports = {
   deleteSesionTaller(id) {
     const data = load();
     data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== Number(id));
+    save(data);
+  },
+
+  // ---- Biblioteca de clases en vivo grabadas (exclusiva para miembros) ----
+  getBibliotecaClases() {
+    return [...load().bibliotecaClases].sort((a, b) => b.id - a.id);
+  },
+  addClaseBiblioteca({ titulo, descripcion, youtubeId, fecha }) {
+    const data = load();
+    const item = {
+      id: nextId(data.bibliotecaClases),
+      titulo: String(titulo || '').trim(),
+      descripcion: String(descripcion || '').trim(),
+      youtubeId: String(youtubeId || '').trim(),
+      fecha: fecha || new Date().toISOString().slice(0, 10),
+      createdAt: new Date().toISOString(),
+    };
+    data.bibliotecaClases.push(item);
+    save(data);
+    return item;
+  },
+  deleteClaseBiblioteca(id) {
+    const data = load();
+    data.bibliotecaClases = data.bibliotecaClases.filter((c) => c.id !== Number(id));
     save(data);
   },
 

@@ -200,6 +200,18 @@ router.get('/contenido', (req, res) => {
   res.json({ ...resto, recetarioDisponible: !!recetarioUrl });
 });
 
+// Biblioteca de clases en vivo grabadas: exclusiva para miembros con
+// membresia activa (o el admin, para revisarla sin pagar).
+router.get('/biblioteca-clases', (req, res) => {
+  if (!esAdmin(req)) {
+    const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+    if (!usuario || usuario.membresiaEstado !== 'activa') {
+      return res.status(403).json({ error: 'Necesitas una membresía activa para ver la biblioteca de clases.' });
+    }
+  }
+  res.json(store.getBibliotecaClases());
+});
+
 // Descarga del recetario del mes: revisa la membresia en cada solicitud
 // (en vez de exponer el link fijo de /uploads) para que el archivo no se
 // pueda seguir descargando si se comparte el link o si la membresia vence.

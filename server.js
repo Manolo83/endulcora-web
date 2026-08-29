@@ -195,11 +195,19 @@ app.get('/membresia', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'membresia.html'));
 });
 
+app.get('/clases-en-vivo', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'clases-en-vivo.html'));
+});
+
+app.get('/biblioteca-clases', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'biblioteca-clases.html'));
+});
+
 // Secciones que se quedan dentro de la pagina principal, pero con URL propia
 // ademas de las anclas #seccion. Sirven la misma index.html; el script del
 // cliente hace scroll a la seccion segun la ruta.
 app.get(
-  ['/clases-en-vivo', '/calculadora', '/resenas', '/anuncios'],
+  ['/calculadora', '/resenas', '/anuncios'],
   (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
   }

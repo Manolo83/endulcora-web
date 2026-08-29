@@ -257,6 +257,32 @@
       </form>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Biblioteca de clases (grabaciones para miembros)</h3>
+        <p class="mt-1 text-xs text-carbon/50">Cada video que agregues aquí queda guardado para siempre en la biblioteca de miembros con membresía activa, con buscador, en <a href="/biblioteca-clases" target="_blank" class="text-vino hover:underline">/biblioteca-clases</a>. El más reciente también se muestra en <a href="/clases-en-vivo" target="_blank" class="text-vino hover:underline">/clases-en-vivo</a>.</p>
+        <form id="formClaseBiblioteca" class="mt-4 grid gap-4 sm:grid-cols-2">
+          <label class="block sm:col-span-2">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título de la clase</span>
+            <input id="claseBibTitulo" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Fecha</span>
+            <input id="claseBibFecha" type="date" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link de YouTube</span>
+            <input id="claseBibYoutube" type="text" required placeholder="https://youtu.be/..." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block sm:col-span-2">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción (opcional)</span>
+            <textarea id="claseBibDescripcion" rows="2" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+          </label>
+          <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition sm:col-span-2">Agregar a la biblioteca</button>
+          <p id="claseBibError" class="hidden text-sm text-red-600 sm:col-span-2"></p>
+        </form>
+        <div id="listaClaseBiblioteca" class="mt-5 space-y-2"></div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Carrusel del inicio (publicidad)</h3>
         <p class="mt-1 text-xs text-carbon/50">Sube una o varias fotos para el marco junto al encabezado. Con 2 o más, rotan solas cada pocos segundos. Sin ninguna, se muestra la ilustración de la vela.</p>
         <form id="formHeroCarrusel" class="mt-4 flex flex-wrap items-center gap-3">
@@ -805,6 +831,7 @@ function mostrarDashboard(mostrar){
   if(mostrar){
     cargarContenidoAdmin();
     cargarHeroCarrusel();
+    cargarBibliotecaClasesAdmin();
     cargarPromosTallerAdmin();
     cargarProductosAdmin();
     cargarSedes();
@@ -1122,6 +1149,56 @@ async function cargarHeroCarrusel(){
     cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
   }
 }
+
+async function cargarBibliotecaClasesAdmin(){
+  const cont = $('listaClaseBiblioteca');
+  try{
+    const lista = await api('/admin/api/clases/biblioteca');
+    if(!lista.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/40">Todavía no hay clases en la biblioteca.</p>';
+      return;
+    }
+    cont.innerHTML = lista.map(c => `
+      <div class="flex items-center justify-between gap-3 rounded-xl border border-vino/10 px-4 py-3">
+        <div class="min-w-0">
+          <p class="truncate text-sm font-600 text-carbon/80">${escapeHtml(c.titulo)}</p>
+          <p class="text-xs text-carbon/40">${escapeHtml(c.fecha || '')} · ID: ${escapeHtml(c.youtubeId)}</p>
+        </div>
+        <button type="button" data-id="${c.id}" class="btnBorrarClaseBib shrink-0 rounded-full border border-red-200 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+      </div>`).join('');
+    cont.querySelectorAll('.btnBorrarClaseBib').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar esta clase de la biblioteca? Los miembros ya no podrán verla.')) return;
+        await api(`/admin/api/clases/biblioteca/${btn.dataset.id}`, { method: 'DELETE' });
+        cargarBibliotecaClasesAdmin();
+      });
+    });
+  }catch(e){
+    cont.innerHTML = '<p class="text-sm text-red-600">No se pudo cargar la biblioteca.</p>';
+  }
+}
+
+$('formClaseBiblioteca').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = $('claseBibError');
+  err.classList.add('hidden');
+  try{
+    await api('/admin/api/clases/biblioteca', {
+      method: 'POST',
+      body: JSON.stringify({
+        titulo: $('claseBibTitulo').value.trim(),
+        fecha: $('claseBibFecha').value,
+        youtubeUrl: $('claseBibYoutube').value.trim(),
+        descripcion: $('claseBibDescripcion').value.trim(),
+      }),
+    });
+    $('formClaseBiblioteca').reset();
+    cargarBibliotecaClasesAdmin();
+  }catch(e2){
+    err.textContent = e2.message || 'No se pudo agregar la clase.';
+    err.classList.remove('hidden');
+  }
+});
 
 $('formHeroCarrusel').addEventListener('submit', async (e) => {
   e.preventDefault();
