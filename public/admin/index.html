@@ -755,16 +755,8 @@
 
           <button type="submit" id="btnEnviarCampana" class="rounded-full bg-vino px-8 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition sm:justify-self-start">Enviar a los seleccionados</button>
           <p id="campanaEnviarError" class="hidden text-sm text-red-600"></p>
+          <p class="text-xs text-carbon/40">El avance del envío se ve abajo, en "Campañas enviadas", en tiempo real.</p>
         </form>
-        <div id="campanaProgreso" class="mt-5 hidden rounded-xl bg-crema/60 p-4">
-          <div class="flex justify-between font-ui text-[11px] uppercase tracking-widest text-carbon/60">
-            <span id="campanaProgresoTexto">Enviando…</span>
-            <span id="campanaProgresoPorcentaje">0%</span>
-          </div>
-          <div class="mt-2 h-2 overflow-hidden rounded-full bg-vino/10">
-            <div id="campanaProgresoBarra" class="h-full rounded-full bg-vino transition-all" style="width:0%"></div>
-          </div>
-        </div>
       </div>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
@@ -1437,45 +1429,43 @@ $('formAgregarContacto').addEventListener('submit', async (e) => {
   }
 });
 
-let campanaPolling = null;
-function detenerPollingCampana(){
-  if(campanaPolling){ clearInterval(campanaPolling); campanaPolling = null; }
-}
-
-async function pollCampana(id){
-  try{
-    const campanas = await api('/admin/api/campanas');
-    const campana = campanas.find(c => c.id === id);
-    if(!campana) return;
-    const pct = campana.total ? Math.round(((campana.enviados + campana.fallidos) / campana.total) * 100) : 100;
-    $('campanaProgresoBarra').style.width = pct + '%';
-    $('campanaProgresoPorcentaje').textContent = pct + '%';
-    $('campanaProgresoTexto').textContent = campana.estado === 'terminada'
-      ? `Terminado: ${campana.enviados} enviados, ${campana.fallidos} fallidos`
-      : `Enviando… ${campana.enviados} enviados, ${campana.fallidos} fallidos de ${campana.total}`;
-    if(campana.estado === 'terminada'){
-      detenerPollingCampana();
-      $('btnEnviarCampana').disabled = false;
-      cargarCampanasEnviadas();
-    }
-  }catch(e){}
-}
+// Mientras haya alguna campaña sin terminar, esta funcion se vuelve a
+// llamar sola cada 2 segundos (venga de donde venga la llamada: al cargar
+// el panel, justo despues de enviar, o desde otra pestaña) — asi el avance
+// en vivo se ve sin importar cuando se abrio /admin, no solo justo despues
+// de darle "Enviar".
+let campanasPollTimer = null;
 
 async function cargarCampanasEnviadas(){
   const cont = $('listaCampanasEnviadas');
+  let campanas = [];
   try{
-    const campanas = await api('/admin/api/campanas');
+    campanas = await api('/admin/api/campanas');
     if(!campanas.length){
       cont.innerHTML = '<p class="text-sm text-carbon/40">Todavía no has enviado ninguna campaña.</p>';
-      return;
+    }else{
+      cont.innerHTML = campanas.map(c => {
+        const enCurso = c.estado !== 'terminada';
+        const pct = c.total ? Math.round(((c.enviados + c.fallidos) / c.total) * 100) : 100;
+        return `
+        <div class="rounded-xl border border-vino/10 px-4 py-3">
+          <p class="text-sm font-600 text-carbon/80">${escapeHtml(c.asunto)}</p>
+          <p class="text-xs text-carbon/40">${new Date(c.createdAt).toLocaleString('es-MX')} · ${c.enviados} enviados, ${c.fallidos} fallidos de ${c.total} · ${enCurso ? 'Enviando…' : 'Terminada'}</p>
+          ${enCurso ? `
+            <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-vino/10">
+              <div class="h-full rounded-full bg-vino transition-all" style="width:${pct}%"></div>
+            </div>
+            <p class="mt-1 text-right font-ui text-[10px] uppercase tracking-widest text-carbon/40">${pct}%</p>
+          ` : ''}
+        </div>`;
+      }).join('');
     }
-    cont.innerHTML = campanas.map(c => `
-      <div class="rounded-xl border border-vino/10 px-4 py-3">
-        <p class="text-sm font-600 text-carbon/80">${escapeHtml(c.asunto)}</p>
-        <p class="text-xs text-carbon/40">${new Date(c.createdAt).toLocaleString('es-MX')} · ${c.enviados} enviados, ${c.fallidos} fallidos de ${c.total} · ${c.estado === 'terminada' ? 'Terminada' : 'Enviando…'}</p>
-      </div>`).join('');
   }catch(e){
     cont.innerHTML = '<p class="text-sm text-red-600">No se pudieron cargar las campañas.</p>';
+  }
+  clearTimeout(campanasPollTimer);
+  if(campanas.some(c => c.estado !== 'terminada')){
+    campanasPollTimer = setTimeout(cargarCampanasEnviadas, 2000);
   }
 }
 
@@ -1574,7 +1564,7 @@ $('formEnviarCampana').addEventListener('submit', async (e) => {
   if(!confirm(`¿Enviar este correo a ${contactoIds.length} contacto(s) seleccionado(s)? Esta acción no se puede deshacer.`)) return;
   $('btnEnviarCampana').disabled = true;
   try{
-    const campana = await api('/admin/api/campanas/enviar', {
+    await api('/admin/api/campanas/enviar', {
       method: 'POST',
       body: JSON.stringify({
         asunto: $('campanaAsunto').value.trim(),
@@ -1585,15 +1575,12 @@ $('formEnviarCampana').addEventListener('submit', async (e) => {
         videoUrl: $('campanaVideoUrl').value.trim(),
       }),
     });
-    $('campanaProgreso').classList.remove('hidden');
-    $('campanaProgresoBarra').style.width = '0%';
-    $('campanaProgresoPorcentaje').textContent = '0%';
-    $('campanaProgresoTexto').textContent = 'Enviando…';
-    detenerPollingCampana();
-    campanaPolling = setInterval(() => pollCampana(campana.id), 2000);
+    toast('Envío iniciado — el avance se ve abajo, en "Campañas enviadas"');
+    cargarCampanasEnviadas();
   }catch(e2){
     err.textContent = e2.message;
     err.classList.remove('hidden');
+  }finally{
     $('btnEnviarCampana').disabled = false;
   }
 });
