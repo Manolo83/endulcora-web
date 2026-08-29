@@ -713,23 +713,17 @@
 
           <div class="grid gap-4 rounded-xl bg-crema/40 p-4 sm:grid-cols-2">
             <div>
-              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Foto para el correo (opcional)</span>
-              <p class="mt-1 text-[11px] text-carbon/40">Aparece arriba del mensaje.</p>
-              <input id="campanaImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="mt-2 w-full text-xs">
-              <div id="campanaImagenPreview" class="mt-2 hidden">
-                <img class="h-20 w-32 rounded-lg object-cover ring-1 ring-vino/10">
-                <button type="button" id="btnQuitarCampanaImagen" class="mt-1 block font-ui text-[10px] font-600 uppercase tracking-wider text-red-600">Quitar foto</button>
-              </div>
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Fotos para el correo (opcional, hasta 6)</span>
+              <p class="mt-1 text-[11px] text-carbon/40">Aparecen arriba del mensaje, una debajo de otra. Puedes seleccionar varias a la vez o irlas agregando.</p>
+              <input id="campanaImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="mt-2 w-full text-xs">
+              <div id="campanaImagenesPreview" class="mt-2 flex flex-wrap gap-2"></div>
               <p id="campanaImagenError" class="hidden mt-1 text-[11px] text-red-600"></p>
             </div>
             <div>
-              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Archivo adjunto (opcional)</span>
-              <p class="mt-1 text-[11px] text-carbon/40">PDF, Excel, ZIP o HTML — máximo 8MB (se manda a todos, entre más pesado, más tarda el envío).</p>
-              <input id="campanaArchivoInput" type="file" accept=".pdf,.zip,.xls,.xlsx,.html" class="mt-2 w-full text-xs">
-              <div id="campanaArchivoPreview" class="mt-2 hidden">
-                <p class="truncate text-xs text-carbon/70"><span id="campanaArchivoNombreTexto"></span></p>
-                <button type="button" id="btnQuitarCampanaArchivo" class="mt-1 block font-ui text-[10px] font-600 uppercase tracking-wider text-red-600">Quitar archivo</button>
-              </div>
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Archivos adjuntos (opcional, hasta 5)</span>
+              <p class="mt-1 text-[11px] text-carbon/40">PDF, Excel, ZIP o HTML — máximo 8MB cada uno (se mandan a todos, entre más pesen, más tarda el envío).</p>
+              <input id="campanaArchivoInput" type="file" accept=".pdf,.zip,.xls,.xlsx,.html" multiple class="mt-2 w-full text-xs">
+              <div id="campanaArchivosPreview" class="mt-2 space-y-1.5"></div>
               <p id="campanaArchivoError" class="hidden mt-1 text-[11px] text-red-600"></p>
             </div>
             <label class="block sm:col-span-2">
@@ -1443,63 +1437,90 @@ async function cargarCampanasEnviadas(){
   }
 }
 
-/* ---------- Adjuntos de la campaña (foto + archivo) ---------- */
-let campanaImagenUrl = '';
-let campanaArchivoUrl = '';
-let campanaArchivoNombreVal = '';
+/* ---------- Adjuntos de la campaña (fotos + archivos, varios de cada uno) ---------- */
+const MAX_IMAGENES_CAMPANA = 6;
+const MAX_ARCHIVOS_CAMPANA = 5;
+let campanaImagenes = []; // [url, url, ...]
+let campanaArchivos = []; // [{url, nombre}, ...]
+
+function pintarImagenesCampana(){
+  const cont = $('campanaImagenesPreview');
+  cont.innerHTML = campanaImagenes.map((url, i) => `
+    <div class="relative">
+      <img src="${url}" class="h-16 w-16 rounded-lg object-cover ring-1 ring-vino/10">
+      <button type="button" data-i="${i}" class="btnQuitarCampanaImagen absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-red-600 text-[10px] font-700 text-white">✕</button>
+    </div>`).join('');
+  cont.querySelectorAll('.btnQuitarCampanaImagen').forEach(btn => {
+    btn.addEventListener('click', () => {
+      campanaImagenes.splice(Number(btn.dataset.i), 1);
+      pintarImagenesCampana();
+    });
+  });
+}
 
 $('campanaImagenInput').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
+  const files = [...e.target.files];
   const err = $('campanaImagenError');
   err.classList.add('hidden');
-  if(!file) return;
+  e.target.value = '';
+  if(!files.length) return;
+  if(campanaImagenes.length + files.length > MAX_IMAGENES_CAMPANA){
+    err.textContent = `Máximo ${MAX_IMAGENES_CAMPANA} fotos por correo.`;
+    err.classList.remove('hidden');
+    return;
+  }
   const fd = new FormData();
-  fd.append('file', file);
+  files.forEach(f => fd.append('files', f));
   try{
-    const res = await fetch('/admin/api/campanas/adjuntos/imagen', { method: 'POST', body: fd });
+    const res = await fetch('/admin/api/campanas/adjuntos/imagenes', { method: 'POST', body: fd });
     const data = await res.json();
-    if(!res.ok) throw new Error(data.error || 'No se pudo subir la foto');
-    campanaImagenUrl = data.url;
-    $('campanaImagenPreview').querySelector('img').src = data.url;
-    $('campanaImagenPreview').classList.remove('hidden');
+    if(!res.ok) throw new Error(data.error || 'No se pudieron subir las fotos');
+    data.forEach(d => campanaImagenes.push(d.url));
+    pintarImagenesCampana();
   }catch(e2){
     err.textContent = e2.message;
     err.classList.remove('hidden');
-    $('campanaImagenInput').value = '';
   }
-});
-$('btnQuitarCampanaImagen').addEventListener('click', () => {
-  campanaImagenUrl = '';
-  $('campanaImagenInput').value = '';
-  $('campanaImagenPreview').classList.add('hidden');
 });
 
+function pintarArchivosCampana(){
+  const cont = $('campanaArchivosPreview');
+  cont.innerHTML = campanaArchivos.map((a, i) => `
+    <div class="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-1.5 ring-1 ring-vino/10">
+      <p class="min-w-0 truncate text-xs text-carbon/70">${escapeHtml(a.nombre)}</p>
+      <button type="button" data-i="${i}" class="btnQuitarCampanaArchivo shrink-0 font-ui text-[10px] font-600 uppercase tracking-wider text-red-600">Quitar</button>
+    </div>`).join('');
+  cont.querySelectorAll('.btnQuitarCampanaArchivo').forEach(btn => {
+    btn.addEventListener('click', () => {
+      campanaArchivos.splice(Number(btn.dataset.i), 1);
+      pintarArchivosCampana();
+    });
+  });
+}
+
 $('campanaArchivoInput').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
+  const files = [...e.target.files];
   const err = $('campanaArchivoError');
   err.classList.add('hidden');
-  if(!file) return;
+  e.target.value = '';
+  if(!files.length) return;
+  if(campanaArchivos.length + files.length > MAX_ARCHIVOS_CAMPANA){
+    err.textContent = `Máximo ${MAX_ARCHIVOS_CAMPANA} archivos por correo.`;
+    err.classList.remove('hidden');
+    return;
+  }
   const fd = new FormData();
-  fd.append('file', file);
+  files.forEach(f => fd.append('files', f));
   try{
-    const res = await fetch('/admin/api/campanas/adjuntos/archivo', { method: 'POST', body: fd });
+    const res = await fetch('/admin/api/campanas/adjuntos/archivos', { method: 'POST', body: fd });
     const data = await res.json();
-    if(!res.ok) throw new Error(data.error || 'No se pudo subir el archivo');
-    campanaArchivoUrl = data.url;
-    campanaArchivoNombreVal = data.nombre;
-    $('campanaArchivoNombreTexto').textContent = data.nombre;
-    $('campanaArchivoPreview').classList.remove('hidden');
+    if(!res.ok) throw new Error(data.error || 'No se pudieron subir los archivos');
+    data.forEach(d => campanaArchivos.push(d));
+    pintarArchivosCampana();
   }catch(e2){
     err.textContent = e2.message;
     err.classList.remove('hidden');
-    $('campanaArchivoInput').value = '';
   }
-});
-$('btnQuitarCampanaArchivo').addEventListener('click', () => {
-  campanaArchivoUrl = '';
-  campanaArchivoNombreVal = '';
-  $('campanaArchivoInput').value = '';
-  $('campanaArchivoPreview').classList.add('hidden');
 });
 
 $('formEnviarCampana').addEventListener('submit', async (e) => {
@@ -1517,9 +1538,8 @@ $('formEnviarCampana').addEventListener('submit', async (e) => {
         asunto: $('campanaAsunto').value.trim(),
         cuerpo: $('campanaCuerpo').value.trim(),
         contactoIds,
-        imagenUrl: campanaImagenUrl,
-        archivoUrl: campanaArchivoUrl,
-        archivoNombre: campanaArchivoNombreVal,
+        imagenes: campanaImagenes,
+        archivos: campanaArchivos,
         videoUrl: $('campanaVideoUrl').value.trim(),
       }),
     });

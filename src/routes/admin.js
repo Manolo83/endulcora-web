@@ -901,21 +901,27 @@ const uploadAdjuntoArchivo = multer({
   },
 });
 
-router.post('/api/campanas/adjuntos/imagen', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'Falta el archivo.' });
-  res.status(201).json({ url: `/uploads/${req.file.filename}` });
+const MAX_IMAGENES_CAMPANA = 6;
+const MAX_ARCHIVOS_CAMPANA = 5;
+
+router.post('/api/campanas/adjuntos/imagenes', requireAdmin, uploadImage.array('files', MAX_IMAGENES_CAMPANA), async (req, res) => {
+  if (!req.files || !req.files.length) return res.status(400).json({ error: 'Falta el archivo.' });
+  for (const file of req.files) {
+    await new Promise((resolve) => procesarImagenSubida({ file }, res, resolve));
+  }
+  res.status(201).json(req.files.map((f) => ({ url: `/uploads/${f.filename}` })));
 });
 
-router.post('/api/campanas/adjuntos/archivo', requireAdmin, uploadAdjuntoArchivo.single('file'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'Falta el archivo.' });
-  res.status(201).json({ url: `/uploads/${req.file.filename}`, nombre: req.file.originalname });
+router.post('/api/campanas/adjuntos/archivos', requireAdmin, uploadAdjuntoArchivo.array('files', MAX_ARCHIVOS_CAMPANA), (req, res) => {
+  if (!req.files || !req.files.length) return res.status(400).json({ error: 'Falta el archivo.' });
+  res.status(201).json(req.files.map((f) => ({ url: `/uploads/${f.filename}`, nombre: f.originalname })));
 });
 
 // El envio se hace en segundo plano (puede tardar varios minutos con miles
 // de contactos): la respuesta regresa de inmediato con el id de la campaña,
 // y /admin consulta el progreso con GET /api/campanas.
 router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
-  const { asunto, cuerpo, contactoIds, imagenUrl, archivoUrl, archivoNombre, videoUrl } = req.body || {};
+  const { asunto, cuerpo, contactoIds, imagenes, archivos, videoUrl } = req.body || {};
   if (!asunto || !String(asunto).trim()) return res.status(400).json({ error: 'Ponle un asunto al correo.' });
   if (!cuerpo || !String(cuerpo).trim()) return res.status(400).json({ error: 'Escribe el contenido del correo.' });
   if (videoUrl && !/^https?:\/\//i.test(String(videoUrl).trim())) {
@@ -936,8 +942,10 @@ router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
     .join('');
   // Las imagenes/archivos suben como ruta relativa (/uploads/...); el correo
   // necesita la URL completa para que se vea/descargue fuera del sitio.
-  const imagenUrlCompleta = imagenUrl ? `${SITE_URL}${imagenUrl}` : '';
-  const archivoUrlCompleta = archivoUrl ? `${SITE_URL}${archivoUrl}` : '';
+  const imagenesCompletas = Array.isArray(imagenes) ? imagenes.slice(0, MAX_IMAGENES_CAMPANA).map((u) => `${SITE_URL}${u}`) : [];
+  const archivosCompletos = Array.isArray(archivos)
+    ? archivos.slice(0, MAX_ARCHIVOS_CAMPANA).map((a) => ({ filename: a.nombre || 'archivo', path: `${SITE_URL}${a.url}` }))
+    : [];
   const videoUrlLimpia = videoUrl ? String(videoUrl).trim() : '';
 
   const campana = store.addCampanaCorreo({ asunto: asuntoLimpio, total: destinatarios.length });
@@ -955,9 +963,8 @@ router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
           asunto: asuntoLimpio,
           cuerpoHtml,
           unsubscribeUrl,
-          imagenUrl: imagenUrlCompleta,
-          archivoUrl: archivoUrlCompleta,
-          archivoNombre,
+          imagenes: imagenesCompletas,
+          archivos: archivosCompletos,
           videoUrl: videoUrlLimpia,
         });
         enviados += 1;

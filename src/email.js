@@ -87,21 +87,21 @@ function escapeHtml(s) {
 // Gmail y Yahoo exigen esto para no marcar como spam a quien manda correo en
 // volumen, y con eso el "darse de baja" es de un clic, sin que el cliente de
 // correo tenga que abrir el link.
-async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribeUrl, imagenUrl, archivoUrl, archivoNombre, videoUrl }) {
+async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribeUrl, imagenes, archivos, videoUrl }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
 
   const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
 
-  const imagenHtml = imagenUrl
-    ? `<img src="${imagenUrl}" alt="" style="display:block;width:100%;max-width:480px;border-radius:14px;margin-bottom:20px;">`
-    : '';
+  const imagenesHtml = (imagenes || [])
+    .map((url) => `<img src="${url}" alt="" style="display:block;width:100%;max-width:480px;border-radius:14px;margin-bottom:14px;">`)
+    .join('');
   const videoHtml = videoUrl
     ? `<p style="margin-top:22px;"><a href="${videoUrl}" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;display:inline-block;">▶ Ver video</a></p>`
     : '';
-  // path: Resend descarga el archivo de esa URL una sola vez y lo adjunta;
-  // asi no hay que mandar el archivo completo en cada peticion a la API.
-  const attachments = archivoUrl ? [{ filename: archivoNombre || 'archivo', path: archivoUrl }] : undefined;
+  // path: Resend descarga cada archivo de esa URL una sola vez y lo adjunta;
+  // asi no hay que mandar los archivos completos en cada peticion a la API.
+  const attachments = archivos && archivos.length ? archivos : undefined;
 
   await client.emails.send({
     from,
@@ -110,7 +110,7 @@ async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribe
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
         <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
-        ${imagenHtml}
+        ${imagenesHtml}
         ${nombre ? `<p style="font-size:14px;">Hola ${escapeHtml(nombre)},</p>` : ''}
         <div style="font-size:14px;line-height:1.6;">${cuerpoHtml}</div>
         ${videoHtml}
