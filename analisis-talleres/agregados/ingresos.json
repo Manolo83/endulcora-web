@@ -1,0 +1,394 @@
+{
+ "taller": {
+  "Intensivo de pastelería": {
+   "n": 9,
+   "m": 1220
+  },
+  "Chocolatería": {
+   "n": 55,
+   "m": 20486
+  },
+  "Galletas decoradas": {
+   "n": 101,
+   "m": 29623
+  },
+  "Mermeladas": {
+   "n": 6,
+   "m": 700
+  },
+  "Gelatinas Marinela": {
+   "n": 34,
+   "m": 5699
+  },
+  "Trufas gourmet": {
+   "n": 19,
+   "m": 6088
+  },
+  "Galletas tipo Palacio": {
+   "n": 51,
+   "m": 12100
+  },
+  "Macarons": {
+   "n": 58,
+   "m": 13013
+  },
+  "Fresas cubiertas": {
+   "n": 38,
+   "m": 6149
+  },
+  "Pastas italianas": {
+   "n": 12,
+   "m": 2649
+  },
+  "Donas gourmet": {
+   "n": 21,
+   "m": 5495
+  },
+  "Pastelería (otros)": {
+   "n": 25,
+   "m": 6690
+  },
+  "Manzanas decoradas": {
+   "n": 33,
+   "m": 6700
+  },
+  "Gomitas y dulces": {
+   "n": 19,
+   "m": 3939
+  },
+  "Pays y tartas": {
+   "n": 53,
+   "m": 13512
+  },
+  "Bolillo, telera y pambazo": {
+   "n": 17,
+   "m": 3298
+  },
+  "Carnitas": {
+   "n": 25,
+   "m": 5350
+  },
+  "Cupcakes florales": {
+   "n": 23,
+   "m": 3649
+  },
+  "Lunch box cake": {
+   "n": 11,
+   "m": 2580
+  },
+  "Alitas": {
+   "n": 33,
+   "m": 4899
+  },
+  "Palomitas gourmet": {
+   "n": 56,
+   "m": 13939
+  },
+  "Gelatina floral": {
+   "n": 19,
+   "m": 3250
+  },
+  "Postres en vaso": {
+   "n": 39,
+   "m": 11095
+  },
+  "Panadería mexicana": {
+   "n": 19,
+   "m": 3750
+  },
+  "Pizza": {
+   "n": 61,
+   "m": 15098
+  },
+  "Crepas, waffles y hot cakes": {
+   "n": 33,
+   "m": 9580
+  },
+  "Helados y nieves": {
+   "n": 2,
+   "m": 600
+  },
+  "Pastel de cupcakes": {
+   "n": 52,
+   "m": 16796
+  },
+  "Malteadas": {
+   "n": 21,
+   "m": 4095
+  },
+  "Aguas y bebidas frescas": {
+   "n": 21,
+   "m": 4280
+  },
+  "Sushi": {
+   "n": 33,
+   "m": 6700
+  },
+  "Paella": {
+   "n": 13,
+   "m": 2349
+  },
+  "Tacos de canasta": {
+   "n": 66,
+   "m": 11449
+  },
+  "Cocina japonesa": {
+   "n": 33,
+   "m": 12420
+  },
+  "Fondant": {
+   "n": 20,
+   "m": 3699
+  },
+  "Pastelería para principiantes": {
+   "n": 9,
+   "m": 3590
+  },
+  "Barbacoa": {
+   "n": 10,
+   "m": 4005
+  },
+  "Tamales": {
+   "n": 68,
+   "m": 16418
+  },
+  "Chiles en nogada": {
+   "n": 12,
+   "m": 1700
+  },
+  "Panes al vapor": {
+   "n": 17,
+   "m": 4599
+  },
+  "Panqués gourmet": {
+   "n": 39,
+   "m": 9449
+  },
+  "Trilogía de pozoles": {
+   "n": 2,
+   "m": 400
+  },
+  "Pastel vintage": {
+   "n": 30,
+   "m": 7400
+  },
+  "Dulces mexicanos": {
+   "n": 5,
+   "m": 700
+  },
+  "Pan de muerto": {
+   "n": 113,
+   "m": 41469
+  },
+  "Mamuts decorados": {
+   "n": 11,
+   "m": 2199
+  },
+  "Cafetería de especialidad": {
+   "n": 11,
+   "m": 1900
+  },
+  "Repostería canina y felina": {
+   "n": 19,
+   "m": 5598
+  },
+  "Mesa de postres": {
+   "n": 15,
+   "m": 2000
+  },
+  "Buñuelos y churros": {
+   "n": 9,
+   "m": 2300
+  },
+  "Ensaladas": {
+   "n": 27,
+   "m": 7499
+  },
+  "Calaveritas de azúcar": {
+   "n": 7,
+   "m": 3838
+  },
+  "Galletas NY": {
+   "n": 37,
+   "m": 9599
+  },
+  "Postres sin horno": {
+   "n": 4,
+   "m": 450
+  },
+  "Empanadas argentinas": {
+   "n": 20,
+   "m": 3700
+  },
+  "Birria": {
+   "n": 10,
+   "m": 3349
+  },
+  "Banderillas coreanas": {
+   "n": 17,
+   "m": 4049
+  },
+  "Cena navideña": {
+   "n": 30,
+   "m": 8049
+  },
+  "Esferas navideñas": {
+   "n": 2,
+   "m": 300
+  },
+  "Galletas navideñas": {
+   "n": 57,
+   "m": 14900
+  },
+  "Rosca de reyes": {
+   "n": 49,
+   "m": 11918
+  },
+  "Panes laminados": {
+   "n": 3,
+   "m": 600
+  },
+  "Roles gourmet": {
+   "n": 40,
+   "m": 10357
+  },
+  "Master class": {
+   "n": 3,
+   "m": 300
+  },
+  "Croissant": {
+   "n": 2,
+   "m": 300
+  },
+  "Recetarios y eBooks": {
+   "n": 4,
+   "m": 300
+  },
+  "Berlinesas": {
+   "n": 3,
+   "m": 300
+  },
+  "Cocina china": {
+   "n": 19,
+   "m": 4140
+  },
+  "Panadería masa madre": {
+   "n": 1,
+   "m": 200
+  },
+  "Membresía": {
+   "n": 1,
+   "m": 640
+  },
+  "Coctelería": {
+   "n": 53,
+   "m": 19740
+  },
+  "Repostería canábica": {
+   "n": 41,
+   "m": 12320
+  },
+  "Repostería para diabéticos": {
+   "n": 77,
+   "m": 23600
+  },
+  "Brownies": {
+   "n": 4,
+   "m": 800
+  },
+  "Cocina yucateca": {
+   "n": 2,
+   "m": 200
+  },
+  "Postres italianos": {
+   "n": 2,
+   "m": 550
+  },
+  "Postres japoneses": {
+   "n": 11,
+   "m": 3800
+  },
+  "Moles": {
+   "n": 2,
+   "m": 1050
+  },
+  "Rollo decorado navideño": {
+   "n": 30,
+   "m": 10400
+  }
+ },
+ "mes": {
+  "Enero": {
+   "n": 322,
+   "monto": 78434,
+   "prom": 244,
+   "anio": 39217
+  },
+  "Febrero": {
+   "n": 64,
+   "monto": 11299,
+   "prom": 177,
+   "anio": 11299
+  },
+  "Marzo": {
+   "n": 58,
+   "monto": 11170,
+   "prom": 193,
+   "anio": 11170
+  },
+  "Abril": {
+   "n": 178,
+   "monto": 33266,
+   "prom": 187,
+   "anio": 16633
+  },
+  "Mayo": {
+   "n": 181,
+   "monto": 46116,
+   "prom": 255,
+   "anio": 15372
+  },
+  "Junio": {
+   "n": 171,
+   "monto": 37927,
+   "prom": 222,
+   "anio": 12642
+  },
+  "Julio": {
+   "n": 122,
+   "monto": 41355,
+   "prom": 339,
+   "anio": 20678
+  },
+  "Agosto": {
+   "n": 128,
+   "monto": 30560,
+   "prom": 239,
+   "anio": 15280
+  },
+  "Septiembre": {
+   "n": 150,
+   "monto": 48102,
+   "prom": 321,
+   "anio": 24051
+  },
+  "Octubre": {
+   "n": 202,
+   "monto": 68051,
+   "prom": 337,
+   "anio": 34026
+  },
+  "Noviembre": {
+   "n": 196,
+   "monto": 50920,
+   "prom": 260,
+   "anio": 25460
+  },
+  "Diciembre": {
+   "n": 287,
+   "monto": 76715,
+   "prom": 267,
+   "anio": 38358
+  }
+ }
+}

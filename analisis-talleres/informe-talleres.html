@@ -1,0 +1,728 @@
+<title>Qué taller vender cada mes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Karla:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  color-scheme: light;
+  --ground:#FBF4E9;
+  --surface:#FFFCF7;
+  --surface-2:#F6EBDA;
+  --ink:#1B0720;
+  --ink-2:#4A3350;
+  --muted:#7A6579;
+  --rule:#E3D3BE;
+  --rule-soft:#EFE3D2;
+  --accent:#7A2E7E;
+  --on-accent:#FFFCF7;
+  --accent-soft:#F0E2F1;
+  --data:#C07D0E;
+  --good:#0a7d24;
+  --warn:#9a6b00;
+  --serious:#b4552a;
+  --crit:#b32d2d;
+  --good-bg:#E4F1E4;
+  --warn-bg:#FBEFD4;
+  --serious-bg:#FAE5DA;
+  --crit-bg:#F8E0E0;
+
+  --f-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Karla","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+
+  --wrap:1120px;
+  --prose:66ch;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#150517;
+    --surface:#1F0E26;
+    --surface-2:#2A1633;
+    --ink:#F7EDF7;
+    --ink-2:#DCC7DE;
+    --muted:#AE93B1;
+    --rule:#3B2242;
+    --rule-soft:#2E1A36;
+    --accent:#C77CCB;
+    --on-accent:#150517;
+    --accent-soft:#33193A;
+    --data:#F5A623;
+    --good:#5cd05c;
+    --warn:#fab219;
+    --serious:#ec835a;
+    --crit:#f06a6a;
+    --good-bg:#16301B;
+    --warn-bg:#38290A;
+    --serious-bg:#3A2018;
+    --crit-bg:#3B1717;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#150517;
+  --surface:#1F0E26;
+  --surface-2:#2A1633;
+  --ink:#F7EDF7;
+  --ink-2:#DCC7DE;
+  --muted:#AE93B1;
+  --rule:#3B2242;
+  --rule-soft:#2E1A36;
+  --accent:#C77CCB;
+  --on-accent:#150517;
+  --accent-soft:#33193A;
+  --data:#F5A623;
+  --good:#5cd05c;
+  --warn:#fab219;
+  --serious:#ec835a;
+  --crit:#f06a6a;
+  --good-bg:#16301B;
+  --warn-bg:#38290A;
+  --serious-bg:#3A2018;
+  --crit-bg:#3B1717;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:16px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:var(--wrap);margin:0 auto;padding:0 24px 96px}
+@media(max-width:640px){.page{padding:0 16px 64px}}
+
+/* ---------- tipografía ---------- */
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(2.4rem,6vw,4.1rem);font-weight:800;letter-spacing:-.03em}
+h2{font-size:clamp(1.6rem,3.4vw,2.35rem);font-weight:700;letter-spacing:-.02em}
+h3{font-size:1.16rem;font-weight:700;letter-spacing:-.01em}
+h4{font-size:.94rem;font-weight:700}
+p{margin:0}
+.prose{max-width:var(--prose);display:flex;flex-direction:column;gap:1em}
+.prose p{color:var(--ink-2)}
+strong{font-weight:700;color:var(--ink)}
+em{font-style:italic}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+.eyebrow{
+  font-family:var(--f-mono);font-size:.7rem;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* ---------- portada ---------- */
+.hero{padding:72px 0 40px;border-bottom:2px solid var(--ink)}
+.hero .kicker{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:baseline;margin-bottom:22px}
+.hero h1{margin-bottom:20px}
+.hero .lede{font-size:1.2rem;color:var(--ink-2);max-width:60ch}
+.hero .lede b{color:var(--ink)}
+
+.factbar{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);
+  margin-top:40px;
+}
+.fact{background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.fact .v{font-family:var(--f-display);font-size:1.75rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.fact .l{font-size:.78rem;color:var(--muted);line-height:1.35}
+
+/* ---------- secciones ---------- */
+section{padding-top:64px}
+.shead{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.shead .bar{width:44px;height:4px;background:var(--accent)}
+
+/* ---------- tablas ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);background:var(--surface);margin-top:24px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.88rem}
+caption{text-align:left;padding:14px 16px;font-size:.8rem;color:var(--muted);border-bottom:1px solid var(--rule-soft);background:var(--surface-2)}
+th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:var(--f-mono);font-size:.68rem;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted);background:var(--surface-2);
+  border-bottom:1px solid var(--rule);position:sticky;top:0;
+}
+tbody tr:last-child td{border-bottom:none}
+td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tbody tr:hover td{background:var(--surface-2)}
+.rank{font-family:var(--f-mono);color:var(--muted);width:2.4em;text-align:right}
+
+/* ---------- chips de estado ---------- */
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--f-mono);font-size:.68rem;font-weight:600;letter-spacing:.04em;
+  padding:2px 7px;border-radius:2px;white-space:nowrap;
+}
+.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.chip.good{color:var(--good);background:var(--good-bg)}
+.chip.warn{color:var(--warn);background:var(--warn-bg)}
+.chip.serious{color:var(--serious);background:var(--serious-bg)}
+.chip.crit{color:var(--crit);background:var(--crit-bg)}
+.chip.neutral{color:var(--muted);background:var(--surface-2)}
+
+/* ---------- gráficas ---------- */
+.figure{margin-top:28px;border:1px solid var(--rule);background:var(--surface);padding:22px 20px 16px}
+.figure .ftitle{font-family:var(--f-display);font-weight:700;font-size:1.02rem;margin-bottom:2px}
+.figure .fsub{font-size:.8rem;color:var(--muted);margin-bottom:22px;max-width:62ch}
+.figure .fnote{font-size:.75rem;color:var(--muted);margin-top:16px;padding-top:12px;border-top:1px solid var(--rule-soft);max-width:70ch}
+
+.season{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;align-items:end;height:230px}
+.sbar{display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:6px;position:relative}
+.sbar .fill{
+  background:var(--accent);border-radius:4px 4px 0 0;width:100%;
+  transition:filter .12s ease;
+}
+.sbar.thin .fill{
+  background:repeating-linear-gradient(135deg,var(--accent) 0 4px,transparent 4px 8px),var(--accent-soft);
+  border:1px solid var(--accent);border-bottom:none;
+}
+.sbar:hover .fill{filter:brightness(1.15)}
+.sbar .cap{font-family:var(--f-mono);font-size:.63rem;color:var(--muted);text-align:center;letter-spacing:.02em}
+.sbar .val{font-family:var(--f-mono);font-size:.7rem;font-weight:600;text-align:center;color:var(--ink);font-variant-numeric:tabular-nums}
+.sbar .base{height:1px;background:var(--rule)}
+.seasonwrap{position:relative}
+.refline{position:absolute;left:0;right:0;border-top:1px dashed var(--data);pointer-events:none}
+.refline span{
+  position:absolute;right:0;top:-9px;background:var(--surface);padding:0 6px;
+  font-family:var(--f-mono);font-size:.62rem;color:var(--data);letter-spacing:.04em;white-space:nowrap;
+}
+@media(max-width:700px){
+  .season{height:180px;gap:3px}
+  .sbar .cap{font-size:.55rem}
+  .sbar .val{font-size:.6rem}
+}
+
+.hbars{display:flex;flex-direction:column;gap:9px}
+.hbars.compact .hrow{grid-template-columns:minmax(76px,.42fr) 1fr auto}
+.hrow{display:grid;grid-template-columns:minmax(120px,1.35fr) 1fr auto;gap:12px;align-items:center;font-size:.82rem}
+.hrow .lab{color:var(--ink-2);line-height:1.3}
+.htrack{height:16px;background:var(--surface-2);position:relative;border-radius:2px}
+.hfill{height:100%;border-radius:2px 4px 4px 2px}
+.hrow .amt{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:.8rem;font-weight:500;white-space:nowrap}
+@media(max-width:620px){.hrow{grid-template-columns:1fr auto;grid-template-areas:"lab amt" "track track";gap:4px 10px}
+  .hrow .lab{grid-area:lab}.hrow .amt{grid-area:amt}.htrack{grid-area:track}}
+
+/* ---------- calendario ---------- */
+.cal{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:28px}
+.mon{background:var(--surface);padding:16px 16px 18px;display:flex;flex-direction:column;gap:11px}
+.mon.peak{background:var(--accent-soft)}
+.monhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;border-bottom:1px solid var(--rule);padding-bottom:8px}
+.monhead .mname{font-family:var(--f-display);font-weight:800;font-size:1.12rem;letter-spacing:-.01em}
+.monhead .midx{font-family:var(--f-mono);font-size:.7rem;color:var(--muted);white-space:nowrap}
+.mon ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mon li{font-size:.85rem;line-height:1.4;display:flex;gap:8px;align-items:flex-start;color:var(--ink-2)}
+.mon li .tag{
+  font-family:var(--f-mono);font-size:.6rem;font-weight:600;letter-spacing:.05em;
+  padding:2px 5px;border-radius:2px;flex:none;margin-top:2px;text-transform:uppercase;
+}
+.tag.ancla{background:var(--accent);color:var(--on-accent)}
+.tag.rot{background:var(--surface-2);color:var(--muted);border:1px solid var(--rule)}
+.tag.test{background:transparent;color:var(--data);border:1px dashed var(--data)}
+.tag.nucleo{background:var(--data);color:#1B0720}
+.mon.peak .tag.rot{background:var(--surface);}
+.mon .note{font-size:.74rem;color:var(--muted);border-top:1px dashed var(--rule);padding-top:8px;line-height:1.45}
+
+/* ---------- bloques de nota ---------- */
+.callout{border-left:3px solid var(--accent);background:var(--surface);padding:16px 20px;display:flex;flex-direction:column;gap:8px;margin-top:24px;max-width:78ch}
+.callout h4{color:var(--accent)}
+.callout p{font-size:.9rem;color:var(--ink-2)}
+
+.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:24px}
+.src{background:var(--surface);padding:15px 17px;display:flex;flex-direction:column;gap:5px}
+.src .sname{font-weight:700;font-size:.9rem}
+.src .smeta{font-family:var(--f-mono);font-size:.7rem;color:var(--accent)}
+.src .sdesc{font-size:.8rem;color:var(--muted);line-height:1.45}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:24px}
+@media(max-width:760px){.split{grid-template-columns:1fr}}
+.half{background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.half h4{font-size:1rem}
+.half ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+.half li{font-size:.86rem;color:var(--ink-2);line-height:1.45}
+
+footer{margin-top:80px;padding-top:24px;border-top:2px solid var(--ink);font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:8px;max-width:78ch}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="page">
+
+<header class="hero">
+  <div class="kicker">
+    <span class="eyebrow">Endulcora · Estudio Gastronómico</span>
+    <span class="eyebrow" style="color:var(--muted)">Informe · 29 de agosto de 2026</span>
+  </div>
+  <h1>Qué taller vender cada mes</h1>
+  <p class="lede">Los talleres más vendidos del histórico de Endulcora, mes por mes, y dos calendarios para los próximos doce meses: uno construido sobre <b>2,297 inscripciones pagadas</b> y otro sobre <b>$534,825 MXN de inversión en Meta</b>. Cuando los dos discrepan, la discrepancia es el hallazgo.</p>
+
+  <div class="factbar">
+    <div class="fact"><span class="v num">2,297</span><span class="l">inscripciones pagadas analizadas (abr 2024 – ene 2026)</span></div>
+    <div class="fact"><span class="v num">94.4%</span><span class="l">clasificadas a un taller con nombre canónico</span></div>
+    <div class="fact"><span class="v num">$534,825</span><span class="l">invertidos en Meta desde sep 2023 (MXN)</span></div>
+    <div class="fact"><span class="v num">4,274</span><span class="l">conversaciones de WhatsApp generadas jun–ago 2026</span></div>
+    <div class="fact"><span class="v num">$533,914</span><span class="l">en anticipos capturados, trazables a taller y mes</span></div>
+    <div class="fact"><span class="v num">61</span><span class="l">talleres distintos con pauta activa este trimestre</span></div>
+  </div>
+</header>
+
+<section id="resumen">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Lo que hay que saber</span><h2>Seis hallazgos</h2></div>
+  <div class="prose">
+    <p><b>1. El año tiene dos picos, no uno.</b> Diciembre y enero concentran la venta: enero vende <b>el doble</b> que un mes promedio (índice 203) y diciembre un 63% más (163). Octubre y noviembre forman un segundo pico por Día de Muertos y Navidad. El valle real es marzo–junio, donde todos los meses caen por debajo del promedio.</p>
+    <p><b>2. Tres talleres estacionales cargan el año.</b> Pan de Muerto (112 inscritos entre septiembre y octubre), Galletas navideñas (57 en nov–dic) y Rosca de Reyes (45 vendidos en diciembre para impartir del 2 al 4 de enero). Ninguno se puede mover de mes, y los tres se venden con anticipación: la Rosca se cobra en diciembre aunque el taller sea en enero.</p>
+    <p><b>3. Meta mide conversaciones, no ventas — y la diferencia es cara.</b> Dulces Mexicanos generó 171 conversaciones de WhatsApp en agosto (el 4.º lugar en demanda) por $3,905 MXN, y terminó con <b>7 inscritos</b>: $558 por alumno sobre un ticket de $700–900. Moles gastó $959 y produjo <b>cero</b> inscritos en cuatro sesiones, todas canceladas. Optimizar por costo por conversación premia justamente los talleres que no cierran.</p>
+    <p><b>4. Velas Comestibles es el activo publicitario más fuerte que tiene Endulcora.</b> 599 conversaciones y 50 inscritos en cuatro sesiones de septiembre — más que los siguientes seis talleres juntos. Es el único que aguanta pauta permanente en las dos sedes.</p>
+    <p><b>5. Volumen y valor no son lo mismo, y separan tres meses.</b> Los cuatro meses más fuertes lo son por ambas medidas, pero de ahí para abajo cambian: <b>julio sube tres lugares</b> al medirlo en dinero (mueve poca gente pero con el anticipo más alto del año después de octubre), y <b>febrero cae cuatro</b> — su catálogo de fresas cubiertas, donas y crepas es el más barato del año.</p>
+    <p><b>6. Las dos propuestas discrepan en un punto concreto y resoluble.</b> Galletas tipo Palacio es el taller #1 de julio en el histórico (18 inscritos) pero está entre los diez peores costos por conversación de la cuenta ($38.1 contra $21.5 de promedio). El histórico dice programarlo; Meta dice que no lo pague. La lectura correcta: <b>programarlo y venderlo por canales propios</b>, no por pauta fría.</p>
+  </div>
+</section>
+
+<section id="fuentes">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Trazabilidad</span><h2>De dónde salen los números</h2></div>
+  <div class="prose"><p>Todo lo que sigue viene de registros propios de Endulcora. No hay estimaciones de mercado ni promedios de industria en este informe.</p></div>
+  <div class="sources">
+    <div class="src">
+      <span class="sname">REGISTRO PAGOS (respuestas)</span>
+      <span class="smeta">Drive · 2,297 pagos · abr 2024 – ene 2026</span>
+      <span class="sdesc">Formulario de pago con monto, taller y fecha. Es la base del ranking histórico y de la estacionalidad. 2,169 registros (94.4%) se pudieron asignar a un taller; los 128 restantes son erratas o nombres únicos.</span>
+    </div>
+    <div class="src">
+      <span class="sname">Inscritos 2025 / Inscritos 2026</span>
+      <span class="smeta">Drive · feb–may 2025, ene y ago–sep 2026</span>
+      <span class="sdesc">Conteo de registros por sesión, taller y sucursal. Sirve para validar el cruce entre lo que Meta genera y lo que realmente se inscribe.</span>
+    </div>
+    <div class="src">
+      <span class="sname">Meta Ads · cuenta Endulcora</span>
+      <span class="smeta">ID 75151654 · MXN · desde sep 2023</span>
+      <span class="sdesc">Gasto mensual completo desde marzo 2025. El detalle por anuncio y taller sólo existe de junio a agosto de 2026 (169 anuncios): las campañas anteriores fueron eliminadas de la cuenta y Meta ya no devuelve su desglose.</span>
+    </div>
+  </div>
+  <div class="callout">
+    <h4>Tres advertencias honestas sobre estos datos</h4>
+    <p><b>El mes es el del pago, no el del taller.</b> En la práctica coinciden salvo en la Rosca de Reyes, que se cobra en diciembre y se imparte los primeros días de enero. Está señalado donde aplica.</p>
+    <p><b>Febrero y marzo tienen un solo año observado</b> (2025), contra dos o tres del resto. Sus barras van rayadas en la gráfica y su índice es menos confiable.</p>
+    <p><b>Meta no explica 2024 ni el primer semestre de 2026.</b> Hay $360,697 MXN gastados en 2026 de los que sólo $92,049 tienen desglose por taller. Todo lo que este informe afirma sobre rendimiento por taller en Meta se apoya en ese trimestre.</p>
+  </div>
+</section>
+
+<section id="estacionalidad">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">El pulso del año</span><h2>Estacionalidad de la venta</h2></div>
+  <div class="prose"><p>Inscripciones promedio por mes, normalizadas por los años realmente observados. La línea de referencia es el mes promedio: <b>91 inscritos</b>.</p></div>
+
+  <div class="figure">
+    <div class="ftitle">Inscripciones promedio por mes calendario</div>
+    <div class="fsub">Promedio por año observado. Las barras rayadas (febrero, marzo) tienen un solo año de datos y deben leerse con reserva.</div>
+    <div class="seasonwrap"><div class="season" id="season"></div><div class="refline" id="refline" hidden><span>promedio 91</span></div></div>
+    <div class="fnote">Enero duplica al mes promedio y diciembre lo supera en 63%. Juntos concentran el 30% de la venta anual en dos meses. Marzo, mayo y junio son los tres meses más débiles del año, los tres por debajo de 70 inscritos.</div>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <caption>Volumen mensual y taller dominante · fuente: REGISTRO PAGOS, abr 2024 – ene 2026</caption>
+      <thead><tr><th>Mes</th><th class="n">Índice</th><th class="n">Inscritos/año</th><th class="n">Años</th><th>Taller dominante</th></tr></thead>
+      <tbody id="seasontable"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="ranking">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Histórico completo</span><h2>Los 20 talleres más vendidos</h2></div>
+  <div class="prose"><p>Ranking sobre las 2,169 inscripciones clasificadas de abril 2024 a enero 2026. La columna de concentración muestra qué tan estacional es cada taller: un valor alto significa que casi toda su venta ocurre en uno o dos meses.</p></div>
+  <div class="tablewrap">
+    <table>
+      <caption>Ranking histórico por inscripciones pagadas</caption>
+      <thead><tr><th class="n">#</th><th>Taller</th><th class="n">Inscritos</th><th class="n">% total</th><th>Ventana de venta</th></tr></thead>
+      <tbody id="rankbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="pormes">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">La respuesta a la pregunta</span><h2>Talleres más vendidos, mes por mes</h2></div>
+  <div class="prose"><p>Para cada mes, los talleres con más inscripciones pagadas en el histórico. Este es el insumo directo de la Propuesta A.</p></div>
+  <div class="cal" id="calhist"></div>
+</section>
+
+<section id="ingreso">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Volumen contra valor</span><h2>No todos los inscritos valen lo mismo</h2></div>
+  <div class="prose">
+    <p>El ranking anterior cuenta cabezas. Pero un taller de $1,100 y uno de $500 no aportan lo mismo, y el mes que más gente mueve no siempre es el que más deja.</p>
+    <p>De los 2,297 pagos, <b>2,059 tienen taller, mes y monto legibles</b> y suman <b>$533,914 MXN</b> en anticipos. Ojo con qué es esa cifra: el formulario captura el <em>anticipo</em>, no el precio final — mediana de $200 sobre tickets de $700–900. Sirve para comparar talleres y meses entre sí, no para leer facturación.</p>
+  </div>
+
+  <div class="figure">
+    <div class="ftitle">Anticipos capturados por mes, por año observado</div>
+    <div class="fsub">Mismo criterio de normalización que la gráfica de volumen. Las barras rayadas (febrero, marzo) tienen un solo año.</div>
+    <div class="hbars compact" id="ingbars"></div>
+    <div class="fnote">Los cuatro primeros meses del año en volumen son también los cuatro primeros en valor: enero, diciembre, octubre y noviembre. A partir del quinto lugar los dos rankings se separan.</div>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <caption>Posición de cada mes por volumen contra su posición por valor capturado</caption>
+      <thead><tr><th>Mes</th><th class="n">Por volumen</th><th class="n">Por valor</th><th class="n">Cambio</th><th class="n">Anticipos/año</th><th class="n">Anticipo medio</th></tr></thead>
+      <tbody id="rankcomp"></tbody>
+    </table>
+  </div>
+
+  <div class="split">
+    <div class="half">
+      <h4>Talleres de anticipo alto</h4>
+      <ul>
+        <li><b>Chocolatería</b> — $372 de anticipo medio, 55 inscritos</li>
+        <li><b>Coctelería</b> — $372, 53 inscritos</li>
+        <li><b>Pan de Muerto</b> — $367, 113 inscritos. Es a la vez el más vendido y de los más caros: el mejor taller del catálogo por cualquier medida.</li>
+        <li><b>Pastel de cupcakes</b> — $323, 52 inscritos</li>
+        <li><b>Repostería para Diabéticos</b> — $306, 77 inscritos</li>
+      </ul>
+    </div>
+    <div class="half">
+      <h4>Talleres de anticipo bajo</h4>
+      <ul>
+        <li><b>Fresas cubiertas</b> — $162, 38 inscritos. El ancla de febrero es la más barata del catálogo.</li>
+        <li><b>Tacos de canasta</b> — $173, 66 inscritos</li>
+        <li><b>Pizza</b> — $248 con 61 inscritos: volumen alto, valor medio</li>
+        <li><b>Galletas tipo Palacio</b> — $237, 51 inscritos</li>
+        <li><b>Tamales</b> — $241, 68 inscritos</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>Los tres meses que cambian de lugar</h4>
+    <p><b>Julio sube tres posiciones</b> (9.º en volumen, 6.º en valor). Mueve poca gente pero con el segundo anticipo más alto del año ($339): chocolatería, coctelería y pastel de cupcakes. No es un mes flojo, es un mes caro.</p>
+    <p><b>Febrero cae cuatro</b> (7.º a 11.º). Su catálogo — fresas cubiertas, donas, berlinesas, crepas — es el más barato del año ($177 de anticipo medio). Si febrero tiene que crecer, no es con más sesiones: es con un taller caro anclado al 14.</p>
+    <p><b>Abril cae dos</b> (5.º a 7.º). Vende mucha galletería a $187. Conviene meterle al menos un intensivo de ticket alto.</p>
+  </div>
+</section>
+
+<section id="meta">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Meta Ads</span><h2>Qué compra la inversión publicitaria</h2></div>
+  <div class="prose">
+    <p>Las campañas de Endulcora se optimizan a <em>conversaciones de WhatsApp iniciadas</em>, no a compra. Entre junio y agosto de 2026, $92,049 MXN produjeron 4,274 conversaciones — <b>$21.5 por conversación</b> en promedio.</p>
+    <p>Ese promedio esconde un rango de 16 a 1: Tiramisú Douyin costó $11.6 por conversación y Alitas $185.8.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <caption>Top 20 talleres por demanda generada en Meta · jun–ago 2026, cuenta 75151654</caption>
+      <thead><tr><th class="n">#</th><th>Taller</th><th class="n">Gasto MXN</th><th class="n">Conversaciones</th><th class="n">$ / conv.</th><th>Lectura</th></tr></thead>
+      <tbody id="metabody"></tbody>
+    </table>
+  </div>
+
+  <div class="figure">
+    <div class="ftitle">Gasto mensual en Meta</div>
+    <div class="fsub">La cuenta pasó de $10–16 mil mensuales en 2025 a $44–56 mil en 2026. El salto ocurre en noviembre–diciembre de 2025 y ya no baja.</div>
+    <div class="hbars compact" id="spendbars"></div>
+    <div class="fnote">El gasto de 2026 (ene–ago) es $360,697 MXN: más del doble de todo 2025. Sólo el 26% de ese gasto tiene desglose por taller recuperable.</div>
+  </div>
+</section>
+
+<section id="cruce">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">El dato incómodo</span><h2>Conversaciones no son inscritos</h2></div>
+  <div class="prose">
+    <p>Cruzando el gasto de Meta con los registros reales de las sesiones de agosto y septiembre de 2026, aparece la métrica que sí importa: <b>cuánto cuesta un alumno sentado en el taller</b>. Con un ticket de $700–900 MXN, todo lo que pase de $300 por inscrito destruye margen.</p>
+  </div>
+
+  <div class="figure">
+    <div class="ftitle">Costo por inscrito real, por taller</div>
+    <div class="fsub">Gasto en Meta jun–ago 2026 contra inscritos confirmados en las sesiones de agosto y septiembre de 2026. Cada barra lleva su etiqueta de estado; el color no carga el significado solo.</div>
+    <div class="hbars" id="cpibars"></div>
+    <div class="fnote">Cuatro talleres consumieron $3,531 MXN de pauta y produjeron cero inscritos: Pastelería Mexicana, Moles, Birria y Taquiza de Guisados. Los nombres de los anuncios lo registran textualmente — «Moles División CANCELADO (0 registros)», «Moles Nativitas 28y30 ago CANCELADO (1 y 0 registros)».</div>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <caption>Embudo completo por taller · gasto Meta jun–ago 2026 vs. inscritos ago–sep 2026</caption>
+      <thead><tr><th>Taller</th><th class="n">Gasto</th><th class="n">Conv.</th><th class="n">Inscritos</th><th class="n">$/conv.</th><th class="n">$/inscrito</th><th class="n">Cierre</th></tr></thead>
+      <tbody id="crucebody"></tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <h4>La trampa del costo por conversación</h4>
+    <p>Carnitas tiene el 3.º mejor costo por conversación de toda la cuenta ($14.3) y el segundo peor por inscrito entre los que sí cerraron alguno ($509). Dulces Mexicanos es 4.º en demanda y, entre los talleres que sí registraron algún inscrito, el segundo peor en cierre (4.1%). Ambos parecen ganadores en el panel de Meta y pierden dinero en caja.</p>
+    <p>Al revés, Bolillo, Telera y Pambazo gastó $479, generó apenas 24 conversaciones — y cerró 7 inscritos, <b>29.2% de cierre</b> y $68 por alumno. Es el taller más rentable del trimestre y está casi sin presupuesto.</p>
+  </div>
+</section>
+
+<section id="propuesta-a">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Propuesta A</span><h2>Calendario por histórico de ventas</h2></div>
+  <div class="prose">
+    <p>Doce meses construidos sobre lo que Endulcora ya demostró que vende. Cada mes lleva <b>anclas</b> — talleres con venta probada en ese mes, que no se mueven — y <b>rotación</b>, plazas variables para sostener catálogo sin canibalizar a las anclas.</p>
+    <p>El principio de asignación es el índice de estacionalidad: los meses de índice alto (enero, diciembre, octubre, noviembre) llevan más sesiones y más anclas; los meses de valle (marzo, mayo, junio) llevan menos sesiones y ahí se prueban formatos nuevos, cuando el costo de fallar es bajo.</p>
+  </div>
+  <div class="cal" id="calA"></div>
+  <div class="callout">
+    <h4>Cómo se lee</h4>
+    <p><span class="tag ancla" style="display:inline-block">ANCLA</span> venta probada en ese mes — se programa sí o sí, en las dos sedes. <span class="tag rot" style="display:inline-block">ROTA</span> respaldo con historial, una sede o una sesión. <span class="tag test" style="display:inline-block">PRUEBA</span> hueco para catálogo nuevo.</p>
+  </div>
+</section>
+
+<section id="propuesta-b">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Propuesta B</span><h2>Calendario por Meta Ads</h2></div>
+  <div class="prose">
+    <p>El mismo año, ordenado por lo que la pauta puede llenar barato. Cambian tres cosas respecto de la Propuesta A.</p>
+    <p><b>Un núcleo permanente.</b> Velas Comestibles corre todo el año en las dos sedes, con campaña siempre encendida. Es el único taller cuyo volumen (599 conversaciones, 50 inscritos en septiembre) justifica presupuesto continuo.</p>
+    <p><b>Rotación por costo por inscrito, no por gusto.</b> Cada mes lleva tres talleres del grupo que cierra barato: Bolillo, Palomitas, Chiles en Nogada, Panqués, Pays y Tartas, Roles, Trufas, Postres Japoneses, Tacos de Canasta, Coctelería Básica, Tiramisú.</p>
+    <p><b>Un slot de prueba con regla de corte.</b> Tope de $150 MXN y apagado a los 5 días si el costo pasa de $35 por conversación o no llega a 8 conversaciones. Endulcora ya opera así — los nombres de anuncio lo documentan («$37.03 CPA, presupuesto agotado») — sólo falta volverlo regla escrita.</p>
+  </div>
+  <div class="cal" id="calB"></div>
+
+  <div class="split">
+    <div class="half">
+      <h4>Escalar presupuesto</h4>
+      <ul>
+        <li><b>Velas Comestibles</b> — $18.7/conv, 50 inscritos en 4 sesiones. Único candidato a always-on.</li>
+        <li><b>Bolillo, Telera y Pambazo</b> — $68/inscrito, 29.2% de cierre. Subir de $479 a $1,500.</li>
+        <li><b>Palomitas Gourmet</b> — $105/inscrito, 14.9% de cierre. Además, taller #1 de marzo en el histórico.</li>
+        <li><b>Chiles en Nogada</b> — $117/inscrito, 19 inscritos. Ventana rígida: sólo agosto y septiembre.</li>
+        <li><b>Panqués Gourmet</b> — $126/inscrito con $759 de gasto. Sin explorar.</li>
+      </ul>
+    </div>
+    <div class="half">
+      <h4>Retirar de pauta</h4>
+      <ul>
+        <li><b>Moles</b> — $959 gastados, 4 sesiones, 0 inscritos, todas canceladas. Sacar del catálogo, no sólo de la pauta.</li>
+        <li><b>Pastelería Mexicana</b> — $1,496, 62 conversaciones, 0 inscritos.</li>
+        <li><b>Dulces Mexicanos</b> — $3,905 y 171 conversaciones para 7 inscritos ($558 c/u). El más caro de la cuenta en términos absolutos.</li>
+        <li><b>Carnitas</b> — $1,528 y 107 conversaciones para 3 inscritos ($509 c/u).</li>
+        <li><b>Alitas, Antojitos, Cocina Oaxaqueña, Coctelería de Barrio, Cocina Italiana, Empanadas, Mermeladas, Panes al Vapor</b> — todos arriba de $37 por conversación y sin inscritos registrados.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="discrepancias">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Contraste</span><h2>Dónde discrepan las dos propuestas</h2></div>
+  <div class="prose"><p>Las dos coinciden en las anclas estacionales — Pan de Muerto, Nogada, Navidad, Rosca. Discrepan en cinco talleres, y en cada caso la discrepancia tiene una lectura operativa.</p></div>
+  <div class="tablewrap">
+    <table>
+      <caption>Talleres donde el histórico y Meta dan señales opuestas</caption>
+      <thead><tr><th>Taller</th><th>Dice el histórico</th><th>Dice Meta</th><th>Resolución</th></tr></thead>
+      <tbody>
+        <tr><td><b>Galletas tipo Palacio</b></td><td class="n">#1 de julio · 53 inscritos históricos</td><td class="n">$38.1/conv · 6.º peor</td><td>Programarlo. Venderlo por WhatsApp propio y comunidad, no por pauta fría.</td></tr>
+        <tr><td><b>Dulces Mexicanos</b></td><td class="n">Sin peso histórico</td><td class="n">171 conv · 4.º en demanda</td><td>La demanda es real pero no cierra (4.1%). Revisar precio y guion de WhatsApp antes de volver a pautarlo.</td></tr>
+        <tr><td><b>Velas Comestibles</b></td><td class="n">No aparece antes de 2026</td><td class="n">599 conv · 50 inscritos</td><td>Producto nuevo que funcionó. Meta manda: núcleo permanente.</td></tr>
+        <tr><td><b>Pan de Muerto</b></td><td class="n">#1 absoluto · 112 inscritos sep–oct</td><td class="n">Sin datos (fuera del trimestre)</td><td>El histórico manda. Es el mayor activo estacional del año.</td></tr>
+        <tr><td><b>Carnitas</b></td><td class="n">8 inscritos en abril</td><td class="n">$14.3/conv pero $509/inscrito</td><td>Barato de anunciar, caro de llenar. Una sesión al año, sin pauta.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="operacion">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Para ejecutarlo</span><h2>Tres reglas y una métrica</h2></div>
+  <div class="prose">
+    <p><b>Regla 1 · Medir inscritos, no conversaciones.</b> La hoja «Inscritos» ya lo registra por sesión. Falta cerrar el circuito: anotar junto a cada sesión el gasto de Meta de esa campaña, para que el costo por inscrito se calcule solo. Es la única métrica que decide presupuesto.</p>
+    <p><b>Regla 2 · Corte a los 5 días.</b> Si un taller nuevo no llega a 8 conversaciones o pasa de $35 por conversación, se apaga y la sesión se cancela con una semana de anticipación. Cuatro sesiones de Moles llegaron a puerta con cero inscritos: eso cuesta local, insumos y reputación.</p>
+    <p><b>Regla 3 · Preventa de diciembre.</b> La Rosca de Reyes se vendió 45 veces en diciembre para impartirse el 2, 3 y 4 de enero. Ese mecanismo — cobrar en el pico y entregar en el mes siguiente — no está aplicado a ningún otro taller. Tamales, Repostería para Diabéticos y Palomitas Gourmet, los tres primeros de enero, son candidatos inmediatos.</p>
+  </div>
+  <div class="callout">
+    <h4>Lo que falta para cerrar el análisis</h4>
+    <p>Falta el <b>ingreso completo por taller</b>. La columna de monto está bien capturada — 97.9% de los registros trae una cifra legible — pero lo que guarda es el <b>anticipo</b>, no el precio final: la mediana es $200 sobre tickets de $700–900. La liquidación se cobra en el local y nunca vuelve al formulario.</p>
+    <p>El arreglo no es normalizar la columna, es <b>cerrar el circuito</b>: registrar el pago final junto al anticipo, o exportar la tabla <span class="num">orders</span> del sitio. Hasta entonces el análisis de precio de la sección anterior sirve para comparar talleres entre sí, no para leer facturación absoluta.</p>
+  </div>
+</section>
+
+<footer>
+  <p><b>Endulcora · Informe de talleres por mes y propuestas de calendario.</b> Elaborado el 29 de agosto de 2026 sobre registros propios: REGISTRO PAGOS (2,297 pagos, abr 2024 – ene 2026), Inscritos 2025 / 2026, y la cuenta de Meta Ads 75151654.</p>
+  <p>Los conteos de Meta cubren del 1 de junio al 29 de agosto de 2026, el único periodo con desglose por anuncio recuperable en la cuenta. Ningún dato personal de alumnos se usó ni se reproduce en este documento.</p>
+</footer>
+
+</div>
+
+<script>
+const MESES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const ABR=["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+
+const season=[
+ {m:0,idx:203,prom:184,anios:2,top:"Tamales (39)"},
+ {m:1,idx:79,prom:72,anios:1,top:"Crepas, waffles y hot cakes (7)"},
+ {m:2,idx:67,prom:61,anios:1,top:"Palomitas Gourmet (10)"},
+ {m:3,idx:104,prom:94,anios:2,top:"Galletas decoradas (17)"},
+ {m:4,idx:68,prom:62,anios:3,top:"Pizza (18)"},
+ {m:5,idx:66,prom:59.7,anios:3,top:"Tacos de canasta (17)"},
+ {m:6,idx:69,prom:62.5,anios:2,top:"Galletas tipo Palacio (18)"},
+ {m:7,idx:73,prom:66,anios:2,top:"Tamales (14)"},
+ {m:8,idx:84,prom:76.5,anios:2,top:"Pan de Muerto (44)"},
+ {m:9,idx:114,prom:103,anios:2,top:"Pan de Muerto (68)"},
+ {m:10,idx:110,prom:100,anios:2,top:"Galletas navideñas (42)"},
+ {m:11,idx:163,prom:147.5,anios:2,top:"Repostería para Diabéticos (53)"}
+];
+const maxProm=Math.max(...season.map(s=>s.prom));
+document.getElementById("season").innerHTML=season.map(s=>{
+  const h=Math.round(s.prom/maxProm*100);
+  const thin=s.anios===1?" thin":"";
+  return `<div class="sbar${thin}" title="${MESES[s.m]}: ${s.prom} inscritos/año (índice ${s.idx}) — ${s.anios} año${s.anios>1?"s":""} observado${s.anios>1?"s":""}">
+    <span class="val">${s.prom}</span>
+    <div class="fill" style="height:${h}%"></div>
+    <div class="base"></div>
+    <span class="cap">${ABR[s.m]}</span></div>`;
+}).join("");
+
+function placeRef(){
+  const wrap=document.querySelector(".seasonwrap"), line=document.getElementById("refline");
+  const ene=document.querySelector("#season .sbar .fill");
+  if(!wrap||!ene||!line) return;
+  const w=wrap.getBoundingClientRect(), f=ene.getBoundingClientRect();
+  if(f.height<4) return;
+  const y=f.bottom-w.top-(91/184)*f.height;
+  line.style.top=y+"px"; line.hidden=false;
+}
+placeRef();
+addEventListener("resize",placeRef);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(placeRef);
+
+document.getElementById("seasontable").innerHTML=season
+  .slice().sort((a,b)=>b.idx-a.idx)
+  .map(s=>`<tr><td><b>${MESES[s.m]}</b></td><td class="n">${s.idx}</td><td class="n">${s.prom}</td><td class="n">${s.anios}</td><td>${s.top}</td></tr>`).join("");
+
+const rank=[
+ ["Pan de muerto",113,"sep–oct"],["Galletas decoradas",103,"todo el año, pico abr y nov"],
+ ["Repostería para diabéticos",77,"diciembre"],["Tacos de canasta",69,"junio y agosto"],
+ ["Tamales",69,"enero y agosto"],["Pizza",62,"mayo–junio"],["Macarons",59,"abr, may y dic"],
+ ["Chocolatería",58,"jul y oct"],["Palomitas gourmet",58,"enero y marzo"],
+ ["Galletas navideñas",57,"nov–dic"],["Coctelería",54,"mar, may y jul"],
+ ["Galletas tipo Palacio",53,"julio"],["Pays y tartas",53,"abr y jun"],
+ ["Pastel de cupcakes",53,"jul y oct"],["Rosca de reyes",52,"dic → ene"],
+ ["Repostería canábica",41,"enero"],["Fresas cubiertas",40,"feb y abr"],
+ ["Roles gourmet",40,"enero"],["Postres en vaso",39,"ene y may"],["Panqués gourmet",39,"noviembre"]
+];
+const totalIns=2169;
+document.getElementById("rankbody").innerHTML=rank.map((r,i)=>
+ `<tr><td class="rank">${i+1}</td><td><b>${r[0]}</b></td><td class="n">${r[1]}</td><td class="n">${(r[1]/totalIns*100).toFixed(1)}%</td><td>${r[2]}</td></tr>`).join("");
+
+const ingMes=[["Enero",39217,244,2],["Diciembre",38358,267,2],["Octubre",34026,337,2],["Noviembre",25460,260,2],["Septiembre",24051,321,2],["Julio",20678,339,2],["Abril",16633,187,2],["Mayo",15372,255,3],["Agosto",15280,239,2],["Junio",12642,222,3],["Febrero",11299,177,1],["Marzo",11170,193,1]];
+const maxIng=Math.max(...ingMes.map(m=>m[1]));
+document.getElementById("ingbars").innerHTML=ingMes.map(m=>{
+  const raya=m[3]===1?"background:repeating-linear-gradient(135deg,var(--accent) 0 4px,transparent 4px 8px),var(--accent-soft);border:1px solid var(--accent);":"background:var(--accent);";
+  return `<div class="hrow" title="${m[0]}: $${m[1].toLocaleString("es-MX")} por año · anticipo medio $${m[2]} · ${m[3]} año${m[3]>1?"s":""} observado${m[3]>1?"s":""}">
+   <span class="lab">${m[0]}</span>
+   <div class="htrack"><div class="hfill" style="width:${m[1]/maxIng*100}%;${raya}"></div></div>
+   <span class="amt">$${m[1].toLocaleString("es-MX")}</span></div>`;
+}).join("");
+
+const rc=[["Enero",1,1,0,39217,244],["Diciembre",2,2,0,38358,267],["Octubre",3,3,0,34026,337],["Noviembre",4,4,0,25460,260],["Septiembre",6,5,1,24051,321],["Julio",9,6,3,20678,339],["Abril",5,7,-2,16633,187],["Mayo",10,8,2,15372,255],["Agosto",8,9,-1,15280,239],["Junio",12,10,2,12642,222],["Febrero",7,11,-4,11299,177],["Marzo",11,12,-1,11170,193]];
+document.getElementById("rankcomp").innerHTML=rc.map(r=>{
+  const d=r[3], cls=d>=2?"good":d<=-2?"crit":"neutral";
+  const txt=d===0?"igual":(d>0?"+"+d:""+d);
+  return `<tr><td><b>${r[0]}</b></td><td class="n">${r[1]}.º</td><td class="n">${r[2]}.º</td><td class="n"><span class="chip ${cls}">${txt}</span></td><td class="n">$${r[4].toLocaleString("es-MX")}</td><td class="n">$${r[5]}</td></tr>`;
+}).join("");
+
+const metaTop=[
+ ["Velas Comestibles",11177,599,18.7,"good","escalar"],
+ ["Postres Italianos",5911,324,18.2,"good","escalar"],
+ ["Coctelería Básica",3974,202,19.7,"good","mantener"],
+ ["Dulces Mexicanos",3905,171,22.8,"crit","no cierra"],
+ ["Panadería Mexicana",3024,144,21.0,"warn","revisar"],
+ ["Postres con Nogada",3336,132,25.3,"warn","estacional"],
+ ["Galletas tipo Palacio",4958,130,38.1,"crit","caro"],
+ ["Postres Japoneses",1999,125,16.0,"good","escalar"],
+ ["Panadería Masa Madre",2480,120,20.7,"warn","revisar"],
+ ["Chocolatería Básica",2917,119,24.5,"warn","mantener"],
+ ["Banderillas Coreanas",2551,109,23.4,"warn","mantener"],
+ ["Carnitas",1528,107,14.3,"crit","no cierra"],
+ ["Trufas Gourmet",1672,100,16.7,"good","escalar"],
+ ["Postres para Cafetería",1738,95,18.3,"good","mantener"],
+ ["Galletas NY",2008,92,21.8,"warn","mantener"],
+ ["Pays y Tartas",1372,92,14.9,"good","escalar"],
+ ["Roles Gourmet",1338,91,14.7,"good","escalar"],
+ ["Tamales Gourmet",1944,87,22.3,"warn","estacional"],
+ ["Chiles en Nogada",2219,83,26.7,"good","estacional"],
+ ["Mamuts Decorados",1217,81,15.0,"good","escalar"]
+];
+const CHIP={good:"Eficiente",warn:"Aceptable",serious:"En riesgo",crit:"Revisar"};
+document.getElementById("metabody").innerHTML=metaTop.map((r,i)=>
+ `<tr><td class="rank">${i+1}</td><td><b>${r[0]}</b></td><td class="n">$${r[1].toLocaleString("es-MX")}</td><td class="n">${r[2]}</td><td class="n">$${r[3].toFixed(1)}</td><td><span class="chip ${r[4]}">${r[5]}</span></td></tr>`).join("");
+
+const spend=[["2025 · mar",4883],["abr",11398],["may",15539],["jun",10448],["jul",14954],["ago",9313],["sep",7451],["oct",16190],["nov",27418],["dic",56233],["2026 · ene",50548],["feb",44214],["mar",55719],["abr",30291],["may",44011],["jun",45546],["jul",44332],["ago*",46037]];
+const maxSpend=Math.max(...spend.map(s=>s[1]));
+document.getElementById("spendbars").innerHTML=spend.map(s=>
+ `<div class="hrow"><span class="lab">${s[0]}</span><div class="htrack"><div class="hfill" style="width:${s[1]/maxSpend*100}%;background:var(--accent)"></div></div><span class="amt">$${s[1].toLocaleString("es-MX")}</span></div>`).join("");
+
+const cpi=[
+ ["Bolillo, Telera y Pambazo",68,7,"good"],["Palomitas Gourmet",105,11,"good"],
+ ["Chiles en Nogada",117,19,"good"],["Panqués Gourmet",126,6,"good"],
+ ["Tiramisú Douyin",191,2,"warn"],["Tacos de Canasta",198,3,"warn"],
+ ["Coctelería Mexicana",215,7,"warn"],["Velas Comestibles",224,50,"warn"],
+ ["Mamuts Decorados",243,5,"warn"],["Postres con Nogada",334,10,"serious"],
+ ["Carnitas",509,3,"crit"],["Dulces Mexicanos",558,7,"crit"]
+];
+const CPILAB={good:"Rentable",warn:"Aceptable",serious:"En riesgo",crit:"Pierde margen"};
+const CPICOL={good:"var(--good)",warn:"var(--warn)",serious:"var(--serious)",crit:"var(--crit)"};
+const maxCpi=Math.max(...cpi.map(c=>c[1]));
+document.getElementById("cpibars").innerHTML=cpi.map(c=>
+ `<div class="hrow" title="${c[0]}: $${c[1]} por inscrito · ${c[2]} inscritos confirmados">
+   <span class="lab">${c[0]}<br><span class="chip ${c[3]}" style="margin-top:3px">${CPILAB[c[3]]}</span></span>
+   <div class="htrack"><div class="hfill" style="width:${c[1]/maxCpi*100}%;background:${CPICOL[c[3]]}"></div></div>
+   <span class="amt">$${c[1]} · ${c[2]} insc.</span></div>`).join("");
+
+const cruce=[
+ ["Bolillo, Telera y Pambazo",479,24,7,19.9,68,29.2,"good"],
+ ["Chiles en Nogada",2219,83,19,26.7,117,22.9,"good"],
+ ["Palomitas Gourmet",1160,74,11,15.7,105,14.9,"good"],
+ ["Panqués Gourmet",759,50,6,15.2,126,12.0,"good"],
+ ["Coctelería Mexicana",1504,72,7,20.9,215,9.7,"warn"],
+ ["Tacos de Canasta",593,35,3,17.0,198,8.6,"warn"],
+ ["Velas Comestibles",11177,599,50,18.7,224,8.3,"warn"],
+ ["Postres con Nogada",3336,132,10,25.3,334,7.6,"serious"],
+ ["Mamuts Decorados",1217,81,5,15.0,243,6.2,"warn"],
+ ["Tiramisú Douyin",382,33,2,11.6,191,6.1,"warn"],
+ ["Dulces Mexicanos",3905,171,7,22.8,558,4.1,"crit"],
+ ["Carnitas",1528,107,3,14.3,509,2.8,"crit"],
+ ["Pastelería Mexicana",1496,62,0,24.1,null,0,"crit"],
+ ["Moles",959,25,0,38.4,null,0,"crit"],
+ ["Birria",755,33,0,22.9,null,0,"crit"],
+ ["Taquiza de Guisados",321,19,0,16.9,null,0,"crit"]
+];
+document.getElementById("crucebody").innerHTML=cruce.map(r=>
+ `<tr><td><b>${r[0]}</b></td><td class="n">$${r[1].toLocaleString("es-MX")}</td><td class="n">${r[2]}</td><td class="n">${r[3]}</td><td class="n">$${r[4].toFixed(1)}</td><td class="n">${r[5]===null?"—":"$"+r[5]}</td><td class="n"><span class="chip ${r[7]}">${r[6].toFixed(1)}%</span></td></tr>`).join("");
+
+function renderCal(id,data){
+  document.getElementById(id).innerHTML=data.map(m=>`
+   <div class="mon${m.peak?" peak":""}">
+     <div class="monhead"><span class="mname">${m.name}</span><span class="midx">${m.idx}</span></div>
+     <ul>${m.items.map(i=>`<li><span class="tag ${i[0]}">${i[0]==="ancla"?"ancla":i[0]==="rot"?"rota":i[0]==="nucleo"?"núcleo":"prueba"}</span><span>${i[1]}</span></li>`).join("")}</ul>
+     ${m.note?`<div class="note">${m.note}</div>`:""}
+   </div>`).join("");
+}
+
+const HIST=[
+ {name:"Enero",idx:"índice 203",peak:true,items:[["ancla","Rosca de Reyes · 2 al 4 de enero"],["ancla","Tamales clásicos y gourmet"],["ancla","Palomitas Gourmet"],["ancla","Roles Gourmet"],["rot","Repostería canábica"],["rot","Ensaladas"],["rot","Repostería para Diabéticos"]],note:"El mes más fuerte del año. 184 inscritos promedio. Todo el catálogo de anclas, las dos sedes."},
+ {name:"Febrero",idx:"índice 79",items:[["ancla","Fresas cubiertas · San Valentín"],["ancla","Galletas de San Valentín"],["rot","Crepas, waffles y hot cakes"],["rot","Banderillas coreanas"],["rot","Donas gourmet"],["test","Berlinesas · Cupcakes florales"]],note:"Un solo año observado. Todo febrero gira alrededor del 14."},
+ {name:"Marzo",idx:"índice 67",items:[["ancla","Palomitas Gourmet"],["ancla","Coctelería básica"],["rot","Aguas y bebidas frescas"],["rot","Empanadas argentinas"],["test","Pays y tartas · Donas"]],note:"Valle del año. Menos sesiones, más experimentación."},
+ {name:"Abril",idx:"índice 104",items:[["ancla","Galletas decoradas"],["ancla","Galletas tipo Palacio"],["ancla","Macarons"],["rot","Fresas cubiertas"],["rot","Pays y tartas"],["rot","Pastel vintage"],["test","Carnitas"]],note:"Repunte de primavera. La galletería manda: tres de los cuatro primeros."},
+ {name:"Mayo",idx:"índice 68",items:[["ancla","Pastel de cupcakes · 10 de mayo"],["ancla","Pizza"],["rot","Malteadas"],["rot","Postres en vaso"],["rot","Cocina japonesa"],["test","Chocolatería"]],note:"El 10 de mayo es la única fecha con tirón propio."},
+ {name:"Junio",idx:"índice 66",items:[["ancla","Tacos de canasta"],["ancla","Pizza"],["rot","Alitas"],["rot","Galletas NY"],["rot","Pays y tartas"],["test","Fondant · Aguas frescas"]],note:"Mes más débil del año (59.7). Salado y comida rápida rinden más que repostería."},
+ {name:"Julio",idx:"índice 69",items:[["ancla","Galletas tipo Palacio"],["ancla","Pastel de cupcakes"],["rot","Gelatinas Marinela"],["rot","Chocolatería"],["rot","Coctelería"],["test","Donas gourmet"]],note:"Galletas tipo Palacio concentra 18 de 125 inscritos. Es el taller más estacional del verano."},
+ {name:"Agosto",idx:"índice 73",items:[["ancla","Chiles en Nogada"],["ancla","Tamales"],["ancla","Postres japoneses"],["rot","Galletas tipo Palacio"],["rot","Tacos de canasta"],["test","Panes al vapor · Manzanas"]],note:"Arranca la temporada de nogada, que sólo vive agosto y septiembre."},
+ {name:"Septiembre",idx:"índice 84",peak:true,items:[["ancla","Pan de Muerto · arranque"],["ancla","Chiles en Nogada"],["ancla","Repostería canina y felina"],["rot","Bolillo, telera y pambazo"],["rot","Mamuts decorados"],["rot","Galletas decoradas"]],note:"Pan de Muerto abre en septiembre con 44 inscritos: hay que empezar a vender el 1.º."},
+ {name:"Octubre",idx:"índice 114",peak:true,items:[["ancla","Pan de Muerto · pico"],["ancla","Calaveritas de azúcar"],["ancla","Galletas decoradas"],["rot","Pastel de cupcakes"],["rot","Fondant"],["rot","Chocolatería"],["test","Banderillas coreanas"]],note:"68 inscritos de Pan de Muerto en un mes: el pico absoluto del catálogo. Máximo de sesiones."},
+ {name:"Noviembre",idx:"índice 110",peak:true,items:[["ancla","Galletas navideñas · venta y regalo"],["ancla","Galletas decoradas"],["ancla","Sushi"],["rot","Cocina japonesa"],["rot","Pays y tartas"],["rot","Panqués gourmet"],["test","Cena navideña"]],note:"La navidad se vende desde noviembre: 42 inscritos de galletas navideñas."},
+ {name:"Diciembre",idx:"índice 163",peak:true,items:[["ancla","Repostería para Diabéticos"],["ancla","Rollo decorado navideño"],["ancla","Rosca de Reyes · preventa"],["rot","Cena navideña"],["rot","Macarons"],["rot","Manzanas decoradas navideñas"],["rot","Galletas navideñas"]],note:"Segundo mes más fuerte. La Rosca se cobra aquí y se imparte en enero: 45 preventas."}
+];
+renderCal("calhist",HIST.map(m=>({...m,items:m.items.slice(0,4),note:null})));
+renderCal("calA",HIST);
+
+const METACAL=[
+ {name:"Septiembre",idx:"núcleo + nogada",items:[["nucleo","Velas Comestibles · 4 sesiones, 2 sedes"],["ancla","Chiles en Nogada · $117/inscrito"],["ancla","Postres con Nogada"],["rot","Palomitas Gourmet · $105/inscrito"],["test","Pan de Muerto · arranque de pauta"]],note:"Velas ya probó 50 inscritos en septiembre. Se sostiene el presupuesto y se corta Moles, Birria y Taquiza."},
+ {name:"Octubre",idx:"pico estacional",peak:true,items:[["nucleo","Velas Comestibles"],["ancla","Pan de Muerto · 60% del presupuesto"],["rot","Galletas decoradas"],["rot","Palomitas Gourmet"],["test","Calaveritas de azúcar"]],note:"Único mes donde la pauta se concentra en un solo taller. Meta no tiene histórico aquí; manda el registro de ventas."},
+ {name:"Noviembre",idx:"arranque navideño",peak:true,items:[["nucleo","Velas Comestibles"],["ancla","Galletas navideñas"],["rot","Pays y Tartas · $14.9/conv"],["rot","Panqués Gourmet · $126/inscrito"],["test","Sushi"]],note:"Subir presupuesto desde el 1.º de noviembre: la venta navideña arranca cinco semanas antes."},
+ {name:"Diciembre",idx:"pico de gasto",peak:true,items:[["nucleo","Velas Comestibles"],["ancla","Repostería para Diabéticos · $18.5/conv"],["ancla","Rollo decorado navideño"],["ancla","Rosca de Reyes · preventa"],["test","Cena navideña"]],note:"El mes de mayor inversión histórica ($56,233 en 2025). Justificado: es el 2.º mes de venta."},
+ {name:"Enero",idx:"pico de venta",peak:true,items:[["nucleo","Velas Comestibles"],["ancla","Tamales"],["ancla","Palomitas Gourmet"],["rot","Roles Gourmet · $14.7/conv"],["test","Repostería canábica"]],note:"Mes #1 en venta y #2 en gasto. La proporción está bien; sostenerla."},
+ {name:"Febrero",idx:"valle",items:[["nucleo","Velas Comestibles"],["ancla","Fresas cubiertas · San Valentín"],["rot","Tiramisú Douyin · $11.6/conv"],["rot","Postres Japoneses · $16.0/conv"],["test","Banderillas coreanas"]],note:"Bajar presupuesto total. Tiramisú es el costo por conversación más bajo de la cuenta."},
+ {name:"Marzo",idx:"valle",items:[["nucleo","Velas Comestibles"],["ancla","Palomitas Gourmet"],["rot","Coctelería Básica · $19.7/conv"],["rot","Trufas Gourmet · $16.7/conv"],["test","slot libre"]],note:"Mes de prueba barata: fallar en marzo cuesta poco."},
+ {name:"Abril",idx:"repunte",items:[["nucleo","Velas Comestibles"],["ancla","Galletas decoradas"],["rot","Pays y Tartas"],["rot","Macarons"],["test","Carnitas · sólo si baja de $200/inscrito"]],note:"Carnitas vuelve a pauta únicamente con la métrica de inscrito, no de conversación."},
+ {name:"Mayo",idx:"valle",items:[["nucleo","Velas Comestibles"],["ancla","Postres Italianos · 324 conv"],["rot","Postres en vaso"],["rot","Chocolatería Básica"],["test","Pizza"]],note:"Postres Italianos fue el 2.º en demanda de todo el trimestre y no se ha repetido."},
+ {name:"Junio",idx:"valle",items:[["nucleo","Velas Comestibles"],["ancla","Tacos de Canasta · $17.0/conv"],["rot","Galletas NY"],["rot","Pays y Tartas"],["test","Pizza"]],note:"Mes más débil del año en venta. Presupuesto mínimo, catálogo salado."},
+ {name:"Julio",idx:"valle",items:[["nucleo","Velas Comestibles"],["ancla","Chocolatería Básica"],["rot","Trufas Gourmet"],["rot","Postres para Cafetería · $18.3/conv"],["test","Gelatinas"]],note:"Galletas tipo Palacio se programa pero fuera de pauta: $38.1/conv no lo justifica."},
+ {name:"Agosto",idx:"arranque nogada",items:[["nucleo","Velas Comestibles"],["ancla","Chiles en Nogada"],["rot","Bolillo, Telera y Pambazo · $68/inscrito"],["rot","Postres Japoneses"],["test","Tamales"]],note:"Bolillo pasa de $479 a $1,500 de presupuesto: es el taller más rentable medido del trimestre."}
+];
+renderCal("calB",METACAL);
+</script>

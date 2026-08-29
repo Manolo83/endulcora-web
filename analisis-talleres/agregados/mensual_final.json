@@ -1,0 +1,518 @@
+{
+ "Enero": {
+  "anios": [
+   "2025",
+   "2026"
+  ],
+  "total": 368,
+  "prom": 184.0,
+  "indice": 203,
+  "top": [
+   [
+    "Recetarios y eBooks",
+    45
+   ],
+   [
+    "Tamales",
+    39
+   ],
+   [
+    "Palomitas gourmet",
+    33
+   ],
+   [
+    "Repostería canábica",
+    33
+   ],
+   [
+    "Roles gourmet",
+    32
+   ],
+   [
+    "Ensaladas",
+    22
+   ],
+   [
+    "Repostería para diabéticos",
+    17
+   ],
+   [
+    "Postres en vaso",
+    16
+   ]
+  ]
+ },
+ "Febrero": {
+  "anios": [
+   "2025"
+  ],
+  "total": 72,
+  "prom": 72.0,
+  "indice": 79,
+  "top": [
+   [
+    "Crepas, waffles y hot cakes",
+    7
+   ],
+   [
+    "Fresas cubiertas",
+    6
+   ],
+   [
+    "Recetarios y eBooks",
+    5
+   ],
+   [
+    "Banderillas coreanas",
+    5
+   ],
+   [
+    "Berlinesas",
+    4
+   ],
+   [
+    "Donas gourmet",
+    4
+   ],
+   [
+    "Roles gourmet",
+    3
+   ],
+   [
+    "Cupcakes florales",
+    3
+   ]
+  ]
+ },
+ "Marzo": {
+  "anios": [
+   "2025"
+  ],
+  "total": 61,
+  "prom": 61.0,
+  "indice": 67,
+  "top": [
+   [
+    "Palomitas gourmet",
+    10
+   ],
+   [
+    "Coctelería",
+    6
+   ],
+   [
+    "Aguas y bebidas frescas",
+    6
+   ],
+   [
+    "Empanadas argentinas",
+    5
+   ],
+   [
+    "Repostería canábica",
+    4
+   ],
+   [
+    "Pays y tartas",
+    3
+   ],
+   [
+    "Donas gourmet",
+    3
+   ],
+   [
+    "Recetarios y eBooks",
+    2
+   ]
+  ]
+ },
+ "Abril": {
+  "anios": [
+   "2024",
+   "2025"
+  ],
+  "total": 188,
+  "prom": 94.0,
+  "indice": 104,
+  "top": [
+   [
+    "Galletas decoradas",
+    17
+   ],
+   [
+    "Galletas tipo Palacio",
+    14
+   ],
+   [
+    "Macarons",
+    14
+   ],
+   [
+    "Fresas cubiertas",
+    13
+   ],
+   [
+    "Pays y tartas",
+    11
+   ],
+   [
+    "Carnitas",
+    8
+   ],
+   [
+    "Cupcakes florales",
+    7
+   ],
+   [
+    "Pastel vintage",
+    7
+   ]
+  ]
+ },
+ "Mayo": {
+  "anios": [
+   "2024",
+   "2025",
+   "2026"
+  ],
+  "total": 186,
+  "prom": 62.0,
+  "indice": 68,
+  "top": [
+   [
+    "Pizza",
+    18
+   ],
+   [
+    "Malteadas",
+    13
+   ],
+   [
+    "Macarons",
+    11
+   ],
+   [
+    "Postres en vaso",
+    11
+   ],
+   [
+    "Cocina japonesa",
+    10
+   ],
+   [
+    "Pastel de cupcakes",
+    8
+   ],
+   [
+    "Chocolatería",
+    8
+   ],
+   [
+    "Coctelería",
+    8
+   ]
+  ]
+ },
+ "Junio": {
+  "anios": [
+   "2024",
+   "2025",
+   "2026"
+  ],
+  "total": 179,
+  "prom": 59.7,
+  "indice": 66,
+  "top": [
+   [
+    "Tacos de canasta",
+    17
+   ],
+   [
+    "Pizza",
+    12
+   ],
+   [
+    "Alitas",
+    11
+   ],
+   [
+    "Pays y tartas",
+    10
+   ],
+   [
+    "Galletas NY",
+    10
+   ],
+   [
+    "Aguas y bebidas frescas",
+    8
+   ],
+   [
+    "Crepas, waffles y hot cakes",
+    8
+   ],
+   [
+    "Fondant",
+    8
+   ]
+  ]
+ },
+ "Julio": {
+  "anios": [
+   "2024",
+   "2025"
+  ],
+  "total": 125,
+  "prom": 62.5,
+  "indice": 69,
+  "top": [
+   [
+    "Galletas tipo Palacio",
+    18
+   ],
+   [
+    "Pastel de cupcakes",
+    10
+   ],
+   [
+    "Gelatinas Marinela",
+    8
+   ],
+   [
+    "Chocolatería",
+    8
+   ],
+   [
+    "Galletas decoradas",
+    7
+   ],
+   [
+    "Coctelería",
+    7
+   ],
+   [
+    "Donas gourmet",
+    6
+   ],
+   [
+    "Cupcakes florales",
+    6
+   ]
+  ]
+ },
+ "Agosto": {
+  "anios": [
+   "2024",
+   "2025"
+  ],
+  "total": 132,
+  "prom": 66.0,
+  "indice": 73,
+  "top": [
+   [
+    "Tamales",
+    14
+   ],
+   [
+    "Postres japoneses",
+    11
+   ],
+   [
+    "Galletas tipo Palacio",
+    10
+   ],
+   [
+    "Tacos de canasta",
+    9
+   ],
+   [
+    "Chiles en nogada",
+    9
+   ],
+   [
+    "Panes al vapor",
+    6
+   ],
+   [
+    "Manzanas decoradas",
+    6
+   ],
+   [
+    "Pastel de cupcakes",
+    5
+   ]
+  ]
+ },
+ "Septiembre": {
+  "anios": [
+   "2024",
+   "2025"
+  ],
+  "total": 153,
+  "prom": 76.5,
+  "indice": 84,
+  "top": [
+   [
+    "Pan de muerto",
+    44
+   ],
+   [
+    "Repostería canina y felina",
+    11
+   ],
+   [
+    "Bolillo, telera y pambazo",
+    8
+   ],
+   [
+    "Galletas decoradas",
+    7
+   ],
+   [
+    "Mamuts decorados",
+    7
+   ],
+   [
+    "Mesa de postres",
+    6
+   ],
+   [
+    "Pizza",
+    6
+   ],
+   [
+    "Chocolatería",
+    5
+   ]
+  ]
+ },
+ "Octubre": {
+  "anios": [
+   "2024",
+   "2025"
+  ],
+  "total": 206,
+  "prom": 103.0,
+  "indice": 114,
+  "top": [
+   [
+    "Pan de muerto",
+    68
+   ],
+   [
+    "Galletas decoradas",
+    13
+   ],
+   [
+    "Pastel de cupcakes",
+    11
+   ],
+   [
+    "Fondant",
+    9
+   ],
+   [
+    "Calaveritas de azúcar",
+    7
+   ],
+   [
+    "Chocolatería",
+    7
+   ],
+   [
+    "Banderillas coreanas",
+    7
+   ],
+   [
+    "Pays y tartas",
+    6
+   ]
+  ]
+ },
+ "Noviembre": {
+  "anios": [
+   "2024",
+   "2025"
+  ],
+  "total": 200,
+  "prom": 100.0,
+  "indice": 110,
+  "top": [
+   [
+    "Galletas navideñas",
+    42
+   ],
+   [
+    "Galletas decoradas",
+    25
+   ],
+   [
+    "Sushi",
+    15
+   ],
+   [
+    "Cocina japonesa",
+    14
+   ],
+   [
+    "Pays y tartas",
+    12
+   ],
+   [
+    "Panqués gourmet",
+    10
+   ],
+   [
+    "Pizza",
+    9
+   ],
+   [
+    "Cena navideña",
+    9
+   ]
+  ]
+ },
+ "Diciembre": {
+  "anios": [
+   "2024",
+   "2025"
+  ],
+  "total": 295,
+  "prom": 147.5,
+  "indice": 163,
+  "top": [
+   [
+    "Repostería para diabéticos",
+    53
+   ],
+   [
+    "Rosca de reyes",
+    45
+   ],
+   [
+    "Rollo decorado navideño",
+    32
+   ],
+   [
+    "Macarons",
+    22
+   ],
+   [
+    "Cena navideña",
+    21
+   ],
+   [
+    "Galletas navideñas",
+    15
+   ],
+   [
+    "Tacos de canasta",
+    13
+   ],
+   [
+    "Tamales",
+    12
+   ]
+  ]
+ }
+}
