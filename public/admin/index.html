@@ -691,11 +691,16 @@
           <p id="campanaContactosResumen" class="font-ui text-[11px] uppercase tracking-widest text-carbon/50">Cargando…</p>
         </div>
         <input id="campanaContactosBuscador" type="search" placeholder="Buscar por correo o nombre…" class="mt-3 w-full max-w-sm rounded-full border border-vino/15 bg-crema/60 px-4 py-2 text-sm outline-none focus:border-vino/40">
-        <div id="listaContactosCampana" class="mt-4 max-h-96 overflow-y-auto rounded-xl border border-vino/10"></div>
+        <label class="mt-3 flex items-center gap-2 text-sm text-carbon/70">
+          <input type="checkbox" id="chkSeleccionarTodos" class="h-4 w-4 rounded border-vino/25">
+          Seleccionar todos los que se ven abajo
+        </label>
+        <div id="listaContactosCampana" class="mt-2 max-h-96 overflow-y-auto rounded-xl border border-vino/10"></div>
       </div>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Escribir y enviar campaña</h3>
+        <p id="campanaSeleccionResumen" class="mt-1 text-xs text-carbon/50">0 contactos seleccionados</p>
         <form id="formEnviarCampana" class="mt-4 grid gap-4">
           <label class="block">
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Asunto</span>
@@ -705,7 +710,7 @@
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mensaje (deja una línea en blanco entre párrafos)</span>
             <textarea id="campanaCuerpo" rows="8" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
           </label>
-          <button type="submit" id="btnEnviarCampana" class="rounded-full bg-vino px-8 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition sm:justify-self-start">Enviar campaña</button>
+          <button type="submit" id="btnEnviarCampana" class="rounded-full bg-vino px-8 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition sm:justify-self-start">Enviar a los seleccionados</button>
           <p id="campanaEnviarError" class="hidden text-sm text-red-600"></p>
         </form>
         <div id="campanaProgreso" class="mt-5 hidden rounded-xl bg-crema/60 p-4">
@@ -1263,41 +1268,79 @@ $('formClaseBiblioteca').addEventListener('submit', async (e) => {
 
 /* ---------- Campañas de correo masivo ---------- */
 let CONTACTOS_CAMPANA = [];
+let SELECCIONADOS_CAMPANA = new Set(); // ids de contactos marcados para el próximo envío
+let ULTIMA_LISTA_MOSTRADA = [];
 
 async function cargarContactosCampana(){
   const cont = $('listaContactosCampana');
   try{
     CONTACTOS_CAMPANA = await api('/admin/api/campanas/contactos');
+    // Por defecto se seleccionan todos los activos, para que "Enviar" mande a
+    // todos sin que tengas que marcarlos uno por uno.
+    SELECCIONADOS_CAMPANA = new Set(CONTACTOS_CAMPANA.filter(c => c.activo !== false).map(c => c.id));
     pintarContactosCampana(CONTACTOS_CAMPANA);
   }catch(e){
     cont.innerHTML = '<p class="p-4 text-sm text-red-600">No se pudo cargar la lista de contactos.</p>';
   }
 }
 
+function actualizarResumenSeleccionCampana(){
+  $('campanaSeleccionResumen').textContent = `${SELECCIONADOS_CAMPANA.size} contacto(s) seleccionado(s) para el próximo envío`;
+}
+
 function pintarContactosCampana(lista){
+  ULTIMA_LISTA_MOSTRADA = lista;
   const cont = $('listaContactosCampana');
   const activos = CONTACTOS_CAMPANA.filter(c => c.activo !== false).length;
   $('campanaContactosResumen').textContent = `${activos} activos de ${CONTACTOS_CAMPANA.length} en total`;
+  actualizarResumenSeleccionCampana();
+
+  const activosEnLista = lista.filter(c => c.activo !== false);
+  $('chkSeleccionarTodos').checked = activosEnLista.length > 0 && activosEnLista.every(c => SELECCIONADOS_CAMPANA.has(c.id));
+
   if(!lista.length){
     cont.innerHTML = '<p class="p-4 text-sm text-carbon/40">Todavía no has importado ningún contacto.</p>';
     return;
   }
   cont.innerHTML = lista.map(c => `
     <div class="flex items-center justify-between gap-3 border-b border-vino/5 px-4 py-2.5 last:border-0">
-      <div class="min-w-0">
-        <p class="truncate text-sm text-carbon/80">${escapeHtml(c.email)}${c.nombre ? ` · ${escapeHtml(c.nombre)}` : ''}</p>
-        ${c.activo === false ? '<p class="text-[11px] uppercase tracking-widest text-carbon/40">Dado de baja</p>' : ''}
-      </div>
+      <label class="flex min-w-0 items-center gap-3">
+        <input type="checkbox" class="chkContactoCampana h-4 w-4 shrink-0 rounded border-vino/25" data-id="${c.id}" ${SELECCIONADOS_CAMPANA.has(c.id) ? 'checked' : ''} ${c.activo === false ? 'disabled' : ''}>
+        <span class="min-w-0">
+          <p class="truncate text-sm text-carbon/80">${escapeHtml(c.email)}${c.nombre ? ` · ${escapeHtml(c.nombre)}` : ''}</p>
+          ${c.activo === false ? '<span class="text-[11px] uppercase tracking-widest text-carbon/40">Dado de baja</span>' : ''}
+        </span>
+      </label>
       <button type="button" data-id="${c.id}" class="btnBorrarContactoCampana shrink-0 rounded-full border border-red-200 px-3 py-1 font-ui text-[10px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
     </div>`).join('');
+  cont.querySelectorAll('.chkContactoCampana').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const id = Number(chk.dataset.id);
+      if(chk.checked) SELECCIONADOS_CAMPANA.add(id);
+      else SELECCIONADOS_CAMPANA.delete(id);
+      actualizarResumenSeleccionCampana();
+      const activosEnLista2 = ULTIMA_LISTA_MOSTRADA.filter(c => c.activo !== false);
+      $('chkSeleccionarTodos').checked = activosEnLista2.length > 0 && activosEnLista2.every(c => SELECCIONADOS_CAMPANA.has(c.id));
+    });
+  });
   cont.querySelectorAll('.btnBorrarContactoCampana').forEach(btn => {
     btn.addEventListener('click', async () => {
       if(!confirm('¿Borrar este contacto de la lista?')) return;
+      SELECCIONADOS_CAMPANA.delete(Number(btn.dataset.id));
       await api(`/admin/api/campanas/contactos/${btn.dataset.id}`, { method: 'DELETE' });
       cargarContactosCampana();
     });
   });
 }
+
+$('chkSeleccionarTodos').addEventListener('change', (e) => {
+  const marcar = e.target.checked;
+  ULTIMA_LISTA_MOSTRADA.filter(c => c.activo !== false).forEach(c => {
+    if(marcar) SELECCIONADOS_CAMPANA.add(c.id);
+    else SELECCIONADOS_CAMPANA.delete(c.id);
+  });
+  pintarContactosCampana(ULTIMA_LISTA_MOSTRADA);
+});
 
 $('campanaContactosBuscador').addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase();
@@ -1375,13 +1418,14 @@ $('formEnviarCampana').addEventListener('submit', async (e) => {
   e.preventDefault();
   const err = $('campanaEnviarError');
   err.classList.add('hidden');
-  const activos = CONTACTOS_CAMPANA.filter(c => c.activo !== false).length;
-  if(!confirm(`¿Enviar este correo a ${activos} contacto(s) activo(s)? Esta acción no se puede deshacer.`)) return;
+  const contactoIds = [...SELECCIONADOS_CAMPANA];
+  if(!contactoIds.length){ err.textContent = 'No has seleccionado ningún contacto.'; err.classList.remove('hidden'); return; }
+  if(!confirm(`¿Enviar este correo a ${contactoIds.length} contacto(s) seleccionado(s)? Esta acción no se puede deshacer.`)) return;
   $('btnEnviarCampana').disabled = true;
   try{
     const campana = await api('/admin/api/campanas/enviar', {
       method: 'POST',
-      body: JSON.stringify({ asunto: $('campanaAsunto').value.trim(), cuerpo: $('campanaCuerpo').value.trim() }),
+      body: JSON.stringify({ asunto: $('campanaAsunto').value.trim(), cuerpo: $('campanaCuerpo').value.trim(), contactoIds }),
     });
     $('campanaProgreso').classList.remove('hidden');
     $('campanaProgresoBarra').style.width = '0%';

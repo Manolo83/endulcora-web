@@ -890,12 +890,16 @@ router.delete('/api/campanas/contactos/:id', requireAdmin, (req, res) => {
 // de contactos): la respuesta regresa de inmediato con el id de la campaña,
 // y /admin consulta el progreso con GET /api/campanas.
 router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
-  const { asunto, cuerpo } = req.body || {};
+  const { asunto, cuerpo, contactoIds } = req.body || {};
   if (!asunto || !String(asunto).trim()) return res.status(400).json({ error: 'Ponle un asunto al correo.' });
   if (!cuerpo || !String(cuerpo).trim()) return res.status(400).json({ error: 'Escribe el contenido del correo.' });
 
-  const destinatarios = store.getContactosCampana().filter((c) => c.activo !== false);
-  if (!destinatarios.length) return res.status(400).json({ error: 'No hay contactos activos a quién enviarle.' });
+  let destinatarios = store.getContactosCampana().filter((c) => c.activo !== false);
+  if (Array.isArray(contactoIds)) {
+    const idsSeleccionados = new Set(contactoIds.map(Number));
+    destinatarios = destinatarios.filter((c) => idsSeleccionados.has(c.id));
+  }
+  if (!destinatarios.length) return res.status(400).json({ error: 'No hay contactos seleccionados a quién enviarle.' });
 
   const asuntoLimpio = String(asunto).trim();
   const cuerpoHtml = String(cuerpo).trim()
