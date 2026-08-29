@@ -881,6 +881,18 @@ router.get('/api/campanas/contactos', requireAdmin, (req, res) => {
   res.json(store.getContactosCampana());
 });
 
+// Agregar un contacto uno por uno a mano (ademas de la importacion masiva
+// por CSV). Reusa importarContactosCampana para que, si el correo ya
+// existia, solo se actualicen sus datos en vez de duplicarlo.
+router.post('/api/campanas/contactos', requireAdmin, (req, res) => {
+  const { email, nombre, telefono } = req.body || {};
+  if (!email || !EMAIL_RE_ADMIN.test(String(email).trim())) {
+    return res.status(400).json({ error: 'Escribe un correo válido.' });
+  }
+  const resultado = store.importarContactosCampana([{ email, nombre, telefono }]);
+  res.status(201).json(resultado);
+});
+
 router.delete('/api/campanas/contactos/:id', requireAdmin, (req, res) => {
   store.deleteContactoCampana(req.params.id);
   res.json({ ok: true });
