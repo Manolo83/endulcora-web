@@ -246,6 +246,45 @@ tbody tr:hover td{background:var(--surface-2)}
 
 footer{margin-top:80px;padding-top:24px;border-top:2px solid var(--ink);font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:8px;max-width:78ch}
 
+/* ---------- impresión / PDF ---------- */
+@media print{
+  @page{ size:A4; margin:14mm 12mm 16mm; }
+  html,body{background:#fff!important}
+  *{ -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
+  .page{max-width:none;padding:0}
+  .hero{padding:0 0 24px;break-after:avoid}
+  h1{font-size:34pt}
+  h2{font-size:19pt}
+  body{font-size:9.6pt;line-height:1.5}
+  .hero .lede{font-size:11.5pt}
+  .prose{max-width:none}
+  section{padding-top:26px;break-inside:auto}
+  .shead{break-after:avoid;break-inside:avoid}
+  /* cada propuesta y el aforo abren página */
+  #pormes,#aforo,#meta,#cruce,#propuesta-a,#propuesta-b,#discrepancias,#operacion{break-before:page}
+  /* las rejillas de 1px dejan celdas vacías al cortar página:
+     se sustituye el fondo compartido por borde propio en cada tarjeta */
+  .factbar,.sources,.split,.cal{background:transparent;border:none;gap:6px}
+  .fact,.src,.half,.mon{border:1px solid var(--rule)}
+  .factbar{grid-template-columns:repeat(3,1fr)}
+  .sources{grid-template-columns:repeat(3,1fr)}
+  .cal{grid-template-columns:repeat(2,1fr)}
+  /* nada se parte por dentro */
+  .fact,.src,.half,.callout,.mon,.figure,.hrow,.sbar{break-inside:avoid}
+  tr,thead{break-inside:avoid}
+  thead{display:table-header-group;position:static}
+  thead th{position:static}
+  tfoot{display:table-footer-group}
+  .tablewrap{overflow:visible;break-inside:auto}
+  table{min-width:0;font-size:8.4pt}
+  th,td{padding:5px 8px}
+  .cal{break-inside:auto}
+  .season{height:150px}
+  footer{break-inside:avoid;margin-top:36px}
+  a{color:inherit;text-decoration:none}
+  tbody tr:hover td{background:transparent}
+}
+
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 

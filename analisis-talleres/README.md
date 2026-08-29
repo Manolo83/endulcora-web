@@ -4,7 +4,8 @@ Informe del 29 de agosto de 2026. Responde qué talleres se han vendido más en 
 histórico de Endulcora, mes por mes, y propone dos calendarios para los próximos
 doce meses: uno construido sobre las ventas propias y otro sobre los datos de Meta Ads.
 
-**El informe se lee en `informe-talleres.html`** (abrir en el navegador).
+**El informe se lee en `Endulcora-talleres-informe.pdf`** (24 páginas, A4) o en
+`informe-talleres.html` (abrir en el navegador).
 Publicado como artifact en https://claude.ai/code/artifact/717a3b19-fefa-4d0d-84f8-9c28b0aed5a2
 
 ## Fuentes
@@ -22,6 +23,10 @@ inscripciones vive en Drive.
 ## Qué hay en esta carpeta
 
 - `informe-talleres.html` — el informe completo.
+- `Endulcora-talleres-informe.pdf` — el informe listo para imprimir o compartir.
+- `topdf.mjs` — regenera el PDF desde el HTML con Chromium (`node topdf.mjs`).
+  El HTML trae su hoja de estilos de impresión, así que imprimir desde el navegador
+  da el mismo resultado.
 - `clasifica.py` — normaliza los 1,130 nombres libres de taller del formulario de
   pagos a un catálogo canónico mediante reglas ordenadas (la primera que hace match
   gana, así que el orden importa: "galletas tipo palacio" va antes que "galletas").
