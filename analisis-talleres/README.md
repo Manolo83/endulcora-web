@@ -44,8 +44,8 @@ CSV a `registro_pagos.csv` y correr `python3 clasifica.py`.
 |---|---|
 | `pagos_clasificados.json` | pares `[mes, taller]` de cada pago clasificado |
 | `mensual_final.json` | por mes: años observados, total, promedio/año, índice de estacionalidad, top 8 talleres |
-| `ingresos.json` | anticipos capturados por taller y por mes |
-| `rankcomp.json` | posición de cada mes por volumen contra su posición por valor |
+| `aforo.json` | por taller: sesiones, inscritos, aforo promedio, mejor sesión, sesiones vacías |
+| `sesiones_raw.json` | las 257 sesiones con su año, mes, taller y conteo final |
 | `por_taller2.json` | Meta jun–ago 2026 por taller: gasto, conversaciones, compras, impresiones |
 | `cruce.json` | gasto de Meta contra inscritos reales: costo por inscrito y tasa de cierre |
 | `registros2026.json` | inscritos confirmados por taller, agosto y septiembre 2026 |
@@ -60,5 +60,6 @@ CSV a `registro_pagos.csv` y correr `python3 clasifica.py`.
 3. **Meta sólo explica jun–ago 2026 a nivel de taller.** Las campañas anteriores fueron
    eliminadas de la cuenta y la API ya no devuelve su desglose. De los $360,697 MXN
    gastados en 2026, sólo $92,049 tienen detalle recuperable.
-4. **El monto del formulario es el anticipo, no el precio final** (mediana $200 sobre
-   tickets de $700–900). Sirve para comparar talleres entre sí, no para leer facturación.
+4. **El aforo cubre nueve meses, no doce.** Hay conteo por sesión de enero a mayo y
+   agosto de 2025, más enero y agosto–septiembre de 2026: 257 sesiones. Faltan junio,
+   julio y septiembre a diciembre de 2025, que son los del segundo pico del año.
