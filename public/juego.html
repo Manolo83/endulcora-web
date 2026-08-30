@@ -182,40 +182,83 @@ body { background: #FBF4E9; }
     <div id="escenarioJuego" class="relative">
       <canvas id="canvasJuego"></canvas>
 
-      <div id="endulcoritoAnimado" class="pointer-events-none absolute bottom-1 z-10" style="width:60px;" aria-hidden="true">
-        <svg viewBox="0 0 120 150" style="width:100%;height:auto;overflow:visible;display:block;">
-          <g id="piernaIzqEndulcorito" style="transform-origin:44px 118px;"><ellipse cx="44" cy="128" rx="9" ry="11" fill="#FBF4E9"/></g>
-          <g id="piernaDerEndulcorito" style="transform-origin:76px 118px;"><ellipse cx="76" cy="128" rx="9" ry="11" fill="#FBF4E9"/></g>
+      <div id="endulcoritoAnimado" class="pointer-events-none absolute bottom-1 z-10" style="width:68px;" aria-hidden="true">
+        <svg viewBox="0 0 200 240" style="width:100%;height:auto;overflow:visible;display:block;">
+          <!-- fondo tipo sticker -->
+          <rect x="14" y="6" width="172" height="226" rx="72" fill="#fff"/>
 
-          <path d="M28 118 L34 78 Q60 68 86 78 L92 118 Z" fill="#F2A6C7"/>
-          <path d="M35 116 L39 80" stroke="#E487AC" stroke-width="3" stroke-linecap="round"/>
-          <path d="M46 116 L48 78" stroke="#E487AC" stroke-width="3" stroke-linecap="round"/>
-          <path d="M60 117 L60 76" stroke="#E487AC" stroke-width="3" stroke-linecap="round"/>
-          <path d="M74 116 L72 78" stroke="#E487AC" stroke-width="3" stroke-linecap="round"/>
-          <path d="M85 116 L81 80" stroke="#E487AC" stroke-width="3" stroke-linecap="round"/>
+          <!-- piernas / pies -->
+          <g id="piernaIzqEndulcorito" style="transform-origin:68px 196px;"><ellipse cx="68" cy="208" rx="20" ry="15" fill="#F7EACF" stroke="#E4CFA0" stroke-width="1.5" transform="rotate(-16 68 208)"/></g>
+          <g id="piernaDerEndulcorito" style="transform-origin:132px 196px;"><ellipse cx="132" cy="208" rx="20" ry="15" fill="#F7EACF" stroke="#E4CFA0" stroke-width="1.5" transform="rotate(16 132 208)"/></g>
 
-          <g id="brazoIzqEndulcorito" style="transform-origin:32px 90px;"><ellipse cx="27" cy="98" rx="7" ry="12" fill="#F3DDBE" transform="rotate(-18 27 98)"/></g>
-          <g id="brazoDerEndulcorito" style="transform-origin:88px 90px;"><ellipse cx="93" cy="98" rx="7" ry="12" fill="#F3DDBE" transform="rotate(18 93 98)"/></g>
+          <!-- envoltorio de cupcake (liner) con pliegues -->
+          <path d="M46 200 L52 140 Q100 124 148 140 L154 200 Q100 212 46 200 Z" fill="#F2A9C4" stroke="#fff" stroke-width="2"/>
+          <path d="M60 196 L64 144" stroke="#E48CAE" stroke-width="3.4" stroke-linecap="round"/>
+          <path d="M80 202 L82 138" stroke="#E48CAE" stroke-width="3.4" stroke-linecap="round"/>
+          <path d="M100 204 L100 136" stroke="#E48CAE" stroke-width="3.4" stroke-linecap="round"/>
+          <path d="M120 202 L118 138" stroke="#E48CAE" stroke-width="3.4" stroke-linecap="round"/>
+          <path d="M140 196 L136 144" stroke="#E48CAE" stroke-width="3.4" stroke-linecap="round"/>
 
-          <ellipse cx="60" cy="70" rx="34" ry="30" fill="#F3DDBE"/>
-          <circle cx="42" cy="76" r="6" fill="#F2A6C7" opacity=".7"/>
-          <circle cx="78" cy="76" r="6" fill="#F2A6C7" opacity=".7"/>
+          <!-- brazos -->
+          <g id="brazoIzqEndulcorito" style="transform-origin:44px 152px;"><ellipse cx="34" cy="176" rx="15" ry="25" fill="#F7EACF" stroke="#E4CFA0" stroke-width="1.5" transform="rotate(-14 34 176)"/></g>
+          <g id="brazoDerEndulcorito" style="transform-origin:156px 152px;"><ellipse cx="166" cy="176" rx="15" ry="25" fill="#F7EACF" stroke="#E4CFA0" stroke-width="1.5" transform="rotate(14 166 176)"/></g>
 
-          <g id="ojoIzqEndulcorito"><circle cx="49" cy="65" r="5.5" fill="#2A1420"/><circle cx="47.3" cy="63" r="1.6" fill="#fff"/></g>
-          <g id="ojoDerEndulcorito" style="transform-origin:71px 65px;"><circle cx="71" cy="65" r="5.5" fill="#2A1420"/><circle cx="69.3" cy="63" r="1.6" fill="#fff"/></g>
+          <!-- borde tipo pastel (entre el liner y la cara) -->
+          <path d="M50 142 Q100 128 150 142 Q150 128 138 122 Q100 110 62 122 Q50 128 50 142 Z" fill="#DBA664" stroke="#fff" stroke-width="2"/>
 
-          <path d="M50 78 Q60 86 70 78" stroke="#2A1420" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <!-- cara -->
+          <ellipse cx="100" cy="90" rx="58" ry="52" fill="#FCEFDD" stroke="#fff" stroke-width="2"/>
+          <path d="M100 46 L100 118" stroke="#E4CFA0" stroke-width="1.6" stroke-dasharray="3 4" stroke-linecap="round"/>
 
-          <path d="M30 46 Q26 24 48 20 Q46 8 64 10 Q80 6 84 22 Q100 26 92 44 Q96 58 78 56 Q70 66 58 56 Q42 64 38 52 Q22 54 30 46 Z" fill="#F2A6C7"/>
-          <path d="M40 40 Q42 22 60 20 Q66 12 76 20 Q86 24 82 38 Q84 46 72 46 Q64 52 56 46 Q44 50 40 40 Z" fill="#8FCFE0"/>
-          <path d="M48 36 Q52 24 64 24 Q72 20 76 30 Q80 36 70 38 Q62 42 56 38 Q48 40 48 36 Z" fill="#F5D976"/>
-          <path d="M58 14 l2.4 4.9 5.4.8-3.9 3.8.9 5.3-4.8-2.5-4.8 2.5.9-5.3-3.9-3.8 5.4-.8Z" fill="#fff" opacity=".85"/>
-          <circle cx="34" cy="30" r="1.6" fill="#fff" opacity=".9"/>
+          <!-- chapitas -->
+          <circle cx="62" cy="100" r="9" fill="#F2A6C0" opacity=".55"/>
+          <circle cx="138" cy="100" r="9" fill="#F2A6C0" opacity=".55"/>
+
+          <!-- ojos -->
+          <g id="ojoIzqEndulcorito"><circle cx="78" cy="88" r="10.5" fill="#201018"/><circle cx="74" cy="84" r="3" fill="#fff"/></g>
+          <g id="ojoDerEndulcorito" style="transform-origin:122px 88px;"><circle cx="122" cy="88" r="10.5" fill="#201018"/><circle cx="118" cy="84" r="3" fill="#fff"/></g>
+
+          <!-- sonrisa -->
+          <path d="M90 106 Q100 113 110 106" stroke="#201018" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+
+          <!-- remolino de betún: rosa (base), azul (medio), amarillo (pico) -->
+          <g>
+            <circle cx="58" cy="54" r="19" fill="#F5AFC9"/>
+            <circle cx="80" cy="40" r="21" fill="#F5AFC9"/>
+            <circle cx="104" cy="34" r="21" fill="#F5AFC9"/>
+            <circle cx="128" cy="40" r="21" fill="#F5AFC9"/>
+            <circle cx="148" cy="54" r="18" fill="#F5AFC9"/>
+            <circle cx="68" cy="60" r="15" fill="#F5AFC9"/>
+            <circle cx="138" cy="60" r="15" fill="#F5AFC9"/>
+          </g>
+          <g>
+            <circle cx="74" cy="38" r="15" fill="#AEDCE9"/>
+            <circle cx="96" cy="27" r="16" fill="#AEDCE9"/>
+            <circle cx="120" cy="34" r="15" fill="#AEDCE9"/>
+            <circle cx="86" cy="46" r="13" fill="#AEDCE9"/>
+            <circle cx="110" cy="46" r="13" fill="#AEDCE9"/>
+          </g>
+          <g>
+            <circle cx="90" cy="19" r="11" fill="#F6E68F"/>
+            <circle cx="104" cy="16" r="11" fill="#F6E68F"/>
+            <circle cx="97" cy="10" r="9" fill="#F6E68F"/>
+          </g>
+
+          <!-- corazon -->
+          <path d="M132 20 C130 16 124 16 124 21 C124 25 128 28 132 32 C136 28 140 25 140 21 C140 16 134 16 132 20 Z" fill="#F2879F"/>
+
+          <!-- destellos -->
+          <circle cx="56" cy="44" r="1.8" fill="#fff" opacity=".9"/>
+          <circle cx="72" cy="24" r="1.5" fill="#fff" opacity=".9"/>
+          <circle cx="112" cy="20" r="1.6" fill="#fff" opacity=".9"/>
+          <circle cx="142" cy="42" r="1.8" fill="#fff" opacity=".9"/>
+          <circle cx="100" cy="52" r="1.5" fill="#fff" opacity=".9"/>
           <circle cx="88" cy="34" r="1.4" fill="#fff" opacity=".9"/>
-          <path d="M62 6 q4-6 8 0 q4-6 8 0 q0 7 -8 12 q-8-5-8-12Z" fill="#E85B8A"/>
+          <circle cx="122" cy="52" r="1.4" fill="#fff" opacity=".9"/>
 
-          <rect x="48" y="96" width="24" height="14" rx="3" fill="#fff"/>
-          <text x="60" y="106" text-anchor="middle" font-family="'Great Vibes', cursive" font-size="9" fill="#6B3A22">Endulcora</text>
+          <!-- delantal / etiqueta -->
+          <rect x="66" y="184" width="68" height="28" rx="5" fill="#fff" stroke="#E4CFA0" stroke-width="1.5"/>
+          <text x="100" y="203" text-anchor="middle" font-family="'Great Vibes', cursive" font-size="15" fill="#8B5A3C">Endulcora</text>
         </svg>
       </div>
 
