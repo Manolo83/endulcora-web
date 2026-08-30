@@ -203,6 +203,10 @@ app.get('/biblioteca-clases', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'biblioteca-clases.html'));
 });
 
+app.get('/juego', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'juego.html'));
+});
+
 // Baja de la lista de campañas de correo. Sirve el link visible al final de
 // cada correo (GET, para que la persona vea la confirmación) y también
 // responde a POST: los clientes de correo que soportan "un clic para darse

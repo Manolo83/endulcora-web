@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YZNFKC6PS8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-YZNFKC6PS8');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>El pastel de Endulcorito · Endulcora</title>
+<meta name="description" content="Ayuda a Endulcorito a apilar capas de pastel lo más alto posible. Un juego rapidito, solo por diversión.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.endulcora.com/juego">
+<meta name="theme-color" content="#1B0720">
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1302735011542499');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1302735011542499&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.endulcora.com/juego">
+<meta property="og:site_name" content="Endulcora · Estudio Gastronómico">
+<meta property="og:title" content="El pastel de Endulcorito · Endulcora">
+<meta property="og:description" content="Ayuda a Endulcorito a apilar capas de pastel lo más alto posible.">
+<meta property="og:image" content="https://www.endulcora.com/og-image.png">
+<meta property="og:locale" content="es_MX">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          firma: ['"Great Vibes"', 'cursive'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+.rule-flama { background-image: linear-gradient(90deg,#F5A623 0 22px,transparent 22px); height: 3px; }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+
+#canvasJuego { touch-action: manipulation; cursor: pointer; display: block; }
+#escenarioJuego { background: radial-gradient(120% 90% at 50% 12%, #FFF7E8 0%, #FBEFD9 42%, #F3DDBE 78%, #E8CBA0 100%); }
+
+#endulcoritoAnimado { will-change: left, transform, opacity; opacity: 0; }
+
+@keyframes caminarEndulcorito {
+  0%   { left: -18%; opacity: 1; }
+  45%  { left: 42%; }
+  55%  { left: 42%; }
+  95%  { left: 108%; opacity: 1; }
+  100% { left: 122%; opacity: 0; }
+}
+#endulcoritoAnimado.endulcorito-caminando { animation: caminarEndulcorito 4.6s ease-in-out forwards; }
+
+@keyframes pasoPierna { 0%, 100% { transform: rotate(-16deg); } 50% { transform: rotate(16deg); } }
+#endulcoritoAnimado.endulcorito-caminando #piernaIzqEndulcorito,
+#endulcoritoAnimado.endulcorito-caminando #piernaDerEndulcorito { animation: pasoPierna .32s ease-in-out infinite; }
+#endulcoritoAnimado.endulcorito-caminando #piernaDerEndulcorito { animation-delay: .16s; }
+
+@keyframes pasoBrazo { 0%, 100% { transform: rotate(10deg); } 50% { transform: rotate(-10deg); } }
+#endulcoritoAnimado.endulcorito-caminando #brazoIzqEndulcorito,
+#endulcoritoAnimado.endulcorito-caminando #brazoDerEndulcorito { animation: pasoBrazo .32s ease-in-out infinite; }
+#endulcoritoAnimado.endulcorito-caminando #brazoDerEndulcorito { animation-delay: .16s; }
+
+@keyframes guinioEndulcorito {
+  0%, 44%, 62%, 100% { transform: scaleY(1); }
+  50%, 56% { transform: scaleY(.12); }
+}
+#endulcoritoAnimado.endulcorito-caminando #ojoDerEndulcorito { animation: guinioEndulcorito 4.6s ease-in-out 1; }
+
+@keyframes saludoEndulcorito {
+  0% { transform: translateY(20px) scale(.6); opacity: 0; }
+  35% { transform: translateY(-6px) scale(1.05); opacity: 1; }
+  55%, 82% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(18px) scale(.7); opacity: 0; }
+}
+#endulcoritoAnimado.endulcorito-saludo { left: 42%; animation: saludoEndulcorito 1.6s ease-out forwards; }
+@keyframes agitarBrazo { 0%, 100% { transform: rotate(18deg); } 50% { transform: rotate(-26deg); } }
+#endulcoritoAnimado.endulcorito-saludo #brazoDerEndulcorito { animation: agitarBrazo .28s ease-in-out 4; }
+
+@keyframes tristeEndulcorito {
+  0% { transform: translateY(10px) scale(.9) rotate(0deg); opacity: 0; }
+  20% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+  40%, 60% { transform: translateY(0) scale(1) rotate(-6deg); }
+  50% { transform: translateY(0) scale(1) rotate(6deg); }
+  100% { transform: translateY(24px) scale(.8) rotate(0deg); opacity: 0; }
+}
+#endulcoritoAnimado.endulcorito-triste { left: 42%; animation: tristeEndulcorito 1.8s ease-in-out forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  #endulcoritoAnimado.endulcorito-caminando,
+  #endulcoritoAnimado.endulcorito-saludo,
+  #endulcoritoAnimado.endulcorito-triste,
+  #endulcoritoAnimado.endulcorito-caminando #piernaIzqEndulcorito,
+  #endulcoritoAnimado.endulcorito-caminando #piernaDerEndulcorito,
+  #endulcoritoAnimado.endulcorito-caminando #brazoIzqEndulcorito,
+  #endulcoritoAnimado.endulcorito-caminando #brazoDerEndulcorito,
+  #endulcoritoAnimado.endulcorito-caminando #ojoDerEndulcorito,
+  #endulcoritoAnimado.endulcorito-saludo #brazoDerEndulcorito { animation: none !important; opacity: 1 !important; left: 42% !important; }
+}
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<header class="sticky top-0 z-50 bg-crema/95 backdrop-blur border-b border-vino/10">
+  <div class="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-5 lg:px-8">
+    <a href="/" class="flex items-center gap-3 shrink-0">
+      <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+    </a>
+    <button type="button" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false" id="btnMenu"
+      class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-vino/25 text-vino">
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+  <div id="menuMovil" class="hidden max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-vino/10 bg-crema px-5 pb-6 pt-2">
+    <a href="/" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Inicio</a>
+    <a href="/tienda" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Tienda</a>
+    <a href="/ebooks" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">eBooks</a>
+    <a href="/anexos" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anexos</a>
+    <a href="/clases-en-vivo" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Clases en vivo</a>
+    <a href="/biblioteca-clases" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Biblioteca de clases</a>
+    <a href="/calculadora" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calculadora</a>
+    <a href="/calendario" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calendario</a>
+    <a href="/galeria" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Galería</a>
+    <a href="/resenas" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Reseñas</a>
+    <a href="/anuncios" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anuncios</a>
+    <a href="/comunidad" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Comunidad</a>
+    <a href="/membresia" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Membresía</a>
+    <a href="/juego" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Juego</a>
+    <a href="/?verCarrito=1#tienda" class="mt-5 block w-full rounded-full boton-vivo border border-vino/25 py-3.5 text-center font-ui text-sm font-700 uppercase tracking-wider text-vino">Ver carrito</a>
+  </div>
+</header>
+
+<main class="mx-auto max-w-3xl px-5 py-10 lg:px-8 lg:py-14">
+  <div class="mb-6 text-center">
+    <div class="rule-flama mx-auto mb-5 w-24"></div>
+    <h1 class="font-display text-3xl leading-tight text-vino sm:text-4xl">El pastel de Endulcorito</h1>
+    <p class="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-carbon/70">Toca justo a tiempo para que cada capa caiga bien alineada. ¿Qué tan alto puedes ayudar a Endulcorito a apilar el pastel?</p>
+  </div>
+
+  <div class="relative mx-auto w-full max-w-sm overflow-hidden rounded-[32px] bg-vino shadow-[0_16px_50px_rgba(78,20,84,.2)]">
+    <div class="flex items-center justify-between px-5 py-3 font-ui text-[11px] font-700 uppercase tracking-widest text-crema">
+      <span class="inline-flex items-center gap-1.5">🍰 Capas: <span id="puntajeActual">0</span></span>
+      <span class="inline-flex items-center gap-1.5">🏆 Mejor: <span id="puntajeMejor">0</span></span>
+    </div>
+    <div id="escenarioJuego" class="relative">
+      <canvas id="canvasJuego"></canvas>
+
+      <div id="endulcoritoAnimado" class="pointer-events-none absolute bottom-1 z-10" style="width:60px;" aria-hidden="true">
+        <svg viewBox="0 0 120 150" style="width:100%;height:auto;overflow:visible;display:block;">
+          <g id="piernaIzqEndulcorito" style="transform-origin:44px 118px;"><ellipse cx="44" cy="128" rx="9" ry="11" fill="#FBF4E9"/></g>
+          <g id="piernaDerEndulcorito" style="transform-origin:76px 118px;"><ellipse cx="76" cy="128" rx="9" ry="11" fill="#FBF4E9"/></g>
+
+          <path d="M28 118 L34 78 Q60 68 86 78 L92 118 Z" fill="#F2A6C7"/>
+          <path d="M35 116 L39 80" stroke="#E487AC" stroke-width="3" stroke-linecap="round"/>
+          <path d="M46 116 L48 78" stroke="#E487AC" stroke-width="3" stroke-linecap="round"/>
+          <path d="M60 117 L60 76" stroke="#E487AC" stroke-width="3" stroke-linecap="round"/>
+          <path d="M74 116 L72 78" stroke="#E487AC" stroke-width="3" stroke-linecap="round"/>
+          <path d="M85 116 L81 80" stroke="#E487AC" stroke-width="3" stroke-linecap="round"/>
+
+          <g id="brazoIzqEndulcorito" style="transform-origin:32px 90px;"><ellipse cx="27" cy="98" rx="7" ry="12" fill="#F3DDBE" transform="rotate(-18 27 98)"/></g>
+          <g id="brazoDerEndulcorito" style="transform-origin:88px 90px;"><ellipse cx="93" cy="98" rx="7" ry="12" fill="#F3DDBE" transform="rotate(18 93 98)"/></g>
+
+          <ellipse cx="60" cy="70" rx="34" ry="30" fill="#F3DDBE"/>
+          <circle cx="42" cy="76" r="6" fill="#F2A6C7" opacity=".7"/>
+          <circle cx="78" cy="76" r="6" fill="#F2A6C7" opacity=".7"/>
+
+          <g id="ojoIzqEndulcorito"><circle cx="49" cy="65" r="5.5" fill="#2A1420"/><circle cx="47.3" cy="63" r="1.6" fill="#fff"/></g>
+          <g id="ojoDerEndulcorito" style="transform-origin:71px 65px;"><circle cx="71" cy="65" r="5.5" fill="#2A1420"/><circle cx="69.3" cy="63" r="1.6" fill="#fff"/></g>
+
+          <path d="M50 78 Q60 86 70 78" stroke="#2A1420" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+
+          <path d="M30 46 Q26 24 48 20 Q46 8 64 10 Q80 6 84 22 Q100 26 92 44 Q96 58 78 56 Q70 66 58 56 Q42 64 38 52 Q22 54 30 46 Z" fill="#F2A6C7"/>
+          <path d="M40 40 Q42 22 60 20 Q66 12 76 20 Q86 24 82 38 Q84 46 72 46 Q64 52 56 46 Q44 50 40 40 Z" fill="#8FCFE0"/>
+          <path d="M48 36 Q52 24 64 24 Q72 20 76 30 Q80 36 70 38 Q62 42 56 38 Q48 40 48 36 Z" fill="#F5D976"/>
+          <path d="M58 14 l2.4 4.9 5.4.8-3.9 3.8.9 5.3-4.8-2.5-4.8 2.5.9-5.3-3.9-3.8 5.4-.8Z" fill="#fff" opacity=".85"/>
+          <circle cx="34" cy="30" r="1.6" fill="#fff" opacity=".9"/>
+          <circle cx="88" cy="34" r="1.4" fill="#fff" opacity=".9"/>
+          <path d="M62 6 q4-6 8 0 q4-6 8 0 q0 7 -8 12 q-8-5-8-12Z" fill="#E85B8A"/>
+
+          <rect x="48" y="96" width="24" height="14" rx="3" fill="#fff"/>
+          <text x="60" y="106" text-anchor="middle" font-family="'Great Vibes', cursive" font-size="9" fill="#6B3A22">Endulcora</text>
+        </svg>
+      </div>
+
+      <div id="pantallaInicio" class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-vino/90 p-6 text-center">
+        <p class="font-titulo text-2xl text-crema">¿Listo para hornear?</p>
+        <p class="max-w-[220px] text-sm text-crema/70">Toca la pantalla (o presiona espacio) para soltar cada capa.</p>
+        <button type="button" id="btnEmpezarJuego" class="rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:brightness-105 transition">Jugar</button>
+      </div>
+
+      <div id="pantallaFin" class="absolute inset-0 hidden flex-col items-center justify-center gap-3 bg-vino/90 p-6 text-center">
+        <p class="font-titulo text-2xl text-crema">¡Se cayó el pastel!</p>
+        <p class="text-sm text-crema/70">Capas apiladas: <span id="puntajeFinal" class="font-700 text-flama">0</span></p>
+        <p id="mensajeRecord" class="hidden text-sm text-flama">¡Nuevo récord! 🎉</p>
+        <button type="button" id="btnReintentar" class="mt-2 rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:brightness-105 transition">Intentar de nuevo</button>
+        <a href="/tienda" class="text-xs text-crema/60 underline hover:text-crema">¿Se te antojó un pastel de verdad? Ve la tienda →</a>
+      </div>
+    </div>
+  </div>
+
+  <p class="mx-auto mt-6 max-w-sm text-center text-xs text-carbon/40">Solo por diversión — tu puntaje se guarda en este dispositivo, nadie más lo ve.</p>
+</main>
+
+<footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
+  <div class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 pb-10 text-center sm:flex-row sm:justify-between sm:text-left lg:px-8">
+    <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-10 w-auto">
+    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/40">© <span id="anioFooter"></span> Endulcora · Ciudad de México</p>
+  </div>
+</footer>
+
+<a href="https://wa.me/525665271901" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"
+  class="fixed bottom-4 left-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl transition hover:scale-110 sm:bottom-6 sm:left-6">
+  <svg viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
+</a>
+
+<script>
+function toggleMenu(){
+  const m = document.getElementById('menuMovil');
+  const b = document.getElementById('btnMenu');
+  const abierto = m.classList.toggle('hidden') === false;
+  b.setAttribute('aria-expanded', abierto);
+}
+document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+/* ---------- Juego: torre de pasteles (estilo "stack") ---------- */
+const canvas = document.getElementById('canvasJuego');
+const ctx = canvas.getContext('2d');
+
+const ANCHO_LOGICO = 320;
+const ALTO_LOGICO = 440;
+const ALTURA_CAPA = 28;
+const LIMITE_VISIBLE = 7; // cuantas capas caben en pantalla antes de "subir la camara"
+
+function ajustarCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.width = ANCHO_LOGICO + 'px';
+  canvas.style.height = ALTO_LOGICO + 'px';
+  canvas.width = ANCHO_LOGICO * dpr;
+  canvas.height = ALTO_LOGICO * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+ajustarCanvas();
+
+const PALETA = ['#F5A623', '#7A2E7E', '#C94F6D', '#4E1454', '#D9A441'];
+
+function aclarar(hex, cantidad){
+  const num = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, (num >> 16) + cantidad);
+  const g = Math.min(255, ((num >> 8) & 0xff) + cantidad);
+  const b = Math.min(255, (num & 0xff) + cantidad);
+  return `rgb(${r},${g},${b})`;
+}
+
+function calcularDesplazamiento(){
+  return Math.max(0, (capas.length - LIMITE_VISIBLE) * ALTURA_CAPA);
+}
+
+let capas = [];
+let capaActual = null;
+let desechos = [];
+let confeti = [];
+let puntaje = 0;
+let mejorPuntaje = parseInt(localStorage.getItem('endulcoraJuegoMejorPuntaje') || '0', 10);
+let estado = 'inicio'; // 'inicio' | 'jugando' | 'fin'
+let velocidad = 1.6;
+
+document.getElementById('puntajeMejor').textContent = mejorPuntaje;
+
+function colorPara(indice){
+  return PALETA[indice % PALETA.length];
+}
+
+function iniciarJuego(){
+  const anchoBase = 180;
+  capas = [{ x: (ANCHO_LOGICO - anchoBase) / 2, width: anchoBase, color: colorPara(0) }];
+  puntaje = 0;
+  velocidad = 1.6;
+  desechos = [];
+  confeti = [];
+  nuevaCapaActual();
+  estado = 'jugando';
+  document.getElementById('pantallaInicio').classList.add('hidden');
+  document.getElementById('pantallaFin').classList.remove('hidden', 'flex');
+  document.getElementById('pantallaFin').classList.add('hidden');
+  document.getElementById('puntajeActual').textContent = '0';
+  reiniciarPaseoEndulcorito();
+}
+
+function nuevaCapaActual(){
+  const ultima = capas[capas.length - 1];
+  const desdeIzquierda = capas.length % 2 === 0;
+  capaActual = {
+    x: desdeIzquierda ? -ultima.width : ANCHO_LOGICO,
+    width: ultima.width,
+    color: colorPara(capas.length),
+    dir: desdeIzquierda ? 1 : -1,
+  };
+}
+
+/* Endulcorito aparece de vez en cuando y se anima con SVG + CSS: camina,
+   guiña un ojo, saluda al levantar una capa o se pone triste si se cae
+   el pastel. Nunca es una imagen fija: siempre son formas dibujadas. */
+let temporizadorPaseoEndulcorito = null;
+
+function reaccionEndulcorito(clase){
+  const el = document.getElementById('endulcoritoAnimado');
+  el.classList.remove('endulcorito-caminando', 'endulcorito-saludo', 'endulcorito-triste');
+  void el.offsetWidth;
+  el.classList.add(clase);
+}
+
+function reiniciarPaseoEndulcorito(){
+  clearTimeout(temporizadorPaseoEndulcorito);
+  if(estado === 'fin') return;
+  const espera = 8000 + Math.random() * 6000;
+  temporizadorPaseoEndulcorito = setTimeout(() => {
+    reaccionEndulcorito('endulcorito-caminando');
+    reiniciarPaseoEndulcorito();
+  }, espera);
+}
+reiniciarPaseoEndulcorito();
+
+function soltarCapa(){
+  if(estado === 'inicio'){ iniciarJuego(); return; }
+  if(estado === 'fin'){ iniciarJuego(); return; }
+
+  const ultima = capas[capas.length - 1];
+  const inicioSolape = Math.max(capaActual.x, ultima.x);
+  const finSolape = Math.min(capaActual.x + capaActual.width, ultima.x + ultima.width);
+  const anchoSolape = finSolape - inicioSolape;
+
+  if(anchoSolape <= 4){
+    terminarJuego();
+    return;
+  }
+
+  // La parte que no encajo se dibuja cayendo, solo de adorno.
+  if(capaActual.x < inicioSolape){
+    desechos.push({ x: capaActual.x, width: inicioSolape - capaActual.x, y: capas.length * ALTURA_CAPA, color: capaActual.color, vy: 2, vx: -2 });
+  }
+  if(capaActual.x + capaActual.width > finSolape){
+    desechos.push({ x: finSolape, width: (capaActual.x + capaActual.width) - finSolape, y: capas.length * ALTURA_CAPA, color: capaActual.color, vy: 2, vx: 2 });
+  }
+
+  capas.push({ x: inicioSolape, width: anchoSolape, color: capaActual.color });
+  puntaje++;
+  document.getElementById('puntajeActual').textContent = puntaje;
+  velocidad = Math.min(5, velocidad + 0.08);
+
+  if(puntaje % 5 === 0){
+    const y = ALTO_LOGICO - capas.length * ALTURA_CAPA + calcularDesplazamiento();
+    lanzarConfeti(inicioSolape + anchoSolape / 2, y);
+    reaccionEndulcorito('endulcorito-saludo');
+  }
+
+  nuevaCapaActual();
+}
+
+function lanzarConfeti(x, y){
+  const colores = ['#F5A623', '#7A2E7E', '#C94F6D', '#FBEFD9', '#4E1454'];
+  for(let i = 0; i < 18; i++){
+    confeti.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 4,
+      vy: -Math.random() * 4 - 2,
+      color: colores[i % colores.length],
+      tam: 3 + Math.random() * 3,
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.3,
+      vida: 60 + Math.random() * 20,
+    });
+  }
+}
+
+function terminarJuego(){
+  estado = 'fin';
+  clearTimeout(temporizadorPaseoEndulcorito);
+  reaccionEndulcorito('endulcorito-triste');
+  const esRecord = puntaje > mejorPuntaje;
+  if(esRecord){
+    mejorPuntaje = puntaje;
+    localStorage.setItem('endulcoraJuegoMejorPuntaje', String(mejorPuntaje));
+    document.getElementById('puntajeMejor').textContent = mejorPuntaje;
+  }
+  document.getElementById('puntajeFinal').textContent = puntaje;
+  document.getElementById('mensajeRecord').classList.toggle('hidden', !esRecord);
+  document.getElementById('pantallaFin').classList.remove('hidden');
+  document.getElementById('pantallaFin').classList.add('flex');
+}
+
+canvas.addEventListener('pointerdown', soltarCapa);
+document.getElementById('btnEmpezarJuego').addEventListener('click', iniciarJuego);
+document.getElementById('btnReintentar').addEventListener('click', iniciarJuego);
+window.addEventListener('keydown', (e) => {
+  if(e.code === 'Space'){ e.preventDefault(); soltarCapa(); }
+});
+
+function dibujarCapaPastel(x, y, width, alto, color){
+  if(width <= 0) return;
+  // cuerpo
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.roundRect(x, y, width, alto, 6);
+  ctx.fill();
+
+  // sombra inferior, para dar volumen
+  ctx.fillStyle = 'rgba(0,0,0,.08)';
+  ctx.fillRect(x + 2, y + alto - 5, Math.max(0, width - 4), 5);
+
+  // glaseado: perlitas de icing a lo largo del borde superior
+  const radioGota = 5;
+  const numGotas = Math.max(2, Math.round(width / (radioGota * 2.4)));
+  const paso = width / numGotas;
+  ctx.fillStyle = aclarar(color, 45);
+  for(let i = 0; i < numGotas; i++){
+    const cx = x + paso * (i + 0.5);
+    ctx.beginPath();
+    ctx.arc(cx, y + 3, radioGota, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function dibujarVela(x, y, ancho){
+  const cx = x + ancho / 2;
+  const anchoVela = 6;
+  const altoVela = 18;
+  const yVela = y - altoVela;
+  ctx.fillStyle = '#F5A623';
+  ctx.fillRect(cx - anchoVela / 2, yVela, anchoVela, altoVela);
+  ctx.strokeStyle = 'rgba(255,255,255,.55)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx - 1.5, yVela + 3); ctx.lineTo(cx - 1.5, yVela + altoVela - 3);
+  ctx.moveTo(cx + 1.5, yVela + 3); ctx.lineTo(cx + 1.5, yVela + altoVela - 3);
+  ctx.stroke();
+
+  const parpadeo = 1 + Math.sin(Date.now() / 120) * 0.15;
+  ctx.fillStyle = '#FFB347';
+  ctx.beginPath();
+  ctx.ellipse(cx, yVela - 6 * parpadeo, 3.2, 6 * parpadeo, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#FFE9B0';
+  ctx.beginPath();
+  ctx.ellipse(cx, yVela - 4 * parpadeo, 1.6, 3 * parpadeo, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function dibujar(){
+  ctx.clearRect(0, 0, ANCHO_LOGICO, ALTO_LOGICO);
+  const fondo = ctx.createLinearGradient(0, 0, 0, ALTO_LOGICO);
+  fondo.addColorStop(0, '#FFF7E8');
+  fondo.addColorStop(0.45, '#FBEFD9');
+  fondo.addColorStop(1, '#EAD2AE');
+  ctx.fillStyle = fondo;
+  ctx.fillRect(0, 0, ANCHO_LOGICO, ALTO_LOGICO);
+
+  const desplazamiento = calcularDesplazamiento();
+
+  function yDeCapa(indiceDesdeBase){
+    return ALTO_LOGICO - (indiceDesdeBase + 1) * ALTURA_CAPA + desplazamiento;
+  }
+
+  capas.forEach((capa, i) => dibujarCapaPastel(capa.x, yDeCapa(i), capa.width, ALTURA_CAPA - 3, capa.color));
+
+  if(capas.length){
+    const tope = capas[capas.length - 1];
+    dibujarVela(tope.x, yDeCapa(capas.length - 1), tope.width);
+  }
+
+  if(estado === 'jugando' && capaActual){
+    capaActual.x += capaActual.dir * velocidad;
+    if(capaActual.x <= 0 || capaActual.x + capaActual.width >= ANCHO_LOGICO) capaActual.dir *= -1;
+    dibujarCapaPastel(capaActual.x, yDeCapa(capas.length), capaActual.width, ALTURA_CAPA - 3, capaActual.color);
+  }
+
+  desechos.forEach((d) => {
+    d.y += d.vy;
+    d.vy += 0.4;
+    d.x += d.vx;
+    const yDibujo = ALTO_LOGICO - d.y + desplazamiento - ALTURA_CAPA;
+    ctx.globalAlpha = Math.max(0, 1 - d.y / 260);
+    dibujarCapaPastel(d.x, yDibujo, d.width, ALTURA_CAPA - 3, d.color);
+    ctx.globalAlpha = 1;
+  });
+  desechos = desechos.filter((d) => d.y < 500);
+
+  confeti.forEach((p) => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.15;
+    p.rot += p.vr;
+    p.vida--;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, Math.min(1, p.vida / 30));
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.tam / 2, -p.tam / 2, p.tam, p.tam);
+    ctx.restore();
+  });
+  confeti = confeti.filter((p) => p.vida > 0);
+
+  requestAnimationFrame(dibujar);
+}
+requestAnimationFrame(dibujar);
+</script>
+</body>
+</html>
