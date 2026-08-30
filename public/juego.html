@@ -506,7 +506,11 @@ function dibujar(){
 
   if(estado === 'jugando' && capaActual){
     capaActual.x += capaActual.dir * velocidad;
-    if(capaActual.x <= 0 || capaActual.x + capaActual.width >= ANCHO_LOGICO) capaActual.dir *= -1;
+    // Solo rebota cuando se topa con la pared HACIA la que se mueve; si no,
+    // como la capa nace fuera del lienzo, la condicion se cumple desde el
+    // primer cuadro y la capa se queda vibrando en el borde sin avanzar.
+    if(capaActual.dir < 0 && capaActual.x <= 0) capaActual.dir = 1;
+    else if(capaActual.dir > 0 && capaActual.x + capaActual.width >= ANCHO_LOGICO) capaActual.dir = -1;
     dibujarCapaPastel(capaActual.x, yDeCapa(capas.length), capaActual.width, ALTURA_CAPA - 3, capaActual.color);
   }
 
