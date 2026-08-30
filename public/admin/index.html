@@ -2389,7 +2389,7 @@ $('btnSincronizarPagosMembresia').addEventListener('click', async () => {
   try{
     const data = await api('/admin/api/membresia/sincronizar-pagos', { method: 'POST' });
     resultado.className = 'mt-2 text-sm text-green-700';
-    resultado.textContent = `✓ Se revisaron ${data.usuariosRevisados} suscripciones y se agregaron ${data.agregados} cobros nuevos al registro.`;
+    resultado.textContent = `✓ Se revisó el historial de ${data.usuariosRevisados} clientes que alguna vez tuvieron membresía (${data.activos} con membresía activa ahora mismo) y se agregaron ${data.agregados} cobros nuevos al registro.`;
     cargarVentas();
   }catch(e){
     resultado.className = 'mt-2 text-sm text-red-600';

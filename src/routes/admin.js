@@ -476,12 +476,18 @@ router.get('/api/orders', requireAdmin, (req, res) => {
 // aviso del webhook no llego). Repara el historial contable sin depender
 // solo del webhook.
 router.post('/api/membresia/sincronizar-pagos', requireAdmin, async (req, res) => {
+  // Ojo: esto incluye a cualquier cliente que ALGUNA VEZ haya tenido una
+  // suscripcion (aunque ya la haya cancelado o pausado) — el id de Mercado
+  // Pago no se borra al cancelar, se necesita para poder seguir viendo su
+  // historial de cobros pasados. No es lo mismo que "suscripciones activas
+  // ahora mismo" (para eso, compara con el numero que se ve en Mercado Pago).
   const usuarios = store.getUsers().filter((u) => u.membresiaPreapprovalId);
+  const activos = usuarios.filter((u) => u.membresiaEstado === 'activa').length;
   let agregados = 0;
   for (const usuario of usuarios) {
     agregados += await sincronizarPagosDePreapproval(usuario.membresiaPreapprovalId, usuario);
   }
-  res.json({ agregados, usuariosRevisados: usuarios.length });
+  res.json({ agregados, usuariosRevisados: usuarios.length, activos });
 });
 
 // ---- Suscriptores del correo (footer) ----
