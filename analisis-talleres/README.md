@@ -27,6 +27,9 @@ inscripciones vive en Drive.
 - `topdf.mjs` — regenera el PDF desde el HTML con Chromium (`node topdf.mjs`).
   El HTML trae su hoja de estilos de impresión, así que imprimir desde el navegador
   da el mismo resultado.
+- `octubre.html` / `Endulcora-octubre-2026.pdf` — revisión del borrador de calendario
+  de octubre de 2026 y propuesta alterna (26 sesiones contra las 47 del borrador).
+  Se regenera con `node topdf-oct.mjs`.
 - `clasifica.py` — normaliza los 1,130 nombres libres de taller del formulario de
   pagos a un catálogo canónico mediante reglas ordenadas (la primera que hace match
   gana, así que el orden importa: "galletas tipo palacio" va antes que "galletas").

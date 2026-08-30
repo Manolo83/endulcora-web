@@ -1,0 +1,506 @@
+<title>Octubre en Endulcora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Karla:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --ground:#FBF4E9;
+  --surface:#FFFCF7;
+  --surface-2:#F6EBDA;
+  --ink:#1B0720;
+  --ink-2:#4A3350;
+  --muted:#7A6579;
+  --rule:#E3D3BE;
+  --rule-soft:#EFE3D2;
+  --accent:#7A2E7E;
+  --on-accent:#FFFCF7;
+  --accent-soft:#F0E2F1;
+  --data:#C07D0E;
+  --good:#0a7d24;
+  --warn:#9a6b00;
+  --serious:#b4552a;
+  --crit:#b32d2d;
+  --good-bg:#E4F1E4;
+  --warn-bg:#FBEFD4;
+  --serious-bg:#FAE5DA;
+  --crit-bg:#F8E0E0;
+
+  --f-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Karla","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+
+  --wrap:1120px;
+  --prose:66ch;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#150517;
+    --surface:#1F0E26;
+    --surface-2:#2A1633;
+    --ink:#F7EDF7;
+    --ink-2:#DCC7DE;
+    --muted:#AE93B1;
+    --rule:#3B2242;
+    --rule-soft:#2E1A36;
+    --accent:#C77CCB;
+    --on-accent:#150517;
+    --accent-soft:#33193A;
+    --data:#F5A623;
+    --good:#5cd05c;
+    --warn:#fab219;
+    --serious:#ec835a;
+    --crit:#f06a6a;
+    --good-bg:#16301B;
+    --warn-bg:#38290A;
+    --serious-bg:#3A2018;
+    --crit-bg:#3B1717;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#150517;
+  --surface:#1F0E26;
+  --surface-2:#2A1633;
+  --ink:#F7EDF7;
+  --ink-2:#DCC7DE;
+  --muted:#AE93B1;
+  --rule:#3B2242;
+  --rule-soft:#2E1A36;
+  --accent:#C77CCB;
+  --on-accent:#150517;
+  --accent-soft:#33193A;
+  --data:#F5A623;
+  --good:#5cd05c;
+  --warn:#fab219;
+  --serious:#ec835a;
+  --crit:#f06a6a;
+  --good-bg:#16301B;
+  --warn-bg:#38290A;
+  --serious-bg:#3A2018;
+  --crit-bg:#3B1717;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:16px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:var(--wrap);margin:0 auto;padding:0 24px 96px}
+@media(max-width:640px){.page{padding:0 16px 64px}}
+
+/* ---------- tipografía ---------- */
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(2.4rem,6vw,4.1rem);font-weight:800;letter-spacing:-.03em}
+h2{font-size:clamp(1.6rem,3.4vw,2.35rem);font-weight:700;letter-spacing:-.02em}
+h3{font-size:1.16rem;font-weight:700;letter-spacing:-.01em}
+h4{font-size:.94rem;font-weight:700}
+p{margin:0}
+.prose{max-width:var(--prose);display:flex;flex-direction:column;gap:1em}
+.prose p{color:var(--ink-2)}
+strong{font-weight:700;color:var(--ink)}
+em{font-style:italic}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+.eyebrow{
+  font-family:var(--f-mono);font-size:.7rem;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* ---------- portada ---------- */
+.hero{padding:72px 0 40px;border-bottom:2px solid var(--ink)}
+.hero .kicker{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:baseline;margin-bottom:22px}
+.hero h1{margin-bottom:20px}
+.hero .lede{font-size:1.2rem;color:var(--ink-2);max-width:60ch}
+.hero .lede b{color:var(--ink)}
+
+.factbar{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);
+  margin-top:40px;
+}
+.fact{background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.fact .v{font-family:var(--f-display);font-size:1.75rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.fact .l{font-size:.78rem;color:var(--muted);line-height:1.35}
+
+/* ---------- secciones ---------- */
+section{padding-top:64px}
+.shead{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.shead .bar{width:44px;height:4px;background:var(--accent)}
+
+/* ---------- tablas ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);background:var(--surface);margin-top:24px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.88rem}
+caption{text-align:left;padding:14px 16px;font-size:.8rem;color:var(--muted);border-bottom:1px solid var(--rule-soft);background:var(--surface-2)}
+th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:var(--f-mono);font-size:.68rem;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted);background:var(--surface-2);
+  border-bottom:1px solid var(--rule);position:sticky;top:0;
+}
+tbody tr:last-child td{border-bottom:none}
+td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tbody tr:hover td{background:var(--surface-2)}
+.rank{font-family:var(--f-mono);color:var(--muted);width:2.4em;text-align:right}
+
+/* ---------- chips de estado ---------- */
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--f-mono);font-size:.68rem;font-weight:600;letter-spacing:.04em;
+  padding:2px 7px;border-radius:2px;white-space:nowrap;
+}
+.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.chip.good{color:var(--good);background:var(--good-bg)}
+.chip.warn{color:var(--warn);background:var(--warn-bg)}
+.chip.serious{color:var(--serious);background:var(--serious-bg)}
+.chip.crit{color:var(--crit);background:var(--crit-bg)}
+.chip.neutral{color:var(--muted);background:var(--surface-2)}
+
+/* ---------- gráficas ---------- */
+.figure{margin-top:28px;border:1px solid var(--rule);background:var(--surface);padding:22px 20px 16px}
+.figure .ftitle{font-family:var(--f-display);font-weight:700;font-size:1.02rem;margin-bottom:2px}
+.figure .fsub{font-size:.8rem;color:var(--muted);margin-bottom:22px;max-width:62ch}
+.figure .fnote{font-size:.75rem;color:var(--muted);margin-top:16px;padding-top:12px;border-top:1px solid var(--rule-soft);max-width:70ch}
+
+.season{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;align-items:end;height:230px}
+.sbar{display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:6px;position:relative}
+.sbar .fill{
+  background:var(--accent);border-radius:4px 4px 0 0;width:100%;
+  transition:filter .12s ease;
+}
+.sbar.thin .fill{
+  background:repeating-linear-gradient(135deg,var(--accent) 0 4px,transparent 4px 8px),var(--accent-soft);
+  border:1px solid var(--accent);border-bottom:none;
+}
+.sbar:hover .fill{filter:brightness(1.15)}
+.sbar .cap{font-family:var(--f-mono);font-size:.63rem;color:var(--muted);text-align:center;letter-spacing:.02em}
+.sbar .val{font-family:var(--f-mono);font-size:.7rem;font-weight:600;text-align:center;color:var(--ink);font-variant-numeric:tabular-nums}
+.sbar .base{height:1px;background:var(--rule)}
+.seasonwrap{position:relative}
+.refline{position:absolute;left:0;right:0;border-top:1px dashed var(--data);pointer-events:none}
+.refline span{
+  position:absolute;right:0;top:-9px;background:var(--surface);padding:0 6px;
+  font-family:var(--f-mono);font-size:.62rem;color:var(--data);letter-spacing:.04em;white-space:nowrap;
+}
+@media(max-width:700px){
+  .season{height:180px;gap:3px}
+  .sbar .cap{font-size:.55rem}
+  .sbar .val{font-size:.6rem}
+}
+
+.hbars{display:flex;flex-direction:column;gap:9px}
+.hbars.compact .hrow{grid-template-columns:minmax(76px,.42fr) 1fr auto}
+.hrow{display:grid;grid-template-columns:minmax(120px,1.35fr) 1fr auto;gap:12px;align-items:center;font-size:.82rem}
+.hrow .lab{color:var(--ink-2);line-height:1.3}
+.htrack{height:16px;background:var(--surface-2);position:relative;border-radius:2px}
+.hfill{height:100%;border-radius:2px 4px 4px 2px}
+.hrow .amt{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:.8rem;font-weight:500;white-space:nowrap}
+@media(max-width:620px){.hrow{grid-template-columns:1fr auto;grid-template-areas:"lab amt" "track track";gap:4px 10px}
+  .hrow .lab{grid-area:lab}.hrow .amt{grid-area:amt}.htrack{grid-area:track}}
+
+/* ---------- calendario ---------- */
+.cal{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:28px}
+.mon{background:var(--surface);padding:16px 16px 18px;display:flex;flex-direction:column;gap:11px}
+.mon.peak{background:var(--accent-soft)}
+.monhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;border-bottom:1px solid var(--rule);padding-bottom:8px}
+.monhead .mname{font-family:var(--f-display);font-weight:800;font-size:1.12rem;letter-spacing:-.01em}
+.monhead .midx{font-family:var(--f-mono);font-size:.7rem;color:var(--muted);white-space:nowrap}
+.mon ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mon li{font-size:.85rem;line-height:1.4;display:flex;gap:8px;align-items:flex-start;color:var(--ink-2)}
+.mon li .tag{
+  font-family:var(--f-mono);font-size:.6rem;font-weight:600;letter-spacing:.05em;
+  padding:2px 5px;border-radius:2px;flex:none;margin-top:2px;text-transform:uppercase;
+}
+.tag.ancla{background:var(--accent);color:var(--on-accent)}
+.tag.rot{background:var(--surface-2);color:var(--muted);border:1px solid var(--rule)}
+.tag.test{background:transparent;color:var(--data);border:1px dashed var(--data)}
+.tag.nucleo{background:var(--data);color:#1B0720}
+.mon.peak .tag.rot{background:var(--surface);}
+.mon .note{font-size:.74rem;color:var(--muted);border-top:1px dashed var(--rule);padding-top:8px;line-height:1.45}
+
+/* ---------- bloques de nota ---------- */
+.callout{border-left:3px solid var(--accent);background:var(--surface);padding:16px 20px;display:flex;flex-direction:column;gap:8px;margin-top:24px;max-width:78ch}
+.callout h4{color:var(--accent)}
+.callout p{font-size:.9rem;color:var(--ink-2)}
+
+.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:24px}
+.src{background:var(--surface);padding:15px 17px;display:flex;flex-direction:column;gap:5px}
+.src .sname{font-weight:700;font-size:.9rem}
+.src .smeta{font-family:var(--f-mono);font-size:.7rem;color:var(--accent)}
+.src .sdesc{font-size:.8rem;color:var(--muted);line-height:1.45}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:24px}
+@media(max-width:760px){.split{grid-template-columns:1fr}}
+.half{background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.half h4{font-size:1rem}
+.half ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+.half li{font-size:.86rem;color:var(--ink-2);line-height:1.45}
+
+footer{margin-top:80px;padding-top:24px;border-top:2px solid var(--ink);font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:8px;max-width:78ch}
+
+/* ---------- impresión / PDF ---------- */
+@media print{
+  @page{ size:A4; margin:14mm 12mm 16mm; }
+  html,body{background:#fff!important}
+  *{ -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
+  .page{max-width:none;padding:0}
+  .hero{padding:0 0 24px;break-after:avoid}
+  h1{font-size:34pt}
+  h2{font-size:19pt}
+  body{font-size:9.6pt;line-height:1.5}
+  .hero .lede{font-size:11.5pt}
+  .prose{max-width:none}
+  section{padding-top:26px;break-inside:auto}
+  .shead{break-after:avoid;break-inside:avoid}
+  /* cada propuesta y el aforo abren página */
+  #pormes,#aforo,#meta,#cruce,#propuesta-a,#propuesta-b,#discrepancias,#operacion{break-before:page}
+  /* las rejillas de 1px dejan celdas vacías al cortar página:
+     se sustituye el fondo compartido por borde propio en cada tarjeta */
+  .factbar,.sources,.split,.cal{background:transparent;border:none;gap:6px}
+  .fact,.src,.half,.mon{border:1px solid var(--rule)}
+  .factbar{grid-template-columns:repeat(3,1fr)}
+  .sources{grid-template-columns:repeat(3,1fr)}
+  .cal{grid-template-columns:repeat(2,1fr)}
+  /* nada se parte por dentro */
+  .fact,.src,.half,.callout,.mon,.figure,.hrow,.sbar{break-inside:avoid}
+  tr,thead{break-inside:avoid}
+  thead{display:table-header-group;position:static}
+  thead th{position:static}
+  tfoot{display:table-footer-group}
+  .tablewrap{overflow:visible;break-inside:auto}
+  table{min-width:0;font-size:8.4pt}
+  th,td{padding:5px 8px}
+  .cal{break-inside:auto}
+  .season{height:150px}
+  footer{break-inside:avoid;margin-top:36px}
+  a{color:inherit;text-decoration:none}
+  tbody tr:hover td{background:transparent}
+}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style><style>
+/* ---------- rejilla de semanas ---------- */
+.semanas{display:flex;flex-direction:column;gap:14px;margin-top:26px}
+.sem{border:1px solid var(--rule);background:var(--surface)}
+.semhead{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:10px 16px;background:var(--surface-2);border-bottom:1px solid var(--rule);
+}
+.semhead .sn{font-family:var(--f-display);font-weight:800;font-size:1.02rem;letter-spacing:-.01em}
+.semhead .sf{font-family:var(--f-mono);font-size:.7rem;color:var(--muted);letter-spacing:.04em}
+.semhead .sb{font-family:var(--f-mono);font-size:.66rem;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:2px}
+.sedes{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule)}
+@media(max-width:700px){.sedes{grid-template-columns:1fr}}
+.sede{background:var(--surface);padding:12px 16px 14px;display:flex;flex-direction:column;gap:8px}
+.sede .sname{font-family:var(--f-mono);font-size:.66rem;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--rule-soft);padding-bottom:6px}
+.dia{display:grid;grid-template-columns:60px 1fr;gap:10px;align-items:baseline;font-size:.87rem}
+.dia .d{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);white-space:nowrap}
+.dia .t{color:var(--ink);line-height:1.35}
+.dia .t small{display:block;color:var(--muted);font-size:.76rem;line-height:1.3;margin-top:1px}
+.vacio{font-size:.82rem;color:var(--muted);font-style:italic}
+
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px;flex:none}
+.d-pdm{background:var(--accent)}
+.d-tem{background:var(--data)}
+.d-fijo{background:var(--muted)}
+
+.leyenda{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:16px;font-size:.8rem;color:var(--ink-2)}
+
+.compara{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:24px}
+@media(max-width:640px){.compara{grid-template-columns:1fr}}
+.comp{background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.comp .ct{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.comp .cv{font-family:var(--f-display);font-size:2rem;font-weight:800;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.comp .cd{font-size:.83rem;color:var(--ink-2);line-height:1.4}
+.comp.malo .cv{color:var(--crit)}
+.comp.bueno .cv{color:var(--good)}
+
+@media print{
+  .sem{break-inside:avoid}
+  .sedes{background:transparent;gap:6px}
+  .sede{border:1px solid var(--rule)}
+  .compara{background:transparent;border:none;gap:6px}
+  .comp{border:1px solid var(--rule)}
+  #propuesta,#movidos{break-before:page}
+}
+</style>
+
+<div class="page">
+
+<header class="hero">
+  <div class="kicker">
+    <span class="eyebrow">Endulcora · Estudio Gastronómico</span>
+    <span class="eyebrow" style="color:var(--muted)">Propuesta · Octubre 2026</span>
+  </div>
+  <h1>Octubre en Endulcora</h1>
+  <p class="lede">Revisión del borrador de calendario y una propuesta alterna. El borrador abre <b>47 sesiones con 19 productos distintos</b>; la demanda histórica de octubre da para <b>103 inscritos</b>. La cuenta no cierra: salen a 2.2 por sesión.</p>
+
+  <div class="compara">
+    <div class="comp malo">
+      <span class="ct">Borrador actual</span>
+      <span class="cv">47</span>
+      <span class="cd">sesiones · 19 productos · <b>2.2 inscritos por sesión</b> con la demanda histórica de octubre</span>
+    </div>
+    <div class="comp bueno">
+      <span class="ct">Propuesta</span>
+      <span class="cv" id="n-ses">—</span>
+      <span class="cd">sesiones · <span id="n-prod">—</span> productos · <b><span id="n-aforo">—</span> inscritos por sesión</b> con la misma demanda</span>
+    </div>
+  </div>
+</header>
+
+<section id="diagnostico">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Cómo veo el borrador</span><h2>Cinco cosas</h2></div>
+  <div class="prose">
+    <p><b>1. Está bien elegido el corazón del mes.</b> Pan de Muerto ocupa 12 de las 47 sesiones, y eso es correcto: históricamente Pan de Muerto es el <b>33% de todo octubre</b> (68 de 206 inscritos). Calaveras, Pumpkin Spice y Galletas Decoradas también tienen respaldo real en octubre. El instinto está bien.</p>
+    <p><b>2. Pero el Pan de Muerto está partido en cuatro nombres.</b> «Pan de Muerto Gourmet», «Pan de Muerto Masa Madre», «Pan de Muerto Tradicional» y «Pan de Muerto» a secas. Cada uno pide su propio anuncio, su propia foto y su propia explicación, y obliga al cliente a elegir antes de entender la diferencia. Son el mismo producto con niveles: conviene <b>una marca con dos niveles</b>, no cuatro productos compitiendo entre sí.</p>
+    <p><b>3. Seis productos no tienen octubre.</b> Fresas Cubiertas, Roles Gourmet, Postres para perros y gatos y Masa Madre/Hogazas suman <b>cero</b> inscritos históricos en octubre; Tacos de Canasta y Mesa de Postres, uno cada uno. Entre los seis ocupan <b>17 de las 47 sesiones</b>. No son malos talleres: Roles llena en enero (32 de sus 40 inscritos) y Fresas en abril. Están en el mes equivocado.</p>
+    <p><b>4. Faltan tres que sí son de octubre.</b> Pastel de Cupcakes (11 inscritos en octubre, el 3.º del mes), Chocolatería (7, con aforo 4.3) y Banderillas Coreanas (7, y además el taller con mejor respuesta en Meta de ese grupo). Ninguno aparece en el borrador.</p>
+    <p><b>5. La última semana está vacía, y es la de mayor demanda.</b> Del 27 al 31 no hay nada en Nativitas y sólo dos sesiones en División. Las búsquedas de Día de Muertos en México <b>llegan a su máximo en la segunda quincena de octubre y la primera semana de noviembre</b>. Ahí no está el emprendedor que quiere vender — ese ya compró — sino el que quiere hacer su pan para la ofrenda. Es un público distinto y esa semana es suya.</p>
+  </div>
+</section>
+
+<section id="fuera">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Lo que pasa afuera</span><h2>La temporada ya arrancó</h2></div>
+  <div class="prose">
+    <p><b>La competencia ya está pautando.</b> En la biblioteca de anuncios de Meta hay <b>217 anuncios activos en México</b> que mencionan taller de pan de muerto, y los más recientes se publicaron esta misma semana de agosto. Endulcora todavía no tiene ninguno arriba para octubre.</p>
+    <p><b>El pan de muerto ya está en anaquel.</b> Supermercados y panaderías de CDMX y Edomex empezaron a venderlo desde agosto de 2026; la temporada general arranca la segunda semana de octubre y le sube las ventas hasta 40% a las panaderías. Para el alumno que quiere <em>vender</em>, el taller le sirve en <b>septiembre y la primera semana de octubre</b> — después ya va tarde.</p>
+    <p><b>El pumpkin spice está en su mejor momento.</b> Starbucks abrió su temporada de otoño en México el 25 de agosto de 2026. Es la ventana cultural del sabor, y coincide con lo que dice el histórico de Endulcora: la mitad de las inscripciones de Repostería Pumpkin Spice caen en octubre. Fue un buen llamado ponerlo.</p>
+  </div>
+  <div class="callout">
+    <h4>La consecuencia de calendario</h4>
+    <p>Octubre no es un mes, son <b>dos públicos en dos momentos</b>. Del 1 al 18 está el emprendedor que va a producir y vender pan de muerto en la temporada. Del 22 al 31 está quien lo hace en casa para su ofrenda. Mismo taller, distinto anuncio, distinto precio si quieres. El borrador los trata igual y por eso la última semana quedó vacía.</p>
+  </div>
+</section>
+
+<section id="propuesta">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Propuesta</span><h2>Calendario de octubre</h2></div>
+  <div class="prose">
+    <p><span id="n-ses2">—</span> sesiones, <span id="n-prod2">—</span> productos. Cada taller conserva sus dos fechas — una entre semana y una en fin de semana — para que el alumno pueda elegir horario. Lo que se recorta es el número de productos distintos, no las opciones de agenda.</p>
+  </div>
+
+  <div class="leyenda">
+    <span><span class="dot d-pdm"></span>Pan de Muerto · <span id="n-pdm">—</span> sesiones, el eje del mes</span>
+    <span><span class="dot d-tem"></span>Temporada · Halloween, Día de Muertos y otoño</span>
+    <span><span class="dot d-fijo"></span>Catálogo de octubre con historial propio</span>
+  </div>
+
+  <div class="semanas" id="semanas"></div>
+
+  <div class="tablewrap">
+    <table>
+      <caption>Por qué cada taller está en el calendario · inscritos históricos de octubre (2 años) y aforo medido</caption>
+      <thead><tr><th>Taller</th><th class="n">Sesiones</th><th class="n">Inscritos en oct.</th><th class="n">Aforo</th><th>Razón</th></tr></thead>
+      <tbody id="razones"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="movidos">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Los que salen</span><h2>Qué se movió y a qué mes</h2></div>
+  <div class="prose"><p>Ninguno de estos se elimina del catálogo. Todos tienen su mes, y en su mes llenan mejor que en octubre.</p></div>
+  <div class="tablewrap">
+    <table>
+      <caption>Talleres del borrador que salen de octubre, con su mes real según el histórico</caption>
+      <thead><tr><th>Taller</th><th class="n">En el borrador</th><th class="n">Inscritos en oct.</th><th>Su mes real</th><th>A dónde va</th></tr></thead>
+      <tbody id="movidos-body"></tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <h4>Dos que conviene revisar antes de programar</h4>
+    <p><b>Hogazas y Masa Madre.</b> En el borrador ocupan 6 sesiones entre las dos sedes, y en todo el histórico de pagos hay <b>un solo registro</b> de Panadería Masa Madre. No es que vendan mal: es que no hay dato. Si quieres meterlo, va como prueba con una fecha y regla de corte, no con seis.</p>
+    <p><b>Mesa de Postres Halloween.</b> Mesa de Postres tiene aforo 5.0, que es bueno, pero su venta cae en abril y septiembre — en octubre tiene un solo inscrito histórico. La versión Halloween es nueva, así que la dejé en el calendario como la única <b>prueba</b> del mes, con dos fechas y presupuesto acotado.</p>
+  </div>
+</section>
+
+<section id="ejecucion">
+  <div class="shead"><div class="bar"></div><span class="eyebrow">Para que funcione</span><h2>Tres decisiones ahora</h2></div>
+  <div class="prose">
+    <p><b>Abrir pauta de Pan de Muerto esta semana.</b> Hay 217 anuncios compitiendo en México y la ventana del alumno-vendedor cierra la segunda semana de octubre. Cada semana que pase sube el costo por conversación.</p>
+    <p><b>Unificar la marca.</b> Un solo taller «Pan de Muerto» con dos niveles: <b>Tradicional</b> (masa, formado, azúcar) y <b>Gourmet</b> (rellenos, masa madre, decoración). Una foto, un anuncio, un mensaje de WhatsApp. El nivel se elige al inscribirse, no antes.</p>
+    <p><b>Cambiar el mensaje el 20 de octubre.</b> Hasta el 18, el anuncio habla de vender: costeo, rendimiento, cuánto sacas por pieza. Del 20 en adelante habla de la ofrenda y de hacerlo en casa. Es el mismo taller con dos argumentos, y es lo que llena la última semana.</p>
+  </div>
+</section>
+
+<footer>
+  <p><b>Endulcora · Propuesta de calendario para octubre de 2026.</b> Elaborada el 29 de agosto de 2026 sobre el histórico de inscripciones (REGISTRO PAGOS, 206 inscritos de octubre en 2024 y 2025), el aforo medido de 257 sesiones, y la cuenta de Meta Ads 75151654.</p>
+  <p>Contexto externo: biblioteca de anuncios de Meta (México, agosto de 2026) y prensa sobre el arranque de la temporada de pan de muerto y de otoño. Los números de inscritos son promedios históricos, no un pronóstico.</p>
+</footer>
+
+</div>
+
+<script>
+const SEMANAS=[
+ {n:"Semana 1",f:"1 al 4 de octubre",b:"Para vender · arranque",
+  nat:[["Jue 1","pdm","Pan de Muerto · Tradicional"],["Vie 2","fijo","Pastel de Cupcakes"],["Sáb 3","pdm","Pan de Muerto · Tradicional"],["Dom 4","fijo","Pastel de Cupcakes"]],
+  div:[["Jue 1","fijo","Galletas Decoradas"],["Sáb 3","fijo","Galletas Decoradas"]]},
+ {n:"Semana 2",f:"8 al 11 de octubre",b:"Para vender · nivel 2",
+  nat:[["Jue 8","pdm","Pan de Muerto · Gourmet"],["Vie 9","fijo","Chocolatería"],["Sáb 10","pdm","Pan de Muerto · Gourmet"],["Dom 11","fijo","Chocolatería"]],
+  div:[["Vie 9","pdm","Pan de Muerto · Tradicional"],["Dom 11","pdm","Pan de Muerto · Tradicional"]]},
+ {n:"Semana 3",f:"15 al 18 de octubre",b:"Temporada",
+  nat:[["Jue 15","tem","Calaveritas de Azúcar"],["Vie 16","tem","Repostería Pumpkin Spice"],["Sáb 17","tem","Calaveritas de Azúcar"],["Dom 18","tem","Repostería Pumpkin Spice"]],
+  div:[["Vie 16","pdm","Pan de Muerto · Gourmet"],["Dom 18","pdm","Pan de Muerto · Gourmet"]]},
+ {n:"Semana 4",f:"22 al 25 de octubre",b:"Cambio de mensaje",
+  nat:[["Jue 22","tem","Mesa de Postres Halloween<small>única prueba del mes · tope $150 y corte a 5 días</small>"],["Sáb 24","tem","Mesa de Postres Halloween"]],
+  div:[["Jue 22","fijo","Banderillas Coreanas"],["Sáb 24","fijo","Banderillas Coreanas"]]},
+ {n:"Semana 5",f:"29 al 31 de octubre",b:"Para la ofrenda",
+  nat:[["Jue 29","pdm","Pan de Muerto · para la ofrenda<small>mismo taller, anuncio dirigido a quien lo hace en casa</small>"],["Sáb 31","pdm","Pan de Muerto · para la ofrenda"]],
+  div:[["Vie 30","pdm","Pan de Muerto · para la ofrenda"],["Sáb 31","pdm","Pan de Muerto · para la ofrenda"]]}
+];
+document.getElementById("semanas").innerHTML=SEMANAS.map(s=>{
+  const fila=d=>`<div class="dia"><span class="d">${d[0]}</span><span class="t"><span class="dot d-${d[1]}"></span>${d[2]}</span></div>`;
+  const col=(nombre,arr)=>`<div class="sede"><span class="sname">${nombre}</span>${
+    arr.length?arr.map(fila).join(""):'<span class="vacio">Sin sesiones esta semana</span>'}</div>`;
+  return `<div class="sem">
+    <div class="semhead"><span class="sn">${s.n}</span><span class="sf">${s.f}</span><span class="sb">${s.b}</span></div>
+    <div class="sedes">${col("Nativitas",s.nat)}${col("División del Norte",s.div)}</div></div>`;
+}).join("");
+
+// Los totales se derivan del calendario para que no puedan desfasarse del texto.
+const TODAS = SEMANAS.flatMap(s=>[...s.nat,...s.div]);
+const PDM  = TODAS.filter(d=>d[1]==="pdm").length;
+const SES  = TODAS.length;
+const DEMANDA_OCT = 103; // inscritos promedio por año en octubre (206 en 2024+2025)
+const PRODUCTOS = 8;     // Pan de Muerto cuenta como uno, con sus dos niveles
+const set=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v;};
+set("n-ses",SES); set("n-ses2",SES); set("n-pdm",PDM);
+set("n-prod",PRODUCTOS); set("n-prod2",PRODUCTOS);
+set("n-aforo",(DEMANDA_OCT/SES).toFixed(1));
+
+const RAZ=[
+ ["Pan de Muerto · Tradicional y Gourmet",null,68,"—","El 33% de todo octubre. Dos niveles bajo una sola marca, en las dos sedes."],
+ ["Galletas Decoradas",2,13,"2.3","2.º de octubre en volumen, pero aforo 2.3 con 5 de 11 sesiones vacías: dos fechas, no cuatro."],
+ ["Pastel de Cupcakes",2,11,"2.2","3.º de octubre y no estaba en el borrador. Dos fechas."],
+ ["Calaveritas de Azúcar",2,7,"—","Los 7 inscritos históricos están todos en octubre. Es el taller más estacional del catálogo."],
+ ["Chocolatería",2,7,"4.3","Buen aforo y presencia estable todo el año, con repunte en octubre. No estaba en el borrador."],
+ ["Banderillas Coreanas",2,7,"—","39% de su venta cae en octubre, y en Meta generó 109 conversaciones a $23.4. No estaba en el borrador."],
+ ["Repostería Pumpkin Spice",2,6,"—","La mitad de su venta es de octubre, y la temporada de otoño ya arrancó en el mercado."],
+ ["Mesa de Postres Halloween",2,1,"5.0","Único hueco de prueba. Aforo bueno pero su mes histórico es abril y septiembre."]
+];
+document.getElementById("razones").innerHTML=RAZ.map(r=>
+ `<tr><td><b>${r[0]}</b></td><td class="n">${r[1]===null?PDM:r[1]}</td><td class="n">${r[2]}</td><td class="n">${r[3]}</td><td>${r[4]}</td></tr>`).join("");
+
+const MOV=[
+ ["Fresas Cubiertas",2,0,"Abril (13) y febrero (6)","Febrero · ancla de San Valentín, aforo 6.5"],
+ ["Roles Gourmet",2,0,"Enero (32 de sus 40)","Enero · ancla del mes más fuerte"],
+ ["Postres para perros y gatos",2,0,"Septiembre (11)","Septiembre · junto a Pan de Muerto"],
+ ["Tacos de Canasta",3,1,"Junio (17) y enero (14)","Junio · máximo 2 sesiones, aforo 3.1"],
+ ["Postres en Vaso",2,3,"Enero (16) y mayo (11)","Enero y mayo · aforo 7.5, de los que más llenan"],
+ ["Manzanas Cubiertas y Gourmet",4,3,"Diciembre (12), no octubre","Diciembre · y unificadas en un solo taller"],
+ ["Pastelería para Diabéticos",2,5,"Diciembre (53 de sus 77)","Diciembre · ancla, aforo 7.8"],
+ ["Pays y Tartas",2,6,"Noviembre (12), abril (11), junio (10)","Noviembre · aforo 3.0, dos fechas"],
+ ["Hogazas y Masa Madre",6,0,"Sin historial suficiente","Sin fecha · falta dato, ver nota abajo"]
+];
+document.getElementById("movidos-body").innerHTML=MOV.map(r=>
+ `<tr><td><b>${r[0]}</b></td><td class="n">${r[1]} ses.</td><td class="n">${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join("");
+</script>
