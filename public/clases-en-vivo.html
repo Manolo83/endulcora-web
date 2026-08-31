@@ -153,9 +153,9 @@ body { background: #FBF4E9; }
         </div>
 
         <div class="mt-8 flex flex-wrap gap-4">
-          <button type="button" id="btnApartarLugar" class="rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:brightness-105 transition">Apartar mi lugar</button>
-          <a href="/calendario" class="rounded-full border border-crema/25 px-7 py-3.5 text-center font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-crema/60 transition">Ver calendario</a>
+          <a href="/calendario" class="rounded-full boton-vivo bg-flama px-7 py-3.5 text-center font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:brightness-105 transition">Ver calendario</a>
         </div>
+        <p class="mt-5 max-w-md text-sm text-crema/60">¿No puedes ver el en vivo? No te preocupes — con tu <a href="/membresia" class="text-flama underline hover:text-crema transition">membresía</a> queda guardada en tu biblioteca.</p>
       </div>
       <div class="flex flex-col justify-center gap-3 bg-crema/5 p-8 sm:p-12">
         <p id="claseDiaHora" class="font-titulo text-xl text-crema">Jueves · 19:00 h · CDMX</p>
@@ -224,13 +224,9 @@ function escapeHtml(s){
 }
 document.getElementById('anioFooter').textContent = new Date().getFullYear();
 
-let NUMERO_WHATSAPP = '5665271901';
-fetch('/api/content').then(r => r.json()).then(c => { if(c.whatsapp_numero) NUMERO_WHATSAPP = c.whatsapp_numero; }).catch(()=>{});
-
 /* ---------- Temporizador de la clase en vivo (misma lógica que en /inicio) ---------- */
 const DIAS_SEMANA = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 let CLASE_DIA = 4, CLASE_HH = 19, CLASE_MM = 0;
-let claseTituloActual = 'la clase en vivo';
 
 function proximaClase(){
   const ahora = new Date();
@@ -276,7 +272,6 @@ function aplicarClaseEnVivo(c){
 
   document.getElementById('claseTitulo').textContent = c.clase_titulo || '';
   document.getElementById('claseDescripcion').textContent = c.clase_descripcion || '';
-  claseTituloActual = c.clase_titulo || 'la clase en vivo';
 
   CLASE_DIA = Math.min(6, Math.max(0, parseInt(c.clase_dia_semana, 10) || 0));
   const [hh, mm] = String(c.clase_hora || '19:00').split(':').map(n => parseInt(n, 10) || 0);
@@ -301,11 +296,6 @@ async function cargarContenido(){
   }catch(e){}
 }
 cargarContenido();
-
-document.getElementById('btnApartarLugar').addEventListener('click', () => {
-  const mensaje = `Hola, quiero apartar mi lugar en la próxima clase en vivo "${claseTituloActual}".`;
-  window.open(`https://wa.me/52${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`, '_blank');
-});
 
 /* ---------- Última clase grabada (solo miembros con membresía activa) ---------- */
 let reproductorUltimaClase = null;
