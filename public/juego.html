@@ -167,14 +167,16 @@ body { background: #FBF4E9; }
   </div>
 </header>
 
-<main class="mx-auto max-w-3xl px-5 py-10 lg:px-8 lg:py-14">
-  <div class="mb-6 text-center">
+<main class="mx-auto max-w-3xl px-5 py-10 lg:max-w-6xl lg:px-8 lg:py-14">
+  <div class="mb-6 text-center lg:mb-12">
     <div class="rule-flama mx-auto mb-5 w-24"></div>
     <h1 class="font-display text-3xl leading-tight text-vino sm:text-4xl">El pastel de Endulcorito</h1>
     <p class="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-carbon/70">Toca justo a tiempo para que cada capa caiga bien alineada. ¿Qué tan alto puedes ayudar a Endulcorito a apilar el pastel?</p>
   </div>
 
-  <div class="relative mx-auto w-full max-w-sm overflow-hidden rounded-[32px] bg-vino shadow-[0_16px_50px_rgba(78,20,84,.2)]">
+  <div class="lg:grid lg:grid-cols-[380px,1fr] lg:items-center lg:gap-16">
+  <div class="mx-auto w-full max-w-sm lg:mx-0">
+  <div class="relative overflow-hidden rounded-[32px] bg-vino shadow-[0_16px_50px_rgba(78,20,84,.2)]">
     <div class="flex items-center justify-between px-5 py-3 font-ui text-[11px] font-700 uppercase tracking-widest text-crema">
       <span class="inline-flex items-center gap-1.5">🍰 Capas: <span id="puntajeActual">0</span></span>
       <span class="inline-flex items-center gap-1.5">🏆 Mejor: <span id="puntajeMejor">0</span></span>
@@ -278,7 +280,41 @@ body { background: #FBF4E9; }
     </div>
   </div>
 
-  <p class="mx-auto mt-6 max-w-sm text-center text-xs text-carbon/40">Solo por diversión — tu puntaje se guarda en este dispositivo, nadie más lo ve.</p>
+  <p class="mx-auto mt-6 max-w-sm text-center text-xs text-carbon/40 lg:mx-0 lg:text-left">Solo por diversión — tu puntaje se guarda en este dispositivo, nadie más lo ve.</p>
+  </div>
+
+  <div class="mt-12 hidden lg:block">
+    <div class="rounded-[28px] border border-vino/10 bg-white/60 p-8">
+      <p class="font-titulo text-lg text-vino">¿Cómo se juega?</p>
+      <ol class="mt-5 space-y-4">
+        <li class="flex gap-3">
+          <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-flama font-ui text-xs font-700 text-vino">1</span>
+          <span class="text-[15px] leading-relaxed text-carbon/70">La capa se mueve sola de un lado a otro.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-flama font-ui text-xs font-700 text-vino">2</span>
+          <span class="text-[15px] leading-relaxed text-carbon/70">Toca la pantalla (o presiona espacio) justo cuando quede alineada con la de abajo.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-flama font-ui text-xs font-700 text-vino">3</span>
+          <span class="text-[15px] leading-relaxed text-carbon/70">Cada acierto suma una capa — si fallas por completo, se cae el pastel.</span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="mt-6 grid grid-cols-2 gap-6">
+      <a href="/tienda" class="group rounded-[28px] border border-vino/10 bg-white/60 p-6 transition hover:border-flama/60">
+        <p class="font-titulo text-base text-vino">¿Se te antojó un pastel de verdad?</p>
+        <p class="mt-2 text-sm leading-relaxed text-carbon/60">Descubre lo que hay en la tienda de Endulcora.</p>
+        <span class="mt-4 inline-block font-ui text-xs font-700 uppercase tracking-widest text-flama group-hover:underline">Ver tienda →</span>
+      </a>
+      <a href="/membresia" class="group rounded-[28px] border border-vino/10 bg-white/60 p-6 transition hover:border-flama/60">
+        <p class="font-titulo text-base text-vino">Aprende a hacerlo tú misma</p>
+        <p class="mt-2 text-sm leading-relaxed text-carbon/60">Con la membresía tienes clases en vivo, recetario y más cada mes.</p>
+        <span class="mt-4 inline-block font-ui text-xs font-700 uppercase tracking-widest text-flama group-hover:underline">Conocer membresía →</span>
+      </a>
+    </div>
+  </div>
 </main>
 
 <footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
