@@ -763,12 +763,13 @@ router.get('/api/membresia/contenido', requireAdmin, (req, res) => {
 });
 
 router.post('/api/membresia/contenido', requireAdmin, (req, res) => {
-  const { recetarioMes, videoYoutubeId, videoTitulo, videoMes } = req.body || {};
+  const { recetarioMes, videoYoutubeId, videoTitulo, videoMes, revistaNumero } = req.body || {};
   const patch = {};
   if (typeof recetarioMes === 'string') patch.recetarioMes = recetarioMes.trim();
   if (typeof videoYoutubeId === 'string') patch.videoYoutubeId = videoYoutubeId.trim();
   if (typeof videoTitulo === 'string') patch.videoTitulo = videoTitulo.trim();
   if (typeof videoMes === 'string') patch.videoMes = videoMes.trim();
+  if (typeof revistaNumero === 'string') patch.revistaNumero = revistaNumero.trim();
   res.json(store.updateContenidoMembresia(patch));
 });
 
@@ -789,6 +790,17 @@ router.post('/api/membresia/recetario', requireAdmin, uploadDocumento.single('fi
       archivoNombre: item.recetarioNombre,
     });
   }
+  res.json(item);
+});
+
+router.post('/api/membresia/revista', requireAdmin, uploadDocumento.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo de la revista.' });
+  const anterior = store.getContenidoMembresia().revistaUrl;
+  const item = store.updateContenidoMembresia({
+    revistaUrl: `/uploads/${req.file.filename}`,
+    revistaNombre: req.file.originalname,
+  });
+  borrarSiEsSubida(anterior);
   res.json(item);
 });
 

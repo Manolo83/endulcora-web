@@ -203,8 +203,8 @@ router.get('/contenido', (req, res) => {
       return res.status(403).json({ error: 'Necesitas una membresía activa para ver este contenido.' });
     }
   }
-  const { recetarioUrl, ...resto } = store.getContenidoMembresia();
-  res.json({ ...resto, recetarioDisponible: !!recetarioUrl });
+  const { recetarioUrl, revistaUrl, ...resto } = store.getContenidoMembresia();
+  res.json({ ...resto, recetarioDisponible: !!recetarioUrl, revistaDisponible: !!revistaUrl });
 });
 
 // Biblioteca de clases en vivo grabadas: exclusiva para miembros con
@@ -240,6 +240,25 @@ router.get('/recetario', (req, res) => {
   if (!fs.existsSync(rutaCompleta)) return res.status(404).send('No pudimos encontrar el recetario en este momento.');
   const nombreDescarga = contenido.recetarioNombre || `Recetario${path.extname(filename)}`;
   res.download(rutaCompleta, nombreDescarga);
+});
+
+// Lectura de la revista mensual: igual que el recetario, revisa la
+// membresia en cada solicitud. Se sirve "inline" (no como descarga forzada)
+// para que se abra directo en el visor de PDF del navegador, listo para leer.
+router.get('/revista', (req, res) => {
+  if (!esAdmin(req)) {
+    const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+    if (!usuario || usuario.membresiaEstado !== 'activa') {
+      return res.status(403).send('Necesitas una membresía activa para leer la revista.');
+    }
+  }
+  const contenido = store.getContenidoMembresia();
+  if (!contenido.revistaUrl) return res.status(404).send('Todavía no hay revista publicada este mes.');
+  const filename = path.basename(contenido.revistaUrl);
+  const rutaCompleta = path.join(UPLOAD_DIR, filename);
+  if (!fs.existsSync(rutaCompleta)) return res.status(404).send('No pudimos encontrar la revista en este momento.');
+  res.setHeader('Content-Disposition', `inline; filename="${(contenido.revistaNombre || `Revista${path.extname(filename)}`).replace(/"/g, '')}"`);
+  res.sendFile(rutaCompleta);
 });
 
 module.exports = router;

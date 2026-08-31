@@ -634,6 +634,24 @@
       </div>
 
       <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Revista mensual (para leer en Membresía)</h3>
+        <p class="mt-1 text-xs text-carbon/50">Se abre directo en el navegador desde <a href="/membresia" target="_blank" class="text-vino hover:underline">/membresia</a> — distinto del "Regalo mensual" de arriba, que la manda por correo.</p>
+        <form id="formRevistaMembresia" class="mt-4 space-y-3">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Número o edición (ej. N.º 1 · Marzo 2026)</span>
+            <input id="membresiaRevistaNumero" type="text" placeholder="N.º 1 · Marzo 2026" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">PDF de la revista (opcional, solo si vas a reemplazarla)</span>
+            <input id="membresiaRevistaArchivo" type="file" accept="application/pdf,.pdf" class="mt-1.5 w-full text-sm">
+          </label>
+          <p id="membresiaRevistaActual" class="text-xs text-carbon/50"></p>
+          <button type="submit" class="w-full rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar revista</button>
+        </form>
+        <div id="membresiaRevistaResultado" class="mt-3"></div>
+      </div>
+
+      <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Video del taller del mes</h3>
         <p class="mt-1 text-xs text-carbon/50">Sube el video a YouTube como "No listado" (no aparece en búsquedas ni en tu canal público) y pega aquí solo el ID del video — el que va después de "v=" en la liga, por ejemplo en youtube.com/watch?v=<strong>abc123XYZ</strong> el ID es "abc123XYZ".</p>
         <form id="formVideoMembresia" class="mt-4 space-y-3">
@@ -2838,6 +2856,8 @@ async function cargarMembresiaAdmin(){
     $('membresiaVideoMes').value = c.videoMes || '';
     $('membresiaVideoTitulo').value = c.videoTitulo || '';
     $('membresiaVideoId').value = c.videoYoutubeId || '';
+    $('membresiaRevistaNumero').value = c.revistaNumero || '';
+    $('membresiaRevistaActual').textContent = c.revistaNombre ? `Archivo actual: ${c.revistaNombre}` : 'Todavía no has subido una revista.';
   }catch(e){
     toast(e.message);
   }
@@ -2859,6 +2879,27 @@ $('formRecetarioMembresia').addEventListener('submit', async (e) => {
       if(!res.ok) throw new Error(data.error || 'No se pudo subir el recetario');
     }
     resultado.innerHTML = '<p class="text-sm text-green-700">✓ Recetario del mes guardado.</p>';
+    cargarMembresiaAdmin();
+  }catch(err){
+    resultado.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(err.message)}</p>`;
+  }
+});
+
+$('formRevistaMembresia').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const resultado = $('membresiaRevistaResultado');
+  const numero = $('membresiaRevistaNumero').value.trim();
+  const file = $('membresiaRevistaArchivo').files[0];
+  try{
+    await api('/admin/api/membresia/contenido', { method: 'POST', body: JSON.stringify({ revistaNumero: numero }) });
+    if(file){
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/admin/api/membresia/revista', { method: 'POST', body: fd });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'No se pudo subir la revista');
+    }
+    resultado.innerHTML = '<p class="text-sm text-green-700">✓ Revista mensual guardada.</p>';
     cargarMembresiaAdmin();
   }catch(err){
     resultado.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(err.message)}</p>`;

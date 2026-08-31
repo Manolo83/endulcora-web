@@ -145,6 +145,7 @@ body { background: #FBF4E9; }
     <h2 class="mt-2 font-display text-2xl">Hazte miembro</h2>
     <ul class="mt-4 space-y-2 text-sm text-crema/85">
       <li class="flex gap-2"><span class="text-flama">▸</span> Recetario del mes, exclusivo para miembros</li>
+      <li class="flex gap-2"><span class="text-flama">▸</span> Revista mensual, para leer en línea</li>
       <li class="flex gap-2"><span class="text-flama">▸</span> Taller online mensual (video privado en nuestro canal de YouTube)</li>
       <li class="flex gap-2"><span class="text-flama">▸</span> Cobro automático mensual — cancela cuando quieras</li>
     </ul>
@@ -168,6 +169,13 @@ body { background: #FBF4E9; }
       </a>
     </div>
 
+    <div id="bloqueRevistaMes" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Revista <span id="revistaNumeroEtiqueta"></span></p>
+      <a id="linkRevistaMes" href="/api/membresia/revista" target="_blank" rel="noopener" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        Leer revista
+      </a>
+    </div>
+
     <div id="bloqueVideoMes" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
       <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Taller de <span id="videoMesEtiqueta"></span></p>
       <h3 id="videoTitulo" class="mt-1 font-titulo text-lg text-vino"></h3>
@@ -182,7 +190,7 @@ body { background: #FBF4E9; }
       </div>
     </div>
 
-    <p id="sinContenidoAviso" class="mt-6 hidden rounded-2xl bg-white p-6 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Todavía no hay recetario ni video publicados este mes. Vuelve pronto.</p>
+    <p id="sinContenidoAviso" class="mt-6 hidden rounded-2xl bg-white p-6 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Todavía no hay recetario, revista ni video publicados este mes. Vuelve pronto.</p>
   </div>
 </main>
 
@@ -227,13 +235,17 @@ async function cargarContenidoMembresia(){
       document.getElementById('bloqueRecetarioMes').classList.remove('hidden');
       document.getElementById('recetarioMesEtiqueta').textContent = c.recetarioMes || 'este mes';
     }
+    if(c.revistaDisponible){
+      document.getElementById('bloqueRevistaMes').classList.remove('hidden');
+      document.getElementById('revistaNumeroEtiqueta').textContent = c.revistaNumero || 'de este mes';
+    }
     if(c.videoYoutubeId){
       document.getElementById('bloqueVideoMes').classList.remove('hidden');
       document.getElementById('videoMesEtiqueta').textContent = c.videoMes || 'este mes';
       document.getElementById('videoTitulo').textContent = c.videoTitulo || '';
       iniciarReproductorVideo(c.videoYoutubeId);
     }
-    if(!c.recetarioDisponible && !c.videoYoutubeId){
+    if(!c.recetarioDisponible && !c.videoYoutubeId && !c.revistaDisponible){
       document.getElementById('sinContenidoAviso').classList.remove('hidden');
     }
   }catch(e){

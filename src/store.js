@@ -170,7 +170,7 @@ function datosPorDefecto() {
     resenas: [],
     publicacionesComunidad: [],
     mensajesComunidad: [],
-    contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '' },
+    contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '', revistaUrl: '', revistaNombre: '', revistaNumero: '' },
   };
 }
 
@@ -237,6 +237,23 @@ async function init() {
       // se vuelve a suscribir despues).
       if (typeof u.membresiaActivaDesde !== 'string') { u.membresiaActivaDesde = ''; changed = true; }
     });
+    if (typeof data.contenidoMembresia.revistaUrl !== 'string') { data.contenidoMembresia.revistaUrl = ''; changed = true; }
+    if (typeof data.contenidoMembresia.revistaNombre !== 'string') { data.contenidoMembresia.revistaNombre = ''; changed = true; }
+    if (typeof data.contenidoMembresia.revistaNumero !== 'string') { data.contenidoMembresia.revistaNumero = ''; changed = true; }
+    // Semilla de la primera revista mensual (solo la primera vez que arranca
+    // el servidor despues de este cambio; si ya hay una revista publicada
+    // -sea esta u otra que suba el admin despues- no se vuelve a tocar).
+    if (!data.contenidoMembresia.revistaUrl) {
+      const origenRevista = path.join(__dirname, '..', 'seed-archivos', 'revista-mensual', 'Endulcora_Revista_N01.pdf');
+      if (fs.existsSync(origenRevista)) {
+        const destino = `${crypto.randomUUID()}.pdf`;
+        fs.copyFileSync(origenRevista, path.join(UPLOAD_DIR, destino));
+        data.contenidoMembresia.revistaUrl = `/uploads/${destino}`;
+        data.contenidoMembresia.revistaNombre = 'Endulcora_Revista_N01.pdf';
+        data.contenidoMembresia.revistaNumero = data.contenidoMembresia.revistaNumero || 'N.º 1';
+        changed = true;
+      }
+    }
     // Reemplaza un producto "paquete completo" antiguo (un solo articulo)
     // por una familia de 4: eBook (principal, visible en el catalogo) +
     // Anexo Excel + App + Paquete completo (estos 3 ocultos del catalogo,
