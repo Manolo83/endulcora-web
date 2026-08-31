@@ -45,6 +45,7 @@ const DEFAULT_CONTENT = {
   clase_hora: '19:00',
   clase_cupos_totales: '25',
   clase_cupos_apartados: '0',
+  clase_info: '',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
