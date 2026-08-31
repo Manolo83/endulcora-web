@@ -153,7 +153,8 @@ body { background: #FBF4E9; }
         </div>
 
         <div class="mt-8 flex flex-wrap gap-4">
-          <a href="/calendario" class="rounded-full boton-vivo bg-flama px-7 py-3.5 text-center font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:brightness-105 transition">Ver calendario</a>
+          <a id="linkEntrarClase" href="#" target="_blank" rel="noopener" class="hidden rounded-full boton-vivo bg-flama px-7 py-3.5 text-center font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:brightness-105 transition">Entrar a la clase</a>
+          <a href="/calendario" class="rounded-full border border-crema/25 px-7 py-3.5 text-center font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:border-crema/60 transition">Ver calendario</a>
         </div>
         <p class="mt-5 max-w-md text-sm text-crema/60">¿No puedes ver el en vivo? No te preocupes — con tu <a href="/membresia" class="text-flama underline hover:text-crema transition">membresía</a> queda guardada en tu biblioteca.</p>
       </div>
@@ -286,6 +287,12 @@ function aplicarClaseEnVivo(c){
   document.getElementById('barraCupos').style.width = (totales ? (apartados/totales*100) : 0) + '%';
 
   document.getElementById('claseDiaHora').textContent = `${DIAS_SEMANA[CLASE_DIA]} · ${String(CLASE_HH).padStart(2,'0')}:${String(CLASE_MM).padStart(2,'0')} h · CDMX`;
+
+  const linkEntrar = document.getElementById('linkEntrarClase');
+  const url = (c.clase_url || '').trim();
+  const valida = /^https?:\/\//i.test(url);
+  linkEntrar.classList.toggle('hidden', !valida);
+  if(valida) linkEntrar.href = url;
 }
 
 async function cargarContenido(){
