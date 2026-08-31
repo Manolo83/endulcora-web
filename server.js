@@ -145,7 +145,7 @@ app.use('/admin', adminRoutes);
 const escaparHtml = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-const CATEGORIA_POR_PREFIJO = { ebooks: 'ebook', anexos: 'anexo' };
+const CATEGORIA_POR_PREFIJO = { ebooks: 'ebook', anexos: 'anexo', recetarios: 'recetario' };
 
 function servirPaginaProducto(prefijo) {
   return (req, res) => {
@@ -176,10 +176,11 @@ function servirPaginaProducto(prefijo) {
 
 app.get('/ebooks/:slug', servirPaginaProducto('ebooks'));
 app.get('/anexos/:slug', servirPaginaProducto('anexos'));
+app.get('/recetarios/:slug', servirPaginaProducto('recetarios'));
 
 // Paginas de catalogo, propias y separadas de la pagina principal (para
 // anunciar sin que la gente tenga que bajar por todo el sitio).
-app.get(['/tienda', '/ebooks', '/anexos'], (req, res) => {
+app.get(['/tienda', '/ebooks', '/anexos', '/recetarios'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'categoria.html'));
 });
 
