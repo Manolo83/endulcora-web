@@ -330,6 +330,72 @@ async function init() {
       data._migFamiliaVelasComestibles = true;
       changed = true;
     }
+    // Arma la familia de Roles Gourmet (Anexo Excel + App + Paquete
+    // completo), igual que Velas Comestibles: el eBook ya existia con su
+    // precio, foto y galeria reales (slug 'roles-gourmet-especial'), solo
+    // le faltaba el archivo descargable. Los 3 satelites quedan ocultos del
+    // catalogo, solo se compran desde la pagina del eBook. Corre una vez.
+    if (!data._migFamiliaRolesGourmet) {
+      const rolesEbook = data.products.find((p) => p.slug === 'roles-gourmet-especial');
+      if (rolesEbook) {
+        const SEED_DIR = path.join(__dirname, '..', 'seed-archivos', 'roles-gourmet');
+        const nuevoSatelite = (titulo, categoriaItem, precio, boton, nombreArchivo) => {
+          const item = {
+            id: nextId(data.products),
+            orden: data.products.length,
+            categoria: categoriaItem,
+            etiqueta: '',
+            destacado: '',
+            titulo,
+            subtitulo: '',
+            descripcionCorta: '',
+            descripcionLarga: '',
+            bullets: [],
+            precio,
+            precioAnterior: '',
+            precioMembresia: '',
+            boton,
+            imagen: '',
+            galeria: [],
+            archivo: '',
+            archivoNombre: '',
+            slug: '',
+            productosRelacionados: [],
+            esPaquete: false,
+            ocultoEnCatalogo: true,
+          };
+          item.slug = slugUnico(titulo, data.products, item.id);
+          data.products.push(item);
+          if (nombreArchivo) {
+            const origen = path.join(SEED_DIR, nombreArchivo);
+            if (fs.existsSync(origen)) {
+              const destino = `${crypto.randomUUID()}${path.extname(nombreArchivo)}`;
+              fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+              item.archivo = `/uploads/${destino}`;
+              item.archivoNombre = nombreArchivo;
+            }
+          }
+          return item;
+        };
+        if (!rolesEbook.archivo) {
+          const origenEbook = path.join(SEED_DIR, 'Endulcora_Roles_Gourmet_eBook.pdf');
+          if (fs.existsSync(origenEbook)) {
+            const destino = `${crypto.randomUUID()}.pdf`;
+            fs.copyFileSync(origenEbook, path.join(UPLOAD_DIR, destino));
+            rolesEbook.archivo = `/uploads/${destino}`;
+            rolesEbook.archivoNombre = 'Endulcora_Roles_Gourmet_eBook.pdf';
+          }
+        }
+        const anexo = nuevoSatelite('Anexo Excel · Roles Gourmet', 'anexo', '50', 'Añadir anexo Excel al carrito', 'Endulcora_Roles_Gourmet_Calculadora_Costos_Merma_Precios.xlsx');
+        const app = nuevoSatelite('App · Roles Gourmet', 'ebook', '50', 'Añadir app al carrito', 'Endulcora_Roles_Gourmet_APP.html');
+        const paquete = nuevoSatelite('Roles Gourmet · Paquete completo', 'ebook', '149', 'Comprar paquete completo', 'Paquete_Completo.zip');
+        paquete.esPaquete = true;
+        paquete.precioMembresia = '100';
+        rolesEbook.productosRelacionados = [anexo.id, app.id, paquete.id];
+      }
+      data._migFamiliaRolesGourmet = true;
+      changed = true;
+    }
     // Reemplaza un producto "paquete completo" antiguo (un solo articulo)
     // por una familia de 4: eBook (principal, visible en el catalogo) +
     // Anexo Excel + App + Paquete completo (estos 3 ocultos del catalogo,
@@ -404,13 +470,6 @@ async function init() {
         categoria: 'ebook',
         carpetaSeed: 'reposteria-para-diabeticos',
         archivos: { ebook: 'Endulcora_Reposteria_Diabeticos_eBook.pdf', anexo: 'Endulcora_Reposteria_Diabeticos_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Reposteria_Diabeticos_APP.html', paquete: 'Paquete_Completo.zip' },
-      },
-      {
-        tituloViejo: 'PAQUETE MAESTRO DE ROLES GOURMET',
-        tituloBase: 'Roles Gourmet',
-        categoria: 'ebook',
-        carpetaSeed: 'roles-gourmet',
-        archivos: { ebook: 'Endulcora_Roles_Gourmet_eBook.pdf', anexo: 'Endulcora_Roles_Gourmet_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Roles_Gourmet_APP.html', paquete: 'Paquete_Completo.zip' },
       },
       {
         // Productos nuevos, sin producto viejo que borrar.
@@ -530,13 +589,6 @@ async function init() {
           { viejoSlug: 'reposteria-para-diabeticos', nuevoSlug: 'reposteria-para-diabeticos-2' },
           { viejoSlug: 'costeo-de-reposteria-para-diabeticos-excel', nuevoSlug: 'anexo-excel-reposteria-para-diabeticos' },
           { viejoSlug: 'calculadora-reposteria-para-diabeticos-app', nuevoSlug: 'app-reposteria-para-diabeticos' },
-        ],
-      },
-      {
-        pares: [
-          { viejoSlug: 'roles-gourmet', nuevoSlug: 'roles-gourmet-3' },
-          { viejoSlug: 'roles-gourmet-2', nuevoSlug: 'anexo-excel-roles-gourmet' },
-          { viejoSlug: 'roles-gourmet-app', nuevoSlug: 'app-roles-gourmet' },
         ],
       },
     ];
