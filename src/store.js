@@ -656,6 +656,33 @@ async function init() {
       data._migBorraRecetarios = true;
       changed = true;
     }
+    // 'Panque de Elote Especial' nunca tuvo eBook real (solo una linea de
+    // descripcion). Se oculta del catalogo hasta que exista el archivo —
+    // no se borra, para no perder el producto si se retoma despues. Corre
+    // una sola vez (si el admin lo vuelve a mostrar a mano, no se le pisa).
+    if (!data._migOcultaPanqueDeEloteEspecial) {
+      const panque = data.products.find((p) => p.slug === 'panque-de-elote-especial');
+      if (panque) panque.ocultoEnCatalogo = true;
+      data._migOcultaPanqueDeEloteEspecial = true;
+      changed = true;
+    }
+    // 'Costos, Merma y Precios' (calculadora generica, no de una receta en
+    // particular) ya no aplica: se descontinua y se borra del catalogo.
+    // Corre una sola vez.
+    if (!data._migBorraCostosMermaYPrecios) {
+      const costosGenerico = data.products.find((p) => p.slug === 'costos-merma-y-precios');
+      if (costosGenerico) {
+        if (typeof costosGenerico.imagen === 'string' && costosGenerico.imagen.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(costosGenerico.imagen)), () => {});
+        }
+        if (typeof costosGenerico.archivo === 'string' && costosGenerico.archivo.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(costosGenerico.archivo)), () => {});
+        }
+        data.products = data.products.filter((p) => p.id !== costosGenerico.id);
+      }
+      data._migBorraCostosMermaYPrecios = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
