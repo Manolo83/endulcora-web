@@ -683,6 +683,25 @@ async function init() {
       data._migBorraCostosMermaYPrecios = true;
       changed = true;
     }
+    // 'Oficios Dulces Vol. I + II' era un paquete que iba a combinar Velas
+    // Comestibles + Galletas Estilo Nueva York, pero Galletas Estilo Nueva
+    // York nunca tuvo su propio Anexo Excel ni App (esos archivos no
+    // existen), asi que el paquete no se puede armar como estaba descrito.
+    // Se descontinua y se borra del catalogo. Corre una sola vez.
+    if (!data._migBorraOficiosDulces) {
+      const oficiosDulces = data.products.find((p) => p.slug === 'oficios-dulces-vol-i-ii');
+      if (oficiosDulces) {
+        if (typeof oficiosDulces.imagen === 'string' && oficiosDulces.imagen.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(oficiosDulces.imagen)), () => {});
+        }
+        if (typeof oficiosDulces.archivo === 'string' && oficiosDulces.archivo.startsWith('/uploads/')) {
+          fs.unlink(path.join(UPLOAD_DIR, path.basename(oficiosDulces.archivo)), () => {});
+        }
+        data.products = data.products.filter((p) => p.id !== oficiosDulces.id);
+      }
+      data._migBorraOficiosDulces = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
