@@ -496,6 +496,12 @@ async function init() {
         carpetaSeed: 'nogada-de-autor',
         archivos: { ebook: 'Endulcora_Nogada_de_Autor_eBook.pdf', anexo: 'Endulcora_Nogada_de_Autor_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Nogada_de_Autor_APP.html', paquete: 'Paquete_Completo.zip' },
       },
+      {
+        tituloBase: 'Dulces Mexicanos Tradicionales',
+        categoria: 'ebook',
+        carpetaSeed: 'dulces-mexicanos-tradicionales',
+        archivos: { ebook: 'Endulcora_Dulces_Mexicanos_Tradicionales_eBook.pdf', anexo: 'Endulcora_Dulces_Mexicanos_Tradicionales_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Dulces_Mexicanos_Tradicionales_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
       const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
