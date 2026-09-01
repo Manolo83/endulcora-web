@@ -273,6 +273,63 @@ async function init() {
         }
       }
     }
+    // Arma la familia de Velas Comestibles (Anexo Excel + App + Paquete
+    // completo), igual que Tamales/Nogada/etc, pero sin recrear el eBook
+    // principal (ese ya existia con su contenido real: precio, bullets,
+    // imagen). Los 3 quedan ocultos del catalogo, solo se compran desde la
+    // pagina del eBook. Corre una sola vez.
+    if (!data._migFamiliaVelasComestibles) {
+      const velasEbook = data.products.find((p) => p.slug === 'velas-comestibles');
+      if (velasEbook) {
+        const SEED_DIR = path.join(__dirname, '..', 'seed-archivos', 'velas-comestibles');
+        const nuevoSatelite = (titulo, categoriaItem, precio, boton, nombreArchivo) => {
+          const item = {
+            id: nextId(data.products),
+            orden: data.products.length,
+            categoria: categoriaItem,
+            etiqueta: '',
+            destacado: '',
+            titulo,
+            subtitulo: '',
+            descripcionCorta: '',
+            descripcionLarga: '',
+            bullets: [],
+            precio,
+            precioAnterior: '',
+            precioMembresia: '',
+            boton,
+            imagen: '',
+            galeria: [],
+            archivo: '',
+            archivoNombre: '',
+            slug: '',
+            productosRelacionados: [],
+            esPaquete: false,
+            ocultoEnCatalogo: true,
+          };
+          item.slug = slugUnico(titulo, data.products, item.id);
+          data.products.push(item);
+          if (nombreArchivo) {
+            const origen = path.join(SEED_DIR, nombreArchivo);
+            if (fs.existsSync(origen)) {
+              const destino = `${crypto.randomUUID()}${path.extname(nombreArchivo)}`;
+              fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+              item.archivo = `/uploads/${destino}`;
+              item.archivoNombre = nombreArchivo;
+            }
+          }
+          return item;
+        };
+        const anexo = nuevoSatelite('Anexo Excel · Velas Comestibles', 'anexo', '50', 'Añadir anexo Excel al carrito', 'Endulcora_Velas_Comestibles_Calculadora_Costos_Merma_Precios.xlsx');
+        const app = nuevoSatelite('App · Velas Comestibles', 'ebook', '50', 'Añadir app al carrito', 'Endulcora_Velas_Comestibles_APP.html');
+        const paquete = nuevoSatelite('Velas Comestibles · Paquete completo', 'ebook', '149', 'Comprar paquete completo', 'Paquete_Completo.zip');
+        paquete.esPaquete = true;
+        paquete.precioMembresia = '100';
+        velasEbook.productosRelacionados = [anexo.id, app.id, paquete.id];
+      }
+      data._migFamiliaVelasComestibles = true;
+      changed = true;
+    }
     // Reemplaza un producto "paquete completo" antiguo (un solo articulo)
     // por una familia de 4: eBook (principal, visible en el catalogo) +
     // Anexo Excel + App + Paquete completo (estos 3 ocultos del catalogo,
