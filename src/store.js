@@ -256,6 +256,23 @@ async function init() {
         changed = true;
       }
     }
+    // Carga el PDF del eBook de Velas Comestibles (el producto ya existia,
+    // con su precio, bullets e imagen reales, pero le faltaba el archivo
+    // descargable). Solo corre si el producto sigue sin archivo — no pisa
+    // uno que ya se haya subido despues a mano desde /admin.
+    {
+      const velasEbook = data.products.find((p) => p.slug === 'velas-comestibles');
+      if (velasEbook && !velasEbook.archivo) {
+        const origen = path.join(__dirname, '..', 'seed-archivos', 'velas-comestibles', 'Endulcora_Velas_Comestibles_eBook.pdf');
+        if (fs.existsSync(origen)) {
+          const destino = `${crypto.randomUUID()}.pdf`;
+          fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+          velasEbook.archivo = `/uploads/${destino}`;
+          velasEbook.archivoNombre = 'Endulcora_Velas_Comestibles_eBook.pdf';
+          changed = true;
+        }
+      }
+    }
     // Reemplaza un producto "paquete completo" antiguo (un solo articulo)
     // por una familia de 4: eBook (principal, visible en el catalogo) +
     // Anexo Excel + App + Paquete completo (estos 3 ocultos del catalogo,
