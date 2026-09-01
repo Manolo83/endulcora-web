@@ -2417,7 +2417,7 @@ $('btnSincronizarPagosMembresia').addEventListener('click', async () => {
   try{
     const data = await api('/admin/api/membresia/sincronizar-pagos', { method: 'POST' });
     resultado.className = 'mt-2 text-sm text-green-700';
-    resultado.textContent = `✓ Se revisó el historial de ${data.usuariosRevisados} clientes que alguna vez tuvieron membresía (${data.activos} con membresía activa ahora mismo) y se agregaron ${data.agregados} cobros nuevos al registro.`;
+    resultado.textContent = `✓ Se revisó el historial de ${data.usuariosRevisados} clientes que alguna vez tuvieron membresía (${data.activos} con membresía activa ahora mismo). Se agregaron ${data.agregados} cobros nuevos al registro y se corrigió el acceso de ${data.corregidos} cliente(s) cuyo estado no coincidía con Mercado Pago.`;
     cargarVentas();
   }catch(e){
     resultado.className = 'mt-2 text-sm text-red-600';

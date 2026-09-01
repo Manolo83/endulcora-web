@@ -11,7 +11,7 @@ const { UPLOAD_DIR, SITE_URL } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
 const { enviarCorreoRevistaMensual } = require('../email');
 const { procesarCampana } = require('../campanas');
-const { sincronizarPagosDePreapproval } = require('./membresia');
+const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 
 const router = express.Router();
 
@@ -482,12 +482,19 @@ router.post('/api/membresia/sincronizar-pagos', requireAdmin, async (req, res) =
   // historial de cobros pasados. No es lo mismo que "suscripciones activas
   // ahora mismo" (para eso, compara con el numero que se ve en Mercado Pago).
   const usuarios = store.getUsers().filter((u) => u.membresiaPreapprovalId);
-  const activos = usuarios.filter((u) => u.membresiaEstado === 'activa').length;
   let agregados = 0;
+  let corregidos = 0;
   for (const usuario of usuarios) {
     agregados += await sincronizarPagosDePreapproval(usuario.membresiaPreapprovalId, usuario);
+    // Ademas del historial de pagos, trae el estado REAL de la suscripcion
+    // desde Mercado Pago y lo aplica localmente — repara a cualquier
+    // cliente cuyo aviso de webhook nunca haya llegado (por ejemplo, quien
+    // se suscribio antes de que se configurara notification_url) y se haya
+    // quedado sin acceso a pesar de tener el cobro aprobado.
+    if (await sincronizarEstadoDePreapproval(usuario.membresiaPreapprovalId)) corregidos += 1;
   }
-  res.json({ agregados, usuariosRevisados: usuarios.length, activos });
+  const activos = store.getUsers().filter((u) => u.membresiaEstado === 'activa').length;
+  res.json({ agregados, corregidos, usuariosRevisados: usuarios.length, activos });
 });
 
 // ---- Suscriptores del correo (footer) ----

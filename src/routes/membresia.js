@@ -40,6 +40,7 @@ router.post('/suscribirse', requireCliente, async (req, res) => {
         payer_email: usuario.email,
         external_reference: String(usuario.id),
         back_url: `${SITE_URL}/membresia`,
+        notification_url: `${SITE_URL}/api/membresia/webhook`,
         status: 'pending',
       },
     });
@@ -111,6 +112,52 @@ async function sincronizarPagosDePreapproval(preapprovalId, usuario) {
   return agregados;
 }
 
+const MAPA_ESTADO_PREAPPROVAL = {
+  authorized: 'activa',
+  paused: 'pausada',
+  cancelled: 'cancelada',
+  pending: 'pendiente',
+};
+
+// Aplica al usuario local el estado real de una suscripcion segun Mercado
+// Pago (info de un PreApproval). Se usa desde el webhook y desde la
+// reconciliacion manual de /admin, para no duplicar el mapeo de estados.
+// Devuelve true si cambio algo.
+function aplicarEstadoDesdePreapprovalInfo(info) {
+  const usuario = (info.external_reference && store.getUserById(info.external_reference)) || store.getUserByPreapprovalId(String(info.id));
+  if (!usuario) return false;
+
+  const nuevoEstado = MAPA_ESTADO_PREAPPROVAL[info.status] || info.status;
+  if (usuario.membresiaEstado === nuevoEstado && usuario.membresiaPreapprovalId === String(info.id)) return false;
+
+  const patch = { membresiaEstado: nuevoEstado, membresiaPreapprovalId: String(info.id) };
+  // Solo se reinicia el "reloj" de la biblioteca de clases cuando de
+  // verdad se activa desde un estado que no era activo (alta nueva o
+  // reactivacion) — no en cada cobro mensual de quien ya seguia activo.
+  if (nuevoEstado === 'activa' && usuario.membresiaEstado !== 'activa') {
+    patch.membresiaActivaDesde = new Date().toISOString().slice(0, 10);
+  }
+  store.updateUser(usuario.id, patch);
+  return true;
+}
+
+// Trae de Mercado Pago el estado real de una suscripcion y lo aplica al
+// usuario local. Se usa desde /admin para reparar el acceso de clientes
+// cuyo aviso de webhook nunca llego (por ejemplo, suscripciones creadas
+// antes de que se configurara notification_url). Devuelve true si corrigio
+// algo.
+async function sincronizarEstadoDePreapproval(preapprovalId) {
+  const client = mpClient();
+  if (!client || !preapprovalId) return false;
+  try {
+    const preapproval = new PreApproval(client);
+    const info = await preapproval.get({ id: preapprovalId });
+    return aplicarEstadoDesdePreapprovalInfo(info);
+  } catch (err) {
+    return false;
+  }
+}
+
 // Mercado Pago avisa aqui cuando la suscripcion de un cliente cambia de
 // estado (autorizada, pausada, cancelada...). Con esto se le quita o da
 // acceso al contenido de membresia automaticamente, sin intervencion manual.
@@ -133,24 +180,7 @@ router.post('/webhook', async (req, res) => {
 
     const preapproval = new PreApproval(client);
     const info = await preapproval.get({ id: dataId });
-    const usuario = (info.external_reference && store.getUserById(info.external_reference)) || store.getUserByPreapprovalId(String(info.id));
-    if (!usuario) return;
-
-    const mapaEstado = {
-      authorized: 'activa',
-      paused: 'pausada',
-      cancelled: 'cancelada',
-      pending: 'pendiente',
-    };
-    const nuevoEstado = mapaEstado[info.status] || info.status;
-    const patch = { membresiaEstado: nuevoEstado, membresiaPreapprovalId: String(info.id) };
-    // Solo se reinicia el "reloj" de la biblioteca de clases cuando de
-    // verdad se activa desde un estado que no era activo (alta nueva o
-    // reactivacion) — no en cada cobro mensual de quien ya seguia activo.
-    if (nuevoEstado === 'activa' && usuario.membresiaEstado !== 'activa') {
-      patch.membresiaActivaDesde = new Date().toISOString().slice(0, 10);
-    }
-    store.updateUser(usuario.id, patch);
+    aplicarEstadoDesdePreapprovalInfo(info);
   } catch (err) {
     // Si Mercado Pago reintenta despues, se procesa en el proximo intento.
   }
@@ -263,3 +293,4 @@ router.get('/revista', (req, res) => {
 
 module.exports = router;
 module.exports.sincronizarPagosDePreapproval = sincronizarPagosDePreapproval;
+module.exports.sincronizarEstadoDePreapproval = sincronizarEstadoDePreapproval;
