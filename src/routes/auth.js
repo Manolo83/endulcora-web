@@ -1,13 +1,14 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const store = require('../store');
+const { uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
 
 const router = express.Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function usuarioPublico(u) {
-  return { id: u.id, email: u.email, nombre: u.nombre, telefono: u.telefono || '' };
+  return { id: u.id, email: u.email, nombre: u.nombre, telefono: u.telefono || '', fotoPerfilUrl: u.fotoPerfilUrl || '' };
 }
 
 function requireCliente(req, res, next) {
@@ -88,7 +89,17 @@ router.get('/orders', requireCliente, (req, res) => {
   res.json(store.getOrdersByUser(user.id, user.email));
 });
 
-router.post('/resenas', requireCliente, (req, res) => {
+router.post('/foto', requireCliente, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
+  const user = store.getUserById(req.session.userId);
+  if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
+  if (!req.file) return res.status(400).json({ error: 'Sube una foto.' });
+  const anterior = user.fotoPerfilUrl;
+  const actualizado = store.updateUser(user.id, { fotoPerfilUrl: `/uploads/${req.file.filename}` });
+  borrarSiEsSubida(anterior);
+  res.json({ user: usuarioPublico(actualizado) });
+});
+
+router.post('/resenas', requireCliente, uploadImage.single('imagen'), procesarImagenSubida, (req, res) => {
   const user = store.getUserById(req.session.userId);
   if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
   const { texto, estrellas } = req.body || {};
@@ -96,7 +107,15 @@ router.post('/resenas', requireCliente, (req, res) => {
   if (!estrellas || Number(estrellas) < 1 || Number(estrellas) > 5) {
     return res.status(400).json({ error: 'Elige una calificación de 1 a 5 estrellas.' });
   }
-  const item = store.addResena({ userId: user.id, nombreAutor: user.nombre, texto, estrellas });
+  const item = store.addResena({
+    userId: user.id,
+    nombreAutor: user.nombre,
+    texto,
+    estrellas,
+    imagen: req.file ? `/uploads/${req.file.filename}` : '',
+    imagenNombre: req.file ? req.file.filename : '',
+    fotoAutor: user.fotoPerfilUrl || '',
+  });
   res.status(201).json(item);
 });
 

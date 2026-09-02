@@ -4,6 +4,7 @@ const fs = require('fs');
 const store = require('../store');
 const { UPLOAD_DIR, GOOGLE_ADS } = require('../config');
 const { requireCliente } = require('./auth');
+const { uploadImage, uploadMedia, procesarImagenSubida, ALLOWED_VIDEO } = require('../uploads');
 
 const router = express.Router();
 
@@ -23,7 +24,22 @@ router.get('/announcements', (req, res) => {
 });
 
 router.get('/media', (req, res) => {
-  res.json(store.getMedia());
+  res.json(store.getMedia().filter((m) => m.estado === 'aprobado'));
+});
+
+// Foto que sube un cliente para la galeria (queda pendiente de aprobar).
+router.post('/galeria/subir', requireCliente, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
+  const user = store.getUserById(req.session.userId);
+  if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
+  if (!req.file) return res.status(400).json({ error: 'Sube una foto.' });
+  const item = store.addMediaCliente({
+    userId: user.id,
+    nombreAutor: user.nombre,
+    url: `/uploads/${req.file.filename}`,
+    filename: req.file.filename,
+    title: (req.body && req.body.titulo) || '',
+  });
+  res.status(201).json(item);
 });
 
 router.get('/content', (req, res) => {
@@ -88,7 +104,30 @@ router.get('/resenas', (req, res) => {
 });
 
 router.get('/comunidad/publicaciones', (req, res) => {
-  res.json(store.getPublicacionesComunidad());
+  res.json(store.getPublicacionesComunidad().filter((p) => p.estado === 'aprobado'));
+});
+
+// Publicacion hecha por un cliente (foto o video + descripcion, como una
+// red social): queda pendiente de aprobar, no se agrega al feed publico.
+router.post('/comunidad/publicaciones', requireCliente, uploadMedia.single('archivo'), procesarImagenSubida, (req, res) => {
+  const user = store.getUserById(req.session.userId);
+  if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
+  const texto = String((req.body && req.body.texto) || '').trim();
+  if (!req.file) return res.status(400).json({ error: 'Sube una foto o un video.' });
+  if (texto.length > 1000) return res.status(400).json({ error: 'Tu descripción es muy larga (máximo 1000 caracteres).' });
+
+  const esVideo = ALLOWED_VIDEO.includes(req.file.mimetype);
+  const item = store.addPublicacionComunidadCliente({
+    userId: user.id,
+    nombreAutor: user.nombre,
+    fotoAutor: user.fotoPerfilUrl || '',
+    texto,
+    imagen: esVideo ? '' : `/uploads/${req.file.filename}`,
+    imagenNombre: esVideo ? null : req.file.filename,
+    video: esVideo ? `/uploads/${req.file.filename}` : '',
+    videoNombre: esVideo ? req.file.filename : '',
+  });
+  res.status(201).json(item);
 });
 
 router.get('/comunidad/publicaciones/:id/mensajes', (req, res) => {
@@ -97,15 +136,23 @@ router.get('/comunidad/publicaciones/:id/mensajes', (req, res) => {
   res.json(store.getMensajesComunidad(req.params.id));
 });
 
-router.post('/comunidad/publicaciones/:id/mensajes', requireCliente, (req, res) => {
+router.post('/comunidad/publicaciones/:id/mensajes', requireCliente, uploadImage.single('imagen'), procesarImagenSubida, (req, res) => {
   const publicacion = store.getPublicacionComunidad(req.params.id);
   if (!publicacion) return res.status(404).json({ error: 'Publicación no encontrada.' });
   const user = store.getUserById(req.session.userId);
   if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
   const texto = String((req.body && req.body.texto) || '').trim();
-  if (!texto) return res.status(400).json({ error: 'Escribe un comentario.' });
+  if (!texto && !req.file) return res.status(400).json({ error: 'Escribe un comentario o adjunta una foto.' });
   if (texto.length > 1000) return res.status(400).json({ error: 'Tu comentario es muy largo (máximo 1000 caracteres).' });
-  const item = store.addMensajeComunidad({ publicacionId: publicacion.id, userId: user.id, nombre: user.nombre, texto });
+  const item = store.addMensajeComunidad({
+    publicacionId: publicacion.id,
+    userId: user.id,
+    nombre: user.nombre,
+    texto,
+    imagen: req.file ? `/uploads/${req.file.filename}` : '',
+    imagenNombre: req.file ? req.file.filename : '',
+    fotoAutor: user.fotoPerfilUrl || '',
+  });
   res.status(201).json(item);
 });
 

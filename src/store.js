@@ -238,6 +238,7 @@ async function init() {
       // desde ese momento en adelante ("borron y cuenta nueva" si cancela y
       // se vuelve a suscribir despues).
       if (typeof u.membresiaActivaDesde !== 'string') { u.membresiaActivaDesde = ''; changed = true; }
+      if (typeof u.fotoPerfilUrl !== 'string') { u.fotoPerfilUrl = ''; changed = true; }
     });
     (data.bibliotecaClases || []).forEach((c) => {
       if (typeof c.recetarioUrl !== 'string') { c.recetarioUrl = ''; changed = true; }
@@ -400,6 +401,33 @@ async function init() {
       data._migFamiliaRolesGourmet = true;
       changed = true;
     }
+    // Campos nuevos para fotos de clientes: reseñas, comunidad y galeria.
+    // Todo lo que ya existia (creado por el admin, o ya publicado) se marca
+    // 'aprobado' para no desaparecer — solo lo nuevo que suban los clientes
+    // empieza en 'pendiente'.
+    (data.resenas || []).forEach((r) => {
+      if (typeof r.imagen !== 'string') { r.imagen = ''; changed = true; }
+      if (typeof r.imagenNombre !== 'string') { r.imagenNombre = ''; changed = true; }
+      if (typeof r.fotoAutor !== 'string') { r.fotoAutor = ''; changed = true; }
+    });
+    (data.publicacionesComunidad || []).forEach((p) => {
+      if (typeof p.userId === 'undefined') { p.userId = null; changed = true; }
+      if (typeof p.nombreAutor !== 'string') { p.nombreAutor = ''; changed = true; }
+      if (typeof p.fotoAutor !== 'string') { p.fotoAutor = ''; changed = true; }
+      if (typeof p.video !== 'string') { p.video = ''; changed = true; }
+      if (typeof p.videoNombre !== 'string') { p.videoNombre = ''; changed = true; }
+      if (typeof p.estado !== 'string') { p.estado = 'aprobado'; changed = true; }
+    });
+    (data.mensajesComunidad || []).forEach((m) => {
+      if (typeof m.imagen !== 'string') { m.imagen = ''; changed = true; }
+      if (typeof m.imagenNombre !== 'string') { m.imagenNombre = ''; changed = true; }
+      if (typeof m.fotoAutor !== 'string') { m.fotoAutor = ''; changed = true; }
+    });
+    (data.media || []).forEach((m) => {
+      if (typeof m.userId === 'undefined') { m.userId = null; changed = true; }
+      if (typeof m.nombreAutor !== 'string') { m.nombreAutor = ''; changed = true; }
+      if (typeof m.estado !== 'string') { m.estado = 'aprobado'; changed = true; }
+    });
     // Reemplaza un producto "paquete completo" antiguo (un solo articulo)
     // por una familia de 4: eBook (principal, visible en el catalogo) +
     // Anexo Excel + App + Paquete completo (estos 3 ocultos del catalogo,
@@ -856,9 +884,42 @@ module.exports = {
       url,
       title: title || '',
       filename: filename || null,
+      userId: null,
+      nombreAutor: '',
+      estado: 'aprobado',
       createdAt: new Date().toISOString(),
     };
     data.media.push(item);
+    save(data);
+    return item;
+  },
+  // Foto que sube un cliente para la galeria publica: queda 'pendiente'
+  // hasta que el admin la apruebe desde /admin, no aparece en /galeria
+  // mientras tanto.
+  addMediaCliente({ userId, nombreAutor, url, title, filename }) {
+    const data = load();
+    const item = {
+      id: nextId(data.media),
+      kind: 'photo',
+      source: 'upload',
+      url,
+      title: title || '',
+      filename: filename || null,
+      userId: userId || null,
+      nombreAutor: String(nombreAutor || '').trim(),
+      estado: 'pendiente',
+      createdAt: new Date().toISOString(),
+    };
+    data.media.push(item);
+    save(data);
+    return item;
+  },
+  updateMedia(id, patch) {
+    const data = load();
+    const item = data.media.find((m) => m.id === Number(id));
+    if (!item) return null;
+    if (typeof patch.estado === 'string') item.estado = patch.estado;
+    if (typeof patch.title === 'string') item.title = patch.title;
     save(data);
     return item;
   },
@@ -1210,6 +1271,7 @@ module.exports = {
       passwordHash,
       nombre: nombre || '',
       telefono: telefono || '',
+      fotoPerfilUrl: '',
       membresiaEstado: 'ninguna',
       membresiaPreapprovalId: '',
       membresiaActivaDesde: '',
@@ -1470,7 +1532,7 @@ module.exports = {
     const items = [...data.resenas].sort((a, b) => b.id - a.id);
     return onlyPublicadas ? items.filter((r) => r.publicado) : items;
   },
-  addResena({ userId, nombreAutor, texto, estrellas }) {
+  addResena({ userId, nombreAutor, texto, estrellas, imagen, imagenNombre, fotoAutor }) {
     const data = load();
     const item = {
       id: nextId(data.resenas),
@@ -1478,6 +1540,9 @@ module.exports = {
       nombreAutor: String(nombreAutor || '').trim(),
       texto: String(texto || '').trim(),
       estrellas: Math.max(1, Math.min(5, Number(estrellas) || 5)),
+      imagen: imagen || '',
+      imagenNombre: imagenNombre || '',
+      fotoAutor: fotoAutor || '',
       publicado: false,
       createdAt: new Date().toISOString(),
     };
@@ -1491,13 +1556,17 @@ module.exports = {
     if (!item) return null;
     if (typeof patch.publicado === 'boolean') item.publicado = patch.publicado;
     if (typeof patch.texto === 'string') item.texto = patch.texto;
+    if (typeof patch.imagen === 'string') item.imagen = patch.imagen;
+    if (typeof patch.imagenNombre === 'string') item.imagenNombre = patch.imagenNombre;
     save(data);
     return item;
   },
   deleteResena(id) {
     const data = load();
+    const item = data.resenas.find((r) => r.id === Number(id));
     data.resenas = data.resenas.filter((r) => r.id !== Number(id));
     save(data);
+    return item || null;
   },
 
   // ---- Comunidad: publicaciones del admin, con comentarios de clientes ----
@@ -1516,6 +1585,35 @@ module.exports = {
       texto: String(texto || '').trim(),
       imagen: '',
       imagenNombre: null,
+      video: '',
+      videoNombre: '',
+      userId: null,
+      nombreAutor: '',
+      fotoAutor: '',
+      estado: 'aprobado',
+      createdAt: new Date().toISOString(),
+    };
+    data.publicacionesComunidad.push(item);
+    save(data);
+    return item;
+  },
+  // Publicacion hecha por un cliente (foto o video + descripcion), como una
+  // red social: queda 'pendiente' hasta que el admin la apruebe desde
+  // /admin, no aparece en /comunidad mientras tanto.
+  addPublicacionComunidadCliente({ userId, nombreAutor, fotoAutor, texto, imagen, imagenNombre, video, videoNombre }) {
+    const data = load();
+    const item = {
+      id: nextId(data.publicacionesComunidad),
+      titulo: '',
+      texto: String(texto || '').trim(),
+      imagen: imagen || '',
+      imagenNombre: imagenNombre || null,
+      video: video || '',
+      videoNombre: videoNombre || '',
+      userId: userId || null,
+      nombreAutor: String(nombreAutor || '').trim(),
+      fotoAutor: fotoAutor || '',
+      estado: 'pendiente',
       createdAt: new Date().toISOString(),
     };
     data.publicacionesComunidad.push(item);
@@ -1530,6 +1628,9 @@ module.exports = {
     if (typeof patch.texto === 'string') item.texto = patch.texto;
     if (typeof patch.imagen === 'string') item.imagen = patch.imagen;
     if (typeof patch.imagenNombre === 'string' || patch.imagenNombre === null) item.imagenNombre = patch.imagenNombre;
+    if (typeof patch.video === 'string') item.video = patch.video;
+    if (typeof patch.videoNombre === 'string') item.videoNombre = patch.videoNombre;
+    if (typeof patch.estado === 'string') item.estado = patch.estado;
     save(data);
     return item;
   },
@@ -1548,7 +1649,7 @@ module.exports = {
     if (publicacionId) items = items.filter((m) => m.publicacionId === Number(publicacionId));
     return items.sort((a, b) => a.id - b.id);
   },
-  addMensajeComunidad({ publicacionId, userId, nombre, texto }) {
+  addMensajeComunidad({ publicacionId, userId, nombre, texto, imagen, imagenNombre, fotoAutor }) {
     const data = load();
     const item = {
       id: nextId(data.mensajesComunidad),
@@ -1556,6 +1657,9 @@ module.exports = {
       userId,
       nombre: String(nombre || '').trim(),
       texto: String(texto || '').trim(),
+      imagen: imagen || '',
+      imagenNombre: imagenNombre || '',
+      fotoAutor: fotoAutor || '',
       createdAt: new Date().toISOString(),
     };
     data.mensajesComunidad.push(item);
@@ -1564,7 +1668,9 @@ module.exports = {
   },
   deleteMensajeComunidad(id) {
     const data = load();
+    const item = data.mensajesComunidad.find((m) => m.id === Number(id));
     data.mensajesComunidad = data.mensajesComunidad.filter((m) => m.id !== Number(id));
     save(data);
+    return item || null;
   },
 };

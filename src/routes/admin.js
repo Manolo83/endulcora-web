@@ -135,6 +135,15 @@ router.post('/api/media/embed', requireAdmin, (req, res) => {
   res.status(201).json(item);
 });
 
+// Aprueba una foto que subio un cliente para la galeria (solo las
+// 'aprobado' se ven en /galeria). Si el admin quiere rechazarla, la borra
+// directo con el DELETE de abajo — no hace falta un estado "rechazado".
+router.patch('/api/media/:id', requireAdmin, (req, res) => {
+  const item = store.updateMedia(req.params.id, { estado: 'aprobado' });
+  if (!item) return res.status(404).json({ error: 'No se encontró esa foto.' });
+  res.json(item);
+});
+
 router.delete('/api/media/:id', requireAdmin, (req, res) => {
   const item = store.deleteMedia(req.params.id);
   if (item && item.source === 'upload' && item.filename) {
@@ -537,7 +546,8 @@ router.patch('/api/resenas/:id', requireAdmin, (req, res) => {
 });
 
 router.delete('/api/resenas/:id', requireAdmin, (req, res) => {
-  store.deleteResena(req.params.id);
+  const item = store.deleteResena(req.params.id);
+  if (item) borrarSiEsSubida(item.imagen);
   res.json({ ok: true });
 });
 
@@ -568,9 +578,21 @@ router.post('/api/comunidad/publicaciones/:id/imagen', requireAdmin, uploadImage
   res.status(201).json(item);
 });
 
+// Aprueba una publicacion que subio un cliente (foto/video + descripcion):
+// solo las 'aprobado' se ven en /comunidad. Para rechazarla, se borra
+// directo con el DELETE de abajo.
+router.patch('/api/comunidad/publicaciones/:id', requireAdmin, (req, res) => {
+  const item = store.updatePublicacionComunidad(req.params.id, { estado: 'aprobado' });
+  if (!item) return res.status(404).json({ error: 'No se encontró esa publicación.' });
+  res.json(item);
+});
+
 router.delete('/api/comunidad/publicaciones/:id', requireAdmin, (req, res) => {
   const item = store.deletePublicacionComunidad(req.params.id);
-  if (item) borrarSiEsSubida(item.imagen);
+  if (item) {
+    borrarSiEsSubida(item.imagen);
+    borrarSiEsSubida(item.video);
+  }
   res.json({ ok: true });
 });
 
@@ -579,7 +601,8 @@ router.get('/api/comunidad/publicaciones/:id/mensajes', requireAdmin, (req, res)
 });
 
 router.delete('/api/comunidad/mensajes/:id', requireAdmin, (req, res) => {
-  store.deleteMensajeComunidad(req.params.id);
+  const item = store.deleteMensajeComunidad(req.params.id);
+  if (item) borrarSiEsSubida(item.imagen);
   res.json({ ok: true });
 });
 

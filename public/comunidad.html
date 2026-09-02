@@ -108,7 +108,7 @@ body { background: #FBF4E9; }
 <main class="mx-auto max-w-3xl px-5 py-10">
   <p class="font-titulo text-[11px] tracking-[.3em] text-flama">COMUNIDAD</p>
   <h1 class="mt-2 font-display text-3xl text-vino sm:text-4xl">Publicaciones de Endulcora</h1>
-  <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-carbon/70">Comenta las publicaciones del equipo, comparte tus dudas o tus resultados. Solo clientes con cuenta pueden comentar; cualquiera puede leer.</p>
+  <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-carbon/70">Comparte tus fotos y videos, comenta las publicaciones de otros. Solo clientes con cuenta pueden publicar y comentar; cualquiera puede leer.</p>
 
   <div id="bloqueInvitado" class="mt-8 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
     <p class="mb-4 text-sm text-carbon/70">Inicia sesión o crea tu cuenta para poder comentar.</p>
@@ -143,6 +143,19 @@ body { background: #FBF4E9; }
     <button type="button" id="btnCerrarSesionComunidad" class="font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cerrar sesión</button>
   </div>
 
+  <form id="formNuevaPublicacion" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Comparte una foto o video</p>
+    <textarea id="nuevaPublicacionTexto" rows="3" maxlength="1000" placeholder="Cuéntanos qué preparaste…" class="mt-3 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm"></textarea>
+    <input id="nuevaPublicacionArchivo" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" required class="mt-3 w-full text-xs">
+    <p id="nuevaPublicacionError" class="mt-2 hidden text-xs text-red-600"></p>
+    <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+      <p class="text-xs text-carbon/50">Tu publicación se revisará antes de aparecer aquí.</p>
+      <button type="submit" class="flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        <span id="nuevaPublicacionSpinner" class="spinner hidden"></span> Publicar
+      </button>
+    </div>
+  </form>
+
   <div id="publicacionesComunidad" class="mt-8 flex flex-col gap-6"></div>
 </main>
 
@@ -175,22 +188,42 @@ function formatoFecha(iso){
   return new Date(iso).toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
+function avatarHtml(url, nombre, talla){
+  if(url) return `<img src="${escapeHtml(url)}" alt="" class="${talla} shrink-0 rounded-full object-cover">`;
+  return `<span class="grid ${talla} shrink-0 place-items-center rounded-full bg-vino/10 font-titulo text-vino">${escapeHtml((nombre || '?').trim().charAt(0).toUpperCase())}</span>`;
+}
+
 function tarjetaPublicacion(p){
-  const imagenHtml = p.imagen ? `<img src="${p.imagen}" alt="${escapeHtml(p.titulo || '')}" loading="lazy" class="aspect-video w-full object-cover">` : '';
+  const mediaHtml = p.video
+    ? `<video src="${escapeHtml(p.video)}" controls playsinline class="aspect-video w-full bg-carbon object-cover"></video>`
+    : (p.imagen ? `<img src="${escapeHtml(p.imagen)}" alt="" loading="lazy" class="aspect-video w-full object-cover">` : '');
   return `
     <article class="overflow-hidden rounded-3xl bg-white ring-1 ring-vino/10" data-publicacion-id="${p.id}">
-      ${imagenHtml}
+      ${mediaHtml}
       <div class="p-5">
-        <p class="font-ui text-[11px] uppercase tracking-widest text-humo">${formatoFecha(p.createdAt)}</p>
-        <h2 class="mt-1 font-titulo text-xl text-vino">${escapeHtml(p.titulo || '')}</h2>
+        <div class="flex items-center gap-2.5">
+          ${p.nombreAutor ? avatarHtml(p.fotoAutor, p.nombreAutor, 'h-8 w-8 text-xs') : ''}
+          <div>
+            ${p.nombreAutor ? `<p class="font-ui text-[11px] font-700 uppercase tracking-wider text-vino">${escapeHtml(p.nombreAutor)}</p>` : ''}
+            <p class="font-ui text-[10px] uppercase tracking-widest text-humo">${formatoFecha(p.createdAt)}</p>
+          </div>
+        </div>
+        ${p.titulo ? `<h2 class="mt-3 font-titulo text-xl text-vino">${escapeHtml(p.titulo)}</h2>` : ''}
         ${p.texto ? `<p class="mt-2 whitespace-pre-line text-[15px] text-carbon/80">${escapeHtml(p.texto)}</p>` : ''}
 
         <div class="mt-5 border-t border-vino/10 pt-4">
           <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Comentarios</p>
           <div class="comentariosPublicacion mt-3 flex flex-col gap-2.5"></div>
-          <form class="formComentario mt-3 hidden gap-2 sm:flex">
-            <input type="text" maxlength="1000" placeholder="Escribe un comentario…" class="campoComentario w-full rounded-full border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
-            <button type="submit" class="shrink-0 rounded-full boton-vivo bg-vino px-5 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Comentar</button>
+          <form class="formComentario mt-3 hidden flex-col gap-2">
+            <div class="flex gap-2">
+              <input type="text" maxlength="1000" placeholder="Escribe un comentario…" class="campoComentario w-full rounded-full border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+              <button type="submit" class="shrink-0 rounded-full boton-vivo bg-vino px-5 py-2.5 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Comentar</button>
+            </div>
+            <label class="inline-flex w-fit cursor-pointer items-center gap-1.5 font-ui text-[11px] text-carbon/50 hover:text-vino transition">
+              📷 Adjuntar foto
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="campoComentarioImagen hidden">
+            </label>
+            <span class="campoComentarioImagenNombre hidden text-[11px] text-carbon/50"></span>
           </form>
         </div>
       </div>
@@ -203,9 +236,13 @@ function pintarComentarios(cont, items){
     return;
   }
   cont.innerHTML = items.map(m => `
-    <div class="rounded-xl bg-crema/60 px-4 py-2.5">
-      <p class="font-ui text-[10px] uppercase tracking-widest text-humo">${escapeHtml(m.nombre)} · ${formatoFecha(m.createdAt)}</p>
-      <p class="mt-0.5 whitespace-pre-line text-sm text-carbon/85">${escapeHtml(m.texto)}</p>
+    <div class="flex items-start gap-2.5">
+      ${avatarHtml(m.fotoAutor, m.nombre, 'h-7 w-7 text-[11px]')}
+      <div class="min-w-0 flex-1 rounded-xl bg-crema/60 px-4 py-2.5">
+        <p class="font-ui text-[10px] uppercase tracking-widest text-humo">${escapeHtml(m.nombre)} · ${formatoFecha(m.createdAt)}</p>
+        ${m.texto ? `<p class="mt-0.5 whitespace-pre-line text-sm text-carbon/85">${escapeHtml(m.texto)}</p>` : ''}
+        ${m.imagen ? `<img src="${escapeHtml(m.imagen)}" alt="" loading="lazy" class="mt-2 max-h-60 rounded-lg object-cover">` : ''}
+      </div>
     </div>
   `).join('');
 }
@@ -237,19 +274,30 @@ async function cargarPublicaciones(){
 
       const form = art.querySelector('.formComentario');
       form.classList.toggle('hidden', !SESION.isLoggedIn);
+      form.classList.toggle('flex', SESION.isLoggedIn);
+      const campoImagen = form.querySelector('.campoComentarioImagen');
+      const campoImagenNombre = form.querySelector('.campoComentarioImagenNombre');
+      campoImagen.addEventListener('change', () => {
+        const file = campoImagen.files[0];
+        campoImagenNombre.textContent = file ? `📎 ${file.name}` : '';
+        campoImagenNombre.classList.toggle('hidden', !file);
+      });
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const campo = form.querySelector('.campoComentario');
         const texto = campo.value.trim();
-        if(!texto) return;
+        if(!texto && !campoImagen.files[0]) return;
         try{
-          const res = await fetch(`/api/comunidad/publicaciones/${publicacionId}/mensajes`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texto }),
-          });
+          const fd = new FormData();
+          fd.append('texto', texto);
+          if(campoImagen.files[0]) fd.append('imagen', campoImagen.files[0]);
+          const res = await fetch(`/api/comunidad/publicaciones/${publicacionId}/mensajes`, { method: 'POST', body: fd });
           const data = await res.json();
           if(!res.ok) throw new Error(data.error || 'No se pudo publicar tu comentario');
           campo.value = '';
+          campoImagen.value = '';
+          campoImagenNombre.textContent = '';
+          campoImagenNombre.classList.add('hidden');
           await cargarComentarios(publicacionId, comentariosCont);
         }catch(err){
           alert(err.message);
@@ -274,7 +322,11 @@ function actualizarVistaSesion(){
     bloqueSesion.classList.add('hidden');
     bloqueSesion.classList.remove('flex');
   }
-  document.querySelectorAll('.formComentario').forEach(f => f.classList.toggle('hidden', !SESION.isLoggedIn));
+  document.querySelectorAll('.formComentario').forEach(f => {
+    f.classList.toggle('hidden', !SESION.isLoggedIn);
+    f.classList.toggle('flex', SESION.isLoggedIn);
+  });
+  document.getElementById('formNuevaPublicacion').classList.toggle('hidden', !SESION.isLoggedIn);
 }
 
 async function cargarSesion(){
@@ -363,6 +415,33 @@ document.getElementById('btnCerrarSesionComunidad').addEventListener('click', as
   try{ await fetch('/api/auth/logout', { method: 'POST' }); }catch(e){}
   SESION = { isLoggedIn: false, user: null };
   actualizarVistaSesion();
+});
+
+document.getElementById('formNuevaPublicacion').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('nuevaPublicacionError');
+  const spinner = document.getElementById('nuevaPublicacionSpinner');
+  err.classList.add('hidden');
+  const archivoInput = document.getElementById('nuevaPublicacionArchivo');
+  const texto = document.getElementById('nuevaPublicacionTexto').value.trim();
+  if(!archivoInput.files[0]){ err.textContent = 'Sube una foto o un video.'; err.classList.remove('hidden'); return; }
+  spinner.classList.remove('hidden');
+  try{
+    const fd = new FormData();
+    fd.append('texto', texto);
+    fd.append('archivo', archivoInput.files[0]);
+    const res = await fetch('/api/comunidad/publicaciones', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo publicar.');
+    document.getElementById('nuevaPublicacionTexto').value = '';
+    archivoInput.value = '';
+    alert('¡Gracias! Tu publicación se revisará antes de aparecer aquí.');
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }finally{
+    spinner.classList.add('hidden');
+  }
 });
 
 cargarPublicaciones();

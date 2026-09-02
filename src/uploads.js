@@ -6,6 +6,7 @@ const sharp = require('sharp');
 const { UPLOAD_DIR } = require('./config');
 
 const ALLOWED_IMAGE = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const ALLOWED_VIDEO = ['video/mp4', 'video/webm', 'video/quicktime'];
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
@@ -23,6 +24,17 @@ const uploadImage = multer({
   fileFilter: (req, file, cb) => {
     if (ALLOWED_IMAGE.includes(file.mimetype)) cb(null, true);
     else cb(new Error('Tipo de archivo no permitido. Usa JPG, PNG, WEBP o GIF.'));
+  },
+});
+
+// Igual, pero acepta tambien video (para publicaciones de comunidad: foto O
+// video + descripcion, como una publicacion de red social).
+const uploadMedia = multer({
+  storage,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB, de sobra para un video corto de celular
+  fileFilter: (req, file, cb) => {
+    if ([...ALLOWED_IMAGE, ...ALLOWED_VIDEO].includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Tipo de archivo no permitido. Usa JPG, PNG, WEBP, GIF, MP4, WEBM o MOV.'));
   },
 });
 
@@ -61,4 +73,4 @@ function borrarSiEsSubida(url) {
   }
 }
 
-module.exports = { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida };
+module.exports = { ALLOWED_IMAGE, ALLOWED_VIDEO, uploadImage, uploadMedia, procesarImagenSubida, borrarSiEsSubida };

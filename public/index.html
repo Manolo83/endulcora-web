@@ -662,6 +662,10 @@ trufada, paso a paso</h2>
           <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Tu reseña</span>
           <textarea id="resenaTexto" required maxlength="600" rows="3" placeholder="Cuéntanos tu experiencia…" class="mt-1.5 w-full rounded-xl border border-vino/20 bg-white px-4 py-3"></textarea>
         </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Foto (opcional)</span>
+          <input id="resenaImagenInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="mt-1.5 w-full text-xs">
+        </label>
         <p id="resenaError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
         <div class="flex flex-wrap items-center justify-between gap-3">
           <p class="text-xs text-carbon/50">Tu reseña se publicará después de ser revisada por el equipo de Endulcora.</p>
@@ -918,14 +922,25 @@ function vistaOlvide(){
 
 function vistaPerfil(){
   const u = SESION.user || {};
+  const avatarHtml = u.fotoPerfilUrl
+    ? `<img src="${escapeHtml(u.fotoPerfilUrl)}" alt="" class="h-14 w-14 shrink-0 rounded-full object-cover ring-2 ring-vino/15">`
+    : `<span class="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-vino/10 font-titulo text-lg text-vino">${escapeHtml((u.nombre || '?').trim().charAt(0).toUpperCase())}</span>`;
   return { titulo: 'Mi cuenta', html: `
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <p class="font-titulo text-lg tracking-wide text-vino">${escapeHtml(u.nombre || '')}</p>
-        <p class="text-sm text-carbon/60">${escapeHtml(u.email || '')}</p>
+      <div class="flex items-center gap-3">
+        <label class="relative block cursor-pointer" title="Cambiar foto de perfil">
+          ${avatarHtml}
+          <span class="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full bg-flama text-[10px] text-vino ring-2 ring-white">✎</span>
+          <input id="perfilFotoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden">
+        </label>
+        <div>
+          <p class="font-titulo text-lg tracking-wide text-vino">${escapeHtml(u.nombre || '')}</p>
+          <p class="text-sm text-carbon/60">${escapeHtml(u.email || '')}</p>
+        </div>
       </div>
       <button type="button" onclick="cerrarSesionCliente()" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Cerrar sesión</button>
     </div>
+    <p id="perfilFotoEstado" class="mt-2 hidden text-xs text-carbon/50"></p>
 
     <div class="mt-6">
       <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Mis compras</p>
@@ -1081,6 +1096,28 @@ function iniciarModalAcceso(){
 
 function iniciarModalPerfil(){
   cargarOrdenesPerfil();
+
+  const inputFoto = document.getElementById('perfilFotoInput');
+  if(inputFoto) inputFoto.addEventListener('change', async () => {
+    const file = inputFoto.files[0];
+    if(!file) return;
+    const estado = document.getElementById('perfilFotoEstado');
+    estado.textContent = 'Subiendo…';
+    estado.classList.remove('hidden');
+    const fd = new FormData();
+    fd.append('file', file);
+    try{
+      const res = await fetch('/api/auth/foto', { method: 'POST', body: fd });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'No se pudo subir la foto');
+      SESION.user = data.user;
+      actualizarHeaderSesion();
+      toast('Foto de perfil actualizada');
+      abrirModal('perfil');
+    }catch(err){
+      estado.textContent = err.message;
+    }
+  });
 
   const form = document.getElementById('formEditarPerfil');
   if(form) form.addEventListener('submit', async (e) => {
@@ -2130,11 +2167,19 @@ async function cargarResenasPublico(){
       return;
     }
     cont.innerHTML = items.map(r => `
-      <article class="reveal visible tarjeta-viva rounded-2xl bg-crema/60 p-6 ring-1 ring-vino/10">
-        <p class="text-lg leading-none">${estrellasHtmlPublico(r.estrellas)}</p>
-        <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-carbon/75">${escapeHtml(r.texto)}</p>
-        <p class="mt-4 font-ui text-[12px] font-700 uppercase tracking-wider text-vino">${escapeHtml(r.nombreAutor)}</p>
-        <p class="text-xs text-carbon/45">${new Date(r.createdAt).toLocaleDateString('es-MX')}</p>
+      <article class="reveal visible tarjeta-viva overflow-hidden rounded-2xl bg-crema/60 ring-1 ring-vino/10">
+        ${r.imagen ? `<img src="${escapeHtml(r.imagen)}" alt="" loading="lazy" class="aspect-video w-full object-cover">` : ''}
+        <div class="p-6">
+          <p class="text-lg leading-none">${estrellasHtmlPublico(r.estrellas)}</p>
+          <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-carbon/75">${escapeHtml(r.texto)}</p>
+          <div class="mt-4 flex items-center gap-2.5">
+            ${r.fotoAutor ? `<img src="${escapeHtml(r.fotoAutor)}" alt="" class="h-8 w-8 rounded-full object-cover">` : `<span class="grid h-8 w-8 place-items-center rounded-full bg-vino/10 font-titulo text-xs text-vino">${escapeHtml((r.nombreAutor || '?').trim().charAt(0).toUpperCase())}</span>`}
+            <div>
+              <p class="font-ui text-[12px] font-700 uppercase tracking-wider text-vino">${escapeHtml(r.nombreAutor)}</p>
+              <p class="text-xs text-carbon/45">${new Date(r.createdAt).toLocaleDateString('es-MX')}</p>
+            </div>
+          </div>
+        </div>
       </article>
     `).join('');
   }catch(e){
@@ -2151,14 +2196,16 @@ if(formResenaEl) formResenaEl.addEventListener('submit', async (e) => {
   if(!texto){ errorEl.textContent = 'Escribe tu reseña.'; errorEl.classList.remove('hidden'); return; }
   spinner.classList.remove('hidden');
   try{
-    const res = await fetch('/api/auth/resenas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ texto, estrellas: RESENA_ESTRELLAS_SEL }),
-    });
+    const fd = new FormData();
+    fd.append('texto', texto);
+    fd.append('estrellas', RESENA_ESTRELLAS_SEL);
+    const imagenInput = document.getElementById('resenaImagenInput');
+    if(imagenInput && imagenInput.files[0]) fd.append('imagen', imagenInput.files[0]);
+    const res = await fetch('/api/auth/resenas', { method: 'POST', body: fd });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo enviar tu reseña.');
     document.getElementById('resenaTexto').value = '';
+    if(imagenInput) imagenInput.value = '';
     RESENA_ESTRELLAS_SEL = 5;
     pintarPickerEstrellas();
     toast('¡Gracias! Tu reseña se publicará después de ser revisada.');

@@ -1086,7 +1086,7 @@ async function cargarGaleria(){
       return;
     }
     cont.innerHTML = items.map(m => `
-      <article class="overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+      <article class="overflow-hidden rounded-2xl bg-white ring-1 ${m.estado === 'pendiente' ? 'ring-2 ring-dorado' : 'ring-1 ring-vino/10'}">
         <div class="aspect-video w-full bg-carbon/5">
           ${m.kind === 'photo'
             ? `<img src="${m.url}" alt="${escapeHtml(m.title || '')}" class="h-full w-full object-cover">`
@@ -1097,13 +1097,25 @@ async function cargarGaleria(){
         </div>
         <div class="flex items-center justify-between gap-3 p-4">
           <div>
-            <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${m.kind === 'photo' ? 'Foto' : 'Video'}</p>
+            <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${m.kind === 'photo' ? 'Foto' : 'Video'}${m.nombreAutor ? ` · ${escapeHtml(m.nombreAutor)}` : ''}</p>
             <p class="text-sm text-carbon/70">${escapeHtml(m.title || '(sin título)')}</p>
+            ${m.estado === 'pendiente' ? '<p class="mt-1 font-ui text-[11px] font-700 uppercase tracking-wider text-dorado">Pendiente de aprobar</p>' : ''}
           </div>
-          <button data-id="${m.id}" class="btnBorrarMedia shrink-0 rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+          <div class="flex shrink-0 items-center gap-2">
+            ${m.estado === 'pendiente' ? `<button data-id="${m.id}" class="btnAprobarMedia rounded-full border border-morado/30 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-morado hover:border-morado transition">Aprobar</button>` : ''}
+            <button data-id="${m.id}" class="btnBorrarMedia rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+          </div>
         </div>
       </article>
     `).join('');
+
+    cont.querySelectorAll('.btnAprobarMedia').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await api(`/admin/api/media/${btn.dataset.id}`, { method: 'PATCH' });
+        toast('Foto aprobada');
+        cargarGaleria();
+      });
+    });
 
     cont.querySelectorAll('.btnBorrarMedia').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -2500,13 +2512,16 @@ async function cargarResenas(){
     }
     cont.innerHTML = items.map(r => `
       <article class="flex items-start justify-between gap-4 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
-        <div>
-          <p class="font-ui text-[11px] uppercase tracking-widest ${r.publicado ? 'text-morado' : 'text-humo'}">
-            ${r.publicado ? 'Publicada' : 'Pendiente'} · ${new Date(r.createdAt).toLocaleDateString('es-MX')}
-          </p>
-          <p class="mt-1 text-sm">${estrellasHtml(r.estrellas)}</p>
-          <h3 class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(r.nombreAutor)}</h3>
-          <p class="mt-1 whitespace-pre-line text-sm text-carbon/70">${escapeHtml(r.texto)}</p>
+        <div class="flex items-start gap-4">
+          ${r.imagen ? `<img src="${r.imagen}" alt="" class="h-20 w-20 shrink-0 rounded-xl object-cover ring-1 ring-vino/10">` : ''}
+          <div>
+            <p class="font-ui text-[11px] uppercase tracking-widest ${r.publicado ? 'text-morado' : 'text-humo'}">
+              ${r.publicado ? 'Publicada' : 'Pendiente'} · ${new Date(r.createdAt).toLocaleDateString('es-MX')}
+            </p>
+            <p class="mt-1 text-sm">${estrellasHtml(r.estrellas)}</p>
+            <h3 class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(r.nombreAutor)}</h3>
+            <p class="mt-1 whitespace-pre-line text-sm text-carbon/70">${escapeHtml(r.texto)}</p>
+          </div>
         </div>
         <div class="flex shrink-0 flex-col gap-2">
           <button data-id="${r.id}" data-pub="${r.publicado ? 0 : 1}" class="btnTogglePubResena rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">
@@ -2545,16 +2560,20 @@ async function cargarComunidadAdmin(){
       return;
     }
     cont.innerHTML = publicaciones.map(p => `
-      <article class="overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10" data-publicacion-id="${p.id}">
-        ${p.imagen ? `<img src="${p.imagen}" alt="" class="aspect-video w-full object-cover">` : ''}
+      <article class="overflow-hidden rounded-2xl bg-white ring-1 ${p.estado === 'pendiente' ? 'ring-2 ring-dorado' : 'ring-1 ring-vino/10'}" data-publicacion-id="${p.id}">
+        ${p.video ? `<video src="${p.video}" controls class="aspect-video w-full bg-black object-cover"></video>` : p.imagen ? `<img src="${p.imagen}" alt="" class="aspect-video w-full object-cover">` : ''}
         <div class="p-4">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
-              <p class="font-ui text-[11px] uppercase tracking-widest text-humo">${new Date(p.createdAt).toLocaleString('es-MX')}</p>
-              <p class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(p.titulo || '')}</p>
+              <p class="font-ui text-[11px] uppercase tracking-widest text-humo">${p.nombreAutor ? `${escapeHtml(p.nombreAutor)} · ` : ''}${new Date(p.createdAt).toLocaleString('es-MX')}</p>
+              ${p.estado === 'pendiente' ? '<p class="mt-1 font-ui text-[11px] font-700 uppercase tracking-wider text-dorado">Pendiente de aprobar</p>' : ''}
+              ${p.titulo ? `<p class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(p.titulo)}</p>` : ''}
               ${p.texto ? `<p class="mt-1 whitespace-pre-line text-sm text-carbon/80">${escapeHtml(p.texto)}</p>` : ''}
             </div>
-            <button data-id="${p.id}" class="btnBorrarPublicacionComunidad shrink-0 rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+            <div class="flex shrink-0 items-center gap-2">
+              ${p.estado === 'pendiente' ? `<button data-id="${p.id}" class="btnAprobarPublicacionComunidad rounded-full border border-morado/30 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-morado hover:border-morado transition">Aprobar</button>` : ''}
+              <button data-id="${p.id}" class="btnBorrarPublicacionComunidad rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+            </div>
           </div>
           <div class="mt-3 border-t border-vino/10 pt-3">
             <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-carbon/50">Comentarios</p>
@@ -2567,6 +2586,13 @@ async function cargarComunidadAdmin(){
     cont.querySelectorAll('[data-publicacion-id]').forEach(art => {
       const publicacionId = art.dataset.publicacionId;
       cargarComentariosComunidadAdmin(publicacionId, art.querySelector('.comentariosPublicacionAdmin'));
+    });
+    cont.querySelectorAll('.btnAprobarPublicacionComunidad').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await api(`/admin/api/comunidad/publicaciones/${btn.dataset.id}`, { method: 'PATCH' });
+        toast('Publicación aprobada');
+        cargarComunidadAdmin();
+      });
     });
     cont.querySelectorAll('.btnBorrarPublicacionComunidad').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -2591,7 +2617,8 @@ async function cargarComentariosComunidadAdmin(publicacionId, cont){
       <div class="flex items-start justify-between gap-3 rounded-xl bg-crema/60 px-3 py-2">
         <div class="min-w-0">
           <p class="font-ui text-[10px] uppercase tracking-widest text-humo">${escapeHtml(m.nombre)} · ${new Date(m.createdAt).toLocaleString('es-MX')}</p>
-          <p class="mt-0.5 whitespace-pre-line text-sm text-carbon/80">${escapeHtml(m.texto)}</p>
+          ${m.texto ? `<p class="mt-0.5 whitespace-pre-line text-sm text-carbon/80">${escapeHtml(m.texto)}</p>` : ''}
+          ${m.imagen ? `<img src="${m.imagen}" alt="" class="mt-1 h-20 w-20 rounded-lg object-cover">` : ''}
         </div>
         <button data-id="${m.id}" class="btnBorrarMensajeComunidad shrink-0 rounded-full border border-red-200 px-2.5 py-1 font-ui text-[10px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
       </div>
