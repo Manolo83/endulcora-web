@@ -2,33 +2,12 @@ const store = require('./store');
 const { SITE_URL } = require('./config');
 const { enviarCorreoCampana } = require('./email');
 
-// "Ramp-up" de reputación: un dominio que de la nada manda miles de correos
-// de golpe hace que Gmail/Outlook filtren buena parte (aceptan el correo —
-// por eso Resend lo marca "Entregado" — pero lo descartan despues, sin que
-// se note). Mandando cada vez mas por dia, el dominio va ganando confianza.
-// Indice 0 = dia en que se crea la campaña, indice 1 = el dia siguiente, etc.
-// De ahi en adelante (una vez pasados estos dias) ya no hay limite.
-const RAMPA_DIARIA = [1000, 2000, 4000];
-
-function diaISO(fecha) {
-  return new Date(fecha).toISOString().slice(0, 10);
-}
-
-function diasTranscurridos(desde, hasta) {
-  const msPorDia = 24 * 60 * 60 * 1000;
-  const inicio = new Date(diaISO(desde) + 'T00:00:00Z').getTime();
-  const fin = new Date(diaISO(hasta) + 'T00:00:00Z').getTime();
-  return Math.max(0, Math.round((fin - inicio) / msPorDia));
-}
-
-// Cuantos contactos, en total (acumulado, no por dia), se pueden haber
-// procesado ya a estas alturas de la campaña.
-function limiteAcumuladoDeHoy(fechaInicio) {
-  const dia = diasTranscurridos(fechaInicio, new Date());
-  if (dia >= RAMPA_DIARIA.length) return Infinity;
-  let acumulado = 0;
-  for (let i = 0; i <= dia; i++) acumulado += RAMPA_DIARIA[i];
-  return acumulado;
+// Sin ramp-up: por decision del negocio, cada campaña manda a todos sus
+// contactos de una sola vez (sin repartir el envio en varios dias). El
+// unico limite que queda es la pausa entre cada correo, mas abajo, para no
+// saturar la API de Resend.
+function limiteAcumuladoDeHoy() {
+  return Infinity;
 }
 
 // Evita que la misma campaña se procese dos veces al mismo tiempo (ej. el
@@ -36,10 +15,10 @@ function limiteAcumuladoDeHoy(fechaInicio) {
 const procesandoActualmente = new Set();
 
 // Manda (o retoma) una campaña de correo masivo contacto por contacto,
-// respetando el limite diario de arriba, y guardando de inmediato quien ya
-// quedo procesado (store.registrarResultadoCampana) para que, si el
-// servidor se reinicia a la mitad, se pueda seguir exactamente donde se
-// quedo en vez de perder el resto o repetir correos ya enviados.
+// guardando de inmediato quien ya quedo procesado
+// (store.registrarResultadoCampana) para que, si el servidor se reinicia a
+// la mitad, se pueda seguir exactamente donde se quedo en vez de perder el
+// resto o repetir correos ya enviados.
 async function procesarCampana(campanaId) {
   if (procesandoActualmente.has(campanaId)) return;
   procesandoActualmente.add(campanaId);
@@ -93,10 +72,9 @@ async function procesarCampana(campanaId) {
     if (totalProcesadosAhora >= (campana.contactoIds || []).length) {
       store.actualizarCampanaCorreo(campanaId, { estado: 'terminada', terminadaAt: new Date().toISOString() });
     }
-    // Si todavia quedan pendientes porque se llego al limite del dia, la
-    // campaña se queda "enviando": el chequeo periodico (o el proximo
-    // arranque del servidor) la retoma en cuanto el limite del dia
-    // siguiente lo permita, sin que haya que hacer nada a mano.
+    // Si el servidor se reinicia a la mitad del envio, la campaña se queda
+    // "enviando": el chequeo periodico (o el proximo arranque del
+    // servidor) la retoma sola, sin que haya que hacer nada a mano.
   } finally {
     procesandoActualmente.delete(campanaId);
   }
