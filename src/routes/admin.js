@@ -12,10 +12,10 @@ const { generarCaratulaPDF } = require('../caratula');
 const { enviarCorreoRevistaMensual } = require('../email');
 const { procesarCampana } = require('../campanas');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
+const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
 
 const router = express.Router();
 
-const ALLOWED_IMAGE = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const ALLOWED_VIDEO = ['video/mp4', 'video/webm', 'video/quicktime'];
 
 const storage = multer.diskStorage({
@@ -35,15 +35,6 @@ const upload = multer({
   },
 });
 
-const uploadImage = multer({
-  storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB, suficiente para fotos de producto/hero
-  fileFilter: (req, file, cb) => {
-    if (ALLOWED_IMAGE.includes(file.mimetype)) cb(null, true);
-    else cb(new Error('Tipo de archivo no permitido. Usa JPG, PNG, WEBP o GIF.'));
-  },
-});
-
 const ALLOWED_DOCUMENTO = [
   'application/pdf',
   'application/zip',
@@ -60,41 +51,6 @@ const uploadDocumento = multer({
     else cb(new Error('Tipo de archivo no permitido. Usa PDF, Excel, ZIP o HTML.'));
   },
 });
-
-// Las fotos subidas desde el celular suelen venir a resolucion de camara
-// (varios MB, 4000px+). Eso hace que muchos celulares no puedan decodificarlas
-// (se ven como "imagen rota"), aunque en computadora carguen bien. Aqui se
-// redimensionan y comprimen antes de guardarlas, para que se vean bien en
-// cualquier dispositivo y carguen mas rapido.
-const IMAGEN_LADO_MAXIMO = 2000;
-async function procesarImagenSubida(req, res, next) {
-  if (!req.file || !ALLOWED_IMAGE.includes(req.file.mimetype) || req.file.mimetype === 'image/gif') {
-    return next();
-  }
-  try {
-    const ruta = req.file.path;
-    const metadata = await sharp(ruta).metadata();
-    let imagen = sharp(ruta)
-      .rotate() // aplica la orientacion EXIF de la camara y la deja fija en los pixeles
-      .resize({ width: IMAGEN_LADO_MAXIMO, height: IMAGEN_LADO_MAXIMO, fit: 'inside', withoutEnlargement: true });
-    if (metadata.format === 'png') imagen = imagen.png({ quality: 82, compressionLevel: 8 });
-    else if (metadata.format === 'webp') imagen = imagen.webp({ quality: 82 });
-    else imagen = imagen.jpeg({ quality: 82, mozjpeg: true });
-
-    const buffer = await imagen.toBuffer();
-    fs.writeFileSync(ruta, buffer);
-    req.file.size = buffer.length;
-  } catch (e) {
-    console.error('No se pudo redimensionar la imagen subida, se guarda tal cual:', e.message);
-  }
-  next();
-}
-
-function borrarSiEsSubida(url) {
-  if (typeof url === 'string' && url.startsWith('/uploads/')) {
-    fs.unlink(path.join(UPLOAD_DIR, path.basename(url)), () => {});
-  }
-}
 
 // Genera la carátula de un PDF (primera página), la comprime y la guarda como
 // imagen subida; regresa su URL o null si no se pudo generar.
