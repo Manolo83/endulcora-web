@@ -172,6 +172,7 @@ function datosPorDefecto() {
     resenas: [],
     publicacionesComunidad: [],
     mensajesComunidad: [],
+    comentariosGaleria: [],
     contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '', revistaUrl: '', revistaNombre: '', revistaNumero: '' },
   };
 }
@@ -927,8 +928,39 @@ module.exports = {
     const data = load();
     const item = data.media.find((m) => m.id === Number(id));
     data.media = data.media.filter((m) => m.id !== Number(id));
+    data.comentariosGaleria = (data.comentariosGaleria || []).filter((c) => c.mediaId !== Number(id));
     save(data);
     return item;
+  },
+
+  getComentariosGaleria(mediaId) {
+    const data = load();
+    return (data.comentariosGaleria || [])
+      .filter((c) => c.mediaId === Number(mediaId))
+      .sort((a, b) => a.id - b.id);
+  },
+  addComentarioGaleria({ mediaId, userId, nombre, texto, fotoAutor }) {
+    const data = load();
+    data.comentariosGaleria = data.comentariosGaleria || [];
+    const item = {
+      id: nextId(data.comentariosGaleria),
+      mediaId: Number(mediaId),
+      userId: userId || null,
+      nombre: String(nombre || '').trim(),
+      texto: String(texto || '').trim(),
+      fotoAutor: fotoAutor || '',
+      createdAt: new Date().toISOString(),
+    };
+    data.comentariosGaleria.push(item);
+    save(data);
+    return item;
+  },
+  deleteComentarioGaleria(id) {
+    const data = load();
+    const item = (data.comentariosGaleria || []).find((c) => c.id === Number(id));
+    data.comentariosGaleria = (data.comentariosGaleria || []).filter((c) => c.id !== Number(id));
+    save(data);
+    return item || null;
   },
 
   // ---- Secretos que el propio servidor consigue y guarda ----

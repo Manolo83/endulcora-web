@@ -606,6 +606,15 @@ router.delete('/api/comunidad/mensajes/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+router.get('/api/galeria/:id/comentarios', requireAdmin, (req, res) => {
+  res.json(store.getComentariosGaleria(req.params.id));
+});
+
+router.delete('/api/galeria/comentarios/:id', requireAdmin, (req, res) => {
+  store.deleteComentarioGaleria(req.params.id);
+  res.json({ ok: true });
+});
+
 // ---- Clientes: lista para /admin (tabla) y para exportar audiencia (Meta Ads) ----
 router.get('/api/users', requireAdmin, (req, res) => {
   const usuarios = store.getUsers().map((u) => {

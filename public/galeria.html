@@ -180,25 +180,65 @@ function toEmbedUrl(url){
   return url;
 }
 
+let SESION_G = { isLoggedIn: false, user: null };
+
+function avatarHtml(url, nombre, talla){
+  if(url) return `<img src="${url}" alt="" class="${talla} shrink-0 rounded-full object-cover">`;
+  const letra = escapeHtml((nombre || '?').trim().charAt(0).toUpperCase() || '?');
+  return `<span class="${talla} shrink-0 grid place-items-center rounded-full bg-vino/10 font-ui text-xs font-700 text-vino">${letra}</span>`;
+}
+
 function tarjetaMedia(m){
-  const titulo = m.title ? `<p class="p-4 font-ui text-sm text-vino">${escapeHtml(m.title)}</p>` : '';
+  const titulo = m.title ? `<p class="px-4 pt-4 font-ui text-sm text-vino">${escapeHtml(m.title)}</p>` : '';
+  let media;
   if(m.kind === 'photo'){
-    return `<figure class="tarjeta-viva overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
-      <img src="${m.url}" alt="${escapeHtml(m.title || 'Foto de Endulcora')}" loading="lazy" class="aspect-[4/3] w-full object-cover">
-      ${titulo}
-    </figure>`;
-  }
-  if(m.source === 'embed'){
+    media = `<img src="${m.url}" alt="${escapeHtml(m.title || 'Foto de Endulcora')}" loading="lazy" class="aspect-[4/3] w-full object-cover">`;
+  }else if(m.source === 'embed'){
     const embedUrl = toEmbedUrl(m.url);
-    return `<figure class="tarjeta-viva overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
-      <div class="aspect-video w-full"><iframe class="h-full w-full" src="${embedUrl}" title="${escapeHtml(m.title || 'Video de Endulcora')}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
-      ${titulo}
-    </figure>`;
+    media = `<div class="aspect-video w-full"><iframe class="h-full w-full" src="${embedUrl}" title="${escapeHtml(m.title || 'Video de Endulcora')}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+  }else{
+    media = `<video class="aspect-video w-full bg-black" src="${m.url}" controls preload="metadata"></video>`;
   }
-  return `<figure class="tarjeta-viva overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
-    <video class="aspect-video w-full bg-black" src="${m.url}" controls preload="metadata"></video>
+  const formComentario = SESION_G.isLoggedIn
+    ? `<form class="formComentarioMedia mt-3 flex items-center gap-2" data-media-id="${m.id}">
+        <input type="text" maxlength="1000" required placeholder="Escribe un comentario…" class="min-w-0 flex-1 rounded-full border border-vino/15 bg-crema/60 px-4 py-2 text-sm">
+        <button type="submit" class="shrink-0 rounded-full bg-vino px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Enviar</button>
+      </form>`
+    : '<p class="mt-3 text-xs text-carbon/40">Inicia sesión para comentar.</p>';
+  return `<figure class="tarjeta-viva overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10" data-media-id="${m.id}">
+    ${media}
     ${titulo}
+    <div class="p-4">
+      <div class="comentariosMedia space-y-2 text-sm"></div>
+      ${formComentario}
+    </div>
   </figure>`;
+}
+
+function pintarComentariosMedia(cont, items){
+  if(!items.length){
+    cont.innerHTML = '<p class="text-xs text-carbon/40">Sé el primero en comentar.</p>';
+    return;
+  }
+  cont.innerHTML = items.map(c => `
+    <div class="flex items-start gap-2">
+      ${avatarHtml(c.fotoAutor, c.nombre, 'h-7 w-7')}
+      <div class="min-w-0">
+        <p class="font-ui text-[11px] font-700 text-vino">${escapeHtml(c.nombre)}</p>
+        <p class="whitespace-pre-line text-carbon/80">${escapeHtml(c.texto)}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function cargarComentariosMedia(mediaId, cont){
+  try{
+    const res = await fetch(`/api/galeria/${mediaId}/comentarios`);
+    const items = await res.json();
+    pintarComentariosMedia(cont, items);
+  }catch(e){
+    cont.innerHTML = '<p class="text-xs text-carbon/40">No se pudieron cargar los comentarios.</p>';
+  }
 }
 
 async function cargarGaleria(){
@@ -211,28 +251,63 @@ async function cargarGaleria(){
       return;
     }
     cont.innerHTML = items.map(tarjetaMedia).join('');
+
+    cont.querySelectorAll('[data-media-id]').forEach(fig => {
+      const mediaId = fig.dataset.mediaId;
+      cargarComentariosMedia(mediaId, fig.querySelector('.comentariosMedia'));
+      const form = fig.querySelector('.formComentarioMedia');
+      if(!form) return;
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = form.querySelector('input');
+        const texto = input.value.trim();
+        if(!texto) return;
+        const boton = form.querySelector('button');
+        boton.disabled = true;
+        try{
+          const res2 = await fetch(`/api/galeria/${mediaId}/comentarios`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texto }),
+          });
+          const data = await res2.json();
+          if(!res2.ok) throw new Error(data.error || 'No se pudo enviar tu comentario.');
+          input.value = '';
+          cargarComentariosMedia(mediaId, fig.querySelector('.comentariosMedia'));
+        }catch(err){
+          alert(err.message);
+        }finally{
+          boton.disabled = false;
+        }
+      });
+    });
   }catch(e){
     cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudo cargar la galería.</p>';
   }
 }
-cargarGaleria();
 
 async function cargarSesionGaleria(){
   try{
     const res = await fetch('/api/auth/session');
-    const data = await res.json();
-    const bloqueInvitado = document.getElementById('galeriaSubirInvitado');
-    const form = document.getElementById('formSubirGaleria');
-    if(data.isLoggedIn){
-      bloqueInvitado.classList.add('hidden');
-      form.classList.remove('hidden');
-    }else{
-      bloqueInvitado.classList.remove('hidden');
-      form.classList.add('hidden');
-    }
-  }catch(e){}
+    SESION_G = await res.json();
+  }catch(e){
+    SESION_G = { isLoggedIn: false, user: null };
+  }
+  const bloqueInvitado = document.getElementById('galeriaSubirInvitado');
+  const form = document.getElementById('formSubirGaleria');
+  if(SESION_G.isLoggedIn){
+    bloqueInvitado.classList.add('hidden');
+    form.classList.remove('hidden');
+  }else{
+    bloqueInvitado.classList.remove('hidden');
+    form.classList.add('hidden');
+  }
 }
-cargarSesionGaleria();
+
+(async () => {
+  await cargarSesionGaleria();
+  await cargarGaleria();
+})();
 
 document.getElementById('formSubirGaleria').addEventListener('submit', async (e) => {
   e.preventDefault();

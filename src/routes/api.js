@@ -42,6 +42,30 @@ router.post('/galeria/subir', requireCliente, uploadImage.single('file'), proces
   res.status(201).json(item);
 });
 
+router.get('/galeria/:id/comentarios', (req, res) => {
+  const item = store.getMedia().find((m) => m.id === Number(req.params.id));
+  if (!item) return res.status(404).json({ error: 'No se encontró esa foto.' });
+  res.json(store.getComentariosGaleria(req.params.id));
+});
+
+router.post('/galeria/:id/comentarios', requireCliente, (req, res) => {
+  const item = store.getMedia().find((m) => m.id === Number(req.params.id));
+  if (!item) return res.status(404).json({ error: 'No se encontró esa foto.' });
+  const user = store.getUserById(req.session.userId);
+  if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
+  const texto = String((req.body && req.body.texto) || '').trim();
+  if (!texto) return res.status(400).json({ error: 'Escribe un comentario.' });
+  if (texto.length > 1000) return res.status(400).json({ error: 'Tu comentario es muy largo (máximo 1000 caracteres).' });
+  const comentario = store.addComentarioGaleria({
+    mediaId: item.id,
+    userId: user.id,
+    nombre: user.nombre,
+    texto,
+    fotoAutor: user.fotoPerfilUrl || '',
+  });
+  res.status(201).json(comentario);
+});
+
 router.get('/content', (req, res) => {
   res.json(store.getContent());
 });

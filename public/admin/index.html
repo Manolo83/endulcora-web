@@ -1086,7 +1086,7 @@ async function cargarGaleria(){
       return;
     }
     cont.innerHTML = items.map(m => `
-      <article class="overflow-hidden rounded-2xl bg-white ring-1 ${m.estado === 'pendiente' ? 'ring-2 ring-dorado' : 'ring-1 ring-vino/10'}">
+      <article class="overflow-hidden rounded-2xl bg-white ring-1 ${m.estado === 'pendiente' ? 'ring-2 ring-dorado' : 'ring-1 ring-vino/10'}" data-media-id="${m.id}">
         <div class="aspect-video w-full bg-carbon/5">
           ${m.kind === 'photo'
             ? `<img src="${m.url}" alt="${escapeHtml(m.title || '')}" class="h-full w-full object-cover">`
@@ -1095,19 +1095,29 @@ async function cargarGaleria(){
               : `<video src="${m.url}" controls class="h-full w-full bg-black"></video>`
           }
         </div>
-        <div class="flex items-center justify-between gap-3 p-4">
-          <div>
-            <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${m.kind === 'photo' ? 'Foto' : 'Video'}${m.nombreAutor ? ` · ${escapeHtml(m.nombreAutor)}` : ''}</p>
-            <p class="text-sm text-carbon/70">${escapeHtml(m.title || '(sin título)')}</p>
-            ${m.estado === 'pendiente' ? '<p class="mt-1 font-ui text-[11px] font-700 uppercase tracking-wider text-dorado">Pendiente de aprobar</p>' : ''}
+        <div class="p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${m.kind === 'photo' ? 'Foto' : 'Video'}${m.nombreAutor ? ` · ${escapeHtml(m.nombreAutor)}` : ''}</p>
+              <p class="text-sm text-carbon/70">${escapeHtml(m.title || '(sin título)')}</p>
+              ${m.estado === 'pendiente' ? '<p class="mt-1 font-ui text-[11px] font-700 uppercase tracking-wider text-dorado">Pendiente de aprobar</p>' : ''}
+            </div>
+            <div class="flex shrink-0 items-center gap-2">
+              ${m.estado === 'pendiente' ? `<button data-id="${m.id}" class="btnAprobarMedia rounded-full border border-morado/30 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-morado hover:border-morado transition">Aprobar</button>` : ''}
+              <button data-id="${m.id}" class="btnBorrarMedia rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+            </div>
           </div>
-          <div class="flex shrink-0 items-center gap-2">
-            ${m.estado === 'pendiente' ? `<button data-id="${m.id}" class="btnAprobarMedia rounded-full border border-morado/30 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-morado hover:border-morado transition">Aprobar</button>` : ''}
-            <button data-id="${m.id}" class="btnBorrarMedia rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+          <div class="mt-3 border-t border-vino/10 pt-3">
+            <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-carbon/50">Comentarios</p>
+            <div class="comentariosGaleriaAdmin mt-2 space-y-2"></div>
           </div>
         </div>
       </article>
     `).join('');
+
+    cont.querySelectorAll('[data-media-id]').forEach(art => {
+      cargarComentariosGaleriaAdmin(art.dataset.mediaId, art.querySelector('.comentariosGaleriaAdmin'));
+    });
 
     cont.querySelectorAll('.btnAprobarMedia').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -1126,6 +1136,34 @@ async function cargarGaleria(){
     });
   }catch(e){
     cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+async function cargarComentariosGaleriaAdmin(mediaId, cont){
+  try{
+    const items = await api(`/admin/api/galeria/${mediaId}/comentarios`);
+    if(!items.length){
+      cont.innerHTML = '<p class="text-xs text-carbon/40">Sin comentarios todavía.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(c => `
+      <div class="flex items-start justify-between gap-3 rounded-xl bg-crema/60 px-3 py-2">
+        <div class="min-w-0">
+          <p class="font-ui text-[10px] uppercase tracking-widest text-humo">${escapeHtml(c.nombre)} · ${new Date(c.createdAt).toLocaleString('es-MX')}</p>
+          <p class="mt-0.5 whitespace-pre-line text-sm text-carbon/80">${escapeHtml(c.texto)}</p>
+        </div>
+        <button data-id="${c.id}" class="btnBorrarComentarioGaleria shrink-0 rounded-full border border-red-200 px-2.5 py-1 font-ui text-[10px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+      </div>
+    `).join('');
+    cont.querySelectorAll('.btnBorrarComentarioGaleria').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar este comentario?')) return;
+        await api(`/admin/api/galeria/comentarios/${btn.dataset.id}`, { method: 'DELETE' });
+        cargarComentariosGaleriaAdmin(mediaId, cont);
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-xs text-red-600">${escapeHtml(e.message)}</p>`;
   }
 }
 
