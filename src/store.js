@@ -894,9 +894,9 @@ module.exports = {
     save(data);
     return item;
   },
-  // Foto que sube un cliente para la galeria publica: queda 'pendiente'
-  // hasta que el admin la apruebe desde /admin, no aparece en /galeria
-  // mientras tanto.
+  // Foto que sube un cliente para la galeria publica: se publica de
+  // inmediato (aparece en /galeria sin esperar aprobacion). El admin
+  // conserva el control desde /admin para borrarla despues si hace falta.
   addMediaCliente({ userId, nombreAutor, url, title, filename }) {
     const data = load();
     const item = {
@@ -908,7 +908,7 @@ module.exports = {
       filename: filename || null,
       userId: userId || null,
       nombreAutor: String(nombreAutor || '').trim(),
-      estado: 'pendiente',
+      estado: 'aprobado',
       createdAt: new Date().toISOString(),
     };
     data.media.push(item);
@@ -1630,8 +1630,9 @@ module.exports = {
     return item;
   },
   // Publicacion hecha por un cliente (foto o video + descripcion), como una
-  // red social: queda 'pendiente' hasta que el admin la apruebe desde
-  // /admin, no aparece en /comunidad mientras tanto.
+  // red social: se publica de inmediato (aparece en /comunidad sin esperar
+  // aprobacion). El admin conserva el control desde /admin para borrarla
+  // despues si hace falta.
   addPublicacionComunidadCliente({ userId, nombreAutor, fotoAutor, texto, imagen, imagenNombre, video, videoNombre }) {
     const data = load();
     const item = {
@@ -1645,7 +1646,7 @@ module.exports = {
       userId: userId || null,
       nombreAutor: String(nombreAutor || '').trim(),
       fotoAutor: fotoAutor || '',
-      estado: 'pendiente',
+      estado: 'aprobado',
       createdAt: new Date().toISOString(),
     };
     data.publicacionesComunidad.push(item);

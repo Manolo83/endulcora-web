@@ -149,7 +149,7 @@ body { background: #FBF4E9; }
     <input id="nuevaPublicacionArchivo" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" required class="mt-3 w-full text-xs">
     <p id="nuevaPublicacionError" class="mt-2 hidden text-xs text-red-600"></p>
     <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-      <p class="text-xs text-carbon/50">Tu publicación se revisará antes de aparecer aquí.</p>
+      <p class="text-xs text-carbon/50">Tu publicación se publica de inmediato.</p>
       <button type="submit" class="flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
         <span id="nuevaPublicacionSpinner" class="spinner hidden"></span> Publicar
       </button>
@@ -435,7 +435,8 @@ document.getElementById('formNuevaPublicacion').addEventListener('submit', async
     if(!res.ok) throw new Error(data.error || 'No se pudo publicar.');
     document.getElementById('nuevaPublicacionTexto').value = '';
     archivoInput.value = '';
-    alert('¡Gracias! Tu publicación se revisará antes de aparecer aquí.');
+    alert('¡Gracias! Tu publicación ya está publicada.');
+    cargarPublicaciones();
   }catch(err2){
     err.textContent = err2.message;
     err.classList.remove('hidden');

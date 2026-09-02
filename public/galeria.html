@@ -131,7 +131,7 @@ body { background: #FBF4E9; }
         <button type="submit" class="rounded-full boton-vivo bg-vino px-6 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir</button>
       </div>
       <p id="galeriaSubirError" class="mt-2 hidden text-xs text-red-600"></p>
-      <p class="mt-2 text-xs text-carbon/50">Tu foto se revisará antes de aparecer en la galería.</p>
+      <p class="mt-2 text-xs text-carbon/50">Tu foto se publica de inmediato en la galería.</p>
     </form>
   </div>
 
@@ -322,7 +322,8 @@ document.getElementById('formSubirGaleria').addEventListener('submit', async (e)
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo subir tu foto.');
     input.value = '';
-    alert('¡Gracias! Tu foto se revisará antes de aparecer en la galería.');
+    alert('¡Gracias! Tu foto ya está publicada en la galería.');
+    cargarGaleria();
   }catch(err2){
     err.textContent = err2.message;
     err.classList.remove('hidden');
