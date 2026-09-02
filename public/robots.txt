@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://endulcora.com/sitemap.xml
+Sitemap: https://www.endulcora.com/sitemap.xml

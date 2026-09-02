@@ -236,6 +236,58 @@ app.get(
   }
 );
 
+// Mapa de vuelta de categoria -> prefijo de URL (lo contrario de
+// CATEGORIA_POR_PREFIJO, usado en servirPaginaProducto).
+const PREFIJO_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
+
+// Sitemap generado en cada solicitud (no un archivo estatico) para que
+// siempre incluya los productos que existen en este momento — nunca se
+// queda desactualizado cuando se agrega o se borra un producto desde
+// /admin. Solo incluye productos visibles en el catalogo (los "satelite"
+// como Anexo/App/Paquete solo se compran desde la pagina del eBook
+// principal, no son una entrada de busqueda pensada para llegar sola) y
+// con titulo real (evita listar productos de prueba sin terminar).
+app.get('/sitemap.xml', (req, res) => {
+  const paginasEstaticas = [
+    { loc: '/', prioridad: '1.0', frecuencia: 'weekly' },
+    { loc: '/tienda', prioridad: '0.8', frecuencia: 'weekly' },
+    { loc: '/ebooks', prioridad: '0.8', frecuencia: 'weekly' },
+    { loc: '/anexos', prioridad: '0.8', frecuencia: 'weekly' },
+    { loc: '/recetarios', prioridad: '0.8', frecuencia: 'weekly' },
+    { loc: '/calendario', prioridad: '0.6', frecuencia: 'weekly' },
+    { loc: '/galeria', prioridad: '0.5', frecuencia: 'weekly' },
+    { loc: '/membresia', prioridad: '0.6', frecuencia: 'monthly' },
+    { loc: '/clases-en-vivo', prioridad: '0.6', frecuencia: 'weekly' },
+    { loc: '/biblioteca-clases', prioridad: '0.5', frecuencia: 'weekly' },
+    { loc: '/comunidad', prioridad: '0.4', frecuencia: 'weekly' },
+    { loc: '/juego', prioridad: '0.4', frecuencia: 'monthly' },
+    { loc: '/calculadora', prioridad: '0.5', frecuencia: 'monthly' },
+    { loc: '/resenas', prioridad: '0.5', frecuencia: 'monthly' },
+    { loc: '/anuncios', prioridad: '0.4', frecuencia: 'weekly' },
+  ];
+
+  const paginasDeProducto = store.getProducts()
+    .filter((p) => !p.ocultoEnCatalogo && p.titulo && p.titulo.trim() && p.slug)
+    .map((p) => ({
+      loc: `/${PREFIJO_POR_CATEGORIA[p.categoria] || 'ebooks'}/${p.slug}`,
+      prioridad: '0.7',
+      frecuencia: 'monthly',
+    }));
+
+  const urls = [...paginasEstaticas, ...paginasDeProducto]
+    .map(({ loc, prioridad, frecuencia }) => `
+  <url>
+    <loc>${SITE_URL}${loc}</loc>
+    <changefreq>${frecuencia}</changefreq>
+    <priority>${prioridad}</priority>
+  </url>`)
+    .join('');
+
+  res.set('Content-Type', 'application/xml');
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}\n</urlset>`);
+});
+
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
