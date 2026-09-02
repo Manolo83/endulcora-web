@@ -239,6 +239,10 @@ async function init() {
       // se vuelve a suscribir despues).
       if (typeof u.membresiaActivaDesde !== 'string') { u.membresiaActivaDesde = ''; changed = true; }
     });
+    (data.bibliotecaClases || []).forEach((c) => {
+      if (typeof c.recetarioUrl !== 'string') { c.recetarioUrl = ''; changed = true; }
+      if (typeof c.recetarioNombre !== 'string') { c.recetarioNombre = ''; changed = true; }
+    });
     if (typeof data.contenidoMembresia.revistaUrl !== 'string') { data.contenidoMembresia.revistaUrl = ''; changed = true; }
     if (typeof data.contenidoMembresia.revistaNombre !== 'string') { data.contenidoMembresia.revistaNombre = ''; changed = true; }
     if (typeof data.contenidoMembresia.revistaNumero !== 'string') { data.contenidoMembresia.revistaNumero = ''; changed = true; }
@@ -1327,9 +1331,19 @@ module.exports = {
       descripcion: String(descripcion || '').trim(),
       youtubeId: String(youtubeId || '').trim(),
       fecha: fecha || new Date().toISOString().slice(0, 10),
+      recetarioUrl: '',
+      recetarioNombre: '',
       createdAt: new Date().toISOString(),
     };
     data.bibliotecaClases.push(item);
+    save(data);
+    return item;
+  },
+  updateClaseBiblioteca(id, patch) {
+    const data = load();
+    const item = data.bibliotecaClases.find((c) => c.id === Number(id));
+    if (!item) return null;
+    Object.assign(item, patch);
     save(data);
     return item;
   },

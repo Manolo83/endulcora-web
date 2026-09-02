@@ -840,6 +840,22 @@ router.delete('/api/clases/biblioteca/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// Recetario que acompaña a una clase grabada de la biblioteca (opcional, se
+// puede subir/reemplazar despues de crear la clase). Se lee dentro de la
+// misma pagina de /biblioteca-clases, igual que la revista mensual.
+router.post('/api/clases/biblioteca/:id/recetario', requireAdmin, uploadDocumento.single('file'), (req, res) => {
+  const clase = store.getBibliotecaClases().find((c) => c.id === Number(req.params.id));
+  if (!clase) return res.status(404).json({ error: 'No se encontró esa clase.' });
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo del recetario.' });
+  const anterior = clase.recetarioUrl;
+  const item = store.updateClaseBiblioteca(clase.id, {
+    recetarioUrl: `/uploads/${req.file.filename}`,
+    recetarioNombre: req.file.originalname,
+  });
+  borrarSiEsSubida(anterior);
+  res.json(item);
+});
+
 // ---- Campañas de correo masivo (lista propia de contactos, vía Resend) ----
 function escapeHtmlAdmin(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

@@ -147,6 +147,13 @@ body { background: #FBF4E9; }
         </span>
       </button>
     </div>
+    <button type="button" id="btnVerRecetarioClase" class="mt-4 hidden inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+      Ver recetario
+    </button>
+    <div id="visorRecetarioClase" class="mt-4 hidden overflow-hidden rounded-2xl ring-1 ring-vino/10">
+      <iframe id="iframeRecetarioClase" title="Recetario de la clase" class="h-[70vh] w-full" style="border:0;"></iframe>
+    </div>
+    <a id="linkRecetarioClaseRespaldo" href="#" target="_blank" rel="noopener" class="mt-3 hidden font-ui text-[11px] uppercase tracking-widest text-carbon/40 hover:text-vino transition">¿No se ve bien aquí? Ábrelo en otra pestaña</a>
   </div>
 </div>
 
@@ -279,12 +286,40 @@ function abrirModalVideo(id){
   }else{
     iniciarReproductorModal(clase.youtubeId);
   }
+
+  const btnRecetario = document.getElementById('btnVerRecetarioClase');
+  const visorRecetario = document.getElementById('visorRecetarioClase');
+  const respaldoRecetario = document.getElementById('linkRecetarioClaseRespaldo');
+  const iframeRecetario = document.getElementById('iframeRecetarioClase');
+  visorRecetario.classList.add('hidden');
+  respaldoRecetario.classList.add('hidden');
+  iframeRecetario.src = '';
+  btnRecetario.classList.toggle('hidden', !clase.recetarioDisponible);
+  btnRecetario.dataset.claseId = clase.id;
 }
 function cerrarModalVideo(){
   document.getElementById('modalVideo').classList.add('hidden');
   document.getElementById('modalVideo').classList.remove('flex');
   if(reproductorModal && typeof reproductorModal.pauseVideo === 'function') reproductorModal.pauseVideo();
 }
+
+document.getElementById('btnVerRecetarioClase').addEventListener('click', function(){
+  const visor = document.getElementById('visorRecetarioClase');
+  const respaldo = document.getElementById('linkRecetarioClaseRespaldo');
+  const iframe = document.getElementById('iframeRecetarioClase');
+  const url = `/api/membresia/biblioteca-clases/${this.dataset.claseId}/recetario`;
+  const abierto = !visor.classList.contains('hidden');
+  if(abierto){
+    visor.classList.add('hidden');
+    respaldo.classList.add('hidden');
+    return;
+  }
+  if(!iframe.src) iframe.src = url;
+  respaldo.href = url;
+  visor.classList.remove('hidden');
+  respaldo.classList.remove('hidden');
+  visor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
 
 cargarBiblioteca();
 </script>

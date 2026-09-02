@@ -1292,13 +1292,35 @@ async function cargarBibliotecaClasesAdmin(){
       return;
     }
     cont.innerHTML = lista.map(c => `
-      <div class="flex items-center justify-between gap-3 rounded-xl border border-vino/10 px-4 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-vino/10 px-4 py-3">
         <div class="min-w-0">
           <p class="truncate text-sm font-600 text-carbon/80">${escapeHtml(c.titulo)}</p>
-          <p class="text-xs text-carbon/40">${escapeHtml(c.fecha || '')} · ID: ${escapeHtml(c.youtubeId)}</p>
+          <p class="text-xs text-carbon/40">${escapeHtml(c.fecha || '')} · ID: ${escapeHtml(c.youtubeId)} · Recetario: ${c.recetarioUrl ? '✓ cargado' : 'sin cargar'}</p>
         </div>
-        <button type="button" data-id="${c.id}" class="btnBorrarClaseBib shrink-0 rounded-full border border-red-200 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+        <div class="flex shrink-0 items-center gap-2">
+          <label class="cursor-pointer rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+            ${c.recetarioUrl ? 'Cambiar recetario' : 'Agregar recetario'}
+            <input type="file" accept="application/pdf" data-id="${c.id}" class="hidden inputRecetarioClaseBib">
+          </label>
+          <button type="button" data-id="${c.id}" class="btnBorrarClaseBib rounded-full border border-red-200 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+        </div>
       </div>`).join('');
+    cont.querySelectorAll('.inputRecetarioClaseBib').forEach(input => {
+      input.addEventListener('change', async () => {
+        const file = input.files[0];
+        if(!file) return;
+        const fd = new FormData();
+        fd.append('file', file);
+        try{
+          const res = await fetch(`/admin/api/clases/biblioteca/${input.dataset.id}/recetario`, { method: 'POST', body: fd, credentials: 'include' });
+          if(!res.ok){ const d = await res.json().catch(()=>({})); throw new Error(d.error || 'No se pudo subir el recetario'); }
+          toast('Recetario guardado');
+          cargarBibliotecaClasesAdmin();
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
     cont.querySelectorAll('.btnBorrarClaseBib').forEach(btn => {
       btn.addEventListener('click', async () => {
         if(!confirm('¿Borrar esta clase de la biblioteca? Los miembros ya no podrán verla.')) return;

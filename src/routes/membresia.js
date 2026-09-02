@@ -237,10 +237,18 @@ router.get('/contenido', (req, res) => {
   res.json({ ...resto, recetarioDisponible: !!recetarioUrl, revistaDisponible: !!revistaUrl });
 });
 
+// No se expone el link directo del recetario (igual que el resto de
+// archivos de membresia): solo si esta disponible, para que la descarga
+// real siempre pase por la ruta de abajo (que vuelve a revisar membresia).
+function sinRecetarioUrl(clase) {
+  const { recetarioUrl, ...resto } = clase;
+  return { ...resto, recetarioDisponible: !!recetarioUrl };
+}
+
 // Biblioteca de clases en vivo grabadas: exclusiva para miembros con
 // membresia activa (o el admin, para revisarla sin pagar).
 router.get('/biblioteca-clases', (req, res) => {
-  if (esAdmin(req)) return res.json(store.getBibliotecaClases());
+  if (esAdmin(req)) return res.json(store.getBibliotecaClases().map(sinRecetarioUrl));
   const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
   if (!usuario || usuario.membresiaEstado !== 'activa') {
     return res.status(403).json({ error: 'Necesitas una membresía activa para ver la biblioteca de clases.' });
@@ -250,7 +258,26 @@ router.get('/biblioteca-clases', (req, res) => {
   // ese dia en adelante — no las de antes de que se hiciera miembro.
   const desde = usuario.membresiaActivaDesde || '';
   const lista = desde ? store.getBibliotecaClases().filter((c) => (c.fecha || '') >= desde) : store.getBibliotecaClases();
-  res.json(lista);
+  res.json(lista.map(sinRecetarioUrl));
+});
+
+// Recetario que acompaña a una clase grabada especifica. Igual que el
+// recetario/revista mensual: revisa la membresia en cada solicitud y se
+// sirve "inline" para leerse dentro de la misma pagina.
+router.get('/biblioteca-clases/:id/recetario', (req, res) => {
+  if (!esAdmin(req)) {
+    const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+    if (!usuario || usuario.membresiaEstado !== 'activa') {
+      return res.status(403).send('Necesitas una membresía activa para ver el recetario.');
+    }
+  }
+  const clase = store.getBibliotecaClases().find((c) => c.id === Number(req.params.id));
+  if (!clase || !clase.recetarioUrl) return res.status(404).send('Esta clase no tiene recetario.');
+  const filename = path.basename(clase.recetarioUrl);
+  const rutaCompleta = path.join(UPLOAD_DIR, filename);
+  if (!fs.existsSync(rutaCompleta)) return res.status(404).send('No pudimos encontrar el recetario en este momento.');
+  res.setHeader('Content-Disposition', `inline; filename="${(clase.recetarioNombre || `Recetario${path.extname(filename)}`).replace(/"/g, '')}"`);
+  res.sendFile(rutaCompleta);
 });
 
 // Descarga del recetario del mes: revisa la membresia en cada solicitud
