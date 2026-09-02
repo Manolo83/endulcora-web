@@ -110,6 +110,42 @@ body { background: #FBF4E9; }
   <h1 class="mt-2 font-display text-3xl text-vino sm:text-4xl">Membresía Endulcora</h1>
   <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-carbon/70">Recetario del mes y taller online mensual, exclusivos para miembros, por $50 MXN al mes. Cobro automático cada mes — cancela cuando quieras y pierdes el acceso de inmediato.</p>
 
+  <!-- Comparativa: se oculta solo si ya eres miembro activo -->
+  <div id="comparativaMembresia" class="mt-10 overflow-hidden rounded-3xl bg-white ring-1 ring-vino/10">
+    <div class="grid grid-cols-[1fr_88px_88px] items-center gap-x-2 border-b border-vino/10 bg-crema/60 px-5 py-4 sm:px-6">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-carbon/50">Incluye</p>
+      <p class="text-center font-ui text-[10px] font-700 uppercase tracking-widest text-carbon/35">Sin cuenta</p>
+      <p class="text-center font-ui text-[10px] font-700 uppercase tracking-widest text-vino">Miembro</p>
+    </div>
+    <div class="divide-y divide-vino/10">
+      <div class="grid grid-cols-[1fr_88px_88px] items-center gap-x-2 px-5 py-3.5 sm:px-6">
+        <p class="text-[13px] font-600 text-carbon/80">Precio</p>
+        <p class="text-center text-[13px] text-carbon/40">Gratis</p>
+        <p class="text-center text-[13px] font-700 text-vino">$50/mes</p>
+      </div>
+      <div class="grid grid-cols-[1fr_88px_88px] items-center gap-x-2 px-5 py-3.5 sm:px-6">
+        <p class="text-[13px] text-carbon/75">Recetario del mes</p>
+        <p class="text-center text-carbon/25">—</p>
+        <p class="text-center text-lg text-flama">✓</p>
+      </div>
+      <div class="grid grid-cols-[1fr_88px_88px] items-center gap-x-2 px-5 py-3.5 sm:px-6">
+        <p class="text-[13px] text-carbon/75">Revista mensual, para leer en línea</p>
+        <p class="text-center text-carbon/25">—</p>
+        <p class="text-center text-lg text-flama">✓</p>
+      </div>
+      <div class="grid grid-cols-[1fr_88px_88px] items-center gap-x-2 px-5 py-3.5 sm:px-6">
+        <p class="text-[13px] text-carbon/75">Taller online mensual (video exclusivo)</p>
+        <p class="text-center text-carbon/25">—</p>
+        <p class="text-center text-lg text-flama">✓</p>
+      </div>
+      <div class="grid grid-cols-[1fr_88px_88px] items-center gap-x-2 px-5 py-3.5 sm:px-6">
+        <p class="text-[13px] text-carbon/75">Biblioteca completa de talleres grabados</p>
+        <p class="text-center text-carbon/25">—</p>
+        <p class="text-center text-lg text-flama">✓</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Invitado: login/registro -->
   <div id="bloqueInvitado" class="mt-8 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
     <p class="mb-4 text-sm text-carbon/70">Inicia sesión o crea tu cuenta para hacerte miembro.</p>
@@ -227,6 +263,8 @@ function mostrarVista(nombre){
   const bloques = { invitado: 'bloqueInvitado', oferta: 'bloqueOferta', miembro: 'bloqueMiembro' };
   Object.values(bloques).forEach(id => document.getElementById(id).classList.add('hidden'));
   document.getElementById(bloques[nombre]).classList.remove('hidden');
+  // Ya siendo miembro no hace falta convencerlo con la comparativa.
+  document.getElementById('comparativaMembresia').classList.toggle('hidden', nombre === 'miembro');
 }
 
 async function cargarContenidoMembresia(){
