@@ -1530,7 +1530,7 @@ async function cargarCampanasEnviadas(){
               <div class="h-full rounded-full bg-vino transition-all" style="width:${pct}%"></div>
             </div>
             <p class="mt-1 text-right font-ui text-[10px] uppercase tracking-widest text-carbon/40">${pct}%</p>
-            ${c.total > 1000 ? '<p class="mt-1 text-[11px] text-carbon/40">Se reparte en varios días (1,000 → 2,000 → 4,000 → resto) para cuidar la reputación del dominio; continúa solo.</p>' : ''}
+            ${c.total > 1000 ? '<p class="mt-1 text-[11px] text-carbon/40">Se manda a todos de una sola vez, con una pausa breve entre cada correo — no hace falta hacer nada, continúa solo hasta terminar.</p>' : ''}
           ` : ''}
           ${c.fallidos > 0 && c.ultimoError ? `<p class="mt-2 text-xs text-red-600">Motivo de los fallos: ${escapeHtml(c.ultimoError)}</p>` : ''}
         </div>`;
