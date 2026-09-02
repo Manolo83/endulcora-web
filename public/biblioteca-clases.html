@@ -293,7 +293,8 @@ function abrirModalVideo(id){
   const iframeRecetario = document.getElementById('iframeRecetarioClase');
   visorRecetario.classList.add('hidden');
   respaldoRecetario.classList.add('hidden');
-  iframeRecetario.src = '';
+  iframeRecetario.src = 'about:blank';
+  delete iframeRecetario.dataset.url;
   btnRecetario.classList.toggle('hidden', !clase.recetarioDisponible);
   btnRecetario.dataset.claseId = clase.id;
 }
@@ -314,7 +315,10 @@ document.getElementById('btnVerRecetarioClase').addEventListener('click', functi
     respaldo.classList.add('hidden');
     return;
   }
-  if(!iframe.src) iframe.src = url;
+  if(iframe.dataset.url !== url){
+    iframe.src = url;
+    iframe.dataset.url = url;
+  }
   respaldo.href = url;
   visor.classList.remove('hidden');
   respaldo.classList.remove('hidden');
