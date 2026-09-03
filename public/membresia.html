@@ -199,6 +199,14 @@ body { background: #FBF4E9; }
       <button type="button" id="btnCancelarMembresia" class="font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cancelar membresía</button>
     </div>
 
+    <div id="bloqueGrupoWhatsapp" class="mt-6 hidden rounded-3xl bg-[#25D366]/10 p-6 ring-1 ring-[#25D366]/30">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-[#128C4A]">Grupo de miembros</p>
+      <p class="mt-1 text-sm text-carbon/70">Únete al grupo de WhatsApp exclusivo para miembros de Endulcora.</p>
+      <a id="linkGrupoWhatsapp" href="#" target="_blank" rel="noopener" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-[#25D366] px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-white hover:brightness-95 transition">
+        Unirme al grupo
+      </a>
+    </div>
+
     <div id="bloqueRecetarioMes" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
       <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Recetario de <span id="recetarioMesEtiqueta"></span></p>
       <a id="linkRecetarioMes" href="/api/membresia/recetario" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
@@ -296,12 +304,24 @@ async function cargarContenidoMembresia(){
   }
 }
 
+async function cargarGrupoWhatsapp(){
+  try{
+    const res = await fetch('/api/content');
+    const c = await res.json();
+    if(c.whatsapp_grupo_miembros_url){
+      document.getElementById('linkGrupoWhatsapp').href = c.whatsapp_grupo_miembros_url;
+      document.getElementById('bloqueGrupoWhatsapp').classList.remove('hidden');
+    }
+  }catch(e){}
+}
+
 async function cargarVistaMembresia(){
   if(SESION.esAdmin){
     mostrarVista('miembro');
     document.getElementById('nombreUsuarioMembresia').textContent = 'Administrador (vista previa)';
     document.getElementById('btnCancelarMembresia').classList.add('hidden');
     cargarContenidoMembresia();
+    cargarGrupoWhatsapp();
     return;
   }
   document.getElementById('btnCancelarMembresia').classList.remove('hidden');
@@ -316,6 +336,7 @@ async function cargarVistaMembresia(){
       mostrarVista('miembro');
       document.getElementById('nombreUsuarioMembresia').textContent = SESION.user.nombre;
       cargarContenidoMembresia();
+      cargarGrupoWhatsapp();
     }else{
       mostrarVista('oferta');
     }
