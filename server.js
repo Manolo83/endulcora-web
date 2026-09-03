@@ -361,9 +361,11 @@ store.init()
     // Si un deploy o reinicio interrumpio una campaña de correo a la mitad,
     // la retoma automaticamente en vez de dejarla congelada para siempre.
     require('./src/campanas').reanudarCampanasPendientes();
-    // Secuencia del lead magnet y recordatorio de membresia: revisa cada
-    // cierto tiempo a quien le toca un correo (ver src/automatizaciones.js).
-    require('./src/automatizaciones').iniciarAutomatizaciones();
+    // La secuencia del lead magnet y el recordatorio de membresia
+    // (src/automatizaciones.js) estan pausados a peticion del dueño del
+    // sitio: por ahora el solo manda los correos que quiere, a mano. Para
+    // reactivarlos, descomentar la siguiente linea.
+    // require('./src/automatizaciones').iniciarAutomatizaciones();
   })
   .catch((err) => {
     console.error('No se pudo conectar a la base de datos, el servidor no arranco:', err.message);

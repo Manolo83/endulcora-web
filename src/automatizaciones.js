@@ -77,11 +77,6 @@ async function revisarRecordatoriosMembresia() {
 let corriendo = false;
 async function revisarAutomatizaciones() {
   if (corriendo) return;
-  // Interruptor general (Contenido general > "Correos automáticos" en
-  // /admin): apagado por defecto, no manda nada hasta que el admin lo
-  // prenda a mano. Con esto apagado, quien ya tenia un correo pendiente
-  // se queda esperando (no se pierde, ni se marca como enviado).
-  if (store.getContent().automatizaciones_correo_activas !== 'true') return;
   corriendo = true;
   try {
     await revisarSecuenciaLeadMagnet();

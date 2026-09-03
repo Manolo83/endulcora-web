@@ -2,16 +2,9 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const store = require('../store');
-const { UPLOAD_DIR, GOOGLE_ADS, SITE_URL } = require('../config');
+const { UPLOAD_DIR, GOOGLE_ADS } = require('../config');
 const { requireCliente } = require('./auth');
 const { uploadImage, uploadMedia, procesarImagenSubida, ALLOWED_VIDEO } = require('../uploads');
-const { enviarCorreoLeadMagnetPaso0 } = require('../email');
-
-function sumarDias(dias) {
-  const fecha = new Date();
-  fecha.setDate(fecha.getDate() + dias);
-  return fecha.toISOString();
-}
 
 const router = express.Router();
 
@@ -214,31 +207,14 @@ router.post('/comunidad/publicaciones/:id/mensajes', requireCliente, uploadImage
 });
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-router.post('/newsletter/suscribir', async (req, res) => {
+router.post('/newsletter/suscribir', (req, res) => {
   const correo = String((req.body && req.body.email) || '').trim();
   if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
-  const { item: sub, nuevo } = store.addSubscriber(correo);
+  // Por ahora solo se guarda en la lista: el envio de correos (receta de
+  // regalo, secuencia hacia la membresia) esta pausado a peticion del dueño
+  // del sitio — ver src/automatizaciones.js para reactivarlo.
+  store.addSubscriber(correo);
   res.status(201).json({ ok: true });
-
-  // El correo de la receta gratis (paso 0 del lead magnet) se manda aparte,
-  // despues de responder, para no hacer esperar al visitante a que Resend
-  // conteste. Solo aplica a suscripciones nuevas y si el admin ya subio un
-  // PDF de regalo — si no, la persona simplemente queda en la lista.
-  if (!nuevo) return;
-  const contenido = store.getContent();
-  if (contenido.automatizaciones_correo_activas !== 'true') return;
-  if (!contenido.leadmagnet_pdf_url) return;
-  try {
-    await enviarCorreoLeadMagnetPaso0({
-      to: sub.email,
-      titulo: contenido.leadmagnet_titulo,
-      url: `${SITE_URL}${contenido.leadmagnet_pdf_url}`,
-      unsubscribeUrl: `${SITE_URL}/desuscribir-correos?id=${sub.id}&token=${sub.unsubToken}`,
-    });
-    store.updateSubscriber(sub.id, { leadMagnetPaso: 1, leadMagnetProximoEnvio: sumarDias(2) });
-  } catch (e) {
-    console.error('No se pudo mandar la receta de regalo a', sub.email, e.message);
-  }
 });
 
 // Estado de un pedido para la pagina de gracias: requiere el viewToken que
