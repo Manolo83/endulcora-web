@@ -738,6 +738,7 @@ trufada, paso a paso</h2>
         </div>
 
         <p class="mt-8 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-vino">Recetas al correo</p>
+        <p id="leadmagnetDescripcion" class="mt-2 text-sm text-carbon/60">Suscríbete y te mandamos una receta de regalo, más tips y ofertas de vez en cuando.</p>
         <div class="mt-4 flex gap-2">
           <label for="correoFooter" class="sr-only">Tu correo</label>
           <input id="correoFooter" type="email" placeholder="tu@correo.com"
@@ -1639,6 +1640,7 @@ async function cargarContenido(){
   texto('claseTitulo', c.clase_titulo);
   texto('claseDescripcion', c.clase_descripcion);
   texto('footerDescripcion', c.footer_descripcion);
+  texto('leadmagnetDescripcion', c.leadmagnet_descripcion);
 
   if(c.chef_imagen){
     const wrapChef = document.getElementById('chefImagenWrap');

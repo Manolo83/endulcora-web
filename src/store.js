@@ -33,6 +33,10 @@ const DEFAULT_CONTENT = {
   hero_caption_sub: 'Receta 01 · Sección gourmet',
   chef_imagen: '',
   asistente_icono: '',
+  leadmagnet_titulo: 'Tu receta gratis',
+  leadmagnet_descripcion: 'Suscríbete al correo de Endulcora y te mandamos una receta de regalo, más tips y ofertas de vez en cuando.',
+  leadmagnet_pdf_url: '',
+  leadmagnet_pdf_nombre: '',
   chef_badge: 'Fundador de Endulcora',
   chef_nombre: 'Chef Luis Alfonso Jiménez Cárdenas',
   chef_bio:
@@ -240,6 +244,12 @@ async function init() {
       // se vuelve a suscribir despues).
       if (typeof u.membresiaActivaDesde !== 'string') { u.membresiaActivaDesde = ''; changed = true; }
       if (typeof u.fotoPerfilUrl !== 'string') { u.fotoPerfilUrl = ''; changed = true; }
+      if (typeof u.registroRecordatorioEnviado !== 'boolean') { u.registroRecordatorioEnviado = false; changed = true; }
+    });
+    (data.subscribers || []).forEach((s) => {
+      if (typeof s.leadMagnetPaso !== 'number') { s.leadMagnetPaso = 0; changed = true; }
+      if (typeof s.leadMagnetProximoEnvio === 'undefined') { s.leadMagnetProximoEnvio = null; changed = true; }
+      if (typeof s.unsubToken !== 'string' || !s.unsubToken) { s.unsubToken = crypto.randomUUID(); changed = true; }
     });
     (data.bibliotecaClases || []).forEach((c) => {
       if (typeof c.recetarioUrl !== 'string') { c.recetarioUrl = ''; changed = true; }
@@ -1307,6 +1317,7 @@ module.exports = {
       membresiaEstado: 'ninguna',
       membresiaPreapprovalId: '',
       membresiaActivaDesde: '',
+      registroRecordatorioEnviado: false,
       createdAt: new Date().toISOString(),
     };
     data.users.push(item);
@@ -1341,11 +1352,56 @@ module.exports = {
     const data = load();
     const correo = String(email || '').trim().toLowerCase();
     const existente = data.subscribers.find((s) => s.email === correo);
-    if (existente) return existente;
-    const item = { id: nextId(data.subscribers), email: correo, createdAt: new Date().toISOString() };
+    if (existente) return { item: existente, nuevo: false };
+    const item = {
+      id: nextId(data.subscribers),
+      email: correo,
+      leadMagnetPaso: 0,
+      leadMagnetProximoEnvio: null,
+      unsubToken: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    };
     data.subscribers.push(item);
     save(data);
+    return { item, nuevo: true };
+  },
+  updateSubscriber(id, patch) {
+    const data = load();
+    const item = data.subscribers.find((s) => s.id === Number(id));
+    if (!item) return null;
+    Object.assign(item, patch);
+    save(data);
     return item;
+  },
+  // Se usa desde el link "dejar de recibir correos" al final de cada correo
+  // del lead magnet: el token evita que cualquiera pueda dar de baja el
+  // correo de otra persona solo adivinando su id.
+  desuscribirSubscriberPorToken(id, token) {
+    const data = load();
+    const item = data.subscribers.find((s) => s.id === Number(id) && s.unsubToken === token);
+    if (!item) return null;
+    data.subscribers = data.subscribers.filter((s) => s.id !== Number(id));
+    save(data);
+    return item;
+  },
+  // Suscriptores a los que toca mandarles el siguiente correo de la
+  // secuencia del lead magnet (paso 0 = receta gratis, ya se manda al
+  // momento de suscribirse; 1-3 = nutricion hacia la membresia).
+  getSubscribersParaLeadMagnet() {
+    const data = load();
+    const ahora = new Date().toISOString();
+    return (data.subscribers || []).filter(
+      (s) => s.leadMagnetProximoEnvio && s.leadMagnetProximoEnvio <= ahora
+    );
+  },
+  // Cuentas que se registraron pero nunca se hicieron miembros, a los N
+  // dias de crear la cuenta (y todavia no se les mando el recordatorio).
+  getUsuariosParaRecordatorioMembresia(diasEspera) {
+    const data = load();
+    const limite = new Date(Date.now() - diasEspera * 24 * 60 * 60 * 1000).toISOString();
+    return (data.users || []).filter(
+      (u) => !u.registroRecordatorioEnviado && u.membresiaEstado !== 'activa' && u.createdAt <= limite
+    );
   },
 
   // ---- Sedes (para el calendario de talleres presenciales) ----

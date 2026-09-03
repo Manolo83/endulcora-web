@@ -131,4 +131,138 @@ async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribe
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
-module.exports = { enviarCorreoConfirmacionCompra, enviarCorreoRevistaMensual, enviarCorreoCampana };
+// ---- Secuencia del lead magnet (receta gratis a cambio del correo) ----
+// Paso 0 se manda de inmediato al suscribirse (desde la propia ruta de
+// suscripcion); los pasos 1-3 los manda el programador de automatizaciones
+// (src/automatizaciones.js) unos dias despues, para ir acercando a quien se
+// suscribio hacia la membresia sin que sea invasivo.
+function piePromocional(unsubscribeUrl) {
+  return `<p style="margin-top:28px;font-size:11px;color:#9C9C9C;">Recibiste este correo porque te suscribiste en endulcora.com.${unsubscribeUrl ? `<br><a href="${unsubscribeUrl}" style="color:#9C9C9C;">Dejar de recibir estos correos</a>` : ''}</p>`;
+}
+
+async function enviarCorreoLeadMagnetPaso0({ to, titulo, url, unsubscribeUrl }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: `${titulo || 'Tu receta de regalo'} · Endulcora`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">¡Aquí está tu receta!</h1>
+        <p style="font-size:14px;line-height:1.6;">Gracias por suscribirte. Como lo prometimos, aquí tienes <strong>${escapeHtml(titulo || 'tu receta de regalo')}</strong>, totalmente gratis.</p>
+        <p style="margin-top:16px;"><a href="${url}" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Descargar receta</a></p>
+        ${piePromocional(unsubscribeUrl)}
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
+async function enviarCorreoLeadMagnetPaso1({ to, siteUrl, unsubscribeUrl }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: '¿Ya hiciste tu receta? Esto es lo que te estás perdiendo',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">Esa receta fue solo una probadita</h1>
+        <p style="font-size:14px;line-height:1.6;">La membresía Endulcora incluye, cada mes:</p>
+        <ul style="font-size:14px;line-height:1.8;color:#1B0720;padding-left:20px;">
+          <li>Recetario del mes, exclusivo para miembros</li>
+          <li>Revista mensual, para leer en línea</li>
+          <li>Taller online mensual (video privado)</li>
+          <li>Biblioteca completa de talleres grabados</li>
+        </ul>
+        <p style="font-size:14px;line-height:1.6;">Por $50 MXN al mes. Cancela cuando quieras.</p>
+        <p style="margin-top:16px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Conocer la membresía</a></p>
+        ${piePromocional(unsubscribeUrl)}
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
+async function enviarCorreoLeadMagnetPaso2({ to, siteUrl, unsubscribeUrl }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: 'Lo que están compartiendo las alumnas de Endulcora',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">No lo decimos solo nosotros</h1>
+        <p style="font-size:14px;line-height:1.6;">Cada mes, más alumnas comparten sus piezas y sus talleres en nuestra galería y comunidad — y dejan su reseña sobre lo que aprendieron.</p>
+        <p style="margin-top:16px;"><a href="${siteUrl}/resenas" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Leer reseñas</a></p>
+        <p style="margin-top:10px;"><a href="${siteUrl}/galeria" style="color:#7A2E7E;text-decoration:none;font-size:13px;font-weight:700;">Ver la galería →</a></p>
+        ${piePromocional(unsubscribeUrl)}
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
+async function enviarCorreoLeadMagnetPaso3({ to, siteUrl, unsubscribeUrl }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: 'Cada mes que esperas, te pierdes el recetario y el taller de ese mes',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">¿Te animas a ser miembro?</h1>
+        <p style="font-size:14px;line-height:1.6;">El recetario y el taller de este mes ya están disponibles solo para miembros. Por $50 MXN al mes tienes acceso a todo, y puedes cancelar cuando quieras.</p>
+        <p style="margin-top:16px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Hacerme miembro</a></p>
+        ${piePromocional(unsubscribeUrl)}
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
+// Recordatorio unico a quien crea una cuenta (para /membresia, /comunidad,
+// etc.) pero nunca llega a suscribirse. Lo manda el programador de
+// automatizaciones un par de dias despues del registro.
+async function enviarCorreoRecordatorioMembresia({ to, nombre, siteUrl }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: 'Te faltó un paso para ser miembro Endulcora',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">¡Hola${nombre ? ` ${escapeHtml(nombre)}` : ''}!</h1>
+        <p style="font-size:14px;line-height:1.6;">Creaste tu cuenta en Endulcora, pero todavía no te has hecho miembro. Con la membresía tienes, cada mes, recetario, revista, taller online y acceso a toda la biblioteca de talleres grabados — por $50 MXN al mes, cancela cuando quieras.</p>
+        <p style="margin-top:16px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Hacerme miembro</a></p>
+        <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">Recibiste este correo porque tienes una cuenta en endulcora.com.</p>
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
+module.exports = {
+  enviarCorreoConfirmacionCompra,
+  enviarCorreoRevistaMensual,
+  enviarCorreoCampana,
+  enviarCorreoLeadMagnetPaso0,
+  enviarCorreoLeadMagnetPaso1,
+  enviarCorreoLeadMagnetPaso2,
+  enviarCorreoLeadMagnetPaso3,
+  enviarCorreoRecordatorioMembresia,
+};

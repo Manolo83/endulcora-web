@@ -186,6 +186,27 @@ router.delete('/api/content/:key/image', requireAdmin, (req, res) => {
   res.json({ content });
 });
 
+// PDF de regalo del lead magnet (footer/newsletter): en cuanto hay uno
+// subido, cada suscripcion nueva recibe el correo de la receta gratis de
+// inmediato (ver POST /api/newsletter/suscribir en api.js).
+router.post('/api/content/leadmagnet-pdf', requireAdmin, uploadDocumento.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo.' });
+  const anterior = store.getContent().leadmagnet_pdf_url;
+  const content = store.updateContent({
+    leadmagnet_pdf_url: `/uploads/${req.file.filename}`,
+    leadmagnet_pdf_nombre: req.file.originalname,
+  });
+  borrarSiEsSubida(anterior);
+  res.json({ content });
+});
+
+router.delete('/api/content/leadmagnet-pdf', requireAdmin, (req, res) => {
+  const anterior = store.getContent().leadmagnet_pdf_url;
+  const content = store.updateContent({ leadmagnet_pdf_url: '', leadmagnet_pdf_nombre: '' });
+  borrarSiEsSubida(anterior);
+  res.json({ content });
+});
+
 // ---- Carrusel de imagenes del inicio (publicidad) ----
 router.get('/api/hero-carrusel', requireAdmin, (req, res) => {
   res.json(store.getHeroCarrusel());

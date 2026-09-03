@@ -226,6 +226,23 @@ function manejarDesuscripcion(req, res) {
 app.get('/desuscribir', manejarDesuscripcion);
 app.post('/desuscribir', express.urlencoded({ extended: false }), manejarDesuscripcion);
 
+// Baja de la lista del footer (newsletter/lead magnet). Misma logica que la
+// de arriba, pero para src/store.js#subscribers (una lista aparte de la de
+// campañas masivas importadas en /admin).
+function manejarDesuscripcionCorreos(req, res) {
+  const { id, token } = req.method === 'POST' ? req.body || {} : req.query;
+  const item = store.desuscribirSubscriberPorToken(id, token);
+  if (req.method === 'POST') return res.status(200).end();
+  res.set('Content-Type', 'text/html; charset=utf-8');
+  if (!item) {
+    return res.status(400).send('<!DOCTYPE html><html lang="es-MX"><meta charset="utf-8"><body style="font-family:Arial,sans-serif;max-width:420px;margin:80px auto;text-align:center;color:#1B0720;"><h1>Enlace no válido</h1><p>Este enlace para dejar de recibir correos ya no es válido.</p></body></html>');
+  }
+  const correoSeguro = String(item.email).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  res.send(`<!DOCTYPE html><html lang="es-MX"><meta charset="utf-8"><body style="font-family:Arial,sans-serif;max-width:420px;margin:80px auto;text-align:center;color:#1B0720;"><h1>Listo</h1><p>${correoSeguro} ya no recibirá correos de Endulcora.</p></body></html>`);
+}
+app.get('/desuscribir-correos', manejarDesuscripcionCorreos);
+app.post('/desuscribir-correos', express.urlencoded({ extended: false }), manejarDesuscripcionCorreos);
+
 // Secciones que se quedan dentro de la pagina principal, pero con URL propia
 // ademas de las anclas #seccion. Sirven la misma index.html; el script del
 // cliente hace scroll a la seccion segun la ruta.
@@ -308,6 +325,9 @@ store.init()
     // Si un deploy o reinicio interrumpio una campaña de correo a la mitad,
     // la retoma automaticamente en vez de dejarla congelada para siempre.
     require('./src/campanas').reanudarCampanasPendientes();
+    // Secuencia del lead magnet y recordatorio de membresia: revisa cada
+    // cierto tiempo a quien le toca un correo (ver src/automatizaciones.js).
+    require('./src/automatizaciones').iniciarAutomatizaciones();
   })
   .catch((err) => {
     console.error('No se pudo conectar a la base de datos, el servidor no arranco:', err.message);

@@ -325,6 +325,27 @@
           <button type="button" id="btnQuitarAsistenteIcono" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar imagen</button>
         </form>
       </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Receta de regalo (lead magnet)</h3>
+        <p class="mt-1 text-xs text-carbon/50">En cuanto subas un PDF aquí, cualquiera que se suscriba en el pie de página recibe esta receta de inmediato por correo, y unos días después le llegan correos invitándolo a hacerse miembro.</p>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título de la receta</span>
+            <input data-content-key="leadmagnet_titulo" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción (para el footer del sitio)</span>
+            <input data-content-key="leadmagnet_descripcion" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+        </div>
+        <div id="leadmagnetPdfPreview" class="mt-4"></div>
+        <form id="formLeadmagnetPdf" class="mt-4 flex flex-wrap items-center gap-3">
+          <input id="leadmagnetPdfInput" type="file" accept="application/pdf" class="text-sm">
+          <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir PDF</button>
+          <button type="button" id="btnQuitarLeadmagnetPdf" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar PDF</button>
+        </form>
+      </div>
     </section>
 
     <!-- PRODUCTOS -->
@@ -1249,9 +1270,17 @@ async function cargarContenidoAdmin(){
     });
     pintarChefImagen(CONTENIDO_ACTUAL.chef_imagen);
     pintarAsistenteIcono(CONTENIDO_ACTUAL.asistente_icono);
+    pintarLeadmagnetPdf(CONTENIDO_ACTUAL.leadmagnet_pdf_url, CONTENIDO_ACTUAL.leadmagnet_pdf_nombre);
   }catch(e){
     toast('No se pudo cargar el contenido general');
   }
+}
+
+function pintarLeadmagnetPdf(url, nombre){
+  const cont = $('leadmagnetPdfPreview');
+  cont.innerHTML = url
+    ? `<p class="text-sm text-carbon/70">📄 <a href="${url}" target="_blank" class="text-vino hover:underline">${escapeHtml(nombre || 'Ver PDF')}</a></p>`
+    : '<p class="text-sm text-carbon/50">Todavía no hay PDF — mientras tanto, nadie recibe la receta de regalo al suscribirse.</p>';
 }
 
 function pintarAsistenteIcono(url){
@@ -1884,6 +1913,34 @@ $('btnQuitarAsistenteIcono').addEventListener('click', async () => {
     await api('/admin/api/content/asistente_icono/image', { method: 'DELETE' });
     pintarAsistenteIcono('');
     toast('Ícono quitado');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('formLeadmagnetPdf').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = $('leadmagnetPdfInput').files[0];
+  if(!file){ toast('Elige un PDF'); return; }
+  const fd = new FormData();
+  fd.append('file', file);
+  try{
+    const res = await fetch('/admin/api/content/leadmagnet-pdf', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir el PDF');
+    pintarLeadmagnetPdf(data.content.leadmagnet_pdf_url, data.content.leadmagnet_pdf_nombre);
+    $('formLeadmagnetPdf').reset();
+    toast('PDF actualizado');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('btnQuitarLeadmagnetPdf').addEventListener('click', async () => {
+  try{
+    await api('/admin/api/content/leadmagnet-pdf', { method: 'DELETE' });
+    pintarLeadmagnetPdf('', '');
+    toast('PDF quitado');
   }catch(e){
     toast(e.message);
   }
