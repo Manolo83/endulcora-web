@@ -296,6 +296,10 @@ async function cargarContenidoMembresia(){
       document.getElementById('videoTitulo').textContent = c.videoTitulo || '';
       iniciarReproductorVideo(c.videoYoutubeId);
     }
+    if(c.whatsappGrupoUrl){
+      document.getElementById('linkGrupoWhatsapp').href = c.whatsappGrupoUrl;
+      document.getElementById('bloqueGrupoWhatsapp').classList.remove('hidden');
+    }
     if(!c.recetarioDisponible && !c.videoYoutubeId && !c.revistaDisponible){
       document.getElementById('sinContenidoAviso').classList.remove('hidden');
     }
@@ -304,24 +308,12 @@ async function cargarContenidoMembresia(){
   }
 }
 
-async function cargarGrupoWhatsapp(){
-  try{
-    const res = await fetch('/api/content');
-    const c = await res.json();
-    if(c.whatsapp_grupo_miembros_url){
-      document.getElementById('linkGrupoWhatsapp').href = c.whatsapp_grupo_miembros_url;
-      document.getElementById('bloqueGrupoWhatsapp').classList.remove('hidden');
-    }
-  }catch(e){}
-}
-
 async function cargarVistaMembresia(){
   if(SESION.esAdmin){
     mostrarVista('miembro');
     document.getElementById('nombreUsuarioMembresia').textContent = 'Administrador (vista previa)';
     document.getElementById('btnCancelarMembresia').classList.add('hidden');
     cargarContenidoMembresia();
-    cargarGrupoWhatsapp();
     return;
   }
   document.getElementById('btnCancelarMembresia').classList.remove('hidden');
@@ -336,7 +328,6 @@ async function cargarVistaMembresia(){
       mostrarVista('miembro');
       document.getElementById('nombreUsuarioMembresia').textContent = SESION.user.nombre;
       cargarContenidoMembresia();
-      cargarGrupoWhatsapp();
     }else{
       mostrarVista('oferta');
     }

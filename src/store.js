@@ -54,7 +54,6 @@ const DEFAULT_CONTENT = {
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
-  whatsapp_grupo_miembros_url: '',
   legal_privacidad:
     'Endulcora · Estudio Gastronómico, con domicilio en Ciudad de México, es responsable del tratamiento de tus datos personales.\n\nQué recabamos. Nombre, correo electrónico y teléfono, y los datos de facturación cuando los solicitas.\n\nPara qué. Entregar tus compras digitales, darte acceso a tus cursos, emitir comprobantes y avisarte de nuevas publicaciones. No vendemos ni compartimos tus datos con terceros ajenos a estos fines.\n\nTus derechos ARCO. Puedes acceder, rectificar, cancelar u oponerte al uso de tus datos escribiendo a nuestro WhatsApp. Respondemos en un máximo de 20 días hábiles.',
   legal_terminos:
@@ -179,7 +178,7 @@ function datosPorDefecto() {
     mensajesComunidad: [],
     comentariosGaleria: [],
     blogPosts: [],
-    contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '', revistaUrl: '', revistaNombre: '', revistaNumero: '' },
+    contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '', revistaUrl: '', revistaNombre: '', revistaNumero: '', whatsappGrupoUrl: '' },
   };
 }
 
@@ -260,6 +259,19 @@ async function init() {
     if (typeof data.contenidoMembresia.revistaUrl !== 'string') { data.contenidoMembresia.revistaUrl = ''; changed = true; }
     if (typeof data.contenidoMembresia.revistaNombre !== 'string') { data.contenidoMembresia.revistaNombre = ''; changed = true; }
     if (typeof data.contenidoMembresia.revistaNumero !== 'string') { data.contenidoMembresia.revistaNumero = ''; changed = true; }
+    if (typeof data.contenidoMembresia.whatsappGrupoUrl !== 'string') { data.contenidoMembresia.whatsappGrupoUrl = ''; changed = true; }
+    // El link del grupo de WhatsApp vivio brevemente en el contenido
+    // publico (data.content.whatsapp_grupo_miembros_url) antes de moverlo
+    // aqui, a contenidoMembresia, que si revisa membresia activa. Si alguien
+    // alcanzo a guardarlo ahi, se rescata el valor y se borra ese campo para
+    // que no quede expuesto sin querer via /api/content.
+    if (data.content && typeof data.content.whatsapp_grupo_miembros_url === 'string') {
+      if (!data.contenidoMembresia.whatsappGrupoUrl && data.content.whatsapp_grupo_miembros_url) {
+        data.contenidoMembresia.whatsappGrupoUrl = data.content.whatsapp_grupo_miembros_url;
+      }
+      delete data.content.whatsapp_grupo_miembros_url;
+      changed = true;
+    }
     // Semilla de la primera revista mensual (solo la primera vez que arranca
     // el servidor despues de este cambio; si ya hay una revista publicada
     // -sea esta u otra que suba el admin despues- no se vuelve a tocar).

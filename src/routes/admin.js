@@ -828,13 +828,14 @@ router.get('/api/membresia/contenido', requireAdmin, (req, res) => {
 });
 
 router.post('/api/membresia/contenido', requireAdmin, (req, res) => {
-  const { recetarioMes, videoYoutubeId, videoTitulo, videoMes, revistaNumero } = req.body || {};
+  const { recetarioMes, videoYoutubeId, videoTitulo, videoMes, revistaNumero, whatsappGrupoUrl } = req.body || {};
   const patch = {};
   if (typeof recetarioMes === 'string') patch.recetarioMes = recetarioMes.trim();
   if (typeof videoYoutubeId === 'string') patch.videoYoutubeId = videoYoutubeId.trim();
   if (typeof videoTitulo === 'string') patch.videoTitulo = videoTitulo.trim();
   if (typeof videoMes === 'string') patch.videoMes = videoMes.trim();
   if (typeof revistaNumero === 'string') patch.revistaNumero = revistaNumero.trim();
+  if (typeof whatsappGrupoUrl === 'string') patch.whatsappGrupoUrl = whatsappGrupoUrl.trim();
   res.json(store.updateContenidoMembresia(patch));
 });
 
