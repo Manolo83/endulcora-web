@@ -645,6 +645,14 @@
       </div>
 
       <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Solo miembros activos</h3>
+        <p class="mt-1 text-xs text-carbon/50">Descarga un CSV con el correo y nombre de quienes tienen membresía activa ahora mismo — listo para subirlo en <a href="#seccionCampanas" class="text-vino hover:underline">Campañas de correo</a> y mandarles algo puntual, como la invitación al grupo de WhatsApp de miembros, cuando tú quieras.</p>
+        <button id="btnExportarMiembrosActivos" class="mt-4 w-full rounded-full border border-vino/25 px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+          Descargar CSV de miembros activos
+        </button>
+      </div>
+
+      <div class="mt-6 max-w-lg rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Regalo mensual: revista mensual</h3>
         <p class="mt-1 text-xs text-carbon/50">Sube el PDF de la revista de este mes y se lo mandamos por correo, automáticamente, a todos los clientes con cuenta (gratis, vía Resend).</p>
         <form id="formRegaloMensual" class="mt-4 space-y-3">
@@ -3093,6 +3101,30 @@ $('btnExportarAudienciaMeta').addEventListener('click', async () => {
     a.download = 'audiencia-clientes-endulcora.csv';
     a.click();
     URL.revokeObjectURL(url);
+  }catch(e){
+    toast(e.message);
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+$('btnExportarMiembrosActivos').addEventListener('click', async () => {
+  const btn = $('btnExportarMiembrosActivos');
+  btn.disabled = true;
+  try{
+    const usuarios = await api('/admin/api/users');
+    const miembros = usuarios.filter(u => u.membresiaEstado === 'activa');
+    if(!miembros.length){ toast('No hay miembros con membresía activa todavía'); return; }
+    const celdaSegura = (v) => /^[=+\-@]/.test(v) ? `'${v}` : v;
+    const filas = ['email,nombre', ...miembros.map(u => `${u.email},${celdaSegura((u.nombre || '').trim())}`)];
+    const blob = new Blob([filas.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'miembros-activos-endulcora.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast(`${miembros.length} miembro(s) exportado(s)`);
   }catch(e){
     toast(e.message);
   }finally{
