@@ -327,9 +327,21 @@
         </form>
       </div>
 
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-2 ring-flama">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Correos automáticos (receta de regalo + recordatorios)</h3>
+        <p class="mt-1 text-xs text-carbon/50">Interruptor general para la receta de regalo, la secuencia hacia la membresía y el recordatorio a quien se registra sin suscribirse. Apagado por defecto — nadie recibe nada hasta que lo prendas aquí. Al apagarlo despues, se pausa: no se pierde a quien ya tenía un correo pendiente, se queda esperando.</p>
+        <label class="mt-4 block max-w-xs">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Estado</span>
+          <select data-content-key="automatizaciones_correo_activas" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            <option value="false">Apagado (no se manda nada)</option>
+            <option value="true">Encendido</option>
+          </select>
+        </label>
+      </div>
+
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Receta de regalo (lead magnet)</h3>
-        <p class="mt-1 text-xs text-carbon/50">En cuanto subas un PDF aquí, cualquiera que se suscriba en el pie de página recibe esta receta de inmediato por correo, y unos días después le llegan correos invitándolo a hacerse miembro.</p>
+        <p class="mt-1 text-xs text-carbon/50">En cuanto subas un PDF aquí <strong>y</strong> enciendas el interruptor de arriba, cualquiera que se suscriba en el pie de página recibe esta receta de inmediato por correo, y unos días después le llegan correos invitándolo a hacerse miembro.</p>
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
           <label class="block">
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título de la receta</span>

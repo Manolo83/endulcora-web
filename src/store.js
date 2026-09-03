@@ -37,6 +37,11 @@ const DEFAULT_CONTENT = {
   leadmagnet_descripcion: 'Suscríbete al correo de Endulcora y te mandamos una receta de regalo, más tips y ofertas de vez en cuando.',
   leadmagnet_pdf_url: '',
   leadmagnet_pdf_nombre: '',
+  // Interruptor general: mientras esté en 'false', nadie recibe la receta
+  // de regalo, la secuencia de correos ni el recordatorio de membresía —
+  // aunque ya esté todo configurado. Apagado por defecto a propósito, para
+  // no mandar nada hasta que el admin lo prenda a mano.
+  automatizaciones_correo_activas: 'false',
   chef_badge: 'Fundador de Endulcora',
   chef_nombre: 'Chef Luis Alfonso Jiménez Cárdenas',
   chef_bio:

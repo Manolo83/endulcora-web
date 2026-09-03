@@ -226,6 +226,7 @@ router.post('/newsletter/suscribir', async (req, res) => {
   // PDF de regalo — si no, la persona simplemente queda en la lista.
   if (!nuevo) return;
   const contenido = store.getContent();
+  if (contenido.automatizaciones_correo_activas !== 'true') return;
   if (!contenido.leadmagnet_pdf_url) return;
   try {
     await enviarCorreoLeadMagnetPaso0({
