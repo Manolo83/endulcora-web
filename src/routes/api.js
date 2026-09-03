@@ -77,6 +77,32 @@ router.get('/content', (req, res) => {
   res.json(store.getContent());
 });
 
+// ---- Blog de recetas gratuitas ----
+const PREFIJO_BLOG_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
+function conProductoRelacionado(post) {
+  if (!post.productoRelacionadoId) return { ...post, productoRelacionado: null };
+  const producto = store.getProduct(post.productoRelacionadoId);
+  if (!producto || producto.ocultoEnCatalogo) return { ...post, productoRelacionado: null };
+  return {
+    ...post,
+    productoRelacionado: {
+      titulo: producto.titulo,
+      slug: producto.slug,
+      prefijo: PREFIJO_BLOG_POR_CATEGORIA[producto.categoria] || 'ebooks',
+    },
+  };
+}
+
+router.get('/blog', (req, res) => {
+  res.json(store.getBlogPosts(true).map(conProductoRelacionado));
+});
+
+router.get('/blog/:slug', (req, res) => {
+  const post = store.getBlogPostBySlug(req.params.slug);
+  if (!post || !post.publicado) return res.status(404).json({ error: 'No se encontró esa entrada.' });
+  res.json(conProductoRelacionado(post));
+});
+
 router.get('/products', (req, res) => {
   res.json(store.getProducts());
 });

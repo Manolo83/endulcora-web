@@ -178,6 +178,37 @@ app.get('/ebooks/:slug', servirPaginaProducto('ebooks'));
 app.get('/anexos/:slug', servirPaginaProducto('anexos'));
 app.get('/recetarios/:slug', servirPaginaProducto('recetarios'));
 
+// Entrada del blog (ej. /blog/como-templar-chocolate): misma logica que
+// servirPaginaProducto, pero para public/blog-post.html.
+app.get('/blog/:slug', (req, res) => {
+  const post = store.getBlogPostBySlug(req.params.slug);
+  if (!post || !post.publicado) {
+    return res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+  }
+  let html;
+  try {
+    html = fs.readFileSync(path.join(__dirname, 'public', 'blog-post.html'), 'utf8');
+  } catch (e) {
+    return res.status(500).send('No se pudo cargar la entrada del blog.');
+  }
+  const titulo = post.titulo || 'Blog';
+  const descripcion = (post.resumen || 'Recetas y consejos de Endulcora, Estudio Gastronómico.').slice(0, 300);
+  const imagen = post.imagen
+    ? (post.imagen.startsWith('http') ? post.imagen : `${SITE_URL}${post.imagen}`)
+    : `${SITE_URL}/og-image.png`;
+  const url = `${SITE_URL}/blog/${post.slug}`;
+  html = html
+    .replace(/__TITULO__/g, escaparHtml(titulo))
+    .replace(/__DESCRIPCION__/g, escaparHtml(descripcion))
+    .replace(/__IMAGEN__/g, escaparHtml(imagen))
+    .replace(/__URL__/g, escaparHtml(url));
+  res.send(html);
+});
+
+app.get('/blog', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'blog.html'));
+});
+
 // Paginas de catalogo, propias y separadas de la pagina principal (para
 // anunciar sin que la gente tenga que bajar por todo el sitio).
 app.get(['/tienda', '/ebooks', '/anexos', '/recetarios'], (req, res) => {
@@ -281,6 +312,7 @@ app.get('/sitemap.xml', (req, res) => {
     { loc: '/calculadora', prioridad: '0.5', frecuencia: 'monthly' },
     { loc: '/resenas', prioridad: '0.5', frecuencia: 'monthly' },
     { loc: '/anuncios', prioridad: '0.4', frecuencia: 'weekly' },
+    { loc: '/blog', prioridad: '0.7', frecuencia: 'weekly' },
   ];
 
   const paginasDeProducto = store.getProducts()
@@ -291,7 +323,11 @@ app.get('/sitemap.xml', (req, res) => {
       frecuencia: 'monthly',
     }));
 
-  const urls = [...paginasEstaticas, ...paginasDeProducto]
+  const paginasDeBlog = store.getBlogPosts(true)
+    .filter((p) => p.titulo && p.titulo.trim() && p.slug)
+    .map((p) => ({ loc: `/blog/${p.slug}`, prioridad: '0.6', frecuencia: 'monthly' }));
+
+  const urls = [...paginasEstaticas, ...paginasDeProducto, ...paginasDeBlog]
     .map(({ loc, prioridad, frecuencia }) => `
   <url>
     <loc>${SITE_URL}${loc}</loc>

@@ -442,6 +442,55 @@ router.post('/api/products/subir-lote', requireAdmin, uploadDocumento.array('arc
   res.status(201).json(creados);
 });
 
+// ---- Blog de recetas gratuitas ----
+router.get('/api/blog', requireAdmin, (req, res) => {
+  res.json(store.getBlogPosts());
+});
+
+router.post('/api/blog', requireAdmin, (req, res) => {
+  const { titulo, resumen, contenido, slug, productoRelacionadoId, publicado } = req.body || {};
+  if (!titulo || !String(titulo).trim()) return res.status(400).json({ error: 'Ponle un título a la entrada.' });
+  const item = store.addBlogPost({
+    titulo: String(titulo).trim(),
+    resumen: String(resumen || '').trim(),
+    contenido: String(contenido || '').trim(),
+    slug: String(slug || '').trim(),
+    productoRelacionadoId: productoRelacionadoId ? Number(productoRelacionadoId) : null,
+    publicado: !!publicado,
+  });
+  res.status(201).json(item);
+});
+
+router.patch('/api/blog/:id', requireAdmin, (req, res) => {
+  const patch = { ...(req.body || {}) };
+  if (Object.prototype.hasOwnProperty.call(patch, 'productoRelacionadoId')) {
+    patch.productoRelacionadoId = patch.productoRelacionadoId ? Number(patch.productoRelacionadoId) : null;
+  }
+  const item = store.updateBlogPost(req.params.id, patch);
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+router.delete('/api/blog/:id', requireAdmin, (req, res) => {
+  const item = store.deleteBlogPost(req.params.id);
+  if (item) borrarSiEsSubida(item.imagen);
+  res.json({ ok: true });
+});
+
+router.post('/api/blog/:id/image', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
+  const post = store.getBlogPost(req.params.id);
+  if (!post) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    return res.status(404).json({ error: 'No encontrado' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
+  const url = `/uploads/${req.file.filename}`;
+  const anterior = post.imagen;
+  const item = store.updateBlogPost(req.params.id, { imagen: url, imagenNombre: req.file.originalname });
+  borrarSiEsSubida(anterior);
+  res.status(201).json(item);
+});
+
 // ---- Ventas (pedidos de Mercado Pago + cobros de membresia) ----
 router.get('/api/orders', requireAdmin, (req, res) => {
   const pedidos = store.getOrders();

@@ -63,6 +63,7 @@
       <a href="#seccionVistaPrevia" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Vista previa</a>
       <a href="#seccionContenido" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Contenido general</a>
       <a href="#seccionProductos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Productos</a>
+      <a href="#seccionBlog" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Blog</a>
       <a href="#seccionCalendario" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Calendario</a>
       <a href="#seccionLegales" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Legales</a>
       <a href="#seccionVentas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Ventas</a>
@@ -487,6 +488,47 @@
       </div>
 
       <div id="listaProductosAdmin" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
+    <!-- BLOG -->
+    <section id="seccionBlog" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Blog de recetas gratuitas</h2>
+      <p class="mt-1 text-sm text-carbon/60">Entradas de blog para atraer tráfico de búsqueda. Se ven en <a href="/blog" target="_blank" class="text-vino hover:underline">/blog</a> solo cuando están "Publicada". Puedes ligar cada entrada a un producto (para vender el eBook completo) o dejarla sin ligar (se invita a la membresía).</p>
+
+      <form id="formBlogPost" class="mt-6 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <input type="hidden" id="blogEditandoId" value="">
+        <p id="blogModoTexto" class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Nueva entrada</p>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
+          <input id="blogTitulo" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Resumen (para la lista y para Google)</span>
+          <textarea id="blogResumen" rows="2" maxlength="300" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Contenido</span>
+          <textarea id="blogContenido" rows="10" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+        </label>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Producto relacionado (opcional)</span>
+            <select id="blogProductoRelacionado" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <option value="">Ninguno (invita a la membresía)</option>
+            </select>
+          </label>
+          <label class="flex items-center gap-2 self-end pb-3">
+            <input id="blogPublicado" type="checkbox" class="h-4 w-4 rounded border-vino/30">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Publicada</span>
+          </label>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar entrada</button>
+          <button type="button" id="btnCancelarBlog" class="hidden rounded-full border border-vino/20 px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Cancelar edición</button>
+        </div>
+      </form>
+
+      <div id="listaBlogAdmin" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
     </section>
 
     <!-- CALENDARIO DE TALLERES -->
@@ -988,6 +1030,7 @@ function mostrarDashboard(mostrar){
     cargarCampanasEnviadas();
     cargarPromosTallerAdmin();
     cargarProductosAdmin();
+    cargarBlogAdmin();
     cargarSedes();
     cargarVentas();
     cargarClientesLista();
@@ -2269,6 +2312,131 @@ $('formLoteProductos').addEventListener('submit', async (e) => {
     $('btnSubirLote').classList.add('hidden');
     toast(`${data.length} producto(s) creado(s)`);
     cargarProductosAdmin();
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+/* ---------- Blog ---------- */
+let BLOG_PRODUCTOS_CACHE = [];
+
+async function poblarSelectProductoBlog(seleccionado){
+  const select = $('blogProductoRelacionado');
+  try{
+    if(!BLOG_PRODUCTOS_CACHE.length) BLOG_PRODUCTOS_CACHE = await api('/admin/api/products');
+  }catch(e){ BLOG_PRODUCTOS_CACHE = []; }
+  select.innerHTML = '<option value="">Ninguno (invita a la membresía)</option>' +
+    BLOG_PRODUCTOS_CACHE.map(p => `<option value="${p.id}">${escapeHtml(p.titulo || '(sin título)')}</option>`).join('');
+  select.value = seleccionado ? String(seleccionado) : '';
+}
+
+function limpiarFormBlog(){
+  $('blogEditandoId').value = '';
+  $('blogModoTexto').textContent = 'Nueva entrada';
+  $('formBlogPost').reset();
+  $('blogProductoRelacionado').value = '';
+  $('btnCancelarBlog').classList.add('hidden');
+}
+
+async function cargarBlogAdmin(){
+  const cont = $('listaBlogAdmin');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
+  try{
+    const items = await api('/admin/api/blog');
+    await poblarSelectProductoBlog();
+    if(!items.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay entradas.</p>';
+      return;
+    }
+    cont.innerHTML = items.map(p => `
+      <article class="overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
+        <div class="aspect-video w-full bg-vino/10">
+          ${p.imagen ? `<img src="${p.imagen}" alt="" class="h-full w-full object-cover">` : ''}
+        </div>
+        <div class="p-4">
+          <p class="font-ui text-[11px] uppercase tracking-widest ${p.publicado ? 'text-morado' : 'text-humo'}">${p.publicado ? 'Publicada' : 'Borrador'}</p>
+          <p class="mt-1 font-titulo text-base tracking-wide text-vino">${escapeHtml(p.titulo)}</p>
+          <label class="mt-3 block">
+            <span class="font-ui text-[10px] font-600 uppercase tracking-widest text-carbon/50">Imagen destacada</span>
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-id="${p.id}" class="blogImagenInput mt-1 w-full text-xs">
+          </label>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button data-id="${p.id}" class="btnEditarBlog rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Editar</button>
+            <button data-id="${p.id}" class="btnBorrarBlog rounded-full border border-red-200 px-3 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
+          </div>
+        </div>
+      </article>
+    `).join('');
+
+    cont.querySelectorAll('.blogImagenInput').forEach(input => {
+      input.addEventListener('change', async () => {
+        const file = input.files[0];
+        if(!file) return;
+        const fd = new FormData();
+        fd.append('file', file);
+        try{
+          const res = await fetch(`/admin/api/blog/${input.dataset.id}/image`, { method: 'POST', body: fd });
+          const data = await res.json();
+          if(!res.ok) throw new Error(data.error || 'No se pudo subir la imagen');
+          toast('Imagen actualizada');
+          cargarBlogAdmin();
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
+
+    cont.querySelectorAll('.btnEditarBlog').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const post = items.find(p => p.id === Number(btn.dataset.id));
+        if(!post) return;
+        $('blogEditandoId').value = post.id;
+        $('blogModoTexto').textContent = `Editando: ${post.titulo}`;
+        $('blogTitulo').value = post.titulo || '';
+        $('blogResumen').value = post.resumen || '';
+        $('blogContenido').value = post.contenido || '';
+        $('blogPublicado').checked = !!post.publicado;
+        poblarSelectProductoBlog(post.productoRelacionadoId);
+        $('btnCancelarBlog').classList.remove('hidden');
+        $('formBlogPost').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    cont.querySelectorAll('.btnBorrarBlog').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar esta entrada del blog?')) return;
+        await api(`/admin/api/blog/${btn.dataset.id}`, { method: 'DELETE' });
+        toast('Entrada borrada');
+        cargarBlogAdmin();
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('btnCancelarBlog').addEventListener('click', limpiarFormBlog);
+
+$('formBlogPost').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('blogEditandoId').value;
+  const payload = {
+    titulo: $('blogTitulo').value.trim(),
+    resumen: $('blogResumen').value.trim(),
+    contenido: $('blogContenido').value.trim(),
+    productoRelacionadoId: $('blogProductoRelacionado').value || null,
+    publicado: $('blogPublicado').checked,
+  };
+  try{
+    if(id){
+      await api(`/admin/api/blog/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+      toast('Entrada actualizada');
+    }else{
+      await api('/admin/api/blog', { method: 'POST', body: JSON.stringify(payload) });
+      toast('Entrada creada');
+    }
+    limpiarFormBlog();
+    cargarBlogAdmin();
   }catch(e){
     toast(e.message);
   }

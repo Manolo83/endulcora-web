@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YZNFKC6PS8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-YZNFKC6PS8');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__TITULO__ · Endulcora</title>
+<meta name="description" content="__DESCRIPCION__">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="__URL__">
+<meta name="theme-color" content="#1B0720">
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1302735011542499');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1302735011542499&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
+<!-- Open Graph / Facebook / WhatsApp / Meta Ads -->
+<meta property="og:type" content="article">
+<meta property="og:url" content="__URL__">
+<meta property="og:site_name" content="Endulcora · Estudio Gastronómico">
+<meta property="og:title" content="__TITULO__">
+<meta property="og:description" content="__DESCRIPCION__">
+<meta property="og:image" content="__IMAGEN__">
+<meta property="og:locale" content="es_MX">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="__TITULO__">
+<meta name="twitter:description" content="__DESCRIPCION__">
+<meta name="twitter:image" content="__IMAGEN__">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          firma: ['"Great Vibes"', 'cursive'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+.rule-flama { background-image: linear-gradient(90deg,#F5A623 0 22px,transparent 22px); height: 3px; }
+.boton-vivo { transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease; }
+.boton-vivo:hover { transform: translateY(-2px) scale(1.03); }
+.boton-vivo:active { transform: scale(.95); }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+.spinner { border: 3px solid rgba(78,20,84,.2); border-top-color: #4E1454; border-radius: 50%; width: 16px; height: 16px; animation: girar .7s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .boton-vivo:hover, .boton-vivo:active { transform:none; }
+}
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<header class="sticky top-0 z-50 bg-crema/95 backdrop-blur border-b border-vino/10">
+  <div class="mx-auto flex h-20 max-w-3xl items-center justify-between gap-4 px-5">
+    <a href="/" class="flex items-center gap-3 shrink-0">
+      <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+    </a>
+    <button type="button" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false" id="btnMenu"
+      class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-vino/25 text-vino">
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+  <div id="menuMovil" class="hidden max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-vino/10 bg-crema px-5 pb-6 pt-2">
+    <a href="/" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Inicio</a>
+    <a href="/tienda" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Tienda</a>
+    <a href="/ebooks" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">eBooks</a>
+    <a href="/anexos" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anexos</a>
+    <a href="/blog" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Blog</a>
+    <a href="/clases-en-vivo" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Clases en vivo</a>
+    <a href="/calculadora" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calculadora</a>
+    <a href="/calendario" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calendario</a>
+    <a href="/galeria" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Galería</a>
+    <a href="/resenas" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Reseñas</a>
+    <a href="/anuncios" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anuncios</a>
+    <a href="/comunidad" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Comunidad</a>
+    <a href="/membresia" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Membresía</a>
+    <a href="/juego" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Juego</a>
+    <a href="/?verCarrito=1#tienda" class="mt-5 block w-full rounded-full boton-vivo border border-vino/25 py-3.5 text-center font-ui text-sm font-700 uppercase tracking-wider text-vino">Ver carrito</a>
+  </div>
+</header>
+
+<main class="mx-auto max-w-3xl px-5 py-10">
+  <a href="/blog" class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado hover:underline">← Volver al blog</a>
+
+  <article id="articuloBlog" class="mt-6">
+    <p class="text-sm text-carbon/50">Cargando…</p>
+  </article>
+
+  <div class="mt-14 rounded-3xl bg-white p-6 ring-1 ring-vino/10 sm:p-8">
+    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Recetas al correo</p>
+    <p id="leadmagnetTexto" class="mt-2 text-sm text-carbon/70">Suscríbete y te mandamos una receta de regalo, más tips y ofertas de vez en cuando.</p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <label for="correoBlog" class="sr-only">Tu correo</label>
+      <input id="correoBlog" type="email" placeholder="tu@correo.com"
+        class="min-w-[200px] flex-1 rounded-full border border-vino/20 bg-crema/60 px-4 py-2.5 text-sm text-carbon placeholder:text-carbon/35">
+      <button type="button" id="btnSuscribirBlog" class="inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        <span id="suscribirBlogSpinner" class="spinner hidden" style="border-top-color:#FBF4E9"></span> Enviar
+      </button>
+    </div>
+    <p id="suscribirBlogMsg" class="mt-2 hidden text-xs"></p>
+  </div>
+</main>
+
+<footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
+  <div class="mx-auto max-w-3xl px-5 pb-10 text-center">
+    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/40">© <span id="anioFooter"></span> Endulcora · Ciudad de México</p>
+  </div>
+</footer>
+
+<a href="https://wa.me/525665271901" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"
+  class="fixed bottom-4 left-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl transition hover:scale-110 sm:bottom-6 sm:left-6">
+  <svg viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
+</a>
+
+<script>
+function toggleMenu(){
+  const m = document.getElementById('menuMovil');
+  const b = document.getElementById('btnMenu');
+  const abierto = m.classList.toggle('hidden') === false;
+  b.setAttribute('aria-expanded', abierto);
+}
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+function tarjetaCTA(p){
+  if(p.productoRelacionado){
+    return `<div class="mt-10 rounded-3xl bg-vino p-6 text-crema sm:p-8">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">¿Quieres la receta completa?</p>
+      <h2 class="mt-2 font-display text-xl">${escapeHtml(p.productoRelacionado.titulo)}</h2>
+      <a href="/${p.productoRelacionado.prefijo}/${p.productoRelacionado.slug}" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">Ver producto</a>
+    </div>`;
+  }
+  return `<div class="mt-10 rounded-3xl bg-vino p-6 text-crema sm:p-8">
+    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">¿Te gustó esta receta?</p>
+    <h2 class="mt-2 font-display text-xl">Con la membresía Endulcora tienes una nueva cada mes</h2>
+    <a href="/membresia" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">Conocer la membresía</a>
+  </div>`;
+}
+
+async function cargarPost(){
+  const cont = document.getElementById('articuloBlog');
+  const slug = window.location.pathname.split('/').filter(Boolean).pop();
+  try{
+    const res = await fetch(`/api/blog/${slug}`);
+    const p = await res.json();
+    if(!res.ok) throw new Error(p.error || 'No se encontró esta entrada.');
+    const fecha = new Date(p.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+    cont.innerHTML = `
+      ${p.imagen ? `<img src="${p.imagen}" alt="${escapeHtml(p.titulo)}" class="aspect-[16/9] w-full rounded-2xl object-cover">` : ''}
+      <p class="mt-6 font-ui text-[11px] uppercase tracking-widest text-humo">${fecha}</p>
+      <h1 class="mt-1 font-display text-3xl leading-tight text-vino">${escapeHtml(p.titulo)}</h1>
+      <div class="mt-6 whitespace-pre-line text-[15px] leading-relaxed text-carbon/80">${escapeHtml(p.contenido)}</div>
+      ${tarjetaCTA(p)}
+    `;
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+cargarPost();
+
+async function cargarLeadmagnetTexto(){
+  try{
+    const res = await fetch('/api/content');
+    const c = await res.json();
+    if(c.leadmagnet_descripcion) document.getElementById('leadmagnetTexto').textContent = c.leadmagnet_descripcion;
+  }catch(e){}
+}
+cargarLeadmagnetTexto();
+
+document.getElementById('btnSuscribirBlog').addEventListener('click', async () => {
+  const input = document.getElementById('correoBlog');
+  const msg = document.getElementById('suscribirBlogMsg');
+  const spinner = document.getElementById('suscribirBlogSpinner');
+  const correo = input.value.trim();
+  if(!correo){ return; }
+  spinner.classList.remove('hidden');
+  msg.classList.add('hidden');
+  try{
+    const res = await fetch('/api/newsletter/suscribir', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: correo }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo suscribir.');
+    input.value = '';
+    msg.textContent = '¡Listo! Revisa tu correo.';
+    msg.className = 'mt-2 text-xs text-morado';
+  }catch(e){
+    msg.textContent = e.message;
+    msg.className = 'mt-2 text-xs text-red-600';
+  }finally{
+    spinner.classList.add('hidden');
+  }
+});
+</script>
+</body>
+</html>

@@ -177,6 +177,7 @@ function datosPorDefecto() {
     publicacionesComunidad: [],
     mensajesComunidad: [],
     comentariosGaleria: [],
+    blogPosts: [],
     contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '', revistaUrl: '', revistaNombre: '', revistaNumero: '' },
   };
 }
@@ -1105,6 +1106,64 @@ module.exports = {
     save(data);
     return item;
   },
+
+  // ---- Blog de recetas gratuitas (contenido SEO, entrada a la tienda/membresia) ----
+  getBlogPosts(soloPublicados) {
+    const data = load();
+    let items = [...data.blogPosts].sort((a, b) => b.id - a.id);
+    if (soloPublicados) items = items.filter((p) => p.publicado);
+    return items;
+  },
+  getBlogPost(id) {
+    return load().blogPosts.find((p) => p.id === Number(id)) || null;
+  },
+  getBlogPostBySlug(slug) {
+    return load().blogPosts.find((p) => p.slug === slug) || null;
+  },
+  addBlogPost(fields) {
+    const data = load();
+    const item = {
+      id: nextId(data.blogPosts),
+      titulo: '',
+      resumen: '',
+      contenido: '',
+      imagen: '',
+      imagenNombre: '',
+      productoRelacionadoId: null,
+      publicado: false,
+      slug: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...fields,
+    };
+    item.slug = slugUnico(item.slug || item.titulo, data.blogPosts, item.id);
+    data.blogPosts.push(item);
+    save(data);
+    return item;
+  },
+  updateBlogPost(id, patch) {
+    const data = load();
+    const item = data.blogPosts.find((p) => p.id === Number(id));
+    if (!item) return null;
+    if (typeof patch.slug === 'string' && patch.slug.trim()) {
+      patch = { ...patch, slug: slugUnico(patch.slug, data.blogPosts, item.id) };
+    } else if (Object.prototype.hasOwnProperty.call(patch, 'slug')) {
+      // vacío: no se toca el slug existente para no romper ligas ya publicadas
+      patch = { ...patch };
+      delete patch.slug;
+    }
+    Object.assign(item, patch, { updatedAt: new Date().toISOString() });
+    save(data);
+    return item;
+  },
+  deleteBlogPost(id) {
+    const data = load();
+    const item = data.blogPosts.find((p) => p.id === Number(id));
+    data.blogPosts = data.blogPosts.filter((p) => p.id !== Number(id));
+    save(data);
+    return item || null;
+  },
+
   addProductoGaleriaImagen(id, { url, filename }) {
     const data = load();
     const item = data.products.find((p) => p.id === Number(id));
