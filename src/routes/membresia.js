@@ -136,6 +136,13 @@ function aplicarEstadoDesdePreapprovalInfo(info) {
   // reactivacion) — no en cada cobro mensual de quien ya seguia activo.
   if (nuevoEstado === 'activa' && usuario.membresiaEstado !== 'activa') {
     patch.membresiaActivaDesde = new Date().toISOString().slice(0, 10);
+    // A diferencia de membresiaActivaDesde (que se actualiza en cada
+    // reactivacion), esta fecha se guarda una sola vez, la primera vez que
+    // la cuenta se activa en toda su historia — es lo que define su
+    // "numero de suscriptor" permanente, aunque despues cancele y vuelva.
+    if (!usuario.membresiaPrimeraActivacion) {
+      patch.membresiaPrimeraActivacion = new Date().toISOString();
+    }
   }
   store.updateUser(usuario.id, patch);
   return true;

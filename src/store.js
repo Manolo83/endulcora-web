@@ -246,6 +246,22 @@ async function init() {
       if (typeof u.membresiaActivaDesde !== 'string') { u.membresiaActivaDesde = ''; changed = true; }
       if (typeof u.fotoPerfilUrl !== 'string') { u.fotoPerfilUrl = ''; changed = true; }
       if (typeof u.registroRecordatorioEnviado !== 'boolean') { u.registroRecordatorioEnviado = false; changed = true; }
+      // Numero de suscriptor: fecha en la que se activo la membresia por
+      // primera vez en su historia (no se vuelve a tocar despues, aunque
+      // cancele y se vuelva a suscribir). A quien ya tenia membresia antes
+      // de este campo se le calcula lo mejor posible con lo que ya existia:
+      // su membresiaActivaDesde si la tiene, o la fecha en que creo su
+      // cuenta si alguna vez tuvo membresia pero nunca se guardo esa fecha.
+      if (typeof u.membresiaPrimeraActivacion !== 'string') {
+        if (u.membresiaActivaDesde) {
+          u.membresiaPrimeraActivacion = new Date(u.membresiaActivaDesde).toISOString();
+        } else if (u.membresiaEstado && u.membresiaEstado !== 'ninguna') {
+          u.membresiaPrimeraActivacion = u.createdAt || '';
+        } else {
+          u.membresiaPrimeraActivacion = '';
+        }
+        changed = true;
+      }
     });
     (data.subscribers || []).forEach((s) => {
       if (typeof s.leadMagnetPaso !== 'number') { s.leadMagnetPaso = 0; changed = true; }
@@ -1389,6 +1405,7 @@ module.exports = {
       membresiaEstado: 'ninguna',
       membresiaPreapprovalId: '',
       membresiaActivaDesde: '',
+      membresiaPrimeraActivacion: '',
       registroRecordatorioEnviado: false,
       createdAt: new Date().toISOString(),
     };

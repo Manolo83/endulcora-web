@@ -532,6 +532,25 @@ router.post('/api/membresia/sincronizar-pagos', requireAdmin, async (req, res) =
   res.json({ agregados, corregidos, usuariosRevisados: usuarios.length, activos });
 });
 
+// Lista, en orden, a todos los que alguna vez se hicieron miembros (tengan
+// o no la membresia activa ahora mismo) — el numero es permanente, por la
+// fecha de su primera activacion en toda su historia, no cambia si cancelan
+// y se vuelven a suscribir despues.
+router.get('/api/membresia/suscriptores', requireAdmin, (req, res) => {
+  const lista = store
+    .getUsers()
+    .filter((u) => u.membresiaPrimeraActivacion)
+    .sort((a, b) => new Date(a.membresiaPrimeraActivacion) - new Date(b.membresiaPrimeraActivacion))
+    .map((u, i) => ({
+      numero: i + 1,
+      nombre: u.nombre,
+      email: u.email,
+      membresiaEstado: u.membresiaEstado,
+      membresiaPrimeraActivacion: u.membresiaPrimeraActivacion,
+    }));
+  res.json(lista);
+});
+
 // ---- Suscriptores del correo (footer) ----
 router.get('/api/newsletter', requireAdmin, (req, res) => {
   res.json(store.getSubscribers());
@@ -731,9 +750,13 @@ router.post('/api/users/:id/membresia', requireAdmin, (req, res) => {
   if (!user) return res.status(404).json({ error: 'No encontrado' });
   const patch = { membresiaEstado: estado };
   // Igual que en el webhook de Mercado Pago: solo reinicia el "reloj" de la
-  // biblioteca de clases si de verdad estaba inactiva antes.
+  // biblioteca de clases si de verdad estaba inactiva antes, y solo asigna
+  // el numero de suscriptor la primera vez que se activa en su historia.
   if (estado === 'activa' && user.membresiaEstado !== 'activa') {
     patch.membresiaActivaDesde = new Date().toISOString().slice(0, 10);
+    if (!user.membresiaPrimeraActivacion) {
+      patch.membresiaPrimeraActivacion = new Date().toISOString();
+    }
   }
   const actualizado = store.updateUser(user.id, patch);
   res.json({ id: actualizado.id, membresiaEstado: actualizado.membresiaEstado });
