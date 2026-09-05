@@ -57,6 +57,11 @@ const DEFAULT_CONTENT = {
   clase_cobro_activo: 'false',
   clase_precio_normal: '300',
   clase_precio_miembro: '150',
+  // Recetario de regalo de esta clase (PDF): se entrega a quien tiene
+  // acceso a la clase, sea porque es gratis o porque ya pago — misma regla
+  // que el link para entrar, nunca se manda por separado.
+  clase_recetario_url: '',
+  clase_recetario_nombre: '',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',

@@ -265,6 +265,17 @@
               <p class="mt-1 text-xs text-carbon/40">Se ve en /clases-en-vivo, debajo del contador. Déjalo vacío si no quieres mostrar nada.</p>
             </label>
           </div>
+
+          <div class="mt-6 border-t border-vino/10 pt-6">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Recetario de regalo de esta clase (PDF)</span>
+            <p class="mt-1 text-xs text-carbon/40">Se entrega junto con el acceso a la clase — si tiene cobro activo, solo lo descarga quien ya pagó; si es gratis, cualquiera puede descargarlo.</p>
+            <div id="claseRecetarioPreview" class="mt-3"></div>
+            <div class="mt-3 flex flex-wrap items-center gap-3">
+              <input id="claseRecetarioInput" type="file" accept="application/pdf,.pdf" class="text-sm">
+              <button type="button" id="btnSubirClaseRecetario" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir PDF</button>
+              <button type="button" id="btnQuitarClaseRecetario" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar</button>
+            </div>
+          </div>
         </div>
 
         <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
@@ -1337,6 +1348,7 @@ async function cargarContenidoAdmin(){
     });
     pintarChefImagen(CONTENIDO_ACTUAL.chef_imagen);
     pintarAsistenteIcono(CONTENIDO_ACTUAL.asistente_icono);
+    pintarClaseRecetario(CONTENIDO_ACTUAL.clase_recetario_url, CONTENIDO_ACTUAL.clase_recetario_nombre);
   }catch(e){
     toast('No se pudo cargar el contenido general');
   }
@@ -1348,6 +1360,40 @@ function pintarAsistenteIcono(url){
     ? `<img src="${url}" alt="Ícono del asistente" class="h-20 w-20 rounded-full object-cover ring-1 ring-vino/10">`
     : '<p class="text-sm text-carbon/50">Usando el ícono por defecto.</p>';
 }
+
+function pintarClaseRecetario(url, nombre){
+  const cont = $('claseRecetarioPreview');
+  cont.innerHTML = url
+    ? `<p class="text-sm text-carbon/70">📄 <a href="${url}" target="_blank" class="text-vino hover:underline">${escapeHtml(nombre || 'Ver PDF')}</a></p>`
+    : '<p class="text-sm text-carbon/50">Todavía no hay recetario de regalo para esta clase.</p>';
+}
+
+$('btnSubirClaseRecetario').addEventListener('click', async () => {
+  const file = $('claseRecetarioInput').files[0];
+  if(!file){ toast('Elige un PDF'); return; }
+  const fd = new FormData();
+  fd.append('file', file);
+  try{
+    const res = await fetch('/admin/api/content/clase-recetario', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir el PDF');
+    pintarClaseRecetario(data.content.clase_recetario_url, data.content.clase_recetario_nombre);
+    $('claseRecetarioInput').value = '';
+    toast('Recetario actualizado');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('btnQuitarClaseRecetario').addEventListener('click', async () => {
+  try{
+    await api('/admin/api/content/clase-recetario', { method: 'DELETE' });
+    pintarClaseRecetario('', '');
+    toast('Recetario quitado');
+  }catch(e){
+    toast(e.message);
+  }
+});
 
 $('formContenido').addEventListener('submit', async (e) => {
   e.preventDefault();

@@ -68,13 +68,13 @@ router.post('/galeria/:id/comentarios', requireCliente, (req, res) => {
 
 router.get('/content', (req, res) => {
   const contenido = store.getContent();
-  // El link para entrar a la clase en vivo solo se manda tal cual cuando NO
-  // hay cobro activo (clases gratis, como hasta ahora). Con el cobro
-  // encendido se quita de aqui — se revela solo a quien ya pago, desde
-  // GET /api/clase-en-vivo — para que nadie se lo salte pidiendo esta ruta
-  // publica directamente.
+  // El link para entrar a la clase en vivo y el recetario de regalo solo se
+  // mandan tal cual cuando NO hay cobro activo (clases gratis, como hasta
+  // ahora). Con el cobro encendido se quitan de aqui — se revelan solo a
+  // quien ya pago, desde GET /api/clase-en-vivo — para que nadie se los
+  // salte pidiendo esta ruta publica directamente.
   if (contenido.clase_cobro_activo === 'true') {
-    res.json({ ...contenido, clase_url: '' });
+    res.json({ ...contenido, clase_url: '', clase_recetario_url: '' });
   } else {
     res.json(contenido);
   }
@@ -86,7 +86,13 @@ router.get('/clase-en-vivo', (req, res) => {
   const requierePago = contenido.clase_cobro_activo === 'true';
   const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora);
   if (!requierePago) {
-    return res.json({ requierePago: false, tieneAcceso: true, url: contenido.clase_url || '' });
+    return res.json({
+      requierePago: false,
+      tieneAcceso: true,
+      url: contenido.clase_url || '',
+      recetarioUrl: contenido.clase_recetario_url || '',
+      recetarioNombre: contenido.clase_recetario_nombre || '',
+    });
   }
   const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
   const esMiembroActivo = !!(usuario && usuario.membresiaEstado === 'activa');
@@ -98,6 +104,8 @@ router.get('/clase-en-vivo', (req, res) => {
     esMiembroActivo,
     tieneAcceso,
     url: tieneAcceso ? (contenido.clase_url || '') : '',
+    recetarioUrl: tieneAcceso ? (contenido.clase_recetario_url || '') : '',
+    recetarioNombre: tieneAcceso ? (contenido.clase_recetario_nombre || '') : '',
   });
 });
 

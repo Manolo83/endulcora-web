@@ -207,6 +207,26 @@ router.delete('/api/content/leadmagnet-pdf', requireAdmin, (req, res) => {
   res.json({ content });
 });
 
+// Recetario de regalo de la clase en vivo: se entrega junto con el link
+// para entrar (misma proteccion si hay cobro activo).
+router.post('/api/content/clase-recetario', requireAdmin, uploadDocumento.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo.' });
+  const anterior = store.getContent().clase_recetario_url;
+  const content = store.updateContent({
+    clase_recetario_url: `/uploads/${req.file.filename}`,
+    clase_recetario_nombre: req.file.originalname,
+  });
+  borrarSiEsSubida(anterior);
+  res.json({ content });
+});
+
+router.delete('/api/content/clase-recetario', requireAdmin, (req, res) => {
+  const anterior = store.getContent().clase_recetario_url;
+  const content = store.updateContent({ clase_recetario_url: '', clase_recetario_nombre: '' });
+  borrarSiEsSubida(anterior);
+  res.json({ content });
+});
+
 // ---- Carrusel de imagenes del inicio (publicidad) ----
 router.get('/api/hero-carrusel', requireAdmin, (req, res) => {
   res.json(store.getHeroCarrusel());
