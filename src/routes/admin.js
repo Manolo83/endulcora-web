@@ -532,10 +532,11 @@ router.post('/api/membresia/sincronizar-pagos', requireAdmin, async (req, res) =
   res.json({ agregados, corregidos, usuariosRevisados: usuarios.length, activos });
 });
 
-// Lista, en orden, a todos los que alguna vez se hicieron miembros (tengan
-// o no la membresia activa ahora mismo) — el numero es permanente, por la
-// fecha de su primera activacion en toda su historia, no cambia si cancelan
-// y se vuelven a suscribir despues.
+// El numero es permanente, por la fecha de la primera activacion de cada
+// quien en toda su historia (se calcula sobre TODOS los que alguna vez
+// fueron miembros, para que no cambie si alguien cancela) — pero la lista
+// que se muestra solo incluye a quien tiene la membresia activa ahora mismo,
+// no a cancelados ni pendientes. Por eso puede haber huecos en los numeros.
 router.get('/api/membresia/suscriptores', requireAdmin, (req, res) => {
   const lista = store
     .getUsers()
@@ -547,7 +548,8 @@ router.get('/api/membresia/suscriptores', requireAdmin, (req, res) => {
       email: u.email,
       membresiaEstado: u.membresiaEstado,
       membresiaPrimeraActivacion: u.membresiaPrimeraActivacion,
-    }));
+    }))
+    .filter((u) => u.membresiaEstado === 'activa');
   res.json(lista);
 });
 

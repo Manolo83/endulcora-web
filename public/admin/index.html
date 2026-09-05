@@ -748,7 +748,7 @@
       <div class="mt-6 rounded-2xl bg-white ring-1 ring-vino/10">
         <div class="p-6 pb-0">
           <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Contador de suscriptores</h3>
-          <p class="mt-1 text-xs text-carbon/50">Orden en el que cada quien se hizo miembro por primera vez, en toda la historia del sitio. El número no cambia aunque después cancele y se vuelva a suscribir.</p>
+          <p class="mt-1 text-xs text-carbon/50">Solo quien tiene la membresía activa ahora mismo — no aparecen cancelados ni pendientes. El número es por orden de cuándo se hizo miembro por primera vez en toda la historia del sitio, así que puede haber huecos (si alguien de en medio canceló) y no cambia aunque después se vuelva a suscribir.</p>
         </div>
         <div id="listaSuscriptoresMembresia" class="mt-4 divide-y divide-vino/10"></div>
       </div>
@@ -3262,16 +3262,13 @@ async function cargarSuscriptoresMembresia(){
   try{
     const lista = await api('/admin/api/membresia/suscriptores');
     if(!lista.length){
-      cont.innerHTML = '<p class="p-6 text-sm text-carbon/50">Todavía nadie se ha hecho miembro.</p>';
+      cont.innerHTML = '<p class="p-6 text-sm text-carbon/50">Todavía nadie tiene la membresía activa.</p>';
       return;
     }
     cont.innerHTML = lista.map(s => `
-      <div class="flex items-center justify-between gap-3 px-6 py-3">
-        <div class="min-w-0">
-          <p class="text-sm text-carbon/85">${escapeHtml(s.nombre || s.email)} <span class="text-carbon/40">·</span> <span class="font-ui text-[11px] font-700 uppercase tracking-wider text-morado">Suscriptor n.º ${s.numero}</span></p>
-          <p class="text-xs text-carbon/40">${escapeHtml(s.email)} · desde ${new Date(s.membresiaPrimeraActivacion).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-        </div>
-        <span class="shrink-0 font-ui text-[11px] uppercase tracking-widest text-carbon/50">${escapeHtml(ETIQUETA_MEMBRESIA[s.membresiaEstado] || s.membresiaEstado)}</span>
+      <div class="px-6 py-3">
+        <p class="text-sm text-carbon/85">${escapeHtml(s.nombre || s.email)} <span class="text-carbon/40">·</span> <span class="font-ui text-[11px] font-700 uppercase tracking-wider text-morado">Suscriptor n.º ${s.numero}</span></p>
+        <p class="text-xs text-carbon/40">${escapeHtml(s.email)} · desde ${new Date(s.membresiaPrimeraActivacion).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
       </div>
     `).join('');
   }catch(e){
