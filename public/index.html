@@ -1410,11 +1410,25 @@ function aplicarClaseEnVivo(c){
   if(diaHora) diaHora.textContent = `${DIAS_SEMANA[CLASE_DIA]} · ${String(CLASE_HH).padStart(2,'0')}:${String(CLASE_MM).padStart(2,'0')} h · CDMX`;
 
   const linkEntrar = document.getElementById('linkEntrarClase');
-  const url = (c.clase_url || '').trim();
   if(linkEntrar){
-    const valida = /^https?:\/\//i.test(url);
-    linkEntrar.classList.toggle('hidden', !valida);
-    if(valida) linkEntrar.href = url;
+    if(c.clase_cobro_activo === 'true'){
+      // Esta clase tiene costo: el link real no viaja en este contenido
+      // publico. Se manda a /clases-en-vivo, que ya sabe mostrar el precio,
+      // el botón de compra o el acceso si ya se pagó.
+      linkEntrar.classList.remove('hidden');
+      linkEntrar.textContent = 'Ver clase en vivo';
+      linkEntrar.href = '/clases-en-vivo';
+      linkEntrar.removeAttribute('target');
+    }else{
+      const url = (c.clase_url || '').trim();
+      const valida = /^https?:\/\//i.test(url);
+      linkEntrar.classList.toggle('hidden', !valida);
+      if(valida){
+        linkEntrar.textContent = 'Entrar a la clase';
+        linkEntrar.href = url;
+        linkEntrar.setAttribute('target', '_blank');
+      }
+    }
   }
 }
 

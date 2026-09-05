@@ -43,6 +43,28 @@ router.post('/preference', async (req, res) => {
 
   const resueltos = [];
   for (const linea of pedido) {
+    if (linea.tipo === 'clase_en_vivo') {
+      if (!userId) return res.status(401).json({ error: 'Inicia sesión para comprar tu acceso a la clase en vivo.' });
+      const contenido = store.getContent();
+      if (contenido.clase_cobro_activo !== 'true') {
+        return res.status(400).json({ error: 'La clase en vivo no tiene cobro activo en este momento.' });
+      }
+      const claseFecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora);
+      if (store.tieneAccesoClaseEnVivo({ fecha: claseFecha, userId })) {
+        return res.status(400).json({ error: 'Ya tienes acceso a esta clase.' });
+      }
+      const precio = esMiembroActivo ? parsePrecio(contenido.clase_precio_miembro) : parsePrecio(contenido.clase_precio_normal);
+      if (precio <= 0) continue;
+      resueltos.push({
+        tipo: 'clase_en_vivo',
+        itemId: null,
+        titulo: `Acceso a la clase en vivo del ${claseFecha}`,
+        precio,
+        cantidad: 1,
+        claseFecha,
+      });
+      continue;
+    }
     if (!['producto', 'curso'].includes(linea.tipo) || !linea.id) {
       return res.status(400).json({ error: 'Uno de los artículos del carrito no es valido.' });
     }
@@ -162,6 +184,20 @@ router.post('/webhook', async (req, res) => {
     if (nuevoEstado === 'aprobado' && !order.googleAdsEnviado) {
       await enviarCompraGoogle({ order: actualizado });
       store.updateOrder(order.id, { googleAdsEnviado: true });
+    }
+
+    if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado) {
+      for (const item of actualizado.items) {
+        if (item.tipo !== 'clase_en_vivo' || !item.claseFecha) continue;
+        if (store.tieneAccesoClaseEnVivo({ fecha: item.claseFecha, userId: actualizado.userId })) continue;
+        store.addAccesoClaseEnVivo({
+          fecha: item.claseFecha,
+          userId: actualizado.userId,
+          email: actualizado.email,
+          monto: item.precio,
+          orderId: actualizado.id,
+        });
+      }
     }
 
     if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado && !order.correoEnviado && actualizado.email) {

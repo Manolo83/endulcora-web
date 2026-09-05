@@ -258,6 +258,10 @@ function pintarDescargas(pedido){
   const disponibles = pedido.items.filter(i => i.descargaDisponible);
   const cont = document.getElementById('listaDescargas');
   if(!disponibles.length){
+    if(pedido.items.some(i => i.tipo === 'clase_en_vivo')){
+      cont.innerHTML = '<a href="/clases-en-vivo" class="block rounded-2xl bg-vino px-5 py-4 text-center font-ui text-sm font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Ya tienes tu acceso — Ver clase en vivo</a>';
+      return;
+    }
     cont.innerHTML = '<p class="text-center text-sm text-carbon/50">Tu material se está preparando y te llegará por correo en breve.</p>';
     return;
   }

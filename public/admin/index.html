@@ -244,6 +244,22 @@
               <p class="mt-1 text-xs text-carbon/40">En cuanto lo pegues aquí, aparece el botón "Entrar a la clase" en /inicio y /clases-en-vivo. Déjalo vacío para no mostrar el botón.</p>
             </label>
             <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">¿Cobrar por esta clase?</span>
+              <select data-content-key="clase_cobro_activo" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+                <option value="false">No, esta clase es gratis</option>
+                <option value="true">Sí, cobrar por el acceso</option>
+              </select>
+              <p class="mt-1 text-xs text-carbon/40">Con esto encendido, el link de arriba deja de mostrarse gratis: solo lo ve quien pague, y el cobro es por esta sesión (la de la fecha configurada) — la siguiente semana vuelve a pedir el pago si lo dejas encendido.</p>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio sin membresía (MXN)</span>
+              <input data-content-key="clase_precio_normal" type="text" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio con membresía activa (MXN)</span>
+              <input data-content-key="clase_precio_miembro" type="text" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block sm:col-span-2">
               <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Información adicional (insumos, receta, notas para la sesión)</span>
               <textarea data-content-key="clase_info" rows="8" placeholder="Ej. Lo que necesitas tener listo antes de la clase:&#10;- 200 g de chocolate blanco&#10;- 1 taza de galleta Lotus molida&#10;- Molde de silicón&#10;&#10;Se comparte en pantalla, pero mándalo también por aquí para que lo tengan a la mano." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
               <p class="mt-1 text-xs text-carbon/40">Se ve en /clases-en-vivo, debajo del contador. Déjalo vacío si no quieres mostrar nada.</p>

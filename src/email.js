@@ -23,6 +23,8 @@ async function enviarCorreoConfirmacionCompra({ to, order, siteUrl, numeroWhatsa
       let accion = '';
       if (item.tipo === 'curso') {
         accion = `<p style="margin:4px 0 0;font-size:13px;color:#7A2E7E;">Te contactaremos por WhatsApp (${numeroWhatsapp || ''}) para agendar tu clase.</p>`;
+      } else if (item.tipo === 'clase_en_vivo') {
+        accion = `<p style="margin:8px 0 0;"><a href="${siteUrl}/clases-en-vivo" style="background:#F5A623;color:#1B0720;padding:8px 18px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Ver mi acceso</a></p>`;
       } else if (item.archivoDisponible) {
         const url = `${siteUrl}/api/pedidos/${order.id}/descarga/${i}?token=${order.descargaToken}`;
         accion = `<p style="margin:8px 0 0;"><a href="${url}" style="background:#F5A623;color:#1B0720;padding:8px 18px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Descargar</a></p>`;

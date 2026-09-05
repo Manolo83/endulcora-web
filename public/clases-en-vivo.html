@@ -169,6 +169,44 @@ body { background: #FBF4E9; }
 
   <p id="claseSinProgramar" class="hidden rounded-3xl bg-white p-8 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Por el momento no hay una clase en vivo programada. Vuelve pronto o revisa tu <a href="/biblioteca-clases" class="text-vino hover:underline">biblioteca de clases</a> si ya tienes membresía.</p>
 
+  <!-- Esta clase tiene cobro y todavía no se tiene acceso: invitado (login/registro) -->
+  <div id="bloqueClaseInvitado" class="mt-6 hidden max-w-md rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+    <p class="mb-4 text-sm text-carbon/70">Esta clase tiene un costo de acceso. Inicia sesión o crea tu cuenta para comprarlo.</p>
+    <div class="flex gap-2 border-b border-vino/10">
+      <button type="button" id="tabLoginClase" class="border-b-2 border-vino px-1 pb-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino">Iniciar sesión</button>
+      <button type="button" id="tabRegistroClase" class="border-b-2 border-transparent px-1 pb-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon/50">Crear cuenta</button>
+    </div>
+    <form id="formLoginClase" class="mt-5 grid gap-3">
+      <input id="loginClaseEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <input id="loginClasePassword" type="password" required placeholder="Contraseña" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <p id="loginClaseError" class="hidden text-xs text-red-600"></p>
+      <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        <span id="loginClaseSpinner" class="spinner hidden"></span> Entrar
+      </button>
+    </form>
+    <form id="formRegistroClase" class="mt-5 hidden grid gap-3">
+      <input id="registroClaseNombre" type="text" required placeholder="Tu nombre" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <input id="registroClaseEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <input id="registroClaseTelefono" type="tel" required inputmode="numeric" placeholder="Teléfono (10 dígitos)" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <input id="registroClasePassword" type="password" required minlength="6" placeholder="Contraseña (mínimo 6 caracteres)" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <p id="registroClaseError" class="hidden text-xs text-red-600"></p>
+      <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        <span id="registroClaseSpinner" class="spinner hidden"></span> Crear cuenta
+      </button>
+    </form>
+  </div>
+
+  <!-- Esta clase tiene cobro, hay sesión pero todavía no se ha pagado -->
+  <div id="bloqueClaseComprar" class="mt-6 hidden max-w-md rounded-3xl bg-vino p-6 text-crema sm:p-8">
+    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">Esta clase tiene costo de acceso</p>
+    <p id="claseComprarPrecio" class="mt-2 font-display text-2xl"></p>
+    <p id="claseComprarNotaMembresia" class="mt-1 hidden text-sm text-crema/60">Precio de miembro aplicado automáticamente.</p>
+    <p id="claseComprarError" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+    <button type="button" id="btnComprarAccesoClase" class="mt-4 inline-flex items-center justify-center gap-2 rounded-full boton-vivo bg-flama px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-crema transition">
+      <span id="comprarClaseSpinner" class="spinner hidden" style="border-top-color:#1B0720"></span> Comprar acceso
+    </button>
+  </div>
+
   <div id="claseInfoBloque" class="mt-6 hidden max-w-2xl rounded-3xl bg-white p-6 ring-1 ring-vino/10 sm:p-8">
     <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Para la sesión</p>
     <div id="claseInfoTexto" class="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-carbon/75"></div>
@@ -289,12 +327,155 @@ function aplicarClaseEnVivo(c){
 
   document.getElementById('claseDiaHora').textContent = `${DIAS_SEMANA[CLASE_DIA]} · ${String(CLASE_HH).padStart(2,'0')}:${String(CLASE_MM).padStart(2,'0')} h · CDMX`;
 
-  const linkEntrar = document.getElementById('linkEntrarClase');
-  const url = (c.clase_url || '').trim();
-  const valida = /^https?:\/\//i.test(url);
-  linkEntrar.classList.toggle('hidden', !valida);
-  if(valida) linkEntrar.href = url;
+  // El link para entrar (gratis o ya pagado) lo controla cargarAccesoClase(),
+  // no este contenido publico — si la clase tiene cobro activo, clase_url
+  // aqui ya viene vacío a propósito.
+  cargarAccesoClase();
 }
+
+let SESION_CLASE = { isLoggedIn: false, user: null };
+
+function mostrarBloqueAcceso(nombre){
+  ['bloqueClaseInvitado', 'bloqueClaseComprar'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('linkEntrarClase').classList.add('hidden');
+  if(nombre) document.getElementById(nombre).classList.remove('hidden');
+}
+
+async function cargarAccesoClase(){
+  try{
+    const res = await fetch('/api/clase-en-vivo');
+    const c = await res.json();
+    const linkEntrar = document.getElementById('linkEntrarClase');
+    if(!c.requierePago){
+      const valida = /^https?:\/\//i.test(c.url || '');
+      mostrarBloqueAcceso(null);
+      linkEntrar.classList.toggle('hidden', !valida);
+      if(valida) linkEntrar.href = c.url;
+      return;
+    }
+    if(c.tieneAcceso){
+      mostrarBloqueAcceso(null);
+      linkEntrar.classList.remove('hidden');
+      linkEntrar.href = c.url;
+      return;
+    }
+    if(!SESION_CLASE.isLoggedIn){
+      mostrarBloqueAcceso('bloqueClaseInvitado');
+      return;
+    }
+    mostrarBloqueAcceso('bloqueClaseComprar');
+    const precio = c.esMiembroActivo ? c.precioMiembro : c.precioNormal;
+    document.getElementById('claseComprarPrecio').textContent = `$${precio} MXN`;
+    document.getElementById('claseComprarNotaMembresia').classList.toggle('hidden', !c.esMiembroActivo);
+  }catch(e){}
+}
+
+async function cargarSesionClase(){
+  try{
+    const res = await fetch('/api/auth/session');
+    SESION_CLASE = await res.json();
+  }catch(e){
+    SESION_CLASE = { isLoggedIn: false, user: null };
+  }
+  cargarAccesoClase();
+}
+
+document.getElementById('tabLoginClase').addEventListener('click', () => {
+  document.getElementById('tabLoginClase').classList.add('border-vino', 'text-vino');
+  document.getElementById('tabLoginClase').classList.remove('border-transparent', 'text-carbon/50');
+  document.getElementById('tabRegistroClase').classList.remove('border-vino', 'text-vino');
+  document.getElementById('tabRegistroClase').classList.add('border-transparent', 'text-carbon/50');
+  document.getElementById('formLoginClase').classList.remove('hidden');
+  document.getElementById('formRegistroClase').classList.add('hidden');
+});
+document.getElementById('tabRegistroClase').addEventListener('click', () => {
+  document.getElementById('tabRegistroClase').classList.add('border-vino', 'text-vino');
+  document.getElementById('tabRegistroClase').classList.remove('border-transparent', 'text-carbon/50');
+  document.getElementById('tabLoginClase').classList.remove('border-vino', 'text-vino');
+  document.getElementById('tabLoginClase').classList.add('border-transparent', 'text-carbon/50');
+  document.getElementById('formRegistroClase').classList.remove('hidden');
+  document.getElementById('formLoginClase').classList.add('hidden');
+});
+
+document.getElementById('formLoginClase').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('loginClaseError');
+  const spinner = document.getElementById('loginClaseSpinner');
+  err.classList.add('hidden');
+  spinner.classList.remove('hidden');
+  try{
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('loginClaseEmail').value.trim(),
+        password: document.getElementById('loginClasePassword').value,
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar sesión');
+    SESION_CLASE = { isLoggedIn: true, user: data.user };
+    cargarAccesoClase();
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }finally{
+    spinner.classList.add('hidden');
+  }
+});
+
+document.getElementById('formRegistroClase').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('registroClaseError');
+  const spinner = document.getElementById('registroClaseSpinner');
+  err.classList.add('hidden');
+  spinner.classList.remove('hidden');
+  try{
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: document.getElementById('registroClaseNombre').value.trim(),
+        email: document.getElementById('registroClaseEmail').value.trim(),
+        telefono: document.getElementById('registroClaseTelefono').value.trim(),
+        password: document.getElementById('registroClasePassword').value,
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo crear la cuenta');
+    SESION_CLASE = { isLoggedIn: true, user: data.user };
+    cargarAccesoClase();
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }finally{
+    spinner.classList.add('hidden');
+  }
+});
+
+document.getElementById('btnComprarAccesoClase').addEventListener('click', async () => {
+  const err = document.getElementById('claseComprarError');
+  const spinner = document.getElementById('comprarClaseSpinner');
+  const btn = document.getElementById('btnComprarAccesoClase');
+  err.classList.add('hidden');
+  spinner.classList.remove('hidden');
+  btn.disabled = true;
+  try{
+    const res = await fetch('/api/checkout/preference', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: [{ tipo: 'clase_en_vivo', cantidad: 1 }],
+        email: SESION_CLASE.user ? SESION_CLASE.user.email : '',
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago.');
+    window.location.href = data.url;
+  }catch(e){
+    err.textContent = e.message;
+    err.classList.remove('hidden');
+    spinner.classList.add('hidden');
+    btn.disabled = false;
+  }
+});
 
 async function cargarContenido(){
   try{
@@ -304,6 +485,7 @@ async function cargarContenido(){
   }catch(e){}
 }
 cargarContenido();
+cargarSesionClase();
 
 /* ---------- Última clase grabada (solo miembros con membresía activa) ---------- */
 let reproductorUltimaClase = null;

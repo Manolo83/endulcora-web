@@ -67,7 +67,38 @@ router.post('/galeria/:id/comentarios', requireCliente, (req, res) => {
 });
 
 router.get('/content', (req, res) => {
-  res.json(store.getContent());
+  const contenido = store.getContent();
+  // El link para entrar a la clase en vivo solo se manda tal cual cuando NO
+  // hay cobro activo (clases gratis, como hasta ahora). Con el cobro
+  // encendido se quita de aqui — se revela solo a quien ya pago, desde
+  // GET /api/clase-en-vivo — para que nadie se lo salte pidiendo esta ruta
+  // publica directamente.
+  if (contenido.clase_cobro_activo === 'true') {
+    res.json({ ...contenido, clase_url: '' });
+  } else {
+    res.json(contenido);
+  }
+});
+
+// ---- Clase en vivo: cobro opcional por sesion ----
+router.get('/clase-en-vivo', (req, res) => {
+  const contenido = store.getContent();
+  const requierePago = contenido.clase_cobro_activo === 'true';
+  const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora);
+  if (!requierePago) {
+    return res.json({ requierePago: false, tieneAcceso: true, url: contenido.clase_url || '' });
+  }
+  const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+  const esMiembroActivo = !!(usuario && usuario.membresiaEstado === 'activa');
+  const tieneAcceso = !!(usuario && store.tieneAccesoClaseEnVivo({ fecha, userId: usuario.id }));
+  res.json({
+    requierePago: true,
+    precioNormal: contenido.clase_precio_normal,
+    precioMiembro: contenido.clase_precio_miembro,
+    esMiembroActivo,
+    tieneAcceso,
+    url: tieneAcceso ? (contenido.clase_url || '') : '',
+  });
 });
 
 // ---- Blog de recetas gratuitas ----
@@ -235,6 +266,7 @@ router.get('/pedidos/:orderId/estado', (req, res) => {
       return {
         index: i,
         itemId: item.itemId,
+        tipo: item.tipo,
         titulo: item.titulo,
         cantidad: item.cantidad,
         precio: item.precio,

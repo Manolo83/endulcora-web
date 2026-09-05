@@ -51,6 +51,12 @@ const DEFAULT_CONTENT = {
   clase_cupos_apartados: '0',
   clase_info: '',
   clase_url: '',
+  // Cobro por acceso a la clase en vivo (aparte, no confundir con la
+  // membresia): apagado por defecto para que las clases sigan siendo
+  // gratis hasta que el admin decida cobrar una en especifico.
+  clase_cobro_activo: 'false',
+  clase_precio_normal: '300',
+  clase_precio_miembro: '150',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
@@ -178,6 +184,7 @@ function datosPorDefecto() {
     mensajesComunidad: [],
     comentariosGaleria: [],
     blogPosts: [],
+    accesosClaseEnVivo: [],
     contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '', revistaUrl: '', revistaNombre: '', revistaNumero: '', whatsappGrupoUrl: '' },
   };
 }
@@ -873,10 +880,27 @@ function slugUnico(base, productos, excludeId) {
   return intento;
 }
 
+// Misma logica que el temporizador del sitio (public/*.html): calcula la
+// fecha (YYYY-MM-DD) de la proxima ocurrencia de la clase en vivo segun el
+// dia de la semana y hora configurados. Se usa para saber a que sesion
+// especifica corresponde un cobro — cada semana es una fecha distinta.
+function proximaFechaClaseISO(diaSemana, hora) {
+  const ahora = new Date();
+  const d = new Date(ahora);
+  const [hh, mm] = String(hora || '19:00').split(':').map((n) => parseInt(n, 10) || 0);
+  d.setHours(hh, mm, 0, 0);
+  const dia = Math.min(6, Math.max(0, parseInt(diaSemana, 10) || 0));
+  const diasAlObjetivo = (dia - d.getDay() + 7) % 7;
+  d.setDate(d.getDate() + diasAlObjetivo);
+  if (d <= ahora) d.setDate(d.getDate() + 7);
+  return d.toISOString().slice(0, 10);
+}
+
 module.exports = {
   init,
   flush,
   UPLOAD_DIR,
+  proximaFechaClaseEnVivo: proximaFechaClaseISO,
 
   getAnnouncements(onlyPublished = false) {
     const data = load();
@@ -1375,6 +1399,33 @@ module.exports = {
     return data.orders
       .filter((o) => o.userId === Number(userId) || (correo && (o.email || '').toLowerCase() === correo))
       .sort((a, b) => b.id - a.id);
+  },
+
+  // ---- Cobro por acceso a una clase en vivo (una sesion en especifico) ----
+  // "fecha" identifica la sesion (la del proximo dia/hora configurados en
+  // Contenido general): quien paga solo tiene acceso a ESA fecha, no a las
+  // siguientes semanas — cada sesion nueva vuelve a cobrar si el admin deja
+  // el interruptor encendido.
+  tieneAccesoClaseEnVivo({ fecha, userId }) {
+    if (!userId) return false;
+    return load().accesosClaseEnVivo.some(
+      (a) => a.fecha === fecha && a.userId === Number(userId)
+    );
+  },
+  addAccesoClaseEnVivo({ fecha, userId, email, monto, orderId }) {
+    const data = load();
+    const item = {
+      id: nextId(data.accesosClaseEnVivo),
+      fecha,
+      userId: userId || null,
+      email: email || '',
+      monto: monto || 0,
+      orderId: orderId || null,
+      createdAt: new Date().toISOString(),
+    };
+    data.accesosClaseEnVivo.push(item);
+    save(data);
+    return item;
   },
 
   // ---- Cuentas de clientes ----
