@@ -540,6 +540,16 @@ async function init() {
       paquete.precioMembresia = '100';
       const ebook = nuevoProducto(tituloBase, categoria, PRECIOS_LINEA_EBOOKS.ebook, 'Agregar al carrito', archivos.ebook);
       ebook.productosRelacionados = [anexo.id, app.id, paquete.id];
+      // Portada pre-generada (opcional): si no se manda, el producto queda
+      // sin imagen y el administrador puede subir una despues desde /admin.
+      if (archivos.portada) {
+        const origenPortada = path.join(SEED_DIR, archivos.portada);
+        if (fs.existsSync(origenPortada)) {
+          const destinoPortada = `${crypto.randomUUID()}${path.extname(archivos.portada)}`;
+          fs.copyFileSync(origenPortada, path.join(UPLOAD_DIR, destinoPortada));
+          ebook.imagen = `/uploads/${destinoPortada}`;
+        }
+      }
     }
     const FAMILIAS_A_DESGLOSAR = [
       {
@@ -586,6 +596,18 @@ async function init() {
         categoria: 'ebook',
         carpetaSeed: 'dulces-mexicanos-tradicionales',
         archivos: { ebook: 'Endulcora_Dulces_Mexicanos_Tradicionales_eBook.pdf', anexo: 'Endulcora_Dulces_Mexicanos_Tradicionales_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Dulces_Mexicanos_Tradicionales_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'Panqués y Pound Cakes Gourmet',
+        categoria: 'ebook',
+        carpetaSeed: 'panques-pound-cakes-gourmet',
+        archivos: { ebook: 'Endulcora_Panques_Pound_Cakes_Gourmet_eBook.pdf', anexo: 'Endulcora_Panques_Pound_Cakes_Gourmet_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Panques_Pound_Cakes_Gourmet_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada.png' },
+      },
+      {
+        tituloBase: 'Coctelería Mexicana',
+        categoria: 'ebook',
+        carpetaSeed: 'cocteleria-mexicana',
+        archivos: { ebook: 'Endulcora_Cocteleria_Mexicana_eBook.pdf', anexo: 'Endulcora_Cocteleria_Mexicana_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Cocteleria_Mexicana_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada.png' },
       },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
