@@ -23,6 +23,10 @@
   body { background: #FBF4E9; }
   .spinner { border: 3px solid rgba(0,0,0,.1); border-top-color: #7A2E7E; border-radius: 50%; width: 18px; height: 18px; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .admin-seccion-toggle { cursor: pointer; user-select: none; }
+  .admin-seccion-toggle:hover { opacity: .75; }
+  .admin-chevron { display: inline-block; margin-left: .5rem; transition: transform .15s ease; color: rgba(122,46,126,.5); }
+  .admin-chevron.abierta { transform: rotate(90deg); }
 </style>
 </head>
 <body class="font-cuerpo text-carbon antialiased">
@@ -3356,6 +3360,87 @@ async function cargarSuscriptoresMembresia(){
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter') irA(input.value); });
   $('btnRecargarPreview').addEventListener('click', () => { iframe.src = iframe.src; });
 })();
+
+// ---------- Acordeon de secciones del panel (para no scrollear tanto) ----------
+// Cada seccion se colapsa dejando visible solo su titulo/descripcion; al
+// abrir una se cierran las demas. Los links del menu de arriba abren la
+// seccion correspondiente en vez de solo saltar con el ancla.
+function inicializarAcordeonAdmin(){
+  const secciones = Array.from(document.querySelectorAll('#vistaDashboard main > section[id^="seccion"]'));
+  const estados = new Map();
+
+  secciones.forEach((section) => {
+    const hijos = Array.from(section.children);
+    if(!hijos.length) return;
+    const h2 = section.querySelector('h2');
+    if(!h2) return;
+
+    let corte;
+    if(hijos[0].tagName !== 'H2' && hijos[0].querySelector && hijos[0].querySelector('h2')){
+      corte = 1; // el h2 viene dentro de un div encabezado (titulo + boton, etc.)
+    } else {
+      corte = 0;
+      while(corte < hijos.length && (hijos[corte].tagName === 'H2' || hijos[corte].tagName === 'P')){
+        corte++;
+      }
+      if(corte === 0) corte = 1;
+    }
+    const cuerpoHijos = hijos.slice(corte);
+    if(!cuerpoHijos.length) return;
+
+    const cuerpo = document.createElement('div');
+    cuerpo.className = 'admin-seccion-cuerpo hidden';
+    cuerpoHijos.forEach((el) => cuerpo.appendChild(el));
+    section.appendChild(cuerpo);
+
+    const chevron = document.createElement('span');
+    chevron.className = 'admin-chevron';
+    chevron.textContent = '▸';
+    h2.classList.add('admin-seccion-toggle');
+    h2.appendChild(chevron);
+
+    const abrir = () => {
+      secciones.forEach((otra) => {
+        if(otra === section) return;
+        const info = estados.get(otra.id);
+        if(info) info.cerrar();
+      });
+      cuerpo.classList.remove('hidden');
+      chevron.classList.add('abierta');
+    };
+    const cerrar = () => {
+      cuerpo.classList.add('hidden');
+      chevron.classList.remove('abierta');
+    };
+    h2.addEventListener('click', () => {
+      if(cuerpo.classList.contains('hidden')) abrir(); else cerrar();
+    });
+    estados.set(section.id, { abrir, cerrar });
+  });
+
+  document.querySelectorAll('nav a[href^="#seccion"]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const id = link.getAttribute('href').slice(1);
+      const info = estados.get(id);
+      const section = $(id);
+      if(!section) return;
+      e.preventDefault();
+      if(info) info.abrir();
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.replaceState(null, '', '#' + id);
+    });
+  });
+
+  const hashId = location.hash.replace('#', '');
+  const inicialId = (hashId && estados.get(hashId)) ? hashId : (secciones[0] && secciones[0].id);
+  if(inicialId && estados.get(inicialId)){
+    estados.get(inicialId).abrir();
+    if(hashId === inicialId){
+      requestAnimationFrame(() => $(inicialId).scrollIntoView({ block: 'start' }));
+    }
+  }
+}
+inicializarAcordeonAdmin();
 
 verificarSesion();
 </script>
