@@ -628,6 +628,32 @@ async function init() {
       data[flag] = true;
       changed = true;
     }
+    // Portadas con fotografia real del platillo/bebida, para reemplazar la
+    // caratula generica (autogenerada de la primera pagina del PDF) cuando
+    // el cliente manda fotos profesionales. Corre una sola vez por producto
+    // y no depende de si la familia ya existia o se acaba de crear arriba.
+    const PORTADAS_REALES = [
+      { slug: 'panques-y-pound-cakes-gourmet', carpetaSeed: 'panques-pound-cakes-gourmet', archivo: 'Portada_Foto.jpeg' },
+      { slug: 'cocteleria-mexicana', carpetaSeed: 'cocteleria-mexicana', archivo: 'Portada_Foto.jpeg' },
+      { slug: 'dulces-mexicanos-tradicionales', carpetaSeed: 'dulces-mexicanos-tradicionales', archivo: 'Portada_Foto.jpeg' },
+    ];
+    for (const p of PORTADAS_REALES) {
+      const flag = `_migPortadaReal_${p.slug}`;
+      if (data[flag]) continue;
+      data[flag] = true;
+      changed = true;
+      const producto = data.products.find((x) => x.slug === p.slug);
+      if (!producto) continue;
+      const origen = path.join(__dirname, '..', 'seed-archivos', p.carpetaSeed, p.archivo);
+      if (!fs.existsSync(origen)) continue;
+      const anteriorImagen = producto.imagen;
+      const destino = `${crypto.randomUUID()}${path.extname(p.archivo)}`;
+      fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+      producto.imagen = `/uploads/${destino}`;
+      if (typeof anteriorImagen === 'string' && anteriorImagen.startsWith('/uploads/')) {
+        fs.unlink(path.join(UPLOAD_DIR, path.basename(anteriorImagen)), () => {});
+      }
+    }
     // Completa el archivo del "paquete completo" de familias que ya se
     // crearon antes de que existiera archivos.paquete en la config de
     // arriba (para no dejarlo sin descarga). Si el producto ya tiene un
