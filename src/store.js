@@ -609,6 +609,18 @@ async function init() {
         carpetaSeed: 'cocteleria-mexicana',
         archivos: { ebook: 'Endulcora_Cocteleria_Mexicana_eBook.pdf', anexo: 'Endulcora_Cocteleria_Mexicana_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Cocteleria_Mexicana_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada.png' },
       },
+      {
+        tituloBase: 'Palomitas Gourmet de Autor',
+        categoria: 'ebook',
+        carpetaSeed: 'palomitas-gourmet-de-autor',
+        archivos: { ebook: 'Endulcora_Palomitas_Gourmet_de_Autor_eBook.pdf', anexo: 'Endulcora_Palomitas_Gourmet_de_Autor_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Palomitas_Gourmet_de_Autor_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada.png' },
+      },
+      {
+        tituloBase: 'Tacos de Canasta',
+        categoria: 'ebook',
+        carpetaSeed: 'tacos-de-canasta',
+        archivos: { ebook: 'Endulcora_Tacos_de_Canasta_eBook.pdf', anexo: 'Endulcora_Tacos_de_Canasta_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tacos_de_Canasta_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada.png' },
+      },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
       const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
