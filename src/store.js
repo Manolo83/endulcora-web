@@ -648,6 +648,8 @@ async function init() {
       { slug: 'panques-y-pound-cakes-gourmet', carpetaSeed: 'panques-pound-cakes-gourmet', archivo: 'Portada_Foto.jpeg' },
       { slug: 'cocteleria-mexicana', carpetaSeed: 'cocteleria-mexicana', archivo: 'Portada_Foto.jpeg' },
       { slug: 'dulces-mexicanos-tradicionales', carpetaSeed: 'dulces-mexicanos-tradicionales', archivo: 'Portada_Foto.jpeg' },
+      { slug: 'tacos-de-canasta', carpetaSeed: 'tacos-de-canasta', archivo: 'Portada_Foto.jpeg' },
+      { slug: 'palomitas-gourmet-de-autor', carpetaSeed: 'palomitas-gourmet-de-autor', archivo: 'Portada_Foto.jpeg' },
     ];
     for (const p of PORTADAS_REALES) {
       const flag = `_migPortadaReal_${p.slug}`;
