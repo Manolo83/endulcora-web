@@ -200,7 +200,7 @@ router.post('/webhook', async (req, res) => {
       }
     }
 
-    if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado && !order.correoEnviado && actualizado.email) {
+    if (nuevoEstado === 'aprobado' && !order.correoEnviado && actualizado.email) {
       const itemsConArchivo = actualizado.items.map((item) => {
         if (item.tipo !== 'producto') return item;
         const producto = store.getProduct(item.itemId);
