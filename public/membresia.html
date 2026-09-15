@@ -69,6 +69,7 @@ body { background: #FBF4E9; }
 :focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
 .spinner { border: 3px solid rgba(78,20,84,.2); border-top-color: #4E1454; border-radius: 50%; width: 16px; height: 16px; animation: girar .7s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .boton-vivo:hover, .boton-vivo:active { transform:none; }
@@ -240,8 +241,47 @@ body { background: #FBF4E9; }
     </div>
 
     <p id="sinContenidoAviso" class="mt-6 hidden rounded-2xl bg-white p-6 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Todavía no hay recetario, revista ni video publicados este mes. Vuelve pronto.</p>
+
+    <div id="bloqueBibliotecaMembresia" class="mt-6 rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Biblioteca de clases</p>
+          <h3 class="mt-1 font-titulo text-lg text-vino">Todas tus grabaciones</h3>
+        </div>
+        <input id="buscadorBibliotecaMembresia" type="search" placeholder="Buscar por nombre…" class="w-full max-w-[220px] rounded-full border border-vino/15 bg-crema/60 px-4 py-2 text-sm outline-none focus:border-vino/40">
+      </div>
+      <div id="gridBibliotecaMembresia" class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+      <p id="bibliotecaMembresiaVacia" class="hidden mt-2 text-sm text-carbon/50">Todavía no hay clases grabadas.</p>
+      <p id="bibliotecaMembresiaSinResultados" class="hidden mt-2 text-sm text-carbon/50">Ninguna clase coincide con tu búsqueda.</p>
+    </div>
   </div>
 </main>
+
+<div id="modalVideoBiblioteca" class="fixed inset-0 z-[60] hidden items-center justify-center bg-carbon/70 p-4" onclick="if(event.target===this) cerrarModalBibliotecaMembresia()">
+  <div class="w-full max-w-3xl rounded-3xl bg-white p-4 sm:p-6">
+    <div class="flex items-start justify-between gap-3">
+      <h3 id="modalBibliotecaTitulo" class="font-titulo text-lg text-vino"></h3>
+      <button type="button" onclick="cerrarModalBibliotecaMembresia()" aria-label="Cerrar" class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-carbon/50 hover:bg-vino/5">✕</button>
+    </div>
+    <p id="modalBibliotecaDescripcion" class="mt-1 text-sm text-carbon/60"></p>
+    <div class="relative mt-4 aspect-video w-full select-none overflow-hidden rounded-2xl bg-carbon" oncontextmenu="return false" ondragstart="return false">
+      <div id="iframeModalBibliotecaHost" class="h-full w-full"></div>
+      <button type="button" id="btnPlayPauseModalBiblioteca" aria-label="Reproducir o pausar el video" class="group absolute inset-0 flex items-center justify-center">
+        <span class="grid h-16 w-16 place-items-center rounded-full bg-white/90 text-vino opacity-80 shadow-xl transition group-hover:opacity-100">
+          <svg id="iconoPlayModalBiblioteca" viewBox="0 0 24 24" class="h-7 w-7 translate-x-0.5" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="iconoPauseModalBiblioteca" viewBox="0 0 24 24" class="hidden h-7 w-7" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        </span>
+      </button>
+    </div>
+    <button type="button" id="btnVerRecetarioBiblioteca" class="mt-4 hidden inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+      Ver recetario
+    </button>
+    <div id="visorRecetarioBiblioteca" class="mt-4 hidden overflow-hidden rounded-2xl ring-1 ring-vino/10">
+      <iframe id="iframeRecetarioBiblioteca" title="Recetario de la clase" class="h-[70vh] w-full" style="border:0;"></iframe>
+    </div>
+    <a id="linkRecetarioBibliotecaRespaldo" href="#" target="_blank" rel="noopener" class="mt-3 hidden font-ui text-[11px] uppercase tracking-widest text-carbon/40 hover:text-vino transition">¿No se ve bien aquí? Ábrelo en otra pestaña</a>
+  </div>
+</div>
 
 <footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
   <div class="mx-auto max-w-3xl px-5 pb-10 text-center">
@@ -314,6 +354,7 @@ async function cargarVistaMembresia(){
     document.getElementById('nombreUsuarioMembresia').textContent = 'Administrador (vista previa)';
     document.getElementById('btnCancelarMembresia').classList.add('hidden');
     cargarContenidoMembresia();
+    cargarBibliotecaMembresia();
     return;
   }
   document.getElementById('btnCancelarMembresia').classList.remove('hidden');
@@ -328,6 +369,7 @@ async function cargarVistaMembresia(){
       mostrarVista('miembro');
       document.getElementById('nombreUsuarioMembresia').textContent = SESION.user.nombre;
       cargarContenidoMembresia();
+      cargarBibliotecaMembresia();
     }else{
       mostrarVista('oferta');
     }
@@ -460,6 +502,15 @@ document.getElementById('btnCancelarMembresia').addEventListener('click', async 
 // hacia YouTube.
 let reproductorVideo = null;
 let videoIdPendiente = null;
+let scriptIframeApiSolicitado = false;
+
+function solicitarIframeApi(){
+  if(scriptIframeApiSolicitado || (window.YT && window.YT.Player)) return;
+  scriptIframeApiSolicitado = true;
+  const script = document.createElement('script');
+  script.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(script);
+}
 
 function crearReproductorVideo(videoId){
   reproductorVideo = new YT.Player('iframeVideoMesHost', {
@@ -488,14 +539,13 @@ function iniciarReproductorVideo(videoId){
     crearReproductorVideo(videoId);
   }else{
     videoIdPendiente = videoId;
-    const script = document.createElement('script');
-    script.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(script);
+    solicitarIframeApi();
   }
 }
 
 window.onYouTubeIframeAPIReady = function(){
   if(videoIdPendiente) crearReproductorVideo(videoIdPendiente);
+  if(videoIdPendienteBiblioteca) crearReproductorBiblioteca(videoIdPendienteBiblioteca);
 };
 
 document.getElementById('btnPlayPauseVideo').addEventListener('click', () => {
@@ -518,6 +568,137 @@ document.getElementById('btnLeerRevista').addEventListener('click', () => {
   }
   const iframe = document.getElementById('iframeRevista');
   if(!iframe.src) iframe.src = '/api/membresia/revista';
+  visor.classList.remove('hidden');
+  respaldo.classList.remove('hidden');
+  visor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+/* ---------- Biblioteca de clases (dentro de la membresía) ---------- */
+let BIBLIOTECA_MIEMBRO = [];
+
+async function cargarBibliotecaMembresia(){
+  try{
+    const res = await fetch('/api/membresia/biblioteca-clases');
+    if(!res.ok) throw new Error();
+    BIBLIOTECA_MIEMBRO = await res.json();
+    pintarBibliotecaMembresia(BIBLIOTECA_MIEMBRO);
+  }catch(e){
+    // Si falla, la seccion se queda vacia sin tronar el resto de la pagina.
+  }
+}
+
+function pintarBibliotecaMembresia(lista){
+  const grid = document.getElementById('gridBibliotecaMembresia');
+  document.getElementById('bibliotecaMembresiaVacia').classList.toggle('hidden', BIBLIOTECA_MIEMBRO.length !== 0);
+  document.getElementById('bibliotecaMembresiaSinResultados').classList.toggle('hidden', !(BIBLIOTECA_MIEMBRO.length && lista.length === 0));
+  grid.innerHTML = lista.map(c => `
+    <button type="button" data-id="${c.id}" class="tarjetaClaseBiblioteca group overflow-hidden rounded-2xl bg-crema/60 text-left ring-1 ring-vino/10 transition hover:ring-vino/30">
+      <div class="relative aspect-video w-full overflow-hidden bg-carbon">
+        <img src="https://img.youtube.com/vi/${encodeURIComponent(c.youtubeId)}/hqdefault.jpg" alt="" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy">
+        <span class="absolute inset-0 grid place-items-center bg-carbon/20 opacity-0 transition group-hover:opacity-100">
+          <span class="grid h-12 w-12 place-items-center rounded-full bg-white/90 text-vino"><svg viewBox="0 0 24 24" class="h-6 w-6 translate-x-0.5" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+        </span>
+      </div>
+      <div class="p-4">
+        <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-morado">${escapeHtml(new Date((c.fecha||'')+'T00:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}))}</p>
+        <h4 class="mt-1 font-titulo text-base text-vino">${escapeHtml(c.titulo)}</h4>
+        ${c.descripcion ? `<p class="mt-1 line-clamp-2 text-xs text-carbon/60">${escapeHtml(c.descripcion)}</p>` : ''}
+      </div>
+    </button>`).join('');
+  document.querySelectorAll('.tarjetaClaseBiblioteca').forEach(btn => {
+    btn.addEventListener('click', () => abrirModalBibliotecaMembresia(Number(btn.dataset.id)));
+  });
+}
+
+document.getElementById('buscadorBibliotecaMembresia').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  const filtrada = !q ? BIBLIOTECA_MIEMBRO : BIBLIOTECA_MIEMBRO.filter(c => (c.titulo||'').toLowerCase().includes(q) || (c.descripcion||'').toLowerCase().includes(q));
+  pintarBibliotecaMembresia(filtrada);
+});
+
+/* Reproductor protegido para el modal de la biblioteca (mismo patron que
+   el video del mes: sin controles nativos de YouTube). */
+let reproductorBiblioteca = null;
+let videoIdPendienteBiblioteca = null;
+
+function crearReproductorBiblioteca(videoId){
+  reproductorBiblioteca = new YT.Player('iframeModalBibliotecaHost', {
+    videoId: videoId,
+    host: 'https://www.youtube-nocookie.com',
+    width: '100%',
+    height: '100%',
+    playerVars: { controls: 0, modestbranding: 1, rel: 0, disablekb: 1, fs: 0, iv_load_policy: 3, playsinline: 1, autoplay: 1 },
+    events: {
+      onStateChange: (e) => {
+        const play = document.getElementById('iconoPlayModalBiblioteca');
+        const pause = document.getElementById('iconoPauseModalBiblioteca');
+        const reproduciendo = e.data === YT.PlayerState.PLAYING;
+        play.classList.toggle('hidden', reproduciendo);
+        pause.classList.toggle('hidden', !reproduciendo);
+      },
+    },
+  });
+}
+
+document.getElementById('btnPlayPauseModalBiblioteca').addEventListener('click', () => {
+  if(!reproductorBiblioteca || typeof reproductorBiblioteca.getPlayerState !== 'function') return;
+  if(reproductorBiblioteca.getPlayerState() === YT.PlayerState.PLAYING){
+    reproductorBiblioteca.pauseVideo();
+  }else{
+    reproductorBiblioteca.playVideo();
+  }
+});
+
+function abrirModalBibliotecaMembresia(id){
+  const clase = BIBLIOTECA_MIEMBRO.find(c => c.id === id);
+  if(!clase) return;
+  document.getElementById('modalBibliotecaTitulo').textContent = clase.titulo;
+  document.getElementById('modalBibliotecaDescripcion').textContent = clase.descripcion || '';
+  document.getElementById('modalVideoBiblioteca').classList.remove('hidden');
+  document.getElementById('modalVideoBiblioteca').classList.add('flex');
+  if(reproductorBiblioteca && typeof reproductorBiblioteca.loadVideoById === 'function'){
+    reproductorBiblioteca.loadVideoById(clase.youtubeId);
+  }else if(window.YT && window.YT.Player){
+    crearReproductorBiblioteca(clase.youtubeId);
+  }else{
+    videoIdPendienteBiblioteca = clase.youtubeId;
+    solicitarIframeApi();
+  }
+
+  const btnRecetario = document.getElementById('btnVerRecetarioBiblioteca');
+  const visorRecetario = document.getElementById('visorRecetarioBiblioteca');
+  const respaldoRecetario = document.getElementById('linkRecetarioBibliotecaRespaldo');
+  const iframeRecetario = document.getElementById('iframeRecetarioBiblioteca');
+  visorRecetario.classList.add('hidden');
+  respaldoRecetario.classList.add('hidden');
+  iframeRecetario.src = 'about:blank';
+  delete iframeRecetario.dataset.url;
+  btnRecetario.classList.toggle('hidden', !clase.recetarioDisponible);
+  btnRecetario.dataset.claseId = clase.id;
+}
+
+function cerrarModalBibliotecaMembresia(){
+  document.getElementById('modalVideoBiblioteca').classList.add('hidden');
+  document.getElementById('modalVideoBiblioteca').classList.remove('flex');
+  if(reproductorBiblioteca && typeof reproductorBiblioteca.pauseVideo === 'function') reproductorBiblioteca.pauseVideo();
+}
+
+document.getElementById('btnVerRecetarioBiblioteca').addEventListener('click', function(){
+  const visor = document.getElementById('visorRecetarioBiblioteca');
+  const respaldo = document.getElementById('linkRecetarioBibliotecaRespaldo');
+  const iframe = document.getElementById('iframeRecetarioBiblioteca');
+  const url = `/api/membresia/biblioteca-clases/${this.dataset.claseId}/recetario`;
+  const abierto = !visor.classList.contains('hidden');
+  if(abierto){
+    visor.classList.add('hidden');
+    respaldo.classList.add('hidden');
+    return;
+  }
+  if(iframe.dataset.url !== url){
+    iframe.src = url;
+    iframe.dataset.url = url;
+  }
+  respaldo.href = url;
   visor.classList.remove('hidden');
   respaldo.classList.remove('hidden');
   visor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
