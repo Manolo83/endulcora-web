@@ -168,6 +168,30 @@ body { background: #FBF4E9; }
     </div>
   </div>
 
+  <!-- Video de la clase embebido en la pagina (no listado, protegido) + chat en vivo -->
+  <div id="bloqueClaseEnVivoPlayer" class="mt-6 hidden overflow-hidden rounded-[32px] bg-carbon ring-1 ring-flama/25">
+    <div class="grid lg:grid-cols-[1fr_.5fr]">
+      <div class="relative aspect-video w-full select-none overflow-hidden bg-carbon" oncontextmenu="return false" ondragstart="return false">
+        <div id="iframeClaseEnVivoHost" class="h-full w-full"></div>
+        <button type="button" id="btnPlayPauseClaseEnVivo" aria-label="Reproducir o pausar el video" class="group absolute inset-0 flex items-center justify-center">
+          <span class="grid h-16 w-16 place-items-center rounded-full bg-white/90 text-vino opacity-80 shadow-xl transition group-hover:opacity-100">
+            <svg id="iconoPlayClaseEnVivo" viewBox="0 0 24 24" class="h-7 w-7 translate-x-0.5" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="iconoPauseClaseEnVivo" viewBox="0 0 24 24" class="hidden h-7 w-7" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+          </span>
+        </button>
+      </div>
+      <div class="flex flex-col border-t border-crema/10 bg-crema/[.03] p-5 lg:max-h-[520px] lg:border-l lg:border-t-0">
+        <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">Chat en vivo</p>
+        <div id="chatClaseMensajes" class="mt-3 flex-1 space-y-3 overflow-y-auto" style="max-height: 380px;"></div>
+        <form id="formChatClase" class="mt-3 flex gap-2">
+          <input id="chatClaseInput" type="text" maxlength="500" placeholder="Escribe un mensaje…" class="min-w-0 flex-1 rounded-full border border-crema/20 bg-crema/10 px-4 py-2.5 text-sm text-crema placeholder:text-crema/40 outline-none focus:border-flama/50">
+          <button type="submit" class="shrink-0 rounded-full bg-flama px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Enviar</button>
+        </form>
+        <p id="chatClaseAviso" class="mt-2 hidden text-xs text-crema/40"></p>
+      </div>
+    </div>
+  </div>
+
   <p id="claseSinProgramar" class="hidden rounded-3xl bg-white p-8 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Por el momento no hay una clase en vivo programada. Vuelve pronto o revisa tu <a href="/biblioteca-clases" class="text-vino hover:underline">biblioteca de clases</a> si ya tienes membresía.</p>
 
   <!-- Esta clase tiene cobro y todavía no se tiene acceso: invitado (login/registro) -->
@@ -340,6 +364,7 @@ function mostrarBloqueAcceso(nombre){
   ['bloqueClaseInvitado', 'bloqueClaseComprar'].forEach(id => document.getElementById(id).classList.add('hidden'));
   document.getElementById('linkEntrarClase').classList.add('hidden');
   document.getElementById('linkRecetarioClase').classList.add('hidden');
+  ocultarPlayerClaseEnVivo();
   if(nombre) document.getElementById(nombre).classList.remove('hidden');
 }
 
@@ -353,24 +378,32 @@ function mostrarRecetario(url){
   }
 }
 
+function mostrarAccesoConcedido(c){
+  const linkEntrar = document.getElementById('linkEntrarClase');
+  mostrarBloqueAcceso(null);
+  if(c.youtubeId){
+    // Video embebido y protegido dentro de la pagina: nunca se manda a
+    // YouTube/StreamYard directamente.
+    linkEntrar.classList.add('hidden');
+    mostrarPlayerClaseEnVivo(c.youtubeId);
+  }else{
+    const valida = /^https?:\/\//i.test(c.url || '');
+    linkEntrar.classList.toggle('hidden', !valida);
+    if(valida) linkEntrar.href = c.url;
+  }
+  mostrarRecetario(c.recetarioUrl);
+}
+
 async function cargarAccesoClase(){
   try{
     const res = await fetch('/api/clase-en-vivo');
     const c = await res.json();
-    const linkEntrar = document.getElementById('linkEntrarClase');
     if(!c.requierePago){
-      const valida = /^https?:\/\//i.test(c.url || '');
-      mostrarBloqueAcceso(null);
-      linkEntrar.classList.toggle('hidden', !valida);
-      if(valida) linkEntrar.href = c.url;
-      mostrarRecetario(c.recetarioUrl);
+      mostrarAccesoConcedido(c);
       return;
     }
     if(c.tieneAcceso){
-      mostrarBloqueAcceso(null);
-      linkEntrar.classList.remove('hidden');
-      linkEntrar.href = c.url;
-      mostrarRecetario(c.recetarioUrl);
+      mostrarAccesoConcedido(c);
       return;
     }
     if(!SESION_CLASE.isLoggedIn){
@@ -523,18 +556,26 @@ function crearReproductorUltimaClase(videoId){
     },
   });
 }
+let scriptIframeApiSolicitado = false;
+function solicitarIframeApi(){
+  if(scriptIframeApiSolicitado || (window.YT && window.YT.Player)) return;
+  scriptIframeApiSolicitado = true;
+  const script = document.createElement('script');
+  script.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(script);
+}
+
 function iniciarReproductorUltimaClase(videoId){
   if(window.YT && window.YT.Player){
     crearReproductorUltimaClase(videoId);
   }else{
     videoIdPendienteUltimaClase = videoId;
-    const script = document.createElement('script');
-    script.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(script);
+    solicitarIframeApi();
   }
 }
 window.onYouTubeIframeAPIReady = function(){
   if(videoIdPendienteUltimaClase) crearReproductorUltimaClase(videoIdPendienteUltimaClase);
+  if(videoIdPendienteClaseEnVivo) crearReproductorClaseEnVivo(videoIdPendienteClaseEnVivo);
 };
 document.getElementById('btnPlayPauseUltimaClase').addEventListener('click', () => {
   if(!reproductorUltimaClase || typeof reproductorUltimaClase.getPlayerState !== 'function') return;
@@ -542,6 +583,135 @@ document.getElementById('btnPlayPauseUltimaClase').addEventListener('click', () 
     reproductorUltimaClase.pauseVideo();
   }else{
     reproductorUltimaClase.playVideo();
+  }
+});
+
+/* ---------- Video en vivo embebido (protegido, sin ir a YouTube) + chat ---------- */
+let reproductorClaseEnVivo = null;
+let videoIdPendienteClaseEnVivo = null;
+let videoIdActualClaseEnVivo = null;
+
+function crearReproductorClaseEnVivo(videoId){
+  reproductorClaseEnVivo = new YT.Player('iframeClaseEnVivoHost', {
+    videoId: videoId,
+    host: 'https://www.youtube-nocookie.com',
+    width: '100%',
+    height: '100%',
+    playerVars: { controls: 0, modestbranding: 1, rel: 0, disablekb: 1, fs: 0, iv_load_policy: 3, playsinline: 1, autoplay: 1 },
+    events: {
+      onStateChange: (e) => {
+        const play = document.getElementById('iconoPlayClaseEnVivo');
+        const pause = document.getElementById('iconoPauseClaseEnVivo');
+        const reproduciendo = e.data === YT.PlayerState.PLAYING;
+        play.classList.toggle('hidden', reproduciendo);
+        pause.classList.toggle('hidden', !reproduciendo);
+      },
+    },
+  });
+}
+
+function mostrarPlayerClaseEnVivo(videoId){
+  document.getElementById('bloqueClaseEnVivoPlayer').classList.remove('hidden');
+  if(videoIdActualClaseEnVivo !== videoId){
+    videoIdActualClaseEnVivo = videoId;
+    if(reproductorClaseEnVivo && typeof reproductorClaseEnVivo.loadVideoById === 'function'){
+      reproductorClaseEnVivo.loadVideoById(videoId);
+    }else if(window.YT && window.YT.Player){
+      crearReproductorClaseEnVivo(videoId);
+    }else{
+      videoIdPendienteClaseEnVivo = videoId;
+      solicitarIframeApi();
+    }
+  }
+  iniciarChatClase();
+}
+
+function ocultarPlayerClaseEnVivo(){
+  document.getElementById('bloqueClaseEnVivoPlayer').classList.add('hidden');
+  videoIdActualClaseEnVivo = null;
+  if(reproductorClaseEnVivo && typeof reproductorClaseEnVivo.pauseVideo === 'function') reproductorClaseEnVivo.pauseVideo();
+  detenerChatClase();
+}
+
+document.getElementById('btnPlayPauseClaseEnVivo').addEventListener('click', () => {
+  if(!reproductorClaseEnVivo || typeof reproductorClaseEnVivo.getPlayerState !== 'function') return;
+  if(reproductorClaseEnVivo.getPlayerState() === YT.PlayerState.PLAYING){
+    reproductorClaseEnVivo.pauseVideo();
+  }else{
+    reproductorClaseEnVivo.playVideo();
+  }
+});
+
+let intervaloChatClase = null;
+let ultimoIdChatClase = 0;
+
+function pintarMensajesChatClase(mensajes, agregar){
+  const cont = document.getElementById('chatClaseMensajes');
+  const alFondo = cont.scrollTop + cont.clientHeight >= cont.scrollHeight - 20;
+  const html = mensajes.map(m => `
+    <div class="text-sm">
+      <span class="font-ui text-[11px] font-700 uppercase tracking-wider text-flama">${escapeHtml(m.nombre)}</span>
+      <span class="ml-1.5 break-words text-crema/85">${escapeHtml(m.texto)}</span>
+    </div>`).join('');
+  if(agregar){
+    cont.insertAdjacentHTML('beforeend', html);
+  }else{
+    cont.innerHTML = html || '<p class="text-xs text-crema/30">Sé el primero en escribir algo.</p>';
+  }
+  mensajes.forEach(m => { if(m.id > ultimoIdChatClase) ultimoIdChatClase = m.id; });
+  if(alFondo) cont.scrollTop = cont.scrollHeight;
+}
+
+async function cargarChatClase(){
+  try{
+    const res = await fetch('/api/clase-en-vivo/chat');
+    if(!res.ok) return;
+    const mensajes = await res.json();
+    const nuevos = mensajes.filter(m => m.id > ultimoIdChatClase);
+    if(ultimoIdChatClase === 0){
+      pintarMensajesChatClase(mensajes, false);
+    }else if(nuevos.length){
+      pintarMensajesChatClase(nuevos, true);
+    }
+  }catch(e){}
+}
+
+function iniciarChatClase(){
+  if(intervaloChatClase) return;
+  ultimoIdChatClase = 0;
+  cargarChatClase();
+  intervaloChatClase = setInterval(cargarChatClase, 3000);
+}
+
+function detenerChatClase(){
+  if(intervaloChatClase){
+    clearInterval(intervaloChatClase);
+    intervaloChatClase = null;
+  }
+  ultimoIdChatClase = 0;
+  document.getElementById('chatClaseMensajes').innerHTML = '';
+}
+
+document.getElementById('formChatClase').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('chatClaseInput');
+  const aviso = document.getElementById('chatClaseAviso');
+  const texto = input.value.trim();
+  if(!texto) return;
+  aviso.classList.add('hidden');
+  try{
+    const res = await fetch('/api/clase-en-vivo/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texto }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo enviar tu mensaje.');
+    input.value = '';
+    cargarChatClase();
+  }catch(err){
+    aviso.textContent = err.message;
+    aviso.classList.remove('hidden');
   }
 });
 

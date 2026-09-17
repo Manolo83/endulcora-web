@@ -960,6 +960,18 @@ router.post('/api/clases/biblioteca/:id/recetario', requireAdmin, uploadDocument
   res.json(item);
 });
 
+// ---- Chat de la clase en vivo actual (moderacion) ----
+router.get('/api/clase-en-vivo/chat', requireAdmin, (req, res) => {
+  const contenido = store.getContent();
+  const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora);
+  res.json(store.getChatClaseEnVivo(fecha));
+});
+
+router.delete('/api/clase-en-vivo/chat/:id', requireAdmin, (req, res) => {
+  store.deleteMensajeChatClaseEnVivo(req.params.id);
+  res.json({ ok: true });
+});
+
 // ---- Campañas de correo masivo (lista propia de contactos, vía Resend) ----
 function escapeHtmlAdmin(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

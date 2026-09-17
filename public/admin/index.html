@@ -243,9 +243,14 @@
               <input data-content-key="clase_cupos_apartados" type="text" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
             </label>
             <label class="block sm:col-span-2">
-              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link para entrar a la clase (Zoom, Google Meet, YouTube Live, etc.)</span>
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">ID del video de YouTube en vivo (transmisión no listada)</span>
+              <input data-content-key="clase_youtube_id" type="text" placeholder="Ej. dQw4w9WgXcQ" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <p class="mt-1 text-xs text-carbon/40">Transmite con StreamYard (o lo que uses) mandando la señal a un video de YouTube configurado como "No listado" — nunca "Público" (cualquiera lo encontraría gratis) ni "Privado". Pega aquí solo el ID del video (la parte después de "v=" en la URL de YouTube). Con esto lleno, la clase se reproduce embebida dentro de esta página, sin salir a YouTube ni a StreamYard, y solo la ve quien tenga acceso.</p>
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link alterno para entrar a la clase (Zoom, Google Meet, etc.)</span>
               <input data-content-key="clase_url" type="url" placeholder="https://zoom.us/j/..." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
-              <p class="mt-1 text-xs text-carbon/40">En cuanto lo pegues aquí, aparece el botón "Entrar a la clase" en /inicio y /clases-en-vivo. Déjalo vacío para no mostrar el botón.</p>
+              <p class="mt-1 text-xs text-carbon/40">Solo se usa si el campo de arriba (ID de YouTube) está vacío — aparece como botón "Entrar a la clase" que abre este link en vez de reproducir el video aquí mismo.</p>
             </label>
             <label class="block sm:col-span-2">
               <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">¿Cobrar por esta clase?</span>
@@ -279,6 +284,17 @@
               <button type="button" id="btnSubirClaseRecetario" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir PDF</button>
               <button type="button" id="btnQuitarClaseRecetario" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar</button>
             </div>
+          </div>
+
+          <div class="mt-6 border-t border-vino/10 pt-6">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Chat en vivo de la sesión actual</span>
+                <p class="mt-1 text-xs text-carbon/40">Mensajes de quien está viendo la clase en este momento. Bórralos si hace falta moderar algo.</p>
+              </div>
+              <button type="button" id="btnActualizarChatClase" class="shrink-0 rounded-full border border-vino/20 px-4 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Actualizar</button>
+            </div>
+            <div id="listaChatClase" class="mt-4 max-h-96 space-y-2 overflow-y-auto"></div>
           </div>
         </div>
 
@@ -1398,6 +1414,37 @@ $('btnQuitarClaseRecetario').addEventListener('click', async () => {
     toast(e.message);
   }
 });
+
+async function cargarChatClaseAdmin(){
+  const cont = $('listaChatClase');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
+  try{
+    const mensajes = await api('/admin/api/clase-en-vivo/chat');
+    if(!mensajes.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay mensajes en esta sesión.</p>';
+      return;
+    }
+    cont.innerHTML = mensajes.map(m => `
+      <div class="flex items-start justify-between gap-3 rounded-xl bg-crema/60 px-4 py-2.5">
+        <p class="text-sm text-carbon/80"><span class="font-ui text-[11px] font-700 uppercase tracking-wider text-morado">${escapeHtml(m.nombre)}</span> ${escapeHtml(m.texto)}</p>
+        <button type="button" data-id="${m.id}" class="btnBorrarMensajeChatClase shrink-0 font-ui text-[11px] uppercase tracking-wider text-red-500 hover:text-red-700 transition">Borrar</button>
+      </div>`).join('');
+    cont.querySelectorAll('.btnBorrarMensajeChatClase').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try{
+          await api(`/admin/api/clase-en-vivo/chat/${btn.dataset.id}`, { method: 'DELETE' });
+          cargarChatClaseAdmin();
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+$('btnActualizarChatClase').addEventListener('click', cargarChatClaseAdmin);
+cargarChatClaseAdmin();
 
 $('formContenido').addEventListener('submit', async (e) => {
   e.preventDefault();

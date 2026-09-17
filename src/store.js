@@ -51,6 +51,11 @@ const DEFAULT_CONTENT = {
   clase_cupos_apartados: '0',
   clase_info: '',
   clase_url: '',
+  // ID del video de YouTube (transmision en vivo, no listada) para
+  // reproducirlo embebido dentro de la pagina en vez de mandar a YouTube o
+  // StreamYard. Si esta vacio, se usa clase_url como enlace externo (modo
+  // anterior).
+  clase_youtube_id: '',
   // Cobro por acceso a la clase en vivo (aparte, no confundir con la
   // membresia): apagado por defecto para que las clases sigan siendo
   // gratis hasta que el admin decida cobrar una en especifico.
@@ -190,6 +195,7 @@ function datosPorDefecto() {
     comentariosGaleria: [],
     blogPosts: [],
     accesosClaseEnVivo: [],
+    chatClaseEnVivo: [],
     contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '', revistaUrl: '', revistaNombre: '', revistaNumero: '', whatsappGrupoUrl: '' },
   };
 }
@@ -1493,6 +1499,35 @@ module.exports = {
     data.accesosClaseEnVivo.push(item);
     save(data);
     return item;
+  },
+
+  // ---- Chat en vivo de la clase (una sesion en especifico, misma "fecha"
+  // que identifica el acceso de pago) ----
+  getChatClaseEnVivo(fecha) {
+    return load()
+      .chatClaseEnVivo.filter((m) => m.fecha === fecha)
+      .sort((a, b) => a.id - b.id);
+  },
+  addMensajeChatClaseEnVivo({ fecha, userId, nombre, texto }) {
+    const data = load();
+    const item = {
+      id: nextId(data.chatClaseEnVivo),
+      fecha,
+      userId: userId || null,
+      nombre: (nombre || 'Alguien').trim().slice(0, 60),
+      texto: String(texto || '').trim().slice(0, 500),
+      createdAt: new Date().toISOString(),
+    };
+    data.chatClaseEnVivo.push(item);
+    save(data);
+    return item;
+  },
+  deleteMensajeChatClaseEnVivo(id) {
+    const data = load();
+    const item = data.chatClaseEnVivo.find((m) => m.id === Number(id));
+    data.chatClaseEnVivo = data.chatClaseEnVivo.filter((m) => m.id !== Number(id));
+    save(data);
+    return item || null;
   },
 
   // ---- Cuentas de clientes ----
