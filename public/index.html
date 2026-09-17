@@ -1411,10 +1411,11 @@ function aplicarClaseEnVivo(c){
 
   const linkEntrar = document.getElementById('linkEntrarClase');
   if(linkEntrar){
-    if(c.clase_cobro_activo === 'true'){
-      // Esta clase tiene costo: el link real no viaja en este contenido
-      // publico. Se manda a /clases-en-vivo, que ya sabe mostrar el precio,
-      // el botón de compra o el acceso si ya se pagó.
+    if(c.clase_cobro_activo === 'true' || (c.clase_youtube_id || '').trim()){
+      // Con cobro activo, o con un video de YouTube embebido configurado,
+      // el link real (precio, video protegido, etc.) no viaja en este
+      // contenido publico. Se manda a /clases-en-vivo, que ya sabe mostrar
+      // todo eso segun corresponda.
       linkEntrar.classList.remove('hidden');
       linkEntrar.textContent = 'Ver clase en vivo';
       linkEntrar.href = '/clases-en-vivo';
