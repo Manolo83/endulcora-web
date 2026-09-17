@@ -158,7 +158,14 @@ router.get('/api/content', requireAdmin, (req, res) => {
 });
 
 router.patch('/api/content', requireAdmin, (req, res) => {
-  const item = store.updateContent(req.body || {});
+  const body = { ...(req.body || {}) };
+  // El admin puede pegar el link completo de YouTube (watch?v=, live/, etc.)
+  // o solo el ID; aqui se normaliza a puro ID, igual que en la biblioteca de
+  // clases, para que no se guarde por error una URL completa.
+  if (typeof body.clase_youtube_id === 'string' && body.clase_youtube_id.trim()) {
+    body.clase_youtube_id = extraerIdYoutube(body.clase_youtube_id) || body.clase_youtube_id.trim();
+  }
+  const item = store.updateContent(body);
   res.json(item);
 });
 
