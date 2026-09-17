@@ -188,6 +188,18 @@ body { background: #FBF4E9; }
           <button type="submit" class="shrink-0 rounded-full bg-flama px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Enviar</button>
         </form>
         <p id="chatClaseAviso" class="mt-2 hidden text-xs text-crema/40"></p>
+
+        <div id="chatClaseLoginBloque" class="mt-3 hidden">
+          <button type="button" id="btnMostrarLoginChat" class="w-full rounded-full border border-crema/20 px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:border-flama/50 transition">Iniciar sesión para chatear</button>
+          <form id="formLoginChatClase" class="mt-3 hidden grid gap-2">
+            <input id="loginChatClaseEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-crema/20 bg-crema/10 px-4 py-2.5 text-sm text-crema placeholder:text-crema/40 outline-none focus:border-flama/50">
+            <input id="loginChatClasePassword" type="password" required placeholder="Contraseña" class="w-full rounded-xl border border-crema/20 bg-crema/10 px-4 py-2.5 text-sm text-crema placeholder:text-crema/40 outline-none focus:border-flama/50">
+            <p id="loginChatClaseError" class="hidden text-xs text-red-400"></p>
+            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full bg-flama px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">
+              <span id="loginChatClaseSpinner" class="spinner hidden" style="border-top-color:#1B0720"></span> Entrar
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -676,7 +688,16 @@ async function cargarChatClase(){
   }catch(e){}
 }
 
+function actualizarLoginChatClase(){
+  const bloque = document.getElementById('chatClaseLoginBloque');
+  bloque.classList.toggle('hidden', SESION_CLASE.isLoggedIn);
+  if(SESION_CLASE.isLoggedIn){
+    document.getElementById('formLoginChatClase').classList.add('hidden');
+  }
+}
+
 function iniciarChatClase(){
+  actualizarLoginChatClase();
   if(intervaloChatClase) return;
   ultimoIdChatClase = 0;
   cargarChatClase();
@@ -712,6 +733,36 @@ document.getElementById('formChatClase').addEventListener('submit', async (e) =>
   }catch(err){
     aviso.textContent = err.message;
     aviso.classList.remove('hidden');
+  }
+});
+
+document.getElementById('btnMostrarLoginChat').addEventListener('click', () => {
+  document.getElementById('formLoginChatClase').classList.toggle('hidden');
+});
+
+document.getElementById('formLoginChatClase').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('loginChatClaseError');
+  const spinner = document.getElementById('loginChatClaseSpinner');
+  err.classList.add('hidden');
+  spinner.classList.remove('hidden');
+  try{
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('loginChatClaseEmail').value.trim(),
+        password: document.getElementById('loginChatClasePassword').value,
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar sesión');
+    SESION_CLASE = { isLoggedIn: true, user: data.user };
+    actualizarLoginChatClase();
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }finally{
+    spinner.classList.add('hidden');
   }
 });
 
