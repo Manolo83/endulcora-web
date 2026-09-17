@@ -627,6 +627,12 @@ async function init() {
         carpetaSeed: 'tacos-de-canasta',
         archivos: { ebook: 'Endulcora_Tacos_de_Canasta_eBook.pdf', anexo: 'Endulcora_Tacos_de_Canasta_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tacos_de_Canasta_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada.png' },
       },
+      {
+        tituloBase: 'Tiramisú Douyin',
+        categoria: 'ebook',
+        carpetaSeed: 'tiramisu-douyin',
+        archivos: { ebook: 'Endulcora_Tiramisu_Douyin_eBook.pdf', anexo: 'Endulcora_Tiramisu_Douyin_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tiramisu_Douyin_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada.png' },
+      },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
       const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
