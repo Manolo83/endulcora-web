@@ -73,6 +73,34 @@ body { background: #FBF4E9; }
 .font-display, .font-titulo { font-weight: 800; }
 .rule-flama { background-image: linear-gradient(90deg,#F5A623 0 22px,transparent 22px); height: 3px; }
 :focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+
+/* Pantalla completa de la clase en vivo: video + chat lado a lado,
+   usando toda la altura de la pantalla. */
+#bloqueClaseEnVivoPlayer.clase-en-vivo-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  margin-top: 0;
+  border-radius: 0;
+}
+.clase-en-vivo-fullscreen #claseEnVivoGrid {
+  display: flex;
+  height: 100vh;
+}
+.clase-en-vivo-fullscreen #claseEnVivoGrid > .aspect-video {
+  aspect-ratio: auto;
+  height: 100%;
+  flex: 1 1 auto;
+}
+.clase-en-vivo-fullscreen #panelChatClaseEnVivo {
+  width: 360px;
+  max-height: 100vh !important;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .clase-en-vivo-fullscreen #claseEnVivoGrid { flex-direction: column; }
+  .clase-en-vivo-fullscreen #claseEnVivoGrid > .aspect-video { flex: 0 0 50vh; height: 50vh; }
+  .clase-en-vivo-fullscreen #panelChatClaseEnVivo { width: 100%; flex: 1 1 auto; max-height: 50vh !important; }
+}
 </style>
 </head>
 <body class="font-cuerpo text-carbon antialiased">
@@ -170,7 +198,7 @@ body { background: #FBF4E9; }
 
   <!-- Video de la clase embebido en la pagina (no listado, protegido) + chat en vivo -->
   <div id="bloqueClaseEnVivoPlayer" class="mt-6 hidden overflow-hidden rounded-[32px] bg-carbon ring-1 ring-flama/25">
-    <div class="grid lg:grid-cols-[1fr_.5fr]">
+    <div id="claseEnVivoGrid" class="grid lg:grid-cols-[1fr_.5fr]">
       <div class="relative aspect-video w-full select-none overflow-hidden bg-carbon" oncontextmenu="return false" ondragstart="return false">
         <div id="iframeClaseEnVivoHost" class="h-full w-full"></div>
         <button type="button" id="btnPlayPauseClaseEnVivo" aria-label="Reproducir o pausar el video" class="group absolute inset-0 flex items-center justify-center">
@@ -179,8 +207,12 @@ body { background: #FBF4E9; }
             <svg id="iconoPauseClaseEnVivo" viewBox="0 0 24 24" class="hidden h-7 w-7" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
           </span>
         </button>
+        <button type="button" id="btnExpandirClaseEnVivo" aria-label="Pantalla completa" class="absolute right-3 top-3 z-10 grid h-10 w-10 place-items-center rounded-full bg-carbon/70 text-crema opacity-80 transition hover:opacity-100">
+          <svg id="iconoExpandirClaseEnVivo" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></svg>
+          <svg id="iconoContraerClaseEnVivo" viewBox="0 0 24 24" class="hidden h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v4a2 2 0 0 1-2 2H3M21 9h-4a2 2 0 0 1-2-2V3M3 15h4a2 2 0 0 1 2 2v4M15 21v-4a2 2 0 0 1 2-2h4"/></svg>
+        </button>
       </div>
-      <div class="flex flex-col border-t border-crema/10 bg-crema/[.03] p-5 lg:max-h-[520px] lg:border-l lg:border-t-0">
+      <div id="panelChatClaseEnVivo" class="flex flex-col border-t border-crema/10 bg-crema/[.03] p-5 lg:max-h-[520px] lg:border-l lg:border-t-0">
         <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">Chat en vivo</p>
         <div id="chatClaseMensajes" class="mt-3 flex-1 space-y-3 overflow-y-auto" style="max-height: 380px;"></div>
         <form id="formChatClase" class="mt-3 flex gap-2">
@@ -653,6 +685,31 @@ document.getElementById('btnPlayPauseClaseEnVivo').addEventListener('click', () 
     reproductorClaseEnVivo.playVideo();
   }
 });
+
+/* ---------- Pantalla completa (video + chat lado a lado) ---------- */
+function estaEnPantallaCompletaClase(){
+  return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+document.getElementById('btnExpandirClaseEnVivo').addEventListener('click', () => {
+  const bloque = document.getElementById('bloqueClaseEnVivoPlayer');
+  if(!estaEnPantallaCompletaClase()){
+    const solicitar = bloque.requestFullscreen || bloque.webkitRequestFullscreen;
+    if(solicitar) solicitar.call(bloque);
+  }else{
+    const salir = document.exitFullscreen || document.webkitExitFullscreen;
+    if(salir) salir.call(document);
+  }
+});
+function actualizarPantallaCompletaClase(){
+  const bloque = document.getElementById('bloqueClaseEnVivoPlayer');
+  const enPantallaCompleta = estaEnPantallaCompletaClase();
+  bloque.classList.toggle('clase-en-vivo-fullscreen', enPantallaCompleta);
+  document.getElementById('iconoExpandirClaseEnVivo').classList.toggle('hidden', enPantallaCompleta);
+  document.getElementById('iconoContraerClaseEnVivo').classList.toggle('hidden', !enPantallaCompleta);
+  document.getElementById('chatClaseMensajes').style.maxHeight = enPantallaCompleta ? '' : '380px';
+}
+document.addEventListener('fullscreenchange', actualizarPantallaCompletaClase);
+document.addEventListener('webkitfullscreenchange', actualizarPantallaCompletaClase);
 
 let intervaloChatClase = null;
 let ultimoIdChatClase = 0;
