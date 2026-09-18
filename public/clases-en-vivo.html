@@ -159,7 +159,13 @@ body { background: #FBF4E9; }
         </button>
       </div>
       <div id="panelChatClaseEnVivo" class="flex flex-col border-t border-crema/10 bg-crema/[.03] p-5 lg:max-h-[520px] lg:border-l lg:border-t-0">
-        <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">Chat en vivo</p>
+        <div class="flex items-center justify-between gap-3">
+          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">Chat en vivo</p>
+          <span id="contadorViendoClase" class="hidden shrink-0 gap-1.5 rounded-full bg-crema/10 px-2.5 py-1 font-ui text-[11px] font-600 text-crema/70">
+            <span class="h-1.5 w-1.5 rounded-full bg-flama"></span>
+            <span id="numViendoClase">0</span> viendo
+          </span>
+        </div>
         <div id="chatClaseMensajes" class="mt-3 flex-1 space-y-3 overflow-y-auto" style="max-height: 380px;"></div>
         <form id="formChatClase" class="mt-3 flex gap-2">
           <input id="chatClaseInput" type="text" maxlength="500" placeholder="Escribe un mensaje…" class="min-w-0 flex-1 rounded-full border border-crema/20 bg-crema/10 px-4 py-2.5 text-sm text-crema placeholder:text-crema/40 outline-none focus:border-flama/50">
@@ -668,6 +674,7 @@ function mostrarPlayerClaseEnVivo(videoId){
     }
   }
   iniciarChatClase();
+  iniciarPresenciaClase();
 }
 
 function ocultarPlayerClaseEnVivo(){
@@ -675,6 +682,7 @@ function ocultarPlayerClaseEnVivo(){
   videoIdActualClaseEnVivo = null;
   if(reproductorClaseEnVivo && typeof reproductorClaseEnVivo.pauseVideo === 'function') reproductorClaseEnVivo.pauseVideo();
   detenerChatClase();
+  detenerPresenciaClase();
 }
 
 document.getElementById('btnPlayPauseClaseEnVivo').addEventListener('click', () => {
@@ -768,6 +776,54 @@ function detenerChatClase(){
   }
   ultimoIdChatClase = 0;
   document.getElementById('chatClaseMensajes').innerHTML = '';
+}
+
+/* ---------- Cuantos estan viendo el en vivo ahora mismo ---------- */
+let intervaloPresenciaClase = null;
+let idPresenciaClaseActual = null;
+
+function idPresenciaClase(){
+  if(idPresenciaClaseActual) return idPresenciaClaseActual;
+  try{ idPresenciaClaseActual = sessionStorage.getItem('presenciaClaseId'); }catch(e){}
+  if(!idPresenciaClaseActual){
+    idPresenciaClaseActual = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(16).slice(2));
+    try{ sessionStorage.setItem('presenciaClaseId', idPresenciaClaseActual); }catch(e){}
+  }
+  return idPresenciaClaseActual;
+}
+
+async function enviarPresenciaClase(){
+  try{
+    const res = await fetch('/api/clase-en-vivo/presencia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: idPresenciaClase() }),
+    });
+    if(!res.ok) return;
+    const data = await res.json();
+    const badge = document.getElementById('contadorViendoClase');
+    document.getElementById('numViendoClase').textContent = data.conectados;
+    const hayViendo = data.conectados > 0;
+    badge.classList.toggle('hidden', !hayViendo);
+    badge.classList.toggle('inline-flex', hayViendo);
+    badge.classList.toggle('items-center', hayViendo);
+  }catch(e){}
+}
+
+function iniciarPresenciaClase(){
+  if(intervaloPresenciaClase) return;
+  enviarPresenciaClase();
+  intervaloPresenciaClase = setInterval(enviarPresenciaClase, 20000);
+}
+
+function detenerPresenciaClase(){
+  if(intervaloPresenciaClase){
+    clearInterval(intervaloPresenciaClase);
+    intervaloPresenciaClase = null;
+  }
+  const badge = document.getElementById('contadorViendoClase');
+  badge.classList.add('hidden');
+  badge.classList.remove('inline-flex', 'items-center');
 }
 
 document.getElementById('formChatClase').addEventListener('submit', async (e) => {

@@ -143,6 +143,36 @@ router.post('/clase-en-vivo/chat', requireCliente, (req, res) => {
   res.status(201).json(item);
 });
 
+// ---- Cuantas personas estan viendo la clase en vivo ahora mismo ----
+// Mientras alguien tiene el video abierto, su pagina manda "sigo aqui" cada
+// rato con un id propio de esa pestaña. Aqui solo se cuentan los que
+// mandaron señal hace poco (se borran los que ya se fueron), y no se guarda
+// en el store porque es informacion que solo importa mientras dura la
+// sesion en vivo.
+const PRESENCIA_CLASE_TIMEOUT_MS = 45 * 1000;
+const presenciaClaseEnVivo = new Map(); // fecha -> Map(id de pestaña -> ultima señal)
+
+function contarPresenciaClaseEnVivo(fecha) {
+  const vistos = presenciaClaseEnVivo.get(fecha);
+  if (!vistos) return 0;
+  const ahora = Date.now();
+  for (const [id, ultimaVez] of vistos) {
+    if (ahora - ultimaVez > PRESENCIA_CLASE_TIMEOUT_MS) vistos.delete(id);
+  }
+  return vistos.size;
+}
+
+router.post('/clase-en-vivo/presencia', (req, res) => {
+  const { acceso, fecha } = accesoClaseEnVivoDeRequest(req);
+  if (!acceso) return res.status(403).json({ error: 'Necesitas acceso a esta clase.' });
+  const id = String((req.body && req.body.id) || '').trim().slice(0, 100);
+  if (id) {
+    if (!presenciaClaseEnVivo.has(fecha)) presenciaClaseEnVivo.set(fecha, new Map());
+    presenciaClaseEnVivo.get(fecha).set(id, Date.now());
+  }
+  res.json({ conectados: contarPresenciaClaseEnVivo(fecha) });
+});
+
 // ---- Blog de recetas gratuitas ----
 const PREFIJO_BLOG_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
 function conProductoRelacionado(post) {
