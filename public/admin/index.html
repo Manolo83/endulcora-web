@@ -246,6 +246,10 @@
               <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Video de YouTube en vivo (transmisión no listada)</span>
               <input data-content-key="clase_youtube_id" type="text" placeholder="Pega aquí el link completo o solo el ID" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
               <p class="mt-1 text-xs text-carbon/40">Transmite con StreamYard (o lo que uses) mandando la señal a un video de YouTube configurado como "No listado" — nunca "Público" (cualquiera lo encontraría gratis) ni "Privado". Puedes pegar aquí el link completo de YouTube (como lo copias del navegador) o solo el ID; se guarda solo el ID automáticamente. Con esto lleno, la clase se reproduce embebida dentro de esta página, sin salir a YouTube ni a StreamYard, y solo la ve quien tenga acceso.</p>
+              <div class="mt-3 flex flex-wrap items-center gap-3 rounded-xl bg-morado/5 px-4 py-3">
+                <button type="button" id="btnArchivarClaseBiblioteca" class="shrink-0 rounded-full border border-morado/30 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-morado hover:border-morado transition">Pasar esta clase a la biblioteca de miembros</button>
+                <p class="text-xs text-carbon/50">Cuando termine la transmisión, usa esto para mover el video de arriba a la <a href="/biblioteca-clases" target="_blank" class="text-vino hover:underline">biblioteca de miembros</a> y quitarlo de aquí — así deja de estar disponible para quien solo entró al en vivo, y se queda guardado nada más para quien tenga membresía activa.</p>
+              </div>
             </label>
             <label class="block sm:col-span-2">
               <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link alterno para entrar a la clase (Zoom, Google Meet, etc.)</span>
@@ -1387,6 +1391,23 @@ function pintarClaseRecetario(url, nombre){
     ? `<p class="text-sm text-carbon/70">📄 <a href="${url}" target="_blank" class="text-vino hover:underline">${escapeHtml(nombre || 'Ver PDF')}</a></p>`
     : '<p class="text-sm text-carbon/50">Todavía no hay recetario de regalo para esta clase.</p>';
 }
+
+$('btnArchivarClaseBiblioteca').addEventListener('click', async () => {
+  if(!CONTENIDO_ACTUAL.clase_youtube_id){ toast('Todavía no hay video de YouTube configurado en la clase en vivo'); return; }
+  if(!confirm('¿Pasar el video de la clase en vivo a la biblioteca de miembros? Dejará de verse en /clases-en-vivo y solo quedará guardado para quien tenga membresía activa.')) return;
+  try{
+    const data = await api('/admin/api/clase-en-vivo/archivar', { method: 'POST' });
+    CONTENIDO_ACTUAL = data.content;
+    camposContenido().forEach(el => {
+      const key = el.dataset.contentKey;
+      if(Object.prototype.hasOwnProperty.call(CONTENIDO_ACTUAL, key)) el.value = CONTENIDO_ACTUAL[key];
+    });
+    cargarBibliotecaClasesAdmin();
+    toast('Clase pasada a la biblioteca de miembros');
+  }catch(e){
+    toast(e.message);
+  }
+});
 
 $('btnSubirClaseRecetario').addEventListener('click', async () => {
   const file = $('claseRecetarioInput').files[0];

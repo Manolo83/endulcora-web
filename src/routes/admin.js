@@ -967,6 +967,30 @@ router.post('/api/clases/biblioteca/:id/recetario', requireAdmin, uploadDocument
   res.json(item);
 });
 
+// El video que se transmitio en vivo pasa a la biblioteca de miembros y se
+// quita del campo de la clase en vivo: asi deja de verse en /clases-en-vivo
+// para quien solo entro al en vivo (o para quien aun no paga, si la clase
+// era de pago) y se queda guardado solo para quien tenga membresia activa.
+router.post('/api/clase-en-vivo/archivar', requireAdmin, (req, res) => {
+  const contenido = store.getContent();
+  const youtubeId = String(contenido.clase_youtube_id || '').trim();
+  if (!youtubeId) return res.status(400).json({ error: 'No hay ningún video de YouTube configurado en la clase en vivo.' });
+  let item = store.addClaseBiblioteca({
+    titulo: contenido.clase_titulo || 'Clase en vivo',
+    descripcion: contenido.clase_descripcion || '',
+    youtubeId,
+    fecha: new Date().toISOString().slice(0, 10),
+  });
+  if (contenido.clase_recetario_url) {
+    item = store.updateClaseBiblioteca(item.id, {
+      recetarioUrl: contenido.clase_recetario_url,
+      recetarioNombre: contenido.clase_recetario_nombre || '',
+    });
+  }
+  const content = store.updateContent({ clase_youtube_id: '' });
+  res.json({ content, claseBiblioteca: item });
+});
+
 // ---- Chat de la clase en vivo actual (moderacion) ----
 router.get('/api/clase-en-vivo/chat', requireAdmin, (req, res) => {
   const contenido = store.getContent();
