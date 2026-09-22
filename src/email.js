@@ -85,6 +85,39 @@ async function enviarCorreoRevistaMensual({ to, nombre, url, mes }) {
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+async function enviarCorreoConfirmacionInscripcionTaller({ to, nombre, taller, fecha, sede, horario, siteUrl, numeroWhatsapp }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const fechaLegible = fecha
+    ? new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })
+    : '';
+
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: `¡Tu lugar está apartado! · ${taller} · Endulcora`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">Gracias por contestar, ${escapeHtml(nombre || '')}</h1>
+        <p style="font-size:14px;line-height:1.6;">Recibimos tu inscripción con éxito. Aquí está el resumen de tu taller:</p>
+        <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;">
+          <tr><td style="padding:6px 0;color:#9C9C9C;width:110px;">Taller</td><td style="padding:6px 0;font-weight:700;">${escapeHtml(taller || '')}</td></tr>
+          ${fechaLegible ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Fecha</td><td style="padding:6px 0;">${escapeHtml(fechaLegible)}</td></tr>` : ''}
+          ${sede ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Sede</td><td style="padding:6px 0;">${escapeHtml(sede)}</td></tr>` : ''}
+          ${horario ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Horario</td><td style="padding:6px 0;">${escapeHtml(horario)}</td></tr>` : ''}
+        </table>
+        <p style="margin-top:20px;font-size:13px;line-height:1.6;color:#1B0720;">Si tienes dudas o necesitas confirmar tu anticipo, escríbenos directo por WhatsApp.</p>
+        <p style="margin-top:16px;"><a href="https://wa.me/52${numeroWhatsapp || ''}" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Escribir por WhatsApp</a></p>
+        <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">Recibiste este correo porque te inscribiste a un taller en ${siteUrl ? siteUrl.replace(/^https?:\/\//, '') : 'endulcora.com'}.</p>
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 function escapeHtml(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
@@ -260,6 +293,7 @@ async function enviarCorreoRecordatorioMembresia({ to, nombre, siteUrl }) {
 
 module.exports = {
   enviarCorreoConfirmacionCompra,
+  enviarCorreoConfirmacionInscripcionTaller,
   enviarCorreoRevistaMensual,
   enviarCorreoCampana,
   enviarCorreoLeadMagnetPaso0,

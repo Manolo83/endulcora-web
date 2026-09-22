@@ -1759,7 +1759,7 @@ module.exports = {
     return [...load().inscripcionesTaller].sort((a, b) => b.id - a.id);
   },
   addInscripcionTaller({
-    nombre, whatsapp, correo, taller, horario, monto,
+    nombre, whatsapp, correo, taller, fecha, sede, horario, montoTotal, montoAnticipo,
     comoSeEntero, categoriasInteres, cumpleDia, cumpleMes,
     esPrimeraVez, aceptaPromociones, aceptaAvisoPrivacidad,
   }) {
@@ -1770,8 +1770,11 @@ module.exports = {
       whatsapp: String(whatsapp || '').trim(),
       correo: String(correo || '').trim().toLowerCase(),
       taller: String(taller || '').trim(),
+      fecha: String(fecha || '').trim(),
+      sede: String(sede || '').trim(),
       horario: String(horario || '').trim(),
-      monto: String(monto || '').trim(),
+      montoTotal: String(montoTotal || '').trim(),
+      montoAnticipo: String(montoAnticipo || '').trim(),
       comoSeEntero: String(comoSeEntero || '').trim(),
       categoriasInteres: Array.isArray(categoriasInteres)
         ? categoriasInteres.filter((c) => typeof c === 'string' && c.trim()).map((c) => c.trim()).slice(0, 10)

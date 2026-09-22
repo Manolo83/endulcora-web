@@ -5,6 +5,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const sharp = require('sharp');
+const ExcelJS = require('exceljs');
 const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL } = require('../config');
@@ -588,6 +589,111 @@ router.get('/api/newsletter', requireAdmin, (req, res) => {
 // ---- Inscripciones a talleres (formulario publico) ----
 router.get('/api/inscripciones-taller', requireAdmin, (req, res) => {
   res.json(store.getInscripcionesTaller());
+});
+
+// Nombre de pestaña de Excel: maximo 31 caracteres, sin los caracteres que
+// Excel prohibe, y unico dentro del libro (le agrega un numero si se repite).
+function nombreHojaExcel(base, usados) {
+  let limpio = String(base || 'Taller').replace(/[\\/?*[\]:]/g, '-').trim() || 'Taller';
+  limpio = limpio.slice(0, 31);
+  let nombre = limpio;
+  let n = 2;
+  while (usados.has(nombre)) {
+    const sufijo = ` (${n})`;
+    nombre = limpio.slice(0, 31 - sufijo.length) + sufijo;
+    n += 1;
+  }
+  usados.add(nombre);
+  return nombre;
+}
+
+router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => {
+  const inscripciones = store.getInscripcionesTaller();
+
+  // Una lista (pestaña) por cada combinacion real de taller + fecha + sede:
+  // asi cada pestaña es la lista de asistencia de una sesion en concreto,
+  // igual que ya manejan en su documento de Drive.
+  const grupos = new Map();
+  inscripciones.forEach((i) => {
+    const clave = `${i.taller}|||${i.fecha}|||${i.sede}`;
+    if (!grupos.has(clave)) grupos.set(clave, { taller: i.taller, fecha: i.fecha, sede: i.sede, filas: [] });
+    grupos.get(clave).filas.push(i);
+  });
+
+  const gruposOrdenados = [...grupos.values()].sort((a, b) => a.fecha.localeCompare(b.fecha) || a.taller.localeCompare(b.taller));
+
+  const libro = new ExcelJS.Workbook();
+  libro.creator = 'Endulcora';
+  libro.created = new Date();
+
+  const usados = new Set();
+  const columnas = [
+    { header: 'Nombre', key: 'nombre', width: 26 },
+    { header: 'WhatsApp', key: 'whatsapp', width: 16 },
+    { header: 'Correo', key: 'correo', width: 28 },
+    { header: 'Fecha', key: 'fecha', width: 12 },
+    { header: 'Sede', key: 'sede', width: 18 },
+    { header: 'Horario', key: 'horario', width: 16 },
+    { header: 'Monto total', key: 'montoTotal', width: 12 },
+    { header: 'Anticipo', key: 'montoAnticipo', width: 12 },
+    { header: '¿Cómo se enteró?', key: 'comoSeEntero', width: 20 },
+    { header: '¿Primera vez?', key: 'esPrimeraVez', width: 12 },
+    { header: 'Registrado el', key: 'createdAt', width: 18 },
+  ];
+
+  gruposOrdenados.forEach((grupo) => {
+    const fechaLegible = grupo.fecha
+      ? new Date(`${grupo.fecha}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'Sin fecha';
+    const MESES_CORTOS_HOJA = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const [anio, mesNum, diaNum] = (grupo.fecha || '').split('-').map(Number);
+    const fechaCorta = grupo.fecha ? `${diaNum}-${MESES_CORTOS_HOJA[mesNum]}-${String(anio).slice(2)}` : 'S-fecha';
+    // La fecha va primero para que nunca se corte: si el nombre del taller es
+    // largo, lo que se recorta es el final del titulo, no la fecha.
+    const nombreHoja = nombreHojaExcel(`${fechaCorta} ${grupo.taller}`.trim() || 'Taller', usados);
+    const hoja = libro.addWorksheet(nombreHoja);
+    hoja.addRow([`${grupo.taller || 'Taller'} — ${fechaLegible}${grupo.sede ? ` — ${grupo.sede}` : ''}`]);
+    hoja.mergeCells(1, 1, 1, columnas.length);
+    hoja.getRow(1).font = { bold: true, size: 13, color: { argb: 'FF4E1454' } };
+    hoja.addRow([]);
+
+    // Solo key+width aqui: si se le pasa "header" a worksheet.columns, ExcelJS
+    // reescribe la fila 1 completa con los encabezados y borra el titulo que
+    // ya pusimos ahi. El encabezado real se agrega a mano, abajo.
+    hoja.columns = columnas.map((c) => ({ key: c.key, width: c.width }));
+    const filaEncabezado = hoja.addRow(columnas.map((c) => c.header));
+    filaEncabezado.font = { bold: true };
+    filaEncabezado.eachCell((celda) => {
+      celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5A623' } };
+    });
+
+    grupo.filas
+      .sort((a, b) => a.nombre.localeCompare(b.nombre))
+      .forEach((i) => {
+        hoja.addRow({
+          nombre: i.nombre,
+          whatsapp: i.whatsapp,
+          correo: i.correo,
+          fecha: i.fecha,
+          sede: i.sede,
+          horario: i.horario,
+          montoTotal: i.montoTotal,
+          montoAnticipo: i.montoAnticipo,
+          comoSeEntero: i.comoSeEntero,
+          esPrimeraVez: i.esPrimeraVez ? 'Sí' : 'No',
+          createdAt: new Date(i.createdAt).toLocaleDateString('es-MX'),
+        });
+      });
+  });
+
+  if (!gruposOrdenados.length) {
+    libro.addWorksheet('Sin inscripciones').addRow(['Todavía no hay inscripciones.']);
+  }
+
+  res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.set('Content-Disposition', 'attachment; filename="inscripciones-talleres-endulcora.xlsx"');
+  await libro.xlsx.write(res);
+  res.end();
 });
 
 // ---- Sedes (calendario de talleres presenciales) ----

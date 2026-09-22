@@ -825,9 +825,13 @@
           <h2 class="font-titulo text-2xl tracking-wide text-vino">Inscripciones a talleres</h2>
           <p class="mt-1 text-sm text-carbon/60">Registros del formulario público de inscripción (<a href="/inscripcion-taller" target="_blank" class="underline hover:text-vino">/inscripcion-taller</a>). Estos contactos también alimentan la base de datos general de Levent.</p>
         </div>
-        <button id="btnExportarInscripcionesTaller" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Exportar CSV</button>
+        <div class="flex gap-2">
+          <a href="/admin/api/inscripciones-taller/excel" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Descargar Excel por taller</a>
+          <button id="btnExportarInscripcionesTaller" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Exportar CSV</button>
+        </div>
       </div>
-      <div id="listaInscripcionesTaller" class="mt-6 overflow-hidden overflow-x-auto rounded-2xl bg-white ring-1 ring-vino/10"></div>
+      <p class="mt-2 text-xs text-carbon/45">El Excel trae una pestaña por cada taller + fecha + sede, lista para pegar en tu control de inscritos.</p>
+      <div id="listaInscripcionesTaller" class="mt-6 space-y-6"></div>
     </section>
 
     <!-- CAMPAÑAS DE CORREO -->
@@ -2883,6 +2887,24 @@ $('btnExportarSuscriptores').addEventListener('click', () => {
 /* ---------- Inscripciones a talleres ---------- */
 let INSCRIPCIONES_TALLER = [];
 const MESES_CORTOS = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function fechaLegibleCorta(fecha){
+  if (!fecha) return 'Sin fecha';
+  return new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// Agrupa por taller + fecha + sede: cada grupo es la lista de asistencia de
+// una sesion en concreto (misma logica que el Excel que se descarga aparte).
+function agruparInscripcionesTaller(lista){
+  const grupos = new Map();
+  lista.forEach(i => {
+    const clave = `${i.taller}|||${i.fecha}|||${i.sede}`;
+    if (!grupos.has(clave)) grupos.set(clave, { taller: i.taller, fecha: i.fecha, sede: i.sede, filas: [] });
+    grupos.get(clave).filas.push(i);
+  });
+  return [...grupos.values()].sort((a, b) => (b.fecha || '').localeCompare(a.fecha || '') || a.taller.localeCompare(b.taller));
+}
+
 async function cargarInscripcionesTaller(){
   const cont = $('listaInscripcionesTaller');
   cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Cargando…</p>';
@@ -2892,41 +2914,49 @@ async function cargarInscripcionesTaller(){
       cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Todavía no hay inscripciones.</p>';
       return;
     }
-    cont.innerHTML = `<table class="w-full min-w-[820px] text-sm">
-      <thead>
-        <tr class="border-b border-vino/10 text-left font-ui text-[11px] uppercase tracking-wider text-carbon/45">
-          <th class="px-5 py-3 font-600">Nombre</th>
-          <th class="px-5 py-3 font-600">Contacto</th>
-          <th class="px-5 py-3 font-600">Taller</th>
-          <th class="px-5 py-3 font-600">Horario</th>
-          <th class="px-5 py-3 font-600">Monto</th>
-          <th class="px-5 py-3 font-600">¿Cómo se enteró?</th>
-          <th class="px-5 py-3 text-right font-600">Fecha</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${INSCRIPCIONES_TALLER.map(i => `
-          <tr class="border-b border-vino/10 last:border-0 align-top">
-            <td class="px-5 py-3 text-carbon/80">${escapeHtml(i.nombre)}${i.esPrimeraVez ? '<span class="ml-2 rounded-full bg-flama/20 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Nuevo</span>' : ''}</td>
-            <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(i.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(i.correo)}</div></td>
-            <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.taller)}</td>
-            <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.horario)}</td>
-            <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.monto)}</td>
-            <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.comoSeEntero || '—')}</td>
-            <td class="px-5 py-3 text-right text-xs text-carbon/45">${new Date(i.createdAt).toLocaleDateString('es-MX')}</td>
-          </tr>`).join('')}
-      </tbody>
-    </table>`;
+    const grupos = agruparInscripcionesTaller(INSCRIPCIONES_TALLER);
+    cont.innerHTML = grupos.map(g => `
+      <div class="overflow-hidden overflow-x-auto rounded-2xl bg-white ring-1 ring-vino/10">
+        <div class="flex flex-wrap items-center justify-between gap-2 bg-vino/5 px-5 py-3">
+          <h3 class="font-titulo text-base text-vino">${escapeHtml(g.taller || 'Sin nombre')} <span class="font-cuerpo text-sm font-400 text-carbon/60">· ${fechaLegibleCorta(g.fecha)}${g.sede ? ` · ${escapeHtml(g.sede)}` : ''}</span></h3>
+          <span class="font-ui text-[11px] uppercase tracking-wider text-carbon/45">${g.filas.length} inscrito${g.filas.length === 1 ? '' : 's'}</span>
+        </div>
+        <table class="w-full min-w-[760px] text-sm">
+          <thead>
+            <tr class="border-b border-vino/10 text-left font-ui text-[11px] uppercase tracking-wider text-carbon/45">
+              <th class="px-5 py-3 font-600">Nombre</th>
+              <th class="px-5 py-3 font-600">Contacto</th>
+              <th class="px-5 py-3 font-600">Horario</th>
+              <th class="px-5 py-3 font-600">Total</th>
+              <th class="px-5 py-3 font-600">Anticipo</th>
+              <th class="px-5 py-3 font-600">¿Cómo se enteró?</th>
+              <th class="px-5 py-3 text-right font-600">Registrado</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${g.filas.map(i => `
+              <tr class="border-b border-vino/10 last:border-0 align-top">
+                <td class="px-5 py-3 text-carbon/80">${escapeHtml(i.nombre)}${i.esPrimeraVez ? '<span class="ml-2 rounded-full bg-flama/20 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Nuevo</span>' : ''}</td>
+                <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(i.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(i.correo)}</div></td>
+                <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.horario)}</td>
+                <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.montoTotal)}</td>
+                <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.montoAnticipo)}</td>
+                <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.comoSeEntero || '—')}</td>
+                <td class="px-5 py-3 text-right text-xs text-carbon/45">${new Date(i.createdAt).toLocaleDateString('es-MX')}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`).join('');
   }catch(e){
     cont.innerHTML = `<p class="p-5 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
   }
 }
 $('btnExportarInscripcionesTaller').addEventListener('click', () => {
   if(!INSCRIPCIONES_TALLER.length){ toast('No hay inscripciones para exportar'); return; }
-  const encabezado = 'nombre,whatsapp,correo,taller,horario,monto,como_se_entero,categorias_interes,cumpleanos,primera_vez,acepta_promociones,fecha';
+  const encabezado = 'nombre,whatsapp,correo,taller,fecha,sede,horario,monto_total,monto_anticipo,como_se_entero,categorias_interes,cumpleanos,primera_vez,acepta_promociones,registrado_el';
   const csvCelda = (v) => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
   const filas = [encabezado, ...INSCRIPCIONES_TALLER.map(i => [
-    i.nombre, i.whatsapp, i.correo, i.taller, i.horario, i.monto,
+    i.nombre, i.whatsapp, i.correo, i.taller, i.fecha, i.sede, i.horario, i.montoTotal, i.montoAnticipo,
     i.comoSeEntero || '',
     (i.categoriasInteres || []).join(' / '),
     i.cumpleDia && i.cumpleMes ? `${i.cumpleDia}-${MESES_CORTOS[i.cumpleMes]}` : '',

@@ -2,9 +2,10 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const store = require('../store');
-const { UPLOAD_DIR, GOOGLE_ADS } = require('../config');
+const { UPLOAD_DIR, GOOGLE_ADS, SITE_URL } = require('../config');
 const { requireCliente } = require('./auth');
 const { uploadImage, uploadMedia, procesarImagenSubida, ALLOWED_VIDEO } = require('../uploads');
+const { enviarCorreoConfirmacionInscripcionTaller } = require('../email');
 
 const router = express.Router();
 
@@ -324,18 +325,23 @@ router.post('/newsletter/suscribir', (req, res) => {
 // pagina de campaña): guarda el registro completo para control interno y
 // alimenta la base de datos general de Levent con los campos de contacto.
 const WHATSAPP_RE = /^[0-9+\s()-]{7,20}$/;
-router.post('/inscripcion-taller', (req, res) => {
+const FECHA_RE = /^\d{4}-\d{2}-\d{2}$/;
+router.post('/inscripcion-taller', async (req, res) => {
   const b = req.body || {};
   const nombre = String(b.nombre || '').trim();
   const whatsapp = String(b.whatsapp || '').trim();
   const correo = String(b.correo || '').trim();
   const taller = String(b.taller || '').trim();
+  const fecha = String(b.fecha || '').trim();
+  const sede = String(b.sede || '').trim();
   const horario = String(b.horario || '').trim();
 
   if (!nombre) return res.status(400).json({ error: 'Escribe tu nombre completo.' });
   if (!WHATSAPP_RE.test(whatsapp)) return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
   if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
   if (!taller) return res.status(400).json({ error: 'Falta el taller al que te inscribes.' });
+  if (!FECHA_RE.test(fecha)) return res.status(400).json({ error: 'Elige la fecha del taller.' });
+  if (!sede) return res.status(400).json({ error: 'Falta la sede.' });
   if (!horario) return res.status(400).json({ error: 'Falta el horario.' });
   if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para inscribirte.' });
 
@@ -344,8 +350,11 @@ router.post('/inscripcion-taller', (req, res) => {
     whatsapp,
     correo,
     taller,
+    fecha,
+    sede,
     horario,
-    monto: b.monto,
+    montoTotal: b.montoTotal,
+    montoAnticipo: b.montoAnticipo,
     comoSeEntero: b.comoSeEntero,
     categoriasInteres: b.categoriasInteres,
     cumpleDia: b.cumpleDia,
@@ -354,7 +363,25 @@ router.post('/inscripcion-taller', (req, res) => {
     aceptaPromociones: b.aceptaPromociones,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
   });
+
   res.status(201).json({ ok: true, id: item.id });
+
+  // El correo de confirmacion nunca debe tumbar la inscripcion: la persona
+  // ya quedo registrada aunque Resend falle o no este configurado. Se manda
+  // despues de responder para no retrasar la confirmacion en pantalla.
+  const contenido = store.getContent();
+  enviarCorreoConfirmacionInscripcionTaller({
+    to: item.correo,
+    nombre: item.nombre,
+    taller: item.taller,
+    fecha: item.fecha,
+    sede: item.sede,
+    horario: item.horario,
+    siteUrl: SITE_URL,
+    numeroWhatsapp: contenido.whatsapp_numero,
+  }).catch((e) => {
+    console.error(`[inscripcion-taller] No se pudo mandar el correo de confirmacion a ${item.correo}:`, e.message);
+  });
 });
 
 // Estado de un pedido para la pagina de gracias: requiere el viewToken que
