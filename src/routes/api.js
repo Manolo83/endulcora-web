@@ -320,6 +320,43 @@ router.post('/newsletter/suscribir', (req, res) => {
   res.status(201).json({ ok: true });
 });
 
+// Formulario publico de inscripcion a talleres (replicable en cualquier
+// pagina de campaña): guarda el registro completo para control interno y
+// alimenta la base de datos general de Levent con los campos de contacto.
+const WHATSAPP_RE = /^[0-9+\s()-]{7,20}$/;
+router.post('/inscripcion-taller', (req, res) => {
+  const b = req.body || {};
+  const nombre = String(b.nombre || '').trim();
+  const whatsapp = String(b.whatsapp || '').trim();
+  const correo = String(b.correo || '').trim();
+  const taller = String(b.taller || '').trim();
+  const horario = String(b.horario || '').trim();
+
+  if (!nombre) return res.status(400).json({ error: 'Escribe tu nombre completo.' });
+  if (!WHATSAPP_RE.test(whatsapp)) return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
+  if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
+  if (!taller) return res.status(400).json({ error: 'Falta el taller al que te inscribes.' });
+  if (!horario) return res.status(400).json({ error: 'Falta el horario.' });
+  if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para inscribirte.' });
+
+  const item = store.addInscripcionTaller({
+    nombre,
+    whatsapp,
+    correo,
+    taller,
+    horario,
+    monto: b.monto,
+    comoSeEntero: b.comoSeEntero,
+    categoriasInteres: b.categoriasInteres,
+    cumpleDia: b.cumpleDia,
+    cumpleMes: b.cumpleMes,
+    esPrimeraVez: b.esPrimeraVez,
+    aceptaPromociones: b.aceptaPromociones,
+    aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
+  });
+  res.status(201).json({ ok: true, id: item.id });
+});
+
 // Estado de un pedido para la pagina de gracias: requiere el viewToken que
 // Mercado Pago devuelve en la URL (no es adivinable, a diferencia del id).
 router.get('/pedidos/:orderId/estado', (req, res) => {

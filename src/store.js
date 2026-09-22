@@ -186,6 +186,7 @@ function datosPorDefecto() {
     subscribers: [],
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
     sesionesTaller: [],
+    inscripcionesTaller: [],
     bibliotecaClases: [],
     contactosCampana: [],
     campanasCorreo: [],
@@ -1748,6 +1749,43 @@ module.exports = {
     const data = load();
     data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== Number(id));
     save(data);
+  },
+
+  // ---- Inscripciones a talleres (formulario publico) ----
+  // Alimenta tanto el control interno (quien pago que y a que hora) como la
+  // base de datos general de Levent (solo los campos de contacto e interes,
+  // nunca el monto ni el horario — eso se filtra en leventSync.js).
+  getInscripcionesTaller() {
+    return [...load().inscripcionesTaller].sort((a, b) => b.id - a.id);
+  },
+  addInscripcionTaller({
+    nombre, whatsapp, correo, taller, horario, monto,
+    comoSeEntero, categoriasInteres, cumpleDia, cumpleMes,
+    esPrimeraVez, aceptaPromociones, aceptaAvisoPrivacidad,
+  }) {
+    const data = load();
+    const item = {
+      id: nextId(data.inscripcionesTaller),
+      nombre: String(nombre || '').trim(),
+      whatsapp: String(whatsapp || '').trim(),
+      correo: String(correo || '').trim().toLowerCase(),
+      taller: String(taller || '').trim(),
+      horario: String(horario || '').trim(),
+      monto: String(monto || '').trim(),
+      comoSeEntero: String(comoSeEntero || '').trim(),
+      categoriasInteres: Array.isArray(categoriasInteres)
+        ? categoriasInteres.filter((c) => typeof c === 'string' && c.trim()).map((c) => c.trim()).slice(0, 10)
+        : [],
+      cumpleDia: Number(cumpleDia) || null,
+      cumpleMes: Number(cumpleMes) || null,
+      esPrimeraVez: !!esPrimeraVez,
+      aceptaPromociones: !!aceptaPromociones,
+      aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
+      createdAt: new Date().toISOString(),
+    };
+    data.inscripcionesTaller.push(item);
+    save(data);
+    return item;
   },
 
   // ---- Biblioteca de clases en vivo grabadas (exclusiva para miembros) ----

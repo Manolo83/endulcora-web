@@ -585,6 +585,11 @@ router.get('/api/newsletter', requireAdmin, (req, res) => {
   res.json(store.getSubscribers());
 });
 
+// ---- Inscripciones a talleres (formulario publico) ----
+router.get('/api/inscripciones-taller', requireAdmin, (req, res) => {
+  res.json(store.getInscripcionesTaller());
+});
+
 // ---- Sedes (calendario de talleres presenciales) ----
 router.get('/api/sedes', requireAdmin, (req, res) => {
   res.json(store.getSedes());

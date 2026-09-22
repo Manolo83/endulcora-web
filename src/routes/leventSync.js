@@ -25,7 +25,7 @@ function requiereClaveSync(req, res, next) {
 
 router.get('/contactos', requiereClaveSync, (req, res) => {
   const usuarios = store.getUsers().filter((u) => u.email);
-  const contactos = usuarios.map((u) => {
+  const contactosUsuarios = usuarios.map((u) => {
     const pedidos = store.getOrdersByUser(u.id, u.email).filter((o) => o.estado === 'pagado');
     const categorias = new Set();
     pedidos.forEach((o) => {
@@ -44,7 +44,25 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
       categoriasInteres: [...categorias],
     };
   });
-  res.json({ marca: 'endulcora', contactos });
+
+  // Inscripciones al formulario de talleres: solo se manda lo que sirve
+  // para mercadotecnia (contacto, interes, como se entero). El monto que
+  // pagaron y el horario son datos operativos de Endulcora y nunca salen
+  // de aqui.
+  const contactosTalleres = store
+    .getInscripcionesTaller()
+    .filter((i) => i.correo)
+    .map((i) => ({
+      email: i.correo,
+      telefono: i.whatsapp || '',
+      nombre: i.nombre || '',
+      categoriasInteres: [...i.categoriasInteres, `taller:${i.taller}`],
+      comoSeEntero: i.comoSeEntero || '',
+      esPrimeraVez: i.esPrimeraVez,
+      aceptaPromociones: i.aceptaPromociones,
+    }));
+
+  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres] });
 });
 
 module.exports = router;

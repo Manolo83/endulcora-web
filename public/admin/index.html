@@ -74,6 +74,7 @@
       <a href="#seccionClientes" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clientes</a>
       <a href="#seccionMembresia" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Membresía</a>
       <a href="#seccionSuscriptores" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Suscriptores</a>
+      <a href="#seccionInscripcionesTaller" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Inscripciones a talleres</a>
       <a href="#seccionCampanas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Campañas de correo</a>
       <a href="#seccionResenas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Reseñas</a>
       <a href="#seccionComunidad" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Comunidad</a>
@@ -817,6 +818,18 @@
       <div id="listaSuscriptores" class="mt-6 overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10"></div>
     </section>
 
+    <!-- INSCRIPCIONES A TALLERES -->
+    <section id="seccionInscripcionesTaller" class="scroll-mt-32 mb-14">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="font-titulo text-2xl tracking-wide text-vino">Inscripciones a talleres</h2>
+          <p class="mt-1 text-sm text-carbon/60">Registros del formulario público de inscripción (<a href="/inscripcion-taller" target="_blank" class="underline hover:text-vino">/inscripcion-taller</a>). Estos contactos también alimentan la base de datos general de Levent.</p>
+        </div>
+        <button id="btnExportarInscripcionesTaller" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Exportar CSV</button>
+      </div>
+      <div id="listaInscripcionesTaller" class="mt-6 overflow-hidden overflow-x-auto rounded-2xl bg-white ring-1 ring-vino/10"></div>
+    </section>
+
     <!-- CAMPAÑAS DE CORREO -->
     <section id="seccionCampanas" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Campañas de correo masivo</h2>
@@ -1094,6 +1107,7 @@ function mostrarDashboard(mostrar){
     cargarVentas();
     cargarClientesLista();
     cargarSuscriptores();
+    cargarInscripcionesTaller();
     cargarResenas();
     cargarComunidadAdmin();
     cargarAnuncios();
@@ -2862,6 +2876,69 @@ $('btnExportarSuscriptores').addEventListener('click', () => {
   const a = document.createElement('a');
   a.href = url;
   a.download = 'suscriptores-endulcora.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* ---------- Inscripciones a talleres ---------- */
+let INSCRIPCIONES_TALLER = [];
+const MESES_CORTOS = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+async function cargarInscripcionesTaller(){
+  const cont = $('listaInscripcionesTaller');
+  cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Cargando…</p>';
+  try{
+    INSCRIPCIONES_TALLER = await api('/admin/api/inscripciones-taller');
+    if(!INSCRIPCIONES_TALLER.length){
+      cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Todavía no hay inscripciones.</p>';
+      return;
+    }
+    cont.innerHTML = `<table class="w-full min-w-[820px] text-sm">
+      <thead>
+        <tr class="border-b border-vino/10 text-left font-ui text-[11px] uppercase tracking-wider text-carbon/45">
+          <th class="px-5 py-3 font-600">Nombre</th>
+          <th class="px-5 py-3 font-600">Contacto</th>
+          <th class="px-5 py-3 font-600">Taller</th>
+          <th class="px-5 py-3 font-600">Horario</th>
+          <th class="px-5 py-3 font-600">Monto</th>
+          <th class="px-5 py-3 font-600">¿Cómo se enteró?</th>
+          <th class="px-5 py-3 text-right font-600">Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${INSCRIPCIONES_TALLER.map(i => `
+          <tr class="border-b border-vino/10 last:border-0 align-top">
+            <td class="px-5 py-3 text-carbon/80">${escapeHtml(i.nombre)}${i.esPrimeraVez ? '<span class="ml-2 rounded-full bg-flama/20 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Nuevo</span>' : ''}</td>
+            <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(i.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(i.correo)}</div></td>
+            <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.taller)}</td>
+            <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.horario)}</td>
+            <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.monto)}</td>
+            <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.comoSeEntero || '—')}</td>
+            <td class="px-5 py-3 text-right text-xs text-carbon/45">${new Date(i.createdAt).toLocaleDateString('es-MX')}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+  }catch(e){
+    cont.innerHTML = `<p class="p-5 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+$('btnExportarInscripcionesTaller').addEventListener('click', () => {
+  if(!INSCRIPCIONES_TALLER.length){ toast('No hay inscripciones para exportar'); return; }
+  const encabezado = 'nombre,whatsapp,correo,taller,horario,monto,como_se_entero,categorias_interes,cumpleanos,primera_vez,acepta_promociones,fecha';
+  const csvCelda = (v) => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
+  const filas = [encabezado, ...INSCRIPCIONES_TALLER.map(i => [
+    i.nombre, i.whatsapp, i.correo, i.taller, i.horario, i.monto,
+    i.comoSeEntero || '',
+    (i.categoriasInteres || []).join(' / '),
+    i.cumpleDia && i.cumpleMes ? `${i.cumpleDia}-${MESES_CORTOS[i.cumpleMes]}` : '',
+    i.esPrimeraVez ? 'si' : 'no',
+    i.aceptaPromociones ? 'si' : 'no',
+    i.createdAt,
+  ].map(csvCelda).join(','))];
+  const blob = new Blob([filas.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'inscripciones-taller-endulcora.csv';
   a.click();
   URL.revokeObjectURL(url);
 });

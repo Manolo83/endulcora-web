@@ -95,6 +95,15 @@ const newsletterLimiter = rateLimit({
 });
 app.use('/api/newsletter/suscribir', newsletterLimiter);
 
+const inscripcionTallerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
+});
+app.use('/api/inscripcion-taller', inscripcionTallerLimiter);
+
 const asistenteLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 30,
@@ -231,6 +240,10 @@ app.get('/calendario', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'calendario.html'));
 });
 
+app.get('/inscripcion-taller', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'inscripcion-taller.html'));
+});
+
 app.get('/galeria', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'galeria.html'));
 });
@@ -315,6 +328,7 @@ app.get('/sitemap.xml', (req, res) => {
     { loc: '/anexos', prioridad: '0.8', frecuencia: 'weekly' },
     { loc: '/recetarios', prioridad: '0.8', frecuencia: 'weekly' },
     { loc: '/calendario', prioridad: '0.6', frecuencia: 'weekly' },
+    { loc: '/inscripcion-taller', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/galeria', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/membresia', prioridad: '0.6', frecuencia: 'monthly' },
     { loc: '/clases-en-vivo', prioridad: '0.6', frecuencia: 'weekly' },
