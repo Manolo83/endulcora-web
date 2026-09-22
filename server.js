@@ -17,6 +17,7 @@ const authRoutes = require('./src/routes/auth');
 const asistenteRoutes = require('./src/routes/asistente');
 const googleAdsRoutes = require('./src/routes/googleAds');
 const membresiaRoutes = require('./src/routes/membresia');
+const leventSyncRoutes = require('./src/routes/leventSync');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 console.log(`[uploads] Los archivos subidos se guardan en: ${UPLOAD_DIR}`);
@@ -122,6 +123,17 @@ const googleAdsLimiter = rateLimit({
   message: { error: 'Demasiadas peticiones al panel de Google Ads. Espera unos minutos.' },
 });
 app.use('/api/google-ads', googleAdsLimiter, googleAdsRoutes);
+
+// Sincronizacion con la base de datos general de Levent: protegida por su
+// propio token y limitada, porque expone contactos aunque sean pocos campos.
+const leventSyncLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas peticiones de sincronizacion. Espera unos minutos.' },
+});
+app.use('/api/levent-sync', leventSyncLimiter, leventSyncRoutes);
 
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
 // El contenido de /api cambia en cualquier momento desde /admin (precios,
