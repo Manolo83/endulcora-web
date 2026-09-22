@@ -633,6 +633,24 @@ async function init() {
         carpetaSeed: 'tiramisu-douyin',
         archivos: { ebook: 'Endulcora_Tiramisu_Douyin_eBook.pdf', anexo: 'Endulcora_Tiramisu_Douyin_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tiramisu_Douyin_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada.png' },
       },
+      {
+        tituloBase: 'Cocina Española',
+        categoria: 'ebook',
+        carpetaSeed: 'cocina-espanola',
+        archivos: { ebook: 'Endulcora_Cocina_Espanola_eBook.pdf', anexo: 'Endulcora_Cocina_Espanola_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Cocina_Espanola_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada_Foto.jpeg' },
+      },
+      {
+        tituloBase: 'Macarons',
+        categoria: 'ebook',
+        carpetaSeed: 'macarons',
+        archivos: { ebook: 'Endulcora_Macarons_eBook.pdf', anexo: 'Endulcora_Macarons_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Macarons_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada_Foto.jpeg' },
+      },
+      {
+        tituloBase: 'Pizza',
+        categoria: 'ebook',
+        carpetaSeed: 'pizza',
+        archivos: { ebook: 'Endulcora_Pizza_eBook.pdf', anexo: 'Endulcora_Pizza_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Pizza_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada_Foto.jpeg' },
+      },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
       const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
