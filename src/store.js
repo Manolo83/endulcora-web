@@ -71,7 +71,7 @@ const DEFAULT_CONTENT = {
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
   legal_privacidad:
-    'Endulcora · Estudio Gastronómico, con domicilio en Ciudad de México, es responsable del tratamiento de tus datos personales.\n\nQué recabamos. Nombre, correo electrónico y teléfono, y los datos de facturación cuando los solicitas.\n\nPara qué. Entregar tus compras digitales, darte acceso a tus cursos, emitir comprobantes y avisarte de nuevas publicaciones. No vendemos ni compartimos tus datos con terceros ajenos a estos fines.\n\nTus derechos ARCO. Puedes acceder, rectificar, cancelar u oponerte al uso de tus datos escribiendo a nuestro WhatsApp. Respondemos en un máximo de 20 días hábiles.',
+    'Endulcora · Estudio Gastronómico, con domicilio en Ciudad de México, es responsable del tratamiento de tus datos personales.\n\nQué recabamos. Nombre, correo electrónico y teléfono, y los datos de facturación cuando los solicitas.\n\nPara qué. Entregar tus compras digitales, darte acceso a tus cursos, emitir comprobantes y avisarte de nuevas publicaciones. No vendemos ni compartimos tus datos con terceros ajenos a estos fines.\n\nCon quién los compartimos. Endulcora forma parte del grupo de marcas acompañadas por Levent (junto con Crenef, Instituto Justo, Silman y futuros proyectos del grupo). Tus datos de contacto y de compra pueden compartirse entre estas marcas únicamente para campañas de mercadotecnia, publicidad (como Meta Ads y Google Ads) y análisis interno de mercado — nunca se venden ni se comparten con nadie fuera de este grupo.\n\nTus derechos ARCO. Puedes acceder, rectificar, cancelar u oponerte al uso de tus datos —incluido oponerte específicamente a que se compartan con las demás marcas del grupo— escribiendo a nuestro WhatsApp. Respondemos en un máximo de 20 días hábiles.',
   legal_terminos:
     'La compra de cualquier producto digital de Endulcora otorga una licencia personal e intransferible de uso.\n\nLos precios están en pesos mexicanos. La entrega de eBooks y anexos es inmediata al confirmarse el pago, mediante enlace de descarga a tu correo.\n\nLas clases en vivo se imparten en la fecha publicada; si no puedes asistir, la grabación queda disponible 30 días.',
   legal_reembolso:
@@ -878,6 +878,20 @@ async function init() {
         data.products = data.products.filter((p) => p.id !== oficiosDulces.id);
       }
       data._migBorraOficiosDulces = true;
+      changed = true;
+    }
+    // El aviso de privacidad no decia nada sobre compartir datos con Levent
+    // (la matriz) y las demas marcas del grupo, algo necesario ahora que se
+    // arma una base de datos general para campanas y analisis compartidos.
+    // Solo se actualiza si nadie lo edito a mano desde el admin (sigue igual
+    // al texto viejo por defecto); si ya lo cambiaron, se deja como esta.
+    if (!data._migAvisoPrivacidadLevent) {
+      const textoViejo =
+        'Endulcora · Estudio Gastronómico, con domicilio en Ciudad de México, es responsable del tratamiento de tus datos personales.\n\nQué recabamos. Nombre, correo electrónico y teléfono, y los datos de facturación cuando los solicitas.\n\nPara qué. Entregar tus compras digitales, darte acceso a tus cursos, emitir comprobantes y avisarte de nuevas publicaciones. No vendemos ni compartimos tus datos con terceros ajenos a estos fines.\n\nTus derechos ARCO. Puedes acceder, rectificar, cancelar u oponerte al uso de tus datos escribiendo a nuestro WhatsApp. Respondemos en un máximo de 20 días hábiles.';
+      if (data.content.legal_privacidad === textoViejo) {
+        data.content.legal_privacidad = DEFAULT_CONTENT.legal_privacidad;
+      }
+      data._migAvisoPrivacidadLevent = true;
       changed = true;
     }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
