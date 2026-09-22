@@ -591,6 +591,11 @@ router.get('/api/inscripciones-taller', requireAdmin, (req, res) => {
   res.json(store.getInscripcionesTaller());
 });
 
+router.delete('/api/inscripciones-taller/:id', requireAdmin, (req, res) => {
+  store.deleteInscripcionTaller(req.params.id);
+  res.json({ ok: true });
+});
+
 // Nombre de pestaña de Excel: maximo 31 caracteres, sin los caracteres que
 // Excel prohibe, y unico dentro del libro (le agrega un numero si se repite).
 function nombreHojaExcel(base, usados) {

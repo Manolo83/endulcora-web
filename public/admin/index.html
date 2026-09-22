@@ -2941,7 +2941,8 @@ async function cargarInscripcionesTaller(){
               <th class="px-5 py-3 font-600">Anticipo</th>
               <th class="px-5 py-3 font-600">¿Cómo se enteró?</th>
               <th class="px-5 py-3 font-600">Preferencias</th>
-              <th class="px-5 py-3 text-right font-600">Registrado</th>
+              <th class="px-5 py-3 font-600">Registrado</th>
+              <th class="px-5 py-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -2953,11 +2954,24 @@ async function cargarInscripcionesTaller(){
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.montoAnticipo)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.comoSeEntero || '—')}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.preferencias || '—')}</td>
-                <td class="px-5 py-3 text-right text-xs text-carbon/45">${new Date(i.createdAt).toLocaleDateString('es-MX')}</td>
+                <td class="px-5 py-3 text-xs text-carbon/45">${new Date(i.createdAt).toLocaleDateString('es-MX')}</td>
+                <td class="px-5 py-3 text-right"><button type="button" data-id="${i.id}" class="btnBorrarInscripcionTaller text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button></td>
               </tr>`).join('')}
           </tbody>
         </table>
       </div>`).join('');
+    $('listaInscripcionesTaller').querySelectorAll('.btnBorrarInscripcionTaller').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Borrar esta inscripción? No se puede deshacer.')) return;
+        try{
+          await api(`/admin/api/inscripciones-taller/${btn.dataset.id}`, { method: 'DELETE' });
+          toast('Inscripción borrada');
+          cargarInscripcionesTaller();
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
   }catch(e){
     cont.innerHTML = `<p class="p-5 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
   }

@@ -1797,6 +1797,11 @@ module.exports = {
     save(data);
     return item;
   },
+  deleteInscripcionTaller(id) {
+    const data = load();
+    data.inscripcionesTaller = data.inscripcionesTaller.filter((i) => i.id !== Number(id));
+    save(data);
+  },
 
   // ---- Biblioteca de clases en vivo grabadas (exclusiva para miembros) ----
   getBibliotecaClases() {
