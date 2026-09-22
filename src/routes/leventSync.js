@@ -46,9 +46,9 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
   });
 
   // Inscripciones al formulario de talleres: solo se manda lo que sirve
-  // para mercadotecnia (contacto, interes, como se entero). El monto que
-  // pagaron y el horario son datos operativos de Endulcora y nunca salen
-  // de aqui.
+  // para mercadotecnia (contacto, interes, como se entero). El anticipo, la
+  // fecha, la sede y el horario son datos operativos de Endulcora y nunca
+  // salen de aqui.
   const contactosTalleres = store
     .getInscripcionesTaller()
     .filter((i) => i.correo)
@@ -56,7 +56,7 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
       email: i.correo,
       telefono: i.whatsapp || '',
       nombre: i.nombre || '',
-      categoriasInteres: [...i.categoriasInteres, `taller:${i.taller}`],
+      categoriasInteres: [i.preferencias, `taller:${i.taller}`].filter(Boolean),
       comoSeEntero: i.comoSeEntero || '',
       esPrimeraVez: i.esPrimeraVez,
       aceptaPromociones: i.aceptaPromociones,

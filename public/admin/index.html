@@ -605,6 +605,13 @@
             <input id="sesionTitulo" type="text" required class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
           </label>
           <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Horario</span>
+            <select id="sesionHorario" required class="mt-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+              <option value="10:00 am – 2:00 pm">10:00 am – 2:00 pm</option>
+              <option value="4:00 pm – 8:00 pm">4:00 pm – 8:00 pm</option>
+            </select>
+          </label>
+          <label>
             <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Estado</span>
             <select id="sesionEstado" class="mt-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
               <option value="disponible">Disponible</option>
@@ -2701,7 +2708,7 @@ function pintarCalendarioAdmin(){
     const sesiones = (sesionesPorFecha[fecha] || []).sort((a,b) => (a.orden ?? 0) - (b.orden ?? 0));
     const chips = sesiones.map(s => {
       const info = ESTADO_INFO[s.estado] || ESTADO_INFO.disponible;
-      return `<button type="button" data-id="${s.id}" class="btnEditarSesion flex w-full items-center gap-1.5 truncate rounded-md px-1.5 py-1 text-left text-[10px] text-crema ${info.clase}">${escapeHtml(s.titulo)}</button>`;
+      return `<button type="button" data-id="${s.id}" title="${escapeHtml(s.horario || '')}" class="btnEditarSesion flex w-full items-center gap-1.5 truncate rounded-md px-1.5 py-1 text-left text-[10px] text-crema ${info.clase}">${escapeHtml(s.titulo)}</button>`;
     }).join('');
     celdas += `
       <div class="min-h-[76px] rounded-lg border border-vino/10 p-1.5">
@@ -2733,6 +2740,7 @@ function abrirFormSesion(sesion){
   $('sesionFechaValor').value = sesion.fecha;
   $('sesionFechaTexto').textContent = new Date(sesion.fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
   $('sesionTitulo').value = sesion.titulo || '';
+  $('sesionHorario').value = sesion.horario || '10:00 am – 2:00 pm';
   $('sesionEstado').value = sesion.estado || 'disponible';
   $('btnEliminarSesion').classList.toggle('hidden', !sesion.id);
   $('sesionTitulo').focus();
@@ -2766,6 +2774,7 @@ $('formSesionTaller').addEventListener('submit', async (e) => {
     sedeId: calendarioSedeId,
     fecha: $('sesionFechaValor').value,
     titulo: $('sesionTitulo').value.trim(),
+    horario: $('sesionHorario').value,
     estado: $('sesionEstado').value,
   };
   try{
@@ -2893,12 +2902,14 @@ function fechaLegibleCorta(fecha){
   return new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-// Agrupa por taller + fecha + sede: cada grupo es la lista de asistencia de
-// una sesion en concreto (misma logica que el Excel que se descarga aparte).
+// Agrupa por sesion real del calendario (sesionTallerId): cada grupo es la
+// lista de asistencia de una sesion en concreto (misma logica que el Excel
+// que se descarga aparte). Agrupar por id, no por texto, evita que una
+// misma sesion se separe en dos listas por variaciones de escritura.
 function agruparInscripcionesTaller(lista){
   const grupos = new Map();
   lista.forEach(i => {
-    const clave = `${i.taller}|||${i.fecha}|||${i.sede}`;
+    const clave = i.sesionTallerId || `${i.taller}|||${i.fecha}|||${i.sede}`;
     if (!grupos.has(clave)) grupos.set(clave, { taller: i.taller, fecha: i.fecha, sede: i.sede, filas: [] });
     grupos.get(clave).filas.push(i);
   });
@@ -2927,9 +2938,9 @@ async function cargarInscripcionesTaller(){
               <th class="px-5 py-3 font-600">Nombre</th>
               <th class="px-5 py-3 font-600">Contacto</th>
               <th class="px-5 py-3 font-600">Horario</th>
-              <th class="px-5 py-3 font-600">Total</th>
               <th class="px-5 py-3 font-600">Anticipo</th>
               <th class="px-5 py-3 font-600">¿Cómo se enteró?</th>
+              <th class="px-5 py-3 font-600">Preferencias</th>
               <th class="px-5 py-3 text-right font-600">Registrado</th>
             </tr>
           </thead>
@@ -2939,9 +2950,9 @@ async function cargarInscripcionesTaller(){
                 <td class="px-5 py-3 text-carbon/80">${escapeHtml(i.nombre)}${i.esPrimeraVez ? '<span class="ml-2 rounded-full bg-flama/20 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Nuevo</span>' : ''}</td>
                 <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(i.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(i.correo)}</div></td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.horario)}</td>
-                <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.montoTotal)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.montoAnticipo)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.comoSeEntero || '—')}</td>
+                <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.preferencias || '—')}</td>
                 <td class="px-5 py-3 text-right text-xs text-carbon/45">${new Date(i.createdAt).toLocaleDateString('es-MX')}</td>
               </tr>`).join('')}
           </tbody>
@@ -2953,12 +2964,12 @@ async function cargarInscripcionesTaller(){
 }
 $('btnExportarInscripcionesTaller').addEventListener('click', () => {
   if(!INSCRIPCIONES_TALLER.length){ toast('No hay inscripciones para exportar'); return; }
-  const encabezado = 'nombre,whatsapp,correo,taller,fecha,sede,horario,monto_total,monto_anticipo,como_se_entero,categorias_interes,cumpleanos,primera_vez,acepta_promociones,registrado_el';
+  const encabezado = 'nombre,whatsapp,correo,taller,fecha,sede,horario,monto_anticipo,como_se_entero,preferencias,cumpleanos,primera_vez,acepta_promociones,registrado_el';
   const csvCelda = (v) => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
   const filas = [encabezado, ...INSCRIPCIONES_TALLER.map(i => [
-    i.nombre, i.whatsapp, i.correo, i.taller, i.fecha, i.sede, i.horario, i.montoTotal, i.montoAnticipo,
+    i.nombre, i.whatsapp, i.correo, i.taller, i.fecha, i.sede, i.horario, i.montoAnticipo,
     i.comoSeEntero || '',
-    (i.categoriasInteres || []).join(' / '),
+    i.preferencias || '',
     i.cumpleDia && i.cumpleMes ? `${i.cumpleDia}-${MESES_CORTOS[i.cumpleMes]}` : '',
     i.esPrimeraVez ? 'si' : 'no',
     i.aceptaPromociones ? 'si' : 'no',

@@ -324,39 +324,45 @@ router.post('/newsletter/suscribir', (req, res) => {
 // Formulario publico de inscripcion a talleres (replicable en cualquier
 // pagina de campaña): guarda el registro completo para control interno y
 // alimenta la base de datos general de Levent con los campos de contacto.
+//
+// El taller, la fecha, la sede y el horario NUNCA se toman de lo que escribe
+// quien llena el formulario — siempre se resuelven en el servidor a partir
+// de una sesion real del calendario (sesionTallerId), para que: (1) nadie
+// pueda inventar una fecha o un taller que no existe, y (2) "Paella",
+// "paella" y "PAELLA" nunca se registren como talleres distintos, porque el
+// texto lo escribe una sola vez el equipo de Endulcora al armar el
+// calendario, no cada persona que se inscribe.
 const WHATSAPP_RE = /^[0-9+\s()-]{7,20}$/;
-const FECHA_RE = /^\d{4}-\d{2}-\d{2}$/;
 router.post('/inscripcion-taller', async (req, res) => {
   const b = req.body || {};
   const nombre = String(b.nombre || '').trim();
   const whatsapp = String(b.whatsapp || '').trim();
   const correo = String(b.correo || '').trim();
-  const taller = String(b.taller || '').trim();
-  const fecha = String(b.fecha || '').trim();
-  const sede = String(b.sede || '').trim();
-  const horario = String(b.horario || '').trim();
+  const sesionTallerId = Number(b.sesionTallerId);
 
   if (!nombre) return res.status(400).json({ error: 'Escribe tu nombre completo.' });
   if (!WHATSAPP_RE.test(whatsapp)) return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
   if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
-  if (!taller) return res.status(400).json({ error: 'Falta el taller al que te inscribes.' });
-  if (!FECHA_RE.test(fecha)) return res.status(400).json({ error: 'Elige la fecha del taller.' });
-  if (!sede) return res.status(400).json({ error: 'Falta la sede.' });
-  if (!horario) return res.status(400).json({ error: 'Falta el horario.' });
+  if (!sesionTallerId) return res.status(400).json({ error: 'Elige el taller al que te inscribes desde el calendario.' });
   if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para inscribirte.' });
+
+  const sesion = store.getSesionesTaller().find((s) => s.id === sesionTallerId);
+  if (!sesion) return res.status(400).json({ error: 'Ese taller ya no está disponible en el calendario. Elige otro.' });
+  if (sesion.estado === 'agotado') return res.status(400).json({ error: 'Ese taller ya está agotado. Elige otra fecha o sede.' });
+  const sedeInfo = store.getSedes().find((s) => s.id === sesion.sedeId);
 
   const item = store.addInscripcionTaller({
     nombre,
     whatsapp,
     correo,
-    taller,
-    fecha,
-    sede,
-    horario,
-    montoTotal: b.montoTotal,
+    sesionTallerId: sesion.id,
+    taller: sesion.titulo,
+    fecha: sesion.fecha,
+    sede: sedeInfo ? sedeInfo.nombre : '',
+    horario: sesion.horario || '',
     montoAnticipo: b.montoAnticipo,
     comoSeEntero: b.comoSeEntero,
-    categoriasInteres: b.categoriasInteres,
+    preferencias: b.preferencias,
     cumpleDia: b.cumpleDia,
     cumpleMes: b.cumpleMes,
     esPrimeraVez: b.esPrimeraVez,

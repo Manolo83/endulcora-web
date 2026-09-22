@@ -610,12 +610,15 @@ function nombreHojaExcel(base, usados) {
 router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => {
   const inscripciones = store.getInscripcionesTaller();
 
-  // Una lista (pestaña) por cada combinacion real de taller + fecha + sede:
+  // Una lista (pestaña) por cada sesion real del calendario (sesionTallerId):
   // asi cada pestaña es la lista de asistencia de una sesion en concreto,
-  // igual que ya manejan en su documento de Drive.
+  // igual que ya manejan en su documento de Drive. Agrupar por el id de la
+  // sesion (no por el texto) evita que "Paella"/"paella" o una fecha mal
+  // tecleada abran una pestaña aparte — ya no es posible, porque taller,
+  // fecha y sede los pone el calendario, no quien llena el formulario.
   const grupos = new Map();
   inscripciones.forEach((i) => {
-    const clave = `${i.taller}|||${i.fecha}|||${i.sede}`;
+    const clave = i.sesionTallerId || `${i.taller}|||${i.fecha}|||${i.sede}`;
     if (!grupos.has(clave)) grupos.set(clave, { taller: i.taller, fecha: i.fecha, sede: i.sede, filas: [] });
     grupos.get(clave).filas.push(i);
   });
@@ -633,10 +636,10 @@ router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => 
     { header: 'Correo', key: 'correo', width: 28 },
     { header: 'Fecha', key: 'fecha', width: 12 },
     { header: 'Sede', key: 'sede', width: 18 },
-    { header: 'Horario', key: 'horario', width: 16 },
-    { header: 'Monto total', key: 'montoTotal', width: 12 },
+    { header: 'Horario', key: 'horario', width: 18 },
     { header: 'Anticipo', key: 'montoAnticipo', width: 12 },
     { header: '¿Cómo se enteró?', key: 'comoSeEntero', width: 20 },
+    { header: 'Otras preferencias', key: 'preferencias', width: 28 },
     { header: '¿Primera vez?', key: 'esPrimeraVez', width: 12 },
     { header: 'Registrado el', key: 'createdAt', width: 18 },
   ];
@@ -677,9 +680,9 @@ router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => 
           fecha: i.fecha,
           sede: i.sede,
           horario: i.horario,
-          montoTotal: i.montoTotal,
           montoAnticipo: i.montoAnticipo,
           comoSeEntero: i.comoSeEntero,
+          preferencias: i.preferencias,
           esPrimeraVez: i.esPrimeraVez ? 'Sí' : 'No',
           createdAt: new Date(i.createdAt).toLocaleDateString('es-MX'),
         });
@@ -742,17 +745,26 @@ router.delete('/api/sedes/:id/imagen', requireAdmin, (req, res) => {
 });
 
 // ---- Calendario de talleres presenciales ----
+// Los talleres de Endulcora solo corren en dos bloques fijos: no se acepta
+// cualquier texto libre de horario, para que el formulario publico siempre
+// pueda mostrar un horario real y consistente.
+const HORARIOS_VALIDOS = ['10:00 am – 2:00 pm', '4:00 pm – 8:00 pm'];
+
 router.get('/api/sesiones-taller', requireAdmin, (req, res) => {
   res.json(store.getSesionesTaller(req.query.sedeId));
 });
 
 router.post('/api/sesiones-taller', requireAdmin, (req, res) => {
-  const { sedeId, fecha, titulo, estado } = req.body || {};
+  const { sedeId, fecha, titulo, estado, horario } = req.body || {};
   if (!sedeId || !fecha || !titulo) return res.status(400).json({ error: 'Falta sede, fecha o título' });
-  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado }));
+  if (horario && !HORARIOS_VALIDOS.includes(horario)) return res.status(400).json({ error: 'Ese horario no es válido.' });
+  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado, horario }));
 });
 
 router.patch('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
+  if (req.body && req.body.horario && !HORARIOS_VALIDOS.includes(req.body.horario)) {
+    return res.status(400).json({ error: 'Ese horario no es válido.' });
+  }
   const item = store.updateSesionTaller(req.params.id, req.body || {});
   if (!item) return res.status(404).json({ error: 'No encontrado' });
   res.json(item);

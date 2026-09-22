@@ -1720,7 +1720,7 @@ module.exports = {
     if (sedeId) items = items.filter((s) => s.sedeId === Number(sedeId));
     return items.sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.orden ?? 0) - (b.orden ?? 0));
   },
-  addSesionTaller({ sedeId, fecha, titulo, estado }) {
+  addSesionTaller({ sedeId, fecha, titulo, estado, horario }) {
     const data = load();
     const mismaFecha = data.sesionesTaller.filter((s) => s.sedeId === Number(sedeId) && s.fecha === fecha);
     const item = {
@@ -1729,6 +1729,7 @@ module.exports = {
       fecha,
       titulo: String(titulo || '').trim(),
       estado: estado || 'disponible',
+      horario: String(horario || '').trim(),
       orden: mismaFecha.length,
     };
     data.sesionesTaller.push(item);
@@ -1742,6 +1743,7 @@ module.exports = {
     if (typeof patch.titulo === 'string') item.titulo = patch.titulo;
     if (typeof patch.estado === 'string') item.estado = patch.estado;
     if (typeof patch.fecha === 'string') item.fecha = patch.fecha;
+    if (typeof patch.horario === 'string') item.horario = patch.horario;
     save(data);
     return item;
   },
@@ -1752,15 +1754,19 @@ module.exports = {
   },
 
   // ---- Inscripciones a talleres (formulario publico) ----
-  // Alimenta tanto el control interno (quien pago que y a que hora) como la
-  // base de datos general de Levent (solo los campos de contacto e interes,
-  // nunca el monto ni el horario — eso se filtra en leventSync.js).
+  // Ligadas siempre a una sesion real del calendario (sesionTallerId): asi
+  // taller/fecha/sede/horario nunca los escribe la persona a mano (se toman
+  // del calendario que ya administra Endulcora), sin variaciones de
+  // mayusculas/minusculas ni fechas inventadas. Alimenta tanto el control
+  // interno (quien pago que) como la base de datos general de Levent (solo
+  // contacto e interes — nunca el anticipo ni el horario, eso se filtra en
+  // leventSync.js).
   getInscripcionesTaller() {
     return [...load().inscripcionesTaller].sort((a, b) => b.id - a.id);
   },
   addInscripcionTaller({
-    nombre, whatsapp, correo, taller, fecha, sede, horario, montoTotal, montoAnticipo,
-    comoSeEntero, categoriasInteres, cumpleDia, cumpleMes,
+    nombre, whatsapp, correo, sesionTallerId, taller, fecha, sede, horario, montoAnticipo,
+    comoSeEntero, preferencias, cumpleDia, cumpleMes,
     esPrimeraVez, aceptaPromociones, aceptaAvisoPrivacidad,
   }) {
     const data = load();
@@ -1769,16 +1775,17 @@ module.exports = {
       nombre: String(nombre || '').trim(),
       whatsapp: String(whatsapp || '').trim(),
       correo: String(correo || '').trim().toLowerCase(),
+      sesionTallerId: Number(sesionTallerId) || null,
+      // Copia del calendario al momento de inscribirse: aunque la sesion se
+      // edite o se borre despues, el registro conserva lo que era cierto
+      // cuando esta persona se inscribio.
       taller: String(taller || '').trim(),
       fecha: String(fecha || '').trim(),
       sede: String(sede || '').trim(),
       horario: String(horario || '').trim(),
-      montoTotal: String(montoTotal || '').trim(),
       montoAnticipo: String(montoAnticipo || '').trim(),
       comoSeEntero: String(comoSeEntero || '').trim(),
-      categoriasInteres: Array.isArray(categoriasInteres)
-        ? categoriasInteres.filter((c) => typeof c === 'string' && c.trim()).map((c) => c.trim()).slice(0, 10)
-        : [],
+      preferencias: String(preferencias || '').trim().slice(0, 500),
       cumpleDia: Number(cumpleDia) || null,
       cumpleMes: Number(cumpleMes) || null,
       esPrimeraVez: !!esPrimeraVez,

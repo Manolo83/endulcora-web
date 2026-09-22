@@ -122,36 +122,23 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4E1454; }
     </div>
 
     <div>
-      <label class="etiqueta-inscripcion" for="campoTaller">Taller al que te inscribes *</label>
-      <input id="campoTaller" name="taller" type="text" required class="campo-inscripcion" placeholder="Ej. Velas de mantequilla trufada">
+      <label class="etiqueta-inscripcion" for="campoSede">Sede *</label>
+      <select id="campoSede" name="sedeId" required class="campo-inscripcion">
+        <option value="">Selecciona tu sede</option>
+      </select>
     </div>
 
-    <div class="grid gap-5 sm:grid-cols-3">
-      <div>
-        <label class="etiqueta-inscripcion" for="campoFecha">Fecha *</label>
-        <input id="campoFecha" name="fecha" type="date" required class="campo-inscripcion">
-      </div>
-      <div>
-        <label class="etiqueta-inscripcion" for="campoHorario">Horario *</label>
-        <input id="campoHorario" name="horario" type="text" required class="campo-inscripcion" placeholder="Ej. 5:00 pm">
-      </div>
-      <div>
-        <label class="etiqueta-inscripcion" for="campoSede">Sede *</label>
-        <select id="campoSede" name="sede" required class="campo-inscripcion">
-          <option value="">Selecciona</option>
-        </select>
-      </div>
+    <div>
+      <label class="etiqueta-inscripcion" for="campoSesion">Taller *</label>
+      <select id="campoSesion" name="sesionTallerId" required disabled class="campo-inscripcion">
+        <option value="">Primero elige tu sede</option>
+      </select>
+      <p id="sesionVacioAviso" class="mt-1.5 hidden text-xs text-carbon/45">Por ahora no hay talleres programados en esta sede. Escríbenos por WhatsApp y te avisamos del próximo.</p>
     </div>
 
-    <div class="grid gap-5 sm:grid-cols-2">
-      <div>
-        <label class="etiqueta-inscripcion" for="campoMontoTotal">Monto total a pagar (MXN)</label>
-        <input id="campoMontoTotal" name="montoTotal" type="text" class="campo-inscripcion" placeholder="Ej. $690">
-      </div>
-      <div>
-        <label class="etiqueta-inscripcion" for="campoMontoAnticipo">Monto de anticipo (MXN)</label>
-        <input id="campoMontoAnticipo" name="montoAnticipo" type="text" class="campo-inscripcion" placeholder="Ej. $200">
-      </div>
+    <div>
+      <label class="etiqueta-inscripcion" for="campoMontoAnticipo">Monto de anticipo (MXN)</label>
+      <input id="campoMontoAnticipo" name="montoAnticipo" type="text" class="campo-inscripcion" placeholder="Ej. $200">
     </div>
 
     <div>
@@ -168,13 +155,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4E1454; }
     </div>
 
     <div>
-      <span class="etiqueta-inscripcion">¿Qué más te interesa aprender? (opcional)</span>
-      <div class="mt-1 grid gap-2.5 sm:grid-cols-2">
-        <label class="flex items-center gap-2.5 text-sm text-carbon/80"><input type="checkbox" name="categoriasInteres" value="Velas comestibles" class="h-4 w-4 rounded border-vino/30">Velas comestibles</label>
-        <label class="flex items-center gap-2.5 text-sm text-carbon/80"><input type="checkbox" name="categoriasInteres" value="Galletas y repostería" class="h-4 w-4 rounded border-vino/30">Galletas y repostería</label>
-        <label class="flex items-center gap-2.5 text-sm text-carbon/80"><input type="checkbox" name="categoriasInteres" value="Costeo y negocio" class="h-4 w-4 rounded border-vino/30">Costeo y negocio</label>
-        <label class="flex items-center gap-2.5 text-sm text-carbon/80"><input type="checkbox" name="categoriasInteres" value="Clases en vivo" class="h-4 w-4 rounded border-vino/30">Clases en vivo</label>
-      </div>
+      <label class="etiqueta-inscripcion" for="campoPreferencias">¿Qué más te interesa aprender? (opcional)</label>
+      <textarea id="campoPreferencias" name="preferencias" rows="2" maxlength="500" class="campo-inscripcion" placeholder="Ej. me gustaría un taller de macarons"></textarea>
     </div>
 
     <div class="grid gap-5 sm:grid-cols-[1fr_auto]">
@@ -260,35 +242,69 @@ document.getElementById('anioFooter').textContent = new Date().getFullYear();
 let NUMERO_WHATSAPP = '5665271901';
 fetch('/api/content').then(r => r.json()).then(c => { if(c.whatsapp_numero) NUMERO_WHATSAPP = c.whatsapp_numero; }).catch(()=>{});
 
-// ---- Sede: se llena con las sedes reales (+ "En línea") para que la lista
-// del panel de admin quede consistente, sin errores de dedo. ----
+// ---- Sede y taller: se llenan SOLO con lo que ya existe en el calendario
+// de Endulcora (las mismas sedes y sesiones que administran en /admin). Asi
+// nadie escribe a mano el nombre del taller, la fecha ni el horario — se
+// elige de una lista real, sin variaciones de mayusculas/minusculas ni
+// fechas inventadas. ----
+const selectSede = document.getElementById('campoSede');
+const selectSesion = document.getElementById('campoSesion');
+const avisoSesionVacio = document.getElementById('sesionVacioAviso');
+const parametros = new URLSearchParams(location.search);
+
 async function cargarSedes(){
-  const select = document.getElementById('campoSede');
   try{
     const sedes = await fetch('/api/sedes').then(r => r.json());
-    sedes.forEach(s => select.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(s.nombre)}">${escapeHtml(s.nombre)}</option>`));
-  }catch(e){ /* si falla, se queda solo con "En línea" */ }
-  select.insertAdjacentHTML('beforeend', '<option value="En línea">En línea</option>');
-  // Prellenado desde la URL (?sede=...) se aplica hasta que ya existan las opciones.
-  const sedeURL = new URLSearchParams(location.search).get('sede');
-  if (sedeURL && [...select.options].some(o => o.value === sedeURL)) select.value = sedeURL;
+    sedes.forEach(s => selectSede.insertAdjacentHTML('beforeend', `<option value="${s.id}">${escapeHtml(s.nombre)}</option>`));
+    const sedeURL = parametros.get('sedeId');
+    if (sedeURL && [...selectSede.options].some(o => o.value === sedeURL)) {
+      selectSede.value = sedeURL;
+      await cargarSesionesDisponibles();
+    }
+  }catch(e){
+    selectSede.innerHTML = '<option value="">No se pudieron cargar las sedes</option>';
+  }
 }
 cargarSedes();
 
-// ---- Prellenado desde la URL: /inscripcion-taller?taller=...&fecha=...&horario=...&montoTotal=...
-// Asi la misma pagina sirve para anunciar cualquier taller sin tocar el codigo.
-const parametros = new URLSearchParams(location.search);
-['taller', 'fecha', 'horario', 'montoTotal', 'montoAnticipo'].forEach((campo) => {
-  const valor = parametros.get(campo);
-  if (valor) {
-    const input = document.querySelector(`[name="${campo}"]`);
-    if (input) input.value = valor;
-  }
-});
-// Alias por compatibilidad con links viejos que usaban "monto" (ahora "montoTotal").
-if (!parametros.get('montoTotal') && parametros.get('monto')) {
-  document.querySelector('[name="montoTotal"]').value = parametros.get('monto');
+function horarioLegible(s){
+  return s.horario || 'Horario por confirmar';
 }
+
+async function cargarSesionesDisponibles(){
+  const sedeId = selectSede.value;
+  selectSesion.innerHTML = '<option value="">Cargando…</option>';
+  selectSesion.disabled = true;
+  avisoSesionVacio.classList.add('hidden');
+  if (!sedeId) {
+    selectSesion.innerHTML = '<option value="">Primero elige tu sede</option>';
+    return;
+  }
+  try{
+    const sesiones = await fetch(`/api/sesiones-taller?sedeId=${sedeId}`).then(r => r.json());
+    const hoyISO = new Date().toISOString().slice(0, 10);
+    const disponibles = sesiones
+      .filter(s => s.fecha >= hoyISO && s.estado !== 'agotado')
+      .sort((a, b) => a.fecha.localeCompare(b.fecha));
+    if (!disponibles.length) {
+      selectSesion.innerHTML = '<option value="">No hay talleres disponibles</option>';
+      selectSesion.disabled = true;
+      avisoSesionVacio.classList.remove('hidden');
+      return;
+    }
+    selectSesion.innerHTML = '<option value="">Selecciona un taller</option>' + disponibles.map(s => {
+      const fechaLegible = new Date(s.fecha + 'T00:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+      const etiqueta = `${s.titulo} — ${fechaLegible} — ${horarioLegible(s)}${s.estado === 'casi_lleno' ? ' (casi lleno)' : ''}`;
+      return `<option value="${s.id}">${escapeHtml(etiqueta)}</option>`;
+    }).join('');
+    selectSesion.disabled = false;
+    const sesionURL = parametros.get('sesionId');
+    if (sesionURL && [...selectSesion.options].some(o => o.value === sesionURL)) selectSesion.value = sesionURL;
+  }catch(e){
+    selectSesion.innerHTML = '<option value="">No se pudieron cargar los talleres</option>';
+  }
+}
+selectSede.addEventListener('change', cargarSesionesDisponibles);
 
 // ---- Selects de día y mes de cumpleaños ----
 const selectDia = document.querySelector('[name="cumpleDia"]');
@@ -336,20 +352,17 @@ form.addEventListener('submit', async (e) => {
     nombre: datos.get('nombre'),
     whatsapp: datos.get('whatsapp'),
     correo: datos.get('correo'),
-    taller: datos.get('taller'),
-    fecha: datos.get('fecha'),
-    sede: datos.get('sede'),
-    horario: datos.get('horario'),
-    montoTotal: datos.get('montoTotal'),
+    sesionTallerId: datos.get('sesionTallerId'),
     montoAnticipo: datos.get('montoAnticipo'),
     comoSeEntero: datos.get('comoSeEntero'),
-    categoriasInteres: datos.getAll('categoriasInteres'),
+    preferencias: datos.get('preferencias'),
     cumpleDia: datos.get('cumpleDia'),
     cumpleMes: datos.get('cumpleMes'),
     esPrimeraVez: datos.get('esPrimeraVez') === 'si',
     aceptaPromociones: datos.get('aceptaPromociones') === 'on',
     aceptaAvisoPrivacidad: datos.get('aceptaAvisoPrivacidad') === 'on',
   };
+  const textoSesion = selectSesion.options[selectSesion.selectedIndex] ? selectSesion.options[selectSesion.selectedIndex].textContent : '';
 
   btnEnviar.disabled = true;
   btnEnviar.textContent = 'Enviando…';
@@ -362,7 +375,7 @@ form.addEventListener('submit', async (e) => {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'No se pudo enviar tu inscripción. Intenta de nuevo.');
 
-    const mensaje = `Hola, acabo de inscribirme al taller "${cuerpo.taller}" del ${cuerpo.fecha} a las ${cuerpo.horario} en ${cuerpo.sede}. Mi nombre es ${cuerpo.nombre}.`;
+    const mensaje = `Hola, acabo de inscribirme al taller: ${textoSesion}. Mi nombre es ${cuerpo.nombre}.`;
     document.getElementById('linkWhatsappExito').href = `https://wa.me/52${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
     form.classList.add('hidden');
     document.getElementById('tarjetaExito').classList.remove('hidden');
