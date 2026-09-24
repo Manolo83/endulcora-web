@@ -267,10 +267,6 @@ async function cargarSedes(){
 }
 cargarSedes();
 
-function horarioLegible(s){
-  return s.horario || 'Horario por confirmar';
-}
-
 async function cargarSesionesDisponibles(){
   const sedeId = selectSede.value;
   selectSesion.innerHTML = '<option value="">Cargando…</option>';
@@ -292,11 +288,27 @@ async function cargarSesionesDisponibles(){
       avisoSesionVacio.classList.remove('hidden');
       return;
     }
-    selectSesion.innerHTML = '<option value="">Selecciona un taller</option>' + disponibles.map(s => {
-      const fechaLegible = new Date(s.fecha + 'T00:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
-      const etiqueta = `${s.titulo} — ${fechaLegible} — ${horarioLegible(s)}${s.estado === 'casi_lleno' ? ' (casi lleno)' : ''}`;
-      return `<option value="${s.id}">${escapeHtml(etiqueta)}</option>`;
-    }).join('');
+    // Agrupado por fecha (con <optgroup>): con el calendario tan lleno, una
+    // lista plana de 30+ talleres es imposible de escanear. Agrupar por dia
+    // deja ver de un vistazo que hay varias opciones el mismo dia.
+    const porFecha = new Map();
+    disponibles.forEach(s => {
+      if (!porFecha.has(s.fecha)) porFecha.set(s.fecha, []);
+      porFecha.get(s.fecha).push(s);
+    });
+    let html = '<option value="">Selecciona un taller</option>';
+    for (const [fecha, items] of porFecha) {
+      const fechaLegible = new Date(fecha + 'T00:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+      html += `<optgroup label="${escapeHtml(fechaLegible.charAt(0).toUpperCase() + fechaLegible.slice(1))}">`;
+      html += items.map(s => {
+        const partes = [s.titulo];
+        if (s.horario) partes.push(s.horario);
+        if (s.estado === 'casi_lleno') partes.push('casi lleno');
+        return `<option value="${s.id}">${escapeHtml(partes.join(' — '))}</option>`;
+      }).join('');
+      html += '</optgroup>';
+    }
+    selectSesion.innerHTML = html;
     selectSesion.disabled = false;
     const sesionURL = parametros.get('sesionId');
     if (sesionURL && [...selectSesion.options].some(o => o.value === sesionURL)) selectSesion.value = sesionURL;
