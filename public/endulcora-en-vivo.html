@@ -700,11 +700,17 @@ async function comprarProductoLive(id, btn){
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago.');
-    await abrirCheckoutModal(data.id, data.url);
+    // El boton solo debe reflejar la espera de ESTE fetch (crear la
+    // preferencia) — no el tiempo que la persona se tarde adentro del
+    // modal de Mercado Pago, que puede quedar abierto varios minutos o
+    // cerrarse sin avisarnos. Por eso se libera el boton ANTES de abrir el
+    // modal, no despues.
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+    abrirCheckoutModal(data.id, data.url);
   }catch(e){
     errorBox.textContent = e.message;
     errorBox.classList.remove('hidden');
-  }finally{
     btn.disabled = false;
     btn.textContent = textoOriginal;
   }

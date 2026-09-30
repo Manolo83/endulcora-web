@@ -134,7 +134,7 @@ window.MEDICION = fetch('/api/medicion')
     <a href="/ebooks" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">eBooks</a>
     <a href="/anexos" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anexos</a>
     <a href="/blog" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Blog</a>
-    <a href="/clases-en-vivo" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Clases en vivo</a>
+    <a href="/endulcora-en-vivo" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Clases en vivo</a>
     <a href="/calculadora" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calculadora</a>
     <a href="/calendario" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calendario</a>
     <a href="/galeria" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Galería</a>
@@ -268,7 +268,7 @@ function pintarDescargas(pedido){
   const cont = document.getElementById('listaDescargas');
   if(!disponibles.length){
     if(pedido.items.some(i => i.tipo === 'clase_en_vivo')){
-      cont.innerHTML = '<a href="/clases-en-vivo" class="block rounded-2xl bg-vino px-5 py-4 text-center font-ui text-sm font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Ya tienes tu acceso — Ver clase en vivo</a>';
+      cont.innerHTML = '<a href="/endulcora-en-vivo" class="block rounded-2xl bg-vino px-5 py-4 text-center font-ui text-sm font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Ya tienes tu acceso — Ver clase en vivo</a>';
       return;
     }
     cont.innerHTML = '<p class="text-center text-sm text-carbon/50">Tu material se está preparando y te llegará por correo en breve.</p>';

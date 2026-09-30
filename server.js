@@ -252,8 +252,12 @@ app.get('/membresia', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'membresia.html'));
 });
 
+// /clases-en-vivo quedo reemplazada por /endulcora-en-vivo (mismo video y
+// chat, mas venta de eBooks y membresia en la misma pagina). Se deja un
+// redirect permanente para no perder el trafico ya indexado ni los
+// enlaces guardados de quien tenia esta URL vieja.
 app.get('/clases-en-vivo', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'clases-en-vivo.html'));
+  res.redirect(301, '/endulcora-en-vivo');
 });
 
 app.get('/endulcora-en-vivo', (req, res) => {
@@ -335,7 +339,6 @@ app.get('/sitemap.xml', (req, res) => {
     { loc: '/inscripcion-taller', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/galeria', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/membresia', prioridad: '0.6', frecuencia: 'monthly' },
-    { loc: '/clases-en-vivo', prioridad: '0.6', frecuencia: 'weekly' },
     { loc: '/endulcora-en-vivo', prioridad: '0.6', frecuencia: 'weekly' },
     { loc: '/biblioteca-clases', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/comunidad', prioridad: '0.4', frecuencia: 'weekly' },
