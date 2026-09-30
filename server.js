@@ -256,6 +256,10 @@ app.get('/clases-en-vivo', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'clases-en-vivo.html'));
 });
 
+app.get('/endulcora-en-vivo', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'endulcora-en-vivo.html'));
+});
+
 app.get('/biblioteca-clases', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'biblioteca-clases.html'));
 });
@@ -332,6 +336,7 @@ app.get('/sitemap.xml', (req, res) => {
     { loc: '/galeria', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/membresia', prioridad: '0.6', frecuencia: 'monthly' },
     { loc: '/clases-en-vivo', prioridad: '0.6', frecuencia: 'weekly' },
+    { loc: '/endulcora-en-vivo', prioridad: '0.6', frecuencia: 'weekly' },
     { loc: '/biblioteca-clases', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/comunidad', prioridad: '0.4', frecuencia: 'weekly' },
     { loc: '/juego', prioridad: '0.4', frecuencia: 'monthly' },

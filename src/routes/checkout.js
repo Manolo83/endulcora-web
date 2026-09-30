@@ -134,7 +134,10 @@ router.post('/preference', async (req, res) => {
     // (util solo mientras se prueba con credenciales de prueba).
     const usarSandbox = process.env.MP_SANDBOX === 'true';
     const url = usarSandbox ? (resultado.sandbox_init_point || resultado.init_point) : resultado.init_point;
-    res.status(201).json({ url });
+    // El id de la preferencia, ademas de la url: lo necesita el SDK de
+    // Mercado Pago en el navegador para abrir el pago en una ventana modal
+    // (Checkout Pro) sin mandar a la gente fuera de la pagina.
+    res.status(201).json({ url, id: resultado.id });
   } catch (err) {
     store.updateOrder(order.id, { estado: 'error' });
     res.status(502).json({ error: 'No se pudo iniciar el pago. Intenta de nuevo en un momento.' });
