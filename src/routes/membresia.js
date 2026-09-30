@@ -336,7 +336,7 @@ router.get('/revista', (req, res) => {
 function productosLegiblesMembresia() {
   return store
     .getProducts()
-    .filter((p) => p.categoria === 'ebook' && p.archivo && path.extname(p.archivo).toLowerCase() === '.pdf' && !p.ocultoEnCatalogo);
+    .filter((p) => p.categoria === 'ebook' && p.archivo && path.extname(p.archivo).toLowerCase() === '.pdf' && !p.ocultoEnCatalogo && !p.esPaquete);
 }
 
 function rutaArchivoProducto(producto) {
