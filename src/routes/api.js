@@ -17,10 +17,6 @@ router.get('/medicion', (req, res) => {
   res.json({
     googleAdsId: GOOGLE_ADS.medicionId,
     conversionCompra: GOOGLE_ADS.conversionCompra,
-    // Llave PUBLICA de Mercado Pago (no el access token): esta si es segura
-    // de mandar al navegador, es la que necesita su SDK para abrir el pago
-    // en una ventana modal sin salir de la pagina.
-    mpPublicKey: process.env.MP_PUBLIC_KEY || '',
   });
 });
 

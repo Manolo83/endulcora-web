@@ -229,54 +229,13 @@ function escapeHtml(s){
 }
 document.getElementById('anioFooter').textContent = new Date().getFullYear();
 
-/* ---------- Mercado Pago: SDK + checkout en modal (sin salir de la pagina) ---------- */
-let MP_PUBLIC_KEY = '';
-let mpInstancia = null;
-let sdkMercadoPagoPromesa = null;
-
-function cargarScriptMercadoPago(){
-  if(window.MercadoPago) return Promise.resolve();
-  if(sdkMercadoPagoPromesa) return sdkMercadoPagoPromesa;
-  sdkMercadoPagoPromesa = new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = 'https://sdk.mercadopago.com/js/v2';
-    s.onload = resolve;
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
-  return sdkMercadoPagoPromesa;
-}
-
-async function obtenerInstanciaMercadoPago(){
-  if(!MP_PUBLIC_KEY) return null;
-  if(mpInstancia) return mpInstancia;
-  try{
-    await cargarScriptMercadoPago();
-    mpInstancia = new MercadoPago(MP_PUBLIC_KEY, { locale: 'es-MX' });
-    return mpInstancia;
-  }catch(e){
-    return null;
-  }
-}
-
-// Abre un pago de un solo cargo (un eBook) en el modal de Mercado Pago. Si
-// por lo que sea no se pudo cargar el SDK (o no hay llave publica
-// configurada), cae de regreso a mandar a la pagina de pago normal, para
-// que la compra nunca se quede sin poder hacerse.
-async function abrirCheckoutModal(preferenceId, urlRespaldo){
-  const mp = await obtenerInstanciaMercadoPago();
-  if(!mp){
-    window.location.href = urlRespaldo;
-    return;
-  }
-  mp.checkout({ preference: { id: preferenceId }, autoOpen: true });
-}
-
-// La suscripcion a la membresia usa un flujo de Mercado Pago distinto
-// (Preapproval, para cobros recurrentes) que no tiene una version en modal
-// como las compras de un solo cargo. Se abre en una ventana emergente en
-// vez de mandar a la persona fuera de esta pagina: el video sigue
-// reproduciendose detras mientras completa su suscripcion.
+/* ---------- Mercado Pago: pago en ventana emergente (sin salir de la pagina) ----------
+   Se probo primero con el "lightbox" modal del SDK de Mercado Pago
+   (mp.checkout), pero al cancelar a veces deja un recuadro/spinner
+   pegado encima de la pagina sin forma de cerrarlo. Una ventana aparte
+   no tiene ese riesgo: cerrarla nunca puede dejar nada atorado en esta
+   pagina, y el video sigue reproduciendose detras mientras se completa
+   el pago. */
 function abrirCheckoutVentana(url){
   const ancho = 460, alto = 720;
   const izquierda = (window.screen.width - ancho) / 2;
@@ -284,8 +243,6 @@ function abrirCheckoutVentana(url){
   const ventana = window.open(url, 'mp_checkout', `width=${ancho},height=${alto},left=${izquierda},top=${arriba}`);
   if(!ventana) window.location.href = url;
 }
-
-fetch('/api/medicion').then(r => r.json()).then(c => { MP_PUBLIC_KEY = c.mpPublicKey || ''; }).catch(()=>{});
 </script>
 
 <script>
@@ -724,13 +681,12 @@ async function comprarProductoLive(id, btn){
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago.');
     // El boton solo debe reflejar la espera de ESTE fetch (crear la
-    // preferencia) — no el tiempo que la persona se tarde adentro del
-    // modal de Mercado Pago, que puede quedar abierto varios minutos o
-    // cerrarse sin avisarnos. Por eso se libera el boton ANTES de abrir el
-    // modal, no despues.
+    // preferencia) — no el tiempo que la persona se tarde adentro de la
+    // ventana de pago, que puede quedar abierta varios minutos o cerrarse
+    // sin avisarnos. Por eso se libera el boton ANTES de abrir la ventana.
     btn.disabled = false;
     btn.textContent = textoOriginal;
-    abrirCheckoutModal(data.id, data.url);
+    abrirCheckoutVentana(data.url);
   }catch(e){
     errorBox.textContent = e.message;
     errorBox.classList.remove('hidden');
