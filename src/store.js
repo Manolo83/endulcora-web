@@ -47,6 +47,9 @@ const DEFAULT_CONTENT = {
   clase_mostrar: 'false',
   clase_dia_semana: '4',
   clase_hora: '19:00',
+  // Para transmisiones de fecha suelta (Endulcora en vivo): si se llena,
+  // reemplaza el calculo del dia de la semana de arriba.
+  clase_fecha_especifica: '',
   clase_cupos_totales: '25',
   clase_cupos_apartados: '0',
   clase_info: '',
@@ -997,7 +1000,11 @@ function slugUnico(base, productos, excludeId) {
 // fecha (YYYY-MM-DD) de la proxima ocurrencia de la clase en vivo segun el
 // dia de la semana y hora configurados. Se usa para saber a que sesion
 // especifica corresponde un cobro — cada semana es una fecha distinta.
-function proximaFechaClaseISO(diaSemana, hora) {
+// fechaEspecifica (YYYY-MM-DD) es para transmisiones de fecha suelta, que
+// no caen en un dia fijo de la semana: si viene, manda sobre el calculo
+// semanal de abajo.
+function proximaFechaClaseISO(diaSemana, hora, fechaEspecifica) {
+  if (fechaEspecifica) return fechaEspecifica;
   const ahora = new Date();
   const d = new Date(ahora);
   const [hh, mm] = String(hora || '19:00').split(':').map((n) => parseInt(n, 10) || 0);

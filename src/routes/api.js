@@ -91,7 +91,7 @@ router.get('/content', (req, res) => {
 function accesoClaseEnVivoDeRequest(req) {
   const contenido = store.getContent();
   const requierePago = contenido.clase_cobro_activo === 'true';
-  const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora);
+  const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora, contenido.clase_fecha_especifica);
   if (!requierePago) return { acceso: true, fecha };
   const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
   const acceso = !!(usuario && store.tieneAccesoClaseEnVivo({ fecha, userId: usuario.id }));
@@ -102,7 +102,7 @@ function accesoClaseEnVivoDeRequest(req) {
 router.get('/clase-en-vivo', (req, res) => {
   const contenido = store.getContent();
   const requierePago = contenido.clase_cobro_activo === 'true';
-  const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora);
+  const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora, contenido.clase_fecha_especifica);
   if (!requierePago) {
     return res.json({
       requierePago: false,

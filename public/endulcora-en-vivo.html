@@ -125,7 +125,8 @@ body { background: #FBF4E9; }
     </div>
     <div id="claseSinVideo" class="flex aspect-video flex-col items-center justify-center rounded-2xl bg-carbon px-8 text-center ring-1 ring-flama/25">
       <img src="/levent-icono.png" alt="" class="h-10 w-10 opacity-60">
-      <p class="mt-4 font-titulo text-lg text-crema">La transmisión empieza pronto</p>
+      <p id="claseSinVideoTitulo" class="mt-4 font-titulo text-lg text-crema">La transmisión empieza pronto</p>
+      <p id="claseSinVideoProxima" class="mt-1 hidden font-ui text-[12px] font-700 uppercase tracking-widest text-flama"></p>
       <p class="mt-2 max-w-xs text-sm text-crema/50">Deja esta página abierta: el video aparece aquí solo en cuanto empecemos. Mientras, puedes saludar en el chat.</p>
     </div>
 
@@ -320,6 +321,28 @@ async function cargarAccesoClaseLive(){
     mostrarPlaceholderVideo(true);
   }
 }
+
+// Mientras no hay video activo, si se configuro una fecha especifica para
+// el proximo live (transmisiones de fecha suelta, no un dia fijo de la
+// semana) se muestra aqui para generar anticipacion.
+async function cargarProximaTransmision(){
+  try{
+    const c = await fetch('/api/content').then(r => r.json());
+    const fecha = (c.clase_fecha_especifica || '').trim();
+    const etiqueta = document.getElementById('claseSinVideoProxima');
+    if(!fecha){
+      etiqueta.classList.add('hidden');
+      return;
+    }
+    const hora = (c.clase_hora || '19:00').trim();
+    const [hh, mm] = hora.split(':').map(n => parseInt(n, 10) || 0);
+    const fechaLegible = new Date(fecha + 'T00:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+    const horaLegible = new Date(2000, 0, 1, hh, mm).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+    etiqueta.textContent = `Próxima transmisión: ${fechaLegible} · ${horaLegible}`;
+    etiqueta.classList.remove('hidden');
+  }catch(e){}
+}
+cargarProximaTransmision();
 
 async function cargarSesionLive(){
   try{
