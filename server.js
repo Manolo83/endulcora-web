@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const cookieSession = require('cookie-session');
 const rateLimit = require('express-rate-limit');
+const QRCode = require('qrcode');
 
 const { UPLOAD_DIR, SITE_URL } = require('./src/config');
 const store = require('./src/store');
@@ -103,6 +104,15 @@ const inscripcionTallerLimiter = rateLimit({
   message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
 });
 app.use('/api/inscripcion-taller', inscripcionTallerLimiter);
+
+const registroQrLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
+});
+app.use('/api/registro', registroQrLimiter);
 
 const asistenteLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
@@ -242,6 +252,28 @@ app.get('/calendario', (req, res) => {
 
 app.get('/inscripcion-taller', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'inscripcion-taller.html'));
+});
+
+app.get('/registro', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'registro.html'));
+});
+
+// Imagen del QR que lleva a /registro, lista para bajar y pegar en
+// StreamYard u otro programa de transmision. Publica a proposito (no trae
+// nada sensible, solo apunta a un formulario publico) para que cualquiera
+// que necesite el archivo lo pueda tomar sin entrar a /admin.
+let qrRegistroCache = null;
+app.get('/qr-registro.png', async (req, res) => {
+  try {
+    if (!qrRegistroCache) {
+      qrRegistroCache = await QRCode.toBuffer(`${SITE_URL}/registro`, { width: 1000, margin: 2 });
+    }
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(qrRegistroCache);
+  } catch (e) {
+    res.status(500).send('No se pudo generar el QR.');
+  }
 });
 
 app.get('/galeria', (req, res) => {

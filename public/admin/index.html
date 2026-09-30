@@ -75,6 +75,7 @@
       <a href="#seccionMembresia" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Membresía</a>
       <a href="#seccionSuscriptores" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Suscriptores</a>
       <a href="#seccionInscripcionesTaller" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Inscripciones a talleres</a>
+      <a href="#seccionRegistrosQr" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">QR de registro</a>
       <a href="#seccionCampanas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Campañas de correo</a>
       <a href="#seccionResenas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Reseñas</a>
       <a href="#seccionComunidad" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Comunidad</a>
@@ -846,6 +847,25 @@
       <div id="listaInscripcionesTaller" class="mt-6 space-y-6"></div>
     </section>
 
+    <!-- QR DE REGISTRO -->
+    <section id="seccionRegistrosQr" class="scroll-mt-32 mb-14">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="font-titulo text-2xl tracking-wide text-vino">QR de registro</h2>
+          <p class="mt-1 text-sm text-carbon/60">Para compartir en transmisiones (StreamYard, multistream): lleva a <a href="/registro" target="_blank" class="underline hover:text-vino">/registro</a>, un formulario corto que alimenta la base de datos general de Levent.</p>
+        </div>
+        <button id="btnExportarRegistrosQr" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Exportar CSV</button>
+      </div>
+      <div class="mt-6 flex flex-wrap items-center gap-5 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <img src="/qr-registro.png" alt="Código QR hacia /registro" class="h-36 w-36 rounded-xl ring-1 ring-vino/10">
+        <div>
+          <p class="text-sm text-carbon/70">Descarga esta imagen y súbela como gráfico en tu programa de transmisión.</p>
+          <a href="/qr-registro.png" download="qr-registro-endulcora.png" class="mt-3 inline-block rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Descargar QR</a>
+        </div>
+      </div>
+      <div id="listaRegistrosQr" class="mt-6 overflow-hidden overflow-x-auto rounded-2xl bg-white ring-1 ring-vino/10"></div>
+    </section>
+
     <!-- CAMPAÑAS DE CORREO -->
     <section id="seccionCampanas" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Campañas de correo masivo</h2>
@@ -1124,6 +1144,7 @@ function mostrarDashboard(mostrar){
     cargarClientesLista();
     cargarSuscriptores();
     cargarInscripcionesTaller();
+    cargarRegistrosQr();
     cargarResenas();
     cargarComunidadAdmin();
     cargarAnuncios();
@@ -2999,6 +3020,72 @@ $('btnExportarInscripcionesTaller').addEventListener('click', () => {
   const a = document.createElement('a');
   a.href = url;
   a.download = 'inscripciones-taller-endulcora.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* ---------- QR de registro ---------- */
+let REGISTROS_QR = [];
+async function cargarRegistrosQr(){
+  const cont = $('listaRegistrosQr');
+  cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Cargando…</p>';
+  try{
+    REGISTROS_QR = await api('/admin/api/registros-qr');
+    if(!REGISTROS_QR.length){
+      cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Todavía no hay registros.</p>';
+      return;
+    }
+    cont.innerHTML = `<table class="w-full min-w-[640px] text-sm">
+      <thead>
+        <tr class="border-b border-vino/10 text-left font-ui text-[11px] uppercase tracking-wider text-carbon/45">
+          <th class="px-5 py-3 font-600">Nombre</th>
+          <th class="px-5 py-3 font-600">Contacto</th>
+          <th class="px-5 py-3 font-600">Le interesa</th>
+          <th class="px-5 py-3 font-600">Registrado</th>
+          <th class="px-5 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${REGISTROS_QR.map(r => `
+          <tr class="border-b border-vino/10 last:border-0 align-top">
+            <td class="px-5 py-3 text-carbon/80">${escapeHtml(r.nombre)}</td>
+            <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(r.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(r.correo)}</div></td>
+            <td class="px-5 py-3 text-carbon/70">${escapeHtml(r.marcaInteres || '—')}</td>
+            <td class="px-5 py-3 text-xs text-carbon/45">${new Date(r.createdAt).toLocaleDateString('es-MX')}</td>
+            <td class="px-5 py-3 text-right"><button type="button" data-id="${r.id}" class="btnBorrarRegistroQr text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+    cont.querySelectorAll('.btnBorrarRegistroQr').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Borrar este registro? No se puede deshacer.')) return;
+        try{
+          await api(`/admin/api/registros-qr/${btn.dataset.id}`, { method: 'DELETE' });
+          toast('Registro borrado');
+          cargarRegistrosQr();
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="p-5 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+$('btnExportarRegistrosQr').addEventListener('click', () => {
+  if(!REGISTROS_QR.length){ toast('No hay registros para exportar'); return; }
+  const encabezado = 'nombre,whatsapp,correo,marca_interes,acepta_promociones,registrado_el';
+  const csvCelda = (v) => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
+  const filas = [encabezado, ...REGISTROS_QR.map(r => [
+    r.nombre, r.whatsapp, r.correo, r.marcaInteres || '',
+    r.aceptaPromociones ? 'si' : 'no',
+    r.createdAt,
+  ].map(csvCelda).join(','))];
+  const blob = new Blob([filas.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'registros-qr-endulcora.csv';
   a.click();
   URL.revokeObjectURL(url);
 });

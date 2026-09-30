@@ -150,12 +150,29 @@ body { background: #FBF4E9; }
 
       <div id="chatClaseLoginBloque" class="mt-3 hidden">
         <button type="button" id="btnMostrarLoginChat" class="w-full rounded-full border border-vino/20 px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:border-vino/40 transition">Iniciar sesión para comentar</button>
-        <form id="formLoginChatClase" class="mt-3 hidden grid gap-2">
-          <input id="loginChatClaseEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
-          <input id="loginChatClasePassword" type="password" required placeholder="Contraseña" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
-          <p id="loginChatClaseError" class="hidden text-xs text-red-600"></p>
-          <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Entrar</button>
-        </form>
+        <div id="formsChatClase" class="mt-3 hidden">
+          <div class="flex gap-2 border-b border-vino/10">
+            <button type="button" id="tabLoginChat" class="border-b-2 border-vino px-1 pb-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino">Iniciar sesión</button>
+            <button type="button" id="tabRegistroChat" class="border-b-2 border-transparent px-1 pb-2 font-ui text-[11px] font-700 uppercase tracking-wider text-carbon/40">Crear cuenta</button>
+          </div>
+          <form id="formLoginChatClase" class="mt-3 grid gap-2">
+            <input id="loginChatClaseEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+            <input id="loginChatClasePassword" type="password" required placeholder="Contraseña" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+            <p id="loginChatClaseError" class="hidden text-xs text-red-600"></p>
+            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Entrar</button>
+          </form>
+          <!-- Cada cuenta nueva aqui alimenta la base de datos general
+               (Levent): aprovechamos el momento en que alguien quiere
+               comentar para registrar un contacto nuevo. -->
+          <form id="formRegistroChat" class="mt-3 hidden grid gap-2">
+            <input id="registroChatNombre" type="text" required placeholder="Tu nombre" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+            <input id="registroChatEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+            <input id="registroChatTelefono" type="tel" required inputmode="numeric" placeholder="Teléfono (10 dígitos)" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+            <input id="registroChatPassword" type="password" required minlength="6" placeholder="Contraseña (mínimo 6 caracteres)" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+            <p id="registroChatError" class="hidden text-xs text-red-600"></p>
+            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Crear cuenta y comentar</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -335,8 +352,49 @@ document.getElementById('formLoginChatClase').addEventListener('submit', async (
     err.classList.remove('hidden');
   }
 });
+document.getElementById('formRegistroChat').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('registroChatError');
+  err.classList.add('hidden');
+  try{
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: document.getElementById('registroChatNombre').value.trim(),
+        email: document.getElementById('registroChatEmail').value.trim(),
+        telefono: document.getElementById('registroChatTelefono').value.trim(),
+        password: document.getElementById('registroChatPassword').value,
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo crear la cuenta');
+    SESION_LIVE = { isLoggedIn: true, user: data.user };
+    actualizarLoginChatClase();
+    cargarEstadoMembresiaLive();
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }
+});
+
 document.getElementById('btnMostrarLoginChat').addEventListener('click', () => {
-  document.getElementById('formLoginChatClase').classList.toggle('hidden');
+  document.getElementById('formsChatClase').classList.toggle('hidden');
+});
+document.getElementById('tabLoginChat').addEventListener('click', () => {
+  document.getElementById('tabLoginChat').classList.add('border-vino', 'text-vino');
+  document.getElementById('tabLoginChat').classList.remove('border-transparent', 'text-carbon/40');
+  document.getElementById('tabRegistroChat').classList.remove('border-vino', 'text-vino');
+  document.getElementById('tabRegistroChat').classList.add('border-transparent', 'text-carbon/40');
+  document.getElementById('formLoginChatClase').classList.remove('hidden');
+  document.getElementById('formRegistroChat').classList.add('hidden');
+});
+document.getElementById('tabRegistroChat').addEventListener('click', () => {
+  document.getElementById('tabRegistroChat').classList.add('border-vino', 'text-vino');
+  document.getElementById('tabRegistroChat').classList.remove('border-transparent', 'text-carbon/40');
+  document.getElementById('tabLoginChat').classList.remove('border-vino', 'text-vino');
+  document.getElementById('tabLoginChat').classList.add('border-transparent', 'text-carbon/40');
+  document.getElementById('formRegistroChat').classList.remove('hidden');
+  document.getElementById('formLoginChatClase').classList.add('hidden');
 });
 
 /* ---------- Video embebido (protegido) ---------- */
@@ -456,7 +514,7 @@ async function cargarChatClase(){
 function actualizarLoginChatClase(){
   const bloque = document.getElementById('chatClaseLoginBloque');
   bloque.classList.toggle('hidden', SESION_LIVE.isLoggedIn);
-  if(SESION_LIVE.isLoggedIn) document.getElementById('formLoginChatClase').classList.add('hidden');
+  if(SESION_LIVE.isLoggedIn) document.getElementById('formsChatClase').classList.add('hidden');
 }
 function iniciarChatClase(){
   actualizarLoginChatClase();

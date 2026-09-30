@@ -62,7 +62,21 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
       aceptaPromociones: i.aceptaPromociones,
     }));
 
-  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres] });
+  // Registros del QR de captura (StreamYard, multistream): la marca que
+  // marcaron como de interes se manda como etiqueta, para que Levent y las
+  // demas marcas del grupo sepan a quien contactar.
+  const contactosQr = store
+    .getRegistrosQr()
+    .filter((r) => r.correo)
+    .map((r) => ({
+      email: r.correo,
+      telefono: r.whatsapp || '',
+      nombre: r.nombre || '',
+      categoriasInteres: [r.marcaInteres ? `interes:${r.marcaInteres}` : '', 'origen:qr-en-vivo'].filter(Boolean),
+      aceptaPromociones: r.aceptaPromociones,
+    }));
+
+  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres, ...contactosQr] });
 });
 
 module.exports = router;

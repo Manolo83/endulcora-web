@@ -190,6 +190,7 @@ function datosPorDefecto() {
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
     sesionesTaller: [],
     inscripcionesTaller: [],
+    registrosQr: [],
     bibliotecaClases: [],
     contactosCampana: [],
     campanasCorreo: [],
@@ -1807,6 +1808,37 @@ module.exports = {
   deleteInscripcionTaller(id) {
     const data = load();
     data.inscripcionesTaller = data.inscripcionesTaller.filter((i) => i.id !== Number(id));
+    save(data);
+  },
+
+  // ---- Registro corto para el QR de captura (multistream, StreamYard) ----
+  // Formulario minimo pensado para escanearse desde un celular a la mitad
+  // de un live: nombre, contacto, y que marca del grupo le interesa. Se
+  // suma a la base de datos general de Levent igual que los demas
+  // contactos — la idea es alimentar el directorio compartido de Crenef,
+  // Instituto Justo, Levent, Endulcora y lo que venga despues.
+  getRegistrosQr() {
+    return [...load().registrosQr].sort((a, b) => b.id - a.id);
+  },
+  addRegistroQr({ nombre, whatsapp, correo, marcaInteres, aceptaPromociones, aceptaAvisoPrivacidad }) {
+    const data = load();
+    const item = {
+      id: nextId(data.registrosQr),
+      nombre: String(nombre || '').trim(),
+      whatsapp: String(whatsapp || '').trim(),
+      correo: String(correo || '').trim().toLowerCase(),
+      marcaInteres: String(marcaInteres || '').trim(),
+      aceptaPromociones: !!aceptaPromociones,
+      aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
+      createdAt: new Date().toISOString(),
+    };
+    data.registrosQr.push(item);
+    save(data);
+    return item;
+  },
+  deleteRegistroQr(id) {
+    const data = load();
+    data.registrosQr = data.registrosQr.filter((r) => r.id !== Number(id));
     save(data);
   },
 

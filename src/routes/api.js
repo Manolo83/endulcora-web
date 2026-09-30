@@ -390,6 +390,33 @@ router.post('/inscripcion-taller', async (req, res) => {
   });
 });
 
+// Formulario corto para el QR de captura (pensado para escanearse desde el
+// celular a la mitad de un live en StreamYard): solo nombre, contacto y
+// que marca le interesa. Igual que el resto de formularios publicos, la
+// base de datos general de Levent solo recibe lo necesario para
+// mercadotecnia (ver leventSync.js).
+router.post('/registro', (req, res) => {
+  const b = req.body || {};
+  const nombre = String(b.nombre || '').trim();
+  const whatsapp = String(b.whatsapp || '').trim();
+  const correo = String(b.correo || '').trim();
+
+  if (!nombre) return res.status(400).json({ error: 'Escribe tu nombre completo.' });
+  if (!WHATSAPP_RE.test(whatsapp)) return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
+  if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
+  if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para registrarte.' });
+
+  const item = store.addRegistroQr({
+    nombre,
+    whatsapp,
+    correo,
+    marcaInteres: b.marcaInteres,
+    aceptaPromociones: b.aceptaPromociones,
+    aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
+  });
+  res.status(201).json({ ok: true, id: item.id });
+});
+
 // Estado de un pedido para la pagina de gracias: requiere el viewToken que
 // Mercado Pago devuelve en la URL (no es adivinable, a diferencia del id).
 router.get('/pedidos/:orderId/estado', (req, res) => {

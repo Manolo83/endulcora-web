@@ -596,6 +596,16 @@ router.delete('/api/inscripciones-taller/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- Registros del QR de captura (multistream) ----
+router.get('/api/registros-qr', requireAdmin, (req, res) => {
+  res.json(store.getRegistrosQr());
+});
+
+router.delete('/api/registros-qr/:id', requireAdmin, (req, res) => {
+  store.deleteRegistroQr(req.params.id);
+  res.json({ ok: true });
+});
+
 // Nombre de pestaña de Excel: maximo 31 caracteres, sin los caracteres que
 // Excel prohibe, y unico dentro del libro (le agrega un numero si se repite).
 function nombreHojaExcel(base, usados) {
