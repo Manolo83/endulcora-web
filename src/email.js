@@ -214,8 +214,9 @@ async function enviarCorreoLeadMagnetPaso1({ to, siteUrl, unsubscribeUrl }) {
           <li>Revista mensual, para leer en línea</li>
           <li>Taller online mensual (video privado)</li>
           <li>Biblioteca completa de talleres grabados</li>
+          <li>Lectura ilimitada de todos los eBooks</li>
         </ul>
-        <p style="font-size:14px;line-height:1.6;">Por $50 MXN al mes. Cancela cuando quieras.</p>
+        <p style="font-size:14px;line-height:1.6;">Por $100 MXN al mes. Cancela cuando quieras.</p>
         <p style="margin-top:16px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Conocer la membresía</a></p>
         ${piePromocional(unsubscribeUrl)}
       </div>
@@ -258,7 +259,7 @@ async function enviarCorreoLeadMagnetPaso3({ to, siteUrl, unsubscribeUrl }) {
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
         <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
         <h1 style="font-size:20px;color:#4E1454;">¿Te animas a ser miembro?</h1>
-        <p style="font-size:14px;line-height:1.6;">El recetario y el taller de este mes ya están disponibles solo para miembros. Por $50 MXN al mes tienes acceso a todo, y puedes cancelar cuando quieras.</p>
+        <p style="font-size:14px;line-height:1.6;">El recetario y el taller de este mes ya están disponibles solo para miembros. Por $100 MXN al mes tienes acceso a todo, y puedes cancelar cuando quieras.</p>
         <p style="margin-top:16px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Hacerme miembro</a></p>
         ${piePromocional(unsubscribeUrl)}
       </div>
@@ -282,7 +283,7 @@ async function enviarCorreoRecordatorioMembresia({ to, nombre, siteUrl }) {
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
         <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
         <h1 style="font-size:20px;color:#4E1454;">¡Hola${nombre ? ` ${escapeHtml(nombre)}` : ''}!</h1>
-        <p style="font-size:14px;line-height:1.6;">Creaste tu cuenta en Endulcora, pero todavía no te has hecho miembro. Con la membresía tienes, cada mes, recetario, revista, taller online y acceso a toda la biblioteca de talleres grabados — por $50 MXN al mes, cancela cuando quieras.</p>
+        <p style="font-size:14px;line-height:1.6;">Creaste tu cuenta en Endulcora, pero todavía no te has hecho miembro. Con la membresía tienes, cada mes, recetario, revista, taller online, acceso a toda la biblioteca de talleres grabados y lectura ilimitada de eBooks — por $100 MXN al mes, cancela cuando quieras.</p>
         <p style="margin-top:16px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Hacerme miembro</a></p>
         <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">Recibiste este correo porque tienes una cuenta en endulcora.com.</p>
       </div>

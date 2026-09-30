@@ -5,10 +5,11 @@ const { MercadoPagoConfig, PreApproval } = require('mercadopago');
 const store = require('../store');
 const { SITE_URL, UPLOAD_DIR } = require('../config');
 const { requireCliente } = require('./auth');
+const { contarPaginasPDF, generarPaginaLecturaPDF } = require('../caratula');
 
 const router = express.Router();
 
-const PRECIO_MEMBRESIA = 50;
+const PRECIO_MEMBRESIA = 100;
 
 function mpClient() {
   const accessToken = process.env.MP_ACCESS_TOKEN;
@@ -323,6 +324,96 @@ router.get('/revista', (req, res) => {
   if (!fs.existsSync(rutaCompleta)) return res.status(404).send('No pudimos encontrar la revista en este momento.');
   res.setHeader('Content-Disposition', `inline; filename="${(contenido.revistaNombre || `Revista${path.extname(filename)}`).replace(/"/g, '')}"`);
   res.sendFile(rutaCompleta);
+});
+
+// ---- Biblioteca de lectura de eBooks (exclusiva para miembros) ----
+// A diferencia del recetario/revista (que se sirven "inline" con el PDF
+// real, lo que se puede guardar desde el propio visor de PDF del
+// navegador), aqui cada pagina se manda como una imagen generada en el
+// servidor: nunca se expone el archivo original, asi que no hay boton de
+// descarga que valga. Solo aplica a productos categoria "ebook" con un PDF
+// propio subido (los paquetes/anexos no tienen archivo propio que leer).
+function productosLegiblesMembresia() {
+  return store
+    .getProducts()
+    .filter((p) => p.categoria === 'ebook' && p.archivo && path.extname(p.archivo).toLowerCase() === '.pdf' && !p.ocultoEnCatalogo);
+}
+
+function rutaArchivoProducto(producto) {
+  return path.join(UPLOAD_DIR, path.basename(producto.archivo));
+}
+
+// Cuantas paginas tiene cada eBook: se calcula una vez (es barato, solo lee
+// el indice del PDF, no renderiza nada) y se guarda en memoria mientras
+// corre el proceso.
+const cachePaginasPorProducto = new Map();
+async function paginasDeProducto(producto) {
+  if (cachePaginasPorProducto.has(producto.id)) return cachePaginasPorProducto.get(producto.id);
+  try {
+    const total = await contarPaginasPDF(rutaArchivoProducto(producto));
+    cachePaginasPorProducto.set(producto.id, total);
+    return total;
+  } catch (e) {
+    return 0;
+  }
+}
+
+router.get('/ebooks', async (req, res) => {
+  if (!esAdmin(req)) {
+    const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+    if (!usuario || usuario.membresiaEstado !== 'activa') {
+      return res.status(403).json({ error: 'Necesitas una membresía activa para ver la biblioteca de eBooks.' });
+    }
+  }
+  const productos = productosLegiblesMembresia().filter((p) => fs.existsSync(rutaArchivoProducto(p)));
+  const lista = await Promise.all(
+    productos.map(async (p) => ({
+      id: p.id,
+      titulo: p.titulo,
+      subtitulo: p.subtitulo || '',
+      imagen: p.imagen || '',
+      totalPaginas: await paginasDeProducto(p),
+    }))
+  );
+  res.json(lista.filter((l) => l.totalPaginas > 0));
+});
+
+// La carpeta de cache vive dentro de UPLOAD_DIR (el Volume de Railway en
+// produccion), para no tener que volver a renderizar cada pagina despues de
+// cada redeploy.
+const CACHE_LECTURA_DIR = path.join(UPLOAD_DIR, 'lectura-cache');
+
+router.get('/ebooks/:id/pagina/:numero', async (req, res) => {
+  if (!esAdmin(req)) {
+    const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+    if (!usuario || usuario.membresiaEstado !== 'activa') {
+      return res.status(403).json({ error: 'Necesitas una membresía activa para leer este eBook.' });
+    }
+  }
+  const producto = productosLegiblesMembresia().find((p) => p.id === Number(req.params.id));
+  if (!producto) return res.status(404).json({ error: 'Ese eBook no está disponible para lectura.' });
+  const numero = parseInt(req.params.numero, 10);
+  if (!Number.isInteger(numero) || numero < 1) return res.status(400).json({ error: 'Número de página inválido.' });
+
+  const rutaPDF = rutaArchivoProducto(producto);
+  if (!fs.existsSync(rutaPDF)) return res.status(404).json({ error: 'No pudimos encontrar este eBook en este momento.' });
+
+  const rutaCache = path.join(CACHE_LECTURA_DIR, String(producto.id), `pagina-${numero}.png`);
+  try {
+    if (!fs.existsSync(rutaCache)) {
+      const buffer = await generarPaginaLecturaPDF(rutaPDF, numero);
+      if (!buffer) return res.status(404).json({ error: 'Esa página no existe en este eBook.' });
+      fs.mkdirSync(path.dirname(rutaCache), { recursive: true });
+      fs.writeFileSync(rutaCache, buffer);
+    }
+    // No-store: esta imagen solo debe verse mientras la sesion tiene
+    // membresia activa, nunca quedarse en el cache del navegador/CDN.
+    res.set('Cache-Control', 'private, no-store');
+    res.type('png').sendFile(rutaCache);
+  } catch (e) {
+    console.error(`[membresia] No se pudo generar la página ${numero} del eBook ${producto.id}:`, e.message);
+    res.status(500).json({ error: 'No se pudo cargar esta página. Intenta de nuevo.' });
+  }
 });
 
 module.exports = router;

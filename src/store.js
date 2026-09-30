@@ -1156,7 +1156,7 @@ module.exports = {
     return valor;
   },
 
-  // ---- Membresia mensual ($50 MXN, recetario + video de taller exclusivos) ----
+  // ---- Membresia mensual ($100 MXN, recetario + video de taller + lectura de eBooks) ----
   getContenidoMembresia() {
     return load().contenidoMembresia;
   },
