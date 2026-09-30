@@ -87,15 +87,6 @@ body { background: #FBF4E9; }
     <input id="campoWhatsapp" name="whatsapp" type="tel" required autocomplete="tel" class="campo-registro" placeholder="Tu WhatsApp">
     <input id="campoCorreo" name="correo" type="email" required autocomplete="email" class="campo-registro" placeholder="Tu correo">
 
-    <select id="campoMarcaInteres" name="marcaInteres" class="campo-registro">
-      <option value="">¿Qué te interesa? (opcional)</option>
-      <option value="Endulcora">Endulcora — repostería y talleres</option>
-      <option value="Crenef">Crenef — salud e inhaloterapia</option>
-      <option value="Instituto Justo">Instituto Justo</option>
-      <option value="Silman">Silman</option>
-      <option value="Otro">Otro / no estoy seguro</option>
-    </select>
-
     <div class="space-y-3 pt-2">
       <label class="flex items-start gap-3 text-sm text-carbon/80">
         <input id="campoAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
@@ -174,7 +165,6 @@ form.addEventListener('submit', async (e) => {
     nombre: datos.get('nombre'),
     whatsapp: datos.get('whatsapp'),
     correo: datos.get('correo'),
-    marcaInteres: datos.get('marcaInteres'),
     aceptaPromociones: datos.get('aceptaPromociones') === 'on',
     aceptaAvisoPrivacidad: datos.get('aceptaAvisoPrivacidad') === 'on',
   };
