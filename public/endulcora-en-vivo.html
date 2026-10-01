@@ -697,7 +697,14 @@ async function cargarCatalogoLive(){
   const grid = document.getElementById('gridCatalogoLive');
   try{
     const productos = await fetch('/api/products').then(r => r.json());
-    const ebooks = productos.filter(p => p.categoria === 'ebook');
+    // Los productos que forman parte de un paquete (anexo, app, paquete
+    // completo) no tienen portada propia y solo se compran desde la
+    // página del eBook principal: se excluyen igual que en /categoria.
+    const componentesDePaquete = new Set();
+    productos.forEach(p => {
+      if (p.esPaquete) (p.productosRelacionados || []).forEach(id => componentesDePaquete.add(id));
+    });
+    const ebooks = productos.filter(p => p.categoria === 'ebook' && !p.ocultoEnCatalogo && !componentesDePaquete.has(p.id));
     document.getElementById('catalogoLiveVacio').classList.toggle('hidden', ebooks.length !== 0);
     grid.innerHTML = ebooks.map(p => `
       <div class="overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
