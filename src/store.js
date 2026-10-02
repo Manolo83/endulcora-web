@@ -3,6 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { Pool } = require('pg');
 const { DATA_DIR, UPLOAD_DIR } = require('./config');
+const { generarCaratulaPDF } = require('./caratula');
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -501,7 +502,7 @@ async function init() {
     // seed-archivos/<carpetaSeed>/ y agrega una entrada a
     // FAMILIAS_A_DESGLOSAR. Cada entrada corre una sola vez.
     const PRECIOS_LINEA_EBOOKS = { ebook: '99', anexo: '50', app: '50', paquete: '149' };
-    function crearFamiliaEbookDesglosada({ tituloBase, categoria, carpetaSeed, archivos }) {
+    async function crearFamiliaEbookDesglosada({ tituloBase, categoria, carpetaSeed, archivos }) {
       const SEED_DIR = path.join(__dirname, '..', 'seed-archivos', carpetaSeed);
       const nuevoProducto = (titulo, categoriaItem, precio, boton, nombreArchivo) => {
         const item = {
@@ -551,14 +552,26 @@ async function init() {
       paquete.precioMembresia = '100';
       const ebook = nuevoProducto(tituloBase, categoria, PRECIOS_LINEA_EBOOKS.ebook, 'Agregar al carrito', archivos.ebook);
       ebook.productosRelacionados = [anexo.id, app.id, paquete.id];
-      // Portada pre-generada (opcional): si no se manda, el producto queda
-      // sin imagen y el administrador puede subir una despues desde /admin.
+      // Portada: si se manda una foto pre-generada, se usa esa. Si no, se
+      // genera sola a partir de la primera pagina del PDF del ebook, igual
+      // que cuando el administrador sube un PDF a mano desde /admin.
       if (archivos.portada) {
         const origenPortada = path.join(SEED_DIR, archivos.portada);
         if (fs.existsSync(origenPortada)) {
           const destinoPortada = `${crypto.randomUUID()}${path.extname(archivos.portada)}`;
           fs.copyFileSync(origenPortada, path.join(UPLOAD_DIR, destinoPortada));
           ebook.imagen = `/uploads/${destinoPortada}`;
+        }
+      } else if (ebook.archivo) {
+        try {
+          const buffer = await generarCaratulaPDF(path.join(UPLOAD_DIR, path.basename(ebook.archivo)));
+          if (buffer) {
+            const destinoPortada = `${crypto.randomUUID()}.png`;
+            fs.writeFileSync(path.join(UPLOAD_DIR, destinoPortada), buffer);
+            ebook.imagen = `/uploads/${destinoPortada}`;
+          }
+        } catch (e) {
+          console.error(`[store] No se pudo generar la caratula automatica de "${tituloBase}":`, e.message);
         }
       }
     }
@@ -656,6 +669,30 @@ async function init() {
         carpetaSeed: 'pizza',
         archivos: { ebook: 'Endulcora_Pizza_eBook.pdf', anexo: 'Endulcora_Pizza_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Pizza_APP.html', paquete: 'Paquete_Completo.zip', portada: 'Portada_Foto.jpeg' },
       },
+      {
+        tituloBase: 'Pastelería Básica',
+        categoria: 'ebook',
+        carpetaSeed: 'pasteleria-basica',
+        archivos: { ebook: 'Endulcora_Pasteleria_Basica_eBook.pdf', anexo: 'Endulcora_Pasteleria_Basica_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Pasteleria_Basica_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'Pan de Muerto',
+        categoria: 'ebook',
+        carpetaSeed: 'pan-de-muerto',
+        archivos: { ebook: 'Endulcora_Pan_de_Muerto_eBook.pdf', anexo: 'Endulcora_Pan_de_Muerto_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Pan_de_Muerto_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'Masa Madre',
+        categoria: 'ebook',
+        carpetaSeed: 'masa-madre',
+        archivos: { ebook: 'Endulcora_Masa_Madre_eBook.pdf', anexo: 'Endulcora_Masa_Madre_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Masa_Madre_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'Postres en Vaso',
+        categoria: 'ebook',
+        carpetaSeed: 'postres-en-vaso',
+        archivos: { ebook: 'Endulcora_Postres_en_Vaso_eBook.pdf', anexo: 'Endulcora_Postres_en_Vaso_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Postres_en_Vaso_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
       const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
@@ -671,7 +708,7 @@ async function init() {
           fs.unlink(path.join(UPLOAD_DIR, path.basename(viejo.archivo)), () => {});
         }
       }
-      crearFamiliaEbookDesglosada(familia);
+      await crearFamiliaEbookDesglosada(familia);
       data[flag] = true;
       changed = true;
     }
