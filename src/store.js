@@ -693,6 +693,30 @@ async function init() {
         carpetaSeed: 'postres-en-vaso',
         archivos: { ebook: 'Endulcora_Postres_en_Vaso_eBook.pdf', anexo: 'Endulcora_Postres_en_Vaso_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Postres_en_Vaso_APP.html', paquete: 'Paquete_Completo.zip' },
       },
+      {
+        tituloBase: 'Sushi',
+        categoria: 'ebook',
+        carpetaSeed: 'sushi',
+        archivos: { ebook: 'Endulcora_Sushi_eBook.pdf', anexo: 'Endulcora_Sushi_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Sushi_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'Tablas de Charcutería',
+        categoria: 'ebook',
+        carpetaSeed: 'tablas-charcuteria',
+        archivos: { ebook: 'Endulcora_Tablas_de_Charcuteria_eBook.pdf', anexo: 'Endulcora_Tablas_de_Charcuteria_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Tablas_de_Charcuteria_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'Fresas Cubiertas',
+        categoria: 'ebook',
+        carpetaSeed: 'fresas-cubiertas',
+        archivos: { ebook: 'Endulcora_Fresas_Cubiertas_eBook.pdf', anexo: 'Endulcora_Fresas_Cubiertas_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Fresas_Cubiertas_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'Barbacoa',
+        categoria: 'ebook',
+        carpetaSeed: 'barbacoa',
+        archivos: { ebook: 'Endulcora_Barbacoa_eBook.pdf', anexo: 'Endulcora_Barbacoa_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Barbacoa_APP.html', paquete: 'Paquete_Completo.zip' },
+      },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
       const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
