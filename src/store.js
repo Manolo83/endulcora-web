@@ -747,6 +747,14 @@ async function init() {
       { slug: 'tacos-de-canasta', carpetaSeed: 'tacos-de-canasta', archivo: 'Portada_Foto.jpeg' },
       { slug: 'palomitas-gourmet-de-autor', carpetaSeed: 'palomitas-gourmet-de-autor', archivo: 'Portada_Foto.jpeg' },
       { slug: 'tiramisu-douyin', carpetaSeed: 'tiramisu-douyin', archivo: 'Portada_Foto.jpeg' },
+      { slug: 'pasteleria-basica', carpetaSeed: 'pasteleria-basica', archivo: 'Portada_Foto.jpg' },
+      { slug: 'pan-de-muerto', carpetaSeed: 'pan-de-muerto', archivo: 'Portada_Foto.jpg' },
+      { slug: 'masa-madre', carpetaSeed: 'masa-madre', archivo: 'Portada_Foto.jpg' },
+      { slug: 'postres-en-vaso', carpetaSeed: 'postres-en-vaso', archivo: 'Portada_Foto.jpg' },
+      { slug: 'sushi', carpetaSeed: 'sushi', archivo: 'Portada_Foto.jpg' },
+      { slug: 'tablas-de-charcuteria', carpetaSeed: 'tablas-charcuteria', archivo: 'Portada_Foto.jpg' },
+      { slug: 'fresas-cubiertas', carpetaSeed: 'fresas-cubiertas', archivo: 'Portada_Foto.jpg' },
+      { slug: 'barbacoa', carpetaSeed: 'barbacoa', archivo: 'Portada_Foto.jpg' },
     ];
     for (const p of PORTADAS_REALES) {
       const flag = `_migPortadaReal_${p.slug}`;
