@@ -1086,11 +1086,21 @@ function proximaFechaClaseISO(diaSemana, hora, fechaEspecifica) {
   return d.toISOString().slice(0, 10);
 }
 
+// Identifica la sesion de chat/presencia de la clase en vivo: mientras haya
+// un video de YouTube publicado, el chat se liga a ese video (no solo a la
+// fecha), asi cada transmision nueva arranca con su propio chat en cuanto el
+// admin pega el link nuevo, sin depender de que tambien actualice la fecha a
+// mano. Sin video activo (antes de que empiece o ya archivada) usa la fecha.
+function claveSesionClaseEnVivo(youtubeId, fecha) {
+  return youtubeId ? `yt:${youtubeId}` : fecha;
+}
+
 module.exports = {
   init,
   flush,
   UPLOAD_DIR,
   proximaFechaClaseEnVivo: proximaFechaClaseISO,
+  claveSesionClaseEnVivo,
 
   getAnnouncements(onlyPublished = false) {
     const data = load();

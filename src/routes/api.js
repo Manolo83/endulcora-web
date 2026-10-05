@@ -88,10 +88,11 @@ function accesoClaseEnVivoDeRequest(req) {
   const contenido = store.getContent();
   const requierePago = contenido.clase_cobro_activo === 'true';
   const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora, contenido.clase_fecha_especifica);
-  if (!requierePago) return { acceso: true, fecha };
+  const sesionChat = store.claveSesionClaseEnVivo(contenido.clase_youtube_id, fecha);
+  if (!requierePago) return { acceso: true, fecha, sesionChat };
   const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
   const acceso = !!(usuario && store.tieneAccesoClaseEnVivo({ fecha, userId: usuario.id }));
-  return { acceso, fecha };
+  return { acceso, fecha, sesionChat };
 }
 
 // ---- Clase en vivo: cobro opcional por sesion ----
@@ -127,20 +128,20 @@ router.get('/clase-en-vivo', (req, res) => {
 
 // ---- Chat en vivo de la clase (solo para quien tiene acceso a esa sesion) ----
 router.get('/clase-en-vivo/chat', (req, res) => {
-  const { acceso, fecha } = accesoClaseEnVivoDeRequest(req);
+  const { acceso, sesionChat } = accesoClaseEnVivoDeRequest(req);
   if (!acceso) return res.status(403).json({ error: 'Necesitas acceso a esta clase para ver el chat.' });
-  res.json(store.getChatClaseEnVivo(fecha));
+  res.json(store.getChatClaseEnVivo(sesionChat));
 });
 
 router.post('/clase-en-vivo/chat', requireCliente, (req, res) => {
-  const { acceso, fecha } = accesoClaseEnVivoDeRequest(req);
+  const { acceso, sesionChat } = accesoClaseEnVivoDeRequest(req);
   if (!acceso) return res.status(403).json({ error: 'Necesitas acceso a esta clase para participar en el chat.' });
   const texto = String((req.body && req.body.texto) || '').trim();
   if (!texto) return res.status(400).json({ error: 'Escribe un mensaje.' });
   if (texto.length > 500) return res.status(400).json({ error: 'Tu mensaje es muy largo.' });
   const usuario = store.getUserById(req.session.userId);
   if (!usuario) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
-  const item = store.addMensajeChatClaseEnVivo({ fecha, userId: usuario.id, nombre: usuario.nombre, texto });
+  const item = store.addMensajeChatClaseEnVivo({ fecha: sesionChat, userId: usuario.id, nombre: usuario.nombre, texto });
   res.status(201).json(item);
 });
 
@@ -151,7 +152,7 @@ router.post('/clase-en-vivo/chat', requireCliente, (req, res) => {
 // en el store porque es informacion que solo importa mientras dura la
 // sesion en vivo.
 const PRESENCIA_CLASE_TIMEOUT_MS = 45 * 1000;
-const presenciaClaseEnVivo = new Map(); // fecha -> Map(id de pestaña -> ultima señal)
+const presenciaClaseEnVivo = new Map(); // sesionChat -> Map(id de pestaña -> ultima señal)
 
 function contarPresenciaClaseEnVivo(fecha) {
   const vistos = presenciaClaseEnVivo.get(fecha);
@@ -164,14 +165,14 @@ function contarPresenciaClaseEnVivo(fecha) {
 }
 
 router.post('/clase-en-vivo/presencia', (req, res) => {
-  const { acceso, fecha } = accesoClaseEnVivoDeRequest(req);
+  const { acceso, sesionChat } = accesoClaseEnVivoDeRequest(req);
   if (!acceso) return res.status(403).json({ error: 'Necesitas acceso a esta clase.' });
   const id = String((req.body && req.body.id) || '').trim().slice(0, 100);
   if (id) {
-    if (!presenciaClaseEnVivo.has(fecha)) presenciaClaseEnVivo.set(fecha, new Map());
-    presenciaClaseEnVivo.get(fecha).set(id, Date.now());
+    if (!presenciaClaseEnVivo.has(sesionChat)) presenciaClaseEnVivo.set(sesionChat, new Map());
+    presenciaClaseEnVivo.get(sesionChat).set(id, Date.now());
   }
-  res.json({ conectados: contarPresenciaClaseEnVivo(fecha) });
+  res.json({ conectados: contarPresenciaClaseEnVivo(sesionChat) });
 });
 
 // ---- Blog de recetas gratuitas ----

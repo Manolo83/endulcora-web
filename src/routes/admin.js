@@ -1132,8 +1132,9 @@ router.post('/api/clase-en-vivo/archivar', requireAdmin, (req, res) => {
 // ---- Chat de la clase en vivo actual (moderacion) ----
 router.get('/api/clase-en-vivo/chat', requireAdmin, (req, res) => {
   const contenido = store.getContent();
-  const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora);
-  res.json(store.getChatClaseEnVivo(fecha));
+  const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora, contenido.clase_fecha_especifica);
+  const sesionChat = store.claveSesionClaseEnVivo(contenido.clase_youtube_id, fecha);
+  res.json(store.getChatClaseEnVivo(sesionChat));
 });
 
 router.delete('/api/clase-en-vivo/chat/:id', requireAdmin, (req, res) => {
