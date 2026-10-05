@@ -968,6 +968,23 @@ async function init() {
       data._migAvisoPrivacidadLevent = true;
       changed = true;
     }
+    // Suma a la lista de campañas de correo masivo (contactosCampana) todos
+    // los registros que ya existian antes de que esto se conectara: talleres
+    // y QR que aceptaron promociones, y todos los suscriptores del correo.
+    // Corre una sola vez; de ahi en adelante cada formulario se suma solo.
+    if (!data._migBackfillContactosCampana) {
+      (data.inscripcionesTaller || []).forEach((i) => {
+        if (i.aceptaPromociones) upsertContactoCampana(data, { email: i.correo, nombre: i.nombre, telefono: i.whatsapp });
+      });
+      (data.registrosQr || []).forEach((r) => {
+        if (r.aceptaPromociones) upsertContactoCampana(data, { email: r.correo, nombre: r.nombre, telefono: r.whatsapp });
+      });
+      (data.subscribers || []).forEach((s) => {
+        upsertContactoCampana(data, { email: s.email });
+      });
+      data._migBackfillContactosCampana = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
@@ -1084,6 +1101,33 @@ function proximaFechaClaseISO(diaSemana, hora, fechaEspecifica) {
   d.setDate(d.getDate() + diasAlObjetivo);
   if (d <= ahora) d.setDate(d.getDate() + 7);
   return d.toISOString().slice(0, 10);
+}
+
+// Suma (o actualiza) un contacto a la lista de campañas de correo masivo.
+// La usan tanto la importacion manual por CSV como cada formulario del sitio
+// que capture un correo con consentimiento para promociones, para que esos
+// registros sirvan para algo mas que quedarse guardados sin usarse. Regresa
+// true si se agrego, false si ya existia (y se actualizo), o null si el
+// correo no era valido.
+function upsertContactoCampana(data, { email, nombre, telefono }) {
+  const correo = String(email || '').trim().toLowerCase();
+  if (!correo || !correo.includes('@')) return null;
+  const existente = data.contactosCampana.find((c) => c.email === correo);
+  if (existente) {
+    if (nombre) existente.nombre = String(nombre).trim();
+    if (telefono) existente.telefono = String(telefono).trim();
+    return false;
+  }
+  data.contactosCampana.push({
+    id: nextId(data.contactosCampana),
+    email: correo,
+    nombre: String(nombre || '').trim(),
+    telefono: String(telefono || '').trim(),
+    activo: true,
+    unsubToken: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+  });
+  return true;
 }
 
 // Identifica la sesion de chat/presencia de la clase en vivo: mientras haya
@@ -1731,6 +1775,9 @@ module.exports = {
       createdAt: new Date().toISOString(),
     };
     data.subscribers.push(item);
+    // Suscribirse al correo ya es en si mismo el consentimiento para
+    // recibir campañas, asi que tambien alimenta esa lista.
+    upsertContactoCampana(data, { email: item.email });
     save(data);
     return { item, nuevo: true };
   },
@@ -1881,6 +1928,10 @@ module.exports = {
       createdAt: new Date().toISOString(),
     };
     data.inscripcionesTaller.push(item);
+    // Si acepto promociones, tambien alimenta la lista de campañas de
+    // correo masivo, para que este registro sirva para algo mas que
+    // quedarse guardado sin usarse.
+    if (item.aceptaPromociones) upsertContactoCampana(data, { email: item.correo, nombre: item.nombre, telefono: item.whatsapp });
     save(data);
     return item;
   },
@@ -1912,6 +1963,7 @@ module.exports = {
       createdAt: new Date().toISOString(),
     };
     data.registrosQr.push(item);
+    if (item.aceptaPromociones) upsertContactoCampana(data, { email: item.correo, nombre: item.nombre, telefono: item.whatsapp });
     save(data);
     return item;
   },
@@ -1965,25 +2017,10 @@ module.exports = {
     let agregados = 0;
     let actualizados = 0;
     for (const fila of lista) {
-      const email = String(fila.email || '').trim().toLowerCase();
-      if (!email || !email.includes('@')) continue;
-      const existente = data.contactosCampana.find((c) => c.email === email);
-      if (existente) {
-        if (fila.nombre) existente.nombre = String(fila.nombre).trim();
-        if (fila.telefono) existente.telefono = String(fila.telefono).trim();
-        actualizados += 1;
-      } else {
-        data.contactosCampana.push({
-          id: nextId(data.contactosCampana),
-          email,
-          nombre: String(fila.nombre || '').trim(),
-          telefono: String(fila.telefono || '').trim(),
-          activo: true,
-          unsubToken: crypto.randomUUID(),
-          createdAt: new Date().toISOString(),
-        });
-        agregados += 1;
-      }
+      const nuevo = upsertContactoCampana(data, fila);
+      if (nuevo === null) continue;
+      if (nuevo) agregados += 1;
+      else actualizados += 1;
     }
     save(data);
     return { agregados, actualizados, total: data.contactosCampana.length };

@@ -76,7 +76,20 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
       aceptaPromociones: r.aceptaPromociones,
     }));
 
-  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres, ...contactosQr] });
+  // Suscriptores del correo (lead magnet del footer): el solo hecho de
+  // suscribirse ya es el consentimiento para recibir campañas.
+  const contactosSubscribers = store
+    .getSubscribers()
+    .filter((s) => s.email)
+    .map((s) => ({
+      email: s.email,
+      telefono: '',
+      nombre: '',
+      categoriasInteres: ['origen:newsletter'],
+      aceptaPromociones: true,
+    }));
+
+  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres, ...contactosQr, ...contactosSubscribers] });
 });
 
 module.exports = router;
