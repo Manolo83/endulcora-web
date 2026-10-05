@@ -422,18 +422,15 @@ router.post('/registro', (req, res) => {
   res.status(201).json({ ok: true, id: item.id });
 });
 
-// ---- Clase gratis en sala (p.ej. Pan de Muerto): registro + horarios con
-// cupo disponible. El "registro vive en el sitio", no en WhatsApp.
-function horariosClaseGratisConCupo(contenido) {
-  const horarios = String(contenido.clasegratis_horarios || '')
+// ---- Clase gratis en sala (p.ej. Pan de Muerto): registro + horarios.
+// El "registro vive en el sitio", no en WhatsApp. Los horarios siempre
+// estan abiertos, sin tope de cupo.
+function horariosClaseGratis(contenido) {
+  return String(contenido.clasegratis_horarios || '')
     .split(',')
     .map((h) => h.trim())
-    .filter(Boolean);
-  const cupoPorHorario = Math.max(0, parseInt(contenido.clasegratis_cupos_por_horario, 10) || 0);
-  return horarios.map((horario) => {
-    const inscritos = store.contarRegistrosClaseGratisPorHorario(horario);
-    return { horario, cupoTotal: cupoPorHorario, cupoDisponible: Math.max(0, cupoPorHorario - inscritos) };
-  });
+    .filter(Boolean)
+    .map((horario) => ({ horario }));
 }
 
 router.get('/clase-gratis', (req, res) => {
@@ -443,7 +440,7 @@ router.get('/clase-gratis', (req, res) => {
     titulo: contenido.clasegratis_titulo || '',
     descripcion: contenido.clasegratis_descripcion || '',
     fecha: contenido.clasegratis_fecha || '',
-    horarios: horariosClaseGratisConCupo(contenido),
+    horarios: horariosClaseGratis(contenido),
     temas: store.TEMAS_CLASE_GRATIS,
   });
 });
@@ -465,10 +462,9 @@ router.post('/clase-gratis/registro', (req, res) => {
   if (typeof b.yaTomoTaller !== 'boolean') return res.status(400).json({ error: 'Dinos si ya tomaste un taller con nosotros.' });
   if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para registrarte.' });
 
-  const horariosDisponibles = horariosClaseGratisConCupo(contenido);
+  const horariosDisponibles = horariosClaseGratis(contenido);
   const elegido = horariosDisponibles.find((h) => h.horario === horario);
   if (!elegido) return res.status(400).json({ error: 'Elige un horario válido.' });
-  if (elegido.cupoDisponible <= 0) return res.status(400).json({ error: 'Ese horario ya no tiene cupo disponible. Elige otro.' });
 
   const item = store.addRegistroClaseGratis({
     nombre,

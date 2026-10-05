@@ -77,12 +77,9 @@ const DEFAULT_CONTENT = {
   clasegratis_titulo: 'Clase gratis: Pan de Muerto',
   clasegratis_descripcion: '',
   clasegratis_fecha: '',
-  // Horarios separados por coma, ej: "11:00 am, 1:00 pm, 4:00 pm".
+  // Horarios separados por coma, ej: "11:00 am, 1:00 pm, 4:00 pm". Siempre
+  // estan abiertos, sin tope de cupo.
   clasegratis_horarios: '',
-  clasegratis_cupos_por_horario: '20',
-  // Oferta de sala: precios de los 3 productos que se ofrecen el dia de la
-  // clase. Masa Madre es un curso presencial (no un producto descargable),
-  // por eso su precio vive aqui y no en el catalogo.
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
@@ -2096,9 +2093,6 @@ module.exports = {
   TEMAS_CLASE_GRATIS,
   getRegistrosClaseGratis() {
     return [...load().registrosClaseGratis].sort((a, b) => b.id - a.id);
-  },
-  contarRegistrosClaseGratisPorHorario(horario) {
-    return load().registrosClaseGratis.filter((r) => r.horario === horario).length;
   },
   addRegistroClaseGratis({ nombre, whatsapp, correo, horario, yaTomoTaller, interesTemas, aceptaAvisoPrivacidad }) {
     const data = load();

@@ -196,9 +196,7 @@ async function cargarClaseGratis(){
 
     const selectHorario = document.getElementById('campoHorario');
     selectHorario.innerHTML = info.horarios.map(h => `
-      <option value="${escapeHtml(h.horario)}" ${h.cupoDisponible <= 0 ? 'disabled' : ''}>
-        ${escapeHtml(h.horario)}${h.cupoDisponible <= 0 ? ' — Sin cupo' : ''}
-      </option>
+      <option value="${escapeHtml(h.horario)}">${escapeHtml(h.horario)}</option>
     `).join('');
 
     document.getElementById('opcionesTemas').innerHTML = info.temas.map(t => `
@@ -208,10 +206,9 @@ async function cargarClaseGratis(){
       </label>
     `).join('');
 
-    if (!info.horarios.length || info.horarios.every(h => h.cupoDisponible <= 0)) {
+    if (!info.horarios.length) {
       form.classList.add('hidden');
       document.getElementById('bloqueSinClase').classList.remove('hidden');
-      document.getElementById('bloqueSinClase').querySelector('p').textContent = 'Ya no hay cupo disponible para esta clase.';
       return;
     }
 
