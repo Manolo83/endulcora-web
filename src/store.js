@@ -985,6 +985,16 @@ async function init() {
       data._migBackfillContactosCampana = true;
       changed = true;
     }
+    // Segunda pasada: tambien suma a la lista de campañas todas las cuentas
+    // de clientes ya existentes (registro separado del anterior porque se
+    // decidio despues incluirlas tambien).
+    if (!data._migBackfillContactosCampanaUsuarios) {
+      (data.users || []).forEach((u) => {
+        upsertContactoCampana(data, { email: u.email, nombre: u.nombre, telefono: u.telefono });
+      });
+      data._migBackfillContactosCampanaUsuarios = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
@@ -1734,6 +1744,7 @@ module.exports = {
       createdAt: new Date().toISOString(),
     };
     data.users.push(item);
+    upsertContactoCampana(data, { email: item.email, nombre: item.nombre, telefono: item.telefono });
     save(data);
     return item;
   },
