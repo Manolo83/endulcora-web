@@ -995,6 +995,16 @@ async function init() {
       data._migBackfillContactosCampanaUsuarios = true;
       changed = true;
     }
+    // Tercera pasada: suma tambien a quien compro pagando como invitado
+    // (sin crear cuenta, solo dejo su correo al pagar) — sin esto esos
+    // clientes reales se quedaban fuera de toda lista.
+    if (!data._migBackfillContactosCampanaPedidos) {
+      (data.orders || []).forEach((o) => {
+        if (o.estado === 'aprobado' && o.email) upsertContactoCampana(data, { email: o.email });
+      });
+      data._migBackfillContactosCampanaPedidos = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);

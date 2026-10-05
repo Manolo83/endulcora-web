@@ -26,7 +26,7 @@ function requiereClaveSync(req, res, next) {
 router.get('/contactos', requiereClaveSync, (req, res) => {
   const usuarios = store.getUsers().filter((u) => u.email);
   const contactosUsuarios = usuarios.map((u) => {
-    const pedidos = store.getOrdersByUser(u.id, u.email).filter((o) => o.estado === 'pagado');
+    const pedidos = store.getOrdersByUser(u.id, u.email).filter((o) => o.estado === 'aprobado');
     const categorias = new Set();
     pedidos.forEach((o) => {
       (o.items || []).forEach((it) => {
@@ -89,7 +89,30 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
       aceptaPromociones: true,
     }));
 
-  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres, ...contactosQr, ...contactosSubscribers] });
+  // Compras pagadas de quien hizo checkout sin crear cuenta (solo dejo su
+  // correo al pagar): sin esto, un cliente real que compro como invitado no
+  // aparecia en ningun lado. Se excluyen los correos que ya van en
+  // contactosUsuarios para no mandarlos duplicados.
+  const emailsConCuenta = new Set(usuarios.map((u) => u.email));
+  const emailsYaIncluidos = new Set();
+  const contactosPedidosInvitado = store
+    .getOrders()
+    .filter((o) => o.estado === 'aprobado' && o.email && !emailsConCuenta.has(o.email.toLowerCase()))
+    .filter((o) => {
+      const correo = o.email.toLowerCase();
+      if (emailsYaIncluidos.has(correo)) return false;
+      emailsYaIncluidos.add(correo);
+      return true;
+    })
+    .map((o) => ({
+      email: o.email.toLowerCase(),
+      telefono: '',
+      nombre: '',
+      categoriasInteres: ['origen:compra-invitado'],
+      totalCompras: 1,
+    }));
+
+  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres, ...contactosQr, ...contactosSubscribers, ...contactosPedidosInvitado] });
 });
 
 module.exports = router;

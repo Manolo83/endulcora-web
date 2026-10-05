@@ -176,6 +176,12 @@ router.post('/webhook', async (req, res) => {
     }
     const actualizado = store.updateOrder(order.id, patch);
 
+    // Cliente real que pago: se suma a la lista de campañas de correo
+    // masivo, sea que tenga cuenta o haya comprado como invitado.
+    if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado && actualizado.email) {
+      store.importarContactosCampana([{ email: actualizado.email }]);
+    }
+
     if (nuevoEstado === 'aprobado' && !order.capiPurchaseEnviado) {
       await enviarPurchaseCAPI({ order: actualizado, siteUrl: SITE_URL });
       store.updateOrder(order.id, { capiPurchaseEnviado: true });
