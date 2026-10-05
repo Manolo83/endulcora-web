@@ -5,7 +5,7 @@ const store = require('../store');
 const { UPLOAD_DIR, GOOGLE_ADS, SITE_URL } = require('../config');
 const { requireCliente } = require('./auth');
 const { uploadImage, uploadMedia, procesarImagenSubida, ALLOWED_VIDEO } = require('../uploads');
-const { enviarCorreoConfirmacionInscripcionTaller } = require('../email');
+const { enviarCorreoConfirmacionInscripcionTaller, enviarCorreoConfirmacionClaseGratis } = require('../email');
 
 const router = express.Router();
 
@@ -476,6 +476,20 @@ router.post('/clase-gratis/registro', (req, res) => {
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
   });
   res.status(201).json({ ok: true, id: item.id });
+
+  // El correo de confirmacion nunca debe tumbar el registro: la persona ya
+  // quedo registrada aunque Resend falle o no este configurado. Se manda
+  // despues de responder para no retrasar la confirmacion en pantalla.
+  enviarCorreoConfirmacionClaseGratis({
+    to: item.correo,
+    nombre: item.nombre,
+    horario: item.horario,
+    fecha: contenido.clasegratis_fecha,
+    ubicacion: contenido.clasegratis_ubicacion,
+    numeroWhatsapp: contenido.whatsapp_numero,
+  }).catch((e) => {
+    console.error(`[clase-gratis] No se pudo mandar el correo de confirmacion a ${item.correo}:`, e.message);
+  });
 });
 
 // Estado de un pedido para la pagina de gracias: requiere el viewToken que

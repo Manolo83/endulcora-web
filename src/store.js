@@ -80,6 +80,8 @@ const DEFAULT_CONTENT = {
   // Horarios separados por coma, ej: "11:00 am, 1:00 pm, 4:00 pm". Siempre
   // estan abiertos, sin tope de cupo.
   clasegratis_horarios: '',
+  // Direccion de la sede, para el correo de confirmacion de registro.
+  clasegratis_ubicacion: 'Endulcora Nativitas — Av. Antonio Rodríguez 34, Col. San Simón Ticumac, Benito Juárez, CDMX (metro Portales o Nativitas)',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',

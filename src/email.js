@@ -118,6 +118,57 @@ async function enviarCorreoConfirmacionInscripcionTaller({ to, nombre, taller, f
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+async function enviarCorreoConfirmacionClaseGratis({ to, nombre, horario, fecha, ubicacion, numeroWhatsapp }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const fechaLegible = fecha
+    ? new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).replace(',', '')
+    : '';
+  const diaDelMes = fecha ? new Date(`${fecha}T00:00:00`).getDate() : '';
+  const whatsappUrl = `https://wa.me/52${numeroWhatsapp || ''}`;
+
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: `Tu lugar en la clase gratis de pan de muerto${fechaLegible ? ` — ${fechaLegible}` : ''}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">Hola, ${escapeHtml(nombre || '')}:</h1>
+        <p style="font-size:14px;line-height:1.6;">Quedaste registrado en la clase gratis de pan de muerto.</p>
+
+        <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;">
+          ${fechaLegible ? `<tr><td style="padding:6px 6px 6px 0;width:24px;">📅</td><td style="padding:6px 0;">${escapeHtml(fechaLegible)}</td></tr>` : ''}
+          ${horario ? `<tr><td style="padding:6px 6px 6px 0;">🕐</td><td style="padding:6px 0;">Horario: ${escapeHtml(horario)}</td></tr>` : ''}
+          ${ubicacion ? `<tr><td style="padding:6px 6px 6px 0;vertical-align:top;">📍</td><td style="padding:6px 0;">${escapeHtml(ubicacion)}</td></tr>` : ''}
+        </table>
+
+        <p style="margin-top:18px;font-size:13px;line-height:1.6;">Llega 10 minutos antes. El cupo por horario es limitado y el lugar se asigna por orden de llegada entre los registrados; si tu horario se llena, te pasamos al siguiente con lugar.</p>
+
+        <h2 style="margin-top:22px;font-size:15px;color:#4E1454;">Qué vas a ver</h2>
+        <p style="font-size:13px;line-height:1.6;">La receta del pan de muerto tradicional, paso a paso: masa, formado de canillas y bolita, barnizado y azucarado. Al final pruebas una muestra del pan recién hecho.</p>
+
+        <div style="margin-top:22px;padding:16px;background:#FBF4E9;border-radius:12px;">
+          <p style="margin:0;font-size:13px;font-weight:700;color:#4E1454;">💎 Si eres miembro de Club Endulcora</p>
+          <p style="margin:8px 0 0;font-size:13px;line-height:1.6;">Tienes lugar VIP asegurado en tu horario y el recetario de pan de muerto incluido. La membresía cuesta $100 al mes y se paga por Mercado Pago. Para hacerte miembro escríbenos por WhatsApp.</p>
+          <p style="margin:10px 0 0;"><a href="${whatsappUrl}" style="background:#F5A623;color:#1B0720;padding:9px 18px;border-radius:999px;text-decoration:none;font-weight:700;font-size:12px;">Hazme miembro</a></p>
+        </div>
+
+        <h2 style="margin-top:22px;font-size:15px;color:#4E1454;">¿Quieres hacerlo tú y llevarte tu pan?</h2>
+        <p style="font-size:13px;line-height:1.6;">En el Taller de Pan de Muerto trabajas la masa con tus manos y te llevas 5 panes rellenos de 100 g cada uno, más el relleno. Es la diferencia con la clase gratis: en la clase pruebas una muestra; en el taller sales con medio kilo de pan hecho por ti.</p>
+        <p style="margin-top:10px;"><a href="${whatsappUrl}" style="background:#4E1454;color:#FBF4E9;padding:9px 18px;border-radius:999px;text-decoration:none;font-weight:700;font-size:12px;">Aparta tu lugar</a></p>
+
+        <p style="margin-top:26px;font-size:14px;">Nos vemos${diaDelMes ? ` el ${diaDelMes}` : ''}.<br><strong>Endulcora Estudio Gastronómico</strong></p>
+
+        <p style="margin-top:20px;font-size:12px;color:#9C9C9C;">Si ya no puedes asistir, responde a este correo para liberar tu lugar.</p>
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 function escapeHtml(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
@@ -295,6 +346,7 @@ async function enviarCorreoRecordatorioMembresia({ to, nombre, siteUrl }) {
 module.exports = {
   enviarCorreoConfirmacionCompra,
   enviarCorreoConfirmacionInscripcionTaller,
+  enviarCorreoConfirmacionClaseGratis,
   enviarCorreoRevistaMensual,
   enviarCorreoCampana,
   enviarCorreoLeadMagnetPaso0,
