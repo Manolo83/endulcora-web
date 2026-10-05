@@ -114,6 +114,15 @@ const registroQrLimiter = rateLimit({
 });
 app.use('/api/registro', registroQrLimiter);
 
+const claseGratisLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
+});
+app.use('/api/clase-gratis/registro', claseGratisLimiter);
+
 const asistenteLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 30,
@@ -258,6 +267,14 @@ app.get('/registro', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'registro.html'));
 });
 
+app.get('/clase-gratis', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'clase-gratis.html'));
+});
+
+app.get('/clase-gratis-sala', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'clase-gratis-sala.html'));
+});
+
 // Imagen del QR que lleva a /registro, lista para bajar y pegar en
 // StreamYard u otro programa de transmision. Publica a proposito (no trae
 // nada sensible, solo apunta a un formulario publico) para que cualquiera
@@ -271,6 +288,22 @@ app.get('/qr-registro.png', async (req, res) => {
     res.set('Content-Type', 'image/png');
     res.set('Cache-Control', 'public, max-age=86400');
     res.send(qrRegistroCache);
+  } catch (e) {
+    res.status(500).send('No se pudo generar el QR.');
+  }
+});
+
+// Imagen del QR que lleva a /clase-gratis-sala, para proyectar en pantalla y
+// poner en el arte de sala durante la clase gratis en vivo.
+let qrClaseGratisSalaCache = null;
+app.get('/qr-clase-gratis-sala.png', async (req, res) => {
+  try {
+    if (!qrClaseGratisSalaCache) {
+      qrClaseGratisSalaCache = await QRCode.toBuffer(`${SITE_URL}/clase-gratis-sala`, { width: 1000, margin: 2 });
+    }
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(qrClaseGratisSalaCache);
   } catch (e) {
     res.status(500).send('No se pudo generar el QR.');
   }
@@ -369,6 +402,7 @@ app.get('/sitemap.xml', (req, res) => {
     { loc: '/recetarios', prioridad: '0.8', frecuencia: 'weekly' },
     { loc: '/calendario', prioridad: '0.6', frecuencia: 'weekly' },
     { loc: '/inscripcion-taller', prioridad: '0.5', frecuencia: 'weekly' },
+    { loc: '/clase-gratis', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/galeria', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/membresia', prioridad: '0.6', frecuencia: 'monthly' },
     { loc: '/endulcora-en-vivo', prioridad: '0.6', frecuencia: 'weekly' },

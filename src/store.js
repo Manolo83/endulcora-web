@@ -71,6 +71,18 @@ const DEFAULT_CONTENT = {
   // que el link para entrar, nunca se manda por separado.
   clase_recetario_url: '',
   clase_recetario_nombre: '',
+  // ---- Clase gratis en sala (p.ej. Pan de Muerto): registro en el sitio +
+  // oferta del día. Independiente de la "clase en vivo" (esa es online).
+  clasegratis_activo: 'false',
+  clasegratis_titulo: 'Clase gratis: Pan de Muerto',
+  clasegratis_descripcion: '',
+  clasegratis_fecha: '',
+  // Horarios separados por coma, ej: "11:00 am, 1:00 pm, 4:00 pm".
+  clasegratis_horarios: '',
+  clasegratis_cupos_por_horario: '20',
+  // Oferta de sala: precios de los 3 productos que se ofrecen el dia de la
+  // clase. Masa Madre es un curso presencial (no un producto descargable),
+  // por eso su precio vive aqui y no en el catalogo.
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
@@ -192,6 +204,7 @@ function datosPorDefecto() {
     sesionesTaller: [],
     inscripcionesTaller: [],
     registrosQr: [],
+    registrosClaseGratis: [],
     bibliotecaClases: [],
     contactosCampana: [],
     campanasCorreo: [],
@@ -1005,6 +1018,56 @@ async function init() {
       data._migBackfillContactosCampanaPedidos = true;
       changed = true;
     }
+    // Curso de Masa Madre (presencial, 5 sesiones): oferta de la clase
+    // gratis en sala. precioMembresia vacio = sin rebaja para miembros,
+    // pendiente de que direccion lo confirme; se puede editar despues desde
+    // /admin > Cursos sin tocar codigo.
+    if (!data._migCursoMasaMadre) {
+      data.cursos.push({
+        id: nextId(data.cursos),
+        orden: data.cursos.length,
+        modalidad: 'Presencial · 5 sesiones / 20 h (lunes a viernes)',
+        titulo: 'Curso de Masa Madre',
+        descripcion: 'Fermentación y panadería a fondo, de la creación del starter al horneado. Cupo de 8 a 15 personas.',
+        precio: '5000',
+        precioMembresia: '',
+      });
+      data._migCursoMasaMadre = true;
+      changed = true;
+    }
+    // Recetario de Pan de Muerto (suelto): oferta de la clase gratis en
+    // sala. Oculto del catalogo general porque solo se ofrece ahi; el PDF
+    // se sube despues desde /admin > Productos cuando este listo.
+    if (!data._migRecetarioPanDeMuerto) {
+      const item = {
+        id: nextId(data.products),
+        orden: data.products.length,
+        categoria: 'recetario',
+        etiqueta: '',
+        destacado: '',
+        titulo: 'Recetario Pan de Muerto',
+        subtitulo: '',
+        descripcionCorta: 'El recetario completo de la clase de Pan de Muerto, en PDF.',
+        descripcionLarga: '',
+        bullets: [],
+        precio: '100',
+        precioAnterior: '',
+        precioMembresia: '',
+        boton: 'Comprar recetario',
+        imagen: '',
+        galeria: [],
+        archivo: '',
+        archivoNombre: '',
+        slug: '',
+        productosRelacionados: [],
+        esPaquete: false,
+        ocultoEnCatalogo: true,
+      };
+      item.slug = slugUnico(item.titulo, data.products, item.id);
+      data.products.push(item);
+      data._migRecetarioPanDeMuerto = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
@@ -1129,13 +1192,16 @@ function proximaFechaClaseISO(diaSemana, hora, fechaEspecifica) {
 // registros sirvan para algo mas que quedarse guardados sin usarse. Regresa
 // true si se agrego, false si ya existia (y se actualizo), o null si el
 // correo no era valido.
-function upsertContactoCampana(data, { email, nombre, telefono }) {
+function upsertContactoCampana(data, { email, nombre, telefono, etiquetas }) {
   const correo = String(email || '').trim().toLowerCase();
   if (!correo || !correo.includes('@')) return null;
+  const nuevasEtiquetas = Array.isArray(etiquetas) ? etiquetas.filter(Boolean) : [];
   const existente = data.contactosCampana.find((c) => c.email === correo);
   if (existente) {
     if (nombre) existente.nombre = String(nombre).trim();
     if (telefono) existente.telefono = String(telefono).trim();
+    if (!Array.isArray(existente.etiquetas)) existente.etiquetas = [];
+    nuevasEtiquetas.forEach((e) => { if (!existente.etiquetas.includes(e)) existente.etiquetas.push(e); });
     return false;
   }
   data.contactosCampana.push({
@@ -1143,11 +1209,40 @@ function upsertContactoCampana(data, { email, nombre, telefono }) {
     email: correo,
     nombre: String(nombre || '').trim(),
     telefono: String(telefono || '').trim(),
+    etiquetas: nuevasEtiquetas,
     activo: true,
     unsubToken: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
   });
   return true;
+}
+
+// Reemplaza la etiqueta de segmento de un contacto (quita cualquier
+// "segmento:*" anterior y pone la nueva), para que al reclasificar a
+// alguien no se acumulen etiquetas viejas contradictorias.
+function reemplazarEtiquetaSegmento(data, email, nuevaEtiqueta) {
+  const correo = String(email || '').trim().toLowerCase();
+  const contacto = data.contactosCampana.find((c) => c.email === correo);
+  if (!contacto) return;
+  if (!Array.isArray(contacto.etiquetas)) contacto.etiquetas = [];
+  contacto.etiquetas = contacto.etiquetas.filter((e) => !e.startsWith('segmento:'));
+  if (nuevaEtiqueta) contacto.etiquetas.push(nuevaEtiqueta);
+}
+
+// Temas de interes que puede marcar quien se registra a la clase gratis en
+// sala (opcional, sirve para decidir el tema de las siguientes clases).
+const TEMAS_CLASE_GRATIS = ['panaderia', 'chocolate', 'reposteria', 'velas', 'cocina_salada'];
+
+// Segmento que le toca a cada registrado de la clase gratis segun lo que se
+// marca al cierre del dia (asistencia + compra real), cruzando registro con
+// lo que de verdad paso. "Se hizo miembro" manda sobre todo lo demas porque
+// esa persona sale de las promociones y entra a la comunicacion del club.
+function segmentoClaseGratis({ asistio, compro, seHizoMiembro }) {
+  if (seHizoMiembro) return 'se_hizo_miembro';
+  if (asistio === true && compro) return 'asistio_compro';
+  if (asistio === true) return 'asistio_no_compro';
+  if (asistio === false) return 'no_asistio';
+  return '';
 }
 
 // Identifica la sesion de chat/presencia de la clase en vivo: mientras haya
@@ -1994,6 +2089,57 @@ module.exports = {
     save(data);
   },
 
+  // ---- Clase gratis en sala (p.ej. Pan de Muerto): registro en el sitio +
+  // segmentacion al cierre del dia, para dar seguimiento distinto a cada
+  // quien segun que paso de verdad (ver clasegratis_* en el contenido para
+  // la configuracion del evento: horarios, cupos, precios de la oferta).
+  TEMAS_CLASE_GRATIS,
+  getRegistrosClaseGratis() {
+    return [...load().registrosClaseGratis].sort((a, b) => b.id - a.id);
+  },
+  contarRegistrosClaseGratisPorHorario(horario) {
+    return load().registrosClaseGratis.filter((r) => r.horario === horario).length;
+  },
+  addRegistroClaseGratis({ nombre, whatsapp, correo, horario, yaTomoTaller, interesTemas, aceptaAvisoPrivacidad }) {
+    const data = load();
+    const item = {
+      id: nextId(data.registrosClaseGratis),
+      nombre: String(nombre || '').trim(),
+      whatsapp: String(whatsapp || '').trim(),
+      correo: String(correo || '').trim().toLowerCase(),
+      horario: String(horario || '').trim(),
+      yaTomoTaller: !!yaTomoTaller,
+      interesTemas: Array.isArray(interesTemas) ? interesTemas.filter((t) => TEMAS_CLASE_GRATIS.includes(t)) : [],
+      aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
+      asistio: null, // null = sin marcar todavia; true/false al cierre del dia
+      compro: '', // '' sin marcar, o 'taller' | 'recetario' si asistio y compro
+      seHizoMiembro: false,
+      segmento: '',
+      createdAt: new Date().toISOString(),
+    };
+    data.registrosClaseGratis.push(item);
+    upsertContactoCampana(data, { email: item.correo, nombre: item.nombre, telefono: item.whatsapp, etiquetas: ['clase-gratis:pan-de-muerto'] });
+    save(data);
+    return item;
+  },
+  actualizarSegmentoClaseGratis(id, { asistio, compro, seHizoMiembro }) {
+    const data = load();
+    const item = data.registrosClaseGratis.find((r) => r.id === Number(id));
+    if (!item) return null;
+    if (typeof asistio === 'boolean' || asistio === null) item.asistio = asistio;
+    if (typeof compro === 'string') item.compro = compro;
+    if (typeof seHizoMiembro === 'boolean') item.seHizoMiembro = seHizoMiembro;
+    item.segmento = segmentoClaseGratis(item);
+    reemplazarEtiquetaSegmento(data, item.correo, item.segmento ? `segmento:${item.segmento}` : '');
+    save(data);
+    return item;
+  },
+  deleteRegistroClaseGratis(id) {
+    const data = load();
+    data.registrosClaseGratis = data.registrosClaseGratis.filter((r) => r.id !== Number(id));
+    save(data);
+  },
+
   // ---- Biblioteca de clases en vivo grabadas (exclusiva para miembros) ----
   getBibliotecaClases() {
     return [...load().bibliotecaClases].sort((a, b) => b.id - a.id);
@@ -2031,7 +2177,9 @@ module.exports = {
   // ---- Contactos para campañas de correo masivo (lista propia, separada de
   // "subscribers"/"users") ----
   getContactosCampana() {
-    return [...load().contactosCampana].sort((a, b) => b.id - a.id);
+    return [...load().contactosCampana]
+      .map((c) => (Array.isArray(c.etiquetas) ? c : { ...c, etiquetas: [] }))
+      .sort((a, b) => b.id - a.id);
   },
   importarContactosCampana(lista) {
     const data = load();

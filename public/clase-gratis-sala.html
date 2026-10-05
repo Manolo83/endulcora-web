@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YZNFKC6PS8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-YZNFKC6PS8');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oferta de hoy · Endulcora</title>
+<meta name="description" content="La oferta de hoy en sala: membresía, recetario y curso de Masa Madre.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://www.endulcora.com/clase-gratis-sala">
+<meta name="theme-color" content="#1B0720">
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1302735011542499');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1302735011542499&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<header class="border-b border-vino/10 bg-crema py-4">
+  <div class="mx-auto flex max-w-3xl items-center justify-center px-5">
+    <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-10 w-auto">
+  </div>
+</header>
+
+<main class="mx-auto max-w-3xl px-5 py-10">
+  <div class="text-center">
+    <p class="inline-flex items-center gap-2 rounded-full bg-vino/10 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.2em] text-vino">
+      <span class="relative flex h-2 w-2"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-flama opacity-75"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-flama"></span></span>
+      Oferta de hoy
+    </p>
+    <h1 class="mt-4 font-display text-3xl text-vino sm:text-4xl">Lo que incluye quedarte hoy</h1>
+    <p class="mt-2 text-sm text-carbon/60">Esta oferta es solo por hoy — el recetario incluido en la membresía, después se vende por separado.</p>
+  </div>
+
+  <!-- Membresia: la oferta principal -->
+  <section class="mt-8">
+    <div class="overflow-hidden rounded-3xl bg-vino p-8 text-crema shadow-[0_16px_50px_rgba(78,20,84,.18)] sm:p-10">
+      <h2 class="font-display text-2xl leading-tight sm:text-3xl">Hazte miembro Club Endulcora</h2>
+      <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-crema/80">Recetario de hoy incluido, grabación permanente de esta clase, precio de miembro en talleres y recetarios, y los lives del jueves — todo por $100 MXN al mes. Cancela cuando quieras.</p>
+
+      <div id="membresiaSalaInvitado" class="mt-6 hidden max-w-sm">
+        <div class="flex gap-2 border-b border-crema/15">
+          <button type="button" id="tabLoginSala" class="border-b-2 border-flama px-1 pb-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-flama">Iniciar sesión</button>
+          <button type="button" id="tabRegistroSala" class="border-b-2 border-transparent px-1 pb-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema/50">Crear cuenta</button>
+        </div>
+        <form id="formLoginSala" class="mt-4 grid gap-2.5">
+          <input id="loginSalaEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-crema/20 bg-crema/10 px-4 py-2.5 text-sm text-crema placeholder:text-crema/40 outline-none focus:border-flama/50">
+          <input id="loginSalaPassword" type="password" required placeholder="Contraseña" class="w-full rounded-xl border border-crema/20 bg-crema/10 px-4 py-2.5 text-sm text-crema placeholder:text-crema/40 outline-none focus:border-flama/50">
+          <p id="loginSalaError" class="hidden text-xs text-red-300"></p>
+          <button type="submit" class="mt-1 inline-flex items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Entrar</button>
+        </form>
+        <form id="formRegistroSala" class="mt-4 hidden grid gap-2.5">
+          <input id="registroSalaNombre" type="text" required placeholder="Tu nombre" class="w-full rounded-xl border border-crema/20 bg-crema/10 px-4 py-2.5 text-sm text-crema placeholder:text-crema/40 outline-none focus:border-flama/50">
+          <input id="registroSalaEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-crema/20 bg-crema/10 px-4 py-2.5 text-sm text-crema placeholder:text-crema/40 outline-none focus:border-flama/50">
+          <input id="registroSalaTelefono" type="tel" required inputmode="numeric" placeholder="Teléfono (10 dígitos)" class="w-full rounded-xl border border-crema/20 bg-crema/10 px-4 py-2.5 text-sm text-crema placeholder:text-crema/40 outline-none focus:border-flama/50">
+          <input id="registroSalaPassword" type="password" required minlength="6" placeholder="Contraseña (mínimo 6 caracteres)" class="w-full rounded-xl border border-crema/20 bg-crema/10 px-4 py-2.5 text-sm text-crema placeholder:text-crema/40 outline-none focus:border-flama/50">
+          <p id="registroSalaError" class="hidden text-xs text-red-300"></p>
+          <button type="submit" class="mt-1 inline-flex items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Crear cuenta</button>
+        </form>
+      </div>
+
+      <div id="membresiaSalaOferta" class="mt-7 hidden">
+        <p id="membresiaSalaError" class="mb-3 hidden rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200"></p>
+        <button type="button" id="btnMembresiaSala" class="inline-flex items-center justify-center gap-2 rounded-full bg-flama px-10 py-5 font-ui text-base font-700 uppercase tracking-wider text-carbon shadow-lg transition hover:brightness-105 disabled:opacity-60">
+          <span id="membresiaSalaSpinner" class="hidden h-4 w-4 animate-spin rounded-full border-2 border-carbon/30 border-t-carbon"></span>
+          Hazte miembro · $100/mes
+        </button>
+        <p class="mt-3 font-ui text-[11px] uppercase tracking-widest text-crema/40">Pago seguro con Mercado Pago</p>
+      </div>
+
+      <div id="membresiaSalaActiva" class="mt-6 hidden inline-flex items-center gap-2 rounded-full bg-crema/10 px-5 py-3 font-ui text-sm font-700 text-flama">
+        ✓ Ya eres miembro — tu recetario de hoy queda incluido.
+      </div>
+    </div>
+  </section>
+
+  <!-- Correo para compras sueltas (sin membresia) -->
+  <section class="mt-8 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+    <label class="block">
+      <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">¿No quieres membresía? Danos tu correo para mandarte la compra</span>
+      <input id="correoCompraSuelta" type="email" placeholder="tu@correo.com" class="mt-1.5 w-full max-w-sm rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+    </label>
+  </section>
+
+  <!-- Recetario suelto -->
+  <section class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h3 class="font-titulo text-xl text-vino">Recetario Pan de Muerto</h3>
+        <p class="mt-1 text-sm text-carbon/60">El PDF completo de la receta de hoy, para quien no quiere membresía.</p>
+      </div>
+      <div class="text-right">
+        <p id="precioRecetarioSala" class="font-display text-2xl text-vino">—</p>
+        <button type="button" id="btnComprarRecetarioSala" class="mt-2 rounded-full bg-vino px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition disabled:opacity-60">Comprar recetario</button>
+      </div>
+    </div>
+    <p id="errorRecetarioSala" class="mt-3 hidden text-xs text-red-600"></p>
+  </section>
+
+  <!-- Curso de Masa Madre -->
+  <section class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h3 class="font-titulo text-xl text-vino">Curso de Masa Madre</h3>
+        <p id="modalidadMasaMadreSala" class="mt-1 text-xs font-600 uppercase tracking-wider text-flama"></p>
+        <p id="descripcionMasaMadreSala" class="mt-2 text-sm text-carbon/60"></p>
+      </div>
+      <div class="text-right">
+        <p id="precioMasaMadreSala" class="font-display text-2xl text-vino">—</p>
+        <p id="precioMasaMadreMiembroSala" class="hidden text-xs text-carbon/50"></p>
+        <button type="button" id="btnComprarMasaMadreSala" class="mt-2 rounded-full bg-vino px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition disabled:opacity-60">Apartar mi lugar</button>
+      </div>
+    </div>
+    <p id="errorMasaMadreSala" class="mt-3 hidden text-xs text-red-600"></p>
+  </section>
+</main>
+
+<footer class="mt-14 border-t border-vino/10 bg-crema py-8">
+  <div class="mx-auto max-w-3xl px-5 text-center lg:px-8">
+    <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/35">© <span id="anioFooter"></span> Endulcora · Ciudad de México</p>
+  </div>
+</footer>
+
+<script>
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+function abrirCheckoutVentana(url){
+  const ancho = 460, alto = 720;
+  const izquierda = (window.screen.width - ancho) / 2;
+  const arriba = (window.screen.height - alto) / 2;
+  const ventana = window.open(url, 'mp_checkout', `width=${ancho},height=${alto},left=${izquierda},top=${arriba}`);
+  if(!ventana) window.location.href = url;
+}
+
+let SESION_SALA = { isLoggedIn: false, user: null };
+
+async function cargarSesionSala(){
+  try{
+    const res = await fetch('/api/auth/session');
+    SESION_SALA = await res.json();
+  }catch(e){
+    SESION_SALA = { isLoggedIn: false, user: null };
+  }
+  if(SESION_SALA.isLoggedIn && SESION_SALA.user && SESION_SALA.user.email){
+    document.getElementById('correoCompraSuelta').value = SESION_SALA.user.email;
+  }
+  cargarEstadoMembresiaSala();
+}
+
+function mostrarVistaMembresiaSala(nombre){
+  ['membresiaSalaInvitado', 'membresiaSalaOferta', 'membresiaSalaActiva'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById(nombre).classList.remove('hidden');
+}
+
+async function cargarEstadoMembresiaSala(){
+  if(!SESION_SALA.isLoggedIn){
+    mostrarVistaMembresiaSala('membresiaSalaInvitado');
+    return;
+  }
+  try{
+    const res = await fetch('/api/membresia/estado');
+    const data = await res.json();
+    mostrarVistaMembresiaSala(data.activa ? 'membresiaSalaActiva' : 'membresiaSalaOferta');
+  }catch(e){
+    mostrarVistaMembresiaSala('membresiaSalaOferta');
+  }
+}
+
+document.getElementById('tabLoginSala').addEventListener('click', () => {
+  document.getElementById('tabLoginSala').classList.add('border-flama', 'text-flama');
+  document.getElementById('tabLoginSala').classList.remove('border-transparent', 'text-crema/50');
+  document.getElementById('tabRegistroSala').classList.remove('border-flama', 'text-flama');
+  document.getElementById('tabRegistroSala').classList.add('border-transparent', 'text-crema/50');
+  document.getElementById('formLoginSala').classList.remove('hidden');
+  document.getElementById('formRegistroSala').classList.add('hidden');
+});
+document.getElementById('tabRegistroSala').addEventListener('click', () => {
+  document.getElementById('tabRegistroSala').classList.add('border-flama', 'text-flama');
+  document.getElementById('tabRegistroSala').classList.remove('border-transparent', 'text-crema/50');
+  document.getElementById('tabLoginSala').classList.remove('border-flama', 'text-flama');
+  document.getElementById('tabLoginSala').classList.add('border-transparent', 'text-crema/50');
+  document.getElementById('formRegistroSala').classList.remove('hidden');
+  document.getElementById('formLoginSala').classList.add('hidden');
+});
+
+document.getElementById('formLoginSala').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('loginSalaError');
+  err.classList.add('hidden');
+  try{
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('loginSalaEmail').value.trim(),
+        password: document.getElementById('loginSalaPassword').value,
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar sesión');
+    SESION_SALA = { isLoggedIn: true, user: data.user };
+    if(data.user.email) document.getElementById('correoCompraSuelta').value = data.user.email;
+    cargarEstadoMembresiaSala();
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }
+});
+
+document.getElementById('formRegistroSala').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('registroSalaError');
+  err.classList.add('hidden');
+  try{
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: document.getElementById('registroSalaNombre').value.trim(),
+        email: document.getElementById('registroSalaEmail').value.trim(),
+        telefono: document.getElementById('registroSalaTelefono').value.trim(),
+        password: document.getElementById('registroSalaPassword').value,
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo crear la cuenta');
+    SESION_SALA = { isLoggedIn: true, user: data.user };
+    if(data.user.email) document.getElementById('correoCompraSuelta').value = data.user.email;
+    cargarEstadoMembresiaSala();
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }
+});
+
+document.getElementById('btnMembresiaSala').addEventListener('click', async () => {
+  const err = document.getElementById('membresiaSalaError');
+  const spinner = document.getElementById('membresiaSalaSpinner');
+  const btn = document.getElementById('btnMembresiaSala');
+  err.classList.add('hidden');
+  spinner.classList.remove('hidden');
+  btn.disabled = true;
+  try{
+    if(typeof fbq === 'function') fbq('track', 'InitiateCheckout', { content_name: 'Membresía Club Endulcora' });
+    const res = await fetch('/api/membresia/suscribirse', { method: 'POST' });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar la suscripción.');
+    abrirCheckoutVentana(data.url);
+  }catch(e){
+    err.textContent = e.message;
+    err.classList.remove('hidden');
+  }finally{
+    spinner.classList.add('hidden');
+    btn.disabled = false;
+  }
+});
+
+/* ---------- Recetario y curso: catalogo + compra suelta ---------- */
+let RECETARIO_SALA = null;
+let CURSO_MASAMADRE_SALA = null;
+
+async function cargarOfertaSala(){
+  try{
+    const productos = await fetch('/api/products').then(r => r.json());
+    RECETARIO_SALA = productos.find(p => p.titulo === 'Recetario Pan de Muerto') || null;
+    if(RECETARIO_SALA){
+      document.getElementById('precioRecetarioSala').textContent = `$${RECETARIO_SALA.precio} MXN`;
+    }else{
+      document.getElementById('precioRecetarioSala').textContent = 'Próximamente';
+      document.getElementById('btnComprarRecetarioSala').disabled = true;
+    }
+  }catch(e){
+    document.getElementById('precioRecetarioSala').textContent = 'No disponible';
+    document.getElementById('btnComprarRecetarioSala').disabled = true;
+  }
+
+  try{
+    const cursos = await fetch('/api/cursos').then(r => r.json());
+    CURSO_MASAMADRE_SALA = cursos.find(c => c.titulo === 'Curso de Masa Madre') || null;
+    if(CURSO_MASAMADRE_SALA){
+      document.getElementById('modalidadMasaMadreSala').textContent = CURSO_MASAMADRE_SALA.modalidad;
+      document.getElementById('descripcionMasaMadreSala').textContent = CURSO_MASAMADRE_SALA.descripcion;
+      document.getElementById('precioMasaMadreSala').textContent = `$${CURSO_MASAMADRE_SALA.precio} MXN`;
+      if(CURSO_MASAMADRE_SALA.precioMembresia){
+        document.getElementById('precioMasaMadreMiembroSala').textContent = `$${CURSO_MASAMADRE_SALA.precioMembresia} MXN para miembros`;
+        document.getElementById('precioMasaMadreMiembroSala').classList.remove('hidden');
+      }
+    }else{
+      document.getElementById('precioMasaMadreSala').textContent = 'Próximamente';
+      document.getElementById('btnComprarMasaMadreSala').disabled = true;
+    }
+  }catch(e){
+    document.getElementById('precioMasaMadreSala').textContent = 'No disponible';
+    document.getElementById('btnComprarMasaMadreSala').disabled = true;
+  }
+}
+cargarOfertaSala();
+
+async function comprarSuelto({ tipo, id, nombreProducto, btn, errorBox }){
+  errorBox.classList.add('hidden');
+  const correo = document.getElementById('correoCompraSuelta').value.trim();
+  if(!correo){
+    errorBox.textContent = 'Escribe tu correo arriba para poder mandarte la compra.';
+    errorBox.classList.remove('hidden');
+    return;
+  }
+  const textoOriginal = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Procesando…';
+  try{
+    if(typeof fbq === 'function') fbq('track', 'InitiateCheckout', { content_name: nombreProducto });
+    const res = await fetch('/api/checkout/preference', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [{ tipo, id, cantidad: 1 }], email: correo }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago.');
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+    abrirCheckoutVentana(data.url);
+  }catch(e){
+    errorBox.textContent = e.message;
+    errorBox.classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+  }
+}
+
+document.getElementById('btnComprarRecetarioSala').addEventListener('click', () => {
+  if(!RECETARIO_SALA) return;
+  comprarSuelto({
+    tipo: 'producto',
+    id: RECETARIO_SALA.id,
+    nombreProducto: 'Recetario Pan de Muerto',
+    btn: document.getElementById('btnComprarRecetarioSala'),
+    errorBox: document.getElementById('errorRecetarioSala'),
+  });
+});
+
+document.getElementById('btnComprarMasaMadreSala').addEventListener('click', () => {
+  if(!CURSO_MASAMADRE_SALA) return;
+  comprarSuelto({
+    tipo: 'curso',
+    id: CURSO_MASAMADRE_SALA.id,
+    nombreProducto: 'Curso de Masa Madre',
+    btn: document.getElementById('btnComprarMasaMadreSala'),
+    errorBox: document.getElementById('errorMasaMadreSala'),
+  });
+});
+
+cargarSesionSala();
+</script>
+</body>
+</html>

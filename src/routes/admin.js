@@ -367,6 +367,28 @@ router.delete('/api/products/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- Cursos presenciales/en línea (modalidad + duración, sin archivo
+// descargable — se agenda por WhatsApp al comprar, ver src/email.js) ----
+router.get('/api/cursos', requireAdmin, (req, res) => {
+  res.json(store.getCursos());
+});
+
+router.post('/api/cursos', requireAdmin, (req, res) => {
+  const item = store.addCurso(req.body || {});
+  res.status(201).json(item);
+});
+
+router.patch('/api/cursos/:id', requireAdmin, (req, res) => {
+  const item = store.updateCurso(req.params.id, req.body || {});
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+router.delete('/api/cursos/:id', requireAdmin, (req, res) => {
+  store.deleteCurso(req.params.id);
+  res.json({ ok: true });
+});
+
 router.post('/api/products/:id/image', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
   const producto = store.getProduct(req.params.id);
   if (!producto) {
@@ -604,6 +626,73 @@ router.get('/api/registros-qr', requireAdmin, (req, res) => {
 router.delete('/api/registros-qr/:id', requireAdmin, (req, res) => {
   store.deleteRegistroQr(req.params.id);
   res.json({ ok: true });
+});
+
+// ---- Clase gratis en sala (p.ej. Pan de Muerto): registros + segmentacion
+// al cierre del dia (ver src/routes/api.js para el registro publico y
+// clasegratis_* en /api/content para la configuracion del evento) ----
+router.get('/api/clase-gratis/registros', requireAdmin, (req, res) => {
+  res.json(store.getRegistrosClaseGratis());
+});
+
+router.patch('/api/clase-gratis/registros/:id', requireAdmin, (req, res) => {
+  const { asistio, compro, seHizoMiembro } = req.body || {};
+  const item = store.actualizarSegmentoClaseGratis(req.params.id, { asistio, compro, seHizoMiembro });
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+router.delete('/api/clase-gratis/registros/:id', requireAdmin, (req, res) => {
+  store.deleteRegistroClaseGratis(req.params.id);
+  res.json({ ok: true });
+});
+
+const ETIQUETA_SEGMENTO_CLASE_GRATIS = {
+  asistio_no_compro: 'Asistió, no compró',
+  asistio_compro: 'Asistió y compró',
+  se_hizo_miembro: 'Se hizo miembro',
+  no_asistio: 'No asistió',
+};
+
+router.get('/api/clase-gratis/registros/excel', requireAdmin, async (req, res) => {
+  const registros = store.getRegistrosClaseGratis();
+  const libro = new ExcelJS.Workbook();
+  libro.creator = 'Endulcora';
+  libro.created = new Date();
+  const hoja = libro.addWorksheet('Clase gratis');
+  hoja.columns = [
+    { key: 'nombre', width: 26 },
+    { key: 'whatsapp', width: 16 },
+    { key: 'correo', width: 28 },
+    { key: 'horario', width: 16 },
+    { key: 'yaTomoTaller', width: 12 },
+    { key: 'intereses', width: 26 },
+    { key: 'segmento', width: 20 },
+    { key: 'createdAt', width: 18 },
+  ];
+  const filaEncabezado = hoja.addRow(['Nombre', 'WhatsApp', 'Correo', 'Horario', '¿Ya tomó taller?', 'Interés', 'Segmento', 'Registrado el']);
+  filaEncabezado.font = { bold: true };
+  filaEncabezado.eachCell((celda) => {
+    celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5A623' } };
+  });
+  registros
+    .sort((a, b) => a.nombre.localeCompare(b.nombre))
+    .forEach((r) => {
+      hoja.addRow({
+        nombre: r.nombre,
+        whatsapp: r.whatsapp,
+        correo: r.correo,
+        horario: r.horario,
+        yaTomoTaller: r.yaTomoTaller ? 'Sí' : 'No',
+        intereses: r.interesTemas.join(', '),
+        segmento: ETIQUETA_SEGMENTO_CLASE_GRATIS[r.segmento] || 'Sin marcar',
+        createdAt: new Date(r.createdAt).toLocaleDateString('es-MX'),
+      });
+    });
+  res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.set('Content-Disposition', 'attachment; filename="clase-gratis-endulcora.xlsx"');
+  await libro.xlsx.write(res);
+  res.end();
 });
 
 // Nombre de pestaña de Excel: maximo 31 caracteres, sin los caracteres que

@@ -112,7 +112,25 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
       totalCompras: 1,
     }));
 
-  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres, ...contactosQr, ...contactosSubscribers, ...contactosPedidosInvitado] });
+  // Registros de la clase gratis en sala (p.ej. Pan de Muerto): el segmento
+  // (si se marco al cierre del dia) se manda como etiqueta, para que las
+  // demas marcas del grupo tambien puedan segmentar sus propios envios.
+  const contactosClaseGratis = store
+    .getRegistrosClaseGratis()
+    .filter((r) => r.correo)
+    .map((r) => ({
+      email: r.correo,
+      telefono: r.whatsapp || '',
+      nombre: r.nombre || '',
+      categoriasInteres: [
+        'origen:clase-gratis-pan-de-muerto',
+        ...r.interesTemas.map((t) => `interes:${t}`),
+        r.segmento ? `segmento:${r.segmento}` : '',
+      ].filter(Boolean),
+      esPrimeraVez: !r.yaTomoTaller,
+    }));
+
+  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres, ...contactosQr, ...contactosSubscribers, ...contactosPedidosInvitado, ...contactosClaseGratis] });
 });
 
 module.exports = router;

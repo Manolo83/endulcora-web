@@ -205,6 +205,10 @@ router.get('/products', (req, res) => {
   res.json(store.getProducts());
 });
 
+router.get('/cursos', (req, res) => {
+  res.json(store.getCursos());
+});
+
 const PREFIJO_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
 
 function resumenProducto(r) {
@@ -413,6 +417,66 @@ router.post('/registro', (req, res) => {
     correo,
     marcaInteres: b.marcaInteres,
     aceptaPromociones: b.aceptaPromociones,
+    aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
+  });
+  res.status(201).json({ ok: true, id: item.id });
+});
+
+// ---- Clase gratis en sala (p.ej. Pan de Muerto): registro + horarios con
+// cupo disponible. El "registro vive en el sitio", no en WhatsApp.
+function horariosClaseGratisConCupo(contenido) {
+  const horarios = String(contenido.clasegratis_horarios || '')
+    .split(',')
+    .map((h) => h.trim())
+    .filter(Boolean);
+  const cupoPorHorario = Math.max(0, parseInt(contenido.clasegratis_cupos_por_horario, 10) || 0);
+  return horarios.map((horario) => {
+    const inscritos = store.contarRegistrosClaseGratisPorHorario(horario);
+    return { horario, cupoTotal: cupoPorHorario, cupoDisponible: Math.max(0, cupoPorHorario - inscritos) };
+  });
+}
+
+router.get('/clase-gratis', (req, res) => {
+  const contenido = store.getContent();
+  res.json({
+    activo: contenido.clasegratis_activo === 'true',
+    titulo: contenido.clasegratis_titulo || '',
+    descripcion: contenido.clasegratis_descripcion || '',
+    fecha: contenido.clasegratis_fecha || '',
+    horarios: horariosClaseGratisConCupo(contenido),
+    temas: store.TEMAS_CLASE_GRATIS,
+  });
+});
+
+router.post('/clase-gratis/registro', (req, res) => {
+  const b = req.body || {};
+  const contenido = store.getContent();
+  if (contenido.clasegratis_activo !== 'true') {
+    return res.status(400).json({ error: 'El registro para esta clase no está abierto en este momento.' });
+  }
+  const nombre = String(b.nombre || '').trim();
+  const whatsapp = String(b.whatsapp || '').trim();
+  const correo = String(b.correo || '').trim();
+  const horario = String(b.horario || '').trim();
+
+  if (!nombre) return res.status(400).json({ error: 'Escribe tu nombre completo.' });
+  if (!WHATSAPP_RE.test(whatsapp)) return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
+  if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
+  if (typeof b.yaTomoTaller !== 'boolean') return res.status(400).json({ error: 'Dinos si ya tomaste un taller con nosotros.' });
+  if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para registrarte.' });
+
+  const horariosDisponibles = horariosClaseGratisConCupo(contenido);
+  const elegido = horariosDisponibles.find((h) => h.horario === horario);
+  if (!elegido) return res.status(400).json({ error: 'Elige un horario válido.' });
+  if (elegido.cupoDisponible <= 0) return res.status(400).json({ error: 'Ese horario ya no tiene cupo disponible. Elige otro.' });
+
+  const item = store.addRegistroClaseGratis({
+    nombre,
+    whatsapp,
+    correo,
+    horario,
+    yaTomoTaller: b.yaTomoTaller,
+    interesTemas: Array.isArray(b.interesTemas) ? b.interesTemas : [],
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
   });
   res.status(201).json({ ok: true, id: item.id });

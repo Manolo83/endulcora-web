@@ -67,6 +67,7 @@
       <a href="#seccionVistaPrevia" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Vista previa</a>
       <a href="#seccionContenido" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Contenido general</a>
       <a href="#seccionProductos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Productos</a>
+      <a href="#seccionCursos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Cursos</a>
       <a href="#seccionBlog" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Blog</a>
       <a href="#seccionCalendario" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Calendario</a>
       <a href="#seccionLegales" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Legales</a>
@@ -76,6 +77,7 @@
       <a href="#seccionSuscriptores" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Suscriptores</a>
       <a href="#seccionInscripcionesTaller" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Inscripciones a talleres</a>
       <a href="#seccionRegistrosQr" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">QR de registro</a>
+      <a href="#seccionClaseGratis" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clase gratis</a>
       <a href="#seccionCampanas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Campañas de correo</a>
       <a href="#seccionResenas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Reseñas</a>
       <a href="#seccionComunidad" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Comunidad</a>
@@ -310,6 +312,41 @@
         </div>
 
         <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Clase gratis en sala (p.ej. Pan de Muerto)</h3>
+          <p class="mt-1 text-xs text-carbon/50">Página de registro en <a href="/clase-gratis" target="_blank" class="underline hover:text-vino">/clase-gratis</a> y oferta del día. Los registrados y la segmentación se manejan en la pestaña <a href="#seccionClaseGratis" class="underline hover:text-vino">Clase gratis</a>.</p>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">¿Abrir el registro al público?</span>
+              <select data-content-key="clasegratis_activo" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+                <option value="false">No, mantener cerrado</option>
+                <option value="true">Sí, hay clase programada</option>
+              </select>
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
+              <input data-content-key="clasegratis_titulo" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción</span>
+              <textarea data-content-key="clasegratis_descripcion" rows="2" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Fecha</span>
+              <input data-content-key="clasegratis_fecha" type="date" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Cupo por horario</span>
+              <input data-content-key="clasegratis_cupos_por_horario" type="text" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Horarios (separados por coma)</span>
+              <input data-content-key="clasegratis_horarios" type="text" placeholder="11:00 am, 1:00 pm, 4:00 pm" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+          </div>
+          <p class="mt-4 text-xs text-carbon/40">El precio del Curso de Masa Madre se edita en la pestaña <a href="#seccionCursos" class="underline hover:text-vino">Cursos</a>; el del Recetario suelto, en <a href="#seccionProductos" class="underline hover:text-vino">Productos</a>.</p>
+        </div>
+
+        <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
           <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Footer y contacto</h3>
           <div class="mt-4 grid gap-4 sm:grid-cols-2">
             <label class="block sm:col-span-2">
@@ -526,6 +563,39 @@
       </div>
 
       <div id="listaProductosAdmin" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
+    <!-- CURSOS -->
+    <section id="seccionCursos" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Cursos</h2>
+      <p class="mt-1 text-sm text-carbon/60">Cursos presenciales o en línea con agenda por WhatsApp (sin descarga). Para el curso de Masa Madre de la oferta de sala, llena "Precio de miembro" solo si se decide dar rebaja — vacío significa que no la hay.</p>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Agregar curso</h3>
+        <form id="formNuevoCurso" class="mt-4 grid gap-4 sm:grid-cols-2">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
+            <input id="cursoNuevoTitulo" type="text" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Modalidad / duración</span>
+            <input id="cursoNuevoModalidad" type="text" placeholder="Presencial · 5 sesiones / 20 h" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <label class="block sm:col-span-2">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción</span>
+            <textarea id="cursoNuevoDescripcion" rows="2" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio (MXN)</span>
+            <input id="cursoNuevoPrecio" type="text" inputmode="numeric" required class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+          <div class="sm:col-span-2">
+            <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Agregar curso</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="listaCursosAdmin" class="mt-6 grid gap-4 sm:grid-cols-2"></div>
     </section>
 
     <!-- BLOG -->
@@ -866,6 +936,28 @@
       <div id="listaRegistrosQr" class="mt-6 overflow-hidden overflow-x-auto rounded-2xl bg-white ring-1 ring-vino/10"></div>
     </section>
 
+    <!-- CLASE GRATIS EN SALA -->
+    <section id="seccionClaseGratis" class="scroll-mt-32 mb-14">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="font-titulo text-2xl tracking-wide text-vino">Clase gratis — registrados</h2>
+          <p class="mt-1 text-sm text-carbon/60">Formulario público en <a href="/clase-gratis" target="_blank" class="underline hover:text-vino">/clase-gratis</a>. Configura título, fecha, horarios y precios de la oferta en la pestaña <a href="#seccionContenido" class="underline hover:text-vino">Contenido</a>.</p>
+        </div>
+        <a href="/admin/api/clase-gratis/registros/excel" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Exportar Excel</a>
+      </div>
+      <p class="mt-4 rounded-xl bg-flama/10 p-3 text-xs leading-relaxed text-vino ring-1 ring-flama/30">Al cierre del día, marca para cada quien qué pasó de verdad (asistió, compró, se hizo miembro). Eso decide la etiqueta con la que queda en la lista de campañas, para poder mandarle a cada segmento el seguimiento que le toca.</p>
+
+      <div class="mt-4 flex flex-wrap items-center gap-5 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <img src="/qr-clase-gratis-sala.png" alt="Código QR hacia la oferta de sala" class="h-36 w-36 rounded-xl ring-1 ring-vino/10">
+        <div>
+          <p class="text-sm text-carbon/70">QR de la oferta de sala (<a href="/clase-gratis-sala" target="_blank" class="underline hover:text-vino">/clase-gratis-sala</a>): proyéctalo en pantalla o ponlo en el arte de sala.</p>
+          <a href="/qr-clase-gratis-sala.png" download="qr-clase-gratis-sala-endulcora.png" class="mt-3 inline-block rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Descargar QR</a>
+        </div>
+      </div>
+
+      <div id="listaClaseGratis" class="mt-6 overflow-hidden overflow-x-auto rounded-2xl bg-white ring-1 ring-vino/10"></div>
+    </section>
+
     <!-- CAMPAÑAS DE CORREO -->
     <section id="seccionCampanas" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Campañas de correo masivo</h2>
@@ -909,7 +1001,7 @@
           <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Contactos</h3>
           <p id="campanaContactosResumen" class="font-ui text-[11px] uppercase tracking-widest text-carbon/50">Cargando…</p>
         </div>
-        <input id="campanaContactosBuscador" type="search" placeholder="Buscar por correo o nombre…" class="mt-3 w-full max-w-sm rounded-full border border-vino/15 bg-crema/60 px-4 py-2 text-sm outline-none focus:border-vino/40">
+        <input id="campanaContactosBuscador" type="search" placeholder="Buscar por correo, nombre o etiqueta (ej. segmento:asistio_compro)…" class="mt-3 w-full max-w-sm rounded-full border border-vino/15 bg-crema/60 px-4 py-2 text-sm outline-none focus:border-vino/40">
         <div class="mt-3 flex flex-wrap items-center gap-3">
           <button type="button" id="btnSeleccionarTodosContactos" class="rounded-full border border-vino/25 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Seleccionar TODOS los contactos activos</button>
           <button type="button" id="btnQuitarSeleccionContactos" class="rounded-full border border-carbon/15 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-carbon/50 hover:border-carbon/40 transition">Quitar toda la selección</button>
@@ -1145,6 +1237,8 @@ function mostrarDashboard(mostrar){
     cargarSuscriptores();
     cargarInscripcionesTaller();
     cargarRegistrosQr();
+    cargarClaseGratis();
+    cargarCursosAdmin();
     cargarResenas();
     cargarComunidadAdmin();
     cargarAnuncios();
@@ -1705,6 +1799,7 @@ function pintarContactosCampana(lista){
         <input type="checkbox" class="chkContactoCampana h-4 w-4 shrink-0 rounded border-vino/25" data-id="${c.id}" ${SELECCIONADOS_CAMPANA.has(c.id) ? 'checked' : ''} ${c.activo === false ? 'disabled' : ''}>
         <span class="min-w-0">
           <p class="truncate text-sm text-carbon/80">${escapeHtml(c.email)}${c.nombre ? ` · ${escapeHtml(c.nombre)}` : ''}</p>
+          ${(c.etiquetas || []).length ? `<span class="mt-0.5 flex flex-wrap gap-1">${c.etiquetas.map(et => `<span class="rounded-full bg-vino/10 px-2 py-0.5 text-[10px] text-vino">${escapeHtml(et)}</span>`).join('')}</span>` : ''}
           ${c.activo === false ? '<span class="text-[11px] uppercase tracking-widest text-carbon/40">Dado de baja</span>' : ''}
         </span>
       </label>
@@ -1753,7 +1848,7 @@ $('chkSeleccionarTodos').addEventListener('change', (e) => {
 
 $('campanaContactosBuscador').addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase();
-  const filtrada = !q ? CONTACTOS_CAMPANA : CONTACTOS_CAMPANA.filter(c => (c.email||'').toLowerCase().includes(q) || (c.nombre||'').toLowerCase().includes(q));
+  const filtrada = !q ? CONTACTOS_CAMPANA : CONTACTOS_CAMPANA.filter(c => (c.email||'').toLowerCase().includes(q) || (c.nombre||'').toLowerCase().includes(q) || (c.etiquetas||[]).some(et => et.toLowerCase().includes(q)));
   pintarContactosCampana(filtrada);
 });
 
@@ -3088,6 +3183,202 @@ $('btnExportarRegistrosQr').addEventListener('click', () => {
   a.download = 'registros-qr-endulcora.csv';
   a.click();
   URL.revokeObjectURL(url);
+});
+
+/* ---------- Clase gratis en sala ---------- */
+let REGISTROS_CLASE_GRATIS = [];
+const ETIQUETA_TEMA_ADMIN = { panaderia: 'Panadería', chocolate: 'Chocolate', reposteria: 'Repostería', velas: 'Velas comestibles', cocina_salada: 'Cocina salada' };
+
+async function cargarClaseGratis(){
+  const cont = $('listaClaseGratis');
+  cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Cargando…</p>';
+  try{
+    REGISTROS_CLASE_GRATIS = await api('/admin/api/clase-gratis/registros');
+    if(!REGISTROS_CLASE_GRATIS.length){
+      cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Todavía no hay registros.</p>';
+      return;
+    }
+    cont.innerHTML = `<table class="w-full min-w-[960px] text-sm">
+      <thead>
+        <tr class="border-b border-vino/10 text-left font-ui text-[11px] uppercase tracking-wider text-carbon/45">
+          <th class="px-5 py-3 font-600">Nombre</th>
+          <th class="px-5 py-3 font-600">Contacto</th>
+          <th class="px-5 py-3 font-600">Horario</th>
+          <th class="px-5 py-3 font-600">¿Ya tomó taller?</th>
+          <th class="px-5 py-3 font-600">Interés</th>
+          <th class="px-5 py-3 font-600">Asistió</th>
+          <th class="px-5 py-3 font-600">Compró</th>
+          <th class="px-5 py-3 font-600">Miembro</th>
+          <th class="px-5 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${REGISTROS_CLASE_GRATIS.map(r => `
+          <tr class="border-b border-vino/10 last:border-0 align-top" data-row-id="${r.id}">
+            <td class="px-5 py-3 text-carbon/80">${escapeHtml(r.nombre)}</td>
+            <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(r.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(r.correo)}</div></td>
+            <td class="px-5 py-3 text-carbon/70">${escapeHtml(r.horario)}</td>
+            <td class="px-5 py-3 text-carbon/70">${r.yaTomoTaller ? 'Sí' : 'No'}</td>
+            <td class="px-5 py-3 text-xs text-carbon/60">${r.interesTemas.map(t => escapeHtml(ETIQUETA_TEMA_ADMIN[t] || t)).join(', ') || '—'}</td>
+            <td class="px-5 py-3">
+              <select class="selAsistio rounded-lg border border-vino/15 bg-crema/60 px-2 py-1.5 text-xs" data-id="${r.id}">
+                <option value="" ${r.asistio === null ? 'selected' : ''}>Sin marcar</option>
+                <option value="si" ${r.asistio === true ? 'selected' : ''}>Sí</option>
+                <option value="no" ${r.asistio === false ? 'selected' : ''}>No</option>
+              </select>
+            </td>
+            <td class="px-5 py-3">
+              <select class="selCompro rounded-lg border border-vino/15 bg-crema/60 px-2 py-1.5 text-xs" data-id="${r.id}">
+                <option value="" ${!r.compro ? 'selected' : ''}>No compró</option>
+                <option value="taller" ${r.compro === 'taller' ? 'selected' : ''}>Taller</option>
+                <option value="recetario" ${r.compro === 'recetario' ? 'selected' : ''}>Recetario</option>
+              </select>
+            </td>
+            <td class="px-5 py-3 text-center">
+              <input type="checkbox" class="chkMiembro h-4 w-4 rounded border-vino/25" data-id="${r.id}" ${r.seHizoMiembro ? 'checked' : ''}>
+            </td>
+            <td class="px-5 py-3 text-right"><button type="button" data-id="${r.id}" class="btnBorrarClaseGratis text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+    async function guardarSegmento(id){
+      const fila = cont.querySelector(`tr[data-row-id="${id}"]`);
+      const asistioVal = fila.querySelector('.selAsistio').value;
+      const compro = fila.querySelector('.selCompro').value;
+      const seHizoMiembro = fila.querySelector('.chkMiembro').checked;
+      try{
+        await api(`/admin/api/clase-gratis/registros/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ asistio: asistioVal === '' ? null : asistioVal === 'si', compro, seHizoMiembro }),
+        });
+        toast('Guardado');
+      }catch(e){
+        toast(e.message);
+      }
+    }
+
+    cont.querySelectorAll('.selAsistio, .selCompro').forEach(el => {
+      el.addEventListener('change', () => guardarSegmento(el.dataset.id));
+    });
+    cont.querySelectorAll('.chkMiembro').forEach(el => {
+      el.addEventListener('change', () => guardarSegmento(el.dataset.id));
+    });
+    cont.querySelectorAll('.btnBorrarClaseGratis').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Borrar este registro? No se puede deshacer.')) return;
+        try{
+          await api(`/admin/api/clase-gratis/registros/${btn.dataset.id}`, { method: 'DELETE' });
+          toast('Registro borrado');
+          cargarClaseGratis();
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="p-5 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+/* ---------- Cursos ---------- */
+let CURSOS_ADMIN = [];
+async function cargarCursosAdmin(){
+  const cont = $('listaCursosAdmin');
+  cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Cargando…</p>';
+  try{
+    CURSOS_ADMIN = await api('/admin/api/cursos');
+    if(!CURSOS_ADMIN.length){
+      cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Todavía no hay cursos.</p>';
+      return;
+    }
+    cont.innerHTML = CURSOS_ADMIN.map(c => `
+      <div class="rounded-2xl bg-white p-5 ring-1 ring-vino/10" data-curso-id="${c.id}">
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
+          <input class="campoCursoTitulo mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm" value="${escapeHtml(c.titulo)}">
+        </label>
+        <label class="mt-2 block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Modalidad / duración</span>
+          <input class="campoCursoModalidad mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm" value="${escapeHtml(c.modalidad)}">
+        </label>
+        <label class="mt-2 block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción</span>
+          <textarea class="campoCursoDescripcion mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm" rows="2">${escapeHtml(c.descripcion)}</textarea>
+        </label>
+        <div class="mt-2 grid grid-cols-2 gap-2">
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio</span>
+            <input class="campoCursoPrecio mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm" inputmode="numeric" value="${escapeHtml(c.precio)}">
+          </label>
+          <label class="block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio de miembro</span>
+            <input class="campoCursoPrecioMiembro mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm" inputmode="numeric" placeholder="Vacío = sin rebaja" value="${escapeHtml(c.precioMembresia || '')}">
+          </label>
+        </div>
+        <div class="mt-3 flex items-center justify-between gap-3">
+          <button type="button" class="btnGuardarCurso rounded-full bg-vino px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar</button>
+          <button type="button" class="btnBorrarCurso text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button>
+        </div>
+      </div>`).join('');
+
+    cont.querySelectorAll('.btnGuardarCurso').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const tarjeta = btn.closest('[data-curso-id]');
+        const id = tarjeta.dataset.cursoId;
+        try{
+          await api(`/admin/api/cursos/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              titulo: tarjeta.querySelector('.campoCursoTitulo').value.trim(),
+              modalidad: tarjeta.querySelector('.campoCursoModalidad').value.trim(),
+              descripcion: tarjeta.querySelector('.campoCursoDescripcion').value.trim(),
+              precio: tarjeta.querySelector('.campoCursoPrecio').value.trim(),
+              precioMembresia: tarjeta.querySelector('.campoCursoPrecioMiembro').value.trim(),
+            }),
+          });
+          toast('Curso guardado');
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
+    cont.querySelectorAll('.btnBorrarCurso').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const tarjeta = btn.closest('[data-curso-id]');
+        if (!confirm('¿Borrar este curso?')) return;
+        try{
+          await api(`/admin/api/cursos/${tarjeta.dataset.cursoId}`, { method: 'DELETE' });
+          toast('Curso borrado');
+          cargarCursosAdmin();
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="p-5 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('formNuevoCurso').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try{
+    await api('/admin/api/cursos', {
+      method: 'POST',
+      body: JSON.stringify({
+        titulo: $('cursoNuevoTitulo').value.trim(),
+        modalidad: $('cursoNuevoModalidad').value.trim(),
+        descripcion: $('cursoNuevoDescripcion').value.trim(),
+        precio: $('cursoNuevoPrecio').value.trim(),
+      }),
+    });
+    e.target.reset();
+    toast('Curso agregado');
+    cargarCursosAdmin();
+  }catch(err){
+    toast(err.message);
+  }
 });
 
 /* ---------- Reseñas ---------- */

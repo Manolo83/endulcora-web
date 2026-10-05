@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YZNFKC6PS8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-YZNFKC6PS8');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clase gratis · Endulcora</title>
+<meta name="description" content="Regístrate gratis a la próxima clase presencial de Endulcora: elige tu horario y asegura tu lugar.">
+<link rel="canonical" href="https://www.endulcora.com/clase-gratis">
+<meta name="theme-color" content="#1B0720">
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1302735011542499');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1302735011542499&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+.campo-registro { width: 100%; border-radius: 0.9rem; border: 1px solid rgba(78,20,84,.18); background: #fff; padding: 0.85rem 1rem; font-size: 1rem; color: #1B0720; }
+.campo-registro:focus { border-color: #4E1454; }
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<main class="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-10">
+  <div class="mb-6 text-center">
+    <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="mx-auto h-14 w-auto">
+  </div>
+
+  <div id="bloqueCargando" class="rounded-3xl bg-white p-8 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Cargando…</div>
+
+  <div id="bloqueSinClase" class="hidden rounded-3xl bg-white p-8 text-center ring-1 ring-vino/10">
+    <p class="font-display text-xl text-vino">Por ahora no hay clase gratis programada</p>
+    <p class="mt-2 text-sm text-carbon/60">Síguenos para enterarte de la próxima fecha.</p>
+  </div>
+
+  <form id="formClaseGratis" class="hidden space-y-4 rounded-3xl bg-white p-6 shadow-[0_2px_0_rgba(78,20,84,.06)] ring-1 ring-vino/10 sm:p-8" novalidate>
+    <div class="mb-2 text-center">
+      <h1 id="tituloClase" class="font-display text-2xl text-vino"></h1>
+      <p id="descripcionClase" class="mt-2 text-sm text-carbon/60"></p>
+      <p id="fechaClase" class="mt-2 font-ui text-[12px] font-700 uppercase tracking-widest text-flama"></p>
+    </div>
+
+    <input id="campoNombre" name="nombre" type="text" required autocomplete="name" class="campo-registro" placeholder="Tu nombre completo">
+    <input id="campoWhatsapp" name="whatsapp" type="tel" required autocomplete="tel" class="campo-registro" placeholder="Tu WhatsApp">
+    <input id="campoCorreo" name="correo" type="email" required autocomplete="email" class="campo-registro" placeholder="Tu correo">
+
+    <label class="block">
+      <span class="mb-1.5 block text-xs font-600 text-carbon/60">Horario</span>
+      <select id="campoHorario" name="horario" required class="campo-registro"></select>
+    </label>
+
+    <div>
+      <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Ya tomaste un taller con nosotros?</span>
+      <div class="flex gap-4 text-sm text-carbon/80">
+        <label class="flex items-center gap-2"><input type="radio" name="yaTomoTaller" value="si" required class="h-4 w-4 border-vino/30"> Sí</label>
+        <label class="flex items-center gap-2"><input type="radio" name="yaTomoTaller" value="no" required class="h-4 w-4 border-vino/30"> No</label>
+      </div>
+    </div>
+
+    <div>
+      <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Qué te gustaría aprender? (opcional)</span>
+      <div id="opcionesTemas" class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm text-carbon/80"></div>
+    </div>
+
+    <div class="pt-2">
+      <label class="flex items-start gap-3 text-sm text-carbon/80">
+        <input id="campoAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
+        <span>He leído y acepto el <a href="#" onclick="abrirModalPrivacidad(event)" class="text-vino underline">aviso de privacidad</a>. *</span>
+      </label>
+    </div>
+
+    <p id="errorRegistro" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+
+    <button type="submit" id="btnEnviarRegistro" class="w-full rounded-full bg-vino py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-crema transition hover:bg-uva disabled:opacity-60">
+      Apartar mi lugar
+    </button>
+  </form>
+
+  <div id="tarjetaExitoRegistro" class="hidden rounded-3xl bg-vino p-8 text-center text-crema shadow-[0_2px_0_rgba(78,20,84,.06)]">
+    <p class="font-display text-2xl">¡Listo, ya tienes tu lugar!</p>
+    <p class="mt-3 text-sm leading-relaxed text-crema/85">Te vamos a escribir por WhatsApp para confirmarte los detalles y recordarte la fecha.</p>
+  </div>
+</main>
+
+<!-- Modal del aviso de privacidad -->
+<div id="modalPrivacidad" class="fixed inset-0 z-[60] hidden items-center justify-center bg-carbon/50 p-4">
+  <div class="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6">
+    <div class="flex items-center justify-between gap-4">
+      <h3 class="font-titulo text-xl text-vino">Aviso de privacidad</h3>
+      <button type="button" onclick="cerrarModalPrivacidad()" aria-label="Cerrar" class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-carbon/50 hover:bg-vino/10 hover:text-vino">✕</button>
+    </div>
+    <div id="textoPrivacidad" class="mt-4 space-y-3 text-sm leading-relaxed text-carbon/75"></div>
+  </div>
+</div>
+
+<script>
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function abrirModalPrivacidad(e){
+  if (e) e.preventDefault();
+  const modal = document.getElementById('modalPrivacidad');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  const cont = document.getElementById('textoPrivacidad');
+  cont.innerHTML = '<p class="text-carbon/50">Cargando…</p>';
+  try{
+    const c = await fetch('/api/content').then(r => r.json());
+    const texto = c.legal_privacidad || '';
+    cont.innerHTML = texto.split('\n\n').map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+  }catch(err){
+    cont.innerHTML = '<p class="text-red-600">No se pudo cargar el aviso de privacidad.</p>';
+  }
+}
+function cerrarModalPrivacidad(){
+  const modal = document.getElementById('modalPrivacidad');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+document.getElementById('modalPrivacidad').addEventListener('click', (e) => {
+  if (e.target.id === 'modalPrivacidad') cerrarModalPrivacidad();
+});
+
+const ETIQUETA_TEMA = {
+  panaderia: 'Panadería',
+  chocolate: 'Chocolate',
+  reposteria: 'Repostería',
+  velas: 'Velas comestibles',
+  cocina_salada: 'Cocina salada',
+};
+
+const form = document.getElementById('formClaseGratis');
+const errorBox = document.getElementById('errorRegistro');
+const btnEnviar = document.getElementById('btnEnviarRegistro');
+
+async function cargarClaseGratis(){
+  try{
+    const info = await fetch('/api/clase-gratis').then(r => r.json());
+    document.getElementById('bloqueCargando').classList.add('hidden');
+    if (!info.activo) {
+      document.getElementById('bloqueSinClase').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('tituloClase').textContent = info.titulo;
+    document.getElementById('descripcionClase').textContent = info.descripcion;
+    if (info.fecha) {
+      document.getElementById('fechaClase').textContent = new Date(info.fecha + 'T00:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+
+    const selectHorario = document.getElementById('campoHorario');
+    selectHorario.innerHTML = info.horarios.map(h => `
+      <option value="${escapeHtml(h.horario)}" ${h.cupoDisponible <= 0 ? 'disabled' : ''}>
+        ${escapeHtml(h.horario)}${h.cupoDisponible <= 0 ? ' — Sin cupo' : ''}
+      </option>
+    `).join('');
+
+    document.getElementById('opcionesTemas').innerHTML = info.temas.map(t => `
+      <label class="flex items-center gap-2">
+        <input type="checkbox" name="interesTemas" value="${escapeHtml(t)}" class="h-4 w-4 rounded border-vino/30">
+        ${escapeHtml(ETIQUETA_TEMA[t] || t)}
+      </label>
+    `).join('');
+
+    if (!info.horarios.length || info.horarios.every(h => h.cupoDisponible <= 0)) {
+      form.classList.add('hidden');
+      document.getElementById('bloqueSinClase').classList.remove('hidden');
+      document.getElementById('bloqueSinClase').querySelector('p').textContent = 'Ya no hay cupo disponible para esta clase.';
+      return;
+    }
+
+    form.classList.remove('hidden');
+  }catch(err){
+    document.getElementById('bloqueCargando').classList.add('hidden');
+    document.getElementById('bloqueSinClase').classList.remove('hidden');
+  }
+}
+cargarClaseGratis();
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorBox.classList.add('hidden');
+
+  const datos = new FormData(form);
+  const yaTomoTaller = datos.get('yaTomoTaller');
+  const cuerpo = {
+    nombre: datos.get('nombre'),
+    whatsapp: datos.get('whatsapp'),
+    correo: datos.get('correo'),
+    horario: datos.get('horario'),
+    yaTomoTaller: yaTomoTaller === 'si',
+    interesTemas: datos.getAll('interesTemas'),
+    aceptaAvisoPrivacidad: datos.get('aceptaAvisoPrivacidad') === 'on',
+  };
+
+  btnEnviar.disabled = true;
+  btnEnviar.textContent = 'Enviando…';
+  try{
+    const res = await fetch('/api/clase-gratis/registro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'No se pudo enviar tu registro. Intenta de nuevo.');
+
+    if (typeof fbq === 'function') fbq('track', 'CompleteRegistration');
+    form.classList.add('hidden');
+    document.getElementById('tarjetaExitoRegistro').classList.remove('hidden');
+  }catch(err){
+    errorBox.textContent = err.message;
+    errorBox.classList.remove('hidden');
+    btnEnviar.disabled = false;
+    btnEnviar.textContent = 'Apartar mi lugar';
+  }
+});
+</script>
+</body>
+</html>
