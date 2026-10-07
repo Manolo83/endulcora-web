@@ -227,8 +227,7 @@ body { background: #FBF4E9; }
         <!-- Recetario de regalo de la clase (se sube desde /admin > Clase en vivo) -->
         <div id="bloqueRecetarioLive" class="hidden shrink-0 rounded-2xl bg-crema/10 p-6 text-center lg:w-64">
           <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">Recetario de regalo</p>
-          <p id="recetarioLiveNombre" class="mt-2 text-sm text-crema/80"></p>
-          <a id="linkRecetarioLive" href="#" target="_blank" class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-flama px-5 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Descargar PDF</a>
+          <a id="linkRecetarioLive" href="#" target="_blank" class="mt-4 inline-flex w-full items-center justify-center rounded-full bg-flama px-5 py-3 text-center font-ui text-[12px] font-700 uppercase leading-tight tracking-wide text-carbon hover:brightness-105 transition">Descarga aquí el recetario</a>
         </div>
       </div>
     </div>
@@ -292,7 +291,6 @@ function mostrarAccesoConcedidoLive(c){
   const bloqueRecetario = document.getElementById('bloqueRecetarioLive');
   if(c.recetarioUrl){
     document.getElementById('linkRecetarioLive').href = c.recetarioUrl;
-    document.getElementById('recetarioLiveNombre').textContent = c.recetarioNombre || 'El recetario de esta clase, en PDF.';
     bloqueRecetario.classList.remove('hidden');
   }else{
     bloqueRecetario.classList.add('hidden');
