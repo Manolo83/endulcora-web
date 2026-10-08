@@ -374,7 +374,7 @@ async function cargarContenidoMembresia(){
       document.getElementById('bloqueRevistaMes').classList.remove('hidden');
       document.getElementById('revistaNumeroEtiqueta').textContent = c.revistaNumero || 'de este mes';
     }
-    if(c.videoYoutubeId){
+    if(c.videoMostrar && c.videoYoutubeId){
       document.getElementById('bloqueVideoMes').classList.remove('hidden');
       document.getElementById('videoMesEtiqueta').textContent = c.videoMes || 'este mes';
       document.getElementById('videoTitulo').textContent = c.videoTitulo || '';
@@ -384,7 +384,7 @@ async function cargarContenidoMembresia(){
       document.getElementById('linkGrupoWhatsapp').href = c.whatsappGrupoUrl;
       document.getElementById('bloqueGrupoWhatsapp').classList.remove('hidden');
     }
-    if(!c.recetarioDisponible && !c.videoYoutubeId && !c.revistaDisponible){
+    if(!c.recetarioDisponible && !(c.videoMostrar && c.videoYoutubeId) && !c.revistaDisponible){
       document.getElementById('sinContenidoAviso').classList.remove('hidden');
     }
   }catch(e){

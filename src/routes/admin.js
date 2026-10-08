@@ -1107,9 +1107,10 @@ router.get('/api/membresia/contenido', requireAdmin, (req, res) => {
 });
 
 router.post('/api/membresia/contenido', requireAdmin, (req, res) => {
-  const { recetarioMes, videoYoutubeId, videoTitulo, videoMes, revistaNumero, whatsappGrupoUrl } = req.body || {};
+  const { recetarioMes, videoMostrar, videoYoutubeId, videoTitulo, videoMes, revistaNumero, whatsappGrupoUrl } = req.body || {};
   const patch = {};
   if (typeof recetarioMes === 'string') patch.recetarioMes = recetarioMes.trim();
+  if (typeof videoMostrar === 'boolean') patch.videoMostrar = videoMostrar;
   if (typeof videoYoutubeId === 'string') patch.videoYoutubeId = videoYoutubeId.trim();
   if (typeof videoTitulo === 'string') patch.videoTitulo = videoTitulo.trim();
   if (typeof videoMes === 'string') patch.videoMes = videoMes.trim();

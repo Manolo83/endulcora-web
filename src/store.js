@@ -214,7 +214,7 @@ function datosPorDefecto() {
     blogPosts: [],
     accesosClaseEnVivo: [],
     chatClaseEnVivo: [],
-    contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoYoutubeId: '', videoTitulo: '', videoMes: '', revistaUrl: '', revistaNombre: '', revistaNumero: '', whatsappGrupoUrl: '' },
+    contenidoMembresia: { recetarioUrl: '', recetarioNombre: '', recetarioMes: '', videoMostrar: false, videoYoutubeId: '', videoTitulo: '', videoMes: '', revistaUrl: '', revistaNombre: '', revistaNumero: '', whatsappGrupoUrl: '' },
   };
 }
 
@@ -308,6 +308,7 @@ async function init() {
       if (typeof c.recetarioUrl !== 'string') { c.recetarioUrl = ''; changed = true; }
       if (typeof c.recetarioNombre !== 'string') { c.recetarioNombre = ''; changed = true; }
     });
+    if (typeof data.contenidoMembresia.videoMostrar !== 'boolean') { data.contenidoMembresia.videoMostrar = false; changed = true; }
     if (typeof data.contenidoMembresia.revistaUrl !== 'string') { data.contenidoMembresia.revistaUrl = ''; changed = true; }
     if (typeof data.contenidoMembresia.revistaNombre !== 'string') { data.contenidoMembresia.revistaNombre = ''; changed = true; }
     if (typeof data.contenidoMembresia.revistaNumero !== 'string') { data.contenidoMembresia.revistaNumero = ''; changed = true; }
