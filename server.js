@@ -309,6 +309,24 @@ app.get('/qr-clase-gratis-sala.png', async (req, res) => {
   }
 });
 
+// Imagen del QR que lleva a /clase-gratis, el registro en el sitio — este es
+// el que se comparte para que la gente se apunte antes de la clase (no
+// confundir con el QR de /clase-gratis-sala, que es para comprar el
+// recetario ya adentro, el día de la clase).
+let qrClaseGratisCache = null;
+app.get('/qr-clase-gratis.png', async (req, res) => {
+  try {
+    if (!qrClaseGratisCache) {
+      qrClaseGratisCache = await QRCode.toBuffer(`${SITE_URL}/clase-gratis`, { width: 1000, margin: 2 });
+    }
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(qrClaseGratisCache);
+  } catch (e) {
+    res.status(500).send('No se pudo generar el QR.');
+  }
+});
+
 app.get('/galeria', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'galeria.html'));
 });
