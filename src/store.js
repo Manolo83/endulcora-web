@@ -86,7 +86,7 @@ const DEFAULT_CONTENT = {
   // https://chat.whatsapp.com/...). Se muestra en el correo de confirmacion
   // y en la pantalla de "ya quedaste registrado". Distinto del WhatsApp
   // general del sitio.
-  clasegratis_whatsapp_grupo: 'https://chat.whatsapp.com/G643EItCpF56S0sfhirV06',
+  clasegratis_whatsapp_grupo: 'https://chat.whatsapp.com/JZE84n4ZOB11tHdKwLs7dY',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
