@@ -958,6 +958,15 @@
         </div>
         <a href="/admin/api/clase-gratis/registros/excel" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Exportar Excel</a>
       </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-4 rounded-2xl bg-vino p-6 text-crema">
+        <div class="shrink-0">
+          <p id="claseGratisContadorTotal" class="font-display text-4xl">0</p>
+          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-crema/60">Registros en total</p>
+        </div>
+        <div id="claseGratisContadorPorHorario" class="flex flex-wrap gap-2 border-l border-crema/20 pl-4"></div>
+      </div>
+
       <p class="mt-4 rounded-xl bg-flama/10 p-3 text-xs leading-relaxed text-vino ring-1 ring-flama/30">Al cierre del día, marca para cada quien qué pasó de verdad (asistió, compró, se hizo miembro). Eso decide la etiqueta con la que queda en la lista de campañas, para poder mandarle a cada segmento el seguimiento que le toca.</p>
 
       <div class="mt-4 flex flex-wrap items-center gap-5 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
@@ -3225,11 +3234,26 @@ $('btnCopiarLinkClaseGratis').addEventListener('click', async () => {
 let REGISTROS_CLASE_GRATIS = [];
 const ETIQUETA_TEMA_ADMIN = { panaderia: 'Panadería', chocolate: 'Chocolate', reposteria: 'Repostería', velas: 'Velas comestibles', cocina_salada: 'Cocina salada' };
 
+function renderContadorClaseGratis(){
+  $('claseGratisContadorTotal').textContent = REGISTROS_CLASE_GRATIS.length;
+  const porHorario = {};
+  REGISTROS_CLASE_GRATIS.forEach(r => {
+    const clave = r.horario || 'Sin horario';
+    porHorario[clave] = (porHorario[clave] || 0) + 1;
+  });
+  const cont = $('claseGratisContadorPorHorario');
+  const claves = Object.keys(porHorario).sort();
+  cont.innerHTML = claves.length ? claves.map(h => `
+    <span class="rounded-full bg-crema/10 px-3 py-1.5 font-ui text-[11px] font-600 text-crema/90">${escapeHtml(h)}: <strong>${porHorario[h]}</strong></span>
+  `).join('') : '<span class="font-ui text-[11px] text-crema/50">Sin registros todavía</span>';
+}
+
 async function cargarClaseGratis(){
   const cont = $('listaClaseGratis');
   cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Cargando…</p>';
   try{
     REGISTROS_CLASE_GRATIS = await api('/admin/api/clase-gratis/registros');
+    renderContadorClaseGratis();
     if(!REGISTROS_CLASE_GRATIS.length){
       cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Todavía no hay registros.</p>';
       return;
