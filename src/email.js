@@ -118,7 +118,7 @@ async function enviarCorreoConfirmacionInscripcionTaller({ to, nombre, taller, f
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
-async function enviarCorreoConfirmacionClaseGratis({ to, nombre, horario, fecha, ubicacion, numeroWhatsapp }) {
+async function enviarCorreoConfirmacionClaseGratis({ to, nombre, horario, fecha, ubicacion, numeroWhatsapp, numeroWhatsappConfirmacion }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
 
@@ -128,6 +128,8 @@ async function enviarCorreoConfirmacionClaseGratis({ to, nombre, horario, fecha,
     : '';
   const diaDelMes = fecha ? new Date(`${fecha}T00:00:00`).getDate() : '';
   const whatsappUrl = `https://wa.me/52${numeroWhatsapp || ''}`;
+  const mensajeConfirmacion = `Hola, quiero confirmar mi asistencia a la clase gratis de pan de muerto${horario ? ` del horario de ${horario}` : ''}.`;
+  const whatsappConfirmacionUrl = `https://wa.me/52${numeroWhatsappConfirmacion || ''}?text=${encodeURIComponent(mensajeConfirmacion)}`;
 
   const { error } = await client.emails.send({
     from,
@@ -144,6 +146,12 @@ async function enviarCorreoConfirmacionClaseGratis({ to, nombre, horario, fecha,
           ${horario ? `<tr><td style="padding:6px 6px 6px 0;">🕐</td><td style="padding:6px 0;">Horario: ${escapeHtml(horario)}</td></tr>` : ''}
           ${ubicacion ? `<tr><td style="padding:6px 6px 6px 0;vertical-align:top;">📍</td><td style="padding:6px 0;">${escapeHtml(ubicacion)}</td></tr>` : ''}
         </table>
+
+        <div style="margin-top:20px;padding:18px;background:#4E1454;border-radius:14px;text-align:center;">
+          <p style="margin:0;font-size:13px;font-weight:700;letter-spacing:.04em;color:#F5A623;">⚠️ FALTA UN PASO: CONFIRMA TU ASISTENCIA</p>
+          <p style="margin:8px 0 0;font-size:13px;line-height:1.6;color:#FBF4E9;">Tu lugar <strong>no queda apartado</strong> hasta que confirmes por WhatsApp. Sin esta confirmación no podemos garantizarte el acceso a la clase.</p>
+          <p style="margin:14px 0 0;"><a href="${whatsappConfirmacionUrl}" style="display:inline-block;background:#F5A623;color:#1B0720;padding:12px 26px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Confirmar asistencia por WhatsApp</a></p>
+        </div>
 
         <p style="margin-top:18px;font-size:13px;line-height:1.6;">Llega 10 minutos antes. El cupo por horario es limitado y el lugar se asigna por orden de llegada entre los registrados; si tu horario se llena, te pasamos al siguiente con lugar.</p>
 

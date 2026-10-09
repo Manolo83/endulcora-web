@@ -442,6 +442,7 @@ router.get('/clase-gratis', (req, res) => {
     fecha: contenido.clasegratis_fecha || '',
     horarios: horariosClaseGratis(contenido),
     temas: store.TEMAS_CLASE_GRATIS,
+    whatsappConfirmacion: contenido.clasegratis_whatsapp_confirmacion || '',
   });
 });
 
@@ -487,6 +488,7 @@ router.post('/clase-gratis/registro', (req, res) => {
     fecha: contenido.clasegratis_fecha,
     ubicacion: contenido.clasegratis_ubicacion,
     numeroWhatsapp: contenido.whatsapp_numero,
+    numeroWhatsappConfirmacion: contenido.clasegratis_whatsapp_confirmacion,
   }).catch((e) => {
     console.error(`[clase-gratis] No se pudo mandar el correo de confirmacion a ${item.correo}:`, e.message);
   });
