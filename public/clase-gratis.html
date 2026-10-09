@@ -126,10 +126,10 @@ body { background: #FBF4E9; }
     <p class="font-display text-2xl">¡Listo, ya tienes tu lugar!</p>
     <p class="mt-3 text-sm leading-relaxed text-crema/85">Te mandamos los detalles a tu correo.</p>
 
-    <div class="mt-6 rounded-2xl bg-carbon/20 p-5">
-      <p class="font-ui text-[12px] font-700 uppercase tracking-wider text-flama">⚠️ Falta un paso: confirma tu asistencia</p>
-      <p class="mt-2 text-sm leading-relaxed text-crema/90">Tu lugar <strong>no queda apartado</strong> hasta que confirmes por WhatsApp. Sin esta confirmación no podemos garantizarte el acceso a la clase.</p>
-      <a id="linkConfirmarWhatsapp" href="#" target="_blank" class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Confirmar asistencia por WhatsApp</a>
+    <div id="bloqueGrupoWhatsapp" class="mt-6 hidden rounded-2xl bg-carbon/20 p-5">
+      <p class="font-ui text-[12px] font-700 uppercase tracking-wider text-flama">📲 Únete al grupo de WhatsApp de la clase</p>
+      <p class="mt-2 text-sm leading-relaxed text-crema/90">Únete para recibir actualizaciones de la clase y para confirmar tu asistencia.</p>
+      <a id="linkGrupoWhatsapp" href="#" target="_blank" class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Unirme al grupo de WhatsApp</a>
     </div>
   </div>
 </main>
@@ -185,12 +185,12 @@ const ETIQUETA_TEMA = {
 const form = document.getElementById('formClaseGratis');
 const errorBox = document.getElementById('errorRegistro');
 const btnEnviar = document.getElementById('btnEnviarRegistro');
-let WHATSAPP_CONFIRMACION = '';
+let WHATSAPP_GRUPO = '';
 
 async function cargarClaseGratis(){
   try{
     const info = await fetch('/api/clase-gratis').then(r => r.json());
-    WHATSAPP_CONFIRMACION = info.whatsappConfirmacion || '';
+    WHATSAPP_GRUPO = info.whatsappGrupo || '';
     document.getElementById('bloqueCargando').classList.add('hidden');
     if (!info.activo) {
       document.getElementById('bloqueSinClase').classList.remove('hidden');
@@ -257,8 +257,10 @@ form.addEventListener('submit', async (e) => {
 
     if (typeof fbq === 'function') fbq('track', 'CompleteRegistration');
 
-    const mensajeConfirmacion = `Hola, quiero confirmar mi asistencia a la clase gratis de pan de muerto${cuerpo.horario ? ` del horario de ${cuerpo.horario}` : ''}.`;
-    document.getElementById('linkConfirmarWhatsapp').href = `https://wa.me/52${WHATSAPP_CONFIRMACION}?text=${encodeURIComponent(mensajeConfirmacion)}`;
+    if (WHATSAPP_GRUPO) {
+      document.getElementById('linkGrupoWhatsapp').href = WHATSAPP_GRUPO;
+      document.getElementById('bloqueGrupoWhatsapp').classList.remove('hidden');
+    }
 
     form.classList.add('hidden');
     document.getElementById('tarjetaExitoRegistro').classList.remove('hidden');

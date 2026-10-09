@@ -82,10 +82,11 @@ const DEFAULT_CONTENT = {
   clasegratis_horarios: '',
   // Direccion de la sede, para el correo de confirmacion de registro.
   clasegratis_ubicacion: 'Endulcora Nativitas — Av. Antonio Rodríguez 34, Col. San Simón Ticumac, Benito Juárez, CDMX (metro Portales o Nativitas)',
-  // Numero de WhatsApp (10 digitos, sin 52) al que hay que confirmar
-  // asistencia para tener acceso a la clase gratis. Distinto del WhatsApp
+  // Link de invitacion al grupo de WhatsApp de la clase gratis (ej. de
+  // https://chat.whatsapp.com/...). Se muestra en el correo de confirmacion
+  // y en la pantalla de "ya quedaste registrado". Distinto del WhatsApp
   // general del sitio.
-  clasegratis_whatsapp_confirmacion: '5575933916',
+  clasegratis_whatsapp_grupo: 'https://chat.whatsapp.com/G643EItCpF56S0sfhirV06',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
