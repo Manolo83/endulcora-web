@@ -1072,6 +1072,16 @@ async function init() {
       data._migRecetarioPanDeMuerto = true;
       changed = true;
     }
+    // Los registros de la clase gratis que ya existian (de antes de que se
+    // guardara la fecha en cada uno) se marcan con la fecha configurada
+    // actualmente, para no dejarlos sin fecha en el Excel agrupado.
+    if (!data._migFechaRegistrosClaseGratis) {
+      (data.registrosClaseGratis || []).forEach((r) => {
+        if (!r.fecha) r.fecha = data.content.clasegratis_fecha || '';
+      });
+      data._migFechaRegistrosClaseGratis = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
@@ -2101,13 +2111,17 @@ module.exports = {
   getRegistrosClaseGratis() {
     return [...load().registrosClaseGratis].sort((a, b) => b.id - a.id);
   },
-  addRegistroClaseGratis({ nombre, whatsapp, correo, horario, yaTomoTaller, interesTemas, aceptaAvisoPrivacidad }) {
+  addRegistroClaseGratis({ nombre, whatsapp, correo, fecha, horario, yaTomoTaller, interesTemas, aceptaAvisoPrivacidad }) {
     const data = load();
     const item = {
       id: nextId(data.registrosClaseGratis),
       nombre: String(nombre || '').trim(),
       whatsapp: String(whatsapp || '').trim(),
       correo: String(correo || '').trim().toLowerCase(),
+      // Copia de la fecha configurada al momento del registro: si mas
+      // adelante se reusa este formulario para otra clase en otra fecha,
+      // cada registro conserva a cual clase pertenecia de verdad.
+      fecha: String(fecha || '').trim(),
       horario: String(horario || '').trim(),
       yaTomoTaller: !!yaTomoTaller,
       interesTemas: Array.isArray(interesTemas) ? interesTemas.filter((t) => TEMAS_CLASE_GRATIS.includes(t)) : [],

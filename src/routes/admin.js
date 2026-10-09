@@ -656,39 +656,81 @@ const ETIQUETA_SEGMENTO_CLASE_GRATIS = {
 
 router.get('/api/clase-gratis/registros/excel', requireAdmin, async (req, res) => {
   const registros = store.getRegistrosClaseGratis();
+
+  // Una pestaña por cada fecha + horario real (cada sesion en la que la
+  // gente de verdad se va a sentar), para que sirva directo como lista de
+  // acomodo. Agrupar por fecha primero y horario despues, cada lista
+  // ordenada alfabeticamente por nombre.
+  const grupos = new Map();
+  registros.forEach((r) => {
+    const clave = `${r.fecha}|||${r.horario}`;
+    if (!grupos.has(clave)) grupos.set(clave, { fecha: r.fecha, horario: r.horario, filas: [] });
+    grupos.get(clave).filas.push(r);
+  });
+  const gruposOrdenados = [...grupos.values()].sort(
+    (a, b) => a.fecha.localeCompare(b.fecha) || a.horario.localeCompare(b.horario)
+  );
+
   const libro = new ExcelJS.Workbook();
   libro.creator = 'Endulcora';
   libro.created = new Date();
-  const hoja = libro.addWorksheet('Clase gratis');
-  hoja.columns = [
-    { key: 'nombre', width: 26 },
-    { key: 'whatsapp', width: 16 },
-    { key: 'correo', width: 28 },
-    { key: 'horario', width: 16 },
-    { key: 'yaTomoTaller', width: 12 },
-    { key: 'intereses', width: 26 },
-    { key: 'segmento', width: 20 },
-    { key: 'createdAt', width: 18 },
+
+  const usados = new Set();
+  const columnas = [
+    { header: 'Nombre', key: 'nombre', width: 26 },
+    { header: 'WhatsApp', key: 'whatsapp', width: 16 },
+    { header: 'Correo', key: 'correo', width: 28 },
+    { header: '¿Ya tomó taller?', key: 'yaTomoTaller', width: 14 },
+    { header: 'Interés', key: 'intereses', width: 26 },
+    { header: 'Segmento', key: 'segmento', width: 20 },
+    { header: 'Registrado el', key: 'createdAt', width: 18 },
   ];
-  const filaEncabezado = hoja.addRow(['Nombre', 'WhatsApp', 'Correo', 'Horario', '¿Ya tomó taller?', 'Interés', 'Segmento', 'Registrado el']);
-  filaEncabezado.font = { bold: true };
-  filaEncabezado.eachCell((celda) => {
-    celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5A623' } };
-  });
-  registros
-    .sort((a, b) => a.nombre.localeCompare(b.nombre))
-    .forEach((r) => {
-      hoja.addRow({
-        nombre: r.nombre,
-        whatsapp: r.whatsapp,
-        correo: r.correo,
-        horario: r.horario,
-        yaTomoTaller: r.yaTomoTaller ? 'Sí' : 'No',
-        intereses: r.interesTemas.join(', '),
-        segmento: ETIQUETA_SEGMENTO_CLASE_GRATIS[r.segmento] || 'Sin marcar',
-        createdAt: new Date(r.createdAt).toLocaleDateString('es-MX'),
-      });
+
+  gruposOrdenados.forEach((grupo) => {
+    const fechaLegible = grupo.fecha
+      ? new Date(`${grupo.fecha}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'Sin fecha';
+    const MESES_CORTOS_HOJA = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const [anio, mesNum, diaNum] = (grupo.fecha || '').split('-').map(Number);
+    const fechaCorta = grupo.fecha ? `${diaNum}-${MESES_CORTOS_HOJA[mesNum]}-${String(anio).slice(2)}` : 'S-fecha';
+    // La fecha va primero para que nunca se corte: si el horario es largo,
+    // lo que se recorta es el final, no la fecha.
+    const nombreHoja = nombreHojaExcel(`${fechaCorta} ${grupo.horario}`.trim() || 'Clase gratis', usados);
+    const hoja = libro.addWorksheet(nombreHoja);
+    hoja.addRow([`Clase gratis — ${fechaLegible}${grupo.horario ? ` — ${grupo.horario}` : ''}`]);
+    hoja.mergeCells(1, 1, 1, columnas.length);
+    hoja.getRow(1).font = { bold: true, size: 13, color: { argb: 'FF4E1454' } };
+    hoja.addRow([]);
+
+    // Solo key+width aqui: si se le pasa "header" a worksheet.columns, ExcelJS
+    // reescribe la fila 1 completa con los encabezados y borra el titulo que
+    // ya pusimos ahi. El encabezado real se agrega a mano, abajo.
+    hoja.columns = columnas.map((c) => ({ key: c.key, width: c.width }));
+    const filaEncabezado = hoja.addRow(columnas.map((c) => c.header));
+    filaEncabezado.font = { bold: true };
+    filaEncabezado.eachCell((celda) => {
+      celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5A623' } };
     });
+
+    grupo.filas
+      .sort((a, b) => a.nombre.localeCompare(b.nombre))
+      .forEach((r) => {
+        hoja.addRow({
+          nombre: r.nombre,
+          whatsapp: r.whatsapp,
+          correo: r.correo,
+          yaTomoTaller: r.yaTomoTaller ? 'Sí' : 'No',
+          intereses: r.interesTemas.join(', '),
+          segmento: ETIQUETA_SEGMENTO_CLASE_GRATIS[r.segmento] || 'Sin marcar',
+          createdAt: new Date(r.createdAt).toLocaleDateString('es-MX'),
+        });
+      });
+  });
+
+  if (!gruposOrdenados.length) {
+    libro.addWorksheet('Sin registros').addRow(['Todavía no hay registros.']);
+  }
+
   res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.set('Content-Disposition', 'attachment; filename="clase-gratis-endulcora.xlsx"');
   await libro.xlsx.write(res);

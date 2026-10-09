@@ -471,6 +471,7 @@ router.post('/clase-gratis/registro', (req, res) => {
     nombre,
     whatsapp,
     correo,
+    fecha: contenido.clasegratis_fecha,
     horario,
     yaTomoTaller: b.yaTomoTaller,
     interesTemas: Array.isArray(b.interesTemas) ? b.interesTemas : [],
