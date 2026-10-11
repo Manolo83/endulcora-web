@@ -1253,6 +1253,31 @@ function reemplazarEtiquetaSegmento(data, email, nuevaEtiqueta) {
 // sala (opcional, sirve para decidir el tema de las siguientes clases).
 const TEMAS_CLASE_GRATIS = ['panaderia', 'chocolate', 'reposteria', 'velas', 'cocina_salada'];
 
+// Los 32 estados de la Republica Mexicana, para formularios de registro que
+// piden de donde es quien se inscribe (sirve para campañas dirigidas por
+// zona). Se guarda tal cual (con acentos) porque es lo que se ve en listas
+// y exports; la etiqueta de campañas usa una version sin acentos/minusculas
+// (ver etiquetaEstado abajo).
+const ESTADOS_MEXICO = [
+  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 'Chihuahua',
+  'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Estado de México', 'Guanajuato', 'Guerrero',
+  'Hidalgo', 'Jalisco', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla',
+  'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas',
+  'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas',
+];
+
+// Etiqueta de campañas a partir del pais/estado de un registro, para poder
+// filtrar contactos por zona en la pestaña de Campañas (ej. "estado:jalisco").
+// Si esDeMexico es undefined (registros de antes de este campo), no se sabe
+// la zona: no se manda ninguna etiqueta, en vez de marcarlo como "otro pais".
+function etiquetasZona({ esDeMexico, estado }) {
+  if (esDeMexico === undefined) return [];
+  if (!esDeMexico) return ['pais:otro'];
+  const slug = String(estado || '').trim().toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, ''); // quita acentos
+  return ['pais:mexico', ...(slug ? [`estado:${slug}`] : [])];
+}
+
 // Segmento que le toca a cada registrado de la clase gratis segun lo que se
 // marca al cierre del dia (asistencia + compra real), cruzando registro con
 // lo que de verdad paso. "Se hizo miembro" manda sobre todo lo demas porque
@@ -2036,7 +2061,7 @@ module.exports = {
   },
   addInscripcionTaller({
     nombre, whatsapp, correo, sesionTallerId, taller, fecha, sede, horario, montoAnticipo,
-    comoSeEntero, preferencias, cumpleDia, cumpleMes,
+    comoSeEntero, preferencias, cumpleDia, cumpleMes, esDeMexico, estado,
     esPrimeraVez, aceptaPromociones, aceptaAvisoPrivacidad,
   }) {
     const data = load();
@@ -2058,6 +2083,10 @@ module.exports = {
       preferencias: String(preferencias || '').trim().slice(0, 500),
       cumpleDia: Number(cumpleDia) || null,
       cumpleMes: Number(cumpleMes) || null,
+      // De donde es quien se inscribe, para poder dirigir campañas por zona
+      // (ver etiquetasZona, que alimenta la lista de campañas de correo).
+      esDeMexico: !!esDeMexico,
+      estado: esDeMexico && ESTADOS_MEXICO.includes(estado) ? estado : '',
       esPrimeraVez: !!esPrimeraVez,
       aceptaPromociones: !!aceptaPromociones,
       aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
@@ -2067,7 +2096,14 @@ module.exports = {
     // Si acepto promociones, tambien alimenta la lista de campañas de
     // correo masivo, para que este registro sirva para algo mas que
     // quedarse guardado sin usarse.
-    if (item.aceptaPromociones) upsertContactoCampana(data, { email: item.correo, nombre: item.nombre, telefono: item.whatsapp });
+    if (item.aceptaPromociones) {
+      upsertContactoCampana(data, {
+        email: item.correo,
+        nombre: item.nombre,
+        telefono: item.whatsapp,
+        etiquetas: etiquetasZona(item),
+      });
+    }
     save(data);
     return item;
   },
@@ -2114,10 +2150,12 @@ module.exports = {
   // quien segun que paso de verdad (ver clasegratis_* en el contenido para
   // la configuracion del evento: horarios, cupos, precios de la oferta).
   TEMAS_CLASE_GRATIS,
+  ESTADOS_MEXICO,
+  etiquetasZona,
   getRegistrosClaseGratis() {
     return [...load().registrosClaseGratis].sort((a, b) => b.id - a.id);
   },
-  addRegistroClaseGratis({ nombre, whatsapp, correo, fecha, horario, yaTomoTaller, interesTemas, aceptaAvisoPrivacidad }) {
+  addRegistroClaseGratis({ nombre, whatsapp, correo, fecha, horario, yaTomoTaller, interesTemas, esDeMexico, estado, aceptaAvisoPrivacidad }) {
     const data = load();
     const item = {
       id: nextId(data.registrosClaseGratis),
@@ -2131,6 +2169,10 @@ module.exports = {
       horario: String(horario || '').trim(),
       yaTomoTaller: !!yaTomoTaller,
       interesTemas: Array.isArray(interesTemas) ? interesTemas.filter((t) => TEMAS_CLASE_GRATIS.includes(t)) : [],
+      // De donde es quien se registra, para poder dirigir campañas por zona
+      // (ver etiquetasZona, que alimenta la lista de campañas de correo).
+      esDeMexico: !!esDeMexico,
+      estado: esDeMexico && ESTADOS_MEXICO.includes(estado) ? estado : '',
       aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
       asistio: null, // null = sin marcar todavia; true/false al cierre del dia
       compro: '', // '' sin marcar, o 'taller' | 'recetario' si asistio y compro
@@ -2139,7 +2181,12 @@ module.exports = {
       createdAt: new Date().toISOString(),
     };
     data.registrosClaseGratis.push(item);
-    upsertContactoCampana(data, { email: item.correo, nombre: item.nombre, telefono: item.whatsapp, etiquetas: ['clase-gratis:pan-de-muerto'] });
+    upsertContactoCampana(data, {
+      email: item.correo,
+      nombre: item.nombre,
+      telefono: item.whatsapp,
+      etiquetas: ['clase-gratis:pan-de-muerto', ...etiquetasZona(item)],
+    });
     save(data);
     return item;
   },
@@ -2170,7 +2217,7 @@ module.exports = {
   getRegistrosVideoEnVivo() {
     return [...load().registrosVideoEnVivo].sort((a, b) => b.id - a.id);
   },
-  addRegistroVideoEnVivo({ nombre, whatsapp, correo, fecha, yaTomoTaller, interesTemas, aceptaAvisoPrivacidad }) {
+  addRegistroVideoEnVivo({ nombre, whatsapp, correo, fecha, yaTomoTaller, interesTemas, esDeMexico, estado, aceptaAvisoPrivacidad }) {
     const data = load();
     const item = {
       id: nextId(data.registrosVideoEnVivo),
@@ -2180,11 +2227,18 @@ module.exports = {
       fecha: String(fecha || '').trim(),
       yaTomoTaller: !!yaTomoTaller,
       interesTemas: Array.isArray(interesTemas) ? interesTemas.filter((t) => TEMAS_CLASE_GRATIS.includes(t)) : [],
+      esDeMexico: !!esDeMexico,
+      estado: esDeMexico && ESTADOS_MEXICO.includes(estado) ? estado : '',
       aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
       createdAt: new Date().toISOString(),
     };
     data.registrosVideoEnVivo.push(item);
-    upsertContactoCampana(data, { email: item.correo, nombre: item.nombre, telefono: item.whatsapp, etiquetas: ['video-en-vivo'] });
+    upsertContactoCampana(data, {
+      email: item.correo,
+      nombre: item.nombre,
+      telefono: item.whatsapp,
+      etiquetas: ['video-en-vivo', ...etiquetasZona(item)],
+    });
     save(data);
     return item;
   },

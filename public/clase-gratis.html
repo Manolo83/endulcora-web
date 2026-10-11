@@ -108,6 +108,19 @@ body { background: #FBF4E9; }
       <div id="opcionesTemas" class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm text-carbon/80"></div>
     </div>
 
+    <div>
+      <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Eres de México?</span>
+      <div class="flex gap-4 text-sm text-carbon/80">
+        <label class="flex items-center gap-2"><input type="radio" name="esDeMexico" value="si" required class="h-4 w-4 border-vino/30"> Sí</label>
+        <label class="flex items-center gap-2"><input type="radio" name="esDeMexico" value="no" required class="h-4 w-4 border-vino/30"> No</label>
+      </div>
+    </div>
+
+    <label id="bloqueCampoEstado" class="hidden block">
+      <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿De qué estado?</span>
+      <select id="campoEstado" name="estado" class="campo-registro"></select>
+    </label>
+
     <div class="pt-2">
       <label class="flex items-start gap-3 text-sm text-carbon/80">
         <input id="campoAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
@@ -182,6 +195,24 @@ const ETIQUETA_TEMA = {
   cocina_salada: 'Cocina salada',
 };
 
+const ESTADOS_MEXICO = [
+  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 'Chihuahua',
+  'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Estado de México', 'Guanajuato', 'Guerrero',
+  'Hidalgo', 'Jalisco', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla',
+  'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas',
+  'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas',
+];
+document.getElementById('campoEstado').innerHTML = ESTADOS_MEXICO.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+document.querySelectorAll('input[name="esDeMexico"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esMexico = radio.value === 'si' && radio.checked;
+    const bloque = document.getElementById('bloqueCampoEstado');
+    const select = document.getElementById('campoEstado');
+    bloque.classList.toggle('hidden', !esMexico);
+    select.required = esMexico;
+  });
+});
+
 const form = document.getElementById('formClaseGratis');
 const errorBox = document.getElementById('errorRegistro');
 const btnEnviar = document.getElementById('btnEnviarRegistro');
@@ -234,6 +265,7 @@ form.addEventListener('submit', async (e) => {
 
   const datos = new FormData(form);
   const yaTomoTaller = datos.get('yaTomoTaller');
+  const esDeMexico = datos.get('esDeMexico');
   const cuerpo = {
     nombre: datos.get('nombre'),
     whatsapp: datos.get('whatsapp'),
@@ -241,6 +273,8 @@ form.addEventListener('submit', async (e) => {
     horario: datos.get('horario'),
     yaTomoTaller: yaTomoTaller === 'si',
     interesTemas: datos.getAll('interesTemas'),
+    esDeMexico: esDeMexico === 'si',
+    estado: esDeMexico === 'si' ? datos.get('estado') : '',
     aceptaAvisoPrivacidad: datos.get('aceptaAvisoPrivacidad') === 'on',
   };
 

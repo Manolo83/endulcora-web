@@ -9,6 +9,17 @@ const { enviarCorreoConfirmacionInscripcionTaller, enviarCorreoConfirmacionClase
 
 const router = express.Router();
 
+// Valida el pais/estado que mandan los formularios de registro (clase
+// gratis, video en vivo, talleres): si dice ser de Mexico, el estado tiene
+// que ser uno de los 32 validos. Regresa null si todo esta bien, o un
+// mensaje de error para responder al cliente.
+function errorZonaInvalida(b) {
+  if (b.esDeMexico && !store.ESTADOS_MEXICO.includes(b.estado)) {
+    return 'Elige tu estado de la lista.';
+  }
+  return null;
+}
+
 // El sitio pregunta aqui que etiquetas de medicion debe cargar, para no tener
 // que tocar el HTML cada vez que cambia un ID. Si GOOGLE_ADS_ID esta vacio, el
 // sitio simplemente no carga nada de Google.
@@ -163,6 +174,8 @@ router.post('/clase-en-vivo/registro', (req, res) => {
   if (!WHATSAPP_RE.test(whatsapp)) return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
   if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
   if (typeof b.yaTomoTaller !== 'boolean') return res.status(400).json({ error: 'Dinos si ya tomaste un taller con nosotros.' });
+  const errorZona = errorZonaInvalida(b);
+  if (errorZona) return res.status(400).json({ error: errorZona });
   if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para registrarte.' });
 
   store.addRegistroVideoEnVivo({
@@ -172,6 +185,8 @@ router.post('/clase-en-vivo/registro', (req, res) => {
     fecha,
     yaTomoTaller: b.yaTomoTaller,
     interesTemas: Array.isArray(b.interesTemas) ? b.interesTemas : [],
+    esDeMexico: b.esDeMexico,
+    estado: b.estado,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
   });
 
@@ -409,6 +424,8 @@ router.post('/inscripcion-taller', async (req, res) => {
   if (!WHATSAPP_RE.test(whatsapp)) return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
   if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
   if (!sesionTallerId) return res.status(400).json({ error: 'Elige el taller al que te inscribes desde el calendario.' });
+  const errorZona = errorZonaInvalida(b);
+  if (errorZona) return res.status(400).json({ error: errorZona });
   if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para inscribirte.' });
 
   const sesion = store.getSesionesTaller().find((s) => s.id === sesionTallerId);
@@ -430,6 +447,8 @@ router.post('/inscripcion-taller', async (req, res) => {
     preferencias: b.preferencias,
     cumpleDia: b.cumpleDia,
     cumpleMes: b.cumpleMes,
+    esDeMexico: b.esDeMexico,
+    estado: b.estado,
     esPrimeraVez: b.esPrimeraVez,
     aceptaPromociones: b.aceptaPromociones,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
@@ -521,6 +540,8 @@ router.post('/clase-gratis/registro', (req, res) => {
   if (!WHATSAPP_RE.test(whatsapp)) return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
   if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
   if (typeof b.yaTomoTaller !== 'boolean') return res.status(400).json({ error: 'Dinos si ya tomaste un taller con nosotros.' });
+  const errorZona = errorZonaInvalida(b);
+  if (errorZona) return res.status(400).json({ error: errorZona });
   if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para registrarte.' });
 
   const horariosDisponibles = horariosClaseGratis(contenido);
@@ -535,6 +556,8 @@ router.post('/clase-gratis/registro', (req, res) => {
     horario,
     yaTomoTaller: b.yaTomoTaller,
     interesTemas: Array.isArray(b.interesTemas) ? b.interesTemas : [],
+    esDeMexico: b.esDeMexico,
+    estado: b.estado,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
   });
   res.status(201).json({ ok: true, id: item.id });

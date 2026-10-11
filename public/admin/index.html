@@ -1267,6 +1267,16 @@ function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// De donde es quien se registro, para las tablas de clase gratis, video en
+// vivo e inscripciones a talleres (sirve para campañas dirigidas por zona,
+// filtrando por "estado:" o "pais:" en la pestaña de Campañas). Registros
+// de antes de este campo no tienen esDeMexico definido.
+function formatoZona(item){
+  if (item.esDeMexico === undefined) return '—';
+  if (!item.esDeMexico) return 'Otro país';
+  return item.estado || 'México';
+}
+
 async function api(url, options = {}){
   const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json' },
@@ -3124,6 +3134,7 @@ async function cargarInscripcionesTaller(){
               <th class="px-5 py-3 font-600">Anticipo</th>
               <th class="px-5 py-3 font-600">¿Cómo se enteró?</th>
               <th class="px-5 py-3 font-600">Preferencias</th>
+              <th class="px-5 py-3 font-600">Zona</th>
               <th class="px-5 py-3 font-600">Registrado</th>
               <th class="px-5 py-3"></th>
             </tr>
@@ -3137,6 +3148,7 @@ async function cargarInscripcionesTaller(){
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.montoAnticipo)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.comoSeEntero || '—')}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.preferencias || '—')}</td>
+                <td class="px-5 py-3 text-carbon/70">${escapeHtml(formatoZona(i))}</td>
                 <td class="px-5 py-3 text-xs text-carbon/45">${new Date(i.createdAt).toLocaleDateString('es-MX')}</td>
                 <td class="px-5 py-3 text-right"><button type="button" data-id="${i.id}" class="btnBorrarInscripcionTaller text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button></td>
               </tr>`).join('')}
@@ -3293,6 +3305,7 @@ async function cargarClaseGratis(){
           <th class="px-5 py-3 font-600">Horario</th>
           <th class="px-5 py-3 font-600">¿Ya tomó taller?</th>
           <th class="px-5 py-3 font-600">Interés</th>
+          <th class="px-5 py-3 font-600">Zona</th>
           <th class="px-5 py-3 font-600">Asistió</th>
           <th class="px-5 py-3 font-600">Compró</th>
           <th class="px-5 py-3 font-600">Miembro</th>
@@ -3307,6 +3320,7 @@ async function cargarClaseGratis(){
             <td class="px-5 py-3 text-carbon/70">${escapeHtml(r.horario)}</td>
             <td class="px-5 py-3 text-carbon/70">${r.yaTomoTaller ? 'Sí' : 'No'}</td>
             <td class="px-5 py-3 text-xs text-carbon/60">${r.interesTemas.map(t => escapeHtml(ETIQUETA_TEMA_ADMIN[t] || t)).join(', ') || '—'}</td>
+            <td class="px-5 py-3 text-carbon/70">${escapeHtml(formatoZona(r))}</td>
             <td class="px-5 py-3">
               <select class="selAsistio rounded-lg border border-vino/15 bg-crema/60 px-2 py-1.5 text-xs" data-id="${r.id}">
                 <option value="" ${r.asistio === null ? 'selected' : ''}>Sin marcar</option>
@@ -3403,6 +3417,7 @@ async function cargarVideoEnVivoAdmin(){
           <th class="px-5 py-3 font-600">Fecha de la sesión</th>
           <th class="px-5 py-3 font-600">¿Ya tomó taller?</th>
           <th class="px-5 py-3 font-600">Interés</th>
+          <th class="px-5 py-3 font-600">Zona</th>
           <th class="px-5 py-3"></th>
         </tr>
       </thead>
@@ -3414,6 +3429,7 @@ async function cargarVideoEnVivoAdmin(){
             <td class="px-5 py-3 text-carbon/70">${escapeHtml(r.fecha)}</td>
             <td class="px-5 py-3 text-carbon/70">${r.yaTomoTaller ? 'Sí' : 'No'}</td>
             <td class="px-5 py-3 text-xs text-carbon/60">${r.interesTemas.map(t => escapeHtml(ETIQUETA_TEMA_ADMIN[t] || t)).join(', ') || '—'}</td>
+            <td class="px-5 py-3 text-carbon/70">${escapeHtml(formatoZona(r))}</td>
             <td class="px-5 py-3 text-right"><button type="button" data-id="${r.id}" class="btnBorrarVideoEnVivo text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button></td>
           </tr>`).join('')}
       </tbody>

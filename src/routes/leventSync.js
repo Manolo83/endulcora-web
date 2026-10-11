@@ -56,7 +56,7 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
       email: i.correo,
       telefono: i.whatsapp || '',
       nombre: i.nombre || '',
-      categoriasInteres: [i.preferencias, `taller:${i.taller}`].filter(Boolean),
+      categoriasInteres: [i.preferencias, `taller:${i.taller}`, ...store.etiquetasZona(i)].filter(Boolean),
       comoSeEntero: i.comoSeEntero || '',
       esPrimeraVez: i.esPrimeraVez,
       aceptaPromociones: i.aceptaPromociones,
@@ -126,6 +126,7 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
         'origen:clase-gratis-pan-de-muerto',
         ...r.interesTemas.map((t) => `interes:${t}`),
         r.segmento ? `segmento:${r.segmento}` : '',
+        ...store.etiquetasZona(r),
       ].filter(Boolean),
       esPrimeraVez: !r.yaTomoTaller,
     }));
@@ -140,7 +141,7 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
       email: r.correo,
       telefono: r.whatsapp || '',
       nombre: r.nombre || '',
-      categoriasInteres: ['origen:video-en-vivo', ...r.interesTemas.map((t) => `interes:${t}`)].filter(Boolean),
+      categoriasInteres: ['origen:video-en-vivo', ...r.interesTemas.map((t) => `interes:${t}`), ...store.etiquetasZona(r)].filter(Boolean),
       esPrimeraVez: !r.yaTomoTaller,
     }));
 

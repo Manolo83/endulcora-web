@@ -150,6 +150,17 @@ body { background: #FBF4E9; }
           <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Qué te gustaría aprender? (opcional)</span>
           <div id="videoLiveOpcionesTemas" class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm text-carbon/80"></div>
         </div>
+        <div>
+          <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Eres de México?</span>
+          <div class="flex gap-4 text-sm text-carbon/80">
+            <label class="flex items-center gap-2"><input type="radio" name="esDeMexico" value="si" required class="h-4 w-4 border-vino/30"> Sí</label>
+            <label class="flex items-center gap-2"><input type="radio" name="esDeMexico" value="no" required class="h-4 w-4 border-vino/30"> No</label>
+          </div>
+        </div>
+        <label id="videoLiveBloqueEstado" class="hidden block">
+          <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿De qué estado?</span>
+          <select id="videoLiveEstado" name="estado" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm"></select>
+        </label>
         <label class="flex items-start gap-3 text-sm text-carbon/80">
           <input id="videoLiveAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
           <span>He leído y acepto el <a href="#" onclick="abrirModalPrivacidadVideoLive(event)" class="text-vino underline">aviso de privacidad</a>. *</span>
@@ -355,6 +366,22 @@ function cargarOpcionesTemasVideoLive(temas){
   temasVideoLiveCargados = true;
 }
 
+const ESTADOS_MEXICO = [
+  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 'Chihuahua',
+  'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Estado de México', 'Guanajuato', 'Guerrero',
+  'Hidalgo', 'Jalisco', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla',
+  'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas',
+  'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas',
+];
+document.getElementById('videoLiveEstado').innerHTML = ESTADOS_MEXICO.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+document.querySelectorAll('input[name="esDeMexico"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esMexico = radio.value === 'si' && radio.checked;
+    document.getElementById('videoLiveBloqueEstado').classList.toggle('hidden', !esMexico);
+    document.getElementById('videoLiveEstado').required = esMexico;
+  });
+});
+
 function mostrarAccesoConcedidoLive(c){
   document.getElementById('bloqueRegistroVideoLive').classList.add('hidden');
   if(c.youtubeId){
@@ -397,12 +424,15 @@ document.getElementById('formRegistroVideoLive').addEventListener('submit', asyn
   const btn = document.getElementById('btnVideoLiveEnviar');
   err.classList.add('hidden');
   const datos = new FormData(e.target);
+  const esDeMexico = datos.get('esDeMexico');
   const cuerpo = {
     nombre: datos.get('nombre'),
     whatsapp: datos.get('whatsapp'),
     correo: datos.get('correo'),
     yaTomoTaller: datos.get('yaTomoTaller') === 'si',
     interesTemas: datos.getAll('interesTemas'),
+    esDeMexico: esDeMexico === 'si',
+    estado: esDeMexico === 'si' ? datos.get('estado') : '',
     aceptaAvisoPrivacidad: datos.get('aceptaAvisoPrivacidad') === 'on',
   };
   btn.disabled = true;

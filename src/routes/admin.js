@@ -682,6 +682,7 @@ router.get('/api/clase-gratis/registros/excel', requireAdmin, async (req, res) =
     { header: 'Correo', key: 'correo', width: 28 },
     { header: '¿Ya tomó taller?', key: 'yaTomoTaller', width: 14 },
     { header: 'Interés', key: 'intereses', width: 26 },
+    { header: 'Zona', key: 'zona', width: 18 },
     { header: 'Segmento', key: 'segmento', width: 20 },
     { header: 'Registrado el', key: 'createdAt', width: 18 },
   ];
@@ -721,6 +722,7 @@ router.get('/api/clase-gratis/registros/excel', requireAdmin, async (req, res) =
           correo: r.correo,
           yaTomoTaller: r.yaTomoTaller ? 'Sí' : 'No',
           intereses: r.interesTemas.join(', '),
+          zona: textoZona(r),
           segmento: ETIQUETA_SEGMENTO_CLASE_GRATIS[r.segmento] || 'Sin marcar',
           createdAt: new Date(r.createdAt).toLocaleDateString('es-MX'),
         });
@@ -773,6 +775,7 @@ router.get('/api/clase-en-vivo/registros/excel', requireAdmin, async (req, res) 
     { header: 'Correo', key: 'correo', width: 28 },
     { header: '¿Ya tomó taller?', key: 'yaTomoTaller', width: 14 },
     { header: 'Interés', key: 'intereses', width: 26 },
+    { header: 'Zona', key: 'zona', width: 18 },
     { header: 'Registrado el', key: 'createdAt', width: 18 },
   ];
 
@@ -806,6 +809,7 @@ router.get('/api/clase-en-vivo/registros/excel', requireAdmin, async (req, res) 
           correo: r.correo,
           yaTomoTaller: r.yaTomoTaller ? 'Sí' : 'No',
           intereses: r.interesTemas.join(', '),
+          zona: textoZona(r),
           createdAt: new Date(r.createdAt).toLocaleDateString('es-MX'),
         });
       });
@@ -835,6 +839,15 @@ function nombreHojaExcel(base, usados) {
   }
   usados.add(nombre);
   return nombre;
+}
+
+// De donde es quien se registro, para los exports a Excel (clase gratis,
+// video en vivo, inscripciones a talleres). Registros de antes de este
+// campo no tienen esDeMexico definido.
+function textoZona(item) {
+  if (item.esDeMexico === undefined) return '';
+  if (!item.esDeMexico) return 'Otro país';
+  return item.estado || 'México';
 }
 
 router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => {
@@ -870,6 +883,7 @@ router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => 
     { header: 'Anticipo', key: 'montoAnticipo', width: 12 },
     { header: '¿Cómo se enteró?', key: 'comoSeEntero', width: 20 },
     { header: 'Otras preferencias', key: 'preferencias', width: 28 },
+    { header: 'Zona', key: 'zona', width: 18 },
     { header: '¿Primera vez?', key: 'esPrimeraVez', width: 12 },
     { header: 'Registrado el', key: 'createdAt', width: 18 },
   ];
@@ -913,6 +927,7 @@ router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => 
           montoAnticipo: i.montoAnticipo,
           comoSeEntero: i.comoSeEntero,
           preferencias: i.preferencias,
+          zona: textoZona(i),
           esPrimeraVez: i.esPrimeraVez ? 'Sí' : 'No',
           createdAt: new Date(i.createdAt).toLocaleDateString('es-MX'),
         });
