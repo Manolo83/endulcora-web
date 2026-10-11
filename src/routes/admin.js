@@ -739,9 +739,10 @@ router.get('/api/clase-gratis/registros/excel', requireAdmin, async (req, res) =
   res.end();
 });
 
-// ---- Registro gratis de la clase en vivo (lunes a jueves): alternativa
+// ---- Registro unico para la clase en vivo (lunes a jueves): alternativa
 // extra para quien no paga ni es miembro (ver POST /api/clase-en-vivo/registro
-// en src/routes/api.js y claseenvivo_whatsapp_grupo en /api/content) ----
+// y /confirmar-comunidad en src/routes/api.js, y comunidad_whatsapp_link en
+// /api/content) ----
 router.get('/api/clase-en-vivo/registros', requireAdmin, (req, res) => {
   res.json(store.getRegistrosVideoEnVivo());
 });
@@ -776,6 +777,7 @@ router.get('/api/clase-en-vivo/registros/excel', requireAdmin, async (req, res) 
     { header: '¿Ya tomó taller?', key: 'yaTomoTaller', width: 14 },
     { header: 'Interés', key: 'intereses', width: 26 },
     { header: 'Zona', key: 'zona', width: 18 },
+    { header: '¿Se unió a la comunidad?', key: 'comunidadConfirmada', width: 20 },
     { header: 'Registrado el', key: 'createdAt', width: 18 },
   ];
 
@@ -810,6 +812,7 @@ router.get('/api/clase-en-vivo/registros/excel', requireAdmin, async (req, res) 
           yaTomoTaller: r.yaTomoTaller ? 'Sí' : 'No',
           intereses: r.interesTemas.join(', '),
           zona: textoZona(r),
+          comunidadConfirmada: r.comunidadConfirmada ? 'Sí' : 'No',
           createdAt: new Date(r.createdAt).toLocaleDateString('es-MX'),
         });
       });

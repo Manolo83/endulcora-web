@@ -87,10 +87,12 @@ const DEFAULT_CONTENT = {
   // y en la pantalla de "ya quedaste registrado". Distinto del WhatsApp
   // general del sitio.
   clasegratis_whatsapp_grupo: 'https://chat.whatsapp.com/JZE84n4ZOB11tHdKwLs7dY',
-  // Link de invitacion al grupo de WhatsApp de quienes se registran para
-  // ver la clase en vivo (lunes a jueves) sin pagar ni ser miembros. Ver
-  // registrosVideoEnVivo / POST /api/clase-en-vivo/registro.
-  claseenvivo_whatsapp_grupo: 'https://chat.whatsapp.com/F4og9zbWdb32SoMek9rH7J',
+  // Link de invitacion al grupo de WhatsApp "Comunidad Endulcora". Se usa
+  // en varios lados: paso obligatorio para ver la clase en vivo sin pagar
+  // ni ser miembro (ver registrosVideoEnVivo / POST
+  // /api/clase-en-vivo/registro y /confirmar-comunidad), e invitacion
+  // opcional en el registro de clase gratis y de talleres.
+  comunidad_whatsapp_link: 'https://chat.whatsapp.com/EBjxTbTxblMAwQ74jPLBUU',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
@@ -2220,10 +2222,11 @@ module.exports = {
 
   // ---- Registro gratis para ver la clase en vivo (lunes a jueves): no
   // reemplaza el acceso de quien paga o es miembro, es una puerta extra
-  // para quien no tiene ninguna de las dos — se vuelve a pedir en cada
-  // sesion (ver claseenvivo_whatsapp_grupo en el contenido y
-  // accesoClaseEnVivoDeRequest en src/routes/api.js, que guarda el acceso
-  // concedido en la sesion del navegador, no aqui).
+  // para quien no tiene ninguna de las dos. Es un registro UNICO (no se
+  // vuelve a pedir en cada sesion): el acceso concedido se guarda en
+  // cookies de largo plazo del navegador (ver accesoClaseEnVivoDeRequest
+  // en src/routes/api.js), no aqui — esta lista es solo el historial de
+  // quien se registro, para campañas y reportes.
   getRegistrosVideoEnVivo() {
     return [...load().registrosVideoEnVivo].sort((a, b) => b.id - a.id);
   },
@@ -2241,6 +2244,10 @@ module.exports = {
       estado: esDeMexico && ESTADOS_MEXICO.includes(estado) ? estado : '',
       pais: !esDeMexico ? String(pais || '').trim().slice(0, 80) : '',
       aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
+      // Si de verdad tocó "ya me uní" en el paso 2 (ver
+      // confirmarComunidadVideoEnVivo). Util para saber quien solo llenó el
+      // formulario pero no se unió de verdad al grupo.
+      comunidadConfirmada: false,
       createdAt: new Date().toISOString(),
     };
     data.registrosVideoEnVivo.push(item);
@@ -2250,6 +2257,23 @@ module.exports = {
       telefono: item.whatsapp,
       etiquetas: ['video-en-vivo', ...etiquetasZona(item)],
     });
+    save(data);
+    return item;
+  },
+  // Marca el registro mas reciente de ese correo como "ya se unio a la
+  // comunidad" (paso 2). Si no hay ningun registro con ese correo (ej. el
+  // navegador ya traia la cookie de "registrado" pero no se mando correo
+  // porque fue una visita de regreso), simplemente no hace nada — el
+  // acceso de todas formas se concede por la cookie, esto es solo para
+  // enriquecer el reporte.
+  confirmarComunidadVideoEnVivo(correo) {
+    const data = load();
+    const limpio = String(correo || '').trim().toLowerCase();
+    if (!limpio) return null;
+    const candidatos = data.registrosVideoEnVivo.filter((r) => r.correo === limpio && !r.comunidadConfirmada);
+    if (!candidatos.length) return null;
+    const item = candidatos.reduce((a, b) => (a.id > b.id ? a : b));
+    item.comunidadConfirmada = true;
     save(data);
     return item;
   },

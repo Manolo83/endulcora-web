@@ -149,6 +149,13 @@ body { background: #FBF4E9; }
       <p class="mt-2 text-sm leading-relaxed text-crema/90">Únete para recibir actualizaciones de la clase y para confirmar tu asistencia.</p>
       <a id="linkGrupoWhatsapp" href="#" target="_blank" class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Unirme al grupo de WhatsApp</a>
     </div>
+
+    <!-- Invitación opcional a la Comunidad Endulcora (no obligatoria) -->
+    <div id="bloqueComunidad" class="mt-4 hidden rounded-2xl bg-carbon/20 p-5">
+      <p class="font-ui text-[12px] font-700 uppercase tracking-wider text-flama">💬 Únete a la Comunidad Endulcora</p>
+      <p class="mt-2 text-sm leading-relaxed text-crema/90">Entérate de talleres, clases en vivo y novedades.</p>
+      <a id="linkComunidad" href="#" target="_blank" class="mt-4 inline-flex items-center justify-center gap-2 rounded-full border border-crema/40 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-crema/10 transition">Unirme a la comunidad</a>
+    </div>
   </div>
 </main>
 
@@ -226,11 +233,13 @@ const form = document.getElementById('formClaseGratis');
 const errorBox = document.getElementById('errorRegistro');
 const btnEnviar = document.getElementById('btnEnviarRegistro');
 let WHATSAPP_GRUPO = '';
+let COMUNIDAD_LINK = '';
 
 async function cargarClaseGratis(){
   try{
     const info = await fetch('/api/clase-gratis').then(r => r.json());
     WHATSAPP_GRUPO = info.whatsappGrupo || '';
+    COMUNIDAD_LINK = info.comunidadLink || '';
     document.getElementById('bloqueCargando').classList.add('hidden');
     if (!info.activo) {
       document.getElementById('bloqueSinClase').classList.remove('hidden');
@@ -304,6 +313,10 @@ form.addEventListener('submit', async (e) => {
     if (WHATSAPP_GRUPO) {
       document.getElementById('linkGrupoWhatsapp').href = WHATSAPP_GRUPO;
       document.getElementById('bloqueGrupoWhatsapp').classList.remove('hidden');
+    }
+    if (COMUNIDAD_LINK) {
+      document.getElementById('linkComunidad').href = COMUNIDAD_LINK;
+      document.getElementById('bloqueComunidad').classList.remove('hidden');
     }
 
     form.classList.add('hidden');

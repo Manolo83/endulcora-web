@@ -95,13 +95,34 @@ router.get('/content', (req, res) => {
   }
 });
 
+// Cookies de largo plazo (no la sesion de 12h que usa el login) para el
+// registro UNICO a la clase en vivo: una vez que alguien llena el
+// formulario y confirma que se unio a la comunidad, no se le vuelve a
+// pedir en su navegador — ni ese dia, ni en sesiones futuras.
+const DOS_ANIOS_MS = 2 * 365 * 24 * 60 * 60 * 1000;
+const COOKIE_OPTS_LARGO_PLAZO = {
+  maxAge: DOS_ANIOS_MS,
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+};
+function leerCookie(req, nombre) {
+  const header = req.headers.cookie || '';
+  for (const parte of header.split(';')) {
+    const i = parte.indexOf('=');
+    if (i === -1) continue;
+    if (parte.slice(0, i).trim() === nombre) return decodeURIComponent(parte.slice(i + 1).trim());
+  }
+  return null;
+}
+
 // Regresa si quien hace la peticion tiene acceso a la sesion de clase en
 // vivo que toca ahora (gratis, o pagada), y la fecha que la identifica —
 // la misma logica que usan /clase-en-vivo y el chat en vivo. Cuando la
 // clase no tiene cobro, el acceso ya no es automatico para cualquiera:
-// hay que ser miembro activo, o haberse registrado para la sesion de hoy
-// (ver POST /clase-en-vivo/registro, que guarda la bandera en la sesion
-// del navegador — por eso se vuelve a pedir en cada sesion/dia distinto).
+// hay que ser miembro activo, o haber completado el registro UNICO (ver
+// cookies ev_registrado/ev_comunidad mas arriba).
 function accesoClaseEnVivoDeRequest(req) {
   const contenido = store.getContent();
   const requierePago = contenido.clase_cobro_activo === 'true';
@@ -113,8 +134,8 @@ function accesoClaseEnVivoDeRequest(req) {
     return { acceso, fecha, sesionChat };
   }
   const esMiembroActivo = !!(usuario && usuario.membresiaEstado === 'activa');
-  const registrado = !!(req.session && req.session.accesoVideoEnVivoFecha === fecha);
-  return { acceso: esMiembroActivo || registrado, fecha, sesionChat };
+  const registroCompleto = leerCookie(req, 'ev_registrado') === '1' && leerCookie(req, 'ev_comunidad') === '1';
+  return { acceso: esMiembroActivo || registroCompleto, fecha, sesionChat };
 }
 
 // ---- Clase en vivo: cobro opcional por sesion ----
@@ -125,11 +146,13 @@ router.get('/clase-en-vivo', (req, res) => {
   if (!requierePago) {
     const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
     const esMiembroActivo = !!(usuario && usuario.membresiaEstado === 'activa');
-    const registrado = !!(req.session && req.session.accesoVideoEnVivoFecha === fecha);
-    const tieneAcceso = esMiembroActivo || registrado;
+    const registrado = leerCookie(req, 'ev_registrado') === '1';
+    const comunidadConfirmada = leerCookie(req, 'ev_comunidad') === '1';
+    const tieneAcceso = esMiembroActivo || (registrado && comunidadConfirmada);
     return res.json({
       requierePago: false,
-      requiereRegistro: !esMiembroActivo,
+      requiereRegistro: !esMiembroActivo && !registrado,
+      requiereComunidad: !esMiembroActivo && registrado && !comunidadConfirmada,
       hayVideo: !!contenido.clase_youtube_id || /^https?:\/\//i.test(contenido.clase_url || ''),
       tieneAcceso,
       url: tieneAcceso ? (contenido.clase_url || '') : '',
@@ -137,7 +160,7 @@ router.get('/clase-en-vivo', (req, res) => {
       recetarioUrl: tieneAcceso ? (contenido.clase_recetario_url || '') : '',
       recetarioNombre: tieneAcceso ? (contenido.clase_recetario_nombre || '') : '',
       temas: store.TEMAS_CLASE_GRATIS,
-      whatsappGrupo: contenido.claseenvivo_whatsapp_grupo || '',
+      comunidadLink: contenido.comunidad_whatsapp_link || '',
     });
   }
   const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
@@ -156,12 +179,11 @@ router.get('/clase-en-vivo', (req, res) => {
   });
 });
 
-// Registro gratis para entrar a la clase en vivo de hoy cuando no hay
+// Paso 1 del registro unico para entrar a la clase en vivo cuando no hay
 // cobro activo (alternativa extra, junto a pago/membresia — no las
-// reemplaza). Se vuelve a pedir en cada sesion: el acceso que concede
-// vive en la sesion del navegador (cookie), amarrado a la fecha exacta
-// de la sesion de hoy, asi que al otro dia (fecha distinta) hay que
-// volver a registrarse.
+// reemplaza). Guarda el registro para control/campañas y deja la cookie
+// "ev_registrado" — falta el paso 2 (confirmar-comunidad) para tener
+// acceso de verdad.
 router.post('/clase-en-vivo/registro', (req, res) => {
   const contenido = store.getContent();
   if (contenido.clase_cobro_activo === 'true') {
@@ -194,14 +216,34 @@ router.post('/clase-en-vivo/registro', (req, res) => {
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
   });
 
-  req.session.accesoVideoEnVivoFecha = fecha;
+  res.cookie('ev_registrado', '1', COOKIE_OPTS_LARGO_PLAZO);
   res.status(201).json({
+    ok: true,
+    requiereComunidad: true,
+    comunidadLink: contenido.comunidad_whatsapp_link || '',
+  });
+});
+
+// Paso 2: confirma que ya se unio a la Comunidad Endulcora. Requiere haber
+// pasado por el paso 1 (cookie ev_registrado). El correo es opcional —
+// solo sirve para marcar el registro correspondiente en el reporte; el
+// acceso se concede igual aunque no llegue (ej. alguien que vuelve en otra
+// visita ya con ev_registrado pero sin el correo a la mano en el navegador).
+router.post('/clase-en-vivo/confirmar-comunidad', (req, res) => {
+  if (leerCookie(req, 'ev_registrado') !== '1') {
+    return res.status(400).json({ error: 'Primero completa el registro.' });
+  }
+  const correo = String((req.body && req.body.correo) || '').trim().toLowerCase();
+  if (correo) store.confirmarComunidadVideoEnVivo(correo);
+
+  res.cookie('ev_comunidad', '1', COOKIE_OPTS_LARGO_PLAZO);
+  const contenido = store.getContent();
+  res.json({
     ok: true,
     url: contenido.clase_url || '',
     youtubeId: contenido.clase_youtube_id || '',
     recetarioUrl: contenido.clase_recetario_url || '',
     recetarioNombre: contenido.clase_recetario_nombre || '',
-    whatsappGrupo: contenido.claseenvivo_whatsapp_grupo || '',
   });
 });
 
@@ -527,6 +569,7 @@ router.get('/clase-gratis', (req, res) => {
     horarios: horariosClaseGratis(contenido),
     temas: store.TEMAS_CLASE_GRATIS,
     whatsappGrupo: contenido.clasegratis_whatsapp_grupo || '',
+    comunidadLink: contenido.comunidad_whatsapp_link || '',
   });
 });
 

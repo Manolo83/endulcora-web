@@ -204,6 +204,15 @@
           </div>
         </div>
 
+        <div id="seccionComunidad" class="scroll-mt-32 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Comunidad Endulcora</h3>
+          <p class="mt-1 text-xs text-carbon/50">Un solo link de WhatsApp, usado en varios lados: paso obligatorio (y único) para ver la clase en vivo gratis, e invitación opcional al terminar el registro de clase gratis y de talleres.</p>
+          <label class="mt-4 block">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link del grupo de WhatsApp "Comunidad Endulcora"</span>
+            <input data-content-key="comunidad_whatsapp_link" type="url" placeholder="https://chat.whatsapp.com/..." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+          </label>
+        </div>
+
         <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
           <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Clase en vivo</h3>
           <p class="mt-1 text-xs text-carbon/50">Es la tarjeta morada con cuenta regresiva. Si no tienes clase programada, apágala aquí en vez de dejar datos viejos.</p>
@@ -274,11 +283,7 @@
               </select>
               <p class="mt-1 text-xs text-carbon/40">Con esto encendido, el link de arriba deja de mostrarse gratis: solo lo ve quien pague, y el cobro es por esta sesión (la de la fecha configurada) — la siguiente semana vuelve a pedir el pago si lo dejas encendido.</p>
             </label>
-            <label class="block sm:col-span-2">
-              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link del grupo de WhatsApp para quien se registra gratis</span>
-              <input data-content-key="claseenvivo_whatsapp_grupo" type="url" placeholder="https://chat.whatsapp.com/..." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
-              <span class="mt-1 block text-xs text-carbon/50">Cuando esta clase no tiene cobro activo, quien no es miembro tiene que llenar un registro rápido para ver el video; al terminar, se le invita a este grupo. Los registros se ven en la pestaña <a href="#seccionVideoEnVivo" class="underline hover:text-vino">Video en vivo</a>.</span>
-            </label>
+            <p class="mt-1 text-xs text-carbon/40 sm:col-span-2">Cuando esta clase no tiene cobro activo, quien no es miembro tiene que registrarse y confirmar que se unió a la <a href="#seccionComunidad" class="underline hover:text-vino">Comunidad Endulcora</a> para ver el video — es un registro único, no se le vuelve a pedir después. Los registros se ven en la pestaña <a href="#seccionVideoEnVivo" class="underline hover:text-vino">Video en vivo</a>.</p>
             <label class="block">
               <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio sin membresía (MXN)</span>
               <input data-content-key="clase_precio_normal" type="text" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
@@ -3418,6 +3423,7 @@ async function cargarVideoEnVivoAdmin(){
           <th class="px-5 py-3 font-600">¿Ya tomó taller?</th>
           <th class="px-5 py-3 font-600">Interés</th>
           <th class="px-5 py-3 font-600">Zona</th>
+          <th class="px-5 py-3 font-600">Comunidad</th>
           <th class="px-5 py-3"></th>
         </tr>
       </thead>
@@ -3430,6 +3436,7 @@ async function cargarVideoEnVivoAdmin(){
             <td class="px-5 py-3 text-carbon/70">${r.yaTomoTaller ? 'Sí' : 'No'}</td>
             <td class="px-5 py-3 text-xs text-carbon/60">${r.interesTemas.map(t => escapeHtml(ETIQUETA_TEMA_ADMIN[t] || t)).join(', ') || '—'}</td>
             <td class="px-5 py-3 text-carbon/70">${escapeHtml(formatoZona(r))}</td>
+            <td class="px-5 py-3 text-carbon/70">${r.comunidadConfirmada ? 'Sí' : 'No'}</td>
             <td class="px-5 py-3 text-right"><button type="button" data-id="${r.id}" class="btnBorrarVideoEnVivo text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button></td>
           </tr>`).join('')}
       </tbody>

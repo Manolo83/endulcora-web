@@ -150,15 +150,17 @@ body { background: #FBF4E9; }
     </form>
   </div>
 
-  <div id="contenidoLiveReal" class="hidden">
-
-  <!-- Invitación al grupo de WhatsApp: solo aparece justo despues de
-       registrarse (no para quien ya entra como miembro) -->
-  <div id="bloqueGrupoWhatsappVideoLive" class="hidden mb-4 rounded-2xl bg-vino p-5 text-crema">
-    <p class="font-ui text-[12px] font-700 uppercase tracking-wider text-flama">📲 Únete al grupo de WhatsApp de la clase</p>
-    <p class="mt-2 text-sm leading-relaxed text-crema/90">Únete para recibir actualizaciones de la clase y para confirmar tu asistencia.</p>
-    <a id="linkGrupoWhatsappVideoLive" href="#" target="_blank" class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Unirme al grupo de WhatsApp</a>
+  <!-- Paso 2 del filtro: ya se registró, falta confirmar que se unió a la
+       Comunidad Endulcora. Es un paso unico (no se repite despues). -->
+  <div id="bloqueComunidadVideoLive" class="hidden mx-auto max-w-md rounded-3xl bg-vino p-6 text-crema sm:p-8">
+    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">📲 Último paso: únete a la Comunidad Endulcora</p>
+    <p class="mt-2 text-sm leading-relaxed text-crema/90">Únete para recibir actualizaciones de la clase y para confirmar tu asistencia. En cuanto confirmes aquí abajo, puedes entrar a la clase.</p>
+    <a id="linkComunidadVideoLive" href="#" target="_blank" class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Unirme a la Comunidad Endulcora</a>
+    <button type="button" id="btnConfirmarComunidadVideoLive" class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-crema/40 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema transition hover:bg-crema/10 disabled:opacity-60">Ya me uní, ver la clase</button>
+    <p id="comunidadVideoLiveError" class="mt-3 hidden rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200"></p>
   </div>
+
+  <div id="contenidoLiveReal" class="hidden">
 
   <div id="claseEnVivoGrid" class="grid gap-4" style="grid-template-columns: 1fr 340px;">
     <!-- Video -->
@@ -347,19 +349,27 @@ let SESION_LIVE = { isLoggedIn: false, user: null };
 // se ve ni el chat, ni la oferta de membresia, ni el catalogo de eBooks —
 // solo el formulario. En cuanto hay acceso (pago, membresia o registro), se
 // revela #contenidoLiveReal completo.
-function mostrarGateRegistro(mostrar){
-  document.getElementById('bloqueRegistroVideoLive').classList.toggle('hidden', !mostrar);
-  document.getElementById('contenidoLiveReal').classList.toggle('hidden', mostrar);
+// Filtro de 3 estados: 'registro' (paso 1), 'comunidad' (paso 2) o
+// 'contenido' (acceso concedido). Solo uno se ve a la vez.
+function mostrarEstadoLive(estado){
+  document.getElementById('bloqueRegistroVideoLive').classList.toggle('hidden', estado !== 'registro');
+  document.getElementById('bloqueComunidadVideoLive').classList.toggle('hidden', estado !== 'comunidad');
+  document.getElementById('contenidoLiveReal').classList.toggle('hidden', estado !== 'contenido');
 }
 
 function mostrarPlaceholderVideo(mostrar){
-  mostrarGateRegistro(false);
+  mostrarEstadoLive('contenido');
   document.getElementById('claseSinVideo').classList.toggle('hidden', !mostrar);
 }
 
 function mostrarFormularioRegistroVideoLive(c){
-  mostrarGateRegistro(true);
+  mostrarEstadoLive('registro');
   cargarOpcionesTemasVideoLive(c.temas || []);
+}
+
+function mostrarPasoComunidadVideoLive(c){
+  mostrarEstadoLive('comunidad');
+  document.getElementById('linkComunidadVideoLive').href = c.comunidadLink || '#';
 }
 
 const ETIQUETA_TEMA_VIDEO_LIVE = {
@@ -400,7 +410,7 @@ document.querySelectorAll('input[name="esDeMexico"]').forEach(radio => {
 });
 
 function mostrarAccesoConcedidoLive(c){
-  mostrarGateRegistro(false);
+  mostrarEstadoLive('contenido');
   if(c.youtubeId){
     mostrarPlaceholderVideo(false);
     mostrarPlayerClaseEnVivo(c.youtubeId);
@@ -423,9 +433,14 @@ async function cargarAccesoClaseLive(){
     const c = await res.json();
     if(c.tieneAcceso){
       mostrarAccesoConcedidoLive(c);
+    }else if(!c.requierePago && c.hayVideo && c.requiereComunidad){
+      // Ya se registró (paso 1), falta confirmar que se unió a la
+      // Comunidad Endulcora (paso 2) para tener acceso.
+      mostrarPasoComunidadVideoLive(c);
     }else if(!c.requierePago && c.hayVideo && c.requiereRegistro){
       // Sin cobro activo: quien no es miembro tiene que registrarse para
-      // ver la clase de hoy (puerta extra, no reemplaza membresía/pago).
+      // ver la clase (puerta extra, no reemplaza membresía/pago). Es un
+      // registro unico: una vez hecho, no se vuelve a pedir.
       mostrarFormularioRegistroVideoLive(c);
     }else{
       mostrarPlaceholderVideo(true);
@@ -463,17 +478,37 @@ document.getElementById('formRegistroVideoLive').addEventListener('submit', asyn
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.error || 'No se pudo completar tu registro. Intenta de nuevo.');
-    if(data.whatsappGrupo){
-      document.getElementById('linkGrupoWhatsappVideoLive').href = data.whatsappGrupo;
-      document.getElementById('bloqueGrupoWhatsappVideoLive').classList.remove('hidden');
-    }
-    mostrarAccesoConcedidoLive(data);
+    correoRegistradoVideoLive = cuerpo.correo;
+    mostrarPasoComunidadVideoLive(data);
   }catch(err2){
     err.textContent = err2.message;
     err.classList.remove('hidden');
   }finally{
     btn.disabled = false;
     btn.textContent = 'Ver la clase';
+  }
+});
+
+let correoRegistradoVideoLive = '';
+document.getElementById('btnConfirmarComunidadVideoLive').addEventListener('click', async () => {
+  const err = document.getElementById('comunidadVideoLiveError');
+  const btn = document.getElementById('btnConfirmarComunidadVideoLive');
+  err.classList.add('hidden');
+  btn.disabled = true;
+  try{
+    const res = await fetch('/api/clase-en-vivo/confirmar-comunidad', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ correo: correoRegistradoVideoLive }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.error || 'No se pudo confirmar. Intenta de nuevo.');
+    mostrarAccesoConcedidoLive(data);
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }finally{
+    btn.disabled = false;
   }
 });
 

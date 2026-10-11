@@ -222,6 +222,13 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4E1454; }
     <p class="font-display text-2xl">¡Gracias por contestar!</p>
     <p class="mt-3 text-sm leading-relaxed text-crema/85">Tu inscripción se registró con éxito. Te mandamos la confirmación a tu correo, y en breve te contactamos por WhatsApp para tu anticipo.</p>
     <a id="linkWhatsappExito" href="#" target="_blank" rel="noopener" class="mt-6 inline-flex items-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon transition hover:brightness-105">Escribirnos por WhatsApp</a>
+
+    <!-- Invitación opcional a la Comunidad Endulcora (no obligatoria) -->
+    <div id="bloqueComunidad" class="mt-6 hidden rounded-2xl bg-carbon/20 p-5 text-left">
+      <p class="font-ui text-[12px] font-700 uppercase tracking-wider text-flama">💬 Únete a la Comunidad Endulcora</p>
+      <p class="mt-2 text-sm leading-relaxed text-crema/90">Entérate de talleres, clases en vivo y novedades.</p>
+      <a id="linkComunidad" href="#" target="_blank" class="mt-4 inline-flex items-center justify-center gap-2 rounded-full border border-crema/40 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-crema/10 transition">Unirme a la comunidad</a>
+    </div>
   </div>
 </main>
 
@@ -258,7 +265,11 @@ function escapeHtml(s){
 document.getElementById('anioFooter').textContent = new Date().getFullYear();
 
 let NUMERO_WHATSAPP = '5665271901';
-fetch('/api/content').then(r => r.json()).then(c => { if(c.whatsapp_numero) NUMERO_WHATSAPP = c.whatsapp_numero; }).catch(()=>{});
+let COMUNIDAD_LINK = '';
+fetch('/api/content').then(r => r.json()).then(c => {
+  if(c.whatsapp_numero) NUMERO_WHATSAPP = c.whatsapp_numero;
+  COMUNIDAD_LINK = c.comunidad_whatsapp_link || '';
+}).catch(()=>{});
 
 const ESTADOS_MEXICO = [
   'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 'Chihuahua',
@@ -431,6 +442,10 @@ form.addEventListener('submit', async (e) => {
 
     const mensaje = `Hola, acabo de inscribirme al taller: ${textoSesion}. Mi nombre es ${cuerpo.nombre}.`;
     document.getElementById('linkWhatsappExito').href = `https://wa.me/52${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+    if (COMUNIDAD_LINK) {
+      document.getElementById('linkComunidad').href = COMUNIDAD_LINK;
+      document.getElementById('bloqueComunidad').classList.remove('hidden');
+    }
     form.classList.add('hidden');
     document.getElementById('tarjetaExito').classList.remove('hidden');
   }catch(err){
