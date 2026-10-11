@@ -106,6 +106,60 @@ body { background: #FBF4E9; }
 
 <main class="mx-auto max-w-6xl px-5 py-6 lg:px-8">
 
+  <!-- Filtro de acceso: mientras no haya acceso (pago/membresia/registro),
+       solo se ve esto — nada del contenido real de la pagina. -->
+  <div id="bloqueRegistroVideoLive" class="hidden mx-auto max-w-md rounded-3xl bg-white p-6 ring-1 ring-vino/10 sm:p-8">
+    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Regístrate para ver la clase de hoy</p>
+    <p class="mt-1 text-xs text-carbon/50">Es gratis, solo necesitamos estos datos.</p>
+    <form id="formRegistroVideoLive" class="mt-4 grid gap-3">
+      <input id="videoLiveNombre" name="nombre" type="text" required autocomplete="name" placeholder="Tu nombre completo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+      <input id="videoLiveWhatsapp" name="whatsapp" type="tel" required autocomplete="tel" placeholder="Tu WhatsApp" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+      <input id="videoLiveCorreo" name="correo" type="email" required autocomplete="email" placeholder="Tu correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+      <div>
+        <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Ya tomaste un taller con nosotros?</span>
+        <div class="flex gap-4 text-sm text-carbon/80">
+          <label class="flex items-center gap-2"><input type="radio" name="yaTomoTaller" value="si" required class="h-4 w-4 border-vino/30"> Sí</label>
+          <label class="flex items-center gap-2"><input type="radio" name="yaTomoTaller" value="no" required class="h-4 w-4 border-vino/30"> No</label>
+        </div>
+      </div>
+      <div>
+        <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Qué te gustaría aprender? (opcional)</span>
+        <div id="videoLiveOpcionesTemas" class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm text-carbon/80"></div>
+      </div>
+      <div>
+        <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Eres de México?</span>
+        <div class="flex gap-4 text-sm text-carbon/80">
+          <label class="flex items-center gap-2"><input type="radio" name="esDeMexico" value="si" required class="h-4 w-4 border-vino/30"> Sí</label>
+          <label class="flex items-center gap-2"><input type="radio" name="esDeMexico" value="no" required class="h-4 w-4 border-vino/30"> No</label>
+        </div>
+      </div>
+      <label id="videoLiveBloqueEstado" class="hidden block">
+        <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿De qué estado?</span>
+        <select id="videoLiveEstado" name="estado" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm"></select>
+      </label>
+      <label id="videoLiveBloquePais" class="hidden block">
+        <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Desde qué país te registras?</span>
+        <input id="videoLivePais" name="pais" type="text" placeholder="Tu país" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+      </label>
+      <label class="flex items-start gap-3 text-sm text-carbon/80">
+        <input id="videoLiveAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
+        <span>He leído y acepto el <a href="#" onclick="abrirModalPrivacidadVideoLive(event)" class="text-vino underline">aviso de privacidad</a>. *</span>
+      </label>
+      <p id="videoLiveError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+      <button type="submit" id="btnVideoLiveEnviar" class="w-full rounded-full bg-vino py-3 font-ui text-sm font-700 uppercase tracking-wider text-crema transition hover:bg-morado disabled:opacity-60">Ver la clase</button>
+    </form>
+  </div>
+
+  <div id="contenidoLiveReal" class="hidden">
+
+  <!-- Invitación al grupo de WhatsApp: solo aparece justo despues de
+       registrarse (no para quien ya entra como miembro) -->
+  <div id="bloqueGrupoWhatsappVideoLive" class="hidden mb-4 rounded-2xl bg-vino p-5 text-crema">
+    <p class="font-ui text-[12px] font-700 uppercase tracking-wider text-flama">📲 Únete al grupo de WhatsApp de la clase</p>
+    <p class="mt-2 text-sm leading-relaxed text-crema/90">Únete para recibir actualizaciones de la clase y para confirmar tu asistencia.</p>
+    <a id="linkGrupoWhatsappVideoLive" href="#" target="_blank" class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Unirme al grupo de WhatsApp</a>
+  </div>
+
   <div id="claseEnVivoGrid" class="grid gap-4" style="grid-template-columns: 1fr 340px;">
     <!-- Video -->
     <div id="bloqueClaseEnVivoPlayer" class="hidden overflow-hidden rounded-2xl bg-carbon ring-1 ring-flama/25">
@@ -128,58 +182,6 @@ body { background: #FBF4E9; }
       <p id="claseSinVideoTitulo" class="mt-4 font-titulo text-lg text-crema">La transmisión empieza pronto</p>
       <p id="claseSinVideoProxima" class="mt-1 hidden font-ui text-[12px] font-700 uppercase tracking-widest text-flama"></p>
       <p class="mt-2 max-w-xs text-sm text-crema/50">Deja esta página abierta: el video aparece aquí solo en cuanto empecemos. Mientras, puedes saludar en el chat.</p>
-    </div>
-
-    <!-- Registro gratis para ver la clase de hoy (no reemplaza membresía/pago,
-         es una puerta extra; se vuelve a pedir en cada sesión) -->
-    <div id="bloqueRegistroVideoLive" class="hidden overflow-y-auto rounded-2xl bg-white p-6 ring-1 ring-vino/10" style="max-height: 480px;">
-      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Regístrate para ver la clase de hoy</p>
-      <p class="mt-1 text-xs text-carbon/50">Es gratis, solo necesitamos estos datos.</p>
-      <form id="formRegistroVideoLive" class="mt-4 grid gap-3">
-        <input id="videoLiveNombre" name="nombre" type="text" required autocomplete="name" placeholder="Tu nombre completo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
-        <input id="videoLiveWhatsapp" name="whatsapp" type="tel" required autocomplete="tel" placeholder="Tu WhatsApp" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
-        <input id="videoLiveCorreo" name="correo" type="email" required autocomplete="email" placeholder="Tu correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
-        <div>
-          <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Ya tomaste un taller con nosotros?</span>
-          <div class="flex gap-4 text-sm text-carbon/80">
-            <label class="flex items-center gap-2"><input type="radio" name="yaTomoTaller" value="si" required class="h-4 w-4 border-vino/30"> Sí</label>
-            <label class="flex items-center gap-2"><input type="radio" name="yaTomoTaller" value="no" required class="h-4 w-4 border-vino/30"> No</label>
-          </div>
-        </div>
-        <div>
-          <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Qué te gustaría aprender? (opcional)</span>
-          <div id="videoLiveOpcionesTemas" class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm text-carbon/80"></div>
-        </div>
-        <div>
-          <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Eres de México?</span>
-          <div class="flex gap-4 text-sm text-carbon/80">
-            <label class="flex items-center gap-2"><input type="radio" name="esDeMexico" value="si" required class="h-4 w-4 border-vino/30"> Sí</label>
-            <label class="flex items-center gap-2"><input type="radio" name="esDeMexico" value="no" required class="h-4 w-4 border-vino/30"> No</label>
-          </div>
-        </div>
-        <label id="videoLiveBloqueEstado" class="hidden block">
-          <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿De qué estado?</span>
-          <select id="videoLiveEstado" name="estado" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm"></select>
-        </label>
-        <label id="videoLiveBloquePais" class="hidden block">
-          <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Desde qué país te registras?</span>
-          <input id="videoLivePais" name="pais" type="text" placeholder="Tu país" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
-        </label>
-        <label class="flex items-start gap-3 text-sm text-carbon/80">
-          <input id="videoLiveAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
-          <span>He leído y acepto el <a href="#" onclick="abrirModalPrivacidadVideoLive(event)" class="text-vino underline">aviso de privacidad</a>. *</span>
-        </label>
-        <p id="videoLiveError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
-        <button type="submit" id="btnVideoLiveEnviar" class="w-full rounded-full bg-vino py-3 font-ui text-sm font-700 uppercase tracking-wider text-crema transition hover:bg-morado disabled:opacity-60">Ver la clase</button>
-      </form>
-    </div>
-
-    <!-- Invitación al grupo de WhatsApp: solo aparece justo despues de
-         registrarse (no para quien ya entra como miembro) -->
-    <div id="bloqueGrupoWhatsappVideoLive" class="hidden mt-4 rounded-2xl bg-vino p-5 text-crema" style="grid-column: 1;">
-      <p class="font-ui text-[12px] font-700 uppercase tracking-wider text-flama">📲 Únete al grupo de WhatsApp de la clase</p>
-      <p class="mt-2 text-sm leading-relaxed text-crema/90">Únete para recibir actualizaciones de la clase y para confirmar tu asistencia.</p>
-      <a id="linkGrupoWhatsappVideoLive" href="#" target="_blank" class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Unirme al grupo de WhatsApp</a>
     </div>
 
     <!-- Chat -->
@@ -294,6 +296,8 @@ body { background: #FBF4E9; }
     <div id="gridCatalogoLive" class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
     <p id="catalogoLiveVacio" class="hidden mt-2 text-sm text-carbon/50">Todavía no hay eBooks disponibles.</p>
   </section>
+
+  </div>
 </main>
 
 <!-- Modal del aviso de privacidad (para el registro gratis de la clase) -->
@@ -339,15 +343,22 @@ function abrirCheckoutVentana(url){
 /* ---------- Video + chat en vivo (mismo sistema que /clases-en-vivo) ---------- */
 let SESION_LIVE = { isLoggedIn: false, user: null };
 
+// El registro es un filtro de TODA la pagina: mientras no haya acceso, no
+// se ve ni el chat, ni la oferta de membresia, ni el catalogo de eBooks —
+// solo el formulario. En cuanto hay acceso (pago, membresia o registro), se
+// revela #contenidoLiveReal completo.
+function mostrarGateRegistro(mostrar){
+  document.getElementById('bloqueRegistroVideoLive').classList.toggle('hidden', !mostrar);
+  document.getElementById('contenidoLiveReal').classList.toggle('hidden', mostrar);
+}
+
 function mostrarPlaceholderVideo(mostrar){
+  mostrarGateRegistro(false);
   document.getElementById('claseSinVideo').classList.toggle('hidden', !mostrar);
-  if(mostrar) document.getElementById('bloqueRegistroVideoLive').classList.add('hidden');
 }
 
 function mostrarFormularioRegistroVideoLive(c){
-  document.getElementById('claseSinVideo').classList.add('hidden');
-  document.getElementById('bloqueClaseEnVivoPlayer').classList.add('hidden');
-  document.getElementById('bloqueRegistroVideoLive').classList.remove('hidden');
+  mostrarGateRegistro(true);
   cargarOpcionesTemasVideoLive(c.temas || []);
 }
 
@@ -389,7 +400,7 @@ document.querySelectorAll('input[name="esDeMexico"]').forEach(radio => {
 });
 
 function mostrarAccesoConcedidoLive(c){
-  document.getElementById('bloqueRegistroVideoLive').classList.add('hidden');
+  mostrarGateRegistro(false);
   if(c.youtubeId){
     mostrarPlaceholderVideo(false);
     mostrarPlayerClaseEnVivo(c.youtubeId);
