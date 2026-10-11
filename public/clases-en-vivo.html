@@ -289,6 +289,44 @@ body { background: #FBF4E9; }
     </button>
   </div>
 
+  <!-- Clase sin cobro activo: quien no es miembro tiene que registrarse para
+       ver la de hoy (puerta extra, no reemplaza membresía/pago; se vuelve a
+       pedir en cada sesión) -->
+  <div id="bloqueClaseRegistroGratis" class="mt-6 hidden max-w-md rounded-3xl bg-white p-6 ring-1 ring-vino/10 sm:p-8">
+    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Regístrate para ver la clase de hoy</p>
+    <p class="mt-1 text-xs text-carbon/50">Es gratis, solo necesitamos estos datos.</p>
+    <form id="formRegistroVideoLive" class="mt-4 grid gap-3">
+      <input id="videoLiveNombre" name="nombre" type="text" required autocomplete="name" placeholder="Tu nombre completo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+      <input id="videoLiveWhatsapp" name="whatsapp" type="tel" required autocomplete="tel" placeholder="Tu WhatsApp" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+      <input id="videoLiveCorreo" name="correo" type="email" required autocomplete="email" placeholder="Tu correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+      <div>
+        <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Ya tomaste un taller con nosotros?</span>
+        <div class="flex gap-4 text-sm text-carbon/80">
+          <label class="flex items-center gap-2"><input type="radio" name="yaTomoTaller" value="si" required class="h-4 w-4 border-vino/30"> Sí</label>
+          <label class="flex items-center gap-2"><input type="radio" name="yaTomoTaller" value="no" required class="h-4 w-4 border-vino/30"> No</label>
+        </div>
+      </div>
+      <div>
+        <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Qué te gustaría aprender? (opcional)</span>
+        <div id="videoLiveOpcionesTemas" class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm text-carbon/80"></div>
+      </div>
+      <label class="flex items-start gap-3 text-sm text-carbon/80">
+        <input id="videoLiveAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
+        <span>He leído y acepto el <a href="#" onclick="abrirModalPrivacidadVideoLive(event)" class="text-vino underline">aviso de privacidad</a>. *</span>
+      </label>
+      <p id="videoLiveError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+      <button type="submit" id="btnVideoLiveEnviar" class="w-full rounded-full boton-vivo bg-vino py-3 font-ui text-sm font-700 uppercase tracking-wider text-crema transition hover:bg-morado disabled:opacity-60">Ver la clase</button>
+    </form>
+  </div>
+
+  <!-- Invitación al grupo de WhatsApp: solo aparece justo despues de
+       registrarse (no para quien ya entra como miembro) -->
+  <div id="bloqueGrupoWhatsappVideoLive" class="mt-6 hidden max-w-md rounded-3xl bg-vino p-6 text-crema">
+    <p class="font-ui text-[12px] font-700 uppercase tracking-wider text-flama">📲 Únete al grupo de WhatsApp de la clase</p>
+    <p class="mt-2 text-sm leading-relaxed text-crema/90">Únete para recibir actualizaciones de la clase y para confirmar tu asistencia.</p>
+    <a id="linkGrupoWhatsappVideoLive" href="#" target="_blank" class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Unirme al grupo de WhatsApp</a>
+  </div>
+
   <div id="claseInfoBloque" class="mt-6 hidden max-w-2xl rounded-3xl bg-white p-6 ring-1 ring-vino/10 sm:p-8">
     <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Para la sesión</p>
     <div id="claseInfoTexto" class="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-carbon/75"></div>
@@ -321,6 +359,17 @@ body { background: #FBF4E9; }
     </div>
   </div>
 </main>
+
+<!-- Modal del aviso de privacidad (para el registro gratis de la clase) -->
+<div id="modalPrivacidadVideoLive" class="fixed inset-0 z-[60] hidden items-center justify-center bg-carbon/50 p-4">
+  <div class="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6">
+    <div class="flex items-center justify-between gap-4">
+      <h3 class="font-titulo text-xl text-vino">Aviso de privacidad</h3>
+      <button type="button" onclick="cerrarModalPrivacidadVideoLive()" aria-label="Cerrar" class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-carbon/50 hover:bg-vino/10 hover:text-vino">✕</button>
+    </div>
+    <div id="textoPrivacidadVideoLive" class="mt-4 space-y-3 text-sm leading-relaxed text-carbon/75"></div>
+  </div>
+</div>
 
 <footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
   <div class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 pb-10 text-center sm:flex-row sm:justify-between sm:text-left lg:px-8">
@@ -421,11 +470,30 @@ function aplicarClaseEnVivo(c){
 let SESION_CLASE = { isLoggedIn: false, user: null };
 
 function mostrarBloqueAcceso(nombre){
-  ['bloqueClaseInvitado', 'bloqueClaseComprar'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  ['bloqueClaseInvitado', 'bloqueClaseComprar', 'bloqueClaseRegistroGratis'].forEach(id => document.getElementById(id).classList.add('hidden'));
   document.getElementById('linkEntrarClase').classList.add('hidden');
   document.getElementById('linkRecetarioClase').classList.add('hidden');
   ocultarPlayerClaseEnVivo();
   if(nombre) document.getElementById(nombre).classList.remove('hidden');
+}
+
+const ETIQUETA_TEMA_VIDEO_LIVE = {
+  panaderia: 'Panadería',
+  chocolate: 'Chocolate',
+  reposteria: 'Repostería',
+  velas: 'Velas comestibles',
+  cocina_salada: 'Cocina salada',
+};
+let temasVideoLiveCargados = false;
+function cargarOpcionesTemasVideoLive(temas){
+  if(temasVideoLiveCargados) return;
+  document.getElementById('videoLiveOpcionesTemas').innerHTML = (temas || []).map(t => `
+    <label class="flex items-center gap-2">
+      <input type="checkbox" name="interesTemas" value="${escapeHtml(t)}" class="h-4 w-4 rounded border-vino/30">
+      ${escapeHtml(ETIQUETA_TEMA_VIDEO_LIVE[t] || t)}
+    </label>
+  `).join('');
+  temasVideoLiveCargados = true;
 }
 
 function mostrarRecetario(url){
@@ -458,24 +526,93 @@ async function cargarAccesoClase(){
   try{
     const res = await fetch('/api/clase-en-vivo');
     const c = await res.json();
-    if(!c.requierePago){
-      mostrarAccesoConcedido(c);
-      return;
-    }
     if(c.tieneAcceso){
       mostrarAccesoConcedido(c);
       return;
     }
-    if(!SESION_CLASE.isLoggedIn){
-      mostrarBloqueAcceso('bloqueClaseInvitado');
+    if(c.requierePago){
+      if(!SESION_CLASE.isLoggedIn){
+        mostrarBloqueAcceso('bloqueClaseInvitado');
+        return;
+      }
+      mostrarBloqueAcceso('bloqueClaseComprar');
+      const precio = c.esMiembroActivo ? c.precioMiembro : c.precioNormal;
+      document.getElementById('claseComprarPrecio').textContent = `$${precio} MXN`;
+      document.getElementById('claseComprarNotaMembresia').classList.toggle('hidden', !c.esMiembroActivo);
       return;
     }
-    mostrarBloqueAcceso('bloqueClaseComprar');
-    const precio = c.esMiembroActivo ? c.precioMiembro : c.precioNormal;
-    document.getElementById('claseComprarPrecio').textContent = `$${precio} MXN`;
-    document.getElementById('claseComprarNotaMembresia').classList.toggle('hidden', !c.esMiembroActivo);
+    if(c.hayVideo && c.requiereRegistro){
+      // Sin cobro activo: quien no es miembro tiene que registrarse para
+      // ver la clase de hoy (puerta extra, no reemplaza membresía/pago).
+      mostrarBloqueAcceso('bloqueClaseRegistroGratis');
+      cargarOpcionesTemasVideoLive(c.temas);
+      return;
+    }
+    mostrarBloqueAcceso(null);
   }catch(e){}
 }
+
+document.getElementById('formRegistroVideoLive').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('videoLiveError');
+  const btn = document.getElementById('btnVideoLiveEnviar');
+  err.classList.add('hidden');
+  const datos = new FormData(e.target);
+  const cuerpo = {
+    nombre: datos.get('nombre'),
+    whatsapp: datos.get('whatsapp'),
+    correo: datos.get('correo'),
+    yaTomoTaller: datos.get('yaTomoTaller') === 'si',
+    interesTemas: datos.getAll('interesTemas'),
+    aceptaAvisoPrivacidad: datos.get('aceptaAvisoPrivacidad') === 'on',
+  };
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+  try{
+    const res = await fetch('/api/clase-en-vivo/registro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.error || 'No se pudo completar tu registro. Intenta de nuevo.');
+    mostrarAccesoConcedido(data);
+    if(data.whatsappGrupo){
+      document.getElementById('linkGrupoWhatsappVideoLive').href = data.whatsappGrupo;
+      document.getElementById('bloqueGrupoWhatsappVideoLive').classList.remove('hidden');
+    }
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Ver la clase';
+  }
+});
+
+async function abrirModalPrivacidadVideoLive(e){
+  if (e) e.preventDefault();
+  const modal = document.getElementById('modalPrivacidadVideoLive');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  const cont = document.getElementById('textoPrivacidadVideoLive');
+  cont.innerHTML = '<p class="text-carbon/50">Cargando…</p>';
+  try{
+    const c = await fetch('/api/content').then(r => r.json());
+    const texto = c.legal_privacidad || '';
+    cont.innerHTML = texto.split('\n\n').map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+  }catch(err){
+    cont.innerHTML = '<p class="text-red-600">No se pudo cargar el aviso de privacidad.</p>';
+  }
+}
+function cerrarModalPrivacidadVideoLive(){
+  const modal = document.getElementById('modalPrivacidadVideoLive');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+document.getElementById('modalPrivacidadVideoLive').addEventListener('click', (e) => {
+  if (e.target.id === 'modalPrivacidadVideoLive') cerrarModalPrivacidadVideoLive();
+});
 
 async function cargarSesionClase(){
   try{

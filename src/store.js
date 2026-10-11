@@ -87,6 +87,10 @@ const DEFAULT_CONTENT = {
   // y en la pantalla de "ya quedaste registrado". Distinto del WhatsApp
   // general del sitio.
   clasegratis_whatsapp_grupo: 'https://chat.whatsapp.com/JZE84n4ZOB11tHdKwLs7dY',
+  // Link de invitacion al grupo de WhatsApp de quienes se registran para
+  // ver la clase en vivo (lunes a jueves) sin pagar ni ser miembros. Ver
+  // registrosVideoEnVivo / POST /api/clase-en-vivo/registro.
+  claseenvivo_whatsapp_grupo: 'https://chat.whatsapp.com/F4og9zbWdb32SoMek9rH7J',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
@@ -209,6 +213,7 @@ function datosPorDefecto() {
     inscripcionesTaller: [],
     registrosQr: [],
     registrosClaseGratis: [],
+    registrosVideoEnVivo: [],
     bibliotecaClases: [],
     contactosCampana: [],
     campanasCorreo: [],
@@ -2153,6 +2158,39 @@ module.exports = {
   deleteRegistroClaseGratis(id) {
     const data = load();
     data.registrosClaseGratis = data.registrosClaseGratis.filter((r) => r.id !== Number(id));
+    save(data);
+  },
+
+  // ---- Registro gratis para ver la clase en vivo (lunes a jueves): no
+  // reemplaza el acceso de quien paga o es miembro, es una puerta extra
+  // para quien no tiene ninguna de las dos — se vuelve a pedir en cada
+  // sesion (ver claseenvivo_whatsapp_grupo en el contenido y
+  // accesoClaseEnVivoDeRequest en src/routes/api.js, que guarda el acceso
+  // concedido en la sesion del navegador, no aqui).
+  getRegistrosVideoEnVivo() {
+    return [...load().registrosVideoEnVivo].sort((a, b) => b.id - a.id);
+  },
+  addRegistroVideoEnVivo({ nombre, whatsapp, correo, fecha, yaTomoTaller, interesTemas, aceptaAvisoPrivacidad }) {
+    const data = load();
+    const item = {
+      id: nextId(data.registrosVideoEnVivo),
+      nombre: String(nombre || '').trim(),
+      whatsapp: String(whatsapp || '').trim(),
+      correo: String(correo || '').trim().toLowerCase(),
+      fecha: String(fecha || '').trim(),
+      yaTomoTaller: !!yaTomoTaller,
+      interesTemas: Array.isArray(interesTemas) ? interesTemas.filter((t) => TEMAS_CLASE_GRATIS.includes(t)) : [],
+      aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
+      createdAt: new Date().toISOString(),
+    };
+    data.registrosVideoEnVivo.push(item);
+    upsertContactoCampana(data, { email: item.correo, nombre: item.nombre, telefono: item.whatsapp, etiquetas: ['video-en-vivo'] });
+    save(data);
+    return item;
+  },
+  deleteRegistroVideoEnVivo(id) {
+    const data = load();
+    data.registrosVideoEnVivo = data.registrosVideoEnVivo.filter((r) => r.id !== Number(id));
     save(data);
   },
 

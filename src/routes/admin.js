@@ -737,6 +737,90 @@ router.get('/api/clase-gratis/registros/excel', requireAdmin, async (req, res) =
   res.end();
 });
 
+// ---- Registro gratis de la clase en vivo (lunes a jueves): alternativa
+// extra para quien no paga ni es miembro (ver POST /api/clase-en-vivo/registro
+// en src/routes/api.js y claseenvivo_whatsapp_grupo en /api/content) ----
+router.get('/api/clase-en-vivo/registros', requireAdmin, (req, res) => {
+  res.json(store.getRegistrosVideoEnVivo());
+});
+
+router.delete('/api/clase-en-vivo/registros/:id', requireAdmin, (req, res) => {
+  store.deleteRegistroVideoEnVivo(req.params.id);
+  res.json({ ok: true });
+});
+
+router.get('/api/clase-en-vivo/registros/excel', requireAdmin, async (req, res) => {
+  const registros = store.getRegistrosVideoEnVivo();
+
+  // Una pestaña por dia (cada sesion en vivo es un dia distinto), orden
+  // alfabetico por nombre adentro de cada una.
+  const grupos = new Map();
+  registros.forEach((r) => {
+    const clave = r.fecha || '';
+    if (!grupos.has(clave)) grupos.set(clave, { fecha: r.fecha, filas: [] });
+    grupos.get(clave).filas.push(r);
+  });
+  const gruposOrdenados = [...grupos.values()].sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+  const libro = new ExcelJS.Workbook();
+  libro.creator = 'Endulcora';
+  libro.created = new Date();
+
+  const usados = new Set();
+  const columnas = [
+    { header: 'Nombre', key: 'nombre', width: 26 },
+    { header: 'WhatsApp', key: 'whatsapp', width: 16 },
+    { header: 'Correo', key: 'correo', width: 28 },
+    { header: '¿Ya tomó taller?', key: 'yaTomoTaller', width: 14 },
+    { header: 'Interés', key: 'intereses', width: 26 },
+    { header: 'Registrado el', key: 'createdAt', width: 18 },
+  ];
+
+  gruposOrdenados.forEach((grupo) => {
+    const fechaLegible = grupo.fecha
+      ? new Date(`${grupo.fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+      : 'Sin fecha';
+    const MESES_CORTOS_HOJA = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const [anio, mesNum, diaNum] = (grupo.fecha || '').split('-').map(Number);
+    const fechaCorta = grupo.fecha ? `${diaNum}-${MESES_CORTOS_HOJA[mesNum]}-${String(anio).slice(2)}` : 'Sin fecha';
+    const nombreHoja = nombreHojaExcel(fechaCorta, usados);
+    const hoja = libro.addWorksheet(nombreHoja);
+    hoja.addRow([`Video en vivo — ${fechaLegible}`]);
+    hoja.mergeCells(1, 1, 1, columnas.length);
+    hoja.getRow(1).font = { bold: true, size: 13, color: { argb: 'FF4E1454' } };
+    hoja.addRow([]);
+
+    hoja.columns = columnas.map((c) => ({ key: c.key, width: c.width }));
+    const filaEncabezado = hoja.addRow(columnas.map((c) => c.header));
+    filaEncabezado.font = { bold: true };
+    filaEncabezado.eachCell((celda) => {
+      celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5A623' } };
+    });
+
+    grupo.filas
+      .sort((a, b) => a.nombre.localeCompare(b.nombre))
+      .forEach((r) => {
+        hoja.addRow({
+          nombre: r.nombre,
+          whatsapp: r.whatsapp,
+          correo: r.correo,
+          yaTomoTaller: r.yaTomoTaller ? 'Sí' : 'No',
+          intereses: r.interesTemas.join(', '),
+          createdAt: new Date(r.createdAt).toLocaleDateString('es-MX'),
+        });
+      });
+  });
+
+  if (!gruposOrdenados.length) {
+    libro.addWorksheet('Sin registros').addRow(['Todavía no hay registros.']);
+  }
+
+  res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.set('Content-Disposition', 'attachment; filename="video-en-vivo-endulcora.xlsx"');
+  await libro.xlsx.write(res);
+  res.end();
+});
+
 // Nombre de pestaña de Excel: maximo 31 caracteres, sin los caracteres que
 // Excel prohibe, y unico dentro del libro (le agrega un numero si se repite).
 function nombreHojaExcel(base, usados) {

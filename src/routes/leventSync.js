@@ -130,7 +130,21 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
       esPrimeraVez: !r.yaTomoTaller,
     }));
 
-  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres, ...contactosQr, ...contactosSubscribers, ...contactosPedidosInvitado, ...contactosClaseGratis] });
+  // Registros gratis para ver la clase en vivo (lunes a jueves) sin pagar ni
+  // ser miembro: una persona puede aparecer varias veces si se registro en
+  // mas de una sesion, igual que pasa con otros formularios recurrentes.
+  const contactosVideoEnVivo = store
+    .getRegistrosVideoEnVivo()
+    .filter((r) => r.correo)
+    .map((r) => ({
+      email: r.correo,
+      telefono: r.whatsapp || '',
+      nombre: r.nombre || '',
+      categoriasInteres: ['origen:video-en-vivo', ...r.interesTemas.map((t) => `interes:${t}`)].filter(Boolean),
+      esPrimeraVez: !r.yaTomoTaller,
+    }));
+
+  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres, ...contactosQr, ...contactosSubscribers, ...contactosPedidosInvitado, ...contactosClaseGratis, ...contactosVideoEnVivo] });
 });
 
 module.exports = router;

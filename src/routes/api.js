@@ -83,16 +83,24 @@ router.get('/content', (req, res) => {
 
 // Regresa si quien hace la peticion tiene acceso a la sesion de clase en
 // vivo que toca ahora (gratis, o pagada), y la fecha que la identifica —
-// la misma logica que usan /clase-en-vivo y el chat en vivo.
+// la misma logica que usan /clase-en-vivo y el chat en vivo. Cuando la
+// clase no tiene cobro, el acceso ya no es automatico para cualquiera:
+// hay que ser miembro activo, o haberse registrado para la sesion de hoy
+// (ver POST /clase-en-vivo/registro, que guarda la bandera en la sesion
+// del navegador — por eso se vuelve a pedir en cada sesion/dia distinto).
 function accesoClaseEnVivoDeRequest(req) {
   const contenido = store.getContent();
   const requierePago = contenido.clase_cobro_activo === 'true';
   const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora, contenido.clase_fecha_especifica);
   const sesionChat = store.claveSesionClaseEnVivo(contenido.clase_youtube_id, fecha);
-  if (!requierePago) return { acceso: true, fecha, sesionChat };
   const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
-  const acceso = !!(usuario && store.tieneAccesoClaseEnVivo({ fecha, userId: usuario.id }));
-  return { acceso, fecha, sesionChat };
+  if (requierePago) {
+    const acceso = !!(usuario && store.tieneAccesoClaseEnVivo({ fecha, userId: usuario.id }));
+    return { acceso, fecha, sesionChat };
+  }
+  const esMiembroActivo = !!(usuario && usuario.membresiaEstado === 'activa');
+  const registrado = !!(req.session && req.session.accesoVideoEnVivoFecha === fecha);
+  return { acceso: esMiembroActivo || registrado, fecha, sesionChat };
 }
 
 // ---- Clase en vivo: cobro opcional por sesion ----
@@ -101,13 +109,21 @@ router.get('/clase-en-vivo', (req, res) => {
   const requierePago = contenido.clase_cobro_activo === 'true';
   const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora, contenido.clase_fecha_especifica);
   if (!requierePago) {
+    const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+    const esMiembroActivo = !!(usuario && usuario.membresiaEstado === 'activa');
+    const registrado = !!(req.session && req.session.accesoVideoEnVivoFecha === fecha);
+    const tieneAcceso = esMiembroActivo || registrado;
     return res.json({
       requierePago: false,
-      tieneAcceso: true,
-      url: contenido.clase_url || '',
-      youtubeId: contenido.clase_youtube_id || '',
-      recetarioUrl: contenido.clase_recetario_url || '',
-      recetarioNombre: contenido.clase_recetario_nombre || '',
+      requiereRegistro: !esMiembroActivo,
+      hayVideo: !!contenido.clase_youtube_id || /^https?:\/\//i.test(contenido.clase_url || ''),
+      tieneAcceso,
+      url: tieneAcceso ? (contenido.clase_url || '') : '',
+      youtubeId: tieneAcceso ? (contenido.clase_youtube_id || '') : '',
+      recetarioUrl: tieneAcceso ? (contenido.clase_recetario_url || '') : '',
+      recetarioNombre: tieneAcceso ? (contenido.clase_recetario_nombre || '') : '',
+      temas: store.TEMAS_CLASE_GRATIS,
+      whatsappGrupo: contenido.claseenvivo_whatsapp_grupo || '',
     });
   }
   const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
@@ -123,6 +139,50 @@ router.get('/clase-en-vivo', (req, res) => {
     youtubeId: tieneAcceso ? (contenido.clase_youtube_id || '') : '',
     recetarioUrl: tieneAcceso ? (contenido.clase_recetario_url || '') : '',
     recetarioNombre: tieneAcceso ? (contenido.clase_recetario_nombre || '') : '',
+  });
+});
+
+// Registro gratis para entrar a la clase en vivo de hoy cuando no hay
+// cobro activo (alternativa extra, junto a pago/membresia — no las
+// reemplaza). Se vuelve a pedir en cada sesion: el acceso que concede
+// vive en la sesion del navegador (cookie), amarrado a la fecha exacta
+// de la sesion de hoy, asi que al otro dia (fecha distinta) hay que
+// volver a registrarse.
+router.post('/clase-en-vivo/registro', (req, res) => {
+  const contenido = store.getContent();
+  if (contenido.clase_cobro_activo === 'true') {
+    return res.status(400).json({ error: 'Esta clase no usa registro gratuito en este momento.' });
+  }
+  const fecha = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora, contenido.clase_fecha_especifica);
+  const b = req.body || {};
+  const nombre = String(b.nombre || '').trim();
+  const whatsapp = String(b.whatsapp || '').trim();
+  const correo = String(b.correo || '').trim();
+
+  if (!nombre) return res.status(400).json({ error: 'Escribe tu nombre completo.' });
+  if (!WHATSAPP_RE.test(whatsapp)) return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
+  if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
+  if (typeof b.yaTomoTaller !== 'boolean') return res.status(400).json({ error: 'Dinos si ya tomaste un taller con nosotros.' });
+  if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para registrarte.' });
+
+  store.addRegistroVideoEnVivo({
+    nombre,
+    whatsapp,
+    correo,
+    fecha,
+    yaTomoTaller: b.yaTomoTaller,
+    interesTemas: Array.isArray(b.interesTemas) ? b.interesTemas : [],
+    aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
+  });
+
+  req.session.accesoVideoEnVivoFecha = fecha;
+  res.status(201).json({
+    ok: true,
+    url: contenido.clase_url || '',
+    youtubeId: contenido.clase_youtube_id || '',
+    recetarioUrl: contenido.clase_recetario_url || '',
+    recetarioNombre: contenido.clase_recetario_nombre || '',
+    whatsappGrupo: contenido.claseenvivo_whatsapp_grupo || '',
   });
 });
 
