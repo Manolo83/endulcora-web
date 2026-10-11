@@ -121,6 +121,11 @@ body { background: #FBF4E9; }
       <select id="campoEstado" name="estado" class="campo-registro"></select>
     </label>
 
+    <label id="bloqueCampoPais" class="hidden block">
+      <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Desde qué país te registras?</span>
+      <input id="campoPais" name="pais" type="text" placeholder="Tu país" class="campo-registro">
+    </label>
+
     <div class="pt-2">
       <label class="flex items-start gap-3 text-sm text-carbon/80">
         <input id="campoAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
@@ -206,10 +211,14 @@ document.getElementById('campoEstado').innerHTML = ESTADOS_MEXICO.map(e => `<opt
 document.querySelectorAll('input[name="esDeMexico"]').forEach(radio => {
   radio.addEventListener('change', () => {
     const esMexico = radio.value === 'si' && radio.checked;
-    const bloque = document.getElementById('bloqueCampoEstado');
+    const bloqueEstado = document.getElementById('bloqueCampoEstado');
     const select = document.getElementById('campoEstado');
-    bloque.classList.toggle('hidden', !esMexico);
+    bloqueEstado.classList.toggle('hidden', !esMexico);
     select.required = esMexico;
+    const bloquePais = document.getElementById('bloqueCampoPais');
+    const campoPais = document.getElementById('campoPais');
+    bloquePais.classList.toggle('hidden', esMexico);
+    campoPais.required = !esMexico;
   });
 });
 
@@ -275,6 +284,7 @@ form.addEventListener('submit', async (e) => {
     interesTemas: datos.getAll('interesTemas'),
     esDeMexico: esDeMexico === 'si',
     estado: esDeMexico === 'si' ? datos.get('estado') : '',
+    pais: esDeMexico === 'no' ? datos.get('pais') : '',
     aceptaAvisoPrivacidad: datos.get('aceptaAvisoPrivacidad') === 'on',
   };
 

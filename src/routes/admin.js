@@ -846,7 +846,7 @@ function nombreHojaExcel(base, usados) {
 // campo no tienen esDeMexico definido.
 function textoZona(item) {
   if (item.esDeMexico === undefined) return '';
-  if (!item.esDeMexico) return 'Otro país';
+  if (!item.esDeMexico) return item.pais || 'Otro país';
   return item.estado || 'México';
 }
 

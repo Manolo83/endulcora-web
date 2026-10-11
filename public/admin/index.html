@@ -1273,7 +1273,7 @@ function escapeHtml(str){
 // de antes de este campo no tienen esDeMexico definido.
 function formatoZona(item){
   if (item.esDeMexico === undefined) return '—';
-  if (!item.esDeMexico) return 'Otro país';
+  if (!item.esDeMexico) return item.pais || 'Otro país';
   return item.estado || 'México';
 }
 

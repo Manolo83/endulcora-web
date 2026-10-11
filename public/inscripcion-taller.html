@@ -195,6 +195,11 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4E1454; }
       <select id="campoEstado" name="estado" class="campo-inscripcion"></select>
     </div>
 
+    <div id="bloqueCampoPais" class="hidden">
+      <label class="etiqueta-inscripcion" for="campoPais">¿Desde qué país te registras?</label>
+      <input id="campoPais" name="pais" type="text" placeholder="Tu país" class="campo-inscripcion">
+    </div>
+
     <div class="space-y-3 border-t border-vino/10 pt-5">
       <label class="flex items-start gap-3 text-sm text-carbon/80">
         <input id="campoAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
@@ -269,6 +274,9 @@ document.querySelectorAll('input[name="esDeMexico"]').forEach(radio => {
     const select = document.getElementById('campoEstado');
     document.getElementById('bloqueCampoEstado').classList.toggle('hidden', !esMexico);
     select.required = esMexico;
+    const campoPais = document.getElementById('campoPais');
+    document.getElementById('bloqueCampoPais').classList.toggle('hidden', esMexico);
+    campoPais.required = !esMexico;
   });
 });
 
@@ -403,6 +411,7 @@ form.addEventListener('submit', async (e) => {
     cumpleMes: datos.get('cumpleMes'),
     esDeMexico: esDeMexico === 'si',
     estado: esDeMexico === 'si' ? datos.get('estado') : '',
+    pais: esDeMexico === 'no' ? datos.get('pais') : '',
     esPrimeraVez: datos.get('esPrimeraVez') === 'si',
     aceptaPromociones: datos.get('aceptaPromociones') === 'on',
     aceptaAvisoPrivacidad: datos.get('aceptaAvisoPrivacidad') === 'on',

@@ -1266,15 +1266,23 @@ const ESTADOS_MEXICO = [
   'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas',
 ];
 
+// Para pasar cualquier texto (estado o pais) a una etiqueta de campañas
+// filtrable: minusculas y sin acentos (ej. "Querétaro" -> "queretaro").
+function slugZona(texto) {
+  return String(texto || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
 // Etiqueta de campañas a partir del pais/estado de un registro, para poder
-// filtrar contactos por zona en la pestaña de Campañas (ej. "estado:jalisco").
-// Si esDeMexico es undefined (registros de antes de este campo), no se sabe
-// la zona: no se manda ninguna etiqueta, en vez de marcarlo como "otro pais".
-function etiquetasZona({ esDeMexico, estado }) {
+// filtrar contactos por zona en la pestaña de Campañas (ej. "estado:jalisco"
+// o "pais:estados-unidos"). Si esDeMexico es undefined (registros de antes
+// de este campo), no se sabe la zona: no se manda ninguna etiqueta.
+function etiquetasZona({ esDeMexico, estado, pais }) {
   if (esDeMexico === undefined) return [];
-  if (!esDeMexico) return ['pais:otro'];
-  const slug = String(estado || '').trim().toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, ''); // quita acentos
+  if (!esDeMexico) {
+    const slug = slugZona(pais);
+    return [`pais:${slug || 'otro'}`];
+  }
+  const slug = slugZona(estado);
   return ['pais:mexico', ...(slug ? [`estado:${slug}`] : [])];
 }
 
@@ -2061,7 +2069,7 @@ module.exports = {
   },
   addInscripcionTaller({
     nombre, whatsapp, correo, sesionTallerId, taller, fecha, sede, horario, montoAnticipo,
-    comoSeEntero, preferencias, cumpleDia, cumpleMes, esDeMexico, estado,
+    comoSeEntero, preferencias, cumpleDia, cumpleMes, esDeMexico, estado, pais,
     esPrimeraVez, aceptaPromociones, aceptaAvisoPrivacidad,
   }) {
     const data = load();
@@ -2087,6 +2095,7 @@ module.exports = {
       // (ver etiquetasZona, que alimenta la lista de campañas de correo).
       esDeMexico: !!esDeMexico,
       estado: esDeMexico && ESTADOS_MEXICO.includes(estado) ? estado : '',
+      pais: !esDeMexico ? String(pais || '').trim().slice(0, 80) : '',
       esPrimeraVez: !!esPrimeraVez,
       aceptaPromociones: !!aceptaPromociones,
       aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
@@ -2155,7 +2164,7 @@ module.exports = {
   getRegistrosClaseGratis() {
     return [...load().registrosClaseGratis].sort((a, b) => b.id - a.id);
   },
-  addRegistroClaseGratis({ nombre, whatsapp, correo, fecha, horario, yaTomoTaller, interesTemas, esDeMexico, estado, aceptaAvisoPrivacidad }) {
+  addRegistroClaseGratis({ nombre, whatsapp, correo, fecha, horario, yaTomoTaller, interesTemas, esDeMexico, estado, pais, aceptaAvisoPrivacidad }) {
     const data = load();
     const item = {
       id: nextId(data.registrosClaseGratis),
@@ -2173,6 +2182,7 @@ module.exports = {
       // (ver etiquetasZona, que alimenta la lista de campañas de correo).
       esDeMexico: !!esDeMexico,
       estado: esDeMexico && ESTADOS_MEXICO.includes(estado) ? estado : '',
+      pais: !esDeMexico ? String(pais || '').trim().slice(0, 80) : '',
       aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
       asistio: null, // null = sin marcar todavia; true/false al cierre del dia
       compro: '', // '' sin marcar, o 'taller' | 'recetario' si asistio y compro
@@ -2217,7 +2227,7 @@ module.exports = {
   getRegistrosVideoEnVivo() {
     return [...load().registrosVideoEnVivo].sort((a, b) => b.id - a.id);
   },
-  addRegistroVideoEnVivo({ nombre, whatsapp, correo, fecha, yaTomoTaller, interesTemas, esDeMexico, estado, aceptaAvisoPrivacidad }) {
+  addRegistroVideoEnVivo({ nombre, whatsapp, correo, fecha, yaTomoTaller, interesTemas, esDeMexico, estado, pais, aceptaAvisoPrivacidad }) {
     const data = load();
     const item = {
       id: nextId(data.registrosVideoEnVivo),
@@ -2229,6 +2239,7 @@ module.exports = {
       interesTemas: Array.isArray(interesTemas) ? interesTemas.filter((t) => TEMAS_CLASE_GRATIS.includes(t)) : [],
       esDeMexico: !!esDeMexico,
       estado: esDeMexico && ESTADOS_MEXICO.includes(estado) ? estado : '',
+      pais: !esDeMexico ? String(pais || '').trim().slice(0, 80) : '',
       aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
       createdAt: new Date().toISOString(),
     };

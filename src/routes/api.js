@@ -17,6 +17,9 @@ function errorZonaInvalida(b) {
   if (b.esDeMexico && !store.ESTADOS_MEXICO.includes(b.estado)) {
     return 'Elige tu estado de la lista.';
   }
+  if (b.esDeMexico === false && !String(b.pais || '').trim()) {
+    return 'Escribe de qué país te registras.';
+  }
   return null;
 }
 
@@ -187,6 +190,7 @@ router.post('/clase-en-vivo/registro', (req, res) => {
     interesTemas: Array.isArray(b.interesTemas) ? b.interesTemas : [],
     esDeMexico: b.esDeMexico,
     estado: b.estado,
+    pais: b.pais,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
   });
 
@@ -449,6 +453,7 @@ router.post('/inscripcion-taller', async (req, res) => {
     cumpleMes: b.cumpleMes,
     esDeMexico: b.esDeMexico,
     estado: b.estado,
+    pais: b.pais,
     esPrimeraVez: b.esPrimeraVez,
     aceptaPromociones: b.aceptaPromociones,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
@@ -558,6 +563,7 @@ router.post('/clase-gratis/registro', (req, res) => {
     interesTemas: Array.isArray(b.interesTemas) ? b.interesTemas : [],
     esDeMexico: b.esDeMexico,
     estado: b.estado,
+    pais: b.pais,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
   });
   res.status(201).json({ ok: true, id: item.id });

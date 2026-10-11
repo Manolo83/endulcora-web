@@ -161,6 +161,10 @@ body { background: #FBF4E9; }
           <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿De qué estado?</span>
           <select id="videoLiveEstado" name="estado" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm"></select>
         </label>
+        <label id="videoLiveBloquePais" class="hidden block">
+          <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Desde qué país te registras?</span>
+          <input id="videoLivePais" name="pais" type="text" placeholder="Tu país" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+        </label>
         <label class="flex items-start gap-3 text-sm text-carbon/80">
           <input id="videoLiveAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
           <span>He leído y acepto el <a href="#" onclick="abrirModalPrivacidadVideoLive(event)" class="text-vino underline">aviso de privacidad</a>. *</span>
@@ -379,6 +383,8 @@ document.querySelectorAll('input[name="esDeMexico"]').forEach(radio => {
     const esMexico = radio.value === 'si' && radio.checked;
     document.getElementById('videoLiveBloqueEstado').classList.toggle('hidden', !esMexico);
     document.getElementById('videoLiveEstado').required = esMexico;
+    document.getElementById('videoLiveBloquePais').classList.toggle('hidden', esMexico);
+    document.getElementById('videoLivePais').required = !esMexico;
   });
 });
 
@@ -433,6 +439,7 @@ document.getElementById('formRegistroVideoLive').addEventListener('submit', asyn
     interesTemas: datos.getAll('interesTemas'),
     esDeMexico: esDeMexico === 'si',
     estado: esDeMexico === 'si' ? datos.get('estado') : '',
+    pais: esDeMexico === 'no' ? datos.get('pais') : '',
     aceptaAvisoPrivacidad: datos.get('aceptaAvisoPrivacidad') === 'on',
   };
   btn.disabled = true;
