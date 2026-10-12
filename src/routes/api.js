@@ -135,7 +135,12 @@ function accesoClaseEnVivoDeRequest(req) {
   }
   const esMiembroActivo = !!(usuario && usuario.membresiaEstado === 'activa');
   const registroCompleto = leerCookie(req, 'ev_registrado') === '1' && leerCookie(req, 'ev_comunidad') === '1';
-  return { acceso: esMiembroActivo || registroCompleto, fecha, sesionChat };
+  // Compatibilidad con quien ya tenia acceso concedido por el sistema
+  // anterior (sesion de 12h amarrada a la fecha de hoy, de antes del
+  // registro unico): no se le debe cortar el acceso a medio live solo
+  // porque su navegador no alcanzo a pasar por el nuevo flujo de 2 pasos.
+  const accesoSesionVieja = req.session && req.session.accesoVideoEnVivoFecha === fecha;
+  return { acceso: esMiembroActivo || registroCompleto || accesoSesionVieja, fecha, sesionChat };
 }
 
 // ---- Clase en vivo: cobro opcional por sesion ----
@@ -148,11 +153,15 @@ router.get('/clase-en-vivo', (req, res) => {
     const esMiembroActivo = !!(usuario && usuario.membresiaEstado === 'activa');
     const registrado = leerCookie(req, 'ev_registrado') === '1';
     const comunidadConfirmada = leerCookie(req, 'ev_comunidad') === '1';
-    const tieneAcceso = esMiembroActivo || (registrado && comunidadConfirmada);
+    // Compatibilidad con quien ya tenia acceso concedido por el sistema
+    // anterior (ver accesoClaseEnVivoDeRequest arriba) — no se le debe
+    // cortar el acceso a medio live.
+    const accesoSesionVieja = req.session && req.session.accesoVideoEnVivoFecha === fecha;
+    const tieneAcceso = esMiembroActivo || (registrado && comunidadConfirmada) || accesoSesionVieja;
     return res.json({
       requierePago: false,
-      requiereRegistro: !esMiembroActivo && !registrado,
-      requiereComunidad: !esMiembroActivo && registrado && !comunidadConfirmada,
+      requiereRegistro: !esMiembroActivo && !registrado && !accesoSesionVieja,
+      requiereComunidad: !esMiembroActivo && registrado && !comunidadConfirmada && !accesoSesionVieja,
       hayVideo: !!contenido.clase_youtube_id || /^https?:\/\//i.test(contenido.clase_url || ''),
       tieneAcceso,
       url: tieneAcceso ? (contenido.clase_url || '') : '',
