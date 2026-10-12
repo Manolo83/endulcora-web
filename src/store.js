@@ -92,7 +92,7 @@ const DEFAULT_CONTENT = {
   // ni ser miembro (ver registrosVideoEnVivo / POST
   // /api/clase-en-vivo/registro y /confirmar-comunidad), e invitacion
   // opcional en el registro de clase gratis y de talleres.
-  comunidad_whatsapp_link: 'https://chat.whatsapp.com/EBjxTbTxblMAwQ74jPLBUU',
+  comunidad_whatsapp_link: 'https://chat.whatsapp.com/EBjxTbTxblMAwQ74jPLBUU?s=cl&p=a&mlu=4&ilr=4',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
