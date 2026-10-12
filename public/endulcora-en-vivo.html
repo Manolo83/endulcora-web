@@ -478,6 +478,7 @@ document.getElementById('formRegistroVideoLive').addEventListener('submit', asyn
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok) throw new Error(data.error || 'No se pudo completar tu registro. Intenta de nuevo.');
+    if (typeof fbq === 'function') fbq('track', 'CompleteRegistration');
     correoRegistradoVideoLive = cuerpo.correo;
     mostrarPasoComunidadVideoLive(data);
   }catch(err2){
