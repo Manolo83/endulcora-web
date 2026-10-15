@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YZNFKC6PS8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-YZNFKC6PS8');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__TITULO__ · Endulcora</title>
+<meta name="description" content="__DESCRIPCION__">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="__URL__">
+<meta name="theme-color" content="#1B0720">
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1302735011542499');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1302735011542499&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
+<!-- Open Graph / Facebook / WhatsApp / Meta Ads -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="__URL__">
+<meta property="og:site_name" content="Endulcora · Estudio Gastronómico">
+<meta property="og:title" content="__TITULO__">
+<meta property="og:description" content="__DESCRIPCION__">
+<meta property="og:image" content="__IMAGEN__">
+<meta property="og:locale" content="es_MX">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="__TITULO__">
+<meta name="twitter:description" content="__DESCRIPCION__">
+<meta name="twitter:image" content="__IMAGEN__">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          firma: ['"Great Vibes"', 'cursive'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+.boton-vivo { transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease; }
+.boton-vivo:hover { transform: translateY(-2px) scale(1.03); }
+.boton-vivo:active { transform: scale(.95); }
+.spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation: girar .7s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .boton-vivo:hover, .boton-vivo:active { transform:none; }
+}
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<header class="sticky top-0 z-50 bg-crema/95 backdrop-blur border-b border-vino/10">
+  <div class="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-5 lg:px-8">
+    <div class="flex items-center gap-3 shrink-0">
+      <a href="/" class="flex items-center">
+        <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+      </a>
+      <div class="h-9 w-px bg-carbon/15"></div>
+      <a href="https://levent-web-production.up.railway.app/" target="_blank" rel="noopener" aria-label="Levent" title="Acompañados por Levent" class="shrink-0 opacity-70 hover:opacity-100 transition">
+        <img src="/levent-icono.png" alt="" class="h-10 w-10">
+      </a>
+    </div>
+    <button type="button" onclick="toggleMenu()" aria-label="Abrir menú" aria-expanded="false" id="btnMenu"
+      class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-vino/25 text-vino">
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+  <div id="menuMovil" class="hidden max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-vino/10 bg-crema px-5 pb-6 pt-2">
+    <a href="/" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Inicio</a>
+    <a href="/talleres" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Talleres</a>
+    <a href="/tienda" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Tienda</a>
+    <a href="/endulcora-en-vivo" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Clases en vivo</a>
+    <a href="/membresia" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Membresía</a>
+  </div>
+</header>
+
+<main class="mx-auto max-w-5xl px-5 py-8 lg:px-8 lg:py-12">
+  <a href="/talleres" class="inline-flex items-center gap-1.5 font-ui text-[12px] font-600 uppercase tracking-wider text-vino/70 hover:text-vino transition">
+    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+    Ver todos los talleres
+  </a>
+
+  <div id="estadoCargando" class="mt-16 text-center text-carbon/50">Cargando…</div>
+
+  <div id="estadoNoEncontrado" class="mt-16 hidden text-center">
+    <p class="font-titulo text-2xl text-vino">Este taller ya no está disponible</p>
+    <p class="mt-2 text-sm text-carbon/60">Puede que ya haya pasado o se haya movido de fecha.</p>
+    <a href="/talleres" class="mt-6 inline-flex rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Ver el calendario</a>
+  </div>
+
+  <div id="contenidoTaller" class="hidden">
+    <!-- Hero -->
+    <div class="mt-6 grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:items-start">
+      <div>
+        <div id="tFoto" class="aspect-[4/3] w-full overflow-hidden rounded-3xl bg-gradient-to-br from-vino to-uva bg-cover bg-center ring-1 ring-vino/10"></div>
+
+        <div id="tBadges" class="mt-5 flex flex-wrap gap-2 font-ui text-[11px] font-700 uppercase tracking-wider"></div>
+
+        <h1 id="tTitulo" class="mt-4 font-display text-2xl leading-tight text-vino sm:text-3xl"></h1>
+        <p id="tDescripcion" class="mt-3 text-[15px] leading-relaxed text-carbon/70"></p>
+
+        <div id="bloqueQueAprendes" class="mt-6 hidden rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Qué aprenderás</p>
+          <p id="tQueAprendes" class="mt-2 text-sm leading-relaxed text-carbon/75"></p>
+        </div>
+
+        <div id="bloqueSede" class="mt-6 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Dónde es</p>
+          <p id="tSedeNombre" class="mt-2 text-sm font-600 text-carbon/80"></p>
+          <p id="tSedeDireccion" class="mt-1 hidden text-sm text-carbon/60"></p>
+          <a id="tSedeMapa" href="#" target="_blank" rel="noopener" class="mt-3 hidden inline-flex items-center gap-1.5 font-ui text-[12px] font-700 uppercase tracking-wider text-vino underline">Ver mapa</a>
+        </div>
+      </div>
+
+      <!-- Tarjeta de compra -->
+      <div class="rounded-3xl bg-white p-6 shadow-[0_2px_0_rgba(78,20,84,.06)] ring-1 ring-vino/10 sm:p-7">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p class="font-ui text-[11px] uppercase tracking-wider text-humo">Precio total</p>
+            <p id="tPrecioTotal" class="font-display text-3xl text-vino"></p>
+          </div>
+          <span id="tCupo" class="rounded-full bg-crema px-3 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino"></span>
+        </div>
+
+        <div id="bloqueAgotado" class="mt-5 hidden rounded-2xl bg-humo/10 px-4 py-4 text-center text-sm text-carbon/60">
+          Este taller ya está agotado. Elige otra fecha en el calendario o escríbenos para la lista de espera.
+        </div>
+
+        <form id="formCompraTaller" class="mt-5 grid gap-3">
+          <input id="tNombre" name="nombre" type="text" required autocomplete="name" placeholder="Tu nombre completo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+          <input id="tWhatsapp" name="whatsapp" type="tel" required autocomplete="tel" placeholder="Tu WhatsApp" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+          <input id="tCorreo" name="correo" type="email" required autocomplete="email" placeholder="Tu correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+
+          <div>
+            <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Eres de México?</span>
+            <div class="flex gap-4 text-sm text-carbon/80">
+              <label class="flex items-center gap-2"><input type="radio" name="esDeMexico" value="si" required class="h-4 w-4 border-vino/30"> Sí</label>
+              <label class="flex items-center gap-2"><input type="radio" name="esDeMexico" value="no" required class="h-4 w-4 border-vino/30"> No</label>
+            </div>
+          </div>
+          <label id="tBloqueEstado" class="hidden block">
+            <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿De qué estado?</span>
+            <select id="tEstado" name="estado" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm"></select>
+          </label>
+          <label id="tBloquePais" class="hidden block">
+            <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Desde qué país?</span>
+            <input id="tPais" name="pais" type="text" placeholder="Tu país" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+          </label>
+
+          <div id="bloqueTipoPago">
+            <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Cómo quieres pagar?</span>
+            <div class="grid gap-2">
+              <label id="opcionAnticipo" class="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-vino/15 px-4 py-3 text-sm">
+                <span class="flex items-center gap-2"><input type="radio" name="tipoPago" value="anticipo" class="h-4 w-4 border-vino/30"> Apartar con anticipo</span>
+                <span id="tMontoAnticipo" class="font-600 text-vino"></span>
+              </label>
+              <label id="opcionCompleto" class="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-vino/15 px-4 py-3 text-sm">
+                <span class="flex items-center gap-2"><input type="radio" name="tipoPago" value="completo" class="h-4 w-4 border-vino/30"> Pagar completo</span>
+                <span id="tMontoCompleto" class="font-600 text-vino"></span>
+              </label>
+            </div>
+          </div>
+
+          <label class="flex items-start gap-3 text-sm text-carbon/80">
+            <input id="tAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
+            <span>He leído y acepto el <a href="#" onclick="abrirModalPrivacidadTaller(event)" class="text-vino underline">aviso de privacidad</a>. *</span>
+          </label>
+
+          <label class="flex items-start gap-3 text-sm text-carbon/80">
+            <input id="tAceptaPromociones" name="aceptaPromociones" type="checkbox" class="mt-0.5 h-4 w-4 rounded border-vino/30">
+            <span>Quiero recibir promociones y avisos de Endulcora.</span>
+          </label>
+
+          <p id="tError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+
+          <button type="submit" id="btnPagarTaller" class="mt-1 flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition disabled:opacity-60">
+            <span id="pagarTallerSpinner" class="spinner hidden"></span>
+            Ir a pagar con Mercado Pago
+          </button>
+        </form>
+
+        <a id="tWhatsappSecundario" href="#" target="_blank" rel="noopener"
+          class="mt-3 flex w-full items-center justify-center gap-2 rounded-full boton-vivo border border-vino/25 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+          Prefiero preguntar por WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal del aviso de privacidad -->
+<div id="modalPrivacidadTaller" class="fixed inset-0 z-[60] hidden items-center justify-center bg-carbon/50 p-4">
+  <div class="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6">
+    <div class="flex items-center justify-between gap-4">
+      <h3 class="font-titulo text-xl text-vino">Aviso de privacidad</h3>
+      <button type="button" onclick="cerrarModalPrivacidadTaller()" aria-label="Cerrar" class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-carbon/50 hover:bg-vino/10 hover:text-vino">✕</button>
+    </div>
+    <div id="textoPrivacidadTaller" class="mt-4 space-y-3 text-sm leading-relaxed text-carbon/75"></div>
+  </div>
+</div>
+
+<footer class="border-t border-vino/10 bg-crema pt-10 text-carbon">
+  <div class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 pb-10 text-center sm:flex-row sm:justify-between sm:text-left lg:px-8">
+    <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-10 w-auto">
+    <div class="flex flex-col items-center gap-1.5 sm:items-end">
+      <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/40">© <span id="anioFooter"></span> Endulcora · Ciudad de México</p>
+      <a href="https://levent-web-production.up.railway.app/" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 font-ui text-[11px] uppercase tracking-widest text-carbon/40 hover:text-vino transition"><img src="/levent-icono.png" alt="" class="h-3.5 w-3.5">Acompañados por Levent</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleMenu(){
+  const m = document.getElementById('menuMovil');
+  const b = document.getElementById('btnMenu');
+  const abierto = m.classList.toggle('hidden') === false;
+  b.setAttribute('aria-expanded', abierto);
+}
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatoMonto(n){
+  return Number(String(n).replace(/,/g,'')).toLocaleString('es-MX');
+}
+document.getElementById('anioFooter').textContent = new Date().getFullYear();
+
+const ESTADOS_MEXICO = [
+  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 'Chihuahua',
+  'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Estado de México', 'Guanajuato', 'Guerrero',
+  'Hidalgo', 'Jalisco', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla',
+  'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas',
+  'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas', 'Ciudad de México (CDMX)'
+];
+document.getElementById('tEstado').innerHTML = ESTADOS_MEXICO.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+document.querySelectorAll('input[name="esDeMexico"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const esMexico = document.querySelector('input[name="esDeMexico"]:checked').value === 'si';
+    document.getElementById('tBloqueEstado').classList.toggle('hidden', !esMexico);
+    document.getElementById('tBloquePais').classList.toggle('hidden', esMexico);
+  });
+});
+
+/* ---------- Mercado Pago: pago en ventana emergente (sin salir de la pagina) ---------- */
+function abrirCheckoutVentana(url){
+  const ancho = 460, alto = 720;
+  const izquierda = (window.screen.width - ancho) / 2;
+  const arriba = (window.screen.height - alto) / 2;
+  const ventana = window.open(url, 'mp_checkout', `width=${ancho},height=${alto},left=${izquierda},top=${arriba}`);
+  if(!ventana) window.location.href = url;
+}
+
+async function abrirModalPrivacidadTaller(e){
+  if (e) e.preventDefault();
+  const modal = document.getElementById('modalPrivacidadTaller');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  const cont = document.getElementById('textoPrivacidadTaller');
+  cont.innerHTML = '<p class="text-carbon/50">Cargando…</p>';
+  try{
+    const c = await fetch('/api/content').then(r => r.json());
+    const texto = c.legal_privacidad || '';
+    cont.innerHTML = texto.split('\n\n').map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+  }catch(err){
+    cont.innerHTML = '<p class="text-red-600">No se pudo cargar el aviso de privacidad.</p>';
+  }
+}
+function cerrarModalPrivacidadTaller(){
+  const modal = document.getElementById('modalPrivacidadTaller');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+document.getElementById('modalPrivacidadTaller').addEventListener('click', (e) => {
+  if (e.target.id === 'modalPrivacidadTaller') cerrarModalPrivacidadTaller();
+});
+
+const slug = decodeURIComponent(window.location.pathname.replace(/^\/talleres\//, '').replace(/\/$/, ''));
+let TALLER = null;
+let NUMERO_WHATSAPP = '5665271901';
+
+function textoCupo(t){
+  if(t.estado === 'agotado' || t.cupoRestante === 0) return 'Agotado';
+  if(t.cupoRestante === null || t.cupoRestante === undefined) return 'Disponible';
+  if(t.cupoRestante <= 3) return `Últimos ${t.cupoRestante} lugares`;
+  return `${t.cupoRestante} lugares disponibles`;
+}
+
+async function cargarTaller(){
+  let contenido = {};
+  try{ contenido = await (await fetch('/api/content')).json(); }catch(e){}
+  if(contenido.whatsapp_numero) NUMERO_WHATSAPP = contenido.whatsapp_numero;
+
+  try{
+    const res = await fetch(`/api/talleres/${encodeURIComponent(slug)}`);
+    if(!res.ok) throw new Error('no encontrado');
+    TALLER = await res.json();
+  }catch(e){
+    document.getElementById('estadoCargando').classList.add('hidden');
+    document.getElementById('estadoNoEncontrado').classList.remove('hidden');
+    return;
+  }
+
+  document.getElementById('estadoCargando').classList.add('hidden');
+  document.getElementById('contenidoTaller').classList.remove('hidden');
+
+  if(typeof fbq === 'function'){
+    fbq('track', 'ViewContent', {
+      content_ids: [String(TALLER.id)],
+      content_name: TALLER.titulo || '',
+      content_type: 'product',
+      value: parseFloat(String(TALLER.precioTotal || 0).replace(/,/g,'')) || 0,
+      currency: 'MXN',
+    });
+  }
+
+  const t = TALLER;
+  document.title = `${t.titulo} · Endulcora`;
+  document.getElementById('tTitulo').textContent = t.titulo || '';
+  document.getElementById('tDescripcion').textContent = t.descripcion || '';
+  if(t.fotoUrl){
+    document.getElementById('tFoto').style.backgroundImage = `url('${t.fotoUrl}')`;
+  }
+
+  const fechaLegible = t.fecha ? new Date(`${t.fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  const cupoTexto = textoCupo(t);
+  const cupoClase = (t.estado === 'agotado' || t.cupoRestante === 0) ? 'bg-humo/20 text-humo' : (t.cupoRestante !== null && t.cupoRestante !== undefined && t.cupoRestante <= 3 ? 'bg-flama/20 text-vino' : 'bg-[#3F8F5F]/15 text-[#2E6B45]');
+  document.getElementById('tBadges').innerHTML = [
+    fechaLegible ? `<span class="rounded-full bg-vino/10 px-3 py-1.5 text-vino">${escapeHtml(fechaLegible)}</span>` : '',
+    t.horario ? `<span class="rounded-full bg-vino/10 px-3 py-1.5 text-vino">${escapeHtml(t.horario)}</span>` : '',
+    `<span class="rounded-full px-3 py-1.5 ${cupoClase}">${escapeHtml(cupoTexto)}</span>`,
+  ].join('');
+  document.getElementById('tCupo').textContent = cupoTexto;
+
+  if(t.queAprendes){
+    document.getElementById('tQueAprendes').textContent = t.queAprendes;
+    document.getElementById('bloqueQueAprendes').classList.remove('hidden');
+  }
+
+  if(t.sede){
+    document.getElementById('tSedeNombre').textContent = t.sede.nombre || '';
+    if(t.sede.direccion){
+      document.getElementById('tSedeDireccion').textContent = t.sede.direccion;
+      document.getElementById('tSedeDireccion').classList.remove('hidden');
+    }
+    if(t.sede.mapaLink){
+      const linkMapa = document.getElementById('tSedeMapa');
+      linkMapa.href = t.sede.mapaLink;
+      linkMapa.classList.remove('hidden');
+    }
+  }
+
+  const precioTotal = parseFloat(String(t.precioTotal || 0).replace(/,/g,'')) || 0;
+  const anticipo = parseFloat(String(t.anticipo || 0).replace(/,/g,'')) || 0;
+  document.getElementById('tPrecioTotal').textContent = precioTotal > 0 ? `$${formatoMonto(precioTotal)} MXN` : 'Precio por confirmar';
+  document.getElementById('tMontoCompleto').textContent = precioTotal > 0 ? `$${formatoMonto(precioTotal)} MXN` : '—';
+  document.getElementById('tMontoAnticipo').textContent = anticipo > 0 ? `$${formatoMonto(anticipo)} MXN` : '—';
+  document.getElementById('opcionAnticipo').classList.toggle('hidden', anticipo <= 0);
+  if(anticipo <= 0){
+    const radioCompleto = document.querySelector('input[name="tipoPago"][value="completo"]');
+    if(radioCompleto) radioCompleto.checked = true;
+  }
+
+  const mensajeWhatsapp = `Hola, quiero más información sobre el taller "${t.titulo}"${fechaLegible ? ` del ${fechaLegible}` : ''}.`;
+  document.getElementById('tWhatsappSecundario').href = `https://wa.me/52${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensajeWhatsapp)}`;
+
+  const agotado = t.estado === 'agotado' || t.cupoRestante === 0;
+  document.getElementById('formCompraTaller').classList.toggle('hidden', agotado);
+  document.getElementById('bloqueAgotado').classList.toggle('hidden', !agotado);
+  if(precioTotal <= 0 && !agotado){
+    document.getElementById('formCompraTaller').classList.add('hidden');
+    document.getElementById('bloqueAgotado').classList.remove('hidden');
+    document.getElementById('bloqueAgotado').textContent = 'Este taller todavía no tiene precio configurado. Escríbenos por WhatsApp para apartar tu lugar.';
+  }
+}
+
+document.getElementById('formCompraTaller').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('tError');
+  const btn = document.getElementById('btnPagarTaller');
+  const spinner = document.getElementById('pagarTallerSpinner');
+  err.classList.add('hidden');
+
+  const datos = new FormData(e.target);
+  const esDeMexico = datos.get('esDeMexico');
+  const tipoPago = datos.get('tipoPago');
+  if(!tipoPago){
+    err.textContent = 'Elige cómo quieres pagar.';
+    err.classList.remove('hidden');
+    return;
+  }
+
+  if(typeof fbq === 'function'){
+    fbq('track', 'InitiateCheckout', {
+      content_ids: [String(TALLER.id)],
+      content_type: 'product',
+      currency: 'MXN',
+    });
+  }
+
+  btn.disabled = true;
+  spinner.classList.remove('hidden');
+  try{
+    const res = await fetch('/api/checkout/preference', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: datos.get('correo').trim(),
+        items: [{
+          tipo: 'taller',
+          sesionTallerId: TALLER.id,
+          tipoPago,
+          nombre: datos.get('nombre').trim(),
+          whatsapp: datos.get('whatsapp').trim(),
+          esDeMexico: esDeMexico === 'si',
+          estado: esDeMexico === 'si' ? datos.get('estado') : '',
+          pais: esDeMexico === 'no' ? datos.get('pais') : '',
+          aceptaPromociones: !!datos.get('aceptaPromociones'),
+          aceptaAvisoPrivacidad: !!datos.get('aceptaAvisoPrivacidad'),
+        }],
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago.');
+    btn.disabled = false;
+    spinner.classList.add('hidden');
+    abrirCheckoutVentana(data.url);
+  }catch(e2){
+    err.textContent = e2.message;
+    err.classList.remove('hidden');
+    btn.disabled = false;
+    spinner.classList.add('hidden');
+  }
+});
+
+cargarTaller();
+</script>
+</body>
+</html>

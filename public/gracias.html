@@ -192,6 +192,15 @@ window.MEDICION = fetch('/api/medicion')
     <a href="https://wa.me/525665271901" target="_blank" rel="noopener" class="mt-6 inline-flex rounded-full boton-vivo border border-vino/25 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Escríbenos por WhatsApp</a>
   </div>
 
+  <!-- Pendiente de pago (OXXO / SPEI): se muestra de inmediato, sin esperar el timeout -->
+  <div id="estadoPendientePago" class="hidden rounded-3xl bg-white p-8 text-center ring-1 ring-vino/10 sm:p-12">
+    <div class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-flama/15 text-3xl">🧾</div>
+    <h1 class="mt-5 font-titulo text-xl text-vino">Tu pago está pendiente</h1>
+    <p class="mt-2 text-[15px] text-carbon/70">Si elegiste OXXO o transferencia (SPEI), tu ficha ya te llegó por correo y también la puedes ver en la página de Mercado Pago donde terminaste tu pago. Esta página se actualiza sola en cuanto se confirme.</p>
+    <p id="pendienteTallerLugar" class="mt-5 hidden rounded-xl bg-crema px-5 py-4 text-sm text-carbon/70"></p>
+    <a href="https://wa.me/525665271901" target="_blank" rel="noopener" class="mt-6 inline-flex rounded-full boton-vivo border border-vino/25 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">¿Dudas? Escríbenos por WhatsApp</a>
+  </div>
+
   <!-- No encontrado -->
   <div id="estadoNoEncontrado" class="hidden rounded-3xl bg-white p-8 text-center ring-1 ring-vino/10 sm:p-12">
     <p class="font-titulo text-xl text-vino">No encontramos este pedido</p>
@@ -230,7 +239,7 @@ const params = new URLSearchParams(window.location.search);
 const ordenId = params.get('orden');
 const token = params.get('token');
 
-const ESTADOS = ['estadoConfirmando','estadoAprobado','estadoRechazado','estadoTardado','estadoNoEncontrado'];
+const ESTADOS = ['estadoConfirmando','estadoAprobado','estadoRechazado','estadoTardado','estadoPendientePago','estadoNoEncontrado'];
 function mostrarEstado(id){
   ESTADOS.forEach(e => document.getElementById(e).classList.toggle('hidden', e !== id));
 }
@@ -267,6 +276,23 @@ function dispararPurchase(pedido){
 function pintarDescargas(pedido){
   const disponibles = pedido.items.filter(i => i.descargaDisponible);
   const cont = document.getElementById('listaDescargas');
+  const itemTaller = pedido.items.find(i => i.tipo === 'taller' && i.tallerInfo);
+  if(itemTaller){
+    const t = itemTaller.tallerInfo;
+    const fechaLegible = t.fecha ? new Date(`${t.fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    cont.innerHTML = `
+      <div class="rounded-2xl border border-vino/15 bg-crema/60 px-5 py-4 text-left">
+        <p class="font-titulo text-base text-vino">${escapeHtml(t.taller || '')}</p>
+        ${fechaLegible ? `<p class="mt-1 text-sm text-carbon/70">${escapeHtml(fechaLegible)}${t.horario ? ` · ${escapeHtml(t.horario)}` : ''}</p>` : ''}
+        ${t.sede ? `<p class="mt-1 text-sm text-carbon/70">${escapeHtml(t.sede)}${t.direccion ? ` — ${escapeHtml(t.direccion)}` : ''}</p>` : ''}
+        ${t.mapaLink ? `<a href="${escapeHtml(t.mapaLink)}" target="_blank" rel="noopener" class="mt-1 inline-block text-sm font-600 text-vino underline">Ver mapa</a>` : ''}
+        ${t.tipoPago === 'anticipo' && t.saldo ? `<p class="mt-3 text-sm font-600 text-flama">Pagaste tu anticipo. Saldo pendiente: $${formatoMonto(t.saldo)} MXN, se paga el día del taller.</p>` : ''}
+        ${t.queAprendes ? `<p class="mt-3 text-sm text-carbon/70"><strong>Qué llevar / aprenderás:</strong> ${escapeHtml(t.queAprendes)}</p>` : ''}
+      </div>
+      ${t.comunidadLink ? `<a href="${escapeHtml(t.comunidadLink)}" target="_blank" rel="noopener" class="mt-3 block rounded-2xl bg-vino px-5 py-4 text-center font-ui text-sm font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Unirme a la Comunidad Endulcora</a>` : ''}
+    `;
+    return;
+  }
   if(!disponibles.length){
     if(pedido.items.some(i => i.tipo === 'clase_en_vivo')){
       cont.innerHTML = '<a href="/endulcora-en-vivo" class="block rounded-2xl bg-vino px-5 py-4 text-center font-ui text-sm font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Ya tienes tu acceso — Ver clase en vivo</a>';
@@ -310,7 +336,23 @@ async function consultarPedido(){
       mostrarEstado('estadoRechazado');
       return;
     }
-    // pendiente / en_proceso: seguir esperando, salvo que ya se agotaron los intentos
+    // "pendiente" (ej. ficha de OXXO/SPEI generada): se avisa de inmediato,
+    // sin esperar el timeout, pero la consulta sigue corriendo para
+    // detectar en cuanto se confirme. "en_proceso" (tarjeta en revisión)
+    // si espera el timeout normal, porque suele resolverse en segundos.
+    if(pedido.estado === 'pendiente'){
+      mostrarEstado('estadoPendientePago');
+      const itemTaller = pedido.items.find(i => i.tipo === 'taller' && i.tallerInfo && i.tallerInfo.vencePendienteEn);
+      const aviso = document.getElementById('pendienteTallerLugar');
+      if(itemTaller){
+        const vence = new Date(itemTaller.tallerInfo.vencePendienteEn);
+        aviso.textContent = `Tu lugar en "${itemTaller.tallerInfo.taller}" queda apartado hasta el ${vence.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} a las ${vence.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}. Si no se confirma el pago antes, se libera automáticamente.`;
+        aviso.classList.remove('hidden');
+      }else{
+        aviso.classList.add('hidden');
+      }
+      return;
+    }
     if(intentos >= MAX_INTENTOS){
       clearInterval(temporizador);
       mostrarEstado('estadoTardado');

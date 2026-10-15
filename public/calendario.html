@@ -274,14 +274,23 @@ function pintarCalendario(){
 
   document.getElementById('calendarioGrid').innerHTML = celdas;
   document.querySelectorAll('.chipSesion[data-sesion]').forEach(btn => {
-    btn.addEventListener('click', () => registrarTallerWhatsApp(Number(btn.dataset.sesion)));
+    btn.addEventListener('click', () => irAlTaller(Number(btn.dataset.sesion)));
   });
 }
 
-function registrarTallerWhatsApp(sesionId){
+// Si el taller ya tiene slug y precio configurados en /admin, se manda a su
+// pagina propia de compra (/talleres/<slug>) — ahi es donde deben llegar
+// los anuncios de Meta. Si todavia no tiene precio (talleres viejos o
+// apenas capturados), se cae de vuelta al WhatsApp de siempre.
+function irAlTaller(sesionId){
   const sesion = SESIONES.find(s => s.id === sesionId);
-  const sede = SEDES.find(s => s.id === sedeId);
   if(!sesion) return;
+  const precioTotal = parseFloat(String(sesion.precioTotal || 0).replace(/,/g, '')) || 0;
+  if(sesion.slug && precioTotal > 0){
+    window.location.href = `/talleres/${sesion.slug}`;
+    return;
+  }
+  const sede = SEDES.find(s => s.id === sedeId);
   const fechaLegible = new Date(sesion.fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
   const mensaje = `Hola, quiero apartar mi lugar en el taller "${sesion.titulo}" del ${fechaLegible}${sede ? ` en la sede ${sede.nombre}` : ''}.`;
   window.open(`https://wa.me/52${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`, '_blank');

@@ -259,6 +259,44 @@ app.get('/calendario', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'calendario.html'));
 });
 
+// /talleres: mismo calendario que /calendario (filtro por sede), pero desde
+// aqui cada sesion con precio configurado lleva a su propia pagina de
+// compra (/talleres/<slug>) en lugar de abrir WhatsApp — es la URL pensada
+// para los anuncios de Meta.
+app.get('/talleres', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'calendario.html'));
+});
+
+// Pagina propia por taller (ej. /talleres/pizza-artesanal-nov): foto,
+// descripcion, fecha/hora/sede con mapa, precio, cupo y botones de compra.
+// Igual que /ebooks/:slug, se inyectan las etiquetas Open Graph en el
+// servidor con los datos reales del taller para que se vean bien las
+// vistas previas al anunciar.
+app.get('/talleres/:slug', (req, res) => {
+  const sesion = store.getSesionTallerPorSlug(req.params.slug);
+  if (!sesion) {
+    return res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+  }
+  let html;
+  try {
+    html = fs.readFileSync(path.join(__dirname, 'public', 'taller.html'), 'utf8');
+  } catch (e) {
+    return res.status(500).send('No se pudo cargar la pagina del taller.');
+  }
+  const titulo = sesion.titulo || 'Taller';
+  const descripcion = (sesion.descripcion || 'Taller presencial de Endulcora, Estudio Gastronómico.').slice(0, 300);
+  const imagen = sesion.fotoUrl
+    ? (sesion.fotoUrl.startsWith('http') ? sesion.fotoUrl : `${SITE_URL}${sesion.fotoUrl}`)
+    : `${SITE_URL}/og-image.png`;
+  const url = `${SITE_URL}/talleres/${sesion.slug}`;
+  html = html
+    .replace(/__TITULO__/g, escaparHtml(titulo))
+    .replace(/__DESCRIPCION__/g, escaparHtml(descripcion))
+    .replace(/__IMAGEN__/g, escaparHtml(imagen))
+    .replace(/__URL__/g, escaparHtml(url));
+  res.send(html);
+});
+
 app.get('/inscripcion-taller', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'inscripcion-taller.html'));
 });
@@ -419,6 +457,7 @@ app.get('/sitemap.xml', (req, res) => {
     { loc: '/anexos', prioridad: '0.8', frecuencia: 'weekly' },
     { loc: '/recetarios', prioridad: '0.8', frecuencia: 'weekly' },
     { loc: '/calendario', prioridad: '0.6', frecuencia: 'weekly' },
+    { loc: '/talleres', prioridad: '0.7', frecuencia: 'weekly' },
     { loc: '/inscripcion-taller', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/clase-gratis', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/galeria', prioridad: '0.5', frecuencia: 'weekly' },
@@ -445,7 +484,14 @@ app.get('/sitemap.xml', (req, res) => {
     .filter((p) => p.titulo && p.titulo.trim() && p.slug)
     .map((p) => ({ loc: `/blog/${p.slug}`, prioridad: '0.6', frecuencia: 'monthly' }));
 
-  const urls = [...paginasEstaticas, ...paginasDeProducto, ...paginasDeBlog]
+  // Solo talleres futuros con precio ya configurado (los que todavia no
+  // tienen precio no tienen una pagina de compra util que anunciar).
+  const hoyISO = new Date().toISOString().slice(0, 10);
+  const paginasDeTaller = store.getSesionesTaller()
+    .filter((s) => s.slug && s.fecha >= hoyISO && (parseFloat(String(s.precioTotal || 0).replace(/,/g, '')) || 0) > 0)
+    .map((s) => ({ loc: `/talleres/${s.slug}`, prioridad: '0.7', frecuencia: 'daily' }));
+
+  const urls = [...paginasEstaticas, ...paginasDeProducto, ...paginasDeBlog, ...paginasDeTaller]
     .map(({ loc, prioridad, frecuencia }) => `
   <url>
     <loc>${SITE_URL}${loc}</loc>

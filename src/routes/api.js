@@ -388,6 +388,18 @@ router.get('/sesiones-taller', (req, res) => {
   res.json(store.getSesionesTaller(req.query.sedeId));
 });
 
+// Pagina publica de un taller por slug (/talleres/<slug>): trae tambien el
+// nombre, direccion y link de mapa de su sede, para no hacer dos pedidos.
+router.get('/talleres/:slug', (req, res) => {
+  const sesion = store.getSesionTallerPorSlug(req.params.slug);
+  if (!sesion) return res.status(404).json({ error: 'Ese taller ya no está disponible.' });
+  const sede = store.getSedes().find((s) => s.id === sesion.sedeId);
+  res.json({
+    ...sesion,
+    sede: sede ? { id: sede.id, nombre: sede.nombre, direccion: sede.direccion, mapaLink: sede.mapaLink } : null,
+  });
+});
+
 router.get('/resenas', (req, res) => {
   res.json(store.getResenas(true));
 });
@@ -644,6 +656,7 @@ router.get('/pedidos/:orderId/estado', (req, res) => {
     return res.status(404).json({ error: 'Pedido no encontrado.' });
   }
   const aprobado = order.estado === 'aprobado';
+  const contenido = store.getContent();
   res.json({
     estado: order.estado,
     total: order.total,
@@ -651,6 +664,28 @@ router.get('/pedidos/:orderId/estado', (req, res) => {
     items: (order.items || []).map((item, i) => {
       const producto = item.tipo === 'producto' ? store.getProduct(item.itemId) : null;
       const archivoExiste = !!(producto && producto.archivo && fs.existsSync(path.join(UPLOAD_DIR, path.basename(producto.archivo))));
+      let tallerInfo = null;
+      if (item.tipo === 'taller' && item.inscripcionTallerId) {
+        const inscripcion = store.getInscripcionTaller(item.inscripcionTallerId);
+        const sesion = inscripcion ? store.getSesionesTaller().find((s) => s.id === inscripcion.sesionTallerId) : null;
+        const sedeInfo = sesion ? store.getSedes().find((s) => s.id === sesion.sedeId) : null;
+        if (inscripcion) {
+          tallerInfo = {
+            taller: inscripcion.taller,
+            fecha: inscripcion.fecha,
+            horario: inscripcion.horario,
+            sede: inscripcion.sede,
+            direccion: sedeInfo ? sedeInfo.direccion : '',
+            mapaLink: sedeInfo ? sedeInfo.mapaLink : '',
+            queAprendes: sesion ? sesion.queAprendes : '',
+            tipoPago: inscripcion.tipoPago,
+            saldo: inscripcion.saldo,
+            estadoPago: inscripcion.estadoPago,
+            vencePendienteEn: inscripcion.vencePendienteEn,
+            comunidadLink: contenido.comunidad_whatsapp_link || '',
+          };
+        }
+      }
       return {
         index: i,
         itemId: item.itemId,
@@ -659,6 +694,7 @@ router.get('/pedidos/:orderId/estado', (req, res) => {
         cantidad: item.cantidad,
         precio: item.precio,
         descargaDisponible: aprobado && archivoExiste,
+        tallerInfo,
       };
     }),
     descargaToken: aprobado ? order.descargaToken : null,

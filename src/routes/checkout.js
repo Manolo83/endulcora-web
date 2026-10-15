@@ -5,7 +5,7 @@ const fs = require('fs');
 const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const store = require('../store');
 const { SITE_URL, UPLOAD_DIR } = require('../config');
-const { enviarCorreoConfirmacionCompra } = require('../email');
+const { enviarCorreoConfirmacionCompra, enviarCorreoConfirmacionPagoTaller } = require('../email');
 const { enviarPurchaseCAPI } = require('../metaConversions');
 const { enviarCompraGoogle } = require('../googleAds/conversiones');
 
@@ -13,6 +13,11 @@ const router = express.Router();
 
 const MAX_ARTICULOS = 15;
 const MAX_CANTIDAD_POR_ARTICULO = 20;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const WHATSAPP_RE = /^[0-9+\s()-]{7,20}$/;
+// Mientras se espera el pago en OXXO/SPEI, el lugar queda apartado (cuenta
+// para el cupo) este tiempo. Si no se paga, se libera solo.
+const HORAS_VENCE_PENDIENTE_TALLER = 72;
 
 function mpClient() {
   const accessToken = process.env.MP_ACCESS_TOKEN;
@@ -62,6 +67,74 @@ router.post('/preference', async (req, res) => {
         precio,
         cantidad: 1,
         claseFecha,
+      });
+      continue;
+    }
+    if (linea.tipo === 'taller') {
+      const sesionTallerId = Number(linea.sesionTallerId);
+      const tipoPago = linea.tipoPago === 'completo' ? 'completo' : 'anticipo';
+      const nombre = String(linea.nombre || '').trim();
+      const whatsapp = String(linea.whatsapp || '').trim();
+      if (!sesionTallerId || !nombre) {
+        return res.status(400).json({ error: 'Faltan tus datos para apartar el taller.' });
+      }
+      if (!WHATSAPP_RE.test(whatsapp)) {
+        return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
+      }
+      if (!EMAIL_RE.test(String(email || ''))) {
+        return res.status(400).json({ error: 'Escribe un correo válido.' });
+      }
+      if (linea.esDeMexico && !store.ESTADOS_MEXICO.includes(linea.estado)) {
+        return res.status(400).json({ error: 'Elige tu estado de la lista.' });
+      }
+      if (linea.esDeMexico === false && !String(linea.pais || '').trim()) {
+        return res.status(400).json({ error: 'Escribe de qué país te registras.' });
+      }
+      if (!linea.aceptaAvisoPrivacidad) {
+        return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para apartar tu lugar.' });
+      }
+      const sesion = store.getSesionesTaller().find((s) => s.id === sesionTallerId);
+      if (!sesion) return res.status(404).json({ error: 'Ese taller ya no está disponible.' });
+      if (sesion.estado === 'agotado' || sesion.cupoRestante === 0) {
+        return res.status(400).json({ error: 'Ese taller ya no tiene lugares disponibles.' });
+      }
+      const precio = tipoPago === 'completo' ? parsePrecio(sesion.precioTotal) : parsePrecio(sesion.anticipo);
+      if (precio <= 0) {
+        return res.status(400).json({ error: 'Ese taller todavía no tiene precio configurado. Escríbenos por WhatsApp.' });
+      }
+      const sedeInfo = store.getSedes().find((s) => s.id === sesion.sedeId);
+      // Se crea la inscripcion desde ahora, "pendiente", para que cuente en
+      // el cupo mientras se espera el pago (sobre todo OXXO/SPEI, que
+      // tardan dias): si no se paga a tiempo, se libera sola (ver
+      // cupoRestanteTaller en store.js).
+      const vencePendienteEn = new Date(Date.now() + HORAS_VENCE_PENDIENTE_TALLER * 60 * 60 * 1000).toISOString();
+      const inscripcion = store.addInscripcionTaller({
+        nombre,
+        whatsapp,
+        correo: email,
+        sesionTallerId: sesion.id,
+        taller: sesion.titulo,
+        fecha: sesion.fecha,
+        sede: sedeInfo ? sedeInfo.nombre : '',
+        horario: sesion.horario || '',
+        montoAnticipo: String(precio),
+        comoSeEntero: 'Pago en línea (endulcora.com)',
+        esDeMexico: linea.esDeMexico,
+        estado: linea.estado,
+        pais: linea.pais,
+        aceptaPromociones: linea.aceptaPromociones,
+        aceptaAvisoPrivacidad: linea.aceptaAvisoPrivacidad,
+      });
+      store.actualizarPagoInscripcionTaller(inscripcion.id, { tipoPago, estadoPago: 'pendiente', vencePendienteEn });
+      resueltos.push({
+        tipo: 'taller',
+        itemId: sesion.id,
+        titulo: `${tipoPago === 'completo' ? 'Pago completo' : 'Anticipo'}: ${sesion.titulo} (${sesion.fecha})`,
+        precio,
+        cantidad: 1,
+        sesionTallerId: sesion.id,
+        inscripcionTallerId: inscripcion.id,
+        tipoPago,
       });
       continue;
     }
@@ -206,20 +279,64 @@ router.post('/webhook', async (req, res) => {
       }
     }
 
+    // Talleres: el pago confirma o libera el lugar que ya se habia
+    // reservado como "pendiente" al crear la preferencia (ver /preference).
+    if (['aprobado', 'rechazado', 'cancelado'].includes(nuevoEstado)) {
+      for (const item of actualizado.items) {
+        if (item.tipo !== 'taller' || !item.inscripcionTallerId) continue;
+        if (nuevoEstado === 'aprobado') {
+          store.actualizarPagoInscripcionTaller(item.inscripcionTallerId, {
+            tipoPago: item.tipoPago,
+            montoPagado: item.precio,
+            estadoPago: 'pagado',
+            pagoId: String(info.id),
+          });
+        } else {
+          store.actualizarPagoInscripcionTaller(item.inscripcionTallerId, { estadoPago: 'cancelado' });
+        }
+      }
+    }
+
     if (nuevoEstado === 'aprobado' && !order.correoEnviado && actualizado.email) {
-      const itemsConArchivo = actualizado.items.map((item) => {
-        if (item.tipo !== 'producto') return item;
-        const producto = store.getProduct(item.itemId);
-        const archivoExiste = !!(producto && producto.archivo && fs.existsSync(path.join(UPLOAD_DIR, path.basename(producto.archivo))));
-        return { ...item, archivoDisponible: archivoExiste };
-      });
       const contenido = store.getContent();
-      enviarCorreoConfirmacionCompra({
-        to: actualizado.email,
-        order: { ...actualizado, items: itemsConArchivo },
-        siteUrl: SITE_URL,
-        numeroWhatsapp: contenido.whatsapp_numero,
-      })
+      const itemTaller = actualizado.items.find((item) => item.tipo === 'taller' && item.inscripcionTallerId);
+      const correoListo = itemTaller
+        ? (() => {
+            const inscripcion = store.getInscripcionTaller(itemTaller.inscripcionTallerId);
+            const sesion = inscripcion ? store.getSesionesTaller().find((s) => s.id === inscripcion.sesionTallerId) : null;
+            const sedeInfo = sesion ? store.getSedes().find((s) => s.id === sesion.sedeId) : null;
+            return enviarCorreoConfirmacionPagoTaller({
+              to: actualizado.email,
+              nombre: inscripcion ? inscripcion.nombre : '',
+              taller: inscripcion ? inscripcion.taller : '',
+              fecha: inscripcion ? inscripcion.fecha : '',
+              horario: inscripcion ? inscripcion.horario : '',
+              sede: inscripcion ? inscripcion.sede : '',
+              direccion: sedeInfo ? sedeInfo.direccion : '',
+              mapaLink: sedeInfo ? sedeInfo.mapaLink : '',
+              queAprendes: sesion ? sesion.queAprendes : '',
+              tipoPago: itemTaller.tipoPago,
+              montoPagado: itemTaller.precio,
+              saldo: inscripcion ? inscripcion.saldo : null,
+              comunidadLink: contenido.comunidad_whatsapp_link || '',
+              numeroWhatsapp: contenido.whatsapp_numero,
+            });
+          })()
+        : (() => {
+            const itemsConArchivo = actualizado.items.map((item) => {
+              if (item.tipo !== 'producto') return item;
+              const producto = store.getProduct(item.itemId);
+              const archivoExiste = !!(producto && producto.archivo && fs.existsSync(path.join(UPLOAD_DIR, path.basename(producto.archivo))));
+              return { ...item, archivoDisponible: archivoExiste };
+            });
+            return enviarCorreoConfirmacionCompra({
+              to: actualizado.email,
+              order: { ...actualizado, items: itemsConArchivo },
+              siteUrl: SITE_URL,
+              numeroWhatsapp: contenido.whatsapp_numero,
+            });
+          })();
+      correoListo
         .then(() => store.updateOrder(order.id, { correoEnviado: true }))
         .catch((err) => {
           // Si el correo no se pudo enviar (ej. servicio no configurado), el pedido sigue visible en /admin > Ventas.

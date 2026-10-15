@@ -210,7 +210,7 @@ function datosPorDefecto() {
     heroCarrusel: [],
     promosTaller: [],
     subscribers: [],
-    sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre })),
+    sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre, imagenFondo: '', direccion: '', mapaLink: '' })),
     sesionesTaller: [],
     inscripcionesTaller: [],
     registrosQr: [],
@@ -1121,6 +1121,16 @@ async function init() {
         if (i.vencePendienteEn === undefined) i.vencePendienteEn = null;
       });
       data._migCobroTalleres = true;
+      changed = true;
+    }
+    // Direccion y link de mapa en cada sede (Fase 2: la pagina publica
+    // /talleres/<slug> necesita mostrar "sede con mapa").
+    if (!data._migDireccionSedes) {
+      (data.sedes || []).forEach((s) => {
+        if (s.direccion === undefined) s.direccion = '';
+        if (s.mapaLink === undefined) s.mapaLink = '';
+      });
+      data._migDireccionSedes = true;
       changed = true;
     }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
@@ -2076,7 +2086,15 @@ module.exports = {
   },
   addSede(nombre) {
     const data = load();
-    const item = { id: nextId(data.sedes), nombre: String(nombre || '').trim(), imagenFondo: '' };
+    const item = {
+      id: nextId(data.sedes),
+      nombre: String(nombre || '').trim(),
+      imagenFondo: '',
+      // Para la futura pagina publica /talleres/<slug> ("sede con mapa"):
+      // direccion en texto libre + un link de Google Maps listo para abrir.
+      direccion: '',
+      mapaLink: '',
+    };
     data.sedes.push(item);
     save(data);
     return item;
@@ -2087,6 +2105,8 @@ module.exports = {
     if (!item) return null;
     if (typeof patch.nombre === 'string') item.nombre = patch.nombre.trim();
     if (typeof patch.imagenFondo === 'string') item.imagenFondo = patch.imagenFondo;
+    if (typeof patch.direccion === 'string') item.direccion = patch.direccion.trim();
+    if (typeof patch.mapaLink === 'string') item.mapaLink = patch.mapaLink.trim();
     save(data);
     return item;
   },
@@ -2183,6 +2203,9 @@ module.exports = {
   getInscripcionesTaller() {
     return [...load().inscripcionesTaller].sort((a, b) => b.id - a.id);
   },
+  getInscripcionTaller(id) {
+    return load().inscripcionesTaller.find((i) => i.id === Number(id)) || null;
+  },
   addInscripcionTaller({
     nombre, whatsapp, correo, sesionTallerId, taller, fecha, sede, horario, montoAnticipo,
     comoSeEntero, preferencias, cumpleDia, cumpleMes, esDeMexico, estado, pais,
@@ -2250,7 +2273,7 @@ module.exports = {
   // Marca a mano el estado del pago de una inscripcion. Mientras no exista
   // el cobro automatico por Mercado Pago (Fase 3), es como el admin
   // registra que alguien ya pago su anticipo o el total por WhatsApp.
-  actualizarPagoInscripcionTaller(id, { tipoPago, montoPagado, estadoPago, pagoId }) {
+  actualizarPagoInscripcionTaller(id, { tipoPago, montoPagado, estadoPago, pagoId, vencePendienteEn }) {
     const data = load();
     const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
     if (!item) return null;
@@ -2258,6 +2281,7 @@ module.exports = {
     if (montoPagado !== undefined) item.montoPagado = Number(montoPagado) || 0;
     if (typeof estadoPago === 'string') item.estadoPago = estadoPago;
     if (typeof pagoId === 'string') item.pagoId = pagoId;
+    if (vencePendienteEn !== undefined) item.vencePendienteEn = vencePendienteEn;
     const sesion = data.sesionesTaller.find((s) => s.id === item.sesionTallerId);
     item.saldo = sesion && sesion.precioTotal ? Math.max(0, sesion.precioTotal - item.montoPagado) : null;
     save(data);

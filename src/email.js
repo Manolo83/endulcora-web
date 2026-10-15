@@ -118,6 +118,45 @@ async function enviarCorreoConfirmacionInscripcionTaller({ to, nombre, taller, f
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+async function enviarCorreoConfirmacionPagoTaller({
+  to, nombre, taller, fecha, horario, sede, direccion, mapaLink, queAprendes,
+  tipoPago, montoPagado, saldo, comunidadLink, numeroWhatsapp,
+}) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const fechaLegible = fecha
+    ? new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : '';
+
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: `¡Tu lugar está confirmado! · ${taller} · Endulcora`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">¡Gracias, ${escapeHtml(nombre || '')}!</h1>
+        <p style="font-size:14px;line-height:1.6;">Tu pago quedó confirmado y tu lugar está asegurado. Aquí está el resumen de tu taller:</p>
+        <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;">
+          <tr><td style="padding:6px 0;color:#9C9C9C;width:110px;">Taller</td><td style="padding:6px 0;font-weight:700;">${escapeHtml(taller || '')}</td></tr>
+          ${fechaLegible ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Fecha</td><td style="padding:6px 0;">${escapeHtml(fechaLegible)}</td></tr>` : ''}
+          ${horario ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Horario</td><td style="padding:6px 0;">${escapeHtml(horario)}</td></tr>` : ''}
+          ${sede ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Sede</td><td style="padding:6px 0;">${escapeHtml(sede)}</td></tr>` : ''}
+          ${direccion ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Dirección</td><td style="padding:6px 0;">${escapeHtml(direccion)}${mapaLink ? ` · <a href="${escapeHtml(mapaLink)}" style="color:#7A2E7E;">Ver mapa</a>` : ''}</td></tr>` : ''}
+          <tr><td style="padding:6px 0;color:#9C9C9C;">Pagaste</td><td style="padding:6px 0;">$${formatoMonto(montoPagado)} MXN ${tipoPago === 'anticipo' ? '(anticipo)' : '(pago completo)'}</td></tr>
+          ${tipoPago === 'anticipo' && saldo ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Saldo pendiente</td><td style="padding:6px 0;">$${formatoMonto(saldo)} MXN, se paga el día del taller</td></tr>` : ''}
+        </table>
+        ${queAprendes ? `<p style="margin-top:18px;font-size:13px;line-height:1.6;color:#1B0720;"><strong>Qué aprenderás:</strong> ${escapeHtml(queAprendes)}</p>` : ''}
+        ${comunidadLink ? `<p style="margin-top:20px;font-size:13px;line-height:1.6;">Únete a la Comunidad Endulcora en WhatsApp para avisos y recordatorios:</p><p style="margin-top:8px;"><a href="${escapeHtml(comunidadLink)}" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Unirme a la comunidad</a></p>` : ''}
+        <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">¿Dudas? Escríbenos por WhatsApp al <a href="https://wa.me/52${numeroWhatsapp || ''}" style="color:#7A2E7E;">${numeroWhatsapp || ''}</a>.</p>
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 async function enviarCorreoConfirmacionClaseGratis({ to, nombre, horario, fecha, ubicacion, numeroWhatsapp, linkWhatsappGrupo }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
@@ -353,6 +392,7 @@ async function enviarCorreoRecordatorioMembresia({ to, nombre, siteUrl }) {
 module.exports = {
   enviarCorreoConfirmacionCompra,
   enviarCorreoConfirmacionInscripcionTaller,
+  enviarCorreoConfirmacionPagoTaller,
   enviarCorreoConfirmacionClaseGratis,
   enviarCorreoRevistaMensual,
   enviarCorreoCampana,
