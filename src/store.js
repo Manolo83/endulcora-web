@@ -1090,6 +1090,39 @@ async function init() {
       data._migFechaRegistrosClaseGratis = true;
       changed = true;
     }
+    // Primera vez que se agregan precio/anticipo/cupo/slug a los talleres
+    // (para la futura pagina publica por slug y el cobro real): a las
+    // sesiones y a las inscripciones que ya existian se les rellenan los
+    // campos nuevos con valores neutros, sin inventar precios.
+    if (!data._migCobroTalleres) {
+      const slugsUsados = new Set();
+      (data.sesionesTaller || []).forEach((s) => {
+        if (!s.slug) {
+          let base = slugificar(s.titulo) || 'taller';
+          let slug = base;
+          let n = 2;
+          while (slugsUsados.has(slug)) { slug = `${base}-${n}`; n += 1; }
+          s.slug = slug;
+        }
+        slugsUsados.add(s.slug);
+        if (s.descripcion === undefined) s.descripcion = '';
+        if (s.queAprendes === undefined) s.queAprendes = '';
+        if (s.fotoUrl === undefined) s.fotoUrl = '';
+        if (s.precioTotal === undefined) s.precioTotal = 0;
+        if (s.anticipo === undefined) s.anticipo = 0;
+        if (s.cupoMaximo === undefined) s.cupoMaximo = null;
+      });
+      (data.inscripcionesTaller || []).forEach((i) => {
+        if (i.tipoPago === undefined) i.tipoPago = '';
+        if (i.montoPagado === undefined) i.montoPagado = 0;
+        if (i.saldo === undefined) i.saldo = null;
+        if (i.estadoPago === undefined) i.estadoPago = 'pendiente';
+        if (i.pagoId === undefined) i.pagoId = '';
+        if (i.vencePendienteEn === undefined) i.vencePendienteEn = null;
+      });
+      data._migCobroTalleres = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
@@ -1272,6 +1305,52 @@ const ESTADOS_MEXICO = [
 // filtrable: minusculas y sin acentos (ej. "Querétaro" -> "queretaro").
 function slugZona(texto) {
   return String(texto || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+// Slug url-friendly para la pagina publica de cada taller (/talleres/<slug>):
+// minusculas, sin acentos, espacios y caracteres raros convertidos a guion.
+function slugificar(texto) {
+  return String(texto || '').trim().toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// Genera un slug unico dentro de sesionesTaller (le agrega un numero si ya
+// existe), ignorando el propio id cuando se esta editando una sesion que ya
+// tenia ese slug.
+function slugUnicoSesionTaller(data, base, idAIgnorar) {
+  const limpio = slugificar(base) || 'taller';
+  const usados = new Set(
+    data.sesionesTaller.filter((s) => s.id !== idAIgnorar).map((s) => s.slug).filter(Boolean)
+  );
+  let slug = limpio;
+  let n = 2;
+  while (usados.has(slug)) {
+    slug = `${limpio}-${n}`;
+    n += 1;
+  }
+  return slug;
+}
+
+// Cupo restante de un taller = cupo maximo configurado, menos las
+// inscripciones ya pagadas y las pendientes que todavia no vencen (una
+// pendiente vencida ya libero su lugar). Si no se configuro cupoMaximo
+// (null, talleres de antes de este campo), regresa null = "sin limite
+// todavia", para no bloquear nada hasta que el admin lo configure.
+function cupoRestanteTaller(data, sesionTallerId) {
+  const sesion = data.sesionesTaller.find((s) => s.id === Number(sesionTallerId));
+  if (!sesion || sesion.cupoMaximo === null || sesion.cupoMaximo === undefined) return null;
+  const ahora = Date.now();
+  const ocupados = data.inscripcionesTaller.filter((i) => {
+    if (i.sesionTallerId !== Number(sesionTallerId)) return false;
+    if (i.estadoPago === 'pagado') return true;
+    if (i.estadoPago === 'pendiente') {
+      return !i.vencePendienteEn || new Date(i.vencePendienteEn).getTime() > ahora;
+    }
+    return false;
+  }).length;
+  return Math.max(0, sesion.cupoMaximo - ocupados);
 }
 
 // Etiqueta de campañas a partir del pais/estado de un registro, para poder
@@ -2019,13 +2098,24 @@ module.exports = {
   },
 
   // ---- Calendario de talleres presenciales ----
+  // Cada sesion es "el Taller": ademas de fecha/sede/horario, desde aqui se
+  // configura el precio, el anticipo y el cupo real para la futura pagina
+  // publica por slug (/talleres/<slug>) y el checkout con Mercado Pago.
   getSesionesTaller(sedeId) {
     const data = load();
     let items = [...data.sesionesTaller];
     if (sedeId) items = items.filter((s) => s.sedeId === Number(sedeId));
-    return items.sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.orden ?? 0) - (b.orden ?? 0));
+    return items
+      .sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.orden ?? 0) - (b.orden ?? 0))
+      .map((s) => ({ ...s, cupoRestante: cupoRestanteTaller(data, s.id) }));
   },
-  addSesionTaller({ sedeId, fecha, titulo, estado, horario }) {
+  getSesionTallerPorSlug(slug) {
+    const data = load();
+    const item = data.sesionesTaller.find((s) => s.slug === slug);
+    if (!item) return null;
+    return { ...item, cupoRestante: cupoRestanteTaller(data, item.id) };
+  },
+  addSesionTaller({ sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo }) {
     const data = load();
     const mismaFecha = data.sesionesTaller.filter((s) => s.sedeId === Number(sedeId) && s.fecha === fecha);
     const item = {
@@ -2036,6 +2126,15 @@ module.exports = {
       estado: estado || 'disponible',
       horario: String(horario || '').trim(),
       orden: mismaFecha.length,
+      slug: slugUnicoSesionTaller(data, titulo),
+      descripcion: String(descripcion || '').trim(),
+      queAprendes: String(queAprendes || '').trim(),
+      fotoUrl: String(fotoUrl || '').trim(),
+      precioTotal: Number(precioTotal) || 0,
+      anticipo: Number(anticipo) || 0,
+      // null = sin limite configurado todavia (no bloquea inscripciones,
+      // para no romper sesiones que se crearon antes de este campo).
+      cupoMaximo: cupoMaximo === '' || cupoMaximo == null ? null : Number(cupoMaximo) || 0,
     };
     data.sesionesTaller.push(item);
     save(data);
@@ -2045,10 +2144,25 @@ module.exports = {
     const data = load();
     const item = data.sesionesTaller.find((s) => s.id === Number(id));
     if (!item) return null;
-    if (typeof patch.titulo === 'string') item.titulo = patch.titulo;
+    if (typeof patch.titulo === 'string') {
+      item.titulo = patch.titulo;
+      // El slug no se recalcula solo porque cambio el titulo (romperia
+      // links ya compartidos) — solo si lo piden explicitamente.
+    }
+    if (typeof patch.slug === 'string' && patch.slug.trim()) {
+      item.slug = slugUnicoSesionTaller(data, patch.slug, item.id);
+    }
     if (typeof patch.estado === 'string') item.estado = patch.estado;
     if (typeof patch.fecha === 'string') item.fecha = patch.fecha;
     if (typeof patch.horario === 'string') item.horario = patch.horario;
+    if (typeof patch.descripcion === 'string') item.descripcion = patch.descripcion;
+    if (typeof patch.queAprendes === 'string') item.queAprendes = patch.queAprendes;
+    if (typeof patch.fotoUrl === 'string') item.fotoUrl = patch.fotoUrl;
+    if (patch.precioTotal !== undefined) item.precioTotal = Number(patch.precioTotal) || 0;
+    if (patch.anticipo !== undefined) item.anticipo = Number(patch.anticipo) || 0;
+    if (patch.cupoMaximo !== undefined) {
+      item.cupoMaximo = patch.cupoMaximo === '' || patch.cupoMaximo === null ? null : Number(patch.cupoMaximo) || 0;
+    }
     save(data);
     return item;
   },
@@ -2101,6 +2215,16 @@ module.exports = {
       esPrimeraVez: !!esPrimeraVez,
       aceptaPromociones: !!aceptaPromociones,
       aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
+      // Control real del pago (Fase 1 del cobro de talleres): por ahora
+      // toda inscripcion nueva entra "pendiente" sin monto, hasta que el
+      // flujo de pago de la Fase 2/3 (o el admin a mano, mientras tanto) la
+      // actualice. tipoPago: '' | 'anticipo' | 'completo'.
+      tipoPago: '',
+      montoPagado: 0,
+      saldo: null,
+      estadoPago: 'pendiente',
+      pagoId: '',
+      vencePendienteEn: null,
       createdAt: new Date().toISOString(),
     };
     data.inscripcionesTaller.push(item);
@@ -2122,6 +2246,22 @@ module.exports = {
     const data = load();
     data.inscripcionesTaller = data.inscripcionesTaller.filter((i) => i.id !== Number(id));
     save(data);
+  },
+  // Marca a mano el estado del pago de una inscripcion. Mientras no exista
+  // el cobro automatico por Mercado Pago (Fase 3), es como el admin
+  // registra que alguien ya pago su anticipo o el total por WhatsApp.
+  actualizarPagoInscripcionTaller(id, { tipoPago, montoPagado, estadoPago, pagoId }) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    if (typeof tipoPago === 'string') item.tipoPago = tipoPago;
+    if (montoPagado !== undefined) item.montoPagado = Number(montoPagado) || 0;
+    if (typeof estadoPago === 'string') item.estadoPago = estadoPago;
+    if (typeof pagoId === 'string') item.pagoId = pagoId;
+    const sesion = data.sesionesTaller.find((s) => s.id === item.sesionTallerId);
+    item.saldo = sesion && sesion.precioTotal ? Math.max(0, sesion.precioTotal - item.montoPagado) : null;
+    save(data);
+    return item;
   },
 
   // ---- Registro corto para el QR de captura (multistream, StreamYard) ----

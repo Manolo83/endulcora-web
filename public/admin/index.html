@@ -686,35 +686,76 @@
           <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-humo"></span> Agotado</span>
         </div>
 
-        <form id="formSesionTaller" class="mt-4 hidden flex-wrap items-end gap-3 rounded-xl bg-crema/60 p-4">
+        <form id="formSesionTaller" class="mt-4 hidden flex-col gap-3 rounded-xl bg-crema/60 p-4">
           <input type="hidden" id="sesionEditandoId">
           <input type="hidden" id="sesionFechaValor">
-          <div>
-            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Fecha</span>
-            <p id="sesionFechaTexto" class="font-700 text-vino"></p>
+          <div class="flex flex-wrap items-end gap-3">
+            <div>
+              <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Fecha</span>
+              <p id="sesionFechaTexto" class="font-700 text-vino"></p>
+            </div>
+            <label class="min-w-[180px] flex-1">
+              <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Nombre del taller</span>
+              <input id="sesionTitulo" type="text" required class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+            </label>
+            <label>
+              <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Horario</span>
+              <select id="sesionHorario" required class="mt-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+                <option value="10:00 am – 2:00 pm">10:00 am – 2:00 pm</option>
+                <option value="4:00 pm – 8:00 pm">4:00 pm – 8:00 pm</option>
+              </select>
+            </label>
+            <label>
+              <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Estado</span>
+              <select id="sesionEstado" class="mt-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+                <option value="disponible">Disponible</option>
+                <option value="casi_lleno">Casi lleno</option>
+                <option value="agotado">Agotado</option>
+              </select>
+            </label>
           </div>
-          <label class="min-w-[180px] flex-1">
-            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Nombre del taller</span>
-            <input id="sesionTitulo" type="text" required class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
-          </label>
-          <label>
-            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Horario</span>
-            <select id="sesionHorario" required class="mt-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
-              <option value="10:00 am – 2:00 pm">10:00 am – 2:00 pm</option>
-              <option value="4:00 pm – 8:00 pm">4:00 pm – 8:00 pm</option>
-            </select>
-          </label>
-          <label>
-            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Estado</span>
-            <select id="sesionEstado" class="mt-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
-              <option value="disponible">Disponible</option>
-              <option value="casi_lleno">Casi lleno</option>
-              <option value="agotado">Agotado</option>
-            </select>
-          </label>
-          <button type="submit" class="rounded-full bg-vino px-5 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar</button>
-          <button type="button" id="btnEliminarSesion" class="hidden rounded-full border border-red-300 px-5 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-red-600">Eliminar</button>
-          <button type="button" id="btnCancelarSesion" class="rounded-full border border-vino/20 px-5 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-vino">Cancelar</button>
+
+          <div class="border-t border-vino/10 pt-3">
+            <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-carbon/50">Para la futura página pública del taller</p>
+            <div class="mt-2 flex flex-wrap items-end gap-3">
+              <label class="min-w-[160px] flex-1">
+                <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Slug (link único)</span>
+                <input id="sesionSlug" type="text" placeholder="se genera solo" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+              </label>
+              <label>
+                <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Precio total (MXN)</span>
+                <input id="sesionPrecioTotal" type="text" inputmode="numeric" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+              </label>
+              <label>
+                <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Anticipo (MXN)</span>
+                <input id="sesionAnticipo" type="text" inputmode="numeric" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+              </label>
+              <label>
+                <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Cupo máximo</span>
+                <input id="sesionCupoMaximo" type="text" inputmode="numeric" placeholder="sin límite" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+              </label>
+            </div>
+            <label class="mt-2 block">
+              <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Descripción</span>
+              <textarea id="sesionDescripcion" rows="2" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm"></textarea>
+            </label>
+            <label class="mt-2 block">
+              <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Qué aprendes</span>
+              <textarea id="sesionQueAprendes" rows="2" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm"></textarea>
+            </label>
+            <div class="mt-2 flex flex-wrap items-center gap-3">
+              <span class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Foto</span>
+              <img id="sesionFotoPreview" src="" alt="" class="hidden h-14 w-14 rounded-lg object-cover ring-1 ring-vino/10">
+              <input id="sesionFotoInput" type="file" accept="image/jpeg,image/png,image/webp" class="text-xs">
+              <button type="button" id="btnQuitarSesionFoto" class="hidden rounded-full border border-red-200 px-3 py-1.5 font-ui text-[10px] font-600 uppercase tracking-wider text-red-600">Quitar foto</button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <button type="submit" class="rounded-full bg-vino px-5 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar</button>
+            <button type="button" id="btnEliminarSesion" class="hidden rounded-full border border-red-300 px-5 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-red-600">Eliminar</button>
+            <button type="button" id="btnCancelarSesion" class="rounded-full border border-vino/20 px-5 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-vino">Cancelar</button>
+          </div>
         </form>
 
         <div id="calendarioGrid" class="mt-6 grid grid-cols-7 gap-1.5 text-xs sm:gap-2"></div>
@@ -2906,7 +2947,8 @@ function pintarCalendarioAdmin(){
     const sesiones = (sesionesPorFecha[fecha] || []).sort((a,b) => (a.orden ?? 0) - (b.orden ?? 0));
     const chips = sesiones.map(s => {
       const info = ESTADO_INFO[s.estado] || ESTADO_INFO.disponible;
-      return `<button type="button" data-id="${s.id}" title="${escapeHtml(s.horario || '')}" class="btnEditarSesion flex w-full items-center gap-1.5 truncate rounded-md px-1.5 py-1 text-left text-[10px] text-crema ${info.clase}">${escapeHtml(s.titulo)}</button>`;
+      const tituloConCupo = s.cupoRestante === null ? s.horario : `${s.horario} · ${s.cupoRestante} lugar${s.cupoRestante === 1 ? '' : 'es'}`;
+      return `<button type="button" data-id="${s.id}" title="${escapeHtml(tituloConCupo || '')}" class="btnEditarSesion flex w-full items-center gap-1.5 truncate rounded-md px-1.5 py-1 text-left text-[10px] text-crema ${info.clase}">${escapeHtml(s.titulo)}</button>`;
     }).join('');
     celdas += `
       <div class="min-h-[76px] rounded-lg border border-vino/10 p-1.5">
@@ -2940,7 +2982,25 @@ function abrirFormSesion(sesion){
   $('sesionTitulo').value = sesion.titulo || '';
   $('sesionHorario').value = sesion.horario || '10:00 am – 2:00 pm';
   $('sesionEstado').value = sesion.estado || 'disponible';
+  $('sesionSlug').value = sesion.slug || '';
+  $('sesionPrecioTotal').value = sesion.precioTotal || '';
+  $('sesionAnticipo').value = sesion.anticipo || '';
+  $('sesionCupoMaximo').value = sesion.cupoMaximo ?? '';
+  $('sesionDescripcion').value = sesion.descripcion || '';
+  $('sesionQueAprendes').value = sesion.queAprendes || '';
   $('btnEliminarSesion').classList.toggle('hidden', !sesion.id);
+  // La foto solo se puede subir una vez que el taller ya tiene id (el
+  // upload va a /api/sesiones-taller/:id/imagen).
+  $('sesionFotoInput').disabled = !sesion.id;
+  $('sesionFotoInput').title = sesion.id ? '' : 'Guarda el taller primero para poder subirle una foto';
+  if(sesion.fotoUrl){
+    $('sesionFotoPreview').src = sesion.fotoUrl;
+    $('sesionFotoPreview').classList.remove('hidden');
+    $('btnQuitarSesionFoto').classList.remove('hidden');
+  }else{
+    $('sesionFotoPreview').classList.add('hidden');
+    $('btnQuitarSesionFoto').classList.add('hidden');
+  }
   $('sesionTitulo').focus();
 }
 
@@ -2948,6 +3008,8 @@ function cerrarFormSesion(){
   $('formSesionTaller').classList.add('hidden');
   $('formSesionTaller').classList.remove('flex');
   $('formSesionTaller').reset();
+  $('sesionFotoPreview').classList.add('hidden');
+  $('btnQuitarSesionFoto').classList.add('hidden');
 }
 
 $('btnCancelarSesion').addEventListener('click', cerrarFormSesion);
@@ -2965,6 +3027,41 @@ $('btnEliminarSesion').addEventListener('click', async () => {
   }
 });
 
+$('sesionFotoInput').addEventListener('change', async () => {
+  const id = $('sesionEditandoId').value;
+  const file = $('sesionFotoInput').files[0];
+  if(!id || !file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  try{
+    const res = await fetch(`/admin/api/sesiones-taller/${id}/imagen`, { method: 'POST', body: fd });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir la foto.');
+    $('sesionFotoPreview').src = data.fotoUrl;
+    $('sesionFotoPreview').classList.remove('hidden');
+    $('btnQuitarSesionFoto').classList.remove('hidden');
+    cargarSesionesTaller();
+    toast('Foto subida');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('btnQuitarSesionFoto').addEventListener('click', async () => {
+  const id = $('sesionEditandoId').value;
+  if(!id) return;
+  try{
+    await api(`/admin/api/sesiones-taller/${id}/imagen`, { method: 'DELETE' });
+    $('sesionFotoPreview').classList.add('hidden');
+    $('btnQuitarSesionFoto').classList.add('hidden');
+    $('sesionFotoInput').value = '';
+    cargarSesionesTaller();
+    toast('Foto quitada');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
 $('formSesionTaller').addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = $('sesionEditandoId').value;
@@ -2974,7 +3071,13 @@ $('formSesionTaller').addEventListener('submit', async (e) => {
     titulo: $('sesionTitulo').value.trim(),
     horario: $('sesionHorario').value,
     estado: $('sesionEstado').value,
+    precioTotal: $('sesionPrecioTotal').value,
+    anticipo: $('sesionAnticipo').value,
+    cupoMaximo: $('sesionCupoMaximo').value,
+    descripcion: $('sesionDescripcion').value.trim(),
+    queAprendes: $('sesionQueAprendes').value.trim(),
   };
+  if(id && $('sesionSlug').value.trim()) payload.slug = $('sesionSlug').value.trim();
   try{
     if(id){
       await api(`/admin/api/sesiones-taller/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
@@ -3136,17 +3239,19 @@ async function cargarInscripcionesTaller(){
               <th class="px-5 py-3 font-600">Nombre</th>
               <th class="px-5 py-3 font-600">Contacto</th>
               <th class="px-5 py-3 font-600">Horario</th>
-              <th class="px-5 py-3 font-600">Anticipo</th>
+              <th class="px-5 py-3 font-600">Anticipo (nota)</th>
               <th class="px-5 py-3 font-600">¿Cómo se enteró?</th>
               <th class="px-5 py-3 font-600">Preferencias</th>
               <th class="px-5 py-3 font-600">Zona</th>
+              <th class="px-5 py-3 font-600">Pago</th>
+              <th class="px-5 py-3 font-600">Monto pagado</th>
               <th class="px-5 py-3 font-600">Registrado</th>
               <th class="px-5 py-3"></th>
             </tr>
           </thead>
           <tbody>
             ${g.filas.map(i => `
-              <tr class="border-b border-vino/10 last:border-0 align-top">
+              <tr class="border-b border-vino/10 last:border-0 align-top" data-row-id="${i.id}">
                 <td class="px-5 py-3 text-carbon/80">${escapeHtml(i.nombre)}${i.esPrimeraVez ? '<span class="ml-2 rounded-full bg-flama/20 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Nuevo</span>' : ''}</td>
                 <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(i.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(i.correo)}</div></td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.horario)}</td>
@@ -3154,12 +3259,43 @@ async function cargarInscripcionesTaller(){
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.comoSeEntero || '—')}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.preferencias || '—')}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(formatoZona(i))}</td>
+                <td class="px-5 py-3">
+                  <select class="selEstadoPagoTaller rounded-lg border border-vino/15 bg-crema/60 px-2 py-1.5 text-xs" data-id="${i.id}">
+                    <option value="pendiente" ${i.estadoPago === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                    <option value="pagado" ${i.estadoPago === 'pagado' ? 'selected' : ''}>Pagado</option>
+                    <option value="cancelado" ${i.estadoPago === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+                  </select>
+                </td>
+                <td class="px-5 py-3">
+                  <input type="text" inputmode="numeric" class="campoMontoPagadoTaller w-20 rounded-lg border border-vino/15 bg-crema/60 px-2 py-1.5 text-xs" data-id="${i.id}" value="${i.montoPagado || ''}" placeholder="$0">
+                </td>
                 <td class="px-5 py-3 text-xs text-carbon/45">${new Date(i.createdAt).toLocaleDateString('es-MX')}</td>
                 <td class="px-5 py-3 text-right"><button type="button" data-id="${i.id}" class="btnBorrarInscripcionTaller text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button></td>
               </tr>`).join('')}
           </tbody>
         </table>
       </div>`).join('');
+
+    async function guardarPagoTaller(id){
+      const fila = cont.querySelector(`tr[data-row-id="${id}"]`);
+      const estadoPago = fila.querySelector('.selEstadoPagoTaller').value;
+      const montoPagado = fila.querySelector('.campoMontoPagadoTaller').value;
+      try{
+        await api(`/admin/api/inscripciones-taller/${id}/pago`, {
+          method: 'PATCH',
+          body: JSON.stringify({ estadoPago, montoPagado }),
+        });
+        toast('Pago guardado');
+      }catch(e){
+        toast(e.message);
+      }
+    }
+    cont.querySelectorAll('.selEstadoPagoTaller').forEach(el => {
+      el.addEventListener('change', () => guardarPagoTaller(el.dataset.id));
+    });
+    cont.querySelectorAll('.campoMontoPagadoTaller').forEach(el => {
+      el.addEventListener('change', () => guardarPagoTaller(el.dataset.id));
+    });
     $('listaInscripcionesTaller').querySelectorAll('.btnBorrarInscripcionTaller').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (!confirm('¿Borrar esta inscripción? No se puede deshacer.')) return;

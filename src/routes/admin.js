@@ -618,6 +618,19 @@ router.delete('/api/inscripciones-taller/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// Marca a mano el pago de una inscripcion (anticipo o total) mientras no
+// existe el cobro automatico por Mercado Pago — ver Fase 3.
+const ESTADOS_PAGO_TALLER = ['pendiente', 'pagado', 'cancelado'];
+router.patch('/api/inscripciones-taller/:id/pago', requireAdmin, (req, res) => {
+  const { tipoPago, montoPagado, estadoPago, pagoId } = req.body || {};
+  if (estadoPago !== undefined && !ESTADOS_PAGO_TALLER.includes(estadoPago)) {
+    return res.status(400).json({ error: 'Estado de pago no válido.' });
+  }
+  const item = store.actualizarPagoInscripcionTaller(req.params.id, { tipoPago, montoPagado, estadoPago, pagoId });
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
 // ---- Registros del QR de captura (multistream) ----
 router.get('/api/registros-qr', requireAdmin, (req, res) => {
   res.json(store.getRegistrosQr());
@@ -1003,10 +1016,10 @@ router.get('/api/sesiones-taller', requireAdmin, (req, res) => {
 });
 
 router.post('/api/sesiones-taller', requireAdmin, (req, res) => {
-  const { sedeId, fecha, titulo, estado, horario } = req.body || {};
+  const { sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo } = req.body || {};
   if (!sedeId || !fecha || !titulo) return res.status(400).json({ error: 'Falta sede, fecha o título' });
   if (horario && !HORARIOS_VALIDOS.includes(horario)) return res.status(400).json({ error: 'Ese horario no es válido.' });
-  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado, horario }));
+  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo }));
 });
 
 router.patch('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
@@ -1021,6 +1034,29 @@ router.patch('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
 router.delete('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
   store.deleteSesionTaller(req.params.id);
   res.json({ ok: true });
+});
+
+router.post('/api/sesiones-taller/:id/imagen', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
+  const existe = store.getSesionesTaller().some((s) => s.id === Number(req.params.id));
+  if (!existe) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    return res.status(404).json({ error: 'No encontrado' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
+  const url = `/uploads/${req.file.filename}`;
+  const anterior = store.getSesionesTaller().find((s) => s.id === Number(req.params.id)).fotoUrl;
+  const item = store.updateSesionTaller(req.params.id, { fotoUrl: url });
+  borrarSiEsSubida(anterior);
+  res.status(201).json(item);
+});
+
+router.delete('/api/sesiones-taller/:id/imagen', requireAdmin, (req, res) => {
+  const sesion = store.getSesionesTaller().find((s) => s.id === Number(req.params.id));
+  if (!sesion) return res.status(404).json({ error: 'No encontrado' });
+  const anterior = sesion.fotoUrl;
+  const item = store.updateSesionTaller(req.params.id, { fotoUrl: '' });
+  borrarSiEsSubida(anterior);
+  res.json(item);
 });
 
 // ---- Reseñas de alumnos (moderación) ----
