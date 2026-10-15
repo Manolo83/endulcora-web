@@ -77,6 +77,20 @@ conjunto y confirmar que hay exactamente UNO y que es el correcto. El gasto
 a nivel conjunto no prueba que el arte correcto este corriendo. Verificar a
 nivel anuncio, siempre.
 
+### 9b. Anuncios dormidos (mismo dia)
+
+Barriendo la cuenta encontre 8 anuncios mas con `status: ACTIVE` que no
+entregaban solo porque su conjunto estaba pausado (`effective_status:
+ADSET_PAUSED`). Entre ellos Tacos de Canasta, que acababa de cortar por
+costo.
+
+En el momento en que yo reuso ese contenedor y lo activo, ese anuncio
+viejo se enciende SOLO. Asi nacieron los dos huerfanos de arriba.
+
+REGLA: antes de activar un contenedor reusado, listar sus anuncios y
+confirmar que cada anuncio viejo tiene `status: PAUSED`, no solo
+`effective_status`. Los ocho quedaron pausados el 15 oct.
+
 ## 10. Verificar el arte renderizado ANTES de escribir el copy (15 oct)
 
 Escribi el copy de Empanadas sin hora porque no la tenia en mis notas.
