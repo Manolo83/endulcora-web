@@ -54,3 +54,34 @@ inscriben. El numero que importa es el registro en la hoja de Leslie.
 - WhatsApp y el seguimiento: instruccion explicita de Manolo.
 - El admin de endulcora.com, la base de datos y el envio de correos.
 - Subir artes a Meta: la herramienta no esta disponible en esta cuenta.
+
+## 9. Reusar un contenedor no apaga el anuncio viejo (15 oct)
+
+Al reusar los conjuntos de Palomitas y Bebidas Otoñales para Pays y Tartas
+y Roles Gourmet, cree los anuncios nuevos y crei haber pausado los viejos.
+Pause IDs equivocados. Durante un dia completo cada contenedor corrio DOS
+anuncios a la vez:
+
+- Pays y Tartas gasto $35.75, pero $31.56 se fueron al arte de Palomitas.
+- Roles Gourmet gasto $68.03, pero $41.22 se fueron al arte de Bebidas
+  Otoñales.
+
+Peor que el dinero: se anunciaron talleres que ya no existen, generando
+conversaciones que nadie puede atender.
+
+Y le reporte a Manolo "Pays y Tartas ya arranco" leyendo el gasto del
+conjunto, no el del anuncio.
+
+REGLA: despues de reusar un contenedor, listar los anuncios ACTIVOS por
+conjunto y confirmar que hay exactamente UNO y que es el correcto. El gasto
+a nivel conjunto no prueba que el arte correcto este corriendo. Verificar a
+nivel anuncio, siempre.
+
+## 10. Verificar el arte renderizado ANTES de escribir el copy (15 oct)
+
+Escribi el copy de Empanadas sin hora porque no la tenia en mis notas.
+Al renderizar el anuncio, el arte decia "10:00 AM" y "TRES RELLENOS".
+Tuve que rehacer el creative (son inmutables).
+
+REGLA: renderizar primero, escribir el copy despues. El arte tiene datos
+que las notas no tienen.
