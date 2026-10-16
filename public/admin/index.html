@@ -994,6 +994,55 @@
         </div>
       </div>
       <p class="mt-2 text-xs text-carbon/45">El Excel trae una pestaña por cada taller + fecha + sede, lista para pegar en tu control de inscritos.</p>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Registrar inscripción manual</h3>
+        <p class="mt-1 text-sm text-carbon/60">Para pagos que no pasan por el sitio — ej. la promoción de $800 que se cobra directo en sucursal a quien ya tomó un taller.</p>
+        <form id="formInscripcionManual" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <label class="sm:col-span-2 lg:col-span-1">
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Taller</span>
+            <select id="manualSesionTallerId" required class="mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2.5 text-sm"></select>
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Nombre completo</span>
+            <input id="manualNombre" type="text" required class="mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2.5 text-sm">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">WhatsApp</span>
+            <input id="manualWhatsapp" type="text" required class="mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2.5 text-sm">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Correo (opcional)</span>
+            <input id="manualCorreo" type="email" class="mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2.5 text-sm">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Monto pagado (MXN)</span>
+            <input id="manualMontoPagado" type="text" inputmode="numeric" required placeholder="800" class="mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2.5 text-sm">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Tipo de pago</span>
+            <select id="manualTipoPago" class="mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2.5 text-sm">
+              <option value="completo">Completo</option>
+              <option value="anticipo">Anticipo</option>
+            </select>
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Forma de pago</span>
+            <input id="manualFormaPago" type="text" list="listaFormasPago" placeholder="Efectivo" class="mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2.5 text-sm">
+            <datalist id="listaFormasPago">
+              <option value="Efectivo"><option value="Transferencia"><option value="TDD"><option value="TDC"><option value="Promoción $800">
+            </datalist>
+          </label>
+          <label class="flex items-end gap-2">
+            <span class="flex items-center gap-2 text-sm text-carbon/70"><input id="manualEstadoPagado" type="checkbox" checked class="h-4 w-4 rounded border-vino/30"> Ya está pagado</span>
+          </label>
+          <div class="sm:col-span-2 lg:col-span-3 flex items-center gap-3">
+            <button type="submit" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Registrar</button>
+            <p id="manualInscripcionError" class="hidden text-sm text-red-600"></p>
+          </div>
+        </form>
+      </div>
+
       <div id="listaInscripcionesTaller" class="mt-6 space-y-6"></div>
     </section>
 
@@ -3055,7 +3104,9 @@ function abrirFormSesion(sesion){
   $('sesionEstado').value = sesion.estado || 'disponible';
   $('sesionSlug').value = sesion.slug || '';
   $('sesionPrecioTotal').value = sesion.precioTotal || '';
-  $('sesionAnticipo').value = sesion.anticipo || '';
+  // El anticipo casi siempre es $400 — se precarga solo en talleres nuevos
+  // (si ya tiene id, se respeta lo que ya estaba guardado, aunque sea 0).
+  $('sesionAnticipo').value = sesion.id ? (sesion.anticipo || '') : (sesion.anticipo ?? 400);
   $('sesionCupoMaximo').value = sesion.cupoMaximo ?? '';
   $('sesionHojaSheets').value = sesion.hojaSheets || '';
   $('sesionDescripcion').value = sesion.descripcion || '';
@@ -3385,6 +3436,55 @@ async function cargarInscripcionesTaller(){
     cont.innerHTML = `<p class="p-5 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
   }
 }
+
+// Dropdown del formulario de registro manual: solo talleres futuros (no
+// tiene sentido registrar a alguien en una fecha que ya pasó), con el cupo
+// restante a la vista para que quien registre sepa si todavia hay lugar.
+async function cargarOpcionesSesionManual(){
+  const select = $('manualSesionTallerId');
+  try{
+    const sesiones = await api('/admin/api/sesiones-taller');
+    const hoy = new Date().toISOString().slice(0, 10);
+    const futuras = sesiones.filter(s => s.fecha >= hoy).sort((a, b) => a.fecha.localeCompare(b.fecha));
+    select.innerHTML = futuras.length
+      ? futuras.map(s => {
+          const cupo = s.cupoMaximo == null ? 'sin límite' : `${s.cupoRestante} lugar${s.cupoRestante === 1 ? '' : 'es'}`;
+          return `<option value="${s.id}">${escapeHtml(s.titulo)} · ${fechaLegibleCorta(s.fecha)} (${cupo})</option>`;
+        }).join('')
+      : '<option value="">No hay talleres programados a futuro</option>';
+  }catch(e){
+    select.innerHTML = '<option value="">No se pudo cargar</option>';
+  }
+}
+cargarOpcionesSesionManual();
+
+$('formInscripcionManual').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = $('manualInscripcionError');
+  err.classList.add('hidden');
+  const payload = {
+    sesionTallerId: $('manualSesionTallerId').value,
+    nombre: $('manualNombre').value.trim(),
+    whatsapp: $('manualWhatsapp').value.trim(),
+    correo: $('manualCorreo').value.trim(),
+    montoPagado: $('manualMontoPagado').value,
+    tipoPago: $('manualTipoPago').value,
+    formaPago: $('manualFormaPago').value.trim(),
+    estadoPago: $('manualEstadoPagado').checked ? 'pagado' : 'pendiente',
+  };
+  try{
+    await api('/admin/api/inscripciones-taller', { method: 'POST', body: JSON.stringify(payload) });
+    toast('Inscripción registrada');
+    $('formInscripcionManual').reset();
+    $('manualEstadoPagado').checked = true;
+    cargarInscripcionesTaller();
+    cargarOpcionesSesionManual();
+  }catch(e2){
+    err.textContent = e2.message;
+    err.classList.remove('hidden');
+  }
+});
+
 $('btnExportarInscripcionesTaller').addEventListener('click', () => {
   if(!INSCRIPCIONES_TALLER.length){ toast('No hay inscripciones para exportar'); return; }
   const encabezado = 'nombre,whatsapp,correo,taller,fecha,sede,horario,monto_anticipo,como_se_entero,preferencias,cumpleanos,primera_vez,acepta_promociones,registrado_el';

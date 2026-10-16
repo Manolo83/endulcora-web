@@ -10,12 +10,12 @@ const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
-const { enviarCorreoRevistaMensual } = require('../email');
+const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller } = require('../email');
 const { procesarCampana } = require('../campanas');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
 const googleSheets = require('../googleSheets');
-const { sincronizarInscripcionTaller } = require('../automatizacionesTaller');
+const { sincronizarInscripcionTaller, avisarEquipoNuevoTaller } = require('../automatizacionesTaller');
 
 const router = express.Router();
 
@@ -624,14 +624,93 @@ router.delete('/api/inscripciones-taller/:id', requireAdmin, (req, res) => {
 // existe el cobro automatico por Mercado Pago — ver Fase 3.
 const ESTADOS_PAGO_TALLER = ['pendiente', 'pagado', 'cancelado'];
 router.patch('/api/inscripciones-taller/:id/pago', requireAdmin, (req, res) => {
-  const { tipoPago, montoPagado, estadoPago, pagoId } = req.body || {};
+  const { tipoPago, montoPagado, estadoPago, pagoId, formaPago } = req.body || {};
   if (estadoPago !== undefined && !ESTADOS_PAGO_TALLER.includes(estadoPago)) {
     return res.status(400).json({ error: 'Estado de pago no válido.' });
   }
-  const item = store.actualizarPagoInscripcionTaller(req.params.id, { tipoPago, montoPagado, estadoPago, pagoId });
+  const item = store.actualizarPagoInscripcionTaller(req.params.id, { tipoPago, montoPagado, estadoPago, pagoId, formaPago });
   if (!item) return res.status(404).json({ error: 'No encontrado' });
   res.json(item);
 });
+
+// Registro manual desde /admin: para inscripciones y pagos que nunca pasan
+// por el sitio (ej. la promoción de $800 que se cobra en efectivo directo
+// en la sucursal a quien ya tomó un taller). A diferencia del formulario
+// publico, aqui no se pide aviso de privacidad por pantalla — quien lo
+// registra ya tiene el consentimiento de la persona en persona.
+router.post('/api/inscripciones-taller', requireAdmin, async (req, res) => {
+  const b = req.body || {};
+  const sesionTallerId = Number(b.sesionTallerId);
+  const nombre = String(b.nombre || '').trim();
+  const whatsapp = String(b.whatsapp || '').trim();
+  if (!sesionTallerId) return res.status(400).json({ error: 'Elige el taller.' });
+  if (!nombre) return res.status(400).json({ error: 'Escribe el nombre.' });
+  if (!whatsapp) return res.status(400).json({ error: 'Escribe el WhatsApp.' });
+  if (estadoPagoInvalido(b.estadoPago)) return res.status(400).json({ error: 'Estado de pago no válido.' });
+
+  const sesion = store.getSesionesTaller().find((s) => s.id === sesionTallerId);
+  if (!sesion) return res.status(404).json({ error: 'Ese taller ya no está en el calendario.' });
+  const sedeInfo = store.getSedes().find((s) => s.id === sesion.sedeId);
+
+  const item = store.addInscripcionTaller({
+    nombre,
+    whatsapp,
+    correo: String(b.correo || '').trim(),
+    sesionTallerId: sesion.id,
+    taller: sesion.titulo,
+    fecha: sesion.fecha,
+    sede: sedeInfo ? sedeInfo.nombre : '',
+    horario: sesion.horario || '',
+    montoAnticipo: String(b.montoPagado || ''),
+    comoSeEntero: 'Registro manual en admin',
+    aceptaAvisoPrivacidad: true,
+  });
+  const actualizado = store.actualizarPagoInscripcionTaller(item.id, {
+    tipoPago: b.tipoPago,
+    montoPagado: b.montoPagado,
+    estadoPago: b.estadoPago || 'pagado',
+    formaPago: b.formaPago || 'Efectivo',
+  });
+
+  // Mismo trato que un pago en linea confirmado: correo de confirmacion,
+  // aviso al equipo y fila en Sheets — nunca deben tumbar el registro si
+  // alguno falla (ej. Resend o Sheets sin configurar).
+  if (actualizado.estadoPago === 'pagado') {
+    if (actualizado.correo) {
+      const contenido = store.getContent();
+      enviarCorreoConfirmacionPagoTaller({
+        to: actualizado.correo,
+        nombre: actualizado.nombre,
+        taller: actualizado.taller,
+        fecha: actualizado.fecha,
+        horario: actualizado.horario,
+        sede: actualizado.sede,
+        direccion: sedeInfo ? sedeInfo.direccion : '',
+        mapaLink: sedeInfo ? sedeInfo.mapaLink : '',
+        queAprendes: sesion.queAprendes,
+        tipoPago: actualizado.tipoPago,
+        montoPagado: actualizado.montoPagado,
+        saldo: actualizado.saldo,
+        comunidadLink: contenido.comunidad_whatsapp_link || '',
+        numeroWhatsapp: contenido.whatsapp_numero,
+      }).catch((err) => {
+        console.error(`[admin] No se pudo mandar el correo de confirmacion del registro manual ${actualizado.id}:`, err.message);
+      });
+    }
+    avisarEquipoNuevoTaller(actualizado).catch((err) => {
+      console.error(`[admin] No se pudo mandar el aviso al equipo del registro manual ${actualizado.id}:`, err.message);
+    });
+    sincronizarInscripcionTaller(actualizado).catch((err) => {
+      console.error(`[admin] No se pudo sincronizar con Google Sheets el registro manual ${actualizado.id}:`, err.message);
+    });
+  }
+
+  res.status(201).json(actualizado);
+});
+
+function estadoPagoInvalido(estadoPago) {
+  return estadoPago !== undefined && !ESTADOS_PAGO_TALLER.includes(estadoPago);
+}
 
 // ---- Google Sheets ("Inscritos 2026", Fase 4) ----
 // Antes de que el servidor escriba una sola fila solo, hay que ver que

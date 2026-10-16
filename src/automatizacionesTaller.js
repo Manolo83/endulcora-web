@@ -108,7 +108,7 @@ function filaParaSheets({ inscripcion, sesion }) {
     '', // APARTADO — se captura a mano
     inscripcion.montoPagado, // PAGO
     'PAGADO', // ESTATUS
-    'Mercado Pago', // FORMA DE PAGO
+    inscripcion.formaPago || 'Mercado Pago', // FORMA DE PAGO — vacio = fue en linea
   ];
 }
 

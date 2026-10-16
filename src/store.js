@@ -1146,6 +1146,16 @@ async function init() {
       data._migRecordatoriosTaller = true;
       changed = true;
     }
+    // Forma de pago real (Efectivo, Transferencia, Promoción...) para las
+    // inscripciones que se registran a mano en /admin — las que ya
+    // existian se quedan vacias (equivale a "fue por Mercado Pago").
+    if (!data._migFormaPagoTaller) {
+      (data.inscripcionesTaller || []).forEach((i) => {
+        if (i.formaPago === undefined) i.formaPago = '';
+      });
+      data._migFormaPagoTaller = true;
+      changed = true;
+    }
     // Direccion y link de mapa en cada sede (Fase 2: la pagina publica
     // /talleres/<slug> necesita mostrar "sede con mapa").
     if (!data._migDireccionSedes) {
@@ -2276,6 +2286,11 @@ module.exports = {
       estadoPago: 'pendiente',
       pagoId: '',
       vencePendienteEn: null,
+      // Como se cobro de verdad (Efectivo, Transferencia, TDD, Promoción...)
+      // — vacio significa "en linea por Mercado Pago" (lo unico que puede
+      // dejarlo vacio es el checkout del sitio; un registro manual en
+      // /admin siempre trae algo aqui).
+      formaPago: '',
       // Fase 4 (correos automaticos + Google Sheets): cada bandera se marca
       // una sola vez, para no mandar el mismo recordatorio dos veces ni
       // duplicar la fila en "Inscritos 2026" si el servidor se reinicia.
@@ -2307,7 +2322,7 @@ module.exports = {
   // Marca a mano el estado del pago de una inscripcion. Mientras no exista
   // el cobro automatico por Mercado Pago (Fase 3), es como el admin
   // registra que alguien ya pago su anticipo o el total por WhatsApp.
-  actualizarPagoInscripcionTaller(id, { tipoPago, montoPagado, estadoPago, pagoId, vencePendienteEn }) {
+  actualizarPagoInscripcionTaller(id, { tipoPago, montoPagado, estadoPago, pagoId, vencePendienteEn, formaPago }) {
     const data = load();
     const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
     if (!item) return null;
@@ -2316,6 +2331,7 @@ module.exports = {
     if (typeof estadoPago === 'string') item.estadoPago = estadoPago;
     if (typeof pagoId === 'string') item.pagoId = pagoId;
     if (vencePendienteEn !== undefined) item.vencePendienteEn = vencePendienteEn;
+    if (typeof formaPago === 'string') item.formaPago = formaPago;
     const sesion = data.sesionesTaller.find((s) => s.id === item.sesionTallerId);
     item.saldo = sesion && sesion.precioTotal ? Math.max(0, sesion.precioTotal - item.montoPagado) : null;
     save(data);
