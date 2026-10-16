@@ -1111,6 +1111,7 @@ async function init() {
         if (s.precioTotal === undefined) s.precioTotal = 0;
         if (s.anticipo === undefined) s.anticipo = 0;
         if (s.cupoMaximo === undefined) s.cupoMaximo = null;
+        if (s.hojaSheets === undefined) s.hojaSheets = '';
       });
       (data.inscripcionesTaller || []).forEach((i) => {
         if (i.tipoPago === undefined) i.tipoPago = '';
@@ -1121,6 +1122,28 @@ async function init() {
         if (i.vencePendienteEn === undefined) i.vencePendienteEn = null;
       });
       data._migCobroTalleres = true;
+      changed = true;
+    }
+    // Nombre de pestaña de Sheets por taller (Fase 4): vacio = se usa el
+    // titulo tal cual al escribir en "Inscritos 2026".
+    if (!data._migHojaSheetsTaller) {
+      (data.sesionesTaller || []).forEach((s) => {
+        if (s.hojaSheets === undefined) s.hojaSheets = '';
+      });
+      data._migHojaSheetsTaller = true;
+      changed = true;
+    }
+    // Banderas de recordatorio y sincronizacion con Google Sheets (Fase 4):
+    // a las inscripciones que ya existian se les rellenan en "no enviado /
+    // no sincronizado todavia", nunca en true (no hay que inventar que ya
+    // se les mando algo que en realidad nunca salio).
+    if (!data._migRecordatoriosTaller) {
+      (data.inscripcionesTaller || []).forEach((i) => {
+        if (i.recordatorio2diasEnviado === undefined) i.recordatorio2diasEnviado = false;
+        if (i.recordatorioMismoDiaEnviado === undefined) i.recordatorioMismoDiaEnviado = false;
+        if (i.sheetsSincronizado === undefined) i.sheetsSincronizado = false;
+      });
+      data._migRecordatoriosTaller = true;
       changed = true;
     }
     // Direccion y link de mapa en cada sede (Fase 2: la pagina publica
@@ -2135,7 +2158,7 @@ module.exports = {
     if (!item) return null;
     return { ...item, cupoRestante: cupoRestanteTaller(data, item.id) };
   },
-  addSesionTaller({ sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo }) {
+  addSesionTaller({ sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo, hojaSheets }) {
     const data = load();
     const mismaFecha = data.sesionesTaller.filter((s) => s.sedeId === Number(sedeId) && s.fecha === fecha);
     const item = {
@@ -2155,6 +2178,10 @@ module.exports = {
       // null = sin limite configurado todavia (no bloquea inscripciones,
       // para no romper sesiones que se crearon antes de este campo).
       cupoMaximo: cupoMaximo === '' || cupoMaximo == null ? null : Number(cupoMaximo) || 0,
+      // Nombre de la pestaña en el Sheet "Inscritos 2026" (Fase 4). Vacio =
+      // se usa el titulo tal cual; se puede corregir aqui si la pestaña real
+      // se llama distinto (ver docs/google-sheets.md).
+      hojaSheets: String(hojaSheets || '').trim(),
     };
     data.sesionesTaller.push(item);
     save(data);
@@ -2178,6 +2205,7 @@ module.exports = {
     if (typeof patch.descripcion === 'string') item.descripcion = patch.descripcion;
     if (typeof patch.queAprendes === 'string') item.queAprendes = patch.queAprendes;
     if (typeof patch.fotoUrl === 'string') item.fotoUrl = patch.fotoUrl;
+    if (typeof patch.hojaSheets === 'string') item.hojaSheets = patch.hojaSheets.trim();
     if (patch.precioTotal !== undefined) item.precioTotal = Number(patch.precioTotal) || 0;
     if (patch.anticipo !== undefined) item.anticipo = Number(patch.anticipo) || 0;
     if (patch.cupoMaximo !== undefined) {
@@ -2248,6 +2276,12 @@ module.exports = {
       estadoPago: 'pendiente',
       pagoId: '',
       vencePendienteEn: null,
+      // Fase 4 (correos automaticos + Google Sheets): cada bandera se marca
+      // una sola vez, para no mandar el mismo recordatorio dos veces ni
+      // duplicar la fila en "Inscritos 2026" si el servidor se reinicia.
+      recordatorio2diasEnviado: false,
+      recordatorioMismoDiaEnviado: false,
+      sheetsSincronizado: false,
       createdAt: new Date().toISOString(),
     };
     data.inscripcionesTaller.push(item);
@@ -2284,6 +2318,39 @@ module.exports = {
     if (vencePendienteEn !== undefined) item.vencePendienteEn = vencePendienteEn;
     const sesion = data.sesionesTaller.find((s) => s.id === item.sesionTallerId);
     item.saldo = sesion && sesion.precioTotal ? Math.max(0, sesion.precioTotal - item.montoPagado) : null;
+    save(data);
+    return item;
+  },
+  // Inscripciones ya pagadas, con taller en la fecha exacta buscada, a las
+  // que todavia no se les manda ESE recordatorio (2 dias antes o el mismo
+  // dia). Solo a quien ya pago: no tiene sentido recordarle el taller a
+  // alguien que todavia no asegura su lugar.
+  getInscripcionesTallerParaRecordatorio(campoBandera, fechaISO) {
+    const data = load();
+    return data.inscripcionesTaller.filter(
+      (i) => i.estadoPago === 'pagado' && i.fecha === fechaISO && !i[campoBandera]
+    );
+  },
+  marcarRecordatorioTallerEnviado(id, campoBandera) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    item[campoBandera] = true;
+    save(data);
+    return item;
+  },
+  // Inscripciones ya pagadas que todavia no se escriben en el Google Sheet
+  // "Inscritos 2026" (ver src/googleSheets.js) — para el primer envio, o para
+  // reintentar las que fallaron mientras no habia credenciales configuradas.
+  getInscripcionesTallerSinSincronizar() {
+    const data = load();
+    return data.inscripcionesTaller.filter((i) => i.estadoPago === 'pagado' && !i.sheetsSincronizado);
+  },
+  marcarInscripcionTallerSincronizada(id) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    item.sheetsSincronizado = true;
     save(data);
     return item;
   },

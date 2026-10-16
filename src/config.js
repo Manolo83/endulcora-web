@@ -35,6 +35,26 @@ const GOOGLE_ADS = {
   conversionCompraId: String(process.env.GOOGLE_ADS_CONVERSION_COMPRA_ID || '').replace(/\D/g, ''),
 };
 
+// Google Sheets (cuenta de servicio): para que el servidor agregue filas
+// solo, sin que nadie tenga que abrir el navegador. Ver docs/google-sheets.md
+// para crear la cuenta de servicio y compartirle la hoja "Inscritos 2026".
+const GOOGLE_SHEETS = {
+  clientEmail: process.env.GOOGLE_SHEETS_CLIENT_EMAIL || '',
+  // La llave viene de Google con saltos de linea reales dentro de un JSON;
+  // al pegarla como variable de entorno esos saltos casi siempre llegan como
+  // "\n" literal (texto, no salto real) — por eso se reemplazan aqui.
+  privateKey: (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+  spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || '1-hL_6N2ix8J-peu-3GSM7EDhZu5DN8xFJPQP7fBMxJg',
+};
+
+// Correo(s) del equipo de Endulcora que deben enterarse de cada inscripcion
+// nueva a un taller sin tener que estar revisando /admin. Varios correos se
+// separan por coma. Vacia = no se manda ningun aviso (no es un requisito).
+const EQUIPO_NOTIFICACIONES_EMAIL = String(process.env.EQUIPO_NOTIFICACIONES_EMAIL || '')
+  .split(',')
+  .map((e) => e.trim())
+  .filter(Boolean);
+
 module.exports = {
   DATA_DIR,
   UPLOAD_DIR,
@@ -43,4 +63,6 @@ module.exports = {
   META_CAPI_TOKEN,
   META_CAPI_TEST_CODE,
   GOOGLE_ADS,
+  GOOGLE_SHEETS,
+  EQUIPO_NOTIFICACIONES_EMAIL,
 };

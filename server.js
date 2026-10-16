@@ -530,6 +530,13 @@ store.init()
     // sitio: por ahora el solo manda los correos que quiere, a mano. Para
     // reactivarlos, descomentar la siguiente linea.
     // require('./src/automatizaciones').iniciarAutomatizaciones();
+    // Recordatorios de talleres pagados (2 dias antes + el mismo dia) y
+    // sincronizacion con "Inscritos 2026": esta si se pidio activarla (Fase
+    // 4), es independiente del interruptor pausado de arriba. Mientras no
+    // haya credenciales de Google Sheets, esa parte simplemente no hace
+    // nada (ver src/googleSheets.js) — los recordatorios por correo si
+    // corren.
+    require('./src/automatizacionesTaller').iniciarAutomatizacionesTaller();
   })
   .catch((err) => {
     console.error('No se pudo conectar a la base de datos, el servidor no arranco:', err.message);

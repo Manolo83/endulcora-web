@@ -157,6 +157,87 @@ async function enviarCorreoConfirmacionPagoTaller({
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+// Recordatorio automatico de un taller ya pagado: diasFaltan es 2 (dos dias
+// antes) o 0 (el mismo dia) — solo cambia el titulo y el tono de urgencia,
+// el resto del contenido es igual.
+async function enviarCorreoRecordatorioTaller({
+  to, nombre, taller, fecha, horario, sede, direccion, mapaLink, queAprendes,
+  tipoPago, saldo, diasFaltan, numeroWhatsapp,
+}) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const fechaLegible = fecha
+    ? new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : '';
+  const titulo = diasFaltan === 0 ? '¡Tu taller es hoy!' : 'Tu taller es en 2 días';
+  const asunto = diasFaltan === 0
+    ? `¡Hoy es tu taller! · ${taller} · Endulcora`
+    : `Faltan 2 días para tu taller · ${taller} · Endulcora`;
+
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: asunto,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">${escapeHtml(titulo)}, ${escapeHtml(nombre || '')}</h1>
+        <p style="font-size:14px;line-height:1.6;">Este es tu recordatorio para que no se te pase:</p>
+        <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;">
+          <tr><td style="padding:6px 0;color:#9C9C9C;width:110px;">Taller</td><td style="padding:6px 0;font-weight:700;">${escapeHtml(taller || '')}</td></tr>
+          ${fechaLegible ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Fecha</td><td style="padding:6px 0;">${escapeHtml(fechaLegible)}</td></tr>` : ''}
+          ${horario ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Horario</td><td style="padding:6px 0;">${escapeHtml(horario)}</td></tr>` : ''}
+          ${sede ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Sede</td><td style="padding:6px 0;">${escapeHtml(sede)}</td></tr>` : ''}
+          ${direccion ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Dirección</td><td style="padding:6px 0;">${escapeHtml(direccion)}${mapaLink ? ` · <a href="${escapeHtml(mapaLink)}" style="color:#7A2E7E;">Ver mapa</a>` : ''}</td></tr>` : ''}
+        </table>
+        ${tipoPago === 'anticipo' && saldo ? `<p style="margin-top:18px;font-size:13px;line-height:1.6;color:#1B0720;">Recuerda que pagaste solo tu anticipo: el día del taller se paga el saldo de <strong>$${formatoMonto(saldo)} MXN</strong>.</p>` : ''}
+        ${queAprendes ? `<p style="margin-top:14px;font-size:13px;line-height:1.6;color:#1B0720;"><strong>Qué aprenderás:</strong> ${escapeHtml(queAprendes)}</p>` : ''}
+        <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">¿Dudas o algún cambio de último momento? Escríbenos por WhatsApp al <a href="https://wa.me/52${numeroWhatsapp || ''}" style="color:#7A2E7E;">${numeroWhatsapp || ''}</a>.</p>
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
+// Aviso interno al equipo (no al cliente): se manda a EQUIPO_NOTIFICACIONES_EMAIL
+// cada vez que se confirma un pago de taller, para que no tengan que estar
+// revisando /admin para saber quien se inscribio.
+async function enviarAvisoEquipoNuevoTaller({ to, nombre, whatsapp, correo, taller, fecha, horario, sede, tipoPago, montoPagado, saldo }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const fechaLegible = fecha
+    ? new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })
+    : '';
+
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: `Nueva inscripción pagada: ${taller} (${nombre})`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora · Aviso interno</p>
+        <h1 style="font-size:18px;color:#4E1454;">Alguien acaba de pagar un taller</h1>
+        <table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;">
+          <tr><td style="padding:4px 0;color:#9C9C9C;width:110px;">Nombre</td><td style="padding:4px 0;font-weight:700;">${escapeHtml(nombre || '')}</td></tr>
+          <tr><td style="padding:4px 0;color:#9C9C9C;">WhatsApp</td><td style="padding:4px 0;">${escapeHtml(whatsapp || '')}</td></tr>
+          <tr><td style="padding:4px 0;color:#9C9C9C;">Correo</td><td style="padding:4px 0;">${escapeHtml(correo || '')}</td></tr>
+          <tr><td style="padding:4px 0;color:#9C9C9C;">Taller</td><td style="padding:4px 0;">${escapeHtml(taller || '')}</td></tr>
+          ${fechaLegible ? `<tr><td style="padding:4px 0;color:#9C9C9C;">Fecha</td><td style="padding:4px 0;">${escapeHtml(fechaLegible)}${horario ? ` · ${escapeHtml(horario)}` : ''}</td></tr>` : ''}
+          ${sede ? `<tr><td style="padding:4px 0;color:#9C9C9C;">Sede</td><td style="padding:4px 0;">${escapeHtml(sede)}</td></tr>` : ''}
+          <tr><td style="padding:4px 0;color:#9C9C9C;">Pagó</td><td style="padding:4px 0;">$${formatoMonto(montoPagado)} MXN (${tipoPago === 'anticipo' ? 'anticipo' : 'completo'})</td></tr>
+          ${tipoPago === 'anticipo' && saldo ? `<tr><td style="padding:4px 0;color:#9C9C9C;">Saldo</td><td style="padding:4px 0;">$${formatoMonto(saldo)} MXN pendiente</td></tr>` : ''}
+        </table>
+        <p style="margin-top:20px;font-size:12px;color:#9C9C9C;">Este es un aviso automático, no hace falta contestarlo. El detalle completo está en /admin.</p>
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 async function enviarCorreoConfirmacionClaseGratis({ to, nombre, horario, fecha, ubicacion, numeroWhatsapp, linkWhatsappGrupo }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
@@ -393,6 +474,8 @@ module.exports = {
   enviarCorreoConfirmacionCompra,
   enviarCorreoConfirmacionInscripcionTaller,
   enviarCorreoConfirmacionPagoTaller,
+  enviarCorreoRecordatorioTaller,
+  enviarAvisoEquipoNuevoTaller,
   enviarCorreoConfirmacionClaseGratis,
   enviarCorreoRevistaMensual,
   enviarCorreoCampana,

@@ -8,6 +8,7 @@ const { SITE_URL, UPLOAD_DIR } = require('../config');
 const { enviarCorreoConfirmacionCompra, enviarCorreoConfirmacionPagoTaller } = require('../email');
 const { enviarPurchaseCAPI } = require('../metaConversions');
 const { enviarCompraGoogle } = require('../googleAds/conversiones');
+const { avisarEquipoNuevoTaller, sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 
 const router = express.Router();
 
@@ -291,6 +292,20 @@ router.post('/webhook', async (req, res) => {
             estadoPago: 'pagado',
             pagoId: String(info.id),
           });
+          // Aviso interno al equipo (si esta configurado) y, cuando ya
+          // existan las credenciales, la fila en "Inscritos 2026" — ambos
+          // nunca deben tumbar la confirmacion del pago si fallan.
+          if (!yaSeHabiaAprobado) {
+            const inscripcionPagada = store.getInscripcionTaller(item.inscripcionTallerId);
+            if (inscripcionPagada) {
+              avisarEquipoNuevoTaller(inscripcionPagada).catch((err) => {
+                console.error(`[checkout] No se pudo mandar el aviso al equipo del taller (inscripcion ${inscripcionPagada.id}):`, err.message);
+              });
+              sincronizarInscripcionTaller(inscripcionPagada).catch((err) => {
+                console.error(`[checkout] No se pudo sincronizar con Google Sheets la inscripcion ${inscripcionPagada.id}:`, err.message);
+              });
+            }
+          }
         } else {
           store.actualizarPagoInscripcionTaller(item.inscripcionTallerId, { estadoPago: 'cancelado' });
         }

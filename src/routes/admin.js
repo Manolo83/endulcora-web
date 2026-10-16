@@ -14,6 +14,8 @@ const { enviarCorreoRevistaMensual } = require('../email');
 const { procesarCampana } = require('../campanas');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
+const googleSheets = require('../googleSheets');
+const { sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 
 const router = express.Router();
 
@@ -631,6 +633,37 @@ router.patch('/api/inscripciones-taller/:id/pago', requireAdmin, (req, res) => {
   res.json(item);
 });
 
+// ---- Google Sheets ("Inscritos 2026", Fase 4) ----
+// Antes de que el servidor escriba una sola fila solo, hay que ver que
+// columnas tiene de verdad la hoja real (nunca se adivina el orden).
+router.get('/api/google-sheets/estado', requireAdmin, async (req, res) => {
+  if (!googleSheets.configurado()) {
+    return res.json({ configurado: false, faltantes: googleSheets.faltantes() });
+  }
+  try {
+    const hojas = await googleSheets.listarHojas();
+    const hoja = String(req.query.hoja || hojas[0] || '').trim();
+    const encabezados = hoja ? await googleSheets.leerEncabezados(hoja) : [];
+    res.json({ configurado: true, hojas, hoja, encabezados });
+  } catch (e) {
+    res.status(502).json({ configurado: true, error: e.message });
+  }
+});
+
+// Reintenta a mano mandar una inscripcion ya pagada a Google Sheets (ej.
+// despues de configurar las credenciales por primera vez, para las que
+// quedaron pendientes desde antes).
+router.post('/api/inscripciones-taller/:id/sincronizar-sheets', requireAdmin, async (req, res) => {
+  const inscripcion = store.getInscripcionTaller(req.params.id);
+  if (!inscripcion) return res.status(404).json({ error: 'No encontrado' });
+  try {
+    await sincronizarInscripcionTaller(inscripcion);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+
 // ---- Registros del QR de captura (multistream) ----
 router.get('/api/registros-qr', requireAdmin, (req, res) => {
   res.json(store.getRegistrosQr());
@@ -1016,10 +1049,10 @@ router.get('/api/sesiones-taller', requireAdmin, (req, res) => {
 });
 
 router.post('/api/sesiones-taller', requireAdmin, (req, res) => {
-  const { sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo } = req.body || {};
+  const { sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo, hojaSheets } = req.body || {};
   if (!sedeId || !fecha || !titulo) return res.status(400).json({ error: 'Falta sede, fecha o título' });
   if (horario && !HORARIOS_VALIDOS.includes(horario)) return res.status(400).json({ error: 'Ese horario no es válido.' });
-  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo }));
+  res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo, hojaSheets }));
 });
 
 router.patch('/api/sesiones-taller/:id', requireAdmin, (req, res) => {

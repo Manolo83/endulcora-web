@@ -672,6 +672,17 @@
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Google Sheets · "Inscritos 2026"</h3>
+            <p id="sheetsEstadoTexto" class="mt-1 text-sm text-carbon/60">Revisando…</p>
+          </div>
+          <button type="button" id="btnVerColumnasSheets" class="shrink-0 rounded-full border border-vino/20 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Ver columnas</button>
+        </div>
+        <div id="sheetsColumnas" class="mt-3 hidden overflow-x-auto rounded-xl bg-crema/60 p-3 text-xs"></div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <div class="flex flex-wrap items-center justify-between gap-3">
           <select id="calendarioSedeSelect" class="rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm"></select>
           <div class="flex items-center gap-3">
             <button type="button" id="btnMesAnterior" class="grid h-9 w-9 place-items-center rounded-full border border-vino/20 text-vino hover:border-vino transition">‹</button>
@@ -733,6 +744,10 @@
               <label>
                 <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Cupo máximo</span>
                 <input id="sesionCupoMaximo" type="text" inputmode="numeric" placeholder="sin límite" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+              </label>
+              <label class="min-w-[160px] flex-1">
+                <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Pestaña en "Inscritos 2026"</span>
+                <input id="sesionHojaSheets" type="text" placeholder="por defecto, el nombre del taller" class="mt-1 w-full rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
               </label>
             </div>
             <label class="mt-2 block">
@@ -2812,6 +2827,48 @@ $('formBlogPost').addEventListener('submit', async (e) => {
   }
 });
 
+/* ---------- Google Sheets ("Inscritos 2026") ---------- */
+async function cargarEstadoSheets(){
+  try{
+    const data = await api('/admin/api/google-sheets/estado');
+    if(!data.configurado){
+      $('sheetsEstadoTexto').textContent = `Todavía no está configurado. Faltan estas variables de entorno: ${data.faltantes.join(', ')}.`;
+      return;
+    }
+    if(data.error){
+      $('sheetsEstadoTexto').textContent = `Configurado, pero Google respondió con un error: ${data.error}`;
+      return;
+    }
+    $('sheetsEstadoTexto').textContent = `Conectado. Pestañas encontradas: ${data.hojas.join(', ') || '(ninguna)'}.`;
+  }catch(e){
+    $('sheetsEstadoTexto').textContent = 'No se pudo revisar el estado.';
+  }
+}
+$('btnVerColumnasSheets').addEventListener('click', async () => {
+  const cont = $('sheetsColumnas');
+  cont.classList.remove('hidden');
+  cont.textContent = 'Cargando…';
+  try{
+    const data = await api('/admin/api/google-sheets/estado');
+    if(!data.configurado){
+      cont.textContent = `Faltan las credenciales: ${data.faltantes.join(', ')}. Ver docs/google-sheets.md.`;
+      return;
+    }
+    if(data.error){
+      cont.textContent = `Error: ${data.error}`;
+      return;
+    }
+    cont.innerHTML = `
+      <p class="font-600 text-carbon/70">Pestaña revisada: ${escapeHtml(data.hoja || '(ninguna)')}</p>
+      <p class="mt-1 text-carbon/60">Encabezados de la fila 1: ${data.encabezados.length ? data.encabezados.map(escapeHtml).join(' · ') : '(vacía)'}</p>
+      <p class="mt-2 text-[11px] text-carbon/40">Todas las pestañas: ${data.hojas.map(escapeHtml).join(', ')}</p>
+    `;
+  }catch(e){
+    cont.textContent = e.message;
+  }
+});
+cargarEstadoSheets();
+
 /* ---------- Calendario de talleres ---------- */
 let SEDES = [];
 let SESIONES_TALLER = [];
@@ -3000,6 +3057,7 @@ function abrirFormSesion(sesion){
   $('sesionPrecioTotal').value = sesion.precioTotal || '';
   $('sesionAnticipo').value = sesion.anticipo || '';
   $('sesionCupoMaximo').value = sesion.cupoMaximo ?? '';
+  $('sesionHojaSheets').value = sesion.hojaSheets || '';
   $('sesionDescripcion').value = sesion.descripcion || '';
   $('sesionQueAprendes').value = sesion.queAprendes || '';
   $('btnEliminarSesion').classList.toggle('hidden', !sesion.id);
@@ -3088,6 +3146,7 @@ $('formSesionTaller').addEventListener('submit', async (e) => {
     precioTotal: $('sesionPrecioTotal').value,
     anticipo: $('sesionAnticipo').value,
     cupoMaximo: $('sesionCupoMaximo').value,
+    hojaSheets: $('sesionHojaSheets').value.trim(),
     descripcion: $('sesionDescripcion').value.trim(),
     queAprendes: $('sesionQueAprendes').value.trim(),
   };
