@@ -6,7 +6,9 @@ nadie): es un "robot" con su propio correo (algo como
 compartirle los archivos, como si fuera una persona mas. La misma cuenta
 sirve para los dos archivos:
 - **"Inscritos 2026"**: el servidor le AGREGA una fila por cada inscripción
-  a un taller (pagada o no), con nombre, anticipo, saldo y fecha/hora.
+  a un taller (pagada o no), con nombre, cuánto dio de anticipo y la fecha
+  en la que asiste. Nunca pone color ni formato en ninguna celda — eso
+  (ej. marcar en verde a quien ya asistió) lo hace el equipo a mano.
 - **El calendario físico** (el Excel con los bloques por sucursal y semana):
   el servidor lee cada 30 minutos la pestaña **del año en curso** (ej.
   "2026" — se calcula sola con la fecha de hoy, no hay que tocar nada
@@ -69,10 +71,11 @@ NOMBRE | ANTICIPO | DEBE | DIA/HORA | RECONOCIMIENTO | Recetario | MATERIAL
 | MEMBRESIA | BETTERWARE | APARTADO | PAGO | ESTATUS | FORMA DE PAGO
 ```
 
-El servidor solo llena lo que viene del pago en línea (nombre, montos,
-fecha/hora, "PAGADO", "Mercado Pago") y deja vacías las columnas que ahí se
-capturan a mano para venta cruzada (Recetario, MATERIAL, MEMBRESIA,
-BETTERWARE, APARTADO) — nunca inventa un dato que no sale del pago.
+El servidor solo llena NOMBRE, ANTICIPO y DIA/HORA — el resto de la fila,
+incluida DEBE, se deja en blanco a propósito para que el equipo la capture
+a mano (Recetario, MATERIAL, MEMBRESIA, BETTERWARE, APARTADO, PAGO,
+ESTATUS, FORMA DE PAGO, y también DEBE). Nunca pone color ni formato en
+ninguna celda.
 
 ## Antes de dejarlo escribiendo solo
 

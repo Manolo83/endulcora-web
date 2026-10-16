@@ -77,16 +77,22 @@ function fechaCortaSheets(fechaISOStr) {
 // NOMBRE | ANTICIPO | DEBE | DIA/HORA | RECONOCIMIENTO | Recetario | MATERIAL
 // | MEMBRESIA | BETTERWARE | APARTADO | PAGO | ESTATUS | FORMA DE PAGO
 //
-// A peticion del dueño del sitio, el llenado automatico solo toca estas
-// cuatro columnas (NOMBRE, ANTICIPO, DEBE, DIA/HORA) — el resto de la fila
-// (RECONOCIMIENTO, Recetario, MATERIAL, MEMBRESIA, BETTERWARE, APARTADO,
-// PAGO, ESTATUS, FORMA DE PAGO) se deja vacia a proposito: el equipo la
-// llena a mano.
+// A peticion del dueño del sitio, el llenado automatico solo toca TRES
+// columnas: NOMBRE, ANTICIPO (cuanto dio de apartado) y DIA/HORA (la fecha
+// en la que asiste) — el resto de la fila, incluida DEBE, se deja vacia a
+// proposito: el equipo la llena a mano (antes se intento calcular DEBE
+// solo, pero para una inscripcion gratuita sin ningun pago salia "PAGADO"
+// por error, asi que mejor se deja en blanco como las demas).
+//
+// El color de las celdas (ej. verde cuando alguien asiste) lo pone el
+// equipo a mano para su propio control — el servidor nunca manda ningun
+// formato ni color, solo agrega texto plano con la API de valores de
+// Sheets (values.append), que no toca el formato de la fila.
 function filaParaSheets({ inscripcion }) {
   return [
     inscripcion.nombre, // NOMBRE
     inscripcion.montoPagado, // ANTICIPO
-    inscripcion.saldo > 0 ? inscripcion.saldo : 'PAGADO', // DEBE
+    '', // DEBE — se captura a mano
     fechaCortaSheets(inscripcion.fecha), // DIA/HORA
     '', // RECONOCIMIENTO — se captura a mano
     '', // Recetario — se captura a mano
