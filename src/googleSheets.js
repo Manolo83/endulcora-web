@@ -130,17 +130,37 @@ async function crearHoja(hoja, spreadsheetId, encabezados) {
   }
 }
 
-// Agrega una fila al final de la pestaña indicada. valueInputOption=USER_ENTERED
-// para que fechas/numeros se interpreten igual que si alguien los tecleara a
-// mano en la hoja (no como texto crudo). Si la pestaña todavia no existe (un
-// taller nuevo que nunca tuvo inscripciones), se crea sola con los
-// encabezados de "Inscritos 2026" y se reintenta una vez.
+// Agrega una fila al final de la pestaña indicada, calculando a mano en
+// que fila escribir (en vez de usar values:append) — las pestañas reales
+// de un equipo editadas a mano suelen tener huecos (filas en blanco entre
+// bloques de inscritos), y el "pegado inteligente" de values:append sobre
+// un rango abierto (A:Z) a veces confunde esos huecos y escribe la fila
+// nueva recorrida varias columnas a la derecha (ej. el nombre cae en la
+// columna de APARTADO en vez de en NOMBRE). Contar cuantas filas tiene ya
+// la columna A y escribir con values:update exactamente ahi es mas lento
+// (una lectura extra) pero no tiene esa ambiguedad.
+//
+// valueInputOption=USER_ENTERED para que fechas/numeros se interpreten
+// igual que si alguien los tecleara a mano en la hoja (no como texto
+// crudo). Si la pestaña todavia no existe (un taller nuevo que nunca tuvo
+// inscripciones), se crea sola con los encabezados de "Inscritos 2026" y
+// se reintenta una vez.
+function columnaLetra(indiceDesdeCero) {
+  // 0 -> A, 1 -> B ... 25 -> Z (de sobra para las 13 columnas de Inscritos).
+  return String.fromCharCode('A'.charCodeAt(0) + indiceDesdeCero);
+}
+
 async function agregarFila(hoja, valores, spreadsheetId = GOOGLE_SHEETS.spreadsheetId, encabezados = ENCABEZADOS_INSCRITOS) {
-  const rango = `${encodeURIComponent(hoja)}!A:Z`;
-  const intentar = () => llamar(`${spreadsheetId}/values/${rango}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
-    method: 'POST',
-    body: { values: [valores] },
-  });
+  const columnaFinal = columnaLetra(valores.length - 1);
+  const intentar = async () => {
+    const columnaA = await llamar(`${spreadsheetId}/values/${encodeURIComponent(hoja)}!A:A`);
+    const filaDestino = (columnaA.values || []).length + 1;
+    const rangoDestino = `${encodeURIComponent(hoja)}!A${filaDestino}:${columnaFinal}${filaDestino}`;
+    return llamar(`${spreadsheetId}/values/${rangoDestino}?valueInputOption=USER_ENTERED`, {
+      method: 'PUT',
+      body: { values: [valores] },
+    });
+  };
   try {
     return await intentar();
   } catch (e) {
