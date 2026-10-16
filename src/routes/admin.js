@@ -1194,6 +1194,21 @@ router.post('/api/sesiones-taller/invalidas/borrar', requireAdmin, (req, res) =>
   res.json(resultado);
 });
 
+// Vista previa + borrado de un rango de fechas del calendario (para
+// recuperarse de datos mal importados por un bug ya corregido en el lector
+// del calendario fisico) — nunca borra una sesion con alguna inscripcion
+// real ligada, esas se reportan aparte como "protegidas".
+router.get('/api/sesiones-taller/rango', requireAdmin, (req, res) => {
+  const { desde, hasta } = req.query;
+  if (!desde || !hasta) return res.status(400).json({ error: 'Falta desde/hasta (AAAA-MM-DD).' });
+  res.json(store.getResumenRangoSesionesTaller(desde, hasta));
+});
+router.post('/api/sesiones-taller/rango/borrar', requireAdmin, (req, res) => {
+  const { desde, hasta } = req.body || {};
+  if (!desde || !hasta) return res.status(400).json({ error: 'Falta desde/hasta (AAAA-MM-DD).' });
+  res.json(store.borrarSesionesTallerEnRango(desde, hasta));
+});
+
 // Pone el mismo precio/anticipo a TODOS los talleres del calendario de un
 // jalon (sobrescribe los que ya tenian uno distinto, a proposito) — util
 // para arreglar de golpe las sesiones viejas sin precio, que por eso

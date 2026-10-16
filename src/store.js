@@ -2278,6 +2278,37 @@ module.exports = {
     save(data);
     return { borradas: antes - data.sesionesTaller.length };
   },
+  // Vista previa + borrado de un rango de fechas del calendario (para
+  // recuperarse de datos mal importados, ej. el bug de fin de mes ya
+  // corregido en syncCalendarioTalleres.js). NUNCA borra una sesion que ya
+  // tenga alguna inscripcion ligada (pagada o no) — esas quedan
+  // "protegidas" para revisar a mano, por si hay una venta real de por
+  // medio. Pensado para usarse junto con sincronizarCalendarioFisico():
+  // borrar el rango sucio y volver a sincronizar, ya con el lector
+  // corregido, recrea las sesiones limpias solas.
+  getResumenRangoSesionesTaller(desde, hasta) {
+    const data = load();
+    const sedesPorId = new Map(data.sedes.map((s) => [s.id, s]));
+    const conInscripcion = new Set(data.inscripcionesTaller.map((i) => i.sesionTallerId));
+    const enRango = data.sesionesTaller
+      .filter((s) => s.fecha >= desde && s.fecha <= hasta)
+      .map((s) => ({ ...s, sede: (sedesPorId.get(s.sedeId) || {}).nombre || '' }));
+    return {
+      protegidas: enRango.filter((s) => conInscripcion.has(s.id)),
+      borrables: enRango.filter((s) => !conInscripcion.has(s.id)),
+    };
+  },
+  borrarSesionesTallerEnRango(desde, hasta) {
+    const data = load();
+    const conInscripcion = new Set(data.inscripcionesTaller.map((i) => i.sesionTallerId));
+    const antes = data.sesionesTaller.length;
+    data.sesionesTaller = data.sesionesTaller.filter((s) => {
+      const enRango = s.fecha >= desde && s.fecha <= hasta;
+      return !(enRango && !conInscripcion.has(s.id));
+    });
+    save(data);
+    return { borradas: antes - data.sesionesTaller.length };
+  },
   // Da de alta varias sesiones de un jalon: pegadas a mano desde /admin
   // ("Importar calendario de un mes") o leidas solas del calendario fisico
   // en Google Sheets (ver src/syncCalendarioTalleres.js). Si la sede no

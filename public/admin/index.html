@@ -728,6 +728,23 @@
       </div>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Reiniciar un rango de fechas y re-sincronizar</h3>
+        <p class="mt-1 text-sm text-carbon/60">Para cuando un mes completo quedó mal importado (fechas corridas, talleres duplicados en días equivocados). Borra las sesiones del rango que elijas y las vuelve a traer limpias de la hoja — <strong>nunca borra una sesión que ya tenga alguna inscripción real</strong>, esas se protegen y se listan aparte para revisarlas a mano.</p>
+        <div class="mt-3 flex flex-wrap items-end gap-3">
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Desde</span>
+            <input id="rangoDesde" type="date" class="mt-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Hasta</span>
+            <input id="rangoHasta" type="date" class="mt-1 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+          </label>
+          <button type="button" id="btnVistaPreviaRango" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Vista previa</button>
+        </div>
+        <div id="rangoResultado" class="mt-3 hidden"></div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Sincronización automática del calendario físico</h3>
@@ -3075,6 +3092,46 @@ $('btnBuscarInvalidas').addEventListener('click', async () => {
         cargarSedes();
       }catch(e){ toast(e.message); }
     });
+  }catch(e){
+    cont.textContent = e.message;
+  }
+});
+
+/* ---------- Reiniciar un rango de fechas y re-sincronizar ---------- */
+$('btnVistaPreviaRango').addEventListener('click', async () => {
+  const desde = $('rangoDesde').value;
+  const hasta = $('rangoHasta').value;
+  const cont = $('rangoResultado');
+  if(!desde || !hasta){ toast('Elige las dos fechas'); return; }
+  cont.classList.remove('hidden');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Revisando…</p>';
+  try{
+    const data = await api(`/admin/api/sesiones-taller/rango?desde=${desde}&hasta=${hasta}`);
+    const fila = (s) => `<li>${escapeHtml(s.fecha)} · ${escapeHtml(s.sede)} · ${escapeHtml(s.titulo)}</li>`;
+    cont.innerHTML = `
+      <p class="text-sm text-carbon/70">${data.borrables.length} sesión${data.borrables.length === 1 ? '' : 'es'} se pueden borrar y volver a traer limpias.${data.protegidas.length ? ` ${data.protegidas.length} tienen inscripción real y NO se van a tocar.` : ''}</p>
+      ${data.protegidas.length ? `<p class="mt-2 font-600 text-carbon/70">Protegidas (con inscripción, no se borran):</p><ul class="mt-1 max-h-32 overflow-y-auto rounded-xl bg-crema/60 p-3 text-xs space-y-1">${data.protegidas.map(fila).join('')}</ul>` : ''}
+      ${data.borrables.length ? `
+        <p class="mt-3 font-600 text-carbon/70">Se van a borrar y re-sincronizar:</p>
+        <ul class="mt-1 max-h-48 overflow-y-auto rounded-xl bg-crema/60 p-3 text-xs space-y-1">${data.borrables.map(fila).join('')}</ul>
+        <button type="button" id="btnBorrarYSincronizarRango" class="mt-3 rounded-full bg-red-600 px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-white hover:bg-red-700 transition">Borrar estos ${data.borrables.length} y re-sincronizar</button>
+      ` : ''}
+    `;
+    const btn = document.getElementById('btnBorrarYSincronizarRango');
+    if(btn){
+      btn.addEventListener('click', async () => {
+        if(!confirm(`¿Borrar ${data.borrables.length} sesiones entre ${desde} y ${hasta} y volver a traerlas limpias de la hoja? No se puede deshacer.`)) return;
+        cont.innerHTML = '<p class="text-sm text-carbon/50">Borrando…</p>';
+        try{
+          const r1 = await api('/admin/api/sesiones-taller/rango/borrar', { method: 'POST', body: JSON.stringify({ desde, hasta }) });
+          cont.innerHTML = `<p class="text-sm text-carbon/50">${r1.borradas} borradas. Re-sincronizando…</p>`;
+          const r2 = await api('/admin/api/calendario-fisico/sincronizar', { method: 'POST' });
+          cont.innerHTML = `<p class="text-sm text-green-700">Listo: ${r1.borradas} borradas, ${r2.creadas} vueltas a traer limpias.</p>`;
+          toast('Rango reiniciado y re-sincronizado');
+          cargarSedes();
+        }catch(e){ cont.textContent = e.message; }
+      });
+    }
   }catch(e){
     cont.textContent = e.message;
   }
