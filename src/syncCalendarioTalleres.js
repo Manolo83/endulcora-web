@@ -110,19 +110,49 @@ function detectarNumerosDeDia(fila, columnas) {
 
 // A partir de los numeros de dia de una fila (que ya puede traer un cruce
 // de mes, ver detectarNumerosDeDia) arma la fecha completa {dia, mesNumero,
-// anio} de cada columna, avanzando el mes (y el año si hace falta) en
-// cuanto el numero baja respecto al anterior de esa misma fila.
-function construirFechasFila(valores, mesInicial, anioInicial) {
-  let mes = mesInicial;
-  let anio = anioInicial;
-  let anterior = null;
-  return valores.map((dia) => {
-    if (dia === null) return null;
-    if (anterior !== null && dia < anterior) {
-      mes += 1;
-      if (mes > 12) { mes = 1; anio += 1; }
+// anio} de cada columna. Un "bajon" dentro de la fila (ej. ...30,1...)
+// cambia de mes, pero el sentido del cambio depende de si es la PRIMERA
+// fila de dias de la seccion:
+// - Primera fila: la semana puede arrancar con la cola del mes ANTERIOR
+//   (ej. "[OCTUBRE]" pero la fila trae 28,29,30 de septiembre antes del
+//   1 de octubre) — lo de antes del bajon es el mes anterior, lo de
+//   despues es el mes de la seccion.
+// - Cualquier otra fila: es el fin de mes de siempre (ej. 26..31,1) — lo
+//   de antes del bajon es el mes de la seccion, lo de despues es el que
+//   entra.
+// Sin esta distincion, la cola de septiembre se etiquetaba como octubre y
+// el bajon se interpretaba siempre "hacia adelante", corriendo esos dias
+// un mes completo (por eso "Masa Madre" del 1 de octubre aparecia el 1 de
+// noviembre).
+function construirFechasFila(valores, mesSeccion, anioSeccion, esPrimeraFila) {
+  const idxConValor = [];
+  valores.forEach((v, i) => { if (v !== null) idxConValor.push(i); });
+  let idxBajon = -1;
+  for (let k = 1; k < idxConValor.length; k++) {
+    if (valores[idxConValor[k]] < valores[idxConValor[k - 1]]) { idxBajon = idxConValor[k]; break; }
+  }
+
+  function mesAnioPara(i) {
+    if (idxBajon === -1) return { mes: mesSeccion, anio: anioSeccion };
+    if (esPrimeraFila) {
+      if (i < idxBajon) {
+        let mes = mesSeccion - 1;
+        let anio = anioSeccion;
+        if (mes < 1) { mes = 12; anio -= 1; }
+        return { mes, anio };
+      }
+      return { mes: mesSeccion, anio: anioSeccion };
     }
-    anterior = dia;
+    if (i < idxBajon) return { mes: mesSeccion, anio: anioSeccion };
+    let mes = mesSeccion + 1;
+    let anio = anioSeccion;
+    if (mes > 12) { mes = 1; anio += 1; }
+    return { mes, anio };
+  }
+
+  return valores.map((dia, i) => {
+    if (dia === null) return null;
+    const { mes, anio } = mesAnioPara(i);
     return { dia, mesNumero: mes, anio };
   });
 }
@@ -146,6 +176,7 @@ function interpretarCuadricula(filas2D, nombreHoja) {
   let seccionActual = null;
   let columnasDias = null;
   let diasSemanaActual = null;
+  let primeraFilaDeDiasPendiente = false;
   const anioPestana = /^\d{4}$/.test(String(nombreHoja || '').trim()) ? Number(nombreHoja) : null;
 
   (filas2D || []).forEach((fila) => {
@@ -157,6 +188,7 @@ function interpretarCuadricula(filas2D, nombreHoja) {
         seccionActual = { ...seccion, anio: anioPestana || anioParaMes(seccion.mesNumero) };
         columnasDias = null;
         diasSemanaActual = null;
+        primeraFilaDeDiasPendiente = true;
         break;
       }
     }
@@ -172,7 +204,8 @@ function interpretarCuadricula(filas2D, nombreHoja) {
 
     const numeros = detectarNumerosDeDia(fila, columnasDias);
     if (numeros) {
-      diasSemanaActual = construirFechasFila(numeros, seccionActual.mesNumero, seccionActual.anio);
+      diasSemanaActual = construirFechasFila(numeros, seccionActual.mesNumero, seccionActual.anio, primeraFilaDeDiasPendiente);
+      primeraFilaDeDiasPendiente = false;
       return;
     }
     if (!diasSemanaActual) return;
