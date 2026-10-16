@@ -71,44 +71,31 @@ function fechaCortaSheets(fechaISOStr) {
   return `${String(dia).padStart(2, '0')} ${MESES[mes - 1] || ''}`;
 }
 
-// La hoja ya usa horas cortas ("10 am", "04 pm") en vez de los rangos
-// completos del sitio ("10:00 am – 2:00 pm") — se recorta a lo mismo.
-function horaCortaSheets(horario) {
-  const inicio = String(horario || '').split('–')[0].trim(); // "10:00 am"
-  const match = inicio.match(/^(\d{1,2}):00\s*(am|pm)$/i);
-  if (!match) return inicio;
-  return `${String(match[1]).padStart(2, '0')} ${match[2].toLowerCase()}`;
-}
-
 // Fila lista para "Inscritos 2026", en el orden real de la hoja (confirmado
 // con el dueño del sitio sobre la pestaña "Velas comestibles"):
 // NOMBRE | ANTICIPO | DEBE | DIA/HORA | RECONOCIMIENTO | Recetario | MATERIAL
 // | MEMBRESIA | BETTERWARE | APARTADO | PAGO | ESTATUS | FORMA DE PAGO
 //
-// Las columnas que ahi se llenan a mano para venta cruzada (Recetario,
-// MATERIAL, MEMBRESIA, BETTERWARE, APARTADO) se dejan vacias a propósito:
-// nunca se inventa un dato que no viene del pago en linea.
-//
-// ANTICIPO y PAGO llevan el mismo monto (lo que de verdad se recibio por
-// Mercado Pago): en la hoja real esas dos columnas no siempre coinciden
-// (hay filas donde alguien pago completo y aun asi ANTICIPO trae un
-// numero), asi que en vez de adivinar esa diferencia se usa el valor mas
-// seguro y verificable en los dos lados — el monto que realmente entro.
-function filaParaSheets({ inscripcion, sesion }) {
+// A peticion del dueño del sitio, el llenado automatico solo toca estas
+// cuatro columnas (NOMBRE, ANTICIPO, DEBE, DIA/HORA) — el resto de la fila
+// (RECONOCIMIENTO, Recetario, MATERIAL, MEMBRESIA, BETTERWARE, APARTADO,
+// PAGO, ESTATUS, FORMA DE PAGO) se deja vacia a proposito: el equipo la
+// llena a mano.
+function filaParaSheets({ inscripcion }) {
   return [
     inscripcion.nombre, // NOMBRE
     inscripcion.montoPagado, // ANTICIPO
     inscripcion.saldo > 0 ? inscripcion.saldo : 'PAGADO', // DEBE
     fechaCortaSheets(inscripcion.fecha), // DIA/HORA
-    horaCortaSheets(sesion ? sesion.horario : inscripcion.horario), // RECONOCIMIENTO (ahi vive la hora en la hoja real)
+    '', // RECONOCIMIENTO — se captura a mano
     '', // Recetario — se captura a mano
     '', // MATERIAL — se captura a mano
     '', // MEMBRESIA — se captura a mano
     '', // BETTERWARE — se captura a mano
     '', // APARTADO — se captura a mano
-    inscripcion.montoPagado, // PAGO
-    'PAGADO', // ESTATUS
-    inscripcion.formaPago || 'Mercado Pago', // FORMA DE PAGO — vacio = fue en linea
+    '', // PAGO — se captura a mano
+    '', // ESTATUS — se captura a mano
+    '', // FORMA DE PAGO — se captura a mano
   ];
 }
 

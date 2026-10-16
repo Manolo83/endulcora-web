@@ -682,6 +682,28 @@
       </div>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Importar calendario de un mes</h3>
+        <p class="mt-1 text-sm text-carbon/60">Pega una línea por taller: <code>Sede | AAAA-MM-DD | Título | manana o tarde</code>. Si la sede no existe, se crea sola. Si una fila ya existe (misma sede, fecha y título), se salta — puedes pegar la misma lista dos veces sin duplicar nada.</p>
+        <textarea id="importarCalendarioTexto" rows="6" placeholder="Nativitas | 2026-11-05 | Cheesecake | manana" class="mt-3 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 font-mono text-xs"></textarea>
+        <div class="mt-3 flex flex-wrap items-end gap-3">
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Precio total (MXN)</span>
+            <input id="importarPrecioTotal" type="text" inputmode="numeric" value="1149" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Anticipo (MXN)</span>
+            <input id="importarAnticipo" type="text" inputmode="numeric" value="400" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Cupo máximo</span>
+            <input id="importarCupoMaximo" type="text" inputmode="numeric" value="20" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+          </label>
+          <button type="button" id="btnImportarCalendario" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Importar</button>
+        </div>
+        <div id="importarCalendarioResultado" class="mt-3 hidden rounded-xl bg-crema/60 p-3 text-xs"></div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <select id="calendarioSedeSelect" class="rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm"></select>
           <div class="flex items-center gap-3">
@@ -2917,6 +2939,43 @@ $('btnVerColumnasSheets').addEventListener('click', async () => {
   }
 });
 cargarEstadoSheets();
+
+/* ---------- Importar calendario de un mes ---------- */
+$('btnImportarCalendario').addEventListener('click', async () => {
+  const resultado = $('importarCalendarioResultado');
+  const texto = $('importarCalendarioTexto').value;
+  const lineas = texto.split('\n').map(l => l.trim()).filter(Boolean);
+  if(!lineas.length){ toast('Pega al menos una línea'); return; }
+
+  const filas = [];
+  for (const linea of lineas) {
+    const partes = linea.split('|').map(p => p.trim());
+    const [sede, fecha, titulo, horario] = partes;
+    filas.push({ sede, fecha, titulo, horario });
+  }
+
+  resultado.classList.remove('hidden');
+  resultado.textContent = 'Importando…';
+  try{
+    const data = await api('/admin/api/sesiones-taller/importar', {
+      method: 'POST',
+      body: JSON.stringify({
+        filas,
+        precioTotal: $('importarPrecioTotal').value,
+        anticipo: $('importarAnticipo').value,
+        cupoMaximo: $('importarCupoMaximo').value,
+      }),
+    });
+    resultado.innerHTML = `
+      <p class="font-600 text-carbon/70">${data.creadas} taller${data.creadas === 1 ? '' : 'es'} creado${data.creadas === 1 ? '' : 's'}, ${data.saltadas} ya existía${data.saltadas === 1 ? '' : 'n'}.</p>
+      ${data.errores && data.errores.length ? `<p class="mt-2 text-red-600">${data.errores.map(escapeHtml).join('<br>')}</p>` : ''}
+    `;
+    toast('Calendario importado');
+    cargarSedes();
+  }catch(e){
+    resultado.textContent = e.message;
+  }
+});
 
 /* ---------- Calendario de talleres ---------- */
 let SEDES = [];

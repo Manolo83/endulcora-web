@@ -1143,6 +1143,76 @@ router.patch('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
   res.json(item);
 });
 
+// Quita acentos y mayusculas para comparar nombres de sede sin que un
+// "Division" sin acento o con mayusculas distintas cuente como una sede
+// nueva.
+function normalizarNombre(s) {
+  return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+// Carga varias sesiones de un jalon, pegando lineas "Sede | AAAA-MM-DD |
+// Titulo | manana|tarde" (pensado para cargar un mes completo del
+// calendario fisico sin dar de alta cada taller a mano uno por uno). Si la
+// sede no existe todavia, se crea sola. Si ya existe una sesion identica
+// (misma sede + fecha + titulo), se salta — para poder pegar la misma
+// lista dos veces sin duplicar nada.
+router.post('/api/sesiones-taller/importar', requireAdmin, (req, res) => {
+  const { filas, precioTotal, anticipo, cupoMaximo } = req.body || {};
+  if (!Array.isArray(filas) || !filas.length) {
+    return res.status(400).json({ error: 'Manda al menos una fila.' });
+  }
+
+  const sedesExistentes = store.getSedes();
+  const sedesPorNombre = new Map(sedesExistentes.map((s) => [normalizarNombre(s.nombre), s]));
+  const sesionesExistentes = store.getSesionesTaller();
+
+  const creadas = [];
+  const saltadas = [];
+  const errores = [];
+
+  filas.forEach((fila, i) => {
+    const sedeNombre = String(fila.sede || '').trim();
+    const fecha = String(fila.fecha || '').trim();
+    const titulo = String(fila.titulo || '').trim();
+    const horarioPedido = String(fila.horario || '').trim().toLowerCase();
+    const horario = horarioPedido === 'tarde' ? HORARIOS_VALIDOS[1] : HORARIOS_VALIDOS[0];
+
+    if (!sedeNombre || !/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !titulo) {
+      errores.push(`Fila ${i + 1}: falta sede, fecha (AAAA-MM-DD) o título.`);
+      return;
+    }
+
+    let sede = sedesPorNombre.get(normalizarNombre(sedeNombre));
+    if (!sede) {
+      sede = store.addSede(sedeNombre);
+      sedesPorNombre.set(normalizarNombre(sede.nombre), sede);
+    }
+
+    const yaExiste = sesionesExistentes.some(
+      (s) => s.sedeId === sede.id && s.fecha === fecha && normalizarNombre(s.titulo) === normalizarNombre(titulo)
+    );
+    if (yaExiste) {
+      saltadas.push(`${sedeNombre} · ${fecha} · ${titulo} (ya existía)`);
+      return;
+    }
+
+    const nueva = store.addSesionTaller({
+      sedeId: sede.id,
+      fecha,
+      titulo,
+      horario,
+      estado: 'disponible',
+      precioTotal: precioTotal ?? 0,
+      anticipo: anticipo ?? 0,
+      cupoMaximo: cupoMaximo ?? null,
+    });
+    sesionesExistentes.push(nueva);
+    creadas.push(`${sedeNombre} · ${fecha} · ${titulo}`);
+  });
+
+  res.status(201).json({ creadas: creadas.length, saltadas: saltadas.length, detalleCreadas: creadas, detalleSaltadas: saltadas, errores });
+});
+
 router.delete('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
   store.deleteSesionTaller(req.params.id);
   res.json({ ok: true });
