@@ -77,22 +77,32 @@ function fechaCortaSheets(fechaISOStr) {
 // NOMBRE | ANTICIPO | DEBE | DIA/HORA | RECONOCIMIENTO | Recetario | MATERIAL
 // | MEMBRESIA | BETTERWARE | APARTADO | PAGO | ESTATUS | FORMA DE PAGO
 //
-// A peticion del dueño del sitio, el llenado automatico solo toca TRES
-// columnas: NOMBRE, ANTICIPO (cuanto dio de apartado) y DIA/HORA (la fecha
-// en la que asiste) — el resto de la fila, incluida DEBE, se deja vacia a
-// proposito: el equipo la llena a mano (antes se intento calcular DEBE
-// solo, pero para una inscripcion gratuita sin ningun pago salia "PAGADO"
-// por error, asi que mejor se deja en blanco como las demas).
+// A peticion del dueño del sitio, el llenado automatico solo toca CUATRO
+// columnas: NOMBRE, ANTICIPO (cuanto dio de apartado), DEBE (cuanto le
+// falta por pagar) y DIA/HORA (la fecha en la que asiste) — el resto de la
+// fila se deja vacia a proposito, el equipo la llena a mano.
+//
+// DEBE se calcula contra el precio total REAL del taller (precioTotal -
+// montoPagado), nunca contra el campo "saldo" guardado en la inscripcion:
+// ese campo solo se llena cuando pasa un pago de verdad, asi que para una
+// inscripcion gratuita (el formulario corto, sin ningun pago) se quedaba
+// vacio y antes se leia por error como "ya pagado". Calculandolo siempre
+// desde el precio del taller, alguien que no pago nada correctamente debe
+// el precio completo, no "PAGADO".
 //
 // El color de las celdas (ej. verde cuando alguien asiste) lo pone el
 // equipo a mano para su propio control — el servidor nunca manda ningun
 // formato ni color, solo agrega texto plano con la API de valores de
 // Sheets (values.append), que no toca el formato de la fila.
-function filaParaSheets({ inscripcion }) {
+function filaParaSheets({ inscripcion, sesion }) {
+  const precioTotal = sesion ? Number(sesion.precioTotal) || 0 : 0;
+  const montoPagado = Number(inscripcion.montoPagado) || 0;
+  const faltante = Math.max(0, precioTotal - montoPagado);
+  const debe = precioTotal > 0 ? (faltante > 0 ? faltante : 'PAGADO') : '';
   return [
     inscripcion.nombre, // NOMBRE
     inscripcion.montoPagado, // ANTICIPO
-    '', // DEBE — se captura a mano
+    debe, // DEBE
     fechaCortaSheets(inscripcion.fecha), // DIA/HORA
     '', // RECONOCIMIENTO — se captura a mano
     '', // Recetario — se captura a mano

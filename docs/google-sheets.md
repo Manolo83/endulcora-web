@@ -6,9 +6,10 @@ nadie): es un "robot" con su propio correo (algo como
 compartirle los archivos, como si fuera una persona mas. La misma cuenta
 sirve para los dos archivos:
 - **"Inscritos 2026"**: el servidor le AGREGA una fila por cada inscripción
-  a un taller (pagada o no), con nombre, cuánto dio de anticipo y la fecha
-  en la que asiste. Nunca pone color ni formato en ninguna celda — eso
-  (ej. marcar en verde a quien ya asistió) lo hace el equipo a mano.
+  a un taller (pagada o no), con nombre, cuánto dio de anticipo, cuánto le
+  falta por pagar y la fecha en la que asiste. Nunca pone color ni formato
+  en ninguna celda — eso (ej. marcar en verde a quien ya asistió) lo hace
+  el equipo a mano.
 - **El calendario físico** (el Excel con los bloques por sucursal y semana):
   el servidor lee cada 30 minutos la pestaña **del año en curso** (ej.
   "2026" — se calcula sola con la fecha de hoy, no hay que tocar nada
@@ -71,11 +72,16 @@ NOMBRE | ANTICIPO | DEBE | DIA/HORA | RECONOCIMIENTO | Recetario | MATERIAL
 | MEMBRESIA | BETTERWARE | APARTADO | PAGO | ESTATUS | FORMA DE PAGO
 ```
 
-El servidor solo llena NOMBRE, ANTICIPO y DIA/HORA — el resto de la fila,
-incluida DEBE, se deja en blanco a propósito para que el equipo la capture
-a mano (Recetario, MATERIAL, MEMBRESIA, BETTERWARE, APARTADO, PAGO,
-ESTATUS, FORMA DE PAGO, y también DEBE). Nunca pone color ni formato en
-ninguna celda.
+El servidor llena NOMBRE, ANTICIPO, DEBE y DIA/HORA — el resto de la fila
+(Recetario, MATERIAL, MEMBRESIA, BETTERWARE, APARTADO, PAGO, ESTATUS,
+FORMA DE PAGO) se deja en blanco a propósito para que el equipo la
+capture a mano. Nunca pone color ni formato en ninguna celda — eso (ej.
+marcar en verde a quien ya asistió) lo hace el equipo a mano.
+
+DEBE siempre se calcula contra el precio total real del taller (precio -
+lo que ya pagó), nunca queda en "PAGADO" por error solo porque alguien
+dejó sus datos sin pagar nada — en ese caso DEBE muestra el precio
+completo, porque es justo lo que falta por pagar.
 
 ## Antes de dejarlo escribiendo solo
 
