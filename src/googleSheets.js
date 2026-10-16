@@ -106,6 +106,19 @@ async function listarHojas(spreadsheetId = GOOGLE_SHEETS.spreadsheetId) {
   return (data.sheets || []).map((s) => s.properties.title);
 }
 
+// Busca entre las pestañas que YA EXISTEN una que coincida con el nombre
+// calculado sin importar mayusculas/minusculas (ej. el titulo del taller
+// es "Tacos de canasta" pero la pestaña real se llama "TACOS DE CANASTA" o
+// "tacos de canasta") — para no crear una pestaña nueva duplicada solo por
+// una diferencia de mayusculas. Si no encuentra ninguna, regresa el nombre
+// calculado tal cual (agregarFila la crea sola si tampoco existe asi).
+async function resolverNombreHoja(nombreCalculado, spreadsheetId = GOOGLE_SHEETS.spreadsheetId) {
+  const hojas = await listarHojas(spreadsheetId);
+  const normal = (s) => String(s || '').trim().toLowerCase();
+  const encontrada = hojas.find((h) => normal(h) === normal(nombreCalculado));
+  return encontrada || nombreCalculado;
+}
+
 // Encabezados reales de "Inscritos 2026" (ver docs/google-sheets.md) — se
 // usan para crear sola la pestaña de un taller nuevo la primera vez que
 // alguien se inscribe, en vez de fallar silenciosamente porque la pestaña
@@ -186,6 +199,7 @@ module.exports = {
   accessToken,
   leerEncabezados,
   listarHojas,
+  resolverNombreHoja,
   agregarFila,
   leerCuadricula,
   ENCABEZADOS_INSCRITOS,

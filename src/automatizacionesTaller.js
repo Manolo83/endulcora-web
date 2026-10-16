@@ -131,7 +131,13 @@ async function sincronizarInscripcionTaller(inscripcion) {
   // admin no fijo un nombre exacto en hojaSheets, se adivina con esa misma
   // convencion a partir del nombre de la sede.
   const esDivision = sede && /divisi[oó]n/i.test(sede.nombre);
-  const hoja = (sesion && sesion.hojaSheets) || `${inscripcion.taller}${esDivision ? ' div' : ''}`;
+  const hojaCalculada = (sesion && sesion.hojaSheets) || `${inscripcion.taller}${esDivision ? ' div' : ''}`;
+  // El nombre calculado puede no coincidir exactamente en mayusculas con
+  // la pestaña real (ej. "Tacos de canasta div" calculado vs "TACOS DE
+  // CANASTA div" real) — se busca primero entre las pestañas que YA
+  // existen sin importar mayusculas/minusculas, para no crear una pestaña
+  // duplicada solo por eso.
+  const hoja = await googleSheets.resolverNombreHoja(hojaCalculada);
   await googleSheets.agregarFila(hoja, filaParaSheets(completos));
   store.marcarInscripcionTallerSincronizada(inscripcion.id);
 }
