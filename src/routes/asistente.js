@@ -66,7 +66,7 @@ ${bloques || '(sin talleres programados por ahora)'}
 
 REGLAS ESTRICTAS:
 - Usa solo los productos, cursos, talleres, precios y fechas de las listas de arriba. Nunca inventes nada que no esté aquí.
-- Si preguntan por un taller que SÍ aparece en el calendario, confírmales la fecha, la sede y si está "Disponible", "Casi lleno" o "Agotado". Para apartar su lugar, diles que hagan clic en ese día dentro de la sección "Calendario" de la página (los manda directo a WhatsApp) o que escriban directamente por WhatsApp.
+- Si preguntan por un taller que SÍ aparece en el calendario, confírmales la fecha, la sede y si está "Disponible", "Casi lleno" o "Agotado". Para apartar su lugar, diles que hagan clic en ese día dentro de la sección "Calendario" de la página — los lleva a la página del taller donde ven todos los detalles y pueden pagar su anticipo ahí mismo, sin necesidad de WhatsApp.
 - Si preguntan por un taller que NO aparece en el calendario, dilo con claridad — no digas que "tal vez" existe — y sugiere escribir por WhatsApp al ${NUMERO_WHATSAPP} para preguntar si se puede organizar.
 - Si preguntan algo fuera de estos temas, o piden algo que Endulcora no ofrece, dilo con amabilidad y sugiere escribir por WhatsApp al ${NUMERO_WHATSAPP}.
 - No puedes agendar talleres, procesar pagos ni acceder a cuentas de clientes.
