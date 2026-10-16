@@ -405,10 +405,14 @@ async function cargarTaller(){
   const mensajeWhatsapp = `Hola, quiero más información sobre el taller "${t.titulo}"${fechaLegible ? ` del ${fechaLegible}` : ''}.`;
   document.getElementById('tWhatsappSecundario').href = `https://wa.me/52${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensajeWhatsapp)}`;
 
+  const hoyISO = new Date().toISOString().slice(0, 10);
+  const yaPaso = t.fecha && t.fecha < hoyISO;
   const agotado = t.estado === 'agotado' || t.cupoRestante === 0;
-  document.getElementById('formCompraTaller').classList.toggle('hidden', agotado);
-  document.getElementById('bloqueAgotado').classList.toggle('hidden', !agotado);
-  if(precioTotal <= 0 && !agotado){
+  document.getElementById('formCompraTaller').classList.toggle('hidden', agotado || yaPaso);
+  document.getElementById('bloqueAgotado').classList.toggle('hidden', !(agotado || yaPaso));
+  if(yaPaso){
+    document.getElementById('bloqueAgotado').textContent = 'Este taller ya se realizó. Revisa el calendario para ver las próximas fechas.';
+  }else if(precioTotal <= 0 && !agotado){
     document.getElementById('formCompraTaller').classList.add('hidden');
     document.getElementById('bloqueAgotado').classList.remove('hidden');
     document.getElementById('bloqueAgotado').textContent = 'Este taller todavía no tiene precio configurado. Escríbenos por WhatsApp para apartar tu lugar.';

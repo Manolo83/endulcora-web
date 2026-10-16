@@ -96,6 +96,9 @@ router.post('/preference', async (req, res) => {
       }
       const sesion = store.getSesionesTaller().find((s) => s.id === sesionTallerId);
       if (!sesion) return res.status(404).json({ error: 'Ese taller ya no está disponible.' });
+      if (sesion.fecha && sesion.fecha < new Date().toISOString().slice(0, 10)) {
+        return res.status(400).json({ error: 'Ese taller ya se realizó.' });
+      }
       if (sesion.estado === 'agotado' || sesion.cupoRestante === 0) {
         return res.status(400).json({ error: 'Ese taller ya no tiene lugares disponibles.' });
       }

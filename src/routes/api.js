@@ -497,6 +497,9 @@ router.post('/inscripcion-taller', async (req, res) => {
 
   const sesion = store.getSesionesTaller().find((s) => s.id === sesionTallerId);
   if (!sesion) return res.status(400).json({ error: 'Ese taller ya no está disponible en el calendario. Elige otro.' });
+  if (sesion.fecha && sesion.fecha < new Date().toISOString().slice(0, 10)) {
+    return res.status(400).json({ error: 'Ese taller ya se realizó.' });
+  }
   if (sesion.estado === 'agotado') return res.status(400).json({ error: 'Ese taller ya está agotado. Elige otra fecha o sede.' });
   const sedeInfo = store.getSedes().find((s) => s.id === sesion.sedeId);
 
