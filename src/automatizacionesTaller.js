@@ -63,23 +63,52 @@ async function revisarRecordatoriosTaller() {
   }
 }
 
-// Fila lista para "Inscritos 2026". El orden de columnas es un supuesto
-// razonable (no se confirmo contra la hoja real todavia) — se ajusta en
-// cuanto se vean los encabezados reales desde /admin > Google Sheets.
-function filaParaSheets({ inscripcion, sesion, sede }) {
+// "01 agosto" — dia con cero y mes en español, sin año, igual que la hoja real.
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+function fechaCortaSheets(fechaISOStr) {
+  if (!fechaISOStr) return '';
+  const [anio, mes, dia] = fechaISOStr.split('-').map(Number);
+  return `${String(dia).padStart(2, '0')} ${MESES[mes - 1] || ''}`;
+}
+
+// La hoja ya usa horas cortas ("10 am", "04 pm") en vez de los rangos
+// completos del sitio ("10:00 am – 2:00 pm") — se recorta a lo mismo.
+function horaCortaSheets(horario) {
+  const inicio = String(horario || '').split('–')[0].trim(); // "10:00 am"
+  const match = inicio.match(/^(\d{1,2}):00\s*(am|pm)$/i);
+  if (!match) return inicio;
+  return `${String(match[1]).padStart(2, '0')} ${match[2].toLowerCase()}`;
+}
+
+// Fila lista para "Inscritos 2026", en el orden real de la hoja (confirmado
+// con el dueño del sitio sobre la pestaña "Velas comestibles"):
+// NOMBRE | ANTICIPO | DEBE | DIA/HORA | RECONOCIMIENTO | Recetario | MATERIAL
+// | MEMBRESIA | BETTERWARE | APARTADO | PAGO | ESTATUS | FORMA DE PAGO
+//
+// Las columnas que ahi se llenan a mano para venta cruzada (Recetario,
+// MATERIAL, MEMBRESIA, BETTERWARE, APARTADO) se dejan vacias a propósito:
+// nunca se inventa un dato que no viene del pago en linea.
+//
+// ANTICIPO y PAGO llevan el mismo monto (lo que de verdad se recibio por
+// Mercado Pago): en la hoja real esas dos columnas no siempre coinciden
+// (hay filas donde alguien pago completo y aun asi ANTICIPO trae un
+// numero), asi que en vez de adivinar esa diferencia se usa el valor mas
+// seguro y verificable en los dos lados — el monto que realmente entro.
+function filaParaSheets({ inscripcion, sesion }) {
   return [
-    inscripcion.nombre,
-    inscripcion.whatsapp,
-    inscripcion.correo,
-    inscripcion.taller,
-    inscripcion.fecha,
-    inscripcion.horario,
-    sede ? sede.nombre : inscripcion.sede,
-    inscripcion.tipoPago === 'completo' ? 'Completo' : 'Anticipo',
-    inscripcion.montoPagado,
-    inscripcion.saldo ?? '',
-    inscripcion.esDeMexico ? (inscripcion.estado || 'México') : (inscripcion.pais || ''),
-    new Date(inscripcion.createdAt).toLocaleDateString('es-MX'),
+    inscripcion.nombre, // NOMBRE
+    inscripcion.montoPagado, // ANTICIPO
+    inscripcion.saldo > 0 ? inscripcion.saldo : 'PAGADO', // DEBE
+    fechaCortaSheets(inscripcion.fecha), // DIA/HORA
+    horaCortaSheets(sesion ? sesion.horario : inscripcion.horario), // RECONOCIMIENTO (ahi vive la hora en la hoja real)
+    '', // Recetario — se captura a mano
+    '', // MATERIAL — se captura a mano
+    '', // MEMBRESIA — se captura a mano
+    '', // BETTERWARE — se captura a mano
+    '', // APARTADO — se captura a mano
+    inscripcion.montoPagado, // PAGO
+    'PAGADO', // ESTATUS
+    'Mercado Pago', // FORMA DE PAGO
   ];
 }
 
@@ -92,7 +121,13 @@ async function sincronizarInscripcionTaller(inscripcion) {
     throw new Error(`Google Sheets no esta configurado todavia: ${googleSheets.faltantes().join(', ')}.`);
   }
   const completos = datosCompletos(inscripcion);
-  const hoja = (completos.sesion && completos.sesion.hojaSheets) || inscripcion.taller;
+  const { sesion, sede } = completos;
+  // Cada taller vive en su propia pestaña; las de la sede División terminan
+  // en " div" (ej. "Palomitas division", "Especial Pumpkin div"). Si el
+  // admin no fijo un nombre exacto en hojaSheets, se adivina con esa misma
+  // convencion a partir del nombre de la sede.
+  const esDivision = sede && /divisi[oó]n/i.test(sede.nombre);
+  const hoja = (sesion && sesion.hojaSheets) || `${inscripcion.taller}${esDivision ? ' div' : ''}`;
   await googleSheets.agregarFila(hoja, filaParaSheets(completos));
   store.marcarInscripcionTallerSincronizada(inscripcion.id);
 }

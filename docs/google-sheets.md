@@ -35,12 +35,32 @@ compartirle la hoja, como si fuera una persona mas.
 Con eso el servidor ya puede leer y escribir en la hoja sin que nadie tenga
 que abrir el navegador cada vez.
 
+## Las columnas (ya confirmadas contra la hoja real)
+
+Cada taller tiene su propia pestaña (ej. "Velas comestibles" para Nativitas,
+"Palomitas division" para División — las de División terminan en " div", y
+el servidor adivina eso solo a partir del nombre de la sede salvo que se fije
+un nombre distinto en el campo "Pestaña en Inscritos 2026" del taller en
+/admin). El orden de columnas, confirmado con el dueño del sitio:
+
+```
+NOMBRE | ANTICIPO | DEBE | DIA/HORA | RECONOCIMIENTO | Recetario | MATERIAL
+| MEMBRESIA | BETTERWARE | APARTADO | PAGO | ESTATUS | FORMA DE PAGO
+```
+
+El servidor solo llena lo que viene del pago en línea (nombre, montos,
+fecha/hora, "PAGADO", "Mercado Pago") y deja vacías las columnas que ahí se
+capturan a mano para venta cruzada (Recetario, MATERIAL, MEMBRESIA,
+BETTERWARE, APARTADO) — nunca inventa un dato que no sale del pago.
+
 ## Antes de dejarlo escribiendo solo
 
 En **Admin > Calendario de talleres** hay una tarjeta "Google Sheets" con un
 botón **Ver columnas**: muestra las pestañas que existen y los encabezados
-reales de la fila 1. Revísalo antes de confiar en el envío automático — si
-el orden de columnas en `src/automatizacionesTaller.js` (función
+reales de la fila 1 — útil para confirmar que una pestaña nueva (un taller
+que todavía no tiene su hoja) tiene los mismos encabezados antes de
+confiar en el envío automático. Si el orden de columnas en
+`src/automatizacionesTaller.js` (función
 `filaParaSheets`) no coincide con el real, ahí se corrige.
 
 Cada taller del calendario puede tener su propio nombre de pestaña (campo
