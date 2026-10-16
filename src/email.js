@@ -149,8 +149,8 @@ async function enviarCorreoConfirmacionPagoTaller({
           ${tipoPago === 'anticipo' && saldo ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Saldo pendiente</td><td style="padding:6px 0;">$${formatoMonto(saldo)} MXN, se paga el día del taller</td></tr>` : ''}
         </table>
         ${queAprendes ? `<p style="margin-top:18px;font-size:13px;line-height:1.6;color:#1B0720;"><strong>Qué aprenderás:</strong> ${escapeHtml(queAprendes)}</p>` : ''}
-        ${comunidadLink ? `<p style="margin-top:20px;font-size:13px;line-height:1.6;">Únete a la Comunidad Endulcora en WhatsApp para avisos y recordatorios:</p><p style="margin-top:8px;"><a href="${escapeHtml(comunidadLink)}" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Unirme a la comunidad</a></p>` : ''}
-        <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">¿Dudas? Escríbenos por WhatsApp al <a href="https://wa.me/52${numeroWhatsapp || ''}" style="color:#7A2E7E;">${numeroWhatsapp || ''}</a>.</p>
+        <p style="margin-top:24px;"><a href="https://wa.me/52${numeroWhatsapp || ''}?text=${encodeURIComponent(`Hola! Tengo una duda sobre mi lugar en "${taller || ''}"`)}" style="background:#4E1454;color:#FBF4E9;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;display:inline-block;">Escríbenos por WhatsApp</a></p>
+        ${comunidadLink ? `<p style="margin-top:16px;font-size:13px;line-height:1.6;">Únete a la Comunidad Endulcora en WhatsApp para avisos y recordatorios:</p><p style="margin-top:8px;"><a href="${escapeHtml(comunidadLink)}" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Unirme a la comunidad</a></p>` : ''}
       </div>
     `,
   });

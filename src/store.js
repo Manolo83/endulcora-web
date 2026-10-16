@@ -1164,6 +1164,19 @@ async function init() {
       data._migFormaPagoTaller = true;
       changed = true;
     }
+    // Pestaña de Sheets por defecto (titulo + " div" si es Division) para
+    // las sesiones que ya existian con el campo vacio — las importadas a
+    // mano o por la sincronizacion automatica antes de este cambio.
+    if (!data._migHojaSheetsTallerAutoNombre) {
+      const sedesPorId = new Map((data.sedes || []).map((s) => [s.id, s]));
+      (data.sesionesTaller || []).forEach((s) => {
+        if (s.hojaSheets) return;
+        const sede = sedesPorId.get(s.sedeId);
+        s.hojaSheets = `${s.titulo}${esSedeDivision(sede && sede.nombre) ? ' div' : ''}`;
+      });
+      data._migHojaSheetsTallerAutoNombre = true;
+      changed = true;
+    }
     // Direccion y link de mapa en cada sede (Fase 2: la pagina publica
     // /talleres/<slug> necesita mostrar "sede con mapa").
     if (!data._migDireccionSedes) {
@@ -1360,6 +1373,13 @@ const HORARIOS_VALIDOS_TALLER = ['10:00 am – 2:00 pm', '4:00 pm – 8:00 pm'];
 // filtrable: minusculas y sin acentos (ej. "Querétaro" -> "queretaro").
 function slugZona(texto) {
   return String(texto || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+// Las pestañas de "Inscritos 2026" de la sede División del Norte siempre
+// terminan en " div" (ver docs/google-sheets.md) — mismo criterio que usa
+// automatizacionesTaller.js para adivinar la pestaña si no se fijo una.
+function esSedeDivision(nombreSede) {
+  return /divisi[oó]n/i.test(String(nombreSede || ''));
 }
 
 // Slug url-friendly para la pagina publica de cada taller (/talleres/<slug>):
@@ -2183,11 +2203,13 @@ module.exports = {
   addSesionTaller({ sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo, hojaSheets }) {
     const data = load();
     const mismaFecha = data.sesionesTaller.filter((s) => s.sedeId === Number(sedeId) && s.fecha === fecha);
+    const sede = data.sedes.find((s) => s.id === Number(sedeId));
+    const tituloLimpio = String(titulo || '').trim();
     const item = {
       id: nextId(data.sesionesTaller),
       sedeId: Number(sedeId),
       fecha,
-      titulo: String(titulo || '').trim(),
+      titulo: tituloLimpio,
       estado: estado || 'disponible',
       horario: String(horario || '').trim(),
       orden: mismaFecha.length,
@@ -2200,10 +2222,12 @@ module.exports = {
       // null = sin limite configurado todavia (no bloquea inscripciones,
       // para no romper sesiones que se crearon antes de este campo).
       cupoMaximo: cupoMaximo === '' || cupoMaximo == null ? null : Number(cupoMaximo) || 0,
-      // Nombre de la pestaña en el Sheet "Inscritos 2026" (Fase 4). Vacio =
-      // se usa el titulo tal cual; se puede corregir aqui si la pestaña real
-      // se llama distinto (ver docs/google-sheets.md).
-      hojaSheets: String(hojaSheets || '').trim(),
+      // Nombre de la pestaña en el Sheet "Inscritos 2026": por defecto el
+      // titulo del taller (sin el numero del slug, que solo existe para que
+      // la URL sea unica) mas " div" si la sede es Division del Norte — se
+      // puede corregir aqui si la pestaña real se llama distinto (ver
+      // docs/google-sheets.md).
+      hojaSheets: String(hojaSheets || '').trim() || `${tituloLimpio}${esSedeDivision(sede && sede.nombre) ? ' div' : ''}`,
     };
     data.sesionesTaller.push(item);
     save(data);
