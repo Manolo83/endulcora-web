@@ -343,11 +343,10 @@ async function consultarPedido(){
     // si espera el timeout normal, porque suele resolverse en segundos.
     if(pedido.estado === 'pendiente'){
       mostrarEstado('estadoPendientePago');
-      const itemTaller = pedido.items.find(i => i.tipo === 'taller' && i.tallerInfo && i.tallerInfo.vencePendienteEn);
+      const itemTaller = pedido.items.find(i => i.tipo === 'taller' && i.tallerInfo);
       const aviso = document.getElementById('pendienteTallerLugar');
       if(itemTaller){
-        const vence = new Date(itemTaller.tallerInfo.vencePendienteEn);
-        aviso.textContent = `Tu lugar en "${itemTaller.tallerInfo.taller}" queda apartado hasta el ${vence.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} a las ${vence.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}. Si no se confirma el pago antes, se libera automáticamente.`;
+        aviso.textContent = `Tu lugar en "${itemTaller.tallerInfo.taller}" se confirma en cuanto se apruebe tu pago — no está apartado todavía, así que si el cupo se llena antes de que se confirme, puede que ya no haya lugar. Te avisamos por correo en cuanto se confirme.`;
         aviso.classList.remove('hidden');
       }else{
         aviso.classList.add('hidden');

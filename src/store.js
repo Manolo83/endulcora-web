@@ -1409,22 +1409,19 @@ function slugUnicoSesionTaller(data, base, idAIgnorar) {
 }
 
 // Cupo restante de un taller = cupo maximo configurado, menos las
-// inscripciones ya pagadas y las pendientes que todavia no vencen (una
-// pendiente vencida ya libero su lugar). Si no se configuro cupoMaximo
-// (null, talleres de antes de este campo), regresa null = "sin limite
-// todavia", para no bloquear nada hasta que el admin lo configure.
+// inscripciones YA PAGADAS (a peticion del dueño del sitio: un pago nada
+// mas iniciado — "pendiente", ej. alguien que elige OXXO/SPEI y tarda en
+// pagar, o que abandona el checkout a medio camino — ya NO aparta lugar;
+// el cupo solo se ocupa cuando el pago se hace efectivo). Si no se
+// configuro cupoMaximo (null, talleres de antes de este campo), regresa
+// null = "sin limite todavia", para no bloquear nada hasta que el admin lo
+// configure.
 function cupoRestanteTaller(data, sesionTallerId) {
   const sesion = data.sesionesTaller.find((s) => s.id === Number(sesionTallerId));
   if (!sesion || sesion.cupoMaximo === null || sesion.cupoMaximo === undefined) return null;
-  const ahora = Date.now();
-  const ocupados = data.inscripcionesTaller.filter((i) => {
-    if (i.sesionTallerId !== Number(sesionTallerId)) return false;
-    if (i.estadoPago === 'pagado') return true;
-    if (i.estadoPago === 'pendiente') {
-      return !i.vencePendienteEn || new Date(i.vencePendienteEn).getTime() > ahora;
-    }
-    return false;
-  }).length;
+  const ocupados = data.inscripcionesTaller.filter(
+    (i) => i.sesionTallerId === Number(sesionTallerId) && i.estadoPago === 'pagado'
+  ).length;
   return Math.max(0, sesion.cupoMaximo - ocupados);
 }
 

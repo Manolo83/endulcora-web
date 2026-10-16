@@ -97,12 +97,12 @@ async function enviarCorreoConfirmacionInscripcionTaller({ to, nombre, taller, f
   const { error } = await client.emails.send({
     from,
     to,
-    subject: `¡Tu lugar está apartado! · ${taller} · Endulcora`,
+    subject: `Recibimos tu inscripción · ${taller} · Endulcora`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
         <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
         <h1 style="font-size:20px;color:#4E1454;">Gracias por contestar, ${escapeHtml(nombre || '')}</h1>
-        <p style="font-size:14px;line-height:1.6;">Recibimos tu inscripción con éxito. Aquí está el resumen de tu taller:</p>
+        <p style="font-size:14px;line-height:1.6;">Recibimos tu inscripción con éxito. Tu lugar todavía no está apartado — se confirma en cuanto se registra tu anticipo. Aquí está el resumen de tu taller:</p>
         <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;">
           <tr><td style="padding:6px 0;color:#9C9C9C;width:110px;">Taller</td><td style="padding:6px 0;font-weight:700;">${escapeHtml(taller || '')}</td></tr>
           ${fechaLegible ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Fecha</td><td style="padding:6px 0;">${escapeHtml(fechaLegible)}</td></tr>` : ''}
