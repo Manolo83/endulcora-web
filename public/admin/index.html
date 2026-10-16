@@ -3522,7 +3522,12 @@ async function cargarInscripcionesTaller(){
                   <input type="text" inputmode="numeric" class="campoMontoPagadoTaller w-20 rounded-lg border border-vino/15 bg-crema/60 px-2 py-1.5 text-xs" data-id="${i.id}" value="${i.montoPagado || ''}" placeholder="$0">
                 </td>
                 <td class="px-5 py-3 text-xs text-carbon/45">${new Date(i.createdAt).toLocaleDateString('es-MX')}</td>
-                <td class="px-5 py-3 text-right"><button type="button" data-id="${i.id}" class="btnBorrarInscripcionTaller text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button></td>
+                <td class="px-5 py-3 text-right whitespace-nowrap">
+                  ${i.sheetsSincronizado
+                    ? '<span class="mr-3 font-ui text-[10px] uppercase tracking-wider text-green-600">Sheets ✓</span>'
+                    : `<button type="button" data-id="${i.id}" class="btnReintentarSheetsTaller mr-3 font-ui text-[10px] uppercase tracking-wider text-flama hover:underline">Reintentar Sheets</button>`}
+                  <button type="button" data-id="${i.id}" class="btnBorrarInscripcionTaller text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button>
+                </td>
               </tr>`).join('')}
           </tbody>
         </table>
@@ -3547,6 +3552,21 @@ async function cargarInscripcionesTaller(){
     });
     cont.querySelectorAll('.campoMontoPagadoTaller').forEach(el => {
       el.addEventListener('change', () => guardarPagoTaller(el.dataset.id));
+    });
+    cont.querySelectorAll('.btnReintentarSheetsTaller').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.textContent = 'Sincronizando…';
+        try{
+          await api(`/admin/api/inscripciones-taller/${btn.dataset.id}/sincronizar-sheets`, { method: 'POST' });
+          toast('Sincronizado con Sheets');
+          cargarInscripcionesTaller();
+        }catch(e){
+          toast(e.message);
+          btn.disabled = false;
+          btn.textContent = 'Reintentar Sheets';
+        }
+      });
     });
     $('listaInscripcionesTaller').querySelectorAll('.btnBorrarInscripcionTaller').forEach(btn => {
       btn.addEventListener('click', async () => {
