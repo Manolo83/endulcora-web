@@ -2369,19 +2369,24 @@ module.exports = {
     return { creadas, saltadas, errores };
   },
 
-  // Pone el mismo precio/anticipo a TODAS las sesiones del calendario de un
-  // jalon (a peticion del dueño del sitio: todos los talleres cuestan lo
-  // mismo) — util para corregir de golpe las que se crearon sin precio
-  // (ej. capturadas a mano antes de que existiera el campo), que sin precio
-  // mandan al cliente a WhatsApp en vez de dejarlo comprar en la pagina
-  // (ver irAlTaller en public/calendario.html). Sobrescribe tambien las que
-  // ya tenian un precio distinto, a proposito.
-  fijarPrecioYAnticipoTodasLasSesiones({ precioTotal, anticipo }) {
+  // Pone el mismo precio/anticipo/cupo a TODAS las sesiones del calendario
+  // de un jalon (a peticion del dueño del sitio: todos los talleres cuestan
+  // lo mismo y tienen el mismo cupo maximo) — util para corregir de golpe
+  // las que se crearon sin precio (ej. capturadas a mano antes de que
+  // existiera el campo), que sin precio mandan al cliente a WhatsApp en vez
+  // de dejarlo comprar en la pagina (ver irAlTaller en
+  // public/calendario.html). Sobrescribe tambien las que ya tenian un valor
+  // distinto, a proposito. cupoMaximo es opcional (si no se manda, no se
+  // toca ese campo) para no obligar a pasar los tres valores siempre.
+  fijarPrecioYAnticipoTodasLasSesiones({ precioTotal, anticipo, cupoMaximo }) {
     const data = load();
     let actualizadas = 0;
     data.sesionesTaller.forEach((s) => {
       s.precioTotal = Number(precioTotal) || 0;
       s.anticipo = Number(anticipo) || 0;
+      if (cupoMaximo !== undefined && cupoMaximo !== '' && cupoMaximo !== null) {
+        s.cupoMaximo = Number(cupoMaximo) || 0;
+      }
       actualizadas += 1;
     });
     save(data);
