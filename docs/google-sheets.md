@@ -8,12 +8,14 @@ sirve para los dos archivos:
 - **"Inscritos 2026"**: el servidor le AGREGA una fila por cada inscripción
   a un taller (pagada o no), con nombre, anticipo, saldo y fecha/hora.
 - **El calendario físico** (el Excel con los bloques por sucursal y semana):
-  el servidor lee cada 30 minutos la pestaña **"MES ACTUAL"** (solo esa — las
-  pestañas de años pasados, 2021...2026, y las de "Ideas"/"Lista
-  Blanca"/"RESUBIDAS"/"Lista Negra" nunca se leen, para no importar
-  historial viejo como si fuera del año que entra) y da de alta en el sitio
-  los talleres nuevos que encuentra — nunca borra ni modifica uno que ya
-  existe.
+  el servidor lee cada 30 minutos la pestaña **del año en curso** (ej.
+  "2026" — se calcula sola con la fecha de hoy, no hay que tocar nada
+  cuando cambie el año). Las pestañas de años pasados y las de "Ideas",
+  "Lista Blanca", "MES ACTUAL" (sin usar), "RESUBIDAS", "Lista Negra" nunca
+  se leen. Dentro de la pestaña del año, los talleres con fecha ya pasada
+  tampoco se importan (no tiene caso llenar el calendario de cosas viejas
+  cada barrido). Da de alta en el sitio los talleres nuevos que encuentra —
+  nunca borra ni modifica uno que ya existe.
 
 ## Lo que solo tu puedes hacer (una sola vez)
 

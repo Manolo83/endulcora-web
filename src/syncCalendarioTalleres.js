@@ -4,13 +4,18 @@
 // alta en el sitio los talleres nuevos que encuentra — nunca borra ni
 // modifica uno que ya existe (ver store.importarSesionesTaller).
 //
-// El archivo real tiene MUCHAS pestañas: una por año (2021...2026, con
-// historial ya pasado), mas "Ideas", "Lista Blanca", "RESUBIDAS", "Lista
-// Negra" que no son calendarios. Solo la pestaña "MES ACTUAL" (confirmado
-// con el dueño del sitio) se mantiene siempre con lo vigente/por venir —
-// por eso es la UNICA que se lee en automatico. Leer las de años viejos
-// crearia talleres falsos (un mes ya pasado sin año se interpreta como "la
-// proxima vez que caiga ese mes", es decir el año que entra).
+// El archivo real tiene MUCHAS pestañas: una por año (2021, 2022... el año
+// en curso, con historial de años pasados), mas "Ideas", "Lista Blanca",
+// "MES ACTUAL" (sin usar), "RESUBIDAS", "Lista Negra" que no son
+// calendarios vigentes. Confirmado con el dueño del sitio: la pestaña que
+// siempre importa es la del AÑO EN CURSO (ej. "2026"), asi que es la unica
+// que se lee en automatico — se calcula sola segun la fecha de hoy, no hay
+// que tocar el codigo cuando cambie el año.
+//
+// Dentro de esa pestaña tambien hay meses ya pasados de este mismo año
+// (enero, febrero...) — esos se leen igual (el año ya es explicito, el
+// nombre de la pestaña) pero se descartan antes de importar, para no
+// llenar el calendario de talleres que ya pasaron cada vez que sincroniza.
 //
 // Es "mejor esfuerzo" a proposito: la hoja la edita una persona a mano, sin
 // ninguna estructura rigida de columnas, asi que el analisis puede fallar
@@ -21,8 +26,6 @@
 const store = require('./store');
 const googleSheets = require('./googleSheets');
 const { GOOGLE_SHEETS } = require('./config');
-
-const PESTAÑA_VIGENTE = 'MES ACTUAL';
 
 const MESES = {
   enero: 1, febrero: 2, marzo: 3, abril: 4, mayo: 5, junio: 6, julio: 7,
@@ -46,8 +49,11 @@ function resolverNombreSede(nombreCrudo) {
   return ALIAS_SEDE[normalizar(nombreCrudo)] || String(nombreCrudo || '').trim();
 }
 
-// El calendario no trae año: se asume el proximo en que cae ese mes (si ya
-// pasó este año, es del año que entra).
+// El calendario no trae año dentro de cada bloque de mes: se usa el año de
+// la pestaña misma (ej. pestaña "2026" -> todo lo que traiga es del 2026).
+// Si alguna vez se lee una pestaña cuyo nombre no es un año de 4 digitos,
+// se asume el proximo en que cae ese mes (respaldo, no deberia pasar en el
+// flujo automatico ya que leerCalendarioFisico solo pide la del año actual).
 function anioParaMes(mesNumero) {
   const hoy = new Date();
   const mesActual = hoy.getMonth() + 1;
@@ -106,13 +112,15 @@ function extraerHorarioYTitulo(textoCrudo) {
 // Interpreta una pestaña completa (matriz de filas x columnas, como la
 // regresa Google Sheets) y regresa las filas {sede, fecha, titulo, horario}
 // que encontro, mas avisos de lo que no pudo interpretar (para mostrar en
-// /admin, nunca en silencio).
+// /admin, nunca en silencio). `nombreHoja` se usa como año explicito si es
+// de 4 digitos (ej. "2026"); si no, se adivina con anioParaMes.
 function interpretarCuadricula(filas2D, nombreHoja) {
   const encontradas = [];
   const avisos = [];
   let seccionActual = null;
   let columnasDias = null;
   let diasSemanaActual = null;
+  const anioPestana = /^\d{4}$/.test(String(nombreHoja || '').trim()) ? Number(nombreHoja) : null;
 
   (filas2D || []).forEach((fila) => {
     if (!fila || !fila.length) return;
@@ -120,7 +128,7 @@ function interpretarCuadricula(filas2D, nombreHoja) {
     for (const celda of fila) {
       const seccion = extraerSeccion(celda);
       if (seccion) {
-        seccionActual = { ...seccion, anio: anioParaMes(seccion.mesNumero) };
+        seccionActual = { ...seccion, anio: anioPestana || anioParaMes(seccion.mesNumero) };
         columnasDias = null;
         diasSemanaActual = null;
         break;
@@ -161,24 +169,25 @@ function interpretarCuadricula(filas2D, nombreHoja) {
   return { filas: encontradas, avisos };
 }
 
-// Lee SOLO la pestaña "MES ACTUAL" del calendario fisico (ver nota arriba
-// de por que no se leen las demas) y la interpreta.
+// Lee SOLO la pestaña del año en curso (ej. "2026") del calendario fisico
+// (ver nota arriba de por que no se leen las demas) y la interpreta.
 async function leerCalendarioFisico() {
   const spreadsheetId = GOOGLE_SHEETS.calendarioFisicoId;
   const hojas = await googleSheets.listarHojas(spreadsheetId);
   const avisos = [];
-  if (!hojas.includes(PESTAÑA_VIGENTE)) {
-    avisos.push(`No se encontró la pestaña "${PESTAÑA_VIGENTE}" en el calendario físico — no se sincronizó nada.`);
+  const pestana = String(new Date().getFullYear());
+  if (!hojas.includes(pestana)) {
+    avisos.push(`No se encontró la pestaña "${pestana}" (el año en curso) en el calendario físico — no se sincronizó nada.`);
     return { filas: [], avisos, hojas };
   }
   let filas = [];
   try {
-    const cuadricula = await googleSheets.leerCuadricula(PESTAÑA_VIGENTE, spreadsheetId);
-    const resultado = interpretarCuadricula(cuadricula, PESTAÑA_VIGENTE);
+    const cuadricula = await googleSheets.leerCuadricula(pestana, spreadsheetId);
+    const resultado = interpretarCuadricula(cuadricula, pestana);
     filas = resultado.filas;
     avisos.push(...resultado.avisos);
   } catch (e) {
-    avisos.push(`No se pudo leer la pestaña "${PESTAÑA_VIGENTE}": ${e.message}`);
+    avisos.push(`No se pudo leer la pestaña "${pestana}": ${e.message}`);
   }
   return { filas, avisos, hojas };
 }
@@ -186,13 +195,18 @@ async function leerCalendarioFisico() {
 // Lee el calendario fisico y da de alta los talleres nuevos. Nunca truena
 // hacia afuera: regresa { creadas, saltadas, errores, avisos } siempre,
 // incluso si Sheets no esta configurado (en ese caso, con creadas=0).
+// Descarta fechas ya pasadas antes de importar — la pestaña del año trae
+// tambien los meses que ya se dieron, y no tiene caso llenar el calendario
+// con talleres viejos cada vez que corre el barrido de 30 minutos.
 async function sincronizarCalendarioFisico() {
   if (!googleSheets.configurado()) {
     return { creadas: 0, saltadas: 0, errores: [], avisos: [`Google Sheets no esta configurado: ${googleSheets.faltantes().join(', ')}.`] };
   }
   const { filas, avisos } = await leerCalendarioFisico();
+  const hoyISO = new Date().toISOString().slice(0, 10);
+  const filasFuturas = filas.filter((f) => f.fecha >= hoyISO);
   const contenido = store.getContent();
-  const resultado = store.importarSesionesTaller(filas, {
+  const resultado = store.importarSesionesTaller(filasFuturas, {
     precioTotal: contenido.taller_precio_default,
     anticipo: contenido.taller_anticipo_default,
     cupoMaximo: contenido.taller_cupo_default,
