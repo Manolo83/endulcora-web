@@ -6,6 +6,7 @@ const { UPLOAD_DIR, GOOGLE_ADS, SITE_URL } = require('../config');
 const { requireCliente } = require('./auth');
 const { uploadImage, uploadMedia, procesarImagenSubida, ALLOWED_VIDEO } = require('../uploads');
 const { enviarCorreoConfirmacionInscripcionTaller, enviarCorreoConfirmacionClaseGratis } = require('../email');
+const { sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 
 const router = express.Router();
 
@@ -542,6 +543,15 @@ router.post('/inscripcion-taller', async (req, res) => {
     numeroWhatsapp: contenido.whatsapp_numero,
   }).catch((e) => {
     console.error(`[inscripcion-taller] No se pudo mandar el correo de confirmacion a ${item.correo}:`, e.message);
+  });
+
+  // Toda inscripcion (pagada o no) se intenta mandar a "Inscritos 2026" de
+  // inmediato, para que Lex vea ahi lo mismo que ve en /admin casi en el
+  // momento. Si Sheets no esta configurado o falla, no pasa nada grave: el
+  // barrido automatico de cada 30 min (ver automatizacionesTaller.js) la
+  // vuelve a intentar sola, nunca se pierde.
+  sincronizarInscripcionTaller(item).catch((e) => {
+    console.error(`[inscripcion-taller] No se pudo sincronizar con Google Sheets la inscripcion ${item.id}:`, e.message);
   });
 });
 

@@ -130,6 +130,13 @@ router.post('/preference', async (req, res) => {
         aceptaAvisoPrivacidad: linea.aceptaAvisoPrivacidad,
       });
       store.actualizarPagoInscripcionTaller(inscripcion.id, { tipoPago, estadoPago: 'pendiente', vencePendienteEn });
+      // Igual que el formulario gratuito: se intenta mandar a "Inscritos
+      // 2026" desde que se crea, no hasta que se confirme el pago — asi
+      // Lex ve ahi tambien a quien ya empezo a pagar. El barrido de cada
+      // 30 min reintenta si esto falla.
+      sincronizarInscripcionTaller(store.getInscripcionTaller(inscripcion.id)).catch((err) => {
+        console.error(`[checkout] No se pudo sincronizar con Google Sheets la inscripcion ${inscripcion.id}:`, err.message);
+      });
       resueltos.push({
         tipo: 'taller',
         itemId: sesion.id,

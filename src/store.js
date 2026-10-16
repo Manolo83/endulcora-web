@@ -2355,12 +2355,16 @@ module.exports = {
     save(data);
     return item;
   },
-  // Inscripciones ya pagadas que todavia no se escriben en el Google Sheet
-  // "Inscritos 2026" (ver src/googleSheets.js) — para el primer envio, o para
-  // reintentar las que fallaron mientras no habia credenciales configuradas.
+  // Inscripciones (pagadas o no) que todavia no se escriben en el Google
+  // Sheet "Inscritos 2026" (ver src/googleSheets.js) — TODO registro entra
+  // aqui, no solo los ya pagados: asi Lex puede ver en la hoja a todo el
+  // que se registro, igual que antes cuando ella lo capturaba a mano, y
+  // comparar contra el estado real del pago segun la columna DEBE. Tambien
+  // sirve para reintentar las que fallaron mientras no habia credenciales
+  // configuradas.
   getInscripcionesTallerSinSincronizar() {
     const data = load();
-    return data.inscripcionesTaller.filter((i) => i.estadoPago === 'pagado' && !i.sheetsSincronizado);
+    return data.inscripcionesTaller.filter((i) => !i.sheetsSincronizado);
   },
   marcarInscripcionTallerSincronizada(id) {
     const data = load();
