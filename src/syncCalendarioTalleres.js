@@ -4,6 +4,14 @@
 // alta en el sitio los talleres nuevos que encuentra — nunca borra ni
 // modifica uno que ya existe (ver store.importarSesionesTaller).
 //
+// El archivo real tiene MUCHAS pestañas: una por año (2021...2026, con
+// historial ya pasado), mas "Ideas", "Lista Blanca", "RESUBIDAS", "Lista
+// Negra" que no son calendarios. Solo la pestaña "MES ACTUAL" (confirmado
+// con el dueño del sitio) se mantiene siempre con lo vigente/por venir —
+// por eso es la UNICA que se lee en automatico. Leer las de años viejos
+// crearia talleres falsos (un mes ya pasado sin año se interpreta como "la
+// proxima vez que caiga ese mes", es decir el año que entra).
+//
 // Es "mejor esfuerzo" a proposito: la hoja la edita una persona a mano, sin
 // ninguna estructura rigida de columnas, asi que el analisis puede fallar
 // si cambia mucho el formato. Por eso nunca se arriesga a borrar nada —
@@ -13,6 +21,8 @@
 const store = require('./store');
 const googleSheets = require('./googleSheets');
 const { GOOGLE_SHEETS } = require('./config');
+
+const PESTAÑA_VIGENTE = 'MES ACTUAL';
 
 const MESES = {
   enero: 1, febrero: 2, marzo: 3, abril: 4, mayo: 5, junio: 6, julio: 7,
@@ -151,21 +161,24 @@ function interpretarCuadricula(filas2D, nombreHoja) {
   return { filas: encontradas, avisos };
 }
 
-// Lee TODAS las pestañas del calendario fisico y las interpreta.
+// Lee SOLO la pestaña "MES ACTUAL" del calendario fisico (ver nota arriba
+// de por que no se leen las demas) y la interpreta.
 async function leerCalendarioFisico() {
   const spreadsheetId = GOOGLE_SHEETS.calendarioFisicoId;
   const hojas = await googleSheets.listarHojas(spreadsheetId);
-  const filas = [];
   const avisos = [];
-  for (const hoja of hojas) {
-    try {
-      const cuadricula = await googleSheets.leerCuadricula(hoja, spreadsheetId);
-      const resultado = interpretarCuadricula(cuadricula, hoja);
-      filas.push(...resultado.filas);
-      avisos.push(...resultado.avisos);
-    } catch (e) {
-      avisos.push(`No se pudo leer la pestaña "${hoja}": ${e.message}`);
-    }
+  if (!hojas.includes(PESTAÑA_VIGENTE)) {
+    avisos.push(`No se encontró la pestaña "${PESTAÑA_VIGENTE}" en el calendario físico — no se sincronizó nada.`);
+    return { filas: [], avisos, hojas };
+  }
+  let filas = [];
+  try {
+    const cuadricula = await googleSheets.leerCuadricula(PESTAÑA_VIGENTE, spreadsheetId);
+    const resultado = interpretarCuadricula(cuadricula, PESTAÑA_VIGENTE);
+    filas = resultado.filas;
+    avisos.push(...resultado.avisos);
+  } catch (e) {
+    avisos.push(`No se pudo leer la pestaña "${PESTAÑA_VIGENTE}": ${e.message}`);
   }
   return { filas, avisos, hojas };
 }
