@@ -87,7 +87,12 @@ function detectarColumnasDias(fila) {
 }
 
 // Una fila "de semana" trae el numero del dia en algunas de las 7 columnas
-// de dias, de izquierda a derecha sin bajar (lunes <= martes <= ... etc).
+// de dias, de izquierda a derecha sin bajar (lunes <= martes <= ... etc) —
+// salvo que la semana cruce de un mes a otro (ej. 26,27,28,29,30,31,1), que
+// es la UNICA bajada que se acepta: del 25 en adelante a un numero del 1 al
+// 7. Sin esto, esa fila de fin de mes no se reconocia como fila de dias y
+// sus celdas se leian como si fueran nombres de talleres (de ahi salian
+// talleres fantasma con un numero suelto como titulo, ej. "26", "27"...).
 function detectarNumerosDeDia(fila, columnas) {
   const valores = columnas.map((idx) => {
     const v = String((fila || [])[idx] || '').trim();
@@ -96,9 +101,30 @@ function detectarNumerosDeDia(fila, columnas) {
   const conValor = valores.filter((v) => v !== null);
   if (!conValor.length || conValor.some((v) => v < 1 || v > 31)) return null;
   for (let i = 1; i < conValor.length; i++) {
-    if (conValor[i] < conValor[i - 1]) return null; // no es una fila de dias reales
+    if (conValor[i] < conValor[i - 1] && !(conValor[i - 1] >= 25 && conValor[i] <= 7)) {
+      return null; // no es una fila de dias reales
+    }
   }
   return valores;
+}
+
+// A partir de los numeros de dia de una fila (que ya puede traer un cruce
+// de mes, ver detectarNumerosDeDia) arma la fecha completa {dia, mesNumero,
+// anio} de cada columna, avanzando el mes (y el año si hace falta) en
+// cuanto el numero baja respecto al anterior de esa misma fila.
+function construirFechasFila(valores, mesInicial, anioInicial) {
+  let mes = mesInicial;
+  let anio = anioInicial;
+  let anterior = null;
+  return valores.map((dia) => {
+    if (dia === null) return null;
+    if (anterior !== null && dia < anterior) {
+      mes += 1;
+      if (mes > 12) { mes = 1; anio += 1; }
+    }
+    anterior = dia;
+    return { dia, mesNumero: mes, anio };
+  });
 }
 
 // "Tablas Charcutería 4pm" -> { titulo: 'Tablas Charcutería', horario: 'tarde' }
@@ -146,19 +172,19 @@ function interpretarCuadricula(filas2D, nombreHoja) {
 
     const numeros = detectarNumerosDeDia(fila, columnasDias);
     if (numeros) {
-      diasSemanaActual = numeros;
+      diasSemanaActual = construirFechasFila(numeros, seccionActual.mesNumero, seccionActual.anio);
       return;
     }
     if (!diasSemanaActual) return;
 
     columnasDias.forEach((idxCol, posDia) => {
-      const diaNumero = diasSemanaActual[posDia];
-      if (!diaNumero) return;
+      const info = diasSemanaActual[posDia];
+      if (!info) return;
       const crudo = fila[idxCol];
       if (!crudo || !String(crudo).trim()) return;
       const { titulo, horario } = extraerHorarioYTitulo(crudo);
       if (!titulo) return;
-      const fecha = `${seccionActual.anio}-${String(seccionActual.mesNumero).padStart(2, '0')}-${String(diaNumero).padStart(2, '0')}`;
+      const fecha = `${info.anio}-${String(info.mesNumero).padStart(2, '0')}-${String(info.dia).padStart(2, '0')}`;
       encontradas.push({ sede: seccionActual.sede, fecha, titulo, horario });
     });
   });

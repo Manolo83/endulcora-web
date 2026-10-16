@@ -1182,6 +1182,18 @@ router.post('/api/sesiones-taller/importar', requireAdmin, (req, res) => {
   res.status(201).json({ creadas: creadas.length, saltadas: saltadas.length, detalleCreadas: creadas, detalleSaltadas: saltadas, errores });
 });
 
+// Talleres "fantasma" (titulo que es solo un numero) que dejo un bug ya
+// corregido del lector del calendario fisico — se listan antes para poder
+// revisarlos, y se borran aparte solo con confirmacion explicita.
+router.get('/api/sesiones-taller/invalidas', requireAdmin, (req, res) => {
+  res.json(store.getSesionesTallerConTituloInvalido());
+});
+router.post('/api/sesiones-taller/invalidas/borrar', requireAdmin, (req, res) => {
+  const invalidas = store.getSesionesTallerConTituloInvalido();
+  const resultado = store.borrarSesionesTallerPorId(invalidas.map((s) => s.id));
+  res.json(resultado);
+});
+
 // Pone el mismo precio/anticipo a TODOS los talleres del calendario de un
 // jalon (sobrescribe los que ya tenian uno distinto, a proposito) — util
 // para arreglar de golpe las sesiones viejas sin precio, que por eso

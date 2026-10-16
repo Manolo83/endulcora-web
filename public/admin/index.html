@@ -721,6 +721,13 @@
       </div>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Talleres fantasma (título que es solo un número)</h3>
+        <p class="mt-1 text-sm text-carbon/60">Huella de un bug ya corregido: al leer el calendario físico, las semanas que cruzan de un mes a otro podían crear talleres falsos con el número del día como título (ej. "26", "27"). Revisa la lista antes de borrar.</p>
+        <button type="button" id="btnBuscarInvalidas" class="mt-3 rounded-full border border-vino/20 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Buscar talleres fantasma</button>
+        <div id="invalidasResultado" class="mt-3 hidden"></div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Sincronización automática del calendario físico</h3>
@@ -3038,6 +3045,38 @@ $('btnFijarPrecioTodos').addEventListener('click', async () => {
     cargarSedes();
   }catch(e){
     resultado.textContent = e.message;
+  }
+});
+
+/* ---------- Talleres fantasma (titulo que es solo un numero) ---------- */
+$('btnBuscarInvalidas').addEventListener('click', async () => {
+  const cont = $('invalidasResultado');
+  cont.classList.remove('hidden');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Buscando…</p>';
+  try{
+    const lista = await api('/admin/api/sesiones-taller/invalidas');
+    if(!lista.length){
+      cont.innerHTML = '<p class="text-sm text-green-700">No se encontró ningún taller fantasma. 🎉</p>';
+      return;
+    }
+    cont.innerHTML = `
+      <p class="text-sm text-carbon/70">Se encontraron ${lista.length} taller${lista.length === 1 ? '' : 'es'} fantasma:</p>
+      <ul class="mt-2 max-h-48 overflow-y-auto rounded-xl bg-crema/60 p-3 text-xs space-y-1">
+        ${lista.map(s => `<li>${escapeHtml(s.fecha)} · título "${escapeHtml(s.titulo)}"</li>`).join('')}
+      </ul>
+      <button type="button" id="btnBorrarInvalidas" class="mt-3 rounded-full bg-red-600 px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-white hover:bg-red-700 transition">Borrar estos ${lista.length} talleres</button>
+    `;
+    $('btnBorrarInvalidas').addEventListener('click', async () => {
+      if(!confirm(`¿Borrar estos ${lista.length} talleres fantasma? No se puede deshacer.`)) return;
+      try{
+        const data = await api('/admin/api/sesiones-taller/invalidas/borrar', { method: 'POST' });
+        toast(`${data.borradas} talleres fantasma borrados`);
+        cont.innerHTML = '<p class="text-sm text-green-700">Listo, ya no quedan talleres fantasma.</p>';
+        cargarSedes();
+      }catch(e){ toast(e.message); }
+    });
+  }catch(e){
+    cont.textContent = e.message;
   }
 });
 

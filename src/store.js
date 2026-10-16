@@ -2262,6 +2262,22 @@ module.exports = {
     data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== Number(id));
     save(data);
   },
+  // Talleres "fantasma": titulo que es solo un numero de 1 o 2 digitos — la
+  // huella de un bug ya corregido en el lector del calendario fisico (una
+  // fila de numeros de dia de fin de mes, ej. "26,27,28,29,30,31,1", se leia
+  // mal como nombres de taller). Se exponen aparte (sin borrar solos) para
+  // que se puedan revisar antes de borrarlos de verdad.
+  getSesionesTallerConTituloInvalido() {
+    return this.getSesionesTaller().filter((s) => /^\d{1,2}$/.test(String(s.titulo || '').trim()));
+  },
+  borrarSesionesTallerPorId(ids) {
+    const idsNum = new Set((ids || []).map(Number));
+    const data = load();
+    const antes = data.sesionesTaller.length;
+    data.sesionesTaller = data.sesionesTaller.filter((s) => !idsNum.has(s.id));
+    save(data);
+    return { borradas: antes - data.sesionesTaller.length };
+  },
   // Da de alta varias sesiones de un jalon: pegadas a mano desde /admin
   // ("Importar calendario de un mes") o leidas solas del calendario fisico
   // en Google Sheets (ver src/syncCalendarioTalleres.js). Si la sede no
