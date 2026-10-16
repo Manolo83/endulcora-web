@@ -1182,6 +1182,18 @@ router.post('/api/sesiones-taller/importar', requireAdmin, (req, res) => {
   res.status(201).json({ creadas: creadas.length, saltadas: saltadas.length, detalleCreadas: creadas, detalleSaltadas: saltadas, errores });
 });
 
+// Pone el mismo precio/anticipo a TODOS los talleres del calendario de un
+// jalon (sobrescribe los que ya tenian uno distinto, a proposito) — util
+// para arreglar de golpe las sesiones viejas sin precio, que por eso
+// mandaban a WhatsApp en vez de dejar comprar en la pagina.
+router.post('/api/sesiones-taller/fijar-precio-default', requireAdmin, (req, res) => {
+  const contenido = store.getContent();
+  const precioTotal = req.body && req.body.precioTotal !== undefined ? req.body.precioTotal : contenido.taller_precio_default;
+  const anticipo = req.body && req.body.anticipo !== undefined ? req.body.anticipo : contenido.taller_anticipo_default;
+  const resultado = store.fijarPrecioYAnticipoTodasLasSesiones({ precioTotal, anticipo });
+  res.json(resultado);
+});
+
 router.delete('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
   store.deleteSesionTaller(req.params.id);
   res.json({ ok: true });

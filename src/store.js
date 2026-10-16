@@ -2322,6 +2322,25 @@ module.exports = {
     return { creadas, saltadas, errores };
   },
 
+  // Pone el mismo precio/anticipo a TODAS las sesiones del calendario de un
+  // jalon (a peticion del dueño del sitio: todos los talleres cuestan lo
+  // mismo) — util para corregir de golpe las que se crearon sin precio
+  // (ej. capturadas a mano antes de que existiera el campo), que sin precio
+  // mandan al cliente a WhatsApp en vez de dejarlo comprar en la pagina
+  // (ver irAlTaller en public/calendario.html). Sobrescribe tambien las que
+  // ya tenian un precio distinto, a proposito.
+  fijarPrecioYAnticipoTodasLasSesiones({ precioTotal, anticipo }) {
+    const data = load();
+    let actualizadas = 0;
+    data.sesionesTaller.forEach((s) => {
+      s.precioTotal = Number(precioTotal) || 0;
+      s.anticipo = Number(anticipo) || 0;
+      actualizadas += 1;
+    });
+    save(data);
+    return { actualizadas };
+  },
+
   // ---- Inscripciones a talleres (formulario publico) ----
   // Ligadas siempre a una sesion real del calendario (sesionTallerId): asi
   // taller/fecha/sede/horario nunca los escribe la persona a mano (se toman
