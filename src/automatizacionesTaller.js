@@ -116,6 +116,16 @@ function filaParaSheets({ inscripcion, sesion }) {
   ];
 }
 
+// Cada taller vive en su propia pestaña; las de la sede División terminan
+// en " div" (ej. "Palomitas division", "Especial Pumpkin div"). Si el admin
+// no fijo un nombre exacto en hojaSheets, se adivina con esa misma
+// convencion a partir del nombre de la sede. Se usa tanto al sincronizar
+// como para la herramienta de "verificar pestañas" en /admin.
+function hojaCalculadaPara({ taller, sesion, sede }) {
+  const esDivision = sede && /divisi[oó]n/i.test(sede.nombre);
+  return (sesion && sesion.hojaSheets) || `${taller}${esDivision ? ' div' : ''}`;
+}
+
 // Manda UNA inscripcion a Sheets (la usan tanto el barrido automatico como
 // el boton de "reintentar" en /admin). Tira el error tal cual para que quien
 // la llamo decida que hacer (el barrido solo lo registra y lo vuelve a
@@ -125,13 +135,7 @@ async function sincronizarInscripcionTaller(inscripcion) {
     throw new Error(`Google Sheets no esta configurado todavia: ${googleSheets.faltantes().join(', ')}.`);
   }
   const completos = datosCompletos(inscripcion);
-  const { sesion, sede } = completos;
-  // Cada taller vive en su propia pestaña; las de la sede División terminan
-  // en " div" (ej. "Palomitas division", "Especial Pumpkin div"). Si el
-  // admin no fijo un nombre exacto en hojaSheets, se adivina con esa misma
-  // convencion a partir del nombre de la sede.
-  const esDivision = sede && /divisi[oó]n/i.test(sede.nombre);
-  const hojaCalculada = (sesion && sesion.hojaSheets) || `${inscripcion.taller}${esDivision ? ' div' : ''}`;
+  const hojaCalculada = hojaCalculadaPara({ taller: inscripcion.taller, ...completos });
   // El nombre calculado puede no coincidir exactamente en mayusculas con
   // la pestaña real (ej. "Tacos de canasta div" calculado vs "TACOS DE
   // CANASTA div" real) — se busca primero entre las pestañas que YA
@@ -202,4 +206,5 @@ module.exports = {
   revisarAutomatizacionesTaller,
   sincronizarInscripcionTaller,
   avisarEquipoNuevoTaller,
+  hojaCalculadaPara,
 };

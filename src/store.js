@@ -2393,6 +2393,24 @@ module.exports = {
     return { actualizadas };
   },
 
+  // Fija a mano el nombre real de la pestaña de Sheets para TODAS las
+  // sesiones de un taller+sede (presente y futuro) de un jalon — para
+  // cuando el nombre que el sistema calcularia (titulo + " div") no
+  // coincide con como el equipo nombro la pestaña de verdad (ver
+  // GET /admin/api/sesiones-taller/verificar-pestanas).
+  fijarHojaSheetsPorTituloYSede(titulo, sedeId, hojaSheets) {
+    const data = load();
+    let actualizadas = 0;
+    data.sesionesTaller.forEach((s) => {
+      if (s.titulo === titulo && s.sedeId === Number(sedeId)) {
+        s.hojaSheets = String(hojaSheets || '').trim();
+        actualizadas += 1;
+      }
+    });
+    save(data);
+    return { actualizadas };
+  },
+
   // ---- Inscripciones a talleres (formulario publico) ----
   // Ligadas siempre a una sesion real del calendario (sesionTallerId): asi
   // taller/fecha/sede/horario nunca los escribe la persona a mano (se toman

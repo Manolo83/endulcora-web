@@ -725,6 +725,13 @@
       </div>
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <h3 class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Verificar pestañas de Sheets</h3>
+        <p class="mt-1 text-sm text-carbon/60">Revisa, taller por taller, si el nombre que el sistema calcularía ("título" o "título div" para División) coincide con una pestaña real de "Inscritos 2026". Si no coincide, una venta real puede crear una pestaña nueva duplicada en vez de usar la que ya usa el equipo — corrígelo aquí mismo.</p>
+        <button type="button" id="btnVerificarPestanas" class="mt-3 rounded-full border border-vino/20 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Verificar pestañas</button>
+        <div id="verificarPestanasResultado" class="mt-3 hidden"></div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <h3 class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Talleres fantasma (título que es solo un número)</h3>
         <p class="mt-1 text-sm text-carbon/60">Huella de un bug ya corregido: al leer el calendario físico, las semanas que cruzan de un mes a otro podían crear talleres falsos con el número del día como título (ej. "26", "27"). Revisa la lista antes de borrar.</p>
         <button type="button" id="btnBuscarInvalidas" class="mt-3 rounded-full border border-vino/20 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Buscar talleres fantasma</button>
@@ -3067,6 +3074,55 @@ $('btnFijarPrecioTodos').addEventListener('click', async () => {
     cargarSedes();
   }catch(e){
     resultado.textContent = e.message;
+  }
+});
+
+/* ---------- Verificar pestañas de Sheets ---------- */
+$('btnVerificarPestanas').addEventListener('click', async () => {
+  const cont = $('verificarPestanasResultado');
+  cont.classList.remove('hidden');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Revisando…</p>';
+  try{
+    const data = await api('/admin/api/sesiones-taller/verificar-pestanas');
+    const faltantes = data.resultado.filter(g => !g.encontrada);
+    const encontradas = data.resultado.filter(g => g.encontrada);
+    if(!faltantes.length){
+      cont.innerHTML = `<p class="text-sm text-green-700">Todos los talleres futuros (${encontradas.length}) coinciden con una pestaña real. 🎉</p>`;
+      return;
+    }
+    cont.innerHTML = `
+      <p class="text-sm text-carbon/70">${faltantes.length} taller${faltantes.length === 1 ? '' : 'es'} sin pestaña que coincida (${encontradas.length} sí coinciden bien):</p>
+      <div class="mt-2 space-y-3">
+        ${faltantes.map((g, i) => `
+          <div class="rounded-xl bg-crema/60 p-3 text-xs" data-grupo="${i}">
+            <p class="font-600 text-carbon/80">${escapeHtml(g.titulo)} · ${escapeHtml(g.sede)}</p>
+            <p class="mt-1 text-carbon/50">Fechas: ${g.fechas.map(escapeHtml).join(', ')}</p>
+            <p class="mt-1 text-carbon/50">El sistema buscaría la pestaña: <code>${escapeHtml(g.hoja)}</code> (no existe así)</p>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <input type="text" placeholder="Nombre real de la pestaña" class="campoHojaReal rounded-lg border border-vino/15 bg-white px-2 py-1.5 text-xs" style="min-width:220px">
+              <button type="button" class="btnGuardarHojaReal rounded-full bg-vino px-4 py-1.5 font-ui text-[10px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    cont.querySelectorAll('[data-grupo]').forEach((div, i) => {
+      const g = faltantes[i];
+      div.querySelector('.btnGuardarHojaReal').addEventListener('click', async () => {
+        const hojaSheets = div.querySelector('.campoHojaReal').value.trim();
+        if(!hojaSheets){ toast('Escribe el nombre real de la pestaña'); return; }
+        try{
+          const r = await api('/admin/api/sesiones-taller/fijar-hoja-sheets', {
+            method: 'POST',
+            body: JSON.stringify({ titulo: g.titulo, sedeId: g.sedeId, hojaSheets }),
+          });
+          toast(`${r.actualizadas} sesiones actualizadas`);
+          div.innerHTML = `<p class="text-green-700">✓ Corregido: ahora usa "${escapeHtml(hojaSheets)}"</p>`;
+        }catch(e){ toast(e.message); }
+      });
+    });
+  }catch(e){
+    cont.textContent = e.message;
   }
 });
 
