@@ -88,6 +88,11 @@ Cada taller del calendario puede tener su propio nombre de pestaña (campo
 "Pestaña en Inscritos 2026" al editarlo en /admin); si se deja vacío, se usa
 el nombre del taller tal cual.
 
+Si la pestaña de un taller todavía no existe en "Inscritos 2026" (un taller
+recién creado, sin ninguna inscripción todavía), el servidor la crea sola
+con los encabezados de arriba en cuanto llega la primera inscripción — no
+hay que crearla a mano de antemano.
+
 ## Qué pasa mientras no esté configurado
 
 Nada se rompe: el aviso al equipo y el correo de confirmación siguen

@@ -106,15 +106,48 @@ async function listarHojas(spreadsheetId = GOOGLE_SHEETS.spreadsheetId) {
   return (data.sheets || []).map((s) => s.properties.title);
 }
 
+// Encabezados reales de "Inscritos 2026" (ver docs/google-sheets.md) — se
+// usan para crear sola la pestaña de un taller nuevo la primera vez que
+// alguien se inscribe, en vez de fallar silenciosamente porque la pestaña
+// todavia no existe (el equipo ya no tiene que acordarse de crearla a mano
+// cada vez que se da de alta un taller).
+const ENCABEZADOS_INSCRITOS = [
+  'NOMBRE', 'ANTICIPO', 'DEBE', 'DIA/HORA', 'RECONOCIMIENTO', 'Recetario',
+  'MATERIAL', 'MEMBRESIA', 'BETTERWARE', 'APARTADO', 'PAGO', 'ESTATUS', 'FORMA DE PAGO',
+];
+
+async function crearHoja(hoja, spreadsheetId, encabezados) {
+  await llamar(`${spreadsheetId}:batchUpdate`, {
+    method: 'POST',
+    body: { requests: [{ addSheet: { properties: { title: hoja } } }] },
+  });
+  if (encabezados && encabezados.length) {
+    const rango = `${encodeURIComponent(hoja)}!A1`;
+    await llamar(`${spreadsheetId}/values/${rango}?valueInputOption=USER_ENTERED`, {
+      method: 'PUT',
+      body: { values: [encabezados] },
+    });
+  }
+}
+
 // Agrega una fila al final de la pestaña indicada. valueInputOption=USER_ENTERED
 // para que fechas/numeros se interpreten igual que si alguien los tecleara a
-// mano en la hoja (no como texto crudo).
-async function agregarFila(hoja, valores, spreadsheetId = GOOGLE_SHEETS.spreadsheetId) {
+// mano en la hoja (no como texto crudo). Si la pestaña todavia no existe (un
+// taller nuevo que nunca tuvo inscripciones), se crea sola con los
+// encabezados de "Inscritos 2026" y se reintenta una vez.
+async function agregarFila(hoja, valores, spreadsheetId = GOOGLE_SHEETS.spreadsheetId, encabezados = ENCABEZADOS_INSCRITOS) {
   const rango = `${encodeURIComponent(hoja)}!A:Z`;
-  return llamar(`${spreadsheetId}/values/${rango}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
+  const intentar = () => llamar(`${spreadsheetId}/values/${rango}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
     method: 'POST',
     body: { values: [valores] },
   });
+  try {
+    return await intentar();
+  } catch (e) {
+    if (!/unable to parse range/i.test(e.message)) throw e;
+    await crearHoja(hoja, spreadsheetId, encabezados);
+    return intentar();
+  }
 }
 
 // Lee todas las celdas (como texto formateado, igual que se ve en pantalla)
@@ -135,4 +168,5 @@ module.exports = {
   listarHojas,
   agregarFila,
   leerCuadricula,
+  ENCABEZADOS_INSCRITOS,
 };
