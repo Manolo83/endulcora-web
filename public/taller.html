@@ -431,10 +431,15 @@ document.getElementById('formCompraTaller').addEventListener('submit', async (e)
     return;
   }
 
+  const precioTotal = parseFloat(String(TALLER.precioTotal || 0).replace(/,/g,'')) || 0;
+  const anticipo = parseFloat(String(TALLER.anticipo || 0).replace(/,/g,'')) || 0;
+  const valorElegido = tipoPago === 'completo' ? precioTotal : anticipo;
+
   if(typeof fbq === 'function'){
     fbq('track', 'InitiateCheckout', {
       content_ids: [String(TALLER.id)],
       content_type: 'product',
+      value: valorElegido,
       currency: 'MXN',
     });
   }
@@ -465,6 +470,17 @@ document.getElementById('formCompraTaller').addEventListener('submit', async (e)
     if(!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago.');
     btn.disabled = false;
     spinner.classList.add('hidden');
+    // AddPaymentInfo: el momento justo en que se le entrega a Mercado Pago
+    // para que capture el pago (no antes, para no contar a quien solo
+    // intento y el formulario le marco un error).
+    if(typeof fbq === 'function'){
+      fbq('track', 'AddPaymentInfo', {
+        content_ids: [String(TALLER.id)],
+        content_type: 'product',
+        value: valorElegido,
+        currency: 'MXN',
+      });
+    }
     abrirCheckoutVentana(data.url);
   }catch(e2){
     err.textContent = e2.message;
