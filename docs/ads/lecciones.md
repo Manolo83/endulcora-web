@@ -99,3 +99,43 @@ Tuve que rehacer el creative (son inmutables).
 
 REGLA: renderizar primero, escribir el copy despues. El arte tiene datos
 que las notas no tienen.
+
+## 11. El radio de 12 km era la causa raiz (16 oct)
+
+Manolo insistio: "esto funciono de diciembre a mayo" y "siento que ya no se
+le esta entregando el anuncio a la gente". Tenia razon en lo segundo y yo
+llevaba dias analizando la cosa equivocada.
+
+Serie mensual de la cuenta:
+
+| Mes | Gasto | Alcance | Impresiones | CPM | CTR |
+|---|---|---|---|---|---|
+| ene 2026 | $50,548 | 655,135 | 1,845,332 | $27.39 | 3.29% |
+| feb 2026 | $44,214 | 283,658 | 1,270,993 | $34.79 | 3.52% |
+| may 2026 | $44,011 | 166,276 | 799,136 | $55.07 | 3.30% |
+| oct 2026 | ~$41,000 | ~230,000 | ~576,000 | $70.99 | 4.74% |
+
+Tres hechos:
+1. El CTR de hoy (4.74%) es el MEJOR del año. Los anuncios no son el problema.
+2. El CPM se multiplico por 2.6 desde enero.
+3. El alcance cayo 57% de enero a febrero y nunca volvio.
+
+Mi primera hipotesis fue que el alcance de enero venia de campañas
+nacionales de ebooks. Manolo la tumbo en una linea: en enero no habia
+ebooks, solo talleres, y una sola sucursal.
+
+Eso deja una sola explicacion posible: EL RADIO ERA MUCHO MAS ANCHO. Un
+circulo de 12 km no puede alcanzar 655,000 personas al mes a frecuencia
+2.8. No caben.
+
+Accion (16 oct): los 12 conjuntos de talleres pasaron de radio 12 km a
+25 km (de 452 km2 a 1,963 km2), se les quito la exclusion de clientes
+propios, y a tres se les quito un Lookalike 1% de solo 1,000 personas que
+los estaba estrangulando ($48 por conversacion, los mas caros de la cuenta).
+
+REGLA: cuando el CTR esta sano y las conversaciones caen, el problema no
+es el anuncio — es a cuanta gente se le entrega. Mirar alcance, CPM e
+impresiones ANTES de tocar creatividades o presupuestos.
+
+REGLA 2: comparar siempre contra el historico de la cuenta, no solo contra
+la semana pasada. La semana pasada tambien estaba rota.
