@@ -1,25 +1,38 @@
-# Google Sheets: la fila en "Inscritos 2026" se escribe sola
+# Google Sheets: "Inscritos 2026" y el calendario físico se leen/escriben solos
 
 El servidor usa una **cuenta de servicio** (no tu cuenta de Google ni la de
 nadie): es un "robot" con su propio correo (algo como
 `endulcora-sheets@tu-proyecto.iam.gserviceaccount.com`) al que solo hay que
-compartirle la hoja, como si fuera una persona mas.
+compartirle los archivos, como si fuera una persona mas. La misma cuenta
+sirve para los dos archivos:
+- **"Inscritos 2026"**: el servidor le AGREGA una fila por cada inscripción
+  a un taller (pagada o no), con nombre, anticipo, saldo y fecha/hora.
+- **El calendario físico** (el Excel con los bloques por sucursal y semana):
+  el servidor lo LEE cada 30 minutos y da de alta en el sitio los talleres
+  nuevos que encuentra — nunca borra ni modifica uno que ya existe.
 
 ## Lo que solo tu puedes hacer (una sola vez)
 
 1. **Crea el proyecto y la cuenta de servicio** en
-   <https://console.cloud.google.com/>:
+   <https://console.cloud.google.com/> (si Google te pide activar la
+   verificación en dos pasos de tu cuenta primero, hazlo ahí mismo):
    - Crea un proyecto (o usa el mismo de Google Ads si ya tienes uno).
    - APIs y servicios > Biblioteca > busca **Google Sheets API** > Habilitar.
+     Repite la búsqueda con **Google Drive API** > Habilitar (hace falta
+     para leer el archivo del calendario).
    - IAM y administracion > Cuentas de servicio > **Crear cuenta de
      servicio**. Dale un nombre (ej. "endulcora-sheets"), no necesita ningun
-     rol de IAM del proyecto (no toca nada fuera de la hoja que le compartas).
+     rol de IAM del proyecto (no toca nada fuera de los archivos que le
+     compartas).
    - Entra a la cuenta de servicio creada > pestaña **Claves** > **Agregar
      clave > Crear clave nueva > JSON**. Se descarga un archivo `.json`.
 
-2. **Comparte la hoja "Inscritos 2026"** con el correo de esa cuenta de
-   servicio (el campo `client_email` del JSON), como colaborador con permiso
-   de **Editor** — igual que compartirla con una persona mas.
+2. **Comparte los DOS archivos** con el correo de esa cuenta de servicio (el
+   campo `client_email` del JSON), como colaborador con permiso de
+   **Editor** — igual que compartirlos con una persona mas:
+   - La hoja **"Inscritos 2026"**.
+   - El Excel del **calendario físico** (el de los bloques NATIVITAS/DIVISIÓN
+     por semana).
 
 3. **Copia dos datos del JSON descargado** a las variables de entorno del
    servidor (Railway > Variables):
@@ -28,9 +41,11 @@ compartirle la hoja, como si fuera una persona mas.
      `-----BEGIN PRIVATE KEY-----`). Pégalo completo, con los `\n` tal cual
      vienen en el JSON — el servidor los convierte solo a saltos de linea
      reales.
-   - `GOOGLE_SHEETS_SPREADSHEET_ID` (opcional): el ID de la hoja, que es la
-     parte de la URL entre `/d/` y `/edit`. Si no la pones, usa por defecto
-     la de "Inscritos 2026" (`1-hL_6N2ix8J-peu-3GSM7EDhZu5DN8xFJPQP7fBMxJg`).
+   - `GOOGLE_SHEETS_SPREADSHEET_ID` (opcional): el ID de "Inscritos 2026",
+     que es la parte de la URL entre `/d/` y `/edit`. Si no la pones, usa el
+     que ya tiene por defecto.
+   - `GOOGLE_SHEETS_CALENDARIO_ID` (opcional): el ID del Excel del
+     calendario físico, misma idea. También tiene un valor por defecto.
 
 Con eso el servidor ya puede leer y escribir en la hoja sin que nadie tenga
 que abrir el navegador cada vez.

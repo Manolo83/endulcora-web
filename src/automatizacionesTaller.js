@@ -8,6 +8,7 @@
 const store = require('./store');
 const email = require('./email');
 const googleSheets = require('./googleSheets');
+const { sincronizarCalendarioFisico } = require('./syncCalendarioTalleres');
 const { EQUIPO_NOTIFICACIONES_EMAIL } = require('./config');
 
 const INTERVALO_MS = 30 * 60 * 1000; // cada 30 minutos es de sobra para avisos de dias
@@ -158,6 +159,10 @@ async function revisarAutomatizacionesTaller() {
   try {
     await revisarRecordatoriosTaller();
     await revisarSincronizacionSheets();
+    const calendario = await sincronizarCalendarioFisico();
+    if (calendario.creadas > 0 || calendario.errores.length || calendario.avisos.length) {
+      console.log(`[talleres] Calendario fisico: ${calendario.creadas} nuevos, ${calendario.saltadas} ya existian.`, calendario.errores, calendario.avisos);
+    }
   } catch (e) {
     console.error('[talleres] Error revisando automatizaciones:', e.message);
   } finally {

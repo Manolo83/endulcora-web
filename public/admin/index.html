@@ -705,6 +705,32 @@
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino/70">Sincronización automática del calendario físico</h3>
+            <p id="calendarioSyncEstadoTexto" class="mt-1 text-sm text-carbon/60">Revisando…</p>
+          </div>
+          <button type="button" id="btnSincronizarCalendarioAhora" class="shrink-0 rounded-full border border-vino/20 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Sincronizar ahora</button>
+        </div>
+        <p class="mt-2 text-xs text-carbon/45">Lee el Excel de Drive (el de los bloques por sucursal y semana) cada 30 minutos y da de alta solo los talleres nuevos que encuentra — nunca borra ni modifica uno que ya existe. Necesita que el archivo esté compartido con la misma cuenta de servicio que "Inscritos 2026" (ver docs/google-sheets.md).</p>
+        <div class="mt-3 flex flex-wrap items-end gap-3">
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Precio total por defecto (MXN)</span>
+            <input data-content-key="taller_precio_default" class="campoDefaultTaller mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm" type="text" inputmode="numeric">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Anticipo por defecto (MXN)</span>
+            <input data-content-key="taller_anticipo_default" class="campoDefaultTaller mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm" type="text" inputmode="numeric">
+          </label>
+          <label>
+            <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Cupo máximo por defecto</span>
+            <input data-content-key="taller_cupo_default" class="campoDefaultTaller mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm" type="text" inputmode="numeric">
+          </label>
+        </div>
+        <div id="calendarioSyncResultado" class="mt-3 hidden rounded-xl bg-crema/60 p-3 text-xs"></div>
+      </div>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <div class="flex flex-wrap items-center justify-between gap-3">
           <select id="calendarioSedeSelect" class="rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm"></select>
           <div class="flex items-center gap-3">
             <button type="button" id="btnMesAnterior" class="grid h-9 w-9 place-items-center rounded-full border border-vino/20 text-vino hover:border-vino transition">‹</button>
@@ -2976,6 +3002,49 @@ $('btnImportarCalendario').addEventListener('click', async () => {
     resultado.textContent = e.message;
   }
 });
+
+/* ---------- Sincronización automática del calendario físico ---------- */
+document.querySelectorAll('.campoDefaultTaller').forEach(input => {
+  input.addEventListener('blur', async () => {
+    try{ await api('/admin/api/content', { method: 'PATCH', body: JSON.stringify({ [input.dataset.contentKey]: input.value.trim() }) }); }
+    catch(e){ toast(e.message); }
+  });
+});
+
+async function cargarEstadoSyncCalendario(){
+  try{
+    const data = await api('/admin/api/calendario-fisico/estado');
+    if(!data.configurado){
+      $('calendarioSyncEstadoTexto').textContent = `Todavía no está configurado. Faltan: ${data.faltantes.join(', ')}.`;
+      return;
+    }
+    if(data.error){
+      $('calendarioSyncEstadoTexto').textContent = `Configurado, pero hubo un error al leer el archivo: ${data.error}`;
+      return;
+    }
+    $('calendarioSyncEstadoTexto').textContent = `Conectado. Pestañas encontradas: ${data.hojas.join(', ') || '(ninguna)'}.`;
+  }catch(e){
+    $('calendarioSyncEstadoTexto').textContent = 'No se pudo revisar el estado.';
+  }
+}
+$('btnSincronizarCalendarioAhora').addEventListener('click', async () => {
+  const resultado = $('calendarioSyncResultado');
+  resultado.classList.remove('hidden');
+  resultado.textContent = 'Sincronizando…';
+  try{
+    const data = await api('/admin/api/calendario-fisico/sincronizar', { method: 'POST' });
+    resultado.innerHTML = `
+      <p class="font-600 text-carbon/70">${data.creadas} taller${data.creadas === 1 ? '' : 'es'} nuevo${data.creadas === 1 ? '' : 's'}, ${data.saltadas} ya existía${data.saltadas === 1 ? '' : 'n'}.</p>
+      ${data.avisos && data.avisos.length ? `<p class="mt-2 text-carbon/50">${data.avisos.map(escapeHtml).join('<br>')}</p>` : ''}
+      ${data.errores && data.errores.length ? `<p class="mt-2 text-red-600">${data.errores.map(escapeHtml).join('<br>')}</p>` : ''}
+    `;
+    toast('Calendario sincronizado');
+    cargarSedes();
+  }catch(e){
+    resultado.textContent = e.message;
+  }
+});
+cargarEstadoSyncCalendario();
 
 /* ---------- Calendario de talleres ---------- */
 let SEDES = [];

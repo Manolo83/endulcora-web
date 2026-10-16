@@ -8,7 +8,7 @@ const sharp = require('sharp');
 const ExcelJS = require('exceljs');
 const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
-const { UPLOAD_DIR, SITE_URL } = require('../config');
+const { UPLOAD_DIR, SITE_URL, GOOGLE_SHEETS } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
 const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller } = require('../email');
 const { procesarCampana } = require('../campanas');
@@ -16,6 +16,7 @@ const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = requir
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
 const googleSheets = require('../googleSheets');
 const { sincronizarInscripcionTaller, avisarEquipoNuevoTaller } = require('../automatizacionesTaller');
+const { sincronizarCalendarioFisico } = require('../syncCalendarioTalleres');
 
 const router = express.Router();
 
@@ -743,6 +744,28 @@ router.post('/api/inscripciones-taller/:id/sincronizar-sheets', requireAdmin, as
   }
 });
 
+// ---- Calendario fisico de talleres (sincronizacion automatica) ----
+router.get('/api/calendario-fisico/estado', requireAdmin, async (req, res) => {
+  if (!googleSheets.configurado()) {
+    return res.json({ configurado: false, faltantes: googleSheets.faltantes() });
+  }
+  try {
+    const hojas = await googleSheets.listarHojas(GOOGLE_SHEETS.calendarioFisicoId);
+    res.json({ configurado: true, hojas });
+  } catch (e) {
+    res.status(502).json({ configurado: true, error: e.message });
+  }
+});
+
+router.post('/api/calendario-fisico/sincronizar', requireAdmin, async (req, res) => {
+  try {
+    const resultado = await sincronizarCalendarioFisico();
+    res.json(resultado);
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+
 // ---- Registros del QR de captura (multistream) ----
 router.get('/api/registros-qr', requireAdmin, (req, res) => {
   res.json(store.getRegistrosQr());
@@ -1121,7 +1144,7 @@ router.delete('/api/sedes/:id/imagen', requireAdmin, (req, res) => {
 // Los talleres de Endulcora solo corren en dos bloques fijos: no se acepta
 // cualquier texto libre de horario, para que el formulario publico siempre
 // pueda mostrar un horario real y consistente.
-const HORARIOS_VALIDOS = ['10:00 am – 2:00 pm', '4:00 pm – 8:00 pm'];
+const HORARIOS_VALIDOS = store.HORARIOS_VALIDOS_TALLER;
 
 router.get('/api/sesiones-taller', requireAdmin, (req, res) => {
   res.json(store.getSesionesTaller(req.query.sedeId));
@@ -1143,73 +1166,19 @@ router.patch('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
   res.json(item);
 });
 
-// Quita acentos y mayusculas para comparar nombres de sede sin que un
-// "Division" sin acento o con mayusculas distintas cuente como una sede
-// nueva.
-function normalizarNombre(s) {
-  return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-}
-
 // Carga varias sesiones de un jalon, pegando lineas "Sede | AAAA-MM-DD |
 // Titulo | manana|tarde" (pensado para cargar un mes completo del
-// calendario fisico sin dar de alta cada taller a mano uno por uno). Si la
-// sede no existe todavia, se crea sola. Si ya existe una sesion identica
-// (misma sede + fecha + titulo), se salta — para poder pegar la misma
-// lista dos veces sin duplicar nada.
+// calendario fisico sin dar de alta cada taller a mano uno por uno). La
+// logica real vive en store.importarSesionesTaller — la misma que usa la
+// sincronizacion automatica desde Google Sheets (ver
+// src/syncCalendarioTalleres.js), para que pegar a mano o sincronizar solo
+// se comporten identico.
 router.post('/api/sesiones-taller/importar', requireAdmin, (req, res) => {
   const { filas, precioTotal, anticipo, cupoMaximo } = req.body || {};
   if (!Array.isArray(filas) || !filas.length) {
     return res.status(400).json({ error: 'Manda al menos una fila.' });
   }
-
-  const sedesExistentes = store.getSedes();
-  const sedesPorNombre = new Map(sedesExistentes.map((s) => [normalizarNombre(s.nombre), s]));
-  const sesionesExistentes = store.getSesionesTaller();
-
-  const creadas = [];
-  const saltadas = [];
-  const errores = [];
-
-  filas.forEach((fila, i) => {
-    const sedeNombre = String(fila.sede || '').trim();
-    const fecha = String(fila.fecha || '').trim();
-    const titulo = String(fila.titulo || '').trim();
-    const horarioPedido = String(fila.horario || '').trim().toLowerCase();
-    const horario = horarioPedido === 'tarde' ? HORARIOS_VALIDOS[1] : HORARIOS_VALIDOS[0];
-
-    if (!sedeNombre || !/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !titulo) {
-      errores.push(`Fila ${i + 1}: falta sede, fecha (AAAA-MM-DD) o título.`);
-      return;
-    }
-
-    let sede = sedesPorNombre.get(normalizarNombre(sedeNombre));
-    if (!sede) {
-      sede = store.addSede(sedeNombre);
-      sedesPorNombre.set(normalizarNombre(sede.nombre), sede);
-    }
-
-    const yaExiste = sesionesExistentes.some(
-      (s) => s.sedeId === sede.id && s.fecha === fecha && normalizarNombre(s.titulo) === normalizarNombre(titulo)
-    );
-    if (yaExiste) {
-      saltadas.push(`${sedeNombre} · ${fecha} · ${titulo} (ya existía)`);
-      return;
-    }
-
-    const nueva = store.addSesionTaller({
-      sedeId: sede.id,
-      fecha,
-      titulo,
-      horario,
-      estado: 'disponible',
-      precioTotal: precioTotal ?? 0,
-      anticipo: anticipo ?? 0,
-      cupoMaximo: cupoMaximo ?? null,
-    });
-    sesionesExistentes.push(nueva);
-    creadas.push(`${sedeNombre} · ${fecha} · ${titulo}`);
-  });
-
+  const { creadas, saltadas, errores } = store.importarSesionesTaller(filas, { precioTotal, anticipo, cupoMaximo });
   res.status(201).json({ creadas: creadas.length, saltadas: saltadas.length, detalleCreadas: creadas, detalleSaltadas: saltadas, errores });
 });
 

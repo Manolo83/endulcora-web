@@ -93,6 +93,14 @@ const DEFAULT_CONTENT = {
   // /api/clase-en-vivo/registro y /confirmar-comunidad), e invitacion
   // opcional en el registro de clase gratis y de talleres.
   comunidad_whatsapp_link: 'https://chat.whatsapp.com/GazcjgRuMje3jm4V9REu2V?s=sw&p=a&mlu=4&ilr=4',
+  // Precio/anticipo/cupo con los que se da de alta un taller nuevo cuando
+  // se importa de un jalon (a mano desde /admin o solo desde el calendario
+  // fisico en Google Sheets, ver src/syncCalendarioTalleres.js) — todos los
+  // talleres cuestan lo mismo segun el dueño del sitio. Un taller ya
+  // existente nunca se toca aunque esto cambie despues.
+  taller_precio_default: '1149',
+  taller_anticipo_default: '400',
+  taller_cupo_default: '20',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5665271901',
@@ -1344,6 +1352,10 @@ const ESTADOS_MEXICO = [
   'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas',
 ];
 
+// Los talleres presenciales solo corren en estos dos bloques fijos — ni el
+// formulario de admin ni ninguna importacion aceptan otro horario.
+const HORARIOS_VALIDOS_TALLER = ['10:00 am – 2:00 pm', '4:00 pm – 8:00 pm'];
+
 // Para pasar cualquier texto (estado o pais) a una etiqueta de campañas
 // filtrable: minusculas y sin acentos (ej. "Querétaro" -> "queretaro").
 function slugZona(texto) {
@@ -2229,6 +2241,65 @@ module.exports = {
     data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== Number(id));
     save(data);
   },
+  // Da de alta varias sesiones de un jalon: pegadas a mano desde /admin
+  // ("Importar calendario de un mes") o leidas solas del calendario fisico
+  // en Google Sheets (ver src/syncCalendarioTalleres.js). Si la sede no
+  // existe todavia, se crea sola. Si ya existe una sesion identica (misma
+  // sede + fecha + titulo), se salta — nunca se duplica ni se toca una que
+  // ya existia (para no arriesgar inscripciones/pagos ya hechos), asi que
+  // es seguro correrlo mas de una vez sobre la misma lista, a mano o solo
+  // todos los dias.
+  importarSesionesTaller(filas, { precioTotal, anticipo, cupoMaximo } = {}) {
+    const sedesExistentes = this.getSedes();
+    const sedesPorNombre = new Map(sedesExistentes.map((s) => [slugZona(s.nombre), s]));
+    const sesionesExistentes = this.getSesionesTaller();
+
+    const creadas = [];
+    const saltadas = [];
+    const errores = [];
+
+    (filas || []).forEach((fila, i) => {
+      const sedeNombre = String(fila.sede || '').trim();
+      const fecha = String(fila.fecha || '').trim();
+      const titulo = String(fila.titulo || '').trim();
+      const horarioPedido = String(fila.horario || '').trim().toLowerCase();
+      const horario = horarioPedido === 'tarde' ? HORARIOS_VALIDOS_TALLER[1] : HORARIOS_VALIDOS_TALLER[0];
+
+      if (!sedeNombre || !/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !titulo) {
+        errores.push(`Fila ${i + 1}: falta sede, fecha (AAAA-MM-DD) o título.`);
+        return;
+      }
+
+      let sede = sedesPorNombre.get(slugZona(sedeNombre));
+      if (!sede) {
+        sede = this.addSede(sedeNombre);
+        sedesPorNombre.set(slugZona(sede.nombre), sede);
+      }
+
+      const yaExiste = sesionesExistentes.some(
+        (s) => s.sedeId === sede.id && s.fecha === fecha && slugZona(s.titulo) === slugZona(titulo)
+      );
+      if (yaExiste) {
+        saltadas.push(`${sedeNombre} · ${fecha} · ${titulo} (ya existía)`);
+        return;
+      }
+
+      const nueva = this.addSesionTaller({
+        sedeId: sede.id,
+        fecha,
+        titulo,
+        horario,
+        estado: 'disponible',
+        precioTotal: precioTotal ?? 0,
+        anticipo: anticipo ?? 0,
+        cupoMaximo: cupoMaximo ?? null,
+      });
+      sesionesExistentes.push(nueva);
+      creadas.push(`${sedeNombre} · ${fecha} · ${titulo}`);
+    });
+
+    return { creadas, saltadas, errores };
+  },
 
   // ---- Inscripciones a talleres (formulario publico) ----
   // Ligadas siempre a una sesion real del calendario (sesionTallerId): asi
@@ -2413,6 +2484,7 @@ module.exports = {
   // la configuracion del evento: horarios, cupos, precios de la oferta).
   TEMAS_CLASE_GRATIS,
   ESTADOS_MEXICO,
+  HORARIOS_VALIDOS_TALLER,
   etiquetasZona,
   getRegistrosClaseGratis() {
     return [...load().registrosClaseGratis].sort((a, b) => b.id - a.id);

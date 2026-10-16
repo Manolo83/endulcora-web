@@ -45,6 +45,11 @@ const GOOGLE_SHEETS = {
   // "\n" literal (texto, no salto real) — por eso se reemplazan aqui.
   privateKey: (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
   spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || '1-hL_6N2ix8J-peu-3GSM7EDhZu5DN8xFJPQP7fBMxJg',
+  // El calendario fisico (un Excel en Drive, con un bloque por sede/mes) que
+  // se lee solo todos los dias para dar de alta los talleres nuevos — ver
+  // src/syncCalendarioTalleres.js. Misma cuenta de servicio, pero hay que
+  // compartirle TAMBIEN este archivo (no solo "Inscritos 2026").
+  calendarioFisicoId: process.env.GOOGLE_SHEETS_CALENDARIO_ID || '1-PgGk3Nk7K1JT5xGjvoYePnoz5ObbmUf',
 };
 
 // Correo(s) del equipo de Endulcora que deben enterarse de cada inscripcion

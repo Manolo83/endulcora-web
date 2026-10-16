@@ -93,29 +93,38 @@ async function llamar(ruta, { method = 'GET', body } = {}) {
 // Lee la primera fila (encabezados) de una pestaña — pensado para mostrarla
 // en /admin ANTES de que el servidor empiece a escribir filas solo, para
 // mapear bien cada columna (nunca se adivina el orden).
-async function leerEncabezados(hoja) {
+async function leerEncabezados(hoja, spreadsheetId = GOOGLE_SHEETS.spreadsheetId) {
   const rango = `${encodeURIComponent(hoja)}!1:1`;
-  const data = await llamar(`${GOOGLE_SHEETS.spreadsheetId}/values/${rango}`);
+  const data = await llamar(`${spreadsheetId}/values/${rango}`);
   return (data.values && data.values[0]) || [];
 }
 
-// Lista las pestañas (nombre y si termina en "div", que marca Division segun
-// el documento de alcance) — tambien para confirmar en /admin a que pestaña
-// le va a escribir cada taller antes de automatizarlo.
-async function listarHojas() {
-  const data = await llamar(`${GOOGLE_SHEETS.spreadsheetId}?fields=sheets.properties.title`);
+// Lista las pestañas de cualquiera de los dos Sheets que usa el sitio
+// (Inscritos 2026 por defecto, o el calendario fisico pasando su ID).
+async function listarHojas(spreadsheetId = GOOGLE_SHEETS.spreadsheetId) {
+  const data = await llamar(`${spreadsheetId}?fields=sheets.properties.title`);
   return (data.sheets || []).map((s) => s.properties.title);
 }
 
 // Agrega una fila al final de la pestaña indicada. valueInputOption=USER_ENTERED
 // para que fechas/numeros se interpreten igual que si alguien los tecleara a
 // mano en la hoja (no como texto crudo).
-async function agregarFila(hoja, valores) {
+async function agregarFila(hoja, valores, spreadsheetId = GOOGLE_SHEETS.spreadsheetId) {
   const rango = `${encodeURIComponent(hoja)}!A:Z`;
-  return llamar(`${GOOGLE_SHEETS.spreadsheetId}/values/${rango}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
+  return llamar(`${spreadsheetId}/values/${rango}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
     method: 'POST',
     body: { values: [valores] },
   });
+}
+
+// Lee todas las celdas (como texto formateado, igual que se ve en pantalla)
+// de una pestaña completa — para el calendario fisico, que no es una tabla
+// de columnas fijas sino una cuadricula libre (ver
+// src/syncCalendarioTalleres.js, que es quien la interpreta).
+async function leerCuadricula(hoja, spreadsheetId) {
+  const rango = `${encodeURIComponent(hoja)}`;
+  const data = await llamar(`${spreadsheetId}/values/${rango}?valueRenderOption=FORMATTED_VALUE`);
+  return data.values || [];
 }
 
 module.exports = {
@@ -125,4 +134,5 @@ module.exports = {
   leerEncabezados,
   listarHojas,
   agregarFila,
+  leerCuadricula,
 };
