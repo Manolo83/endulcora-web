@@ -5,10 +5,27 @@
 // aqui es el mismo que se ve en /admin y el mismo que cuenta para el cupo
 // del taller en la pagina publica.
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const crypto = require('crypto');
 const store = require('../store');
+const email = require('../email');
 const { requireLex, checkLexCode } = require('../authLex');
+const { UPLOAD_DIR, SITE_URL } = require('../config');
 
 const router = express.Router();
+
+const uploadRecetario = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+    filename: (req, file, cb) => cb(null, `${crypto.randomUUID()}${path.extname(file.originalname).toLowerCase()}`),
+  }),
+  limits: { fileSize: 30 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') cb(null, true);
+    else cb(new Error('El recetario debe ser un PDF.'));
+  },
+});
 
 router.post('/codigo', (req, res) => {
   const { codigo } = req.body || {};
@@ -120,7 +137,10 @@ router.get('/api/talleres/:id/inscritos', requireLex, (req, res) => {
       // campo siga vacio).
       formaPago: !i.formaPago && i.estadoPago === 'pagado' ? EN_LINEA : i.formaPago,
       ventasExtra: i.ventasExtra || [],
+      asistio: !!i.asistio,
+      recetarioEnviado: !!i.recetarioEnviado,
     }));
+  const recetario = store.getRecetarioTaller(sesion.titulo);
   res.json({
     taller: {
       id: sesion.id,
@@ -129,11 +149,65 @@ router.get('/api/talleres/:id/inscritos', requireLex, (req, res) => {
       horario: sesion.horario,
       sede: sede ? sede.nombre : '',
       precioTotal: sesion.precioTotal,
+      recetario: recetario ? { archivo: recetario.archivo, archivoNombre: recetario.archivoNombre } : null,
     },
     inscritos,
     formasPago: FORMAS_PAGO,
     catalogo: CATALOGO,
   });
+});
+
+// Sube (o reemplaza) el recetario PDF de este taller. Se guarda por
+// TITULO, no por esta fecha -- sirve sola para cualquier otra sesion
+// futura del mismo taller, sin volver a subirlo.
+router.post('/api/talleres/:id/recetario', requireLex, uploadRecetario.single('archivo'), (req, res) => {
+  const sesion = store.getSesionesTaller().find((s) => s.id === Number(req.params.id));
+  if (!sesion) return res.status(404).json({ error: 'Taller no encontrado' });
+  if (!req.file) return res.status(400).json({ error: 'Sube un archivo PDF.' });
+  const recetario = store.guardarRecetarioTaller(sesion.titulo, {
+    archivo: `/uploads/${req.file.filename}`,
+    archivoNombre: req.file.originalname,
+  });
+  res.json(recetario);
+});
+
+// Marca (o quita) la asistencia de un inscrito. Si se marca que asistio y
+// todavia no se le habia mandado el recetario de este taller, lo manda en
+// automatico y dice que paso -- para que Lex vea en el acto a quien le
+// llego y a quien no (sin correo o sin recetario cargado).
+router.post('/api/inscripciones/:id/asistencia', requireLex, async (req, res) => {
+  const { asistio } = req.body || {};
+  const inscripcion = store.getInscripcionTaller(req.params.id);
+  if (!inscripcion) return res.status(404).json({ error: 'No encontrado' });
+  const actualizado = store.marcarAsistenciaInscripcionTaller(req.params.id, asistio);
+
+  let recetarioEstado = null;
+  if (asistio && !inscripcion.recetarioEnviado) {
+    const sesion = store.getSesionesTaller().find((s) => s.id === inscripcion.sesionTallerId);
+    const recetario = sesion ? store.getRecetarioTaller(sesion.titulo) : null;
+    if (!inscripcion.correo) {
+      recetarioEstado = 'sinCorreo';
+    } else if (!recetario) {
+      recetarioEstado = 'sinRecetario';
+    } else {
+      try {
+        await email.enviarCorreoRecetarioTaller({
+          to: inscripcion.correo,
+          nombre: inscripcion.nombre,
+          taller: sesion.titulo,
+          siteUrl: SITE_URL,
+          archivo: recetario.archivo,
+          archivoNombre: recetario.archivoNombre,
+        });
+        store.marcarRecetarioEnviado(inscripcion.id);
+        recetarioEstado = 'enviado';
+      } catch (e) {
+        console.error(`[lex] No se pudo mandar el recetario a la inscripcion ${inscripcion.id}:`, e.message);
+        recetarioEstado = 'error';
+      }
+    }
+  }
+  res.json({ ...actualizado, recetarioEstado });
 });
 
 router.patch('/api/inscripciones/:id/pago', requireLex, (req, res) => {

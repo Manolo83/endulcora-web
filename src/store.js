@@ -221,6 +221,7 @@ function datosPorDefecto() {
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre, imagenFondo: '', direccion: '', mapaLink: '' })),
     sesionesTaller: [],
     inscripcionesTaller: [],
+    recetariosTaller: [],
     registrosQr: [],
     registrosClaseGratis: [],
     registrosVideoEnVivo: [],
@@ -1171,6 +1172,15 @@ async function init() {
         if (!Array.isArray(i.ventasExtra)) i.ventasExtra = [];
       });
       data._migVentasExtraTaller = true;
+      changed = true;
+    }
+    // Asistencia y recetario (portal de Lex, Fase 3).
+    if (!data._migAsistenciaTaller) {
+      (data.inscripcionesTaller || []).forEach((i) => {
+        if (typeof i.asistio !== 'boolean') i.asistio = false;
+        if (typeof i.recetarioEnviado !== 'boolean') i.recetarioEnviado = false;
+      });
+      data._migAsistenciaTaller = true;
       changed = true;
     }
     // Pestaña de Sheets por defecto (titulo + " div" si es Division) para
@@ -2484,6 +2494,9 @@ module.exports = {
       // Ventas extra (portal de Lex, Fase 2): materiales, ebooks y
       // membresia que se le venden a este inscrito ademas de su taller.
       ventasExtra: [],
+      // Asistencia y recetario (portal de Lex, Fase 3).
+      asistio: false,
+      recetarioEnviado: false,
       // Fase 4 (correos automaticos + Google Sheets): cada bandera se marca
       // una sola vez, para no mandar el mismo recordatorio dos veces ni
       // duplicar la fila en "Inscritos 2026" si el servidor se reinicia.
@@ -2562,6 +2575,48 @@ module.exports = {
     const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
     if (!item) return null;
     item.ventasExtra = (item.ventasExtra || []).filter((v) => v.id !== Number(ventaId));
+    save(data);
+    return item;
+  },
+  // Marca o quita la asistencia de un inscrito (portal de Lex). No manda
+  // el recetario por si sola -- eso lo decide la ruta, que es quien tiene
+  // acceso al correo (src/email.js); aqui solo se guarda el estado.
+  marcarAsistenciaInscripcionTaller(id, asistio) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    item.asistio = !!asistio;
+    save(data);
+    return item;
+  },
+  marcarRecetarioEnviado(id) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    item.recetarioEnviado = true;
+    save(data);
+    return item;
+  },
+  // ---- Recetarios por taller (portal de Lex, Fase 3) ----
+  // Uno por titulo de taller (no por fecha): se sube una vez y sirve para
+  // todas las sesiones futuras de ese mismo taller, sin volver a subirlo.
+  getRecetarioTaller(titulo) {
+    const clave = String(titulo || '').trim().toLowerCase();
+    if (!clave) return null;
+    return load().recetariosTaller.find((r) => r.titulo === clave) || null;
+  },
+  guardarRecetarioTaller(titulo, { archivo, archivoNombre }) {
+    const data = load();
+    const clave = String(titulo || '').trim().toLowerCase();
+    if (!clave) return null;
+    let item = data.recetariosTaller.find((r) => r.titulo === clave);
+    if (!item) {
+      item = { titulo: clave, archivo: '', archivoNombre: '' };
+      data.recetariosTaller.push(item);
+    }
+    item.archivo = archivo;
+    item.archivoNombre = archivoNombre || '';
+    item.actualizadoEn = new Date().toISOString();
     save(data);
     return item;
   },

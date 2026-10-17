@@ -157,6 +157,32 @@ async function enviarCorreoConfirmacionPagoTaller({
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+// Recetario del taller: se manda desde el portal de Lex en cuanto marca
+// que esa persona asistio. "archivo" es la ruta publica del PDF que se
+// subio para ese taller (ej. "/uploads/xxxx.pdf"); Resend lo descarga de
+// ahi una sola vez y lo adjunta, no hace falta mandar el archivo completo.
+async function enviarCorreoRecetarioTaller({ to, nombre, taller, siteUrl, archivo, archivoNombre }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: `Tu recetario de "${taller}" · Endulcora`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">¡Gracias por venir, ${escapeHtml(nombre || '')}!</h1>
+        <p style="font-size:14px;line-height:1.6;">Aquí está el recetario de <strong>${escapeHtml(taller || '')}</strong>, para que repitas la receta en casa.</p>
+      </div>
+    `,
+    attachments: [{ filename: archivoNombre || 'Recetario.pdf', path: `${siteUrl}${archivo}` }],
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 // Recordatorio automatico de un taller ya pagado: diasFaltan es 2 (dos dias
 // antes) o 0 (el mismo dia) — solo cambia el titulo y el tono de urgencia,
 // el resto del contenido es igual.
@@ -475,6 +501,7 @@ module.exports = {
   enviarCorreoConfirmacionInscripcionTaller,
   enviarCorreoConfirmacionPagoTaller,
   enviarCorreoRecordatorioTaller,
+  enviarCorreoRecetarioTaller,
   enviarAvisoEquipoNuevoTaller,
   enviarCorreoConfirmacionClaseGratis,
   enviarCorreoRevistaMensual,
