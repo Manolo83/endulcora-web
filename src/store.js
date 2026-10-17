@@ -1164,6 +1164,15 @@ async function init() {
       data._migFormaPagoTaller = true;
       changed = true;
     }
+    // Ventas extra (portal de Lex, Fase 2): materiales, ebooks y membresia
+    // que se le venden a un inscrito ademas de su taller.
+    if (!data._migVentasExtraTaller) {
+      (data.inscripcionesTaller || []).forEach((i) => {
+        if (!Array.isArray(i.ventasExtra)) i.ventasExtra = [];
+      });
+      data._migVentasExtraTaller = true;
+      changed = true;
+    }
     // Pestaña de Sheets por defecto (titulo + " div" si es Division) para
     // las sesiones que ya existian con el campo vacio — las importadas a
     // mano o por la sincronizacion automatica antes de este cambio.
@@ -2472,6 +2481,9 @@ module.exports = {
       // dejarlo vacio es el checkout del sitio; un registro manual en
       // /admin siempre trae algo aqui).
       formaPago: '',
+      // Ventas extra (portal de Lex, Fase 2): materiales, ebooks y
+      // membresia que se le venden a este inscrito ademas de su taller.
+      ventasExtra: [],
       // Fase 4 (correos automaticos + Google Sheets): cada bandera se marca
       // una sola vez, para no mandar el mismo recordatorio dos veces ni
       // duplicar la fila en "Inscritos 2026" si el servidor se reinicia.
@@ -2515,6 +2527,41 @@ module.exports = {
     if (typeof formaPago === 'string') item.formaPago = formaPago;
     const sesion = data.sesionesTaller.find((s) => s.id === item.sesionTallerId);
     item.saldo = sesion && sesion.precioTotal ? Math.max(0, sesion.precioTotal - item.montoPagado) : null;
+    save(data);
+    return item;
+  },
+  // Venta extra (portal de Lex): materiales, ebooks o membresia que se le
+  // venden a un inscrito ademas de su taller, en un solo ticket con su
+  // propia forma de pago. No toca el pago del taller (montoPagado/saldo).
+  agregarVentaExtraInscripcion(id, { items, formaPago }) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    const lineas = (Array.isArray(items) ? items : [])
+      .map((it) => ({
+        concepto: String(it.concepto || '').trim(),
+        precioUnitario: Math.max(0, Number(it.precioUnitario) || 0),
+        cantidad: Math.max(1, Math.round(Number(it.cantidad) || 1)),
+      }))
+      .filter((l) => l.concepto);
+    if (!lineas.length) return null;
+    if (!Array.isArray(item.ventasExtra)) item.ventasExtra = [];
+    const venta = {
+      id: nextId(item.ventasExtra),
+      items: lineas,
+      total: lineas.reduce((suma, l) => suma + l.precioUnitario * l.cantidad, 0),
+      formaPago: String(formaPago || '').trim(),
+      fecha: new Date().toISOString(),
+    };
+    item.ventasExtra.push(venta);
+    save(data);
+    return item;
+  },
+  borrarVentaExtraInscripcion(id, ventaId) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    item.ventasExtra = (item.ventasExtra || []).filter((v) => v.id !== Number(ventaId));
     save(data);
     return item;
   },

@@ -32,6 +32,25 @@ const EN_LINEA = 'En línea (Mercado Pago)';
 const FORMAS_PAGO = ['Efectivo', 'Tarjeta de crédito', 'Tarjeta de débito', 'Transferencia', EN_LINEA];
 const ESTADOS_PAGO = ['pendiente', 'pagado', 'cancelado'];
 
+// Catalogo fijo de lo que Lex vende ademas del taller (precios dados por
+// el dueño del sitio). "Membresía Club Endulcora" es el concepto exacto
+// que activa la membresia sola al guardar la venta — ver POST /ventas.
+const CONCEPTO_MEMBRESIA = 'Membresía Club Endulcora (mensual)';
+const CATALOGO = [
+  { concepto: 'Red desechable', precio: 10 },
+  { concepto: 'Gorro reutilizable', precio: 30 },
+  { concepto: 'Cofia', precio: 50 },
+  { concepto: 'Mandil liso', precio: 80 },
+  { concepto: 'Mandil diseño', precio: 120 },
+  { concepto: 'Trapo', precio: 20 },
+  { concepto: 'Domo tipo pastel', precio: 30 },
+  { concepto: 'Domo charola', precio: 20 },
+  { concepto: 'Tupper cuadrado', precio: 20 },
+  { concepto: 'Ebook', precio: 100 },
+  { concepto: 'Reconocimiento', precio: 50 },
+  { concepto: CONCEPTO_MEMBRESIA, precio: 100 },
+];
+
 function hoyISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -100,6 +119,7 @@ router.get('/api/talleres/:id/inscritos', requireLex, (req, res) => {
       // queda escrita tal cual (no pasa nada, nadie mas depende de que el
       // campo siga vacio).
       formaPago: !i.formaPago && i.estadoPago === 'pagado' ? EN_LINEA : i.formaPago,
+      ventasExtra: i.ventasExtra || [],
     }));
   res.json({
     taller: {
@@ -112,6 +132,7 @@ router.get('/api/talleres/:id/inscritos', requireLex, (req, res) => {
     },
     inscritos,
     formasPago: FORMAS_PAGO,
+    catalogo: CATALOGO,
   });
 });
 
@@ -124,6 +145,41 @@ router.patch('/api/inscripciones/:id/pago', requireLex, (req, res) => {
     return res.status(400).json({ error: 'Forma de pago no válida.' });
   }
   const item = store.actualizarPagoInscripcionTaller(req.params.id, { montoPagado, estadoPago, formaPago });
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+// Si entre lo vendido hay una membresia y esa persona YA tiene cuenta en
+// el sitio (mismo correo del registro), la activa sola — mismo efecto que
+// el dueño del sitio dandola de alta a mano en /admin. Si todavia no
+// tiene cuenta, no se inventa una con contraseña al aire: se avisa para
+// que el equipo la resuelva (la venta igual queda registrada).
+function intentarActivarMembresia(correo, huboMembresia) {
+  if (!huboMembresia) return null;
+  const user = store.getUserByEmail(correo);
+  if (!user) return 'sinCuenta';
+  if (user.membresiaEstado !== 'activa') {
+    const patch = { membresiaEstado: 'activa', membresiaActivaDesde: hoyISO() };
+    if (!user.membresiaPrimeraActivacion) patch.membresiaPrimeraActivacion = new Date().toISOString();
+    store.updateUser(user.id, patch);
+  }
+  return 'activada';
+}
+
+router.post('/api/inscripciones/:id/ventas', requireLex, (req, res) => {
+  const { items, formaPago } = req.body || {};
+  if (formaPago !== undefined && formaPago !== '' && !FORMAS_PAGO.includes(formaPago)) {
+    return res.status(400).json({ error: 'Forma de pago no válida.' });
+  }
+  const item = store.agregarVentaExtraInscripcion(req.params.id, { items, formaPago });
+  if (!item) return res.status(400).json({ error: 'Agrega al menos un artículo con nombre.' });
+  const huboMembresia = Array.isArray(items) && items.some((it) => it.concepto === CONCEPTO_MEMBRESIA);
+  const membresia = intentarActivarMembresia(item.correo, huboMembresia);
+  res.json({ ...item, membresia });
+});
+
+router.delete('/api/inscripciones/:id/ventas/:ventaId', requireLex, (req, res) => {
+  const item = store.borrarVentaExtraInscripcion(req.params.id, req.params.ventaId);
   if (!item) return res.status(404).json({ error: 'No encontrado' });
   res.json(item);
 });

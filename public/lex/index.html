@@ -177,7 +177,9 @@ $('btnVolver').addEventListener('click', cargarTalleres);
 
 // ---------- Detalle de un taller ----------
 let formasPagoCache = [];
+let catalogoCache = [];
 let tallerActualId = null;
+let carritos = {}; // inscripcionId -> [{concepto, precioUnitario, cantidad}]
 
 async function abrirTaller(id) {
   tallerActualId = id;
@@ -185,6 +187,7 @@ async function abrirTaller(id) {
   $('listaInscritos').innerHTML = '<p class="py-10 text-center text-lg text-carbon/50">Cargando…</p>';
   const data = await api(`/api/talleres/${id}/inscritos`);
   formasPagoCache = data.formasPago;
+  catalogoCache = data.catalogo;
   $('tituloDetalle').textContent = data.taller.titulo;
   $('subtituloDetalle').textContent = `${data.taller.sede} · ${formatoFecha(data.taller.fecha)} · Precio del taller: $${data.taller.precioTotal || 0}`;
   pintarInscritos(data.inscritos);
@@ -228,12 +231,50 @@ function pintarInscritos(inscritos) {
         </label>
       </div>
       <button type="button" class="btnGuardarPago mt-4 rounded-full bg-vino px-6 py-3 text-base font-700 text-crema hover:bg-morado transition">Guardar</button>
+
+      <div class="mt-5 border-t border-vino/10 pt-4">
+        <p class="text-sm font-600 uppercase tracking-wider text-carbon/50">Vender algo más</p>
+        <div class="mt-2 flex flex-wrap items-end gap-2">
+          <select class="selCatalogo rounded-xl border border-vino/15 bg-crema/60 px-3 py-2.5 text-base">
+            ${catalogoCache.map((c) => `<option value="${escapeHtml(c.concepto)}" data-precio="${c.precio}">${escapeHtml(c.concepto)} — $${c.precio}</option>`).join('')}
+          </select>
+          <input type="number" min="1" value="1" class="campoCantidad w-20 rounded-xl border border-vino/15 bg-crema/60 px-3 py-2.5 text-base">
+          <button type="button" class="btnAgregarCatalogo rounded-full border border-vino/30 px-4 py-2.5 text-sm font-700 text-vino hover:border-vino transition">+ Agregar</button>
+        </div>
+        <div class="mt-2 flex flex-wrap items-end gap-2">
+          <input type="text" placeholder="Artículo libre" class="campoLibreNombre min-w-[160px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-3 py-2.5 text-base">
+          <input type="text" inputmode="numeric" placeholder="$" class="campoLibrePrecio w-24 rounded-xl border border-vino/15 bg-crema/60 px-3 py-2.5 text-base">
+          <button type="button" class="btnAgregarLibre rounded-full border border-vino/30 px-4 py-2.5 text-sm font-700 text-vino hover:border-vino transition">+ Agregar</button>
+        </div>
+        <div class="carrito mt-3 space-y-1.5"></div>
+        <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <p class="text-lg font-700 text-vino">Total: $<span class="totalCarrito">0</span></p>
+          <div class="flex flex-wrap items-center gap-2">
+            <select class="campoFormaVenta rounded-xl border border-vino/15 bg-crema/60 px-3 py-2.5 text-base">
+              <option value="">Forma de pago</option>
+              ${formasPagoCache.map((f) => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('')}
+            </select>
+            <button type="button" class="btnRegistrarVenta rounded-full bg-flama px-5 py-2.5 text-sm font-700 text-vino hover:brightness-95 transition">Registrar venta</button>
+          </div>
+        </div>
+        ${i.ventasExtra && i.ventasExtra.length ? `
+          <div class="mt-4 space-y-1.5">
+            <p class="text-sm font-600 uppercase tracking-wider text-carbon/50">Ya se le vendió</p>
+            ${i.ventasExtra.map((v) => `
+              <div class="flex items-center justify-between gap-2 rounded-xl bg-crema/60 px-3 py-2 text-sm">
+                <span>${v.items.map((it) => `${it.cantidad > 1 ? it.cantidad + '× ' : ''}${escapeHtml(it.concepto)}`).join(', ')} — $${v.total}${v.formaPago ? ' · ' + escapeHtml(v.formaPago) : ''}</span>
+                <button type="button" class="btnBorrarVenta text-red-500 hover:text-red-700" data-venta="${v.id}">Borrar</button>
+              </div>`).join('')}
+          </div>` : ''}
+      </div>
     </div>`;
   }).join('');
 
   $('listaInscritos').querySelectorAll('[data-fila]').forEach((fila) => {
+    const id = fila.dataset.fila;
+    if (!carritos[id]) carritos[id] = [];
+
     fila.querySelector('.btnGuardarPago').addEventListener('click', async () => {
-      const id = fila.dataset.fila;
       const montoPagado = fila.querySelector('.campoMonto').value;
       const estadoPago = fila.querySelector('.campoEstado').value;
       const formaPago = fila.querySelector('.campoForma').value;
@@ -244,6 +285,65 @@ function pintarInscritos(inscritos) {
       } catch (e) {
         toast(e.message);
       }
+    });
+
+    function pintarCarrito() {
+      const carrito = carritos[id];
+      const cont = fila.querySelector('.carrito');
+      cont.innerHTML = carrito.map((l, idx) => `
+        <div class="flex items-center justify-between gap-2 rounded-xl bg-flama/10 px-3 py-2 text-sm">
+          <span>${l.cantidad > 1 ? l.cantidad + '× ' : ''}${escapeHtml(l.concepto)} — $${l.precioUnitario * l.cantidad}</span>
+          <button type="button" class="btnQuitarLinea text-red-500 hover:text-red-700" data-idx="${idx}">Quitar</button>
+        </div>`).join('');
+      cont.querySelectorAll('.btnQuitarLinea').forEach((b) => {
+        b.addEventListener('click', () => { carrito.splice(Number(b.dataset.idx), 1); pintarCarrito(); });
+      });
+      const total = carrito.reduce((s, l) => s + l.precioUnitario * l.cantidad, 0);
+      fila.querySelector('.totalCarrito').textContent = total;
+    }
+
+    fila.querySelector('.btnAgregarCatalogo').addEventListener('click', () => {
+      const sel = fila.querySelector('.selCatalogo');
+      const opt = sel.selectedOptions[0];
+      const cantidad = Math.max(1, Number(fila.querySelector('.campoCantidad').value) || 1);
+      carritos[id].push({ concepto: opt.value, precioUnitario: Number(opt.dataset.precio), cantidad });
+      pintarCarrito();
+    });
+
+    fila.querySelector('.btnAgregarLibre').addEventListener('click', () => {
+      const nombre = fila.querySelector('.campoLibreNombre').value.trim();
+      const precio = Number(fila.querySelector('.campoLibrePrecio').value) || 0;
+      if (!nombre) { toast('Escribe el nombre del artículo'); return; }
+      carritos[id].push({ concepto: nombre, precioUnitario: precio, cantidad: 1 });
+      fila.querySelector('.campoLibreNombre').value = '';
+      fila.querySelector('.campoLibrePrecio').value = '';
+      pintarCarrito();
+    });
+
+    fila.querySelector('.btnRegistrarVenta').addEventListener('click', async () => {
+      const carrito = carritos[id];
+      if (!carrito.length) { toast('Agrega al menos un artículo'); return; }
+      const formaPago = fila.querySelector('.campoFormaVenta').value;
+      try {
+        const r = await api(`/api/inscripciones/${id}/ventas`, { method: 'POST', body: JSON.stringify({ items: carrito, formaPago }) });
+        carritos[id] = [];
+        toast(r.membresia === 'sinCuenta' ? 'Venta guardada — avisa al equipo, esta persona aún no tiene cuenta para activar su membresía' : 'Venta guardada');
+        if (tallerActualId) abrirTaller(tallerActualId);
+      } catch (e) {
+        toast(e.message);
+      }
+    });
+
+    fila.querySelectorAll('.btnBorrarVenta').forEach((b) => {
+      b.addEventListener('click', async () => {
+        try {
+          await api(`/api/inscripciones/${id}/ventas/${b.dataset.venta}`, { method: 'DELETE' });
+          toast('Venta borrada');
+          if (tallerActualId) abrirTaller(tallerActualId);
+        } catch (e) {
+          toast(e.message);
+        }
+      });
     });
   });
 }
