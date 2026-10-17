@@ -28,7 +28,8 @@ router.get('/api/sesion', (req, res) => {
   res.json({ isLex: !!(req.session && req.session.isLex) });
 });
 
-const FORMAS_PAGO = ['Efectivo', 'Tarjeta de crédito', 'Tarjeta de débito', 'Transferencia'];
+const EN_LINEA = 'En línea (Mercado Pago)';
+const FORMAS_PAGO = ['Efectivo', 'Tarjeta de crédito', 'Tarjeta de débito', 'Transferencia', EN_LINEA];
 const ESTADOS_PAGO = ['pendiente', 'pagado', 'cancelado'];
 
 function hoyISO() {
@@ -92,7 +93,13 @@ router.get('/api/talleres/:id/inscritos', requireLex, (req, res) => {
       montoPagado: i.montoPagado,
       saldo: i.saldo,
       estadoPago: i.estadoPago,
-      formaPago: i.formaPago,
+      // Una compra pagada de verdad en linea (Mercado Pago) nunca trae
+      // formaPago -- el cobro automatico no la llena, solo el estado y el
+      // monto. Se la mostramos a Lex como "En linea" para que no parezca
+      // un registro sin forma de pago; si ella le da Guardar sin cambiarla,
+      // queda escrita tal cual (no pasa nada, nadie mas depende de que el
+      // campo siga vacio).
+      formaPago: !i.formaPago && i.estadoPago === 'pagado' ? EN_LINEA : i.formaPago,
     }));
   res.json({
     taller: {
