@@ -11,7 +11,9 @@ function checkLexCode(codigo) {
   if (typeof codigo !== 'string' || !codigo) return false;
   const esperado = process.env.LEX_CODE;
   if (!esperado) return false;
-  return codigo.trim() === esperado.trim();
+  // Sin distinguir mayusculas/minusculas: que a Lex le funcione aunque lo
+  // escriba distinto a como quedo guardado en Railway.
+  return codigo.trim().toLowerCase() === esperado.trim().toLowerCase();
 }
 
 module.exports = { requireLex, checkLexCode };
