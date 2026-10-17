@@ -19,6 +19,7 @@ const asistenteRoutes = require('./src/routes/asistente');
 const googleAdsRoutes = require('./src/routes/googleAds');
 const membresiaRoutes = require('./src/routes/membresia');
 const leventSyncRoutes = require('./src/routes/leventSync');
+const lexRoutes = require('./src/routes/lex');
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 console.log(`[uploads] Los archivos subidos se guardan en: ${UPLOAD_DIR}`);
@@ -54,6 +55,21 @@ app.use(
     name: 'endulcora_session',
     secret: process.env.SESSION_SECRET || 'cambia-esta-clave-en-las-variables-de-entorno',
     maxAge: 12 * 60 * 60 * 1000,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  })
+);
+
+// Sesion aparte para el portal de Lex: mismo mecanismo que la de /admin,
+// pero dura meses en vez de horas — es un codigo corto, no una
+// contraseña, y se espera que la computadora lo recuerde solo (ver
+// src/authLex.js).
+app.use(
+  '/lex',
+  cookieSession({
+    name: 'endulcora_lex_session',
+    secret: process.env.SESSION_SECRET || 'cambia-esta-clave-en-las-variables-de-entorno',
+    maxAge: 180 * 24 * 60 * 60 * 1000,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   })
@@ -177,6 +193,7 @@ app.use('/api/asistente', asistenteRoutes);
 app.use('/api/membresia', membresiaRoutes);
 app.use('/api', apiRoutes);
 app.use('/admin', adminRoutes);
+app.use('/lex', lexRoutes);
 
 // Pagina propia por producto (ej. /ebooks/velas-comestibles, /anexos/costeo):
 // se sirve la misma plantilla para cualquier slug, pero se inyectan las
