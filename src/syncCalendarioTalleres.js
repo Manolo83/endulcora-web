@@ -197,10 +197,18 @@ function construirFechasFila(valores, mesSeccion, anioSeccion, esPrimeraFila) {
 }
 
 // "Tablas Charcutería 4pm" -> { titulo: 'Tablas Charcutería', horario: 'tarde' }
+// "Roles Gourmet 10AM" -> { titulo: 'Roles Gourmet', horario: 'manana' } — el
+// "10am" se quita igual que el "4pm": es la hora de la mañana por defecto
+// (HORARIOS_VALIDOS_TALLER[0]), el equipo a veces lo escribe de todos modos
+// para dejarlo claro. Sin quitarlo, el titulo quedaba con la hora pegada y
+// ya no coincidia con el nombre real de la pestaña en Sheets (ej. "Roles
+// Gourmet" a secas), creando una pestaña duplicada de mas.
 function extraerHorarioYTitulo(textoCrudo) {
   const texto = String(textoCrudo || '').trim();
-  const m = texto.match(/^(.*?)\s*-?\s*4(:00)?\s*pm\s*$/i);
-  if (m && m[1].trim()) return { titulo: m[1].trim(), horario: 'tarde' };
+  const mTarde = texto.match(/^(.*?)\s*-?\s*4(:00)?\s*pm\s*$/i);
+  if (mTarde && mTarde[1].trim()) return { titulo: mTarde[1].trim(), horario: 'tarde' };
+  const mManana = texto.match(/^(.*?)\s*-?\s*10(:00)?\s*am\s*$/i);
+  if (mManana && mManana[1].trim()) return { titulo: mManana[1].trim(), horario: 'manana' };
   return { titulo: texto, horario: 'manana' };
 }
 
