@@ -73,4 +73,11 @@ function enviarReconocimientos({ taller, fecha, participantes }) {
   return llamar('/api/enviar', { method: 'POST', body: JSON.stringify({ taller, fecha, participantes }) });
 }
 
-module.exports = { configurado, faltantes, enviarReconocimientos };
+// Solo para revisar que la conexion funciona, sin mandar nada ni gastar
+// ningun folio -- es la misma consulta de estado que usa su propia
+// pantalla de inicio.
+function estado() {
+  return llamar('/api/sesion');
+}
+
+module.exports = { configurado, faltantes, enviarReconocimientos, estado };

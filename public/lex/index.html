@@ -51,6 +51,7 @@
       <p class="font-titulo text-[11px] tracking-[.34em] text-morado">ENDULCORA</p>
       <h1 class="font-titulo text-3xl tracking-wide text-vino">Talleres</h1>
       <div id="tabsSede" class="mt-4 flex flex-wrap gap-2"></div>
+      <p id="estadoReconocimientos" class="mt-3 text-sm"></p>
     </div>
   </header>
   <main class="mx-auto max-w-5xl px-5 py-6">
@@ -141,6 +142,26 @@ async function cargarTalleres() {
     btn.addEventListener('click', () => { sedeActiva = btn.dataset.sede; pintarTalleres(); });
   });
   pintarTalleres();
+  cargarEstadoReconocimientos();
+}
+
+async function cargarEstadoReconocimientos() {
+  const p = $('estadoReconocimientos');
+  p.textContent = 'Revisando conexión con reconocimientos…';
+  p.className = 'mt-3 text-sm text-carbon/40';
+  try {
+    const data = await api('/api/reconocimientos/estado');
+    if (data.conectado) {
+      p.textContent = `✓ Conectado con reconocimientos — próximo folio: ${data.folioSiguiente}`;
+      p.className = 'mt-3 text-sm text-verde';
+    } else {
+      p.textContent = `⚠ No conectado con reconocimientos: ${data.error}`;
+      p.className = 'mt-3 text-sm text-red-600';
+    }
+  } catch (e) {
+    p.textContent = `⚠ No se pudo revisar: ${e.message}`;
+    p.className = 'mt-3 text-sm text-red-600';
+  }
 }
 
 function pintarTalleres() {

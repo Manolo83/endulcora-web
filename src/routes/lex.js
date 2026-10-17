@@ -46,6 +46,21 @@ router.get('/api/sesion', (req, res) => {
   res.json({ isLex: !!(req.session && req.session.isLex) });
 });
 
+// Revisa que la conexion con el servicio de reconocimientos funcione, sin
+// mandar nada ni gastar ningun folio -- para confirmar antes de usarlo de
+// verdad que ENVIOS_API_URL/ENVIOS_APP_PASSWORD quedaron bien puestas.
+router.get('/api/reconocimientos/estado', requireLex, async (req, res) => {
+  if (!enviosClient.configurado()) {
+    return res.json({ conectado: false, error: `Falta configurar: ${enviosClient.faltantes().join(', ')}.` });
+  }
+  try {
+    const estado = await enviosClient.estado();
+    res.json({ conectado: true, folioSiguiente: estado.folioSiguiente, plantillaLista: estado.plantillaLista, firmaLista: estado.firmaLista });
+  } catch (e) {
+    res.json({ conectado: false, error: e.message });
+  }
+});
+
 const EN_LINEA = 'En línea (Mercado Pago)';
 const FORMAS_PAGO = ['Efectivo', 'Tarjeta de crédito', 'Tarjeta de débito', 'Transferencia', EN_LINEA];
 const ESTADOS_PAGO = ['pendiente', 'pagado', 'cancelado'];
