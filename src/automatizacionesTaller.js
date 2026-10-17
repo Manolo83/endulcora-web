@@ -126,36 +126,18 @@ function hojaCalculadaPara({ taller, sesion, sede }) {
   return (sesion && sesion.hojaSheets) || `${taller}${esDivision ? ' div' : ''}`;
 }
 
-// Manda UNA inscripcion a Sheets (la usan tanto el barrido automatico como
-// el boton de "reintentar" en /admin). Tira el error tal cual para que quien
-// la llamo decida que hacer (el barrido solo lo registra y lo vuelve a
-// intentar despues; /admin se lo muestra a la persona).
+// La sincronizacion automatica con "Inscritos 2026" quedo DESACTIVADA a
+// peticion del dueño del sitio (volvio a ser 100% manual, como antes de
+// esta automatizacion) — se va a reconstruir de cero mas adelante. Esta
+// funcion ya no escribe nada en Sheets; solo avisa en el log por si algo
+// todavia la llama, sin tronar el flujo que la rodea (compra, registro
+// manual, etc. siguen funcionando igual).
 async function sincronizarInscripcionTaller(inscripcion) {
-  if (!googleSheets.configurado()) {
-    throw new Error(`Google Sheets no esta configurado todavia: ${googleSheets.faltantes().join(', ')}.`);
-  }
-  const completos = datosCompletos(inscripcion);
-  const hojaCalculada = hojaCalculadaPara({ taller: inscripcion.taller, ...completos });
-  // El nombre calculado puede no coincidir exactamente en mayusculas con
-  // la pestaña real (ej. "Tacos de canasta div" calculado vs "TACOS DE
-  // CANASTA div" real) — se busca primero entre las pestañas que YA
-  // existen sin importar mayusculas/minusculas, para no crear una pestaña
-  // duplicada solo por eso.
-  const hoja = await googleSheets.resolverNombreHoja(hojaCalculada);
-  await googleSheets.agregarFila(hoja, filaParaSheets(completos));
-  store.marcarInscripcionTallerSincronizada(inscripcion.id);
+  console.log(`[talleres] Sincronizacion con Google Sheets desactivada (manual por ahora) — se omite la inscripcion ${inscripcion.id}.`);
 }
 
 async function revisarSincronizacionSheets() {
-  if (!googleSheets.configurado()) return; // nada que hacer todavia, sin ruido en el log
-  const pendientes = store.getInscripcionesTallerSinSincronizar();
-  for (const inscripcion of pendientes) {
-    try {
-      await sincronizarInscripcionTaller(inscripcion);
-    } catch (e) {
-      console.error(`[talleres] No se pudo escribir en Google Sheets la inscripcion ${inscripcion.id}:`, e.message);
-    }
-  }
+  // desactivado, ver nota arriba
 }
 
 // Correo interno al equipo cuando se confirma un pago — lo llama el webhook

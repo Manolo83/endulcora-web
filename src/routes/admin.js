@@ -15,7 +15,7 @@ const { procesarCampana } = require('../campanas');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
 const googleSheets = require('../googleSheets');
-const { sincronizarInscripcionTaller, avisarEquipoNuevoTaller, hojaCalculadaPara } = require('../automatizacionesTaller');
+const { sincronizarInscripcionTaller, avisarEquipoNuevoTaller } = require('../automatizacionesTaller');
 const { sincronizarCalendarioFisico } = require('../syncCalendarioTalleres');
 
 const router = express.Router();
@@ -728,75 +728,6 @@ router.get('/api/google-sheets/estado', requireAdmin, async (req, res) => {
   } catch (e) {
     res.status(502).json({ configurado: true, error: e.message });
   }
-});
-
-// Reintenta a mano mandar una inscripcion ya pagada a Google Sheets (ej.
-// despues de configurar las credenciales por primera vez, para las que
-// quedaron pendientes desde antes).
-router.post('/api/inscripciones-taller/:id/sincronizar-sheets', requireAdmin, async (req, res) => {
-  const inscripcion = store.getInscripcionTaller(req.params.id);
-  if (!inscripcion) return res.status(404).json({ error: 'No encontrado' });
-  try {
-    await sincronizarInscripcionTaller(inscripcion);
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(502).json({ error: e.message });
-  }
-});
-
-// Revisa, para cada taller futuro distinto (agrupado por el nombre de
-// pestaña que el sistema calcularia), si existe de verdad una pestaña con
-// ese nombre en "Inscritos 2026" (sin importar mayusculas/minusculas) —
-// para encontrar de antemano los casos donde el nombre real de la
-// pestaña no sigue la convencion "titulo" / "titulo div" (ej. usa
-// "division" completo, o palabras distintas al titulo del taller) y asi
-// corregirlos a mano (campo "Pestaña en Inscritos 2026" del taller en
-// /admin, o renombrando la pestaña real) antes de que una venta real cree
-// una pestaña duplicada.
-router.get('/api/sesiones-taller/verificar-pestanas', requireAdmin, async (req, res) => {
-  if (!googleSheets.configurado()) {
-    return res.status(503).json({ error: 'Google Sheets no esta configurado.' });
-  }
-  try {
-    const hojasReales = await googleSheets.listarHojas();
-    const normal = (s) => String(s || '').trim().toLowerCase();
-    const hojasRealesNorm = new Set(hojasReales.map(normal));
-    const hoy = new Date().toISOString().slice(0, 10);
-    const sesiones = store.getSesionesTaller().filter((s) => s.fecha >= hoy);
-    const sedesPorId = new Map(store.getSedes().map((s) => [s.id, s]));
-    const grupos = new Map();
-    sesiones.forEach((s) => {
-      const sede = sedesPorId.get(s.sedeId);
-      const hoja = hojaCalculadaPara({ taller: s.titulo, sesion: s, sede });
-      const key = `${s.titulo}|||${s.sedeId}`;
-      if (!grupos.has(key)) {
-        grupos.set(key, {
-          titulo: s.titulo,
-          sedeId: s.sedeId,
-          sede: sede ? sede.nombre : '',
-          hoja,
-          encontrada: hojasRealesNorm.has(normal(hoja)),
-          fechas: [],
-        });
-      }
-      grupos.get(key).fechas.push(s.fecha);
-    });
-    const resultado = [...grupos.values()].sort((a, b) => Number(a.encontrada) - Number(b.encontrada));
-    res.json({ resultado });
-  } catch (e) {
-    res.status(502).json({ error: e.message });
-  }
-});
-
-// Fija a mano la pestaña de Sheets para TODAS las sesiones futuras de un
-// taller+sede (lo que piden corregir con "verificar-pestanas" de arriba) —
-// mismo efecto que editar el campo "Pestaña en Inscritos 2026" uno por uno
-// en cada fecha, pero de un jalon.
-router.post('/api/sesiones-taller/fijar-hoja-sheets', requireAdmin, (req, res) => {
-  const { titulo, sedeId, hojaSheets } = req.body || {};
-  if (!titulo || !sedeId || !hojaSheets) return res.status(400).json({ error: 'Falta titulo, sedeId o hojaSheets.' });
-  const resultado = store.fijarHojaSheetsPorTituloYSede(titulo, sedeId, hojaSheets);
-  res.json(resultado);
 });
 
 // ---- Calendario fisico de talleres (sincronizacion automatica) ----
