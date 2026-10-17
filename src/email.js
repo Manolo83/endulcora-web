@@ -183,6 +183,32 @@ async function enviarCorreoRecetarioTaller({ to, nombre, taller, siteUrl, archiv
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+// eBook(s) que Lex vendio en persona (portal de Lex) -- mismos archivos
+// que recibiria alguien que compra en linea (el eBook y, si los tiene
+// cargados, su anexo y su app), adjuntos de una vez en un solo correo.
+async function enviarCorreoEbooksTaller({ to, nombre, titulos, siteUrl, archivos }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: `Tu${titulos.length > 1 ? 's' : ''} eBook${titulos.length > 1 ? 's' : ''} de Endulcora`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">¡Gracias, ${escapeHtml(nombre || '')}!</h1>
+        <p style="font-size:14px;line-height:1.6;">Aquí está${titulos.length > 1 ? 'n' : ''} lo que compraste:</p>
+        <ul style="font-size:14px;line-height:1.8;">${titulos.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
+      </div>
+    `,
+    attachments: archivos.map((a) => ({ filename: a.archivoNombre || 'archivo', path: `${siteUrl}${a.archivo}` })),
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 // Recordatorio automatico de un taller ya pagado: diasFaltan es 2 (dos dias
 // antes) o 0 (el mismo dia) — solo cambia el titulo y el tono de urgencia,
 // el resto del contenido es igual.
@@ -502,6 +528,7 @@ module.exports = {
   enviarCorreoConfirmacionPagoTaller,
   enviarCorreoRecordatorioTaller,
   enviarCorreoRecetarioTaller,
+  enviarCorreoEbooksTaller,
   enviarAvisoEquipoNuevoTaller,
   enviarCorreoConfirmacionClaseGratis,
   enviarCorreoRevistaMensual,

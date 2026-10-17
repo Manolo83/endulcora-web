@@ -200,8 +200,9 @@ $('btnVolver').addEventListener('click', cargarTalleres);
 // ---------- Detalle de un taller ----------
 let formasPagoCache = [];
 let catalogoCache = [];
+let ebooksCache = [];
 let tallerActualId = null;
-let carritos = {}; // inscripcionId -> [{concepto, precioUnitario, cantidad}]
+let carritos = {}; // inscripcionId -> [{concepto, precioUnitario, cantidad, productoId}]
 
 async function abrirTaller(id) {
   tallerActualId = id;
@@ -210,6 +211,7 @@ async function abrirTaller(id) {
   const data = await api(`/api/talleres/${id}/inscritos`);
   formasPagoCache = data.formasPago;
   catalogoCache = data.catalogo;
+  ebooksCache = data.ebooks;
   $('tituloDetalle').textContent = data.taller.titulo;
   $('subtituloDetalle').textContent = `${data.taller.sede} · ${formatoFecha(data.taller.fecha)} · Precio del taller: $${data.taller.precioTotal || 0}`;
   pintarRecetarioBox(data.taller);
@@ -301,6 +303,13 @@ function pintarInscritos(inscritos) {
           <input type="number" min="1" value="1" class="campoCantidad w-20 rounded-xl border border-vino/15 bg-crema/60 px-3 py-2.5 text-base">
           <button type="button" class="btnAgregarCatalogo rounded-full border border-vino/30 px-4 py-2.5 text-sm font-700 text-vino hover:border-vino transition">+ Agregar</button>
         </div>
+        ${ebooksCache.length ? `
+        <div class="mt-2 flex flex-wrap items-end gap-2">
+          <select class="selEbook rounded-xl border border-vino/15 bg-crema/60 px-3 py-2.5 text-base">
+            ${ebooksCache.map((e) => `<option value="${e.productoId}" data-precio="${e.precio}">${escapeHtml(e.concepto)} — $${e.precio}</option>`).join('')}
+          </select>
+          <button type="button" class="btnAgregarEbook rounded-full border border-vino/30 px-4 py-2.5 text-sm font-700 text-vino hover:border-vino transition">+ Agregar eBook</button>
+        </div>` : ''}
         <div class="mt-2 flex flex-wrap items-end gap-2">
           <input type="text" placeholder="Artículo libre" class="campoLibreNombre min-w-[160px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-3 py-2.5 text-base">
           <input type="text" inputmode="numeric" placeholder="$" class="campoLibrePrecio w-24 rounded-xl border border-vino/15 bg-crema/60 px-3 py-2.5 text-base">
@@ -404,6 +413,16 @@ function pintarInscritos(inscritos) {
       pintarCarrito();
     });
 
+    const btnAgregarEbook = fila.querySelector('.btnAgregarEbook');
+    if (btnAgregarEbook) {
+      btnAgregarEbook.addEventListener('click', () => {
+        const sel = fila.querySelector('.selEbook');
+        const opt = sel.selectedOptions[0];
+        carritos[id].push({ concepto: opt.textContent.trim().replace(/\s*—\s*\$\d+$/, ''), precioUnitario: Number(opt.dataset.precio), cantidad: 1, productoId: Number(opt.value) });
+        pintarCarrito();
+      });
+    }
+
     fila.querySelector('.btnAgregarLibre').addEventListener('click', () => {
       const nombre = fila.querySelector('.campoLibreNombre').value.trim();
       const precio = Number(fila.querySelector('.campoLibrePrecio').value) || 0;
@@ -421,7 +440,13 @@ function pintarInscritos(inscritos) {
       try {
         const r = await api(`/api/inscripciones/${id}/ventas`, { method: 'POST', body: JSON.stringify({ items: carrito, formaPago }) });
         carritos[id] = [];
-        toast(r.membresia === 'sinCuenta' ? 'Venta guardada — avisa al equipo, esta persona aún no tiene cuenta para activar su membresía' : 'Venta guardada');
+        const avisos = [];
+        if (r.membresia === 'sinCuenta') avisos.push('esta persona aún no tiene cuenta para activar su membresía');
+        if (r.ebooks === 'enviado') avisos.push('el eBook ya se mandó a su correo');
+        if (r.ebooks === 'sinCorreo') avisos.push('no tiene correo, no se pudo mandar el eBook');
+        if (r.ebooks === 'sinArchivo') avisos.push('ese eBook todavía no tiene archivo cargado');
+        if (r.ebooks === 'error') avisos.push('el eBook no se pudo mandar, intenta de nuevo');
+        toast(avisos.length ? `Venta guardada — ${avisos.join(' · ')}` : 'Venta guardada');
         if (tallerActualId) abrirTaller(tallerActualId);
       } catch (e) {
         toast(e.message);

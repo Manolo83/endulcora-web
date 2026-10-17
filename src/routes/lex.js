@@ -79,10 +79,35 @@ const CATALOGO = [
   { concepto: 'Domo tipo pastel', precio: 30 },
   { concepto: 'Domo charola', precio: 20 },
   { concepto: 'Tupper cuadrado', precio: 20 },
-  { concepto: 'Ebook', precio: 100 },
   { concepto: 'Reconocimiento', precio: 50 },
   { concepto: CONCEPTO_MEMBRESIA, precio: 100 },
 ];
+
+// Los eBooks reales del catalogo de endulcora.com (no el generico de
+// antes): asi, cuando Lex vende uno en persona, se le manda por correo el
+// mismo archivo (y su anexo/app, si los tiene) que recibiria alguien que
+// compra en linea -- no solo se cobra, tambien se entrega.
+function ebooksDelCatalogo() {
+  return store.getProducts()
+    .filter((p) => p.categoria === 'ebook' && !p.ocultoEnCatalogo && p.archivo)
+    .map((p) => ({ productoId: p.id, concepto: p.titulo, precio: Number(p.precio) || 0 }));
+}
+
+// Junta el archivo propio de un producto con los de sus relacionados
+// (anexo, app) que SI tengan archivo cargado -- lo que de verdad se le
+// manda a quien compra ese eBook.
+function archivosDeProducto(producto) {
+  const propios = producto.archivo ? [{ archivo: producto.archivo, archivoNombre: producto.archivoNombre || producto.titulo }] : [];
+  // El "paquete completo" es su propio producto que se vende aparte (ya
+  // trae de por si todo junto en un .zip) -- no se incluye como si fuera
+  // un anexo gratis del eBook base, o se mandarian los mismos archivos
+  // duplicados dos veces.
+  const relacionados = (producto.productosRelacionados || [])
+    .map((id) => store.getProduct(id))
+    .filter((p) => p && p.archivo && !p.esPaquete)
+    .map((p) => ({ archivo: p.archivo, archivoNombre: p.archivoNombre || p.titulo }));
+  return [...propios, ...relacionados];
+}
 
 function hoyISO() {
   const d = new Date();
@@ -172,6 +197,7 @@ router.get('/api/talleres/:id/inscritos', requireLex, (req, res) => {
     inscritos,
     formasPago: FORMAS_PAGO,
     catalogo: CATALOGO,
+    ebooks: ebooksDelCatalogo(),
   });
 });
 
@@ -258,7 +284,7 @@ function intentarActivarMembresia(correo, huboMembresia) {
   return 'activada';
 }
 
-router.post('/api/inscripciones/:id/ventas', requireLex, (req, res) => {
+router.post('/api/inscripciones/:id/ventas', requireLex, async (req, res) => {
   const { items, formaPago } = req.body || {};
   if (formaPago !== undefined && formaPago !== '' && !FORMAS_PAGO.includes(formaPago)) {
     return res.status(400).json({ error: 'Forma de pago no válida.' });
@@ -267,7 +293,39 @@ router.post('/api/inscripciones/:id/ventas', requireLex, (req, res) => {
   if (!item) return res.status(400).json({ error: 'Agrega al menos un artículo con nombre.' });
   const huboMembresia = Array.isArray(items) && items.some((it) => it.concepto === CONCEPTO_MEMBRESIA);
   const membresia = intentarActivarMembresia(item.correo, huboMembresia);
-  res.json({ ...item, membresia });
+
+  // Si entre lo vendido hay eBooks reales del catalogo, se le mandan por
+  // correo de una vez (mismos archivos que recibiria si lo hubiera
+  // comprado en linea) -- vender un eBook sin entregarlo no sirve de nada.
+  let ebooks = null;
+  const idsEbooks = Array.isArray(items) ? [...new Set(items.map((it) => it.productoId).filter(Boolean))] : [];
+  if (idsEbooks.length) {
+    if (!item.correo) {
+      ebooks = 'sinCorreo';
+    } else {
+      const productos = idsEbooks.map((id) => store.getProduct(id)).filter(Boolean);
+      const archivos = productos.flatMap((p) => archivosDeProducto(p));
+      if (!archivos.length) {
+        ebooks = 'sinArchivo';
+      } else {
+        try {
+          await email.enviarCorreoEbooksTaller({
+            to: item.correo,
+            nombre: item.nombre,
+            titulos: productos.map((p) => p.titulo),
+            siteUrl: SITE_URL,
+            archivos,
+          });
+          ebooks = 'enviado';
+        } catch (e) {
+          console.error(`[lex] No se pudieron mandar los eBooks a la inscripcion ${item.id}:`, e.message);
+          ebooks = 'error';
+        }
+      }
+    }
+  }
+
+  res.json({ ...item, membresia, ebooks });
 });
 
 router.delete('/api/inscripciones/:id/ventas/:ventaId', requireLex, (req, res) => {

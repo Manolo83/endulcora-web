@@ -2566,6 +2566,10 @@ module.exports = {
         concepto: String(it.concepto || '').trim(),
         precioUnitario: Math.max(0, Number(it.precioUnitario) || 0),
         cantidad: Math.max(1, Math.round(Number(it.cantidad) || 1)),
+        // Si viene del selector de ebooks (no de un articulo libre o del
+        // catalogo de materiales), liga la linea al producto real para
+        // poder mandarle sus archivos por correo despues de guardar.
+        productoId: it.productoId ? Number(it.productoId) : null,
       }))
       .filter((l) => l.concepto);
     if (!lineas.length) return null;
