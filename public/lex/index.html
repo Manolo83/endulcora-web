@@ -243,6 +243,9 @@ function pintarInscritos(inscritos) {
             <input type="checkbox" class="campoAsistio h-4 w-4 accent-[#1E7A46]" ${i.asistio ? 'checked' : ''}>
             Asistió
           </label>
+          <button type="button" class="btnReconocimiento rounded-full px-3 py-1 text-sm font-700 transition ${i.reconocimientoEnviado ? 'bg-verde/15 text-verde' : 'border border-vino/30 text-vino hover:border-vino'}">
+            ${i.reconocimientoEnviado ? `✓ Reconocimiento (folio ${i.reconocimientoFolio})` : 'Mandar reconocimiento'}
+          </button>
         </div>
       </div>
       <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -325,6 +328,22 @@ function pintarInscritos(inscritos) {
       } catch (err) {
         toast(err.message);
         e.target.checked = !asistio;
+      }
+    });
+
+    fila.querySelector('.btnReconocimiento').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      const textoOriginal = btn.textContent;
+      btn.textContent = 'Enviando…';
+      try {
+        await api(`/api/inscripciones/${id}/reconocimiento`, { method: 'POST' });
+        toast('Reconocimiento enviado');
+        if (tallerActualId) abrirTaller(tallerActualId);
+      } catch (err) {
+        toast(err.message);
+        btn.disabled = false;
+        btn.textContent = textoOriginal;
       }
     });
 

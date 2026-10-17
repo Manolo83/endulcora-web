@@ -1183,6 +1183,15 @@ async function init() {
       data._migAsistenciaTaller = true;
       changed = true;
     }
+    // Reconocimiento enviado (portal de Lex, Fase 3 parte 2).
+    if (!data._migReconocimientoTaller) {
+      (data.inscripcionesTaller || []).forEach((i) => {
+        if (typeof i.reconocimientoEnviado !== 'boolean') i.reconocimientoEnviado = false;
+        if (i.reconocimientoFolio === undefined) i.reconocimientoFolio = null;
+      });
+      data._migReconocimientoTaller = true;
+      changed = true;
+    }
     // Pestaña de Sheets por defecto (titulo + " div" si es Division) para
     // las sesiones que ya existian con el campo vacio — las importadas a
     // mano o por la sincronizacion automatica antes de este cambio.
@@ -2497,6 +2506,8 @@ module.exports = {
       // Asistencia y recetario (portal de Lex, Fase 3).
       asistio: false,
       recetarioEnviado: false,
+      reconocimientoEnviado: false,
+      reconocimientoFolio: null,
       // Fase 4 (correos automaticos + Google Sheets): cada bandera se marca
       // una sola vez, para no mandar el mismo recordatorio dos veces ni
       // duplicar la fila en "Inscritos 2026" si el servidor se reinicia.
@@ -2594,6 +2605,15 @@ module.exports = {
     const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
     if (!item) return null;
     item.recetarioEnviado = true;
+    save(data);
+    return item;
+  },
+  marcarReconocimientoEnviado(id, folio) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    item.reconocimientoEnviado = true;
+    item.reconocimientoFolio = folio || null;
     save(data);
     return item;
   },

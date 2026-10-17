@@ -52,6 +52,16 @@ const GOOGLE_SHEETS = {
   calendarioFisicoId: process.env.GOOGLE_SHEETS_CALENDARIO_ID || '1-PgGk3Nk7K1JT5xGjvoYePnoz5ObbmUf',
 };
 
+// Servicio aparte "envios" (carpeta envios/, otro despliegue en Railway)
+// donde ya vive el envio de reconocimientos con folio y plantilla de
+// Canva. El portal de Lex le habla por detras (como si fuera otra
+// persona entrando con la misma contraseña compartida) para que ella
+// mande el reconocimiento desde el mismo lugar, sin abrir otra pagina.
+const ENVIOS = {
+  url: (process.env.ENVIOS_API_URL || '').replace(/\/+$/, ''),
+  password: process.env.ENVIOS_APP_PASSWORD || '',
+};
+
 // Correo(s) del equipo de Endulcora que deben enterarse de cada inscripcion
 // nueva a un taller sin tener que estar revisando /admin. Varios correos se
 // separan por coma. Vacia = no se manda ningun aviso (no es un requisito).
@@ -69,5 +79,6 @@ module.exports = {
   META_CAPI_TEST_CODE,
   GOOGLE_ADS,
   GOOGLE_SHEETS,
+  ENVIOS,
   EQUIPO_NOTIFICACIONES_EMAIL,
 };

@@ -10,6 +10,7 @@ const path = require('path');
 const crypto = require('crypto');
 const store = require('../store');
 const email = require('../email');
+const enviosClient = require('../enviosClient');
 const { requireLex, checkLexCode } = require('../authLex');
 const { UPLOAD_DIR, SITE_URL } = require('../config');
 
@@ -139,6 +140,8 @@ router.get('/api/talleres/:id/inscritos', requireLex, (req, res) => {
       ventasExtra: i.ventasExtra || [],
       asistio: !!i.asistio,
       recetarioEnviado: !!i.recetarioEnviado,
+      reconocimientoEnviado: !!i.reconocimientoEnviado,
+      reconocimientoFolio: i.reconocimientoFolio || null,
     }));
   const recetario = store.getRecetarioTaller(sesion.titulo);
   res.json({
@@ -256,6 +259,31 @@ router.delete('/api/inscripciones/:id/ventas/:ventaId', requireLex, (req, res) =
   const item = store.borrarVentaExtraInscripcion(req.params.id, req.params.ventaId);
   if (!item) return res.status(404).json({ error: 'No encontrado' });
   res.json(item);
+});
+
+// Manda el reconocimiento de un inscrito usando el servicio "envios" ya
+// armado (folio, plantilla, historial) -- Lex no sale de este portal, el
+// servidor es quien le habla al otro servicio por detras.
+router.post('/api/inscripciones/:id/reconocimiento', requireLex, async (req, res) => {
+  const inscripcion = store.getInscripcionTaller(req.params.id);
+  if (!inscripcion) return res.status(404).json({ error: 'No encontrado' });
+  if (!inscripcion.correo) return res.status(400).json({ error: 'Esta persona no tiene correo registrado.' });
+  const sesion = store.getSesionesTaller().find((s) => s.id === inscripcion.sesionTallerId);
+  try {
+    const envio = await enviosClient.enviarReconocimientos({
+      taller: sesion ? sesion.titulo : inscripcion.taller,
+      fecha: sesion ? sesion.fecha : inscripcion.fecha,
+      participantes: [{ nombre: inscripcion.nombre, email: inscripcion.correo }],
+    });
+    const resultado = (envio.resultados || [])[0];
+    if (!resultado || resultado.estado !== 'enviado') {
+      return res.status(502).json({ error: (resultado && resultado.error) || 'No se pudo mandar el reconocimiento.' });
+    }
+    const item = store.marcarReconocimientoEnviado(inscripcion.id, resultado.folio);
+    res.json(item);
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
 });
 
 module.exports = router;
