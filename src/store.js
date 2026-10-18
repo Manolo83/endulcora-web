@@ -2924,7 +2924,7 @@ module.exports = {
   getCampanaCorreo(id) {
     return load().campanasCorreo.find((c) => c.id === Number(id)) || null;
   },
-  addCampanaCorreo({ asunto, cuerpoHtml, imagenes, archivos, videoUrl, contactoIds }) {
+  addCampanaCorreo({ asunto, cuerpoHtml, imagenes, archivos, videoUrl, botonTexto, contactoIds }) {
     const data = load();
     const item = {
       id: nextId(data.campanasCorreo),
@@ -2933,6 +2933,10 @@ module.exports = {
       imagenes: imagenes || [],
       archivos: archivos || [],
       videoUrl: videoUrl || '',
+      // Texto del boton que acompaña a videoUrl -- por defecto "Ver video"
+      // (lo que ya hacia antes), pero si el link no es un video (ej. la
+      // pagina de compra de un taller) se puede poner otro texto.
+      botonTexto: String(botonTexto || '').trim(),
       contactoIds: contactoIds || [],
       enviadosIds: [],
       fallidosIds: [],

@@ -357,7 +357,7 @@ function escapeHtml(s) {
 // Gmail y Yahoo exigen esto para no marcar como spam a quien manda correo en
 // volumen, y con eso el "darse de baja" es de un clic, sin que el cliente de
 // correo tenga que abrir el link.
-async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribeUrl, imagenes, archivos, videoUrl }) {
+async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribeUrl, imagenes, archivos, videoUrl, botonTexto }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
 
@@ -366,8 +366,11 @@ async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribe
   const imagenesHtml = (imagenes || [])
     .map((url) => `<img src="${url}" alt="" style="display:block;width:100%;max-width:480px;border-radius:14px;margin-bottom:14px;">`)
     .join('');
+  // El texto del boton es "Ver video" por defecto (como siempre fue), pero
+  // se puede cambiar si el link no es un video de verdad (ej. la pagina de
+  // compra de un taller) -- ver botonTexto en /admin > Campañas.
   const videoHtml = videoUrl
-    ? `<p style="margin-top:22px;"><a href="${videoUrl}" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;display:inline-block;">▶ Ver video</a></p>`
+    ? `<p style="margin-top:22px;"><a href="${videoUrl}" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;display:inline-block;">${escapeHtml(botonTexto || '▶ Ver video')}</a></p>`
     : '';
   // path: Resend descarga cada archivo de esa URL una sola vez y lo adjunta;
   // asi no hay que mandar los archivos completos en cada peticion a la API.

@@ -1310,6 +1310,11 @@
               <p class="mt-1 text-[11px] text-carbon/40">Pega el link de YouTube (u otro) del video. No se adjunta el video en sí — pesaría demasiado y el correo caería en spam — en su lugar el correo trae un botón "Ver video" hacia ese link.</p>
               <input id="campanaVideoUrl" type="url" placeholder="https://youtu.be/..." class="mt-2 w-full rounded-xl border border-vino/15 bg-white px-4 py-2.5 text-sm">
             </label>
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Texto del botón (opcional)</span>
+              <p class="mt-1 text-[11px] text-carbon/40">Si el link de arriba no es un video (ej. la página de un taller), escribe aquí qué debe decir el botón. Si lo dejas vacío, dice "Ver video".</p>
+              <input id="campanaBotonTexto" type="text" maxlength="40" placeholder="Apartar mi lugar en la página" class="mt-2 w-full rounded-xl border border-vino/15 bg-white px-4 py-2.5 text-sm">
+            </label>
           </div>
 
           <button type="submit" id="btnEnviarCampana" class="rounded-full bg-vino px-8 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition sm:justify-self-start">Enviar a los seleccionados</button>
@@ -2338,6 +2343,7 @@ $('formEnviarCampana').addEventListener('submit', async (e) => {
         imagenes: campanaImagenes,
         archivos: campanaArchivos,
         videoUrl: $('campanaVideoUrl').value.trim(),
+        botonTexto: $('campanaBotonTexto').value.trim(),
       }),
     });
     toast('Envío iniciado — el avance se ve abajo, en "Campañas enviadas"');

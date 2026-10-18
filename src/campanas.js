@@ -56,6 +56,7 @@ async function procesarCampana(campanaId) {
           imagenes: campana.imagenes,
           archivos: campana.archivos,
           videoUrl: campana.videoUrl,
+          botonTexto: campana.botonTexto,
         });
         exito = true;
       } catch (e) {

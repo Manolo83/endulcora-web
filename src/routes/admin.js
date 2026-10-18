@@ -1721,7 +1721,7 @@ router.post('/api/campanas/adjuntos/archivos', requireAdmin, uploadAdjuntoArchiv
 // para que si el servidor se reinicia a la mitad (ej. un deploy), se pueda
 // retomar exactamente donde se quedo en vez de perderse (ver src/campanas.js).
 router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
-  const { asunto, cuerpo, contactoIds, imagenes, archivos, videoUrl } = req.body || {};
+  const { asunto, cuerpo, contactoIds, imagenes, archivos, videoUrl, botonTexto } = req.body || {};
   if (!asunto || !String(asunto).trim()) return res.status(400).json({ error: 'Ponle un asunto al correo.' });
   if (!cuerpo || !String(cuerpo).trim()) return res.status(400).json({ error: 'Escribe el contenido del correo.' });
   if (videoUrl && !/^https?:\/\//i.test(String(videoUrl).trim())) {
@@ -1747,6 +1747,7 @@ router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
     ? archivos.slice(0, MAX_ARCHIVOS_CAMPANA).map((a) => ({ filename: a.nombre || 'archivo', path: `${SITE_URL}${a.url}` }))
     : [];
   const videoUrlLimpia = videoUrl ? String(videoUrl).trim() : '';
+  const botonTextoLimpio = botonTexto ? String(botonTexto).trim().slice(0, 40) : '';
 
   const campana = store.addCampanaCorreo({
     asunto: asuntoLimpio,
@@ -1754,6 +1755,7 @@ router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
     imagenes: imagenesCompletas,
     archivos: archivosCompletos,
     videoUrl: videoUrlLimpia,
+    botonTexto: botonTextoLimpio,
     contactoIds: destinatarios.map((c) => c.id),
   });
   res.status(202).json(campana);
