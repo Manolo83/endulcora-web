@@ -139,3 +139,62 @@ impresiones ANTES de tocar creatividades o presupuestos.
 
 REGLA 2: comparar siempre contra el historico de la cuenta, no solo contra
 la semana pasada. La semana pasada tambien estaba rota.
+
+---
+
+## Leccion 12 — Un conjunto con fecha de fin vencida dice ACTIVE y no entrega nada
+
+18 oct. Al intentar colgar los cuatro anuncios de los lives (19–22 oct) en el
+conjunto `LIVES · Habla hispana` (52515358023591), Meta rechazo la creacion:
+
+    "Ad set has ended: Ad set 52515358023591 expired on Oct 15, 2026."
+
+El conjunto se leia asi:
+
+    status:           ACTIVE
+    effective_status: ACTIVE
+    end_time:         2026-10-15T18:00:00-0700
+    amount_spent:     $368.30
+
+Es decir: ACTIVE en los dos campos, y muerto desde el 15 de octubre a las
+6 PM. Tres dias enteros sin entregar una sola impresion, sin ninguna señal
+en los campos que yo venia revisando. Esto explica el anuncio de Brownies
+que llevaba 5 reportes en $0 y que yo seguia preguntando en vez de
+diagnosticar: no era que no gastara, era que el contenedor ya habia
+terminado su calendario.
+
+REGLA: `status` y `effective_status` NO detectan un calendario vencido.
+Para cualquier conjunto o campaña con `end_time` / `stop_time` puesto, hay
+que leer esa fecha y compararla contra hoy. Un conjunto vencido acepta
+renombrar y cambiar presupuesto sin protestar, pero rechaza anuncios nuevos
+y no gasta un peso.
+
+REGLA 2: si un anuncio lleva varios dias en $0, no se pregunta — se revisa
+el `end_time` del conjunto y del campaign ANTES de cualquier otra hipotesis.
+Que yo preguntara cinco veces por el de Brownies en vez de mirar la fecha
+fue el error; la respuesta estaba en un campo que nunca pedi.
+
+REGLA 3: los conjuntos de talleres no llevan `end_time` y por eso nunca
+dieron este problema. Los lives si lo llevan porque son fechas fijas.
+Cada vez que se agregue un live nuevo hay que extender el `end_time` del
+conjunto hasta la hora del ultimo live, o el anuncio ni siquiera se puede
+crear.
+
+Corregido el 18 oct: `end_time` movido a 2026-10-22T18:00:00-0700 (hora de
+inicio del ultimo live, Pastel Bruce). La campaña 52515356214591 se
+renombro de "LIVES · Registros en sitio · Semana 12–15 oct" a
+"LIVES · Registros en sitio" para que el nombre no vuelva a caducar.
+
+---
+
+## Leccion 13 — No repetir de memoria un dato que puedo leer
+
+En la misma sesion yo traia anotado que `Reposteria Otoñal` (52507244353591)
+gastaba $0 con $30 diarios, y sobre eso arme un plan para pausarla y liberar
+presupuesto para los lives. Antes de ejecutarlo lo lei: habia gastado
+$567.25 en 7 dias. Pausarla habria cortado un taller que si estaba
+vendiendo (29 o 31 oct).
+
+REGLA: ningun numero que venga de mi memoria o de un resumen anterior se
+usa para decidir un corte. Se vuelve a leer de la cuenta en el momento. Los
+numeros envejecen en horas.
