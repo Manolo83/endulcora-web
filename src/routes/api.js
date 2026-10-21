@@ -5,7 +5,7 @@ const store = require('../store');
 const { UPLOAD_DIR, GOOGLE_ADS, SITE_URL } = require('../config');
 const { requireCliente } = require('./auth');
 const { uploadImage, uploadMedia, procesarImagenSubida, ALLOWED_VIDEO } = require('../uploads');
-const { enviarCorreoConfirmacionInscripcionTaller, enviarCorreoConfirmacionClaseGratis } = require('../email');
+const { enviarCorreoConfirmacionInscripcionTaller, enviarCorreoConfirmacionClaseGratis, linkAgregarCalendario } = require('../email');
 const { sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 
 const router = express.Router();
@@ -658,6 +658,42 @@ router.post('/clase-gratis/registro', (req, res) => {
     linkWhatsappGrupo: contenido.clasegratis_whatsapp_grupo,
   }).catch((e) => {
     console.error(`[clase-gratis] No se pudo mandar el correo de confirmacion a ${item.correo}:`, e.message);
+  });
+});
+
+// Confirma el lugar de alguien en la clase gratis (control de aforo, tope
+// de 50 por horario) -- dos formas de llegar aqui:
+// 1. Desde el correo personal: trae id+token (el link de ese correo).
+// 2. Desde el link compartido en el grupo de WhatsApp: trae correo (la
+//    persona lo escribe en la pagina publica /confirmar-clase).
+router.post('/clase-gratis/confirmar', (req, res) => {
+  const b = req.body || {};
+  let registro = null;
+  if (b.id && b.token) {
+    registro = store.getRegistroClaseGratisPorToken(b.id, b.token);
+  } else if (b.correo) {
+    registro = store.buscarRegistroClaseGratisActivo(String(b.correo).trim());
+  }
+  if (!registro) {
+    return res.status(404).json({ error: 'No encontramos tu registro. Revisa que el correo sea el mismo con el que te registraste.' });
+  }
+  const { item, resultado } = store.confirmarRegistroClaseGratis(registro.id);
+  const contenido = store.getContent();
+  const calendarLink = resultado !== 'listaEspera'
+    ? linkAgregarCalendario({
+        titulo: 'Clase gratis Endulcora — Pan de muerto',
+        fecha: item.fecha,
+        horario: item.horario,
+        ubicacion: contenido.clasegratis_ubicacion,
+      })
+    : '';
+  res.json({
+    resultado, // 'confirmado' | 'yaConfirmado' | 'listaEspera'
+    nombre: item.nombre,
+    horario: item.horario,
+    fecha: item.fecha,
+    ubicacion: contenido.clasegratis_ubicacion,
+    calendarLink,
   });
 });
 

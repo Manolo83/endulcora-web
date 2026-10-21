@@ -1176,6 +1176,23 @@
         <div id="claseGratisContadorPorHorario" class="flex flex-wrap gap-2 border-l border-crema/20 pl-4"></div>
       </div>
 
+      <div class="mt-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Control de aforo — confirmación de lugar</h3>
+          <button type="button" id="btnMandarConfirmaciones" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Mandar correo "Confirma tu lugar"</button>
+        </div>
+        <p class="mt-1 text-xs text-carbon/50">Tope de <span id="claseGratisCupo">50</span> por horario, por orden de llegada. El resto queda en lista de espera y se le avisa por correo si se libera un lugar.</p>
+        <p id="claseGratisEnvioEstado" class="mt-2 hidden text-sm font-600 text-vino"></p>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-crema/60 p-4">
+          <p class="text-sm text-carbon/70">Link para compartir en el grupo de WhatsApp de la clase (uno solo, cada quien escribe su correo ahí):</p>
+          <code id="claseGratisLinkCompartible" class="rounded-lg bg-white px-3 py-1.5 text-xs text-vino ring-1 ring-vino/10"></code>
+          <button type="button" id="btnCopiarLinkConfirmar" class="rounded-full border border-vino/25 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Copiar</button>
+        </div>
+
+        <div id="claseGratisResumenHorarios" class="mt-4 space-y-2"></div>
+      </div>
+
       <p class="mt-4 rounded-xl bg-flama/10 p-3 text-xs leading-relaxed text-vino ring-1 ring-flama/30">Al cierre del día, marca para cada quien qué pasó de verdad (asistió, compró, se hizo miembro). Eso decide la etiqueta con la que queda en la lista de campañas, para poder mandarle a cada segmento el seguimiento que le toca.</p>
 
       <div class="mt-4 flex flex-wrap items-center gap-5 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
@@ -1517,6 +1534,7 @@ function mostrarDashboard(mostrar){
     cargarInscripcionesTaller();
     cargarRegistrosQr();
     cargarClaseGratis();
+    cargarConfirmacionesClaseGratis();
     cargarVideoEnVivoAdmin();
     cargarCursosAdmin();
     cargarResenas();
@@ -3874,6 +3892,77 @@ function renderContadorClaseGratis(){
   cont.innerHTML = claves.length ? claves.map(h => `
     <span class="rounded-full bg-crema/10 px-3 py-1.5 font-ui text-[11px] font-600 text-crema/90">${escapeHtml(h)}: <strong>${porHorario[h]}</strong></span>
   `).join('') : '<span class="font-ui text-[11px] text-crema/50">Sin registros todavía</span>';
+}
+
+/* ---------- Control de aforo (confirmacion de lugar) ---------- */
+async function cargarConfirmacionesClaseGratis(){
+  try{
+    const data = await api('/admin/api/clase-gratis/confirmaciones/resumen');
+    $('claseGratisCupo').textContent = data.cupoPorHorario;
+    $('claseGratisLinkCompartible').textContent = data.linkCompartible;
+    const cont = $('claseGratisResumenHorarios');
+    cont.innerHTML = !data.resumen.length ? '<p class="text-sm text-carbon/50">Sin registros todavía.</p>' : data.resumen.map(h => `
+      <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-vino/10 px-4 py-3">
+        <div>
+          <p class="text-sm font-700 text-vino">${escapeHtml(h.horario)}</p>
+          <p class="text-xs text-carbon/50">${h.registrados} registrados · <strong class="${h.confirmados >= h.cupo ? 'text-red-600' : 'text-verde'}">${h.confirmados}/${h.cupo} confirmados</strong>${h.enListaEspera ? ` · ${h.enListaEspera} en lista de espera` : ''}</p>
+        </div>
+        ${h.enListaEspera > 0 && h.confirmados < h.cupo ? `<button type="button" class="btnPromoverEspera rounded-full border border-vino/25 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition" data-horario="${escapeHtml(h.horario)}">Promover 1 de la lista de espera</button>` : ''}
+      </div>
+    `).join('');
+    cont.querySelectorAll('.btnPromoverEspera').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try{
+          const r = await api('/admin/api/clase-gratis/confirmaciones/promover', { method: 'POST', body: JSON.stringify({ horario: btn.dataset.horario }) });
+          toast(`${r.nombre} fue promovido y avisado por correo`);
+          cargarConfirmacionesClaseGratis();
+        }catch(e){
+          toast(e.message);
+          btn.disabled = false;
+        }
+      });
+    });
+    revisarEnvioConfirmacionesEnCurso();
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+$('btnCopiarLinkConfirmar').addEventListener('click', async () => {
+  const link = $('claseGratisLinkCompartible').textContent;
+  try{ await navigator.clipboard.writeText(link); toast('Link copiado'); }
+  catch(e){ toast(link); }
+});
+
+$('btnMandarConfirmaciones').addEventListener('click', async () => {
+  if(!confirm('¿Mandar el correo "Confirma tu lugar" a todos los registrados que todavía no lo han recibido? Esta acción no se puede deshacer.')) return;
+  $('btnMandarConfirmaciones').disabled = true;
+  try{
+    await api('/admin/api/clase-gratis/confirmaciones/mandar', { method: 'POST' });
+    toast('Envío iniciado — el avance se ve aquí mismo en unos segundos');
+    revisarEnvioConfirmacionesEnCurso();
+  }catch(e){
+    toast(e.message);
+    $('btnMandarConfirmaciones').disabled = false;
+  }
+});
+
+let intervaloEnvioConfirmaciones = null;
+async function revisarEnvioConfirmacionesEnCurso(){
+  const envio = await api('/admin/api/clase-gratis/confirmaciones/envio').catch(() => null);
+  const p = $('claseGratisEnvioEstado');
+  if(!envio){ p.classList.add('hidden'); return; }
+  const procesados = envio.enviadosIds.length + envio.fallidosIds.length;
+  p.classList.remove('hidden');
+  p.textContent = envio.estado === 'terminada'
+    ? `Envío terminado: ${envio.enviadosIds.length} enviados, ${envio.fallidosIds.length} fallidos de ${envio.total}.`
+    : `Enviando… ${procesados}/${envio.total}`;
+  $('btnMandarConfirmaciones').disabled = envio.estado !== 'terminada';
+  clearInterval(intervaloEnvioConfirmaciones);
+  if(envio.estado !== 'terminada'){
+    intervaloEnvioConfirmaciones = setInterval(() => { revisarEnvioConfirmacionesEnCurso(); cargarConfirmacionesClaseGratis(); }, 4000);
+  }
 }
 
 async function cargarClaseGratis(){

@@ -276,6 +276,14 @@ app.get('/calendario', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'calendario.html'));
 });
 
+// Confirmar lugar en la clase gratis (control de aforo): el link personal
+// del correo trae ?id=&token=, el link compartido en el grupo de WhatsApp
+// no trae nada y la misma pagina muestra el formulario de "escribe tu
+// correo" en su lugar.
+app.get('/confirmar-clase', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'confirmar-clase.html'));
+});
+
 // /talleres: mismo calendario que /calendario (filtro por sede), pero desde
 // aqui cada sesion con precio configurado lleva a su propia pagina de
 // compra (/talleres/<slug>) en lugar de abrir WhatsApp — es la URL pensada
@@ -554,6 +562,9 @@ store.init()
     // nada (ver src/googleSheets.js) — los recordatorios por correo si
     // corren.
     require('./src/automatizacionesTaller').iniciarAutomatizacionesTaller();
+    // Confirmacion de lugar de la clase gratis (control de aforo con tope
+    // de cupo) y sus recordatorios a quien ya confirmo.
+    require('./src/confirmacionClaseGratis').iniciarAutomatizacionClaseGratis();
   })
   .catch((err) => {
     console.error('No se pudo conectar a la base de datos, el servidor no arranco:', err.message);

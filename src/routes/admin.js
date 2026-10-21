@@ -10,7 +10,7 @@ const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL, GOOGLE_SHEETS } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
-const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller } = require('../email');
+const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller, enviarCorreoPromovidoListaEsperaClaseGratis } = require('../email');
 const { procesarCampana } = require('../campanas');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
@@ -779,6 +779,67 @@ router.patch('/api/clase-gratis/registros/:id', requireAdmin, (req, res) => {
 router.delete('/api/clase-gratis/registros/:id', requireAdmin, (req, res) => {
   store.deleteRegistroClaseGratis(req.params.id);
   res.json({ ok: true });
+});
+
+// ---- Control de aforo (correo "confirma tu lugar" + tope de cupo + lista
+// de espera) ----
+router.get('/api/clase-gratis/confirmaciones/resumen', requireAdmin, (req, res) => {
+  const contenido = store.getContent();
+  res.json({
+    cupoPorHorario: store.CUPO_CLASE_GRATIS_POR_HORARIO,
+    resumen: store.resumenConfirmacionesClaseGratis(contenido.clasegratis_fecha),
+    linkCompartible: `${SITE_URL}/confirmar-clase`,
+  });
+});
+
+router.post('/api/clase-gratis/confirmaciones/mandar', requireAdmin, (req, res) => {
+  const envioActual = store.getEnvioConfirmacionClaseGratis();
+  if (envioActual && envioActual.estado !== 'terminada') {
+    return res.status(400).json({ error: 'Ya hay un envío en curso.' });
+  }
+  const ids = store.getRegistrosClaseGratis()
+    .filter((r) => !r.correoConfirmarEnviado)
+    .map((r) => r.id);
+  if (!ids.length) return res.status(400).json({ error: 'No hay nadie pendiente de mandarle el correo de confirmación.' });
+  // Se marca de una vez como "ya se le mando" para que un reintento
+  // posterior (ej. si llega gente nueva despues) no se lo vuelva a mandar
+  // a quien ya lo recibio.
+  ids.forEach((id) => store.marcarRecordatorioClaseGratisEnviado(id, 'correoConfirmarEnviado'));
+  const envio = store.iniciarEnvioConfirmacionClaseGratis(ids);
+  res.status(202).json(envio);
+  require('../confirmacionClaseGratis').procesarEnvioConfirmacionClaseGratis().catch(() => {});
+});
+
+router.get('/api/clase-gratis/confirmaciones/envio', requireAdmin, (req, res) => {
+  res.json(store.getEnvioConfirmacionClaseGratis());
+});
+
+router.post('/api/clase-gratis/confirmaciones/:id/cancelar', requireAdmin, (req, res) => {
+  const item = store.cancelarConfirmacionClaseGratis(req.params.id);
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+// Promueve a quien lleve mas tiempo en lista de espera de ese horario, y le
+// avisa por correo que ya quedo confirmado.
+router.post('/api/clase-gratis/confirmaciones/promover', requireAdmin, async (req, res) => {
+  const { horario } = req.body || {};
+  if (!horario) return res.status(400).json({ error: 'Falta el horario.' });
+  const contenido = store.getContent();
+  const promovido = store.promoverListaEsperaClaseGratis(horario, contenido.clasegratis_fecha);
+  if (!promovido) return res.status(400).json({ error: 'No hay lugar libre o nadie en lista de espera para ese horario.' });
+  try {
+    await enviarCorreoPromovidoListaEsperaClaseGratis({
+      to: promovido.correo,
+      nombre: promovido.nombre,
+      horario: promovido.horario,
+      fecha: promovido.fecha,
+      ubicacion: contenido.clasegratis_ubicacion,
+    });
+  } catch (e) {
+    console.error(`[clase-gratis] Se promovio a ${promovido.correo} pero no se le pudo avisar:`, e.message);
+  }
+  res.json(promovido);
 });
 
 const ETIQUETA_SEGMENTO_CLASE_GRATIS = {
