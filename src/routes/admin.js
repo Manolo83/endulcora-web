@@ -1583,11 +1583,16 @@ router.get('/api/clases/biblioteca', requireAdmin, (req, res) => {
   res.json(store.getBibliotecaClases());
 });
 
+// El video es opcional: una clase puede quedar solo con su recetario (ej.
+// una sesion que no se grabo), sin link de YouTube. Si se pega un link, se
+// valida que sea uno de verdad.
 router.post('/api/clases/biblioteca', requireAdmin, (req, res) => {
   const { titulo, descripcion, youtubeUrl, fecha } = req.body || {};
   if (!titulo || !String(titulo).trim()) return res.status(400).json({ error: 'Ponle un título a la clase.' });
   const youtubeId = extraerIdYoutube(youtubeUrl);
-  if (!youtubeId) return res.status(400).json({ error: 'Pega un link válido de YouTube.' });
+  if (youtubeUrl && String(youtubeUrl).trim() && !youtubeId) {
+    return res.status(400).json({ error: 'Ese link de YouTube no se reconoce. Pega uno válido o deja el campo vacío.' });
+  }
   const item = store.addClaseBiblioteca({ titulo, descripcion, youtubeId, fecha });
   res.status(201).json(item);
 });

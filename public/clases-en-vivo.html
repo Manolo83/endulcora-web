@@ -372,7 +372,9 @@ body { background: #FBF4E9; }
           </span>
         </button>
       </div>
-      <a href="/biblioteca-clases" class="mt-4 inline-flex items-center gap-1.5 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:underline">Ver todas las clases en tu biblioteca →</a>
+      <p id="avisoSinVideoUltimaClase" class="mt-4 hidden rounded-2xl bg-crema/60 p-4 text-sm text-carbon/60">Esta clase no tiene grabación disponible.</p>
+      <a id="linkRecetarioUltimaClase" href="#" target="_blank" rel="noopener" class="mt-4 hidden inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Descargar recetario</a>
+      <a href="/biblioteca-clases" class="mt-4 block font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:underline">Ver todas las clases en tu biblioteca →</a>
     </div>
   </div>
 </main>
@@ -1114,7 +1116,19 @@ async function cargarUltimaClase(){
     document.getElementById('ultimaClaseFecha').textContent = new Date((ultima.fecha || '') + 'T00:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
     document.getElementById('ultimaClaseTitulo').textContent = ultima.titulo;
     document.getElementById('ultimaClaseDescripcion').textContent = ultima.descripcion || '';
-    iniciarReproductorUltimaClase(ultima.youtubeId);
+    const contenedorVideo = document.getElementById('ultimaClaseContenedor');
+    const avisoSinVideo = document.getElementById('avisoSinVideoUltimaClase');
+    if(ultima.youtubeId){
+      contenedorVideo.classList.remove('hidden');
+      avisoSinVideo.classList.add('hidden');
+      iniciarReproductorUltimaClase(ultima.youtubeId);
+    }else{
+      contenedorVideo.classList.add('hidden');
+      avisoSinVideo.classList.remove('hidden');
+    }
+    const linkRecetario = document.getElementById('linkRecetarioUltimaClase');
+    linkRecetario.classList.toggle('hidden', !ultima.recetarioDisponible);
+    if(ultima.recetarioDisponible) linkRecetario.href = `/api/membresia/biblioteca-clases/${ultima.id}/recetario`;
   }catch(e){
     document.getElementById('bloqueUltimaClaseInvitado').classList.remove('hidden');
   }

@@ -155,6 +155,7 @@ body { background: #FBF4E9; }
         </span>
       </button>
     </div>
+    <p id="avisoSinVideoClase" class="mt-4 hidden rounded-2xl bg-crema/60 p-4 text-sm text-carbon/60">Esta clase no tiene grabación disponible — descarga su recetario aquí abajo.</p>
     <button type="button" id="btnVerRecetarioClase" class="mt-4 hidden inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
       Ver recetario
     </button>
@@ -218,11 +219,15 @@ function pintarBiblioteca(lista){
   document.getElementById('bibliotecaSinResultados').classList.toggle('hidden', !(BIBLIOTECA.length && lista.length === 0));
   grid.innerHTML = lista.map(c => `
     <button type="button" data-id="${c.id}" class="tarjetaClase group overflow-hidden rounded-2xl bg-white text-left ring-1 ring-vino/10 transition hover:ring-vino/30">
-      <div class="relative aspect-video w-full overflow-hidden bg-carbon">
+      <div class="relative aspect-video w-full overflow-hidden ${c.youtubeId ? 'bg-carbon' : 'bg-vino/90'}">
+        ${c.youtubeId ? `
         <img src="https://img.youtube.com/vi/${encodeURIComponent(c.youtubeId)}/hqdefault.jpg" alt="" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy">
         <span class="absolute inset-0 grid place-items-center bg-carbon/20 opacity-0 transition group-hover:opacity-100">
           <span class="grid h-12 w-12 place-items-center rounded-full bg-white/90 text-vino"><svg viewBox="0 0 24 24" class="h-6 w-6 translate-x-0.5" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-        </span>
+        </span>` : `
+        <div class="grid h-full w-full place-items-center">
+          <svg viewBox="0 0 24 24" class="h-10 w-10 text-crema/70" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5M9 13h6M9 17h6"/></svg>
+        </div>`}
       </div>
       <div class="p-4">
         <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-morado">${escapeHtml(new Date((c.fecha||'')+'T00:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}))}</p>
@@ -292,10 +297,20 @@ function abrirModalVideo(id){
   document.getElementById('modalVideoDescripcion').textContent = clase.descripcion || '';
   document.getElementById('modalVideo').classList.remove('hidden');
   document.getElementById('modalVideo').classList.add('flex');
-  if(reproductorModal && typeof reproductorModal.loadVideoById === 'function'){
-    reproductorModal.loadVideoById(clase.youtubeId);
+  const contenedorVideo = document.getElementById('modalVideoContenedor');
+  const avisoSinVideo = document.getElementById('avisoSinVideoClase');
+  if(clase.youtubeId){
+    contenedorVideo.classList.remove('hidden');
+    avisoSinVideo.classList.add('hidden');
+    if(reproductorModal && typeof reproductorModal.loadVideoById === 'function'){
+      reproductorModal.loadVideoById(clase.youtubeId);
+    }else{
+      iniciarReproductorModal(clase.youtubeId);
+    }
   }else{
-    iniciarReproductorModal(clase.youtubeId);
+    contenedorVideo.classList.add('hidden');
+    if(reproductorModal && typeof reproductorModal.pauseVideo === 'function') reproductorModal.pauseVideo();
+    avisoSinVideo.classList.remove('hidden');
   }
 
   const btnRecetario = document.getElementById('btnVerRecetarioClase');

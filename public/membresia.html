@@ -305,7 +305,7 @@ body { background: #FBF4E9; }
       <button type="button" onclick="cerrarModalBibliotecaMembresia()" aria-label="Cerrar" class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-carbon/50 hover:bg-vino/5">✕</button>
     </div>
     <p id="modalBibliotecaDescripcion" class="mt-1 text-sm text-carbon/60"></p>
-    <div class="relative mt-4 aspect-video w-full select-none overflow-hidden rounded-2xl bg-carbon" oncontextmenu="return false" ondragstart="return false">
+    <div id="contenedorVideoBiblioteca" class="relative mt-4 aspect-video w-full select-none overflow-hidden rounded-2xl bg-carbon" oncontextmenu="return false" ondragstart="return false">
       <div id="iframeModalBibliotecaHost" class="h-full w-full"></div>
       <button type="button" id="btnPlayPauseModalBiblioteca" aria-label="Reproducir o pausar el video" class="group absolute inset-0 flex items-center justify-center">
         <span class="grid h-16 w-16 place-items-center rounded-full bg-white/90 text-vino opacity-80 shadow-xl transition group-hover:opacity-100">
@@ -314,6 +314,7 @@ body { background: #FBF4E9; }
         </span>
       </button>
     </div>
+    <p id="avisoSinVideoBiblioteca" class="mt-4 hidden rounded-2xl bg-crema/60 p-4 text-sm text-carbon/60">Esta clase no tiene grabación disponible — descarga su recetario aquí abajo.</p>
     <button type="button" id="btnVerRecetarioBiblioteca" class="mt-4 hidden inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
       Ver recetario
     </button>
@@ -737,11 +738,15 @@ function pintarBibliotecaMembresia(lista){
   document.getElementById('bibliotecaMembresiaSinResultados').classList.toggle('hidden', !(BIBLIOTECA_MIEMBRO.length && lista.length === 0));
   grid.innerHTML = lista.map(c => `
     <button type="button" data-id="${c.id}" class="tarjetaClaseBiblioteca group overflow-hidden rounded-2xl bg-crema/60 text-left ring-1 ring-vino/10 transition hover:ring-vino/30">
-      <div class="relative aspect-video w-full overflow-hidden bg-carbon">
+      <div class="relative aspect-video w-full overflow-hidden ${c.youtubeId ? 'bg-carbon' : 'bg-vino/90'}">
+        ${c.youtubeId ? `
         <img src="https://img.youtube.com/vi/${encodeURIComponent(c.youtubeId)}/hqdefault.jpg" alt="" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy">
         <span class="absolute inset-0 grid place-items-center bg-carbon/20 opacity-0 transition group-hover:opacity-100">
           <span class="grid h-12 w-12 place-items-center rounded-full bg-white/90 text-vino"><svg viewBox="0 0 24 24" class="h-6 w-6 translate-x-0.5" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-        </span>
+        </span>` : `
+        <div class="grid h-full w-full place-items-center">
+          <svg viewBox="0 0 24 24" class="h-10 w-10 text-crema/70" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5M9 13h6M9 17h6"/></svg>
+        </div>`}
       </div>
       <div class="p-4">
         <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-morado">${escapeHtml(new Date((c.fecha||'')+'T00:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}))}</p>
@@ -800,13 +805,23 @@ function abrirModalBibliotecaMembresia(id){
   document.getElementById('modalBibliotecaDescripcion').textContent = clase.descripcion || '';
   document.getElementById('modalVideoBiblioteca').classList.remove('hidden');
   document.getElementById('modalVideoBiblioteca').classList.add('flex');
-  if(reproductorBiblioteca && typeof reproductorBiblioteca.loadVideoById === 'function'){
-    reproductorBiblioteca.loadVideoById(clase.youtubeId);
-  }else if(window.YT && window.YT.Player){
-    crearReproductorBiblioteca(clase.youtubeId);
+  const contenedorVideo = document.getElementById('contenedorVideoBiblioteca');
+  const avisoSinVideo = document.getElementById('avisoSinVideoBiblioteca');
+  if(clase.youtubeId){
+    contenedorVideo.classList.remove('hidden');
+    if(avisoSinVideo) avisoSinVideo.classList.add('hidden');
+    if(reproductorBiblioteca && typeof reproductorBiblioteca.loadVideoById === 'function'){
+      reproductorBiblioteca.loadVideoById(clase.youtubeId);
+    }else if(window.YT && window.YT.Player){
+      crearReproductorBiblioteca(clase.youtubeId);
+    }else{
+      videoIdPendienteBiblioteca = clase.youtubeId;
+      solicitarIframeApi();
+    }
   }else{
-    videoIdPendienteBiblioteca = clase.youtubeId;
-    solicitarIframeApi();
+    contenedorVideo.classList.add('hidden');
+    if(reproductorBiblioteca && typeof reproductorBiblioteca.pauseVideo === 'function') reproductorBiblioteca.pauseVideo();
+    if(avisoSinVideo) avisoSinVideo.classList.remove('hidden');
   }
 
   const btnRecetario = document.getElementById('btnVerRecetarioBiblioteca');

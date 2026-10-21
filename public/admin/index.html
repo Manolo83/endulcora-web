@@ -382,7 +382,7 @@
 
       <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Biblioteca de clases (grabaciones para miembros)</h3>
-        <p class="mt-1 text-xs text-carbon/50">Cada video que agregues aquí queda guardado para siempre en la biblioteca de miembros con membresía activa, con buscador, en <a href="/biblioteca-clases" target="_blank" class="text-vino hover:underline">/biblioteca-clases</a>. El más reciente también se muestra en <a href="/clases-en-vivo" target="_blank" class="text-vino hover:underline">/clases-en-vivo</a>.</p>
+        <p class="mt-1 text-xs text-carbon/50">Cada clase que agregues aquí queda guardada para siempre en la biblioteca de miembros con membresía activa, con buscador, en <a href="/biblioteca-clases" target="_blank" class="text-vino hover:underline">/biblioteca-clases</a>. El más reciente también se muestra en <a href="/clases-en-vivo" target="_blank" class="text-vino hover:underline">/clases-en-vivo</a>. El video es opcional: si una clase no se grabó, déjalo vacío y agrégale solo su recetario.</p>
         <form id="formClaseBiblioteca" class="mt-4 grid gap-4 sm:grid-cols-2">
           <label class="block sm:col-span-2">
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título de la clase</span>
@@ -393,8 +393,8 @@
             <input id="claseBibFecha" type="date" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           </label>
           <label class="block">
-            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link de YouTube</span>
-            <input id="claseBibYoutube" type="text" required placeholder="https://youtu.be/..." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link de YouTube (opcional)</span>
+            <input id="claseBibYoutube" type="text" placeholder="https://youtu.be/..." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
           </label>
           <label class="block sm:col-span-2">
             <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción (opcional)</span>
@@ -1994,7 +1994,7 @@ async function cargarBibliotecaClasesAdmin(){
       <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-vino/10 px-4 py-3">
         <div class="min-w-0">
           <p class="truncate text-sm font-600 text-carbon/80">${escapeHtml(c.titulo)}</p>
-          <p class="text-xs text-carbon/40">${escapeHtml(c.fecha || '')} · ID: ${escapeHtml(c.youtubeId)} · Recetario: ${c.recetarioUrl ? '✓ cargado' : 'sin cargar'}</p>
+          <p class="text-xs text-carbon/40">${escapeHtml(c.fecha || '')} · ${c.youtubeId ? 'ID video: ' + escapeHtml(c.youtubeId) : 'Sin grabación'} · Recetario: ${c.recetarioUrl ? '✓ cargado' : 'sin cargar'}</p>
         </div>
         <div class="flex shrink-0 items-center gap-2">
           <label class="cursor-pointer rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
