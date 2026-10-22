@@ -1235,6 +1235,129 @@ async function init() {
       data._migDireccionSedes = true;
       changed = true;
     }
+    // Campaña noviembre · semana 1 (5-8 nov 2026): 8 talleres con copy de
+    // Manuel (artes + info del 22 oct), dados de alta de una sola vez para
+    // que cada uno tenga ya su pagina /talleres/<slug> con foto y se pueda
+    // ligar desde Meta Ads (en vez de mandar a WhatsApp). Varios talleres
+    // tienen dos fechas alternas ("jueves o sabado") — cada fecha es su
+    // propia sesion/pagina, como ya funciona el resto del calendario.
+    if (!data._migTalleresNov26Semana1) {
+      const SEED_DIR_TALLERES = path.join(__dirname, '..', 'seed-archivos', 'talleres-nov26-s1');
+      const sedePorNombre = (nombre) => (data.sedes || []).find(
+        (s) => s.nombre.toLowerCase().includes(nombre.toLowerCase())
+      );
+      const sedeNativitas = sedePorNombre('nativitas');
+      const sedeDivision = sedePorNombre('divisi');
+      const copiarImagen = (archivo) => {
+        const origen = path.join(SEED_DIR_TALLERES, archivo);
+        if (!fs.existsSync(origen)) return '';
+        const destino = `${crypto.randomUUID()}${path.extname(archivo)}`;
+        fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+        return `/uploads/${destino}`;
+      };
+      const HORARIO_MANANA = '10:00 am – 2:00 pm';
+      const HORARIO_TARDE = '4:00 pm – 8:00 pm';
+      const TALLERES_NOV26_S1 = [
+        {
+          sede: sedeNativitas,
+          titulo: 'Cheesecakes Horneados',
+          fechas: ['2026-11-05', '2026-11-07'],
+          horario: HORARIO_MANANA,
+          imagen: 'cheesecake.jpg',
+          descripcion: 'El cheesecake horneado, cremoso y sin una sola grieta. New York clásico, zarzamora con compota casera y estilo tortuga. Base firme, batido sin aire y horneado a baño maría. Taller presencial de 4 horas, para principiantes.',
+          queAprendes: 'Preparas 3 cheesecakes: New York Clásico, Zarzamora con mermelada natural y Estilo Tortuga. Además aprendes la base de galleta firme, el batido sin aire, el horneado a baño maría sin grietas, y el enfriado, desmolde y conservación.',
+        },
+        {
+          sede: sedeNativitas,
+          titulo: 'Chocolatería Básica',
+          fechas: ['2026-11-05', '2026-11-07'],
+          horario: HORARIO_MANANA,
+          imagen: 'chocolate.jpg',
+          descripcion: 'El chocolate se trabaja con técnica, no con suerte. Trufas, rocas, enjambres y tortugas. Más el fundido sin errores y una ganache que no se corta. Taller presencial de 4 horas, para principiantes.',
+          queAprendes: 'Preparas trufas, rocas, enjambres y tortugas. Además aprendes a distinguir cobertura real de sucedáneo, el fundido controlado sin quemar el chocolate, la ganache (emulsión estable y proporciones), qué hacer si se corta el chocolate, y conservación y empaque.',
+        },
+        {
+          sede: sedeNativitas,
+          titulo: 'Velas Comestibles',
+          fechas: ['2026-11-06', '2026-11-08'],
+          horario: HORARIO_MANANA,
+          imagen: 'velas.jpg',
+          descripcion: 'Parece una vela. Se enciende. Y se come. Tres velas comestibles: de mantequilla, de chocolate y de frutos rojos. Con mecha comestible y control de flama. Taller presencial de 4 horas, para principiantes.',
+          queAprendes: 'Preparas 3 velas comestibles: base de mantequilla, base de chocolate y de frutos rojos. Además aprendes mecha comestible y control de flama, estabilización de la grasa, decoración de cada vela, y conservación y cadena de frío.',
+        },
+        {
+          sede: sedeNativitas,
+          titulo: 'Aguas Michoacanas',
+          fechas: ['2026-11-06', '2026-11-08'],
+          horario: HORARIO_MANANA,
+          imagen: 'aguas.jpg',
+          descripcion: 'El agua fresca que no se pone aguada ni se va al fondo. 14 aguas: 8 clásicas estilo Michoacana y 6 gourmet de autor. Más el punto de dulzor de la base, contando el hielo. Taller presencial de 4 horas, para principiantes.',
+          queAprendes: 'Preparas 14 aguas: horchata, jamaica, limón con chía, tamarindo, fresa con leche, melón, piña colada y mango con chile (clásicas), más jamaica con lavanda, pepino con menta y limón, piña con albahaca y jengibre, guayaba con flor de jamaica, maracuyá con hierbabuena y coco tostado con vainilla (gourmet). Además aprendes el punto de dulzor contando el hielo, que la fruta no se vaya al fondo ni se oxide, y conservación de cada agua.',
+        },
+        {
+          sede: sedeNativitas,
+          titulo: 'Tablas de Charcutería',
+          fechas: ['2026-11-07'],
+          horario: HORARIO_TARDE,
+          imagen: 'charcuteria.jpg',
+          descripcion: 'La tabla que se roba la reunión. Rosas de charcutería, plisados en abanico, geometría en quesos y zonificación para que luzca llena. Taller vespertino de 4 horas, para principiantes.',
+          queAprendes: 'Armas tu propia tabla de 15x25 cm con rosas de charcutería, plisados en abanico, geometría en quesos y zonificación estética. Además aprendes elección de quesos y carnes frías, corte de quesos según su textura, y conservación y empaque para llevar.',
+        },
+        {
+          sede: sedeNativitas,
+          titulo: 'Carnitas',
+          fechas: ['2026-11-08'],
+          horario: HORARIO_MANANA,
+          imagen: 'carnitas.jpg',
+          descripcion: 'Carnitas doradas por fuera y jugosas por dentro. La receta completa, más las salsas y los nopales que las acompañan. Taller presencial de 4 horas, para principiantes.',
+          queAprendes: 'Preparas carnitas completas, las salsas que las acompañan y nopales. Además aprendes selección de cortes, manejo de grasa y temperatura, el punto dorado sin resecar la carne, y conservación.',
+        },
+        {
+          sede: sedeDivision,
+          titulo: 'Galletas NY',
+          fechas: ['2026-11-05', '2026-11-07'],
+          horario: HORARIO_MANANA,
+          imagen: 'galletasny.jpg',
+          descripcion: 'La galleta gruesa estilo Nueva York, con el centro suave. Cinco rellenas: conejito de chocolate, red velvet, volcán de chocolate y avellana, caramelo especiado y carrot cake. Masa que no se extiende, reposo en frío y el punto exacto de horneado. Taller presencial de 4 horas, para principiantes.',
+          queAprendes: 'Preparas 5 galletas rellenas: conejito de chocolate, corazón red velvet, volcán de chocolate y avellana, caramelo especiado y carrot cake. Además aprendes la masa que no se extiende en el horno, reposo en frío y porcionado, el punto de horneado para un centro suave, y conservación y empaque.',
+        },
+        {
+          sede: sedeDivision,
+          titulo: 'Tiramisú Douyin',
+          fechas: ['2026-11-06', '2026-11-08'],
+          horario: HORARIO_MANANA,
+          imagen: 'tiramisu.jpg',
+          descripcion: 'El tiramisú que está arrasando en redes. Cuatro sabores: mango, frutos rojos, cookies and cream y pistacho. En molde, con capas visibles. Taller presencial de 4 horas, para principiantes.',
+          queAprendes: 'Preparas tiramisú en 4 sabores: mango, frutos rojos, cookies and cream y pistacho. Además aprendes crema estable que no se escurre, capas visibles y parejas en molde, remojo justo de la base, y conservación en frío.',
+        },
+      ];
+      TALLERES_NOV26_S1.forEach((t) => {
+        if (!t.sede) return; // sede no encontrada: no crea nada a ciegas
+        const fotoUrl = copiarImagen(t.imagen);
+        t.fechas.forEach((fecha) => {
+          const mismaFecha = data.sesionesTaller.filter((s) => s.sedeId === t.sede.id && s.fecha === fecha);
+          data.sesionesTaller.push({
+            id: nextId(data.sesionesTaller),
+            sedeId: t.sede.id,
+            fecha,
+            titulo: t.titulo,
+            estado: 'disponible',
+            horario: t.horario,
+            orden: mismaFecha.length,
+            slug: slugUnicoSesionTaller(data, t.titulo),
+            descripcion: t.descripcion,
+            queAprendes: t.queAprendes,
+            fotoUrl,
+            precioTotal: 1149,
+            anticipo: 400,
+            cupoMaximo: 20,
+            hojaSheets: `${t.titulo}${esSedeDivision(t.sede.nombre) ? ' div' : ''}`,
+          });
+        });
+      });
+      data._migTalleresNov26Semana1 = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
