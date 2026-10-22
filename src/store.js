@@ -1358,6 +1358,64 @@ async function init() {
       data._migTalleresNov26Semana1 = true;
       changed = true;
     }
+    // Resuelve el duplicado: el calendario fisico ya habia sincronizado solo
+    // estos mismos talleres (ej. "Cheesecake" sin foto/precio) ANTES de que
+    // la migracion de arriba agregara su version completa ("Cheesecakes
+    // Horneados" con foto, descripcion y precio) — misma sede/fecha/horario,
+    // dos sesiones distintas. Aqui se fusionan: la sesion vieja (la que ya
+    // existia, con su slug e inscritos si los tiene) se queda, se le rellena
+    // SOLO lo que le faltaba (nunca pisa un dato que el equipo ya haya
+    // puesto a mano), se le pasan los inscritos de la duplicada nueva (por si
+    // alguien alcanzo a registrarse en los minutos que estuvo viva), y la
+    // duplicada se borra. Si no hay exactamente una sesion vieja que
+    // coincida (0 o mas de 1), no se toca nada — mejor dejar el duplicado
+    // visible que fusionar a ciegas.
+    if (!data._migTalleresNov26Semana1Fusion) {
+      // Palabra clave que debe aparecer en el titulo de la sesion vieja para
+      // considerarla "la misma" — no basta con sede+fecha, porque varios
+      // talleres MIOS de este mismo lote comparten sede/fecha/horario (ej.
+      // Cheesecakes y Chocolateria el mismo jueves por la manana en
+      // Nativitas: son dos talleres distintos en paralelo, no un duplicado).
+      const CLAVES_NOV26_S1 = [
+        { slug: 'cheesecakes-horneados', clave: 'cheesecake' },
+        { slug: 'cheesecakes-horneados-2', clave: 'cheesecake' },
+        { slug: 'chocolateria-basica', clave: 'chocolat' },
+        { slug: 'chocolateria-basica-2', clave: 'chocolat' },
+        { slug: 'velas-comestibles', clave: 'vela' },
+        { slug: 'velas-comestibles-2', clave: 'vela' },
+        { slug: 'aguas-michoacanas', clave: 'agua' },
+        { slug: 'aguas-michoacanas-2', clave: 'agua' },
+        { slug: 'tablas-de-charcuteria', clave: 'charcuter' },
+        { slug: 'carnitas', clave: 'carnita' },
+        { slug: 'galletas-ny', clave: 'galleta' },
+        { slug: 'galletas-ny-2', clave: 'galleta' },
+        { slug: 'tiramisu-douyin', clave: 'tiramis' },
+        { slug: 'tiramisu-douyin-2', clave: 'tiramis' },
+      ];
+      const SLUGS_NOV26_S1 = new Set(CLAVES_NOV26_S1.map((c) => c.slug));
+      const normalizar = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      CLAVES_NOV26_S1.forEach(({ slug, clave }) => {
+        const mia = data.sesionesTaller.find((s) => s.slug === slug);
+        if (!mia) return; // ya se fusiono y se borro en una vuelta anterior
+        const candidatos = data.sesionesTaller.filter((s) => s.id !== mia.id
+          && !SLUGS_NOV26_S1.has(s.slug) && s.sedeId === mia.sedeId && s.fecha === mia.fecha
+          && normalizar(s.titulo).includes(clave));
+        if (candidatos.length !== 1) return; // 0 o ambiguo (>1): no se toca
+        const original = candidatos[0];
+        if (!original.fotoUrl && mia.fotoUrl) original.fotoUrl = mia.fotoUrl;
+        if (!original.descripcion && mia.descripcion) original.descripcion = mia.descripcion;
+        if (!original.queAprendes && mia.queAprendes) original.queAprendes = mia.queAprendes;
+        if (!original.precioTotal) original.precioTotal = mia.precioTotal;
+        if (!original.anticipo) original.anticipo = mia.anticipo;
+        if (original.cupoMaximo == null) original.cupoMaximo = mia.cupoMaximo;
+        (data.inscripcionesTaller || []).forEach((i) => {
+          if (i.sesionTallerId === mia.id) i.sesionTallerId = original.id;
+        });
+        data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== mia.id);
+      });
+      data._migTalleresNov26Semana1Fusion = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
