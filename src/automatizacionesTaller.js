@@ -171,9 +171,9 @@ async function revisarAutomatizacionesTaller() {
     if (calendario.creadas > 0 || calendario.errores.length || calendario.avisos.length) {
       console.log(`[talleres] Calendario fisico: ${calendario.creadas} nuevos, ${calendario.saltadas} ya existian.`, calendario.errores, calendario.avisos);
     }
-    const fusionadas = store.fusionarDuplicadosTalleresNov26S1();
-    if (fusionadas > 0) {
-      console.log(`[talleres] Fusionadas ${fusionadas} sesiones duplicadas del calendario fisico (nov26 semana 1).`);
+    const cambiosNov26S1 = store.asegurarTalleresNov26S1();
+    if (cambiosNov26S1 > 0) {
+      console.log(`[talleres] ${cambiosNov26S1} ajustes en los talleres de nov26 semana 1 (fusion/foto/precio).`);
     }
   } catch (e) {
     console.error('[talleres] Error revisando automatizaciones:', e.message);

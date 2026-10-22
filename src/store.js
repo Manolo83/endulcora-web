@@ -2623,53 +2623,136 @@ module.exports = {
   // duplicar — pero el nombre corto que Manuel escribe a mano en su Excel
   // (ej. "Cheesecake") casi nunca es identico al nombre completo con el que
   // se dio de alta el taller aqui (ej. "Cheesecakes Horneados"), asi que
-  // cada sincronizacion vuelve a crear una sesion corta y vacia (sin foto ni
-  // descripcion) al lado de la buena. Esto se llama DESPUES de cada
-  // sincronizacion (mismo ciclo) para fusionar esas sesiones cortas en la
-  // version completa correspondiente (la que ya tiene su link repartido en
-  // las campañas de Meta, por eso esta SIEMPRE se queda y la corta se
-  // borra) — por palabra clave en el titulo, nunca solo por sede+fecha,
-  // porque varios talleres de este lote comparten horario en la misma sede.
-  fusionarDuplicadosTalleresNov26S1() {
+  // cada sincronizacion puede volver a crear una sesion corta y vacia (sin
+  // foto ni descripcion) al lado de la buena. Esto se llama DESPUES de cada
+  // sincronizacion (mismo ciclo): por sede+fecha+palabra clave en el titulo
+  // (nunca sede+fecha solamente, porque varios talleres de este lote
+  // comparten horario en la misma sede) encuentra TODAS las sesiones de
+  // cada taller, se queda con la que ya tenga foto (o la crea si de plano
+  // no hay ninguna) y fusiona el resto en esa — para que sea el mismo
+  // resultado sin importar cual sesion sobrevivio en pasadas anteriores.
+  asegurarTalleresNov26S1() {
     const data = load();
-    const CLAVES_NOV26_S1 = [
-      { slug: 'cheesecakes-horneados', clave: 'cheesecake' },
-      { slug: 'cheesecakes-horneados-2', clave: 'cheesecake' },
-      { slug: 'chocolateria-basica', clave: 'chocolat' },
-      { slug: 'chocolateria-basica-2', clave: 'chocolat' },
-      { slug: 'velas-comestibles', clave: 'vela' },
-      { slug: 'velas-comestibles-2', clave: 'vela' },
-      { slug: 'aguas-michoacanas', clave: 'agua' },
-      { slug: 'aguas-michoacanas-2', clave: 'agua' },
-      { slug: 'tablas-de-charcuteria', clave: 'charcuter' },
-      { slug: 'carnitas', clave: 'carnita' },
-      { slug: 'galletas-ny', clave: 'galleta' },
-      { slug: 'galletas-ny-2', clave: 'galleta' },
-      { slug: 'tiramisu-douyin', clave: 'tiramis' },
-      { slug: 'tiramisu-douyin-2', clave: 'tiramis' },
-    ];
-    const SLUGS_NOV26_S1 = new Set(CLAVES_NOV26_S1.map((c) => c.slug));
+    const SEED_DIR_TALLERES = path.join(__dirname, '..', 'seed-archivos', 'talleres-nov26-s1');
     const normalizar = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-    let fusionadas = 0;
-    CLAVES_NOV26_S1.forEach(({ slug, clave }) => {
-      const mia = data.sesionesTaller.find((s) => s.slug === slug);
-      if (!mia) return;
-      const duplicadas = data.sesionesTaller.filter((s) => s.id !== mia.id
-        && !SLUGS_NOV26_S1.has(s.slug) && s.sedeId === mia.sedeId && s.fecha === mia.fecha
-        && normalizar(s.titulo).includes(clave));
-      duplicadas.forEach((dup) => {
-        if (!mia.fotoUrl && dup.fotoUrl) mia.fotoUrl = dup.fotoUrl;
-        if (!mia.descripcion && dup.descripcion) mia.descripcion = dup.descripcion;
-        if (!mia.queAprendes && dup.queAprendes) mia.queAprendes = dup.queAprendes;
-        (data.inscripcionesTaller || []).forEach((i) => {
-          if (i.sesionTallerId === dup.id) i.sesionTallerId = mia.id;
+    const sedePorNombre = (nombre) => (data.sedes || []).find((s) => normalizar(s.nombre).includes(nombre));
+    const sedeNativitas = sedePorNombre('nativitas');
+    const sedeDivision = sedePorNombre('division');
+    const copiarImagen = (archivo) => {
+      const origen = path.join(SEED_DIR_TALLERES, archivo);
+      if (!fs.existsSync(origen)) return '';
+      const destino = `${crypto.randomUUID()}${path.extname(archivo)}`;
+      fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+      return `/uploads/${destino}`;
+    };
+    const HORARIO_MANANA = '10:00 am – 2:00 pm';
+    const HORARIO_TARDE = '4:00 pm – 8:00 pm';
+    const DEFINICIONES_NOV26_S1 = [
+      {
+        sede: sedeNativitas, clave: 'cheesecake', titulo: 'Cheesecakes Horneados',
+        fechas: ['2026-11-05', '2026-11-07'], horario: HORARIO_MANANA, imagen: 'cheesecake.jpg',
+        descripcion: 'El cheesecake horneado, cremoso y sin una sola grieta. New York clásico, zarzamora con compota casera y estilo tortuga. Base firme, batido sin aire y horneado a baño maría. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas 3 cheesecakes: New York Clásico, Zarzamora con mermelada natural y Estilo Tortuga. Además aprendes la base de galleta firme, el batido sin aire, el horneado a baño maría sin grietas, y el enfriado, desmolde y conservación.',
+      },
+      {
+        sede: sedeNativitas, clave: 'chocolat', titulo: 'Chocolatería Básica',
+        fechas: ['2026-11-05', '2026-11-07'], horario: HORARIO_MANANA, imagen: 'chocolate.jpg',
+        descripcion: 'El chocolate se trabaja con técnica, no con suerte. Trufas, rocas, enjambres y tortugas. Más el fundido sin errores y una ganache que no se corta. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas trufas, rocas, enjambres y tortugas. Además aprendes a distinguir cobertura real de sucedáneo, el fundido controlado sin quemar el chocolate, la ganache (emulsión estable y proporciones), qué hacer si se corta el chocolate, y conservación y empaque.',
+      },
+      {
+        sede: sedeNativitas, clave: 'vela', titulo: 'Velas Comestibles',
+        fechas: ['2026-11-06', '2026-11-08'], horario: HORARIO_MANANA, imagen: 'velas.jpg',
+        descripcion: 'Parece una vela. Se enciende. Y se come. Tres velas comestibles: de mantequilla, de chocolate y de frutos rojos. Con mecha comestible y control de flama. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas 3 velas comestibles: base de mantequilla, base de chocolate y de frutos rojos. Además aprendes mecha comestible y control de flama, estabilización de la grasa, decoración de cada vela, y conservación y cadena de frío.',
+      },
+      {
+        sede: sedeNativitas, clave: 'agua', titulo: 'Aguas Michoacanas',
+        fechas: ['2026-11-06', '2026-11-08'], horario: HORARIO_MANANA, imagen: 'aguas.jpg',
+        descripcion: 'El agua fresca que no se pone aguada ni se va al fondo. 14 aguas: 8 clásicas estilo Michoacana y 6 gourmet de autor. Más el punto de dulzor de la base, contando el hielo. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas 14 aguas: horchata, jamaica, limón con chía, tamarindo, fresa con leche, melón, piña colada y mango con chile (clásicas), más jamaica con lavanda, pepino con menta y limón, piña con albahaca y jengibre, guayaba con flor de jamaica, maracuyá con hierbabuena y coco tostado con vainilla (gourmet). Además aprendes el punto de dulzor contando el hielo, que la fruta no se vaya al fondo ni se oxide, y conservación de cada agua.',
+      },
+      {
+        sede: sedeNativitas, clave: 'charcuter', titulo: 'Tablas de Charcutería',
+        fechas: ['2026-11-07'], horario: HORARIO_TARDE, imagen: 'charcuteria.jpg',
+        descripcion: 'La tabla que se roba la reunión. Rosas de charcutería, plisados en abanico, geometría en quesos y zonificación para que luzca llena. Taller vespertino de 4 horas, para principiantes.',
+        queAprendes: 'Armas tu propia tabla de 15x25 cm con rosas de charcutería, plisados en abanico, geometría en quesos y zonificación estética. Además aprendes elección de quesos y carnes frías, corte de quesos según su textura, y conservación y empaque para llevar.',
+      },
+      {
+        sede: sedeNativitas, clave: 'carnita', titulo: 'Carnitas',
+        fechas: ['2026-11-08'], horario: HORARIO_MANANA, imagen: 'carnitas.jpg',
+        descripcion: 'Carnitas doradas por fuera y jugosas por dentro. La receta completa, más las salsas y los nopales que las acompañan. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas carnitas completas, las salsas que las acompañan y nopales. Además aprendes selección de cortes, manejo de grasa y temperatura, el punto dorado sin resecar la carne, y conservación.',
+      },
+      {
+        sede: sedeDivision, clave: 'galleta', titulo: 'Galletas NY',
+        fechas: ['2026-11-05', '2026-11-07'], horario: HORARIO_MANANA, imagen: 'galletasny.jpg',
+        descripcion: 'La galleta gruesa estilo Nueva York, con el centro suave. Cinco rellenas: conejito de chocolate, red velvet, volcán de chocolate y avellana, caramelo especiado y carrot cake. Masa que no se extiende, reposo en frío y el punto exacto de horneado. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas 5 galletas rellenas: conejito de chocolate, corazón red velvet, volcán de chocolate y avellana, caramelo especiado y carrot cake. Además aprendes la masa que no se extiende en el horno, reposo en frío y porcionado, el punto de horneado para un centro suave, y conservación y empaque.',
+      },
+      {
+        sede: sedeDivision, clave: 'tiramis', titulo: 'Tiramisú Douyin',
+        fechas: ['2026-11-06', '2026-11-08'], horario: HORARIO_MANANA, imagen: 'tiramisu.jpg',
+        descripcion: 'El tiramisú que está arrasando en redes. Cuatro sabores: mango, frutos rojos, cookies and cream y pistacho. En molde, con capas visibles. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas tiramisú en 4 sabores: mango, frutos rojos, cookies and cream y pistacho. Además aprendes crema estable que no se escurre, capas visibles y parejas en molde, remojo justo de la base, y conservación en frío.',
+      },
+    ];
+    let cambios = 0;
+    DEFINICIONES_NOV26_S1.forEach((def) => {
+      if (!def.sede) return; // sede no encontrada: no crea nada a ciegas
+      def.fechas.forEach((fecha) => {
+        const encontradas = data.sesionesTaller.filter((s) => s.sedeId === def.sede.id && s.fecha === fecha
+          && normalizar(s.titulo).includes(def.clave));
+        // Sobreviviente: la que ya tenga foto; si ninguna, la de titulo mas
+        // largo (la version rica siempre es mas descriptiva que la del
+        // calendario fisico, ej. "Tablas de Charcutería" vs "Tablas
+        // Charcuteria"); si sigue empatado, la mas vieja (id mas chico).
+        let sobreviviente = encontradas.find((s) => s.fotoUrl)
+          || [...encontradas].sort((a, b) => b.titulo.length - a.titulo.length || a.id - b.id)[0];
+        if (!sobreviviente) {
+          const mismaFecha = data.sesionesTaller.filter((s) => s.sedeId === def.sede.id && s.fecha === fecha);
+          sobreviviente = {
+            id: nextId(data.sesionesTaller),
+            sedeId: def.sede.id,
+            fecha,
+            titulo: def.titulo,
+            estado: 'disponible',
+            horario: def.horario,
+            orden: mismaFecha.length,
+            slug: slugUnicoSesionTaller(data, def.titulo),
+            descripcion: '',
+            queAprendes: '',
+            fotoUrl: '',
+            precioTotal: 0,
+            anticipo: 0,
+            cupoMaximo: null,
+            hojaSheets: `${def.titulo}${esSedeDivision(def.sede.nombre) ? ' div' : ''}`,
+          };
+          data.sesionesTaller.push(sobreviviente);
+          cambios += 1;
+        }
+        // Si sobrevivio la version corta del calendario fisico (ej.
+        // "Tablas Charcuteria"), se sube de nivel al titulo completo — solo
+        // hacia arriba, nunca se acorta un titulo que el equipo ya haya
+        // dejado igual o mas largo a mano.
+        if (sobreviviente.titulo.length < def.titulo.length) { sobreviviente.titulo = def.titulo; cambios += 1; }
+        if (!sobreviviente.fotoUrl) { sobreviviente.fotoUrl = copiarImagen(def.imagen); cambios += 1; }
+        if (!sobreviviente.descripcion) { sobreviviente.descripcion = def.descripcion; cambios += 1; }
+        if (!sobreviviente.queAprendes) { sobreviviente.queAprendes = def.queAprendes; cambios += 1; }
+        if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 1149; cambios += 1; }
+        if (!sobreviviente.anticipo) { sobreviviente.anticipo = 400; cambios += 1; }
+        if (sobreviviente.cupoMaximo == null) { sobreviviente.cupoMaximo = 20; cambios += 1; }
+        encontradas.filter((s) => s.id !== sobreviviente.id).forEach((dup) => {
+          (data.inscripcionesTaller || []).forEach((i) => {
+            if (i.sesionTallerId === dup.id) i.sesionTallerId = sobreviviente.id;
+          });
+          data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== dup.id);
+          cambios += 1;
         });
-        data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== dup.id);
-        fusionadas += 1;
       });
     });
-    if (fusionadas) save(data);
-    return fusionadas;
+    if (cambios) save(data);
+    return cambios;
   },
 
   // Pone el mismo precio/anticipo/cupo a TODAS las sesiones del calendario
