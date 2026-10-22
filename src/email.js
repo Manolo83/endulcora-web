@@ -246,6 +246,16 @@ async function enviarCorreoRecordatorioTaller({
         </table>
         ${tipoPago === 'anticipo' && saldo ? `<p style="margin-top:18px;font-size:13px;line-height:1.6;color:#1B0720;">Recuerda que pagaste solo tu anticipo: el día del taller se paga el saldo de <strong>$${formatoMonto(saldo)} MXN</strong>.</p>` : ''}
         ${queAprendes ? `<p style="margin-top:14px;font-size:13px;line-height:1.6;color:#1B0720;"><strong>Qué aprenderás:</strong> ${escapeHtml(queAprendes)}</p>` : ''}
+        <div style="margin-top:14px;font-size:13px;line-height:1.6;color:#1B0720;">
+          <strong>Qué traer:</strong>
+          <ul style="margin:6px 0 0;padding-left:18px;">
+            <li>Mandil</li>
+            <li>Dos trapos para limpieza</li>
+            <li>Gorro, cofia, gorra o algo que te cubra el cabello</li>
+            <li>Toppers para llevarte tu producto terminado</li>
+            <li>Una cuchara para degustación</li>
+          </ul>
+        </div>
         <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">¿Dudas o algún cambio de último momento? Escríbenos por WhatsApp al <a href="https://wa.me/52${numeroWhatsapp || ''}" style="color:#7A2E7E;">${numeroWhatsapp || ''}</a>.</p>
       </div>
     `,
