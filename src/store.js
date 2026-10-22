@@ -1235,6 +1235,26 @@ async function init() {
       data._migDireccionSedes = true;
       changed = true;
     }
+    // Rellena la direccion y el link de mapa reales de cada sede (quedaron
+    // vacios desde que se agrego el campo arriba, nadie los habia puesto a
+    // mano) — sacados del copy real que ya se manda por WhatsApp. Solo
+    // escribe si esta vacio, para no pisar algo que el equipo ya haya
+    // corregido en /admin.
+    if (!data._migDireccionSedesReales) {
+      const DIRECCIONES_SEDES = {
+        nativitas: 'Antonio Rodríguez 34, Col. San Simón Ticumac, Ciudad de México (3 cuadras del Metro Portales o Nativitas)',
+        'division del norte': 'Av. División del Norte 3651, Plaza Real de Coyoacán Local 7, Coyoacán, Ciudad de México (entre Nezahualpilli y Registro Federal, Tren Ligero)',
+      };
+      const normalizarNombreSede = (t) => String(t || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      (data.sedes || []).forEach((s) => {
+        const direccion = DIRECCIONES_SEDES[normalizarNombreSede(s.nombre)];
+        if (!direccion) return;
+        if (!s.direccion) s.direccion = direccion;
+        if (!s.mapaLink) s.mapaLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`;
+      });
+      data._migDireccionSedesReales = true;
+      changed = true;
+    }
     // Campaña noviembre · semana 1 (5-8 nov 2026): 8 talleres con copy de
     // Manuel (artes + info del 22 oct), dados de alta de una sola vez para
     // que cada uno tenga ya su pagina /talleres/<slug> con foto y se pueda
@@ -2596,6 +2616,60 @@ module.exports = {
     });
 
     return { creadas, saltadas, errores };
+  },
+
+  // El calendario fisico sincroniza SOLO (cada 30 min, ver
+  // automatizacionesTaller.js) y compara titulos EXACTOS (slugZona) para no
+  // duplicar — pero el nombre corto que Manuel escribe a mano en su Excel
+  // (ej. "Cheesecake") casi nunca es identico al nombre completo con el que
+  // se dio de alta el taller aqui (ej. "Cheesecakes Horneados"), asi que
+  // cada sincronizacion vuelve a crear una sesion corta y vacia (sin foto ni
+  // descripcion) al lado de la buena. Esto se llama DESPUES de cada
+  // sincronizacion (mismo ciclo) para fusionar esas sesiones cortas en la
+  // version completa correspondiente (la que ya tiene su link repartido en
+  // las campañas de Meta, por eso esta SIEMPRE se queda y la corta se
+  // borra) — por palabra clave en el titulo, nunca solo por sede+fecha,
+  // porque varios talleres de este lote comparten horario en la misma sede.
+  fusionarDuplicadosTalleresNov26S1() {
+    const data = load();
+    const CLAVES_NOV26_S1 = [
+      { slug: 'cheesecakes-horneados', clave: 'cheesecake' },
+      { slug: 'cheesecakes-horneados-2', clave: 'cheesecake' },
+      { slug: 'chocolateria-basica', clave: 'chocolat' },
+      { slug: 'chocolateria-basica-2', clave: 'chocolat' },
+      { slug: 'velas-comestibles', clave: 'vela' },
+      { slug: 'velas-comestibles-2', clave: 'vela' },
+      { slug: 'aguas-michoacanas', clave: 'agua' },
+      { slug: 'aguas-michoacanas-2', clave: 'agua' },
+      { slug: 'tablas-de-charcuteria', clave: 'charcuter' },
+      { slug: 'carnitas', clave: 'carnita' },
+      { slug: 'galletas-ny', clave: 'galleta' },
+      { slug: 'galletas-ny-2', clave: 'galleta' },
+      { slug: 'tiramisu-douyin', clave: 'tiramis' },
+      { slug: 'tiramisu-douyin-2', clave: 'tiramis' },
+    ];
+    const SLUGS_NOV26_S1 = new Set(CLAVES_NOV26_S1.map((c) => c.slug));
+    const normalizar = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    let fusionadas = 0;
+    CLAVES_NOV26_S1.forEach(({ slug, clave }) => {
+      const mia = data.sesionesTaller.find((s) => s.slug === slug);
+      if (!mia) return;
+      const duplicadas = data.sesionesTaller.filter((s) => s.id !== mia.id
+        && !SLUGS_NOV26_S1.has(s.slug) && s.sedeId === mia.sedeId && s.fecha === mia.fecha
+        && normalizar(s.titulo).includes(clave));
+      duplicadas.forEach((dup) => {
+        if (!mia.fotoUrl && dup.fotoUrl) mia.fotoUrl = dup.fotoUrl;
+        if (!mia.descripcion && dup.descripcion) mia.descripcion = dup.descripcion;
+        if (!mia.queAprendes && dup.queAprendes) mia.queAprendes = dup.queAprendes;
+        (data.inscripcionesTaller || []).forEach((i) => {
+          if (i.sesionTallerId === dup.id) i.sesionTallerId = mia.id;
+        });
+        data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== dup.id);
+        fusionadas += 1;
+      });
+    });
+    if (fusionadas) save(data);
+    return fusionadas;
   },
 
   // Pone el mismo precio/anticipo/cupo a TODAS las sesiones del calendario

@@ -171,6 +171,10 @@ async function revisarAutomatizacionesTaller() {
     if (calendario.creadas > 0 || calendario.errores.length || calendario.avisos.length) {
       console.log(`[talleres] Calendario fisico: ${calendario.creadas} nuevos, ${calendario.saltadas} ya existian.`, calendario.errores, calendario.avisos);
     }
+    const fusionadas = store.fusionarDuplicadosTalleresNov26S1();
+    if (fusionadas > 0) {
+      console.log(`[talleres] Fusionadas ${fusionadas} sesiones duplicadas del calendario fisico (nov26 semana 1).`);
+    }
   } catch (e) {
     console.error('[talleres] Error revisando automatizaciones:', e.message);
   } finally {
