@@ -2755,6 +2755,47 @@ module.exports = {
     return cambios;
   },
 
+  // Solo lectura: para sacar el link real de cada uno de los 14 (8
+  // talleres x fecha) de la campaña de noviembre semana 1, sin adivinar el
+  // slug (puede haber sobrevivido el de la sesion creada por el calendario
+  // fisico o el de la creada aqui). Mismo criterio sede+fecha+clave que
+  // asegurarTalleresNov26S1, pero sin tocar nada.
+  getLinksTalleresNov26S1() {
+    const data = load();
+    const normalizar = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const sedePorNombre = (nombre) => (data.sedes || []).find((s) => normalizar(s.nombre).includes(nombre));
+    const sedeNativitas = sedePorNombre('nativitas');
+    const sedeDivision = sedePorNombre('division');
+    const DEF = [
+      { sede: sedeNativitas, clave: 'cheesecake', titulo: 'Cheesecakes Horneados', fechas: ['2026-11-05', '2026-11-07'] },
+      { sede: sedeNativitas, clave: 'chocolat', titulo: 'Chocolatería Básica', fechas: ['2026-11-05', '2026-11-07'] },
+      { sede: sedeNativitas, clave: 'vela', titulo: 'Velas Comestibles', fechas: ['2026-11-06', '2026-11-08'] },
+      { sede: sedeNativitas, clave: 'agua', titulo: 'Aguas Michoacanas', fechas: ['2026-11-06', '2026-11-08'] },
+      { sede: sedeNativitas, clave: 'charcuter', titulo: 'Tablas de Charcutería', fechas: ['2026-11-07'] },
+      { sede: sedeNativitas, clave: 'carnita', titulo: 'Carnitas', fechas: ['2026-11-08'] },
+      { sede: sedeDivision, clave: 'galleta', titulo: 'Galletas NY', fechas: ['2026-11-05', '2026-11-07'] },
+      { sede: sedeDivision, clave: 'tiramis', titulo: 'Tiramisú Douyin', fechas: ['2026-11-06', '2026-11-08'] },
+    ];
+    const resultado = [];
+    DEF.forEach((def) => {
+      if (!def.sede) return;
+      def.fechas.forEach((fecha) => {
+        const encontradas = data.sesionesTaller.filter((s) => s.sedeId === def.sede.id && s.fecha === fecha
+          && normalizar(s.titulo).includes(def.clave));
+        const sesion = encontradas.find((s) => s.fotoUrl) || encontradas[0] || null;
+        resultado.push({
+          taller: def.titulo,
+          sede: def.sede.nombre,
+          fecha,
+          slug: sesion ? sesion.slug : null,
+          tieneFoto: !!(sesion && sesion.fotoUrl),
+          otrasEnElMismoSlot: encontradas.length > 1 ? encontradas.length - 1 : 0,
+        });
+      });
+    });
+    return resultado;
+  },
+
   // Pone el mismo precio/anticipo/cupo a TODAS las sesiones del calendario
   // de un jalon (a peticion del dueño del sitio: todos los talleres cuestan
   // lo mismo y tienen el mismo cupo maximo) — util para corregir de golpe

@@ -1197,6 +1197,18 @@ router.get('/api/sesiones-taller', requireAdmin, (req, res) => {
   res.json(store.getSesionesTaller(req.query.sedeId));
 });
 
+// Diagnostico de una sola vez: los 14 links reales (8 talleres x fecha) de
+// la campaña de noviembre semana 1, para pegarlos en Meta Ads sin adivinar
+// el slug.
+router.get('/api/talleres/nov26-s1/links', requireAdmin, (req, res) => {
+  const SITE_URL = require('../config').SITE_URL;
+  const items = store.getLinksTalleresNov26S1().map((it) => ({
+    ...it,
+    url: it.slug ? `${SITE_URL}/talleres/${it.slug}` : null,
+  }));
+  res.json(items);
+});
+
 router.post('/api/sesiones-taller', requireAdmin, (req, res) => {
   const { sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo, hojaSheets } = req.body || {};
   if (!sedeId || !fecha || !titulo) return res.status(400).json({ error: 'Falta sede, fecha o título' });
