@@ -192,6 +192,14 @@ app.use('/api/auth', authRoutes);
 app.use('/api/asistente', asistenteRoutes);
 app.use('/api/membresia', membresiaRoutes);
 app.use('/api', apiRoutes);
+// El panel de /admin (HTML y JS incluidos) cambia seguido con cada deploy;
+// sin esto el navegador puede seguir mostrando una version vieja de la
+// pagina despues de un deploy (ej. numeros de cupo desactualizados) hasta
+// que alguien haga un refresh forzado.
+app.use('/admin', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
 app.use('/admin', adminRoutes);
 app.use('/lex', lexRoutes);
 
