@@ -129,9 +129,9 @@ body { background: #FBF4E9; }
     <div class="relative">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
-          <button type="button" id="btnMesAnterior" aria-label="Mes anterior" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-vino/20 bg-white text-vino hover:border-vino transition">‹</button>
-          <p id="calendarioMesTexto" class="min-w-[150px] text-center font-titulo text-lg text-vino"></p>
-          <button type="button" id="btnMesSiguiente" aria-label="Mes siguiente" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-vino/20 bg-white text-vino hover:border-vino transition">›</button>
+          <button type="button" id="btnSemanaAnterior" aria-label="Semana anterior" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-vino/20 bg-white text-vino hover:border-vino transition">‹</button>
+          <p id="calendarioMesTexto" class="min-w-[170px] text-center font-titulo text-lg text-vino"></p>
+          <button type="button" id="btnSemanaSiguiente" aria-label="Semana siguiente" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-vino/20 bg-white text-vino hover:border-vino transition">›</button>
         </div>
         <div class="flex flex-wrap gap-4 font-ui text-[11px] uppercase tracking-wider text-carbon/60">
           <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-[#3F8F5F]"></span> Disponible</span>
@@ -179,9 +179,17 @@ fetch('/api/content').then(r => r.json()).then(c => { if(c.whatsapp_numero) NUME
 let SEDES = [];
 let SESIONES = [];
 let sedeId = null;
-let mesActual = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+function inicioDeSemana(d){
+  const fecha = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const offset = (fecha.getDay() + 6) % 7; // 0 = lunes
+  fecha.setDate(fecha.getDate() - offset);
+  return fecha;
+}
+let semanaActual = inicioDeSemana(new Date());
 
 const NOMBRES_MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const NOMBRES_MES_CORTO = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const NOMBRES_DIA = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 const ESTADO_INFO = {
   disponible: { texto: 'Disponible', clase: 'bg-[#3F8F5F] hover:brightness-110 cursor-pointer' },
@@ -229,35 +237,37 @@ async function cargarSesiones(){
   pintarCalendario();
 }
 
-document.getElementById('btnMesAnterior').addEventListener('click', () => { mesActual = new Date(mesActual.getFullYear(), mesActual.getMonth() - 1, 1); pintarCalendario(); });
-document.getElementById('btnMesSiguiente').addEventListener('click', () => { mesActual = new Date(mesActual.getFullYear(), mesActual.getMonth() + 1, 1); pintarCalendario(); });
+document.getElementById('btnSemanaAnterior').addEventListener('click', () => { semanaActual = new Date(semanaActual.getFullYear(), semanaActual.getMonth(), semanaActual.getDate() - 7); pintarCalendario(); });
+document.getElementById('btnSemanaSiguiente').addEventListener('click', () => { semanaActual = new Date(semanaActual.getFullYear(), semanaActual.getMonth(), semanaActual.getDate() + 7); pintarCalendario(); });
 
 function fechaISO(date){
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 
+function textoRangoSemana(inicio){
+  const fin = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 6);
+  const mismoMes = inicio.getMonth() === fin.getMonth();
+  if(mismoMes) return `${inicio.getDate()} – ${fin.getDate()} ${NOMBRES_MES_CORTO[fin.getMonth()]} ${fin.getFullYear()}`;
+  return `${inicio.getDate()} ${NOMBRES_MES_CORTO[inicio.getMonth()]} – ${fin.getDate()} ${NOMBRES_MES_CORTO[fin.getMonth()]} ${fin.getFullYear()}`;
+}
+
 function pintarCalendario(){
-  document.getElementById('calendarioMesTexto').textContent = `${NOMBRES_MES[mesActual.getMonth()]} ${mesActual.getFullYear()}`;
-  const anio = mesActual.getFullYear();
-  const mes = mesActual.getMonth();
-  const primerDia = new Date(anio, mes, 1);
-  const diasEnMes = new Date(anio, mes + 1, 0).getDate();
-  const offset = (primerDia.getDay() + 6) % 7;
+  document.getElementById('calendarioMesTexto').textContent = textoRangoSemana(semanaActual);
 
   const sesionesPorFecha = {};
   SESIONES.forEach(s => { (sesionesPorFecha[s.fecha] = sesionesPorFecha[s.fecha] || []).push(s); });
 
   let celdas = NOMBRES_DIA.map(d => `<div class="pb-1 text-center font-ui text-[10px] font-700 uppercase tracking-wider text-carbon/40">${d}</div>`).join('');
-  for(let i = 0; i < offset; i++) celdas += '<div></div>';
 
   const hoy = new Date();
-  const esMismoMes = hoy.getFullYear() === anio && hoy.getMonth() === mes;
   const fechaISOHoy = fechaISO(hoy);
 
-  for(let dia = 1; dia <= diasEnMes; dia++){
-    const fecha = `${anio}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+  for(let i = 0; i < 7; i++){
+    const fechaDia = new Date(semanaActual.getFullYear(), semanaActual.getMonth(), semanaActual.getDate() + i);
+    const dia = fechaDia.getDate();
+    const fecha = fechaISO(fechaDia);
     const sesiones = (sesionesPorFecha[fecha] || []).sort((a,b) => (a.orden ?? 0) - (b.orden ?? 0));
-    const esHoy = esMismoMes && hoy.getDate() === dia;
+    const esHoy = fecha === fechaISOHoy;
     const esPasado = fecha < fechaISOHoy;
     const chips = sesiones.map(s => {
       const info = esPasado ? ESTADO_INFO.agotado : (ESTADO_INFO[s.estado] || ESTADO_INFO.disponible);
@@ -266,7 +276,7 @@ function pintarCalendario(){
       return `<button type="button" ${accion} class="chipSesion w-full truncate rounded-md px-1.5 py-1 text-left text-[10px] leading-tight text-crema transition ${info.clase}" title="${escapeHtml(s.titulo)} · ${etiqueta}">${escapeHtml(s.titulo)}</button>`;
     }).join('');
     celdas += `
-      <div class="min-h-[64px] rounded-lg border p-1.5 sm:min-h-[84px] ${esHoy ? 'border-flama bg-[#FDF1D8]' : 'border-vino/10 bg-white/90'}">
+      <div class="min-h-[90px] rounded-lg border p-1.5 sm:min-h-[120px] ${esHoy ? 'border-flama bg-[#FDF1D8]' : 'border-vino/10 bg-white/90'}">
         <span class="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-flama/25 px-1 font-ui text-[10px] font-700 text-vino">${dia}</span>
         <div class="mt-1 space-y-1">${chips}</div>
       </div>`;

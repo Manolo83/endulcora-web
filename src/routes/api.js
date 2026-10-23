@@ -377,10 +377,6 @@ router.get('/hero-carrusel', (req, res) => {
   res.json(store.getHeroCarrusel());
 });
 
-router.get('/promos-taller', (req, res) => {
-  res.json(store.getPromosTaller());
-});
-
 router.get('/sedes', (req, res) => {
   res.json(store.getSedes());
 });

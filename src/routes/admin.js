@@ -267,49 +267,6 @@ router.delete('/api/hero-carrusel/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- Promos semanales de talleres (carrusel de anuncios) ----
-router.get('/api/promos-taller', requireAdmin, (req, res) => {
-  res.json(store.getPromosTaller());
-});
-
-router.post('/api/promos-taller/upload', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
-  const item = store.addPromoTaller({
-    url: `/uploads/${req.file.filename}`,
-    filename: req.file.filename,
-    titulo: req.body.titulo || '',
-    descripcion: req.body.descripcion || '',
-  });
-  res.status(201).json(item);
-});
-
-router.patch('/api/promos-taller/:id', requireAdmin, (req, res) => {
-  const item = store.updatePromoTaller(req.params.id, req.body || {});
-  if (!item) return res.status(404).json({ error: 'No encontrado' });
-  res.json(item);
-});
-
-router.post('/api/promos-taller/:id/imagen', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
-  const promo = store.getPromosTaller().find((p) => p.id === Number(req.params.id));
-  if (!promo) {
-    if (req.file) fs.unlink(req.file.path, () => {});
-    return res.status(404).json({ error: 'No encontrado' });
-  }
-  if (!req.file) return res.status(400).json({ error: 'Falta el archivo' });
-  const anteriorFilename = promo.filename;
-  const item = store.updatePromoTaller(req.params.id, { url: `/uploads/${req.file.filename}`, filename: req.file.filename });
-  if (anteriorFilename) fs.unlink(path.join(UPLOAD_DIR, anteriorFilename), () => {});
-  res.status(201).json(item);
-});
-
-router.delete('/api/promos-taller/:id', requireAdmin, (req, res) => {
-  const item = store.deletePromoTaller(req.params.id);
-  if (item && item.filename) {
-    fs.unlink(path.join(UPLOAD_DIR, item.filename), () => {});
-  }
-  res.json({ ok: true });
-});
-
 // ---- Productos de la tienda ----
 router.get('/api/products', requireAdmin, (req, res) => {
   res.json(store.getProducts());

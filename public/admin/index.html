@@ -82,7 +82,6 @@
       <a href="#seccionCampanas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Campañas de correo</a>
       <a href="#seccionResenas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Reseñas</a>
       <a href="#seccionComunidad" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Comunidad</a>
-      <a href="#seccionPromosTaller" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Promos de talleres</a>
       <a href="#seccionAnuncios" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Anuncios</a>
       <a href="#seccionGaleria" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Galería</a>
     </nav>
@@ -1378,32 +1377,6 @@
     </section>
 
     <!-- ANUNCIOS -->
-    <!-- PROMOS DE TALLERES -->
-    <section id="seccionPromosTaller" class="scroll-mt-32 mb-14">
-      <h2 class="font-titulo text-2xl tracking-wide text-vino">Promos de talleres</h2>
-      <p class="mt-1 text-sm text-carbon/60">Sube el arte de cada taller de la semana con una descripción corta. Aparecen en un carrusel al inicio del sitio, con botones para ver el calendario o agendar por WhatsApp. Bórralas cuando ya no apliquen.</p>
-
-      <form id="formPromoTaller" class="mt-6 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
-        <label class="block">
-          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Imagen del taller</span>
-          <input id="promoTallerInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required class="mt-1.5 w-full text-sm">
-        </label>
-        <label class="block">
-          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Título</span>
-          <input id="promoTallerTitulo" type="text" maxlength="120" placeholder="Ej. Chiles en nogada · Sesión presencial"
-            class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
-        </label>
-        <label class="block">
-          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción corta</span>
-          <textarea id="promoTallerDescripcion" maxlength="280" rows="2" placeholder="Fecha, sede y lo más atractivo del taller"
-            class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3"></textarea>
-        </label>
-        <button type="submit" class="rounded-full bg-vino py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Agregar promo</button>
-      </form>
-
-      <div id="listaPromosTaller" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
-    </section>
-
     <section id="seccionAnuncios" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Anuncios</h2>
       <p class="mt-1 text-sm text-carbon/60">Publica avisos, fechas de clases o novedades. Aparecen de inmediato en la sección "Anuncios" del sitio.</p>
@@ -1524,7 +1497,6 @@ function mostrarDashboard(mostrar){
     cargarBibliotecaClasesAdmin();
     cargarContactosCampana();
     cargarCampanasEnviadas();
-    cargarPromosTallerAdmin();
     cargarProductosAdmin();
     cargarBlogAdmin();
     cargarSedes();
@@ -2388,97 +2360,6 @@ $('formHeroCarrusel').addEventListener('submit', async (e) => {
     $('formHeroCarrusel').reset();
     toast('Imagen agregada al carrusel');
     cargarHeroCarrusel();
-  }catch(e){
-    toast(e.message);
-  }
-});
-
-/* ---------- Promos de talleres ---------- */
-async function cargarPromosTallerAdmin(){
-  const cont = $('listaPromosTaller');
-  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
-  try{
-    const items = await api('/admin/api/promos-taller');
-    if(!items.length){
-      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay promos de talleres.</p>';
-      return;
-    }
-    cont.innerHTML = items.map(m => `
-      <div class="overflow-hidden rounded-xl bg-white ring-1 ring-vino/10">
-        <img src="${m.url}" alt="" class="aspect-video w-full object-cover">
-        <div class="space-y-2 p-3">
-          <input type="text" value="${escapeHtml(m.titulo || '')}" placeholder="Título" data-id="${m.id}" class="inputTituloPromoTaller w-full rounded-lg border border-vino/15 bg-crema/60 px-2.5 py-1.5 text-xs">
-          <textarea rows="2" placeholder="Descripción corta" data-id="${m.id}" class="inputDescripcionPromoTaller w-full rounded-lg border border-vino/15 bg-crema/60 px-2.5 py-1.5 text-xs">${escapeHtml(m.descripcion || '')}</textarea>
-          <button type="button" data-id="${m.id}" class="btnGuardarPromoTaller w-full rounded-lg bg-vino py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar</button>
-          <label class="block w-full cursor-pointer rounded-lg border border-vino/20 py-1.5 text-center font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
-            Cambiar imagen
-            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-id="${m.id}" class="hidden inputImagenPromoTaller">
-          </label>
-        </div>
-        <button type="button" data-id="${m.id}" class="btnBorrarPromoTaller w-full border-t border-red-100 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:bg-red-50 transition">Borrar</button>
-      </div>
-    `).join('');
-    cont.querySelectorAll('.inputImagenPromoTaller').forEach(input => {
-      input.addEventListener('change', async () => {
-        const file = input.files[0];
-        if(!file) return;
-        const fd = new FormData();
-        fd.append('file', file);
-        try{
-          const res = await fetch(`/admin/api/promos-taller/${input.dataset.id}/imagen`, { method: 'POST', body: fd, credentials: 'include' });
-          if(!res.ok){ const d = await res.json().catch(()=>({})); throw new Error(d.error || 'No se pudo subir la imagen'); }
-          toast('Imagen actualizada');
-          cargarPromosTallerAdmin();
-        }catch(e){
-          toast(e.message);
-        }
-      });
-    });
-    cont.querySelectorAll('.btnGuardarPromoTaller').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const titulo = cont.querySelector(`.inputTituloPromoTaller[data-id="${btn.dataset.id}"]`);
-        const descripcion = cont.querySelector(`.inputDescripcionPromoTaller[data-id="${btn.dataset.id}"]`);
-        if(!titulo || !descripcion) return;
-        try{
-          await api(`/admin/api/promos-taller/${btn.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ titulo: titulo.value.trim(), descripcion: descripcion.value.trim() }) });
-          toast('Promo guardada');
-        }catch(e){
-          toast(`No se pudo guardar: ${e.message}. Actualizando la lista…`);
-          cargarPromosTallerAdmin();
-        }
-      });
-    });
-    cont.querySelectorAll('.btnBorrarPromoTaller').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if(!confirm('¿Borrar esta promo?')) return;
-        try{
-          await api(`/admin/api/promos-taller/${btn.dataset.id}`, { method: 'DELETE' });
-        }catch(e){
-          toast(e.message);
-        }
-        cargarPromosTallerAdmin();
-      });
-    });
-  }catch(e){
-    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
-  }
-}
-
-$('formPromoTaller').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const file = $('promoTallerInput').files[0];
-  if(!file){ toast('Elige una imagen'); return; }
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('titulo', $('promoTallerTitulo').value.trim());
-  fd.append('descripcion', $('promoTallerDescripcion').value.trim());
-  try{
-    const res = await fetch('/admin/api/promos-taller/upload', { method: 'POST', body: fd });
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error || 'No se pudo subir la imagen');
-    $('formPromoTaller').reset();
-    toast('Promo agregada');
-    cargarPromosTallerAdmin();
   }catch(e){
     toast(e.message);
   }

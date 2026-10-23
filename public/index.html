@@ -367,17 +367,33 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
   </div>
 </section>
 
-<!-- ══════════════ PROMOS DE TALLERES (semanal) ══════════════ -->
-<section id="seccionPromosTaller" class="hidden relative overflow-hidden bg-carbon">
-  <div class="relative aspect-[4/5] w-full sm:aspect-[16/9] lg:aspect-[3/1]">
-    <div id="promoTallerSlide" class="absolute inset-0"></div>
-    <div id="promoTallerDots" class="absolute inset-x-0 bottom-4 z-10 flex items-center justify-center gap-1.5"></div>
-    <button type="button" id="btnPromoTallerPrev" onclick="pasoPromoTaller(-1)" aria-label="Anuncio anterior" class="hidden absolute left-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-vino shadow-md transition hover:bg-white sm:left-5">
-      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
-    <button type="button" id="btnPromoTallerNext" onclick="pasoPromoTaller(1)" aria-label="Siguiente anuncio" class="hidden absolute right-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-vino shadow-md transition hover:bg-white sm:right-5">
-      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
+<!-- ══════════════ CALENDARIO DE LA SEMANA ══════════════ -->
+<section id="seccionCalendarioSemana" class="relative overflow-hidden bg-crema py-16 lg:py-20">
+  <div class="mx-auto max-w-6xl px-5 lg:px-8">
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <div class="rule-flama mb-4 w-20"></div>
+        <h2 class="font-display text-2xl leading-tight text-vino sm:text-3xl">Talleres de esta semana</h2>
+        <p class="mt-2 max-w-md text-sm leading-relaxed text-carbon/60">Elige tu sede, revisa la disponibilidad y aparta tu lugar directo en línea.</p>
+      </div>
+      <a href="/calendario" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/25 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino hover:text-crema transition">Ver calendario completo</a>
+    </div>
+
+    <div id="homeSedeTabs" class="mb-5 flex flex-wrap gap-2"></div>
+
+    <div id="homeCalendarioTarjeta" class="relative overflow-hidden rounded-3xl bg-white bg-cover bg-center p-5 shadow-[0_2px_0_rgba(78,20,84,.06)] ring-1 ring-vino/10 sm:p-7">
+      <div class="pointer-events-none absolute inset-0 bg-crema/55"></div>
+      <div class="relative">
+        <div class="flex items-center justify-between gap-4">
+          <button type="button" id="btnHomeSemanaAnterior" aria-label="Semana anterior" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-vino/20 bg-white text-vino hover:border-vino transition">‹</button>
+          <p id="homeSemanaTexto" class="min-w-[170px] text-center font-titulo text-base text-vino"></p>
+          <button type="button" id="btnHomeSemanaSiguiente" aria-label="Semana siguiente" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-vino/20 bg-white text-vino hover:border-vino transition">›</button>
+        </div>
+        <div id="homeCalendarioGrid" class="mt-5 grid grid-cols-7 gap-1.5 sm:gap-2">
+          <p class="col-span-7 text-sm text-carbon/50">Cargando…</p>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -779,24 +795,6 @@ trufada, paso a paso</h2>
 
 <!-- ══════════════ TOAST ══════════════ -->
 <div id="toast" class="pointer-events-none fixed bottom-6 left-1/2 z-[70] hidden -translate-x-1/2 rounded-full bg-vino px-6 py-3 font-ui text-sm text-crema shadow-xl"></div>
-
-<!-- ══════════════ BURBUJA · PRÓXIMOS TALLERES ══════════════ -->
-<div id="burbujaTalleres" class="fixed bottom-24 right-4 z-40 hidden max-w-[calc(100vw-2rem)] sm:bottom-28 sm:right-6">
-  <div class="relative w-72 max-w-full rounded-3xl bg-vino p-5 text-crema shadow-2xl ring-1 ring-flama/25">
-    <button type="button" onclick="cerrarBurbujaTalleres()" aria-label="Cerrar aviso de próximos talleres"
-      class="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full bg-white/10 text-crema/80 hover:bg-white/20 transition">
-      <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 6 12 12M18 6 6 18"/></svg>
-    </button>
-    <p class="pr-6 font-ui text-[10px] font-700 uppercase tracking-[.2em] text-flama">Taller de la semana</p>
-    <p id="burbujaTallerTitulo" class="mt-1.5 font-titulo text-lg leading-tight tracking-wide">Cargando…</p>
-    <p id="burbujaTallerDescripcion" class="mt-1 line-clamp-2 font-ui text-[12px] text-crema/70"></p>
-    <button type="button" id="burbujaTallerBtn"
-      class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-[#25D366] px-4 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-white hover:bg-[#1ea952] transition">
-      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6s.6-1.8.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.2z"/></svg>
-      Agenda tu taller
-    </button>
-  </div>
-</div>
 
 <!-- ══════════════ BOTÓN FLOTANTE · WHATSAPP ══════════════ -->
 <a id="whatsappFlotante" href="https://wa.me/525665271901" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"
@@ -1441,59 +1439,6 @@ function aplicarClaseEnVivo(c){
   }
 }
 
-/* ---------- Burbuja de próximos talleres (toma la promo destacada de la semana) ---------- */
-function pintarBurbujaTaller(){
-  const titulo = document.getElementById('burbujaTallerTitulo');
-  const desc = document.getElementById('burbujaTallerDescripcion');
-  const btn = document.getElementById('burbujaTallerBtn');
-  if(!titulo || !desc || !btn) return;
-  const item = PROMOS_TALLER[0];
-  titulo.textContent = item ? (item.titulo || 'Taller de la semana') : '';
-  desc.textContent = item ? (item.descripcion || '') : '';
-  btn.onclick = () => {
-    if(item) agendarPromoTaller(item.id);
-    cerrarBurbujaTalleres();
-  };
-}
-
-(function(){
-  const burbuja = document.getElementById('burbujaTalleres');
-  const seccionPromos = document.getElementById('seccionPromosTaller');
-  const pie = document.querySelector('footer');
-  if(sessionStorage.getItem('burbujaTalleresCerrada')) return;
-
-  let mostrada = false;
-  let ocultarPorSeccion = false;
-
-  function refrescar(){
-    burbuja.classList.toggle('hidden', !mostrada || ocultarPorSeccion || !PROMOS_TALLER.length);
-  }
-
-  window.addEventListener('scroll', () => {
-    if(mostrada || sessionStorage.getItem('burbujaTalleresCerrada')) return;
-    if(!PROMOS_TALLER.length) return;
-    if(window.scrollY > window.innerHeight * 0.6){
-      mostrada = true;
-      cerrarBurbujaAsistente();
-      refrescar();
-    }
-  }, { passive: true });
-
-  const objetivos = [seccionPromos, pie].filter(Boolean);
-  if(objetivos.length){
-    const estados = new Map();
-    const obs = new IntersectionObserver(entradas => {
-      entradas.forEach(e => estados.set(e.target, e.isIntersecting));
-      ocultarPorSeccion = objetivos.some(el => estados.get(el));
-      refrescar();
-    }, { threshold: .15 });
-    objetivos.forEach(el => obs.observe(el));
-  }
-})();
-function cerrarBurbujaTalleres(){
-  document.getElementById('burbujaTalleres').classList.add('hidden');
-  sessionStorage.setItem('burbujaTalleresCerrada', '1');
-}
 
 /* ---------- Burbuja del asistente (Endulcorito) ---------- */
 function cerrarBurbujaAsistente(){
@@ -1506,8 +1451,7 @@ function cerrarBurbujaAsistente(){
   setTimeout(() => {
     if(sessionStorage.getItem('burbujaAsistenteCerrada')) return;
     const panelAbierto = !document.getElementById('panelAsistente').classList.contains('hidden');
-    const burbujaTalleresVisible = !document.getElementById('burbujaTalleres').classList.contains('hidden');
-    if(panelAbierto || burbujaTalleresVisible) return;
+    if(panelAbierto) return;
     document.getElementById('burbujaAsistente').classList.remove('hidden');
     setTimeout(() => {
       if(!sessionStorage.getItem('burbujaAsistenteCerrada')) document.getElementById('burbujaAsistente').classList.add('hidden');
@@ -1779,103 +1723,133 @@ function pasoHeroCarrusel(delta){
   irASlideHero((heroCarruselIndex + delta + total) % total);
 }
 
-/* ---------- Carrusel de promos semanales de talleres ---------- */
-let PROMOS_TALLER = [];
-let promoTallerIndex = 0;
-let promoTallerTimer = null;
+/* ---------- Calendario de la semana (inicio) ---------- */
+let HOME_SEDES = [];
+let HOME_SESIONES = [];
+let homeSedeId = null;
 
-async function cargarPromosTaller(){
+function homeInicioDeSemana(d){
+  const fecha = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const offset = (fecha.getDay() + 6) % 7; // 0 = lunes
+  fecha.setDate(fecha.getDate() - offset);
+  return fecha;
+}
+let homeSemanaActual = homeInicioDeSemana(new Date());
+
+const HOME_NOMBRES_MES_CORTO = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const HOME_NOMBRES_DIA = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const HOME_ESTADO_INFO = {
+  disponible: { texto: 'Disponible', clase: 'bg-[#3F8F5F] hover:brightness-110 cursor-pointer' },
+  casi_lleno: { texto: 'Casi lleno', clase: 'bg-flama hover:brightness-110 cursor-pointer' },
+  agotado: { texto: 'Agotado', clase: 'bg-humo/70 cursor-not-allowed' },
+};
+
+async function cargarCalendarioSemana(){
+  const seccion = document.getElementById('seccionCalendarioSemana');
+  const cont = document.getElementById('homeCalendarioGrid');
   try{
-    const res = await fetch('/api/promos-taller');
-    PROMOS_TALLER = await res.json();
+    const res = await fetch('/api/sedes');
+    HOME_SEDES = await res.json();
+    if(!HOME_SEDES.length){
+      if(seccion) seccion.classList.add('hidden');
+      return;
+    }
+    homeSedeId = HOME_SEDES[0].id;
+    homePintarTabsSede();
+    await homeCargarSesiones();
   }catch(e){
-    PROMOS_TALLER = [];
+    if(cont) cont.innerHTML = '<p class="col-span-7 text-sm text-carbon/50">No se pudo cargar el calendario.</p>';
   }
-  pintarPromoTaller();
-  pintarBurbujaTaller();
 }
 
-function pintarPromoTaller(){
-  const seccion = document.getElementById('seccionPromosTaller');
-  const dots = document.getElementById('promoTallerDots');
-  const btnPrev = document.getElementById('btnPromoTallerPrev');
-  const btnNext = document.getElementById('btnPromoTallerNext');
-  clearInterval(promoTallerTimer);
-  promoTallerIndex = 0;
+function homePintarTabsSede(){
+  document.getElementById('homeSedeTabs').innerHTML = HOME_SEDES.map(s => `
+    <button type="button" data-id="${s.id}" class="homeBtnSede rounded-full px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider transition ${s.id === homeSedeId ? 'bg-vino text-crema' : 'border border-vino/20 text-vino hover:border-vino'}">
+      ${escapeHtml(s.nombre)}
+    </button>`).join('');
+  document.querySelectorAll('.homeBtnSede').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      homeSedeId = Number(btn.dataset.id);
+      homePintarTabsSede();
+      await homeCargarSesiones();
+    });
+  });
+  const sedeActual = HOME_SEDES.find(s => s.id === homeSedeId);
+  const tarjeta = document.getElementById('homeCalendarioTarjeta');
+  if(tarjeta) tarjeta.style.backgroundImage = sedeActual && sedeActual.imagenFondo ? `url('${sedeActual.imagenFondo}')` : '';
+}
 
-  if(!seccion) return;
-  if(!PROMOS_TALLER.length){
-    seccion.classList.add('hidden');
-    if(dots) dots.innerHTML = '';
+async function homeCargarSesiones(){
+  const res = await fetch(`/api/sesiones-taller?sedeId=${homeSedeId}`);
+  HOME_SESIONES = await res.json();
+  homePintarCalendario();
+}
+
+document.getElementById('btnHomeSemanaAnterior').addEventListener('click', () => { homeSemanaActual = new Date(homeSemanaActual.getFullYear(), homeSemanaActual.getMonth(), homeSemanaActual.getDate() - 7); homePintarCalendario(); });
+document.getElementById('btnHomeSemanaSiguiente').addEventListener('click', () => { homeSemanaActual = new Date(homeSemanaActual.getFullYear(), homeSemanaActual.getMonth(), homeSemanaActual.getDate() + 7); homePintarCalendario(); });
+
+function homeFechaISO(date){
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function homeTextoRangoSemana(inicio){
+  const fin = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 6);
+  const mismoMes = inicio.getMonth() === fin.getMonth();
+  if(mismoMes) return `${inicio.getDate()} – ${fin.getDate()} ${HOME_NOMBRES_MES_CORTO[fin.getMonth()]} ${fin.getFullYear()}`;
+  return `${inicio.getDate()} ${HOME_NOMBRES_MES_CORTO[inicio.getMonth()]} – ${fin.getDate()} ${HOME_NOMBRES_MES_CORTO[fin.getMonth()]} ${fin.getFullYear()}`;
+}
+
+function homePintarCalendario(){
+  document.getElementById('homeSemanaTexto').textContent = homeTextoRangoSemana(homeSemanaActual);
+
+  const sesionesPorFecha = {};
+  HOME_SESIONES.forEach(s => { (sesionesPorFecha[s.fecha] = sesionesPorFecha[s.fecha] || []).push(s); });
+
+  let celdas = HOME_NOMBRES_DIA.map(d => `<div class="pb-1 text-center font-ui text-[10px] font-700 uppercase tracking-wider text-carbon/40">${d}</div>`).join('');
+
+  const hoy = new Date();
+  const fechaISOHoy = homeFechaISO(hoy);
+
+  for(let i = 0; i < 7; i++){
+    const fechaDia = new Date(homeSemanaActual.getFullYear(), homeSemanaActual.getMonth(), homeSemanaActual.getDate() + i);
+    const dia = fechaDia.getDate();
+    const fecha = homeFechaISO(fechaDia);
+    const sesiones = (sesionesPorFecha[fecha] || []).sort((a,b) => (a.orden ?? 0) - (b.orden ?? 0));
+    const esHoy = fecha === fechaISOHoy;
+    const esPasado = fecha < fechaISOHoy;
+    const chips = sesiones.map(s => {
+      const info = esPasado ? HOME_ESTADO_INFO.agotado : (HOME_ESTADO_INFO[s.estado] || HOME_ESTADO_INFO.disponible);
+      const accion = (esPasado || s.estado === 'agotado') ? '' : `data-sesion="${s.id}"`;
+      const etiqueta = esPasado ? 'No disponible' : info.texto;
+      return `<button type="button" ${accion} class="homeChipSesion w-full truncate rounded-md px-1.5 py-1 text-left text-[10px] leading-tight text-crema transition ${info.clase}" title="${escapeHtml(s.titulo)} · ${etiqueta}">${escapeHtml(s.titulo)}</button>`;
+    }).join('');
+    celdas += `
+      <div class="min-h-[64px] rounded-lg border p-1.5 sm:min-h-[90px] ${esHoy ? 'border-flama bg-[#FDF1D8]' : 'border-vino/10 bg-white/90'}">
+        <span class="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-flama/25 px-1 font-ui text-[10px] font-700 text-vino">${dia}</span>
+        <div class="mt-1 space-y-1">${chips}</div>
+      </div>`;
+  }
+
+  document.getElementById('homeCalendarioGrid').innerHTML = celdas;
+  document.querySelectorAll('.homeChipSesion[data-sesion]').forEach(btn => {
+    btn.addEventListener('click', () => homeIrAlTaller(Number(btn.dataset.sesion)));
+  });
+}
+
+// Si el taller ya tiene slug y precio configurados, manda a su pagina propia
+// de compra (/talleres/<slug>) — ahi es donde deben llegar los anuncios de
+// Meta. Si todavia no tiene precio, se cae de vuelta al WhatsApp de siempre.
+function homeIrAlTaller(sesionId){
+  const sesion = HOME_SESIONES.find(s => s.id === sesionId);
+  if(!sesion) return;
+  const precioTotal = parseFloat(String(sesion.precioTotal || 0).replace(/,/g, '')) || 0;
+  if(sesion.slug && precioTotal > 0){
+    window.location.href = `/talleres/${sesion.slug}`;
     return;
   }
-  seccion.classList.remove('hidden');
-
-  renderPromoTallerSlide();
-
-  const hayVarias = PROMOS_TALLER.length > 1;
-  if(btnPrev) btnPrev.classList.toggle('hidden', !hayVarias);
-  if(btnNext) btnNext.classList.toggle('hidden', !hayVarias);
-
-  if(hayVarias && dots){
-    dots.innerHTML = PROMOS_TALLER.map((_, i) =>
-      `<button type="button" onclick="irASlidePromoTaller(${i})" aria-label="Anuncio ${i + 1}" class="h-2 w-2 rounded-full transition ${i === 0 ? 'bg-flama' : 'bg-white/70'}"></button>`
-    ).join('');
-    iniciarAutoavancePromoTaller();
-  } else if(dots){
-    dots.innerHTML = '';
-  }
-}
-
-function iniciarAutoavancePromoTaller(){
-  clearInterval(promoTallerTimer);
-  if(PROMOS_TALLER.length < 2) return;
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  promoTallerTimer = setInterval(() => irASlidePromoTaller((promoTallerIndex + 1) % PROMOS_TALLER.length), 5000);
-}
-
-function renderPromoTallerSlide(){
-  const wrap = document.getElementById('promoTallerSlide');
-  const item = PROMOS_TALLER[promoTallerIndex];
-  if(!wrap || !item) return;
-  wrap.innerHTML = `<div class="relative h-full w-full">
-    <img src="${item.url}" alt="${escapeHtml(item.titulo || 'Taller de Endulcora')}" class="h-full w-full object-cover">
-    <div class="absolute inset-0 bg-gradient-to-t from-carbon/90 via-carbon/25 to-transparent"></div>
-    <div class="absolute inset-x-0 bottom-0 z-[5] px-5 pb-16 pt-10 text-center sm:px-10 sm:pb-20 md:text-left">
-      <p class="font-ui text-[11px] font-700 uppercase tracking-[.22em] text-flama">Taller de la semana</p>
-      ${item.titulo ? `<h3 class="mt-1 font-display text-2xl text-crema sm:text-3xl">${escapeHtml(item.titulo)}</h3>` : ''}
-      ${item.descripcion ? `<p class="mt-2 max-w-xl text-sm text-crema/80 sm:text-base">${escapeHtml(item.descripcion)}</p>` : ''}
-      <div class="mt-5 flex flex-wrap justify-center gap-3 md:justify-start">
-        <a href="/calendario" class="rounded-full boton-vivo border border-crema/40 bg-white/10 px-6 py-3 font-ui text-xs font-700 uppercase tracking-wider text-crema hover:bg-white/20 transition">Ver calendario</a>
-        <button type="button" onclick="agendarPromoTaller(${item.id})" class="rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-xs font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">Agenda tu taller</button>
-      </div>
-    </div>
-  </div>`;
-}
-
-function irASlidePromoTaller(i){
-  promoTallerIndex = i;
-  renderPromoTallerSlide();
-  const dots = document.getElementById('promoTallerDots');
-  if(dots){
-    [...dots.children].forEach((d, idx) => {
-      d.classList.toggle('bg-flama', idx === i);
-      d.classList.toggle('bg-white/70', idx !== i);
-    });
-  }
-  iniciarAutoavancePromoTaller();
-}
-
-function pasoPromoTaller(delta){
-  if(!PROMOS_TALLER.length) return;
-  const total = PROMOS_TALLER.length;
-  irASlidePromoTaller((promoTallerIndex + delta + total) % total);
-}
-
-function agendarPromoTaller(promoId){
-  const item = PROMOS_TALLER.find(p => p.id === promoId);
-  const titulo = item && item.titulo ? item.titulo : 'un taller';
-  const mensaje = `Hola, me interesa agendar el taller: ${titulo}`;
+  const sede = HOME_SEDES.find(s => s.id === homeSedeId);
+  const fechaLegible = new Date(sesion.fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+  const mensaje = `Hola, quiero apartar mi lugar en el taller "${sesion.titulo}" del ${fechaLegible}${sede ? ` en la sede ${sede.nombre}` : ''}.`;
   window.open(`https://wa.me/52${numeroWhatsapp()}?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
 
@@ -1971,120 +1945,6 @@ function limpiarBusquedaTienda(){
   pintarProductosFiltrados();
 }
 
-/* ---------- Calendario de talleres por sede ---------- */
-let CALENDARIO_SEDES = [];
-let CALENDARIO_SESIONES = [];
-let calendarioPublicoSedeId = null;
-let calendarioPublicoMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-
-const NOMBRES_MES_PUBLICO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const NOMBRES_DIA_PUBLICO = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-const ESTADO_INFO_PUBLICO = {
-  disponible: { texto: 'Disponible', clase: 'bg-[#3F8F5F] hover:brightness-110 cursor-pointer' },
-  casi_lleno: { texto: 'Casi lleno', clase: 'bg-flama hover:brightness-110 cursor-pointer' },
-  agotado: { texto: 'Agotado', clase: 'bg-humo/70 cursor-not-allowed' },
-};
-
-async function cargarCalendario(){
-  const cont = document.getElementById('calendarioPublicoGrid');
-  try{
-    const res = await fetch('/api/sedes');
-    CALENDARIO_SEDES = await res.json();
-    if(!CALENDARIO_SEDES.length){
-      document.getElementById('sedeTabsCalendario').innerHTML = '';
-      cont.innerHTML = '<p class="col-span-7 text-sm text-carbon/50">Todavía no hay talleres programados.</p>';
-      return;
-    }
-    calendarioPublicoSedeId = CALENDARIO_SEDES[0].id;
-    pintarTabsSede();
-    await cargarSesionesCalendario();
-  }catch(e){
-    cont.innerHTML = '<p class="col-span-7 text-sm text-carbon/50">No se pudo cargar el calendario.</p>';
-  }
-}
-
-function pintarTabsSede(){
-  document.getElementById('sedeTabsCalendario').innerHTML = CALENDARIO_SEDES.map(s => `
-    <button type="button" data-id="${s.id}" onclick="seleccionarSedeCalendario(${s.id})"
-      class="rounded-full px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider transition ${s.id === calendarioPublicoSedeId ? 'bg-vino text-crema' : 'border border-vino/20 text-vino hover:border-vino'}">
-      ${escapeHtml(s.nombre)}
-    </button>`).join('');
-
-  const sedeActual = CALENDARIO_SEDES.find(s => s.id === calendarioPublicoSedeId);
-  const tarjeta = document.getElementById('calendarioTarjeta');
-  tarjeta.style.backgroundImage = sedeActual && sedeActual.imagenFondo ? `url('${sedeActual.imagenFondo}')` : '';
-}
-
-async function seleccionarSedeCalendario(id){
-  calendarioPublicoSedeId = id;
-  pintarTabsSede();
-  await cargarSesionesCalendario();
-}
-
-async function cargarSesionesCalendario(){
-  const res = await fetch(`/api/sesiones-taller?sedeId=${calendarioPublicoSedeId}`);
-  CALENDARIO_SESIONES = await res.json();
-  pintarCalendarioPublico();
-}
-
-function cambiarMesCalendario(delta){
-  calendarioPublicoMes = new Date(calendarioPublicoMes.getFullYear(), calendarioPublicoMes.getMonth() + delta, 1);
-  pintarCalendarioPublico();
-}
-
-function fechaISOPublico(date){
-  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-}
-
-function pintarCalendarioPublico(){
-  document.getElementById('calendarioPublicoMesTexto').textContent = `${NOMBRES_MES_PUBLICO[calendarioPublicoMes.getMonth()]} ${calendarioPublicoMes.getFullYear()}`;
-  const anio = calendarioPublicoMes.getFullYear();
-  const mes = calendarioPublicoMes.getMonth();
-  const primerDia = new Date(anio, mes, 1);
-  const diasEnMes = new Date(anio, mes + 1, 0).getDate();
-  const offset = (primerDia.getDay() + 6) % 7;
-
-  const sesionesPorFecha = {};
-  CALENDARIO_SESIONES.forEach(s => {
-    (sesionesPorFecha[s.fecha] = sesionesPorFecha[s.fecha] || []).push(s);
-  });
-
-  let celdas = NOMBRES_DIA_PUBLICO.map(d => `<div class="pb-1 text-center font-ui text-[10px] font-700 uppercase tracking-wider text-carbon/40">${d}</div>`).join('');
-  for(let i = 0; i < offset; i++) celdas += '<div></div>';
-
-  const hoy = new Date();
-  const esMismoMes = hoy.getFullYear() === anio && hoy.getMonth() === mes;
-  const fechaISOHoy = fechaISOPublico(hoy);
-
-  for(let dia = 1; dia <= diasEnMes; dia++){
-    const fecha = `${anio}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
-    const sesiones = (sesionesPorFecha[fecha] || []).sort((a,b) => (a.orden ?? 0) - (b.orden ?? 0));
-    const esHoy = esMismoMes && hoy.getDate() === dia;
-    const esPasado = fecha < fechaISOHoy;
-    const chips = sesiones.map(s => {
-      const info = esPasado ? ESTADO_INFO_PUBLICO.agotado : (ESTADO_INFO_PUBLICO[s.estado] || ESTADO_INFO_PUBLICO.disponible);
-      const accion = (esPasado || s.estado === 'agotado') ? '' : `onclick="registrarTallerWhatsApp(${s.id})"`;
-      const etiqueta = esPasado ? 'No disponible' : info.texto;
-      return `<button type="button" ${accion} class="w-full truncate rounded-md px-1.5 py-1 text-left text-[10px] leading-tight text-crema transition ${info.clase}" title="${escapeHtml(s.titulo)} · ${etiqueta}">${escapeHtml(s.titulo)}</button>`;
-    }).join('');
-    celdas += `
-      <div class="min-h-[64px] rounded-lg border p-1.5 sm:min-h-[84px] ${esHoy ? 'border-flama bg-[#FDF1D8]' : 'border-vino/10 bg-white/90'}">
-        <span class="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-flama/25 px-1 font-ui text-[10px] font-700 text-vino">${dia}</span>
-        <div class="mt-1 space-y-1">${chips}</div>
-      </div>`;
-  }
-
-  document.getElementById('calendarioPublicoGrid').innerHTML = celdas;
-}
-
-function registrarTallerWhatsApp(sesionId){
-  const sesion = CALENDARIO_SESIONES.find(s => s.id === sesionId);
-  const sede = CALENDARIO_SEDES.find(s => s.id === calendarioPublicoSedeId);
-  if(!sesion) return;
-  const fechaLegible = new Date(sesion.fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
-  const mensaje = `Hola, quiero apartar mi lugar en el taller "${sesion.titulo}" del ${fechaLegible}${sede ? ` en la sede ${sede.nombre}` : ''}.`;
-  window.open(`https://wa.me/52${numeroWhatsapp()}?text=${encodeURIComponent(mensaje)}`, '_blank');
-}
 
 async function cargarAnuncios(){
   const cont = document.getElementById('listaAnuncios');
@@ -2342,7 +2202,7 @@ manejarRegresoDePago();
 abrirCarritoSiSeSolicito();
 cargarSesion();
 cargarHeroCarrusel();
-cargarPromosTaller();
+cargarCalendarioSemana();
 cargarPromoRecetarioMes();
 
 async function cargarPromoRecetarioMes(){

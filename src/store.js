@@ -2163,44 +2163,6 @@ module.exports = {
   },
 
   // ---- Promos semanales de talleres (carrusel de anuncios) ----
-  getPromosTaller() {
-    const data = load();
-    return [...data.promosTaller].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
-  },
-  addPromoTaller({ url, filename, titulo, descripcion }) {
-    const data = load();
-    const item = {
-      id: nextId(data.promosTaller),
-      orden: data.promosTaller.length,
-      url,
-      filename: filename || null,
-      titulo: titulo || '',
-      descripcion: descripcion || '',
-      createdAt: new Date().toISOString(),
-    };
-    data.promosTaller.push(item);
-    save(data);
-    return item;
-  },
-  updatePromoTaller(id, patch) {
-    const data = load();
-    const item = data.promosTaller.find((m) => m.id === Number(id));
-    if (!item) return null;
-    if (typeof patch.titulo === 'string') item.titulo = patch.titulo;
-    if (typeof patch.descripcion === 'string') item.descripcion = patch.descripcion;
-    if (typeof patch.url === 'string') item.url = patch.url;
-    if (typeof patch.filename === 'string' || patch.filename === null) item.filename = patch.filename;
-    save(data);
-    return item;
-  },
-  deletePromoTaller(id) {
-    const data = load();
-    const item = data.promosTaller.find((m) => m.id === Number(id));
-    data.promosTaller = data.promosTaller.filter((m) => m.id !== Number(id));
-    save(data);
-    return item;
-  },
-
   // ---- Pedidos (Mercado Pago) ----
   getOrders() {
     const data = load();
