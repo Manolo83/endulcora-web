@@ -383,10 +383,11 @@ async function enviarCorreoConfirmacionClaseGratis({ to, nombre, horario, fecha,
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
-// "Confirma tu lugar" de la clase gratis: el control de aforo real (tope
-// de 50 por horario) vive en store.confirmarRegistroClaseGratis, que se
-// ejecuta cuando la persona abre confirmLink -- este correo solo invita a
-// hacerlo, por orden de llegada, antes de la fecha limite.
+// "¿Asistirás?" de la clase gratis: dos botones (Sí / No). El control de
+// aforo real (tope por horario, numero de inscrito) vive en
+// store.responderClaseGratis, que se ejecuta cuando la persona abre uno de
+// los dos links -- este correo solo pregunta, por orden de llegada de quien
+// contesta "Sí" primero.
 async function enviarCorreoConfirmarClaseGratis({ to, nombre, horario, fecha, ubicacion, confirmLink, fechaLimiteLegible }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
@@ -395,17 +396,19 @@ async function enviarCorreoConfirmarClaseGratis({ to, nombre, horario, fecha, ub
   const fechaLegible = fecha
     ? new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).replace(',', '')
     : '';
+  const linkSi = `${confirmLink}${confirmLink.includes('?') ? '&' : '?'}va=si`;
+  const linkNo = `${confirmLink}${confirmLink.includes('?') ? '&' : '?'}va=no`;
 
   const { error } = await client.emails.send({
     from,
     to,
-    subject: `Confirma tu lugar en la clase gratis de pan de muerto${fechaLegible ? ` — ${fechaLegible}` : ''}`,
+    subject: `¿Asistirás a la clase gratis de pan de muerto?${fechaLegible ? ` — ${fechaLegible}` : ''}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
         <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
         <h1 style="font-size:20px;color:#4E1454;">Hola, ${escapeHtml(nombre || '')}:</h1>
         <p style="font-size:14px;line-height:1.6;">Ya casi es tu clase demo gratis de pan de muerto, y los lugares de cada horario son limitados.</p>
-        <p style="font-size:14px;line-height:1.6;"><strong>Necesitamos que confirmes tu lugar</strong> — es por orden de llegada: los primeros en confirmar son quienes se quedan con su lugar en el horario.</p>
+        <p style="font-size:14px;line-height:1.6;"><strong>Necesitamos que nos digas si vendrás</strong> — por horario hay solo 100 lugares, por orden de llegada de quien conteste primero.</p>
 
         <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;">
           ${fechaLegible ? `<tr><td style="padding:6px 6px 6px 0;width:24px;">📅</td><td style="padding:6px 0;">${escapeHtml(fechaLegible)}</td></tr>` : ''}
@@ -414,9 +417,13 @@ async function enviarCorreoConfirmarClaseGratis({ to, nombre, horario, fecha, ub
           ${ubicacion ? `<tr><td style="padding:6px 6px 6px 0;vertical-align:top;">📍</td><td style="padding:6px 0;">${escapeHtml(ubicacion)}</td></tr>` : ''}
         </table>
 
-        <p style="margin-top:24px;text-align:center;"><a href="${confirmLink}" style="display:inline-block;background:#4E1454;color:#FBF4E9;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;">CONFIRMO MI LUGAR</a></p>
+        <p style="margin-top:22px;margin-bottom:10px;text-align:center;font-weight:700;font-size:14px;">¿Asistirás?</p>
+        <table style="width:100%;border-collapse:collapse;"><tr>
+          <td style="width:50%;padding-right:6px;"><a href="${linkSi}" style="display:block;text-align:center;background:#1E7A46;color:#ffffff;padding:14px 0;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">SÍ, VOY</a></td>
+          <td style="width:50%;padding-left:6px;"><a href="${linkNo}" style="display:block;text-align:center;background:transparent;color:#4E1454;border:2px solid #4E1454;padding:12px 0;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">NO PUEDO</a></td>
+        </tr></table>
 
-        ${fechaLimiteLegible ? `<p style="margin-top:18px;font-size:13px;line-height:1.6;text-align:center;color:#7A2E7E;"><strong>Confirma antes del ${escapeHtml(fechaLimiteLegible)}</strong> — después de esa fecha, tu lugar se libera para quien está en lista de espera.</p>` : ''}
+        ${fechaLimiteLegible ? `<p style="margin-top:18px;font-size:13px;line-height:1.6;text-align:center;color:#7A2E7E;"><strong>Contesta antes del ${escapeHtml(fechaLimiteLegible)}</strong> para asegurar tu lugar.</p>` : ''}
 
         <div style="margin-top:26px;border-radius:14px;background:#FBF4E9;padding:16px 18px;">
           <p style="margin:0 0 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7A2E7E;font-weight:700;">Qué incluye esta clase demo</p>
@@ -437,45 +444,7 @@ async function enviarCorreoConfirmarClaseGratis({ to, nombre, horario, fecha, ub
           </ul>
         </div>
 
-        <p style="margin-top:26px;font-size:12px;color:#9C9C9C;">Si ya no puedes venir, simplemente no hace falta que hagas nada: tu lugar se libera solo y se lo damos a alguien más.</p>
-      </div>
-    `,
-  });
-  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
-}
-
-// Se manda a mano desde /admin cuando se promueve a alguien de la lista de
-// espera (ver store.promoverListaEsperaClaseGratis) -- a diferencia del
-// correo de arriba, aqui ya quedo confirmado, no hace falta que haga nada.
-async function enviarCorreoPromovidoListaEsperaClaseGratis({ to, nombre, horario, fecha, ubicacion }) {
-  const client = resendClient();
-  if (!client) throw new Error('El envío de correos todavía no está configurado.');
-
-  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
-  const fechaLegible = fecha
-    ? new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).replace(',', '')
-    : '';
-  const calendarLink = linkAgregarCalendario({ titulo: 'Clase gratis Endulcora — Pan de muerto', fecha, horario, ubicacion });
-
-  const { error } = await client.emails.send({
-    from,
-    to,
-    subject: `¡Se liberó un lugar! Ya quedaste confirmado en la clase gratis`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
-        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
-        <h1 style="font-size:20px;color:#4E1454;">¡Buenas noticias, ${escapeHtml(nombre || '')}!</h1>
-        <p style="font-size:14px;line-height:1.6;">Se liberó un lugar en tu horario y ya quedaste confirmado — no tienes que hacer nada más.</p>
-
-        <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;">
-          ${fechaLegible ? `<tr><td style="padding:6px 6px 6px 0;width:24px;">📅</td><td style="padding:6px 0;">${escapeHtml(fechaLegible)}</td></tr>` : ''}
-          ${horario ? `<tr><td style="padding:6px 6px 6px 0;">🕐</td><td style="padding:6px 0;">Horario: ${escapeHtml(horario)}</td></tr>` : ''}
-          ${ubicacion ? `<tr><td style="padding:6px 6px 6px 0;vertical-align:top;">📍</td><td style="padding:6px 0;">${escapeHtml(ubicacion)}</td></tr>` : ''}
-        </table>
-
-        ${calendarLink ? `<p style="margin-top:20px;"><a href="${calendarLink}" style="background:#F5A623;color:#1B0720;padding:10px 20px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">📅 Agregar a mi calendario</a></p>` : ''}
-
-        <p style="margin-top:22px;font-size:14px;">Nos vemos pronto.<br><strong>Endulcora Estudio Gastronómico</strong></p>
+        <p style="margin-top:26px;font-size:12px;color:#9C9C9C;">Si contestas "Sí" y alcanzas lugar, te llega tu ficha con tu número de inscrito — muéstrala al llegar, es tu pase de entrada.</p>
       </div>
     `,
   });
@@ -510,7 +479,7 @@ async function enviarCorreoRecordatorioClaseGratis({ to, nombre, horario, fecha,
           ${horario ? `<tr><td style="padding:6px 6px 6px 0;">🕐</td><td style="padding:6px 0;">Horario: ${escapeHtml(horario)}</td></tr>` : ''}
           ${ubicacion ? `<tr><td style="padding:6px 6px 6px 0;vertical-align:top;">📍</td><td style="padding:6px 0;">${escapeHtml(ubicacion)}</td></tr>` : ''}
         </table>
-        <p style="margin-top:20px;font-size:13px;line-height:1.6;">Si ya no puedes venir, avísanos por WhatsApp para dejar tu lugar libre a alguien en lista de espera.</p>
+        <p style="margin-top:20px;font-size:13px;line-height:1.6;">Si ya no puedes venir, avísanos por WhatsApp para liberar tu lugar.</p>
         <p style="margin-top:12px;"><a href="${whatsappUrl}" style="background:#4E1454;color:#FBF4E9;padding:9px 18px;border-radius:999px;text-decoration:none;font-weight:700;font-size:12px;">Avisar por WhatsApp</a></p>
       </div>
     `,
@@ -705,7 +674,6 @@ module.exports = {
   enviarAvisoEquipoNuevoTaller,
   enviarCorreoConfirmacionClaseGratis,
   enviarCorreoConfirmarClaseGratis,
-  enviarCorreoPromovidoListaEsperaClaseGratis,
   enviarCorreoRecordatorioClaseGratis,
   linkAgregarCalendario,
   enviarCorreoRevistaMensual,

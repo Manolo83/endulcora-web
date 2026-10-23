@@ -1,6 +1,7 @@
-// Envio masivo del correo "confirma tu lugar" de la clase gratis (control
-// de aforo con tope de 50 por horario, ver store.confirmarRegistroClaseGratis
-// y el plan aprobado con el dueño del sitio). Mismo patron de resumibilidad
+// Envio masivo del correo "¿Asistirás?" de la clase gratis (dos botones
+// Sí/No, control de aforo con tope de 100 por horario, ver
+// store.responderClaseGratis y el plan aprobado con el dueño del sitio).
+// Mismo patron de resumibilidad
 // que src/campanas.js: guarda de inmediato quien ya quedo procesado, para
 // que si el servidor se reinicia a la mitad (ej. un deploy) se retome solo
 // donde se quedo en vez de perder el resto o repetir correos.

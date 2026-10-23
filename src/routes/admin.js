@@ -10,7 +10,7 @@ const store = require('../store');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL, GOOGLE_SHEETS } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
-const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller, enviarCorreoPromovidoListaEsperaClaseGratis } = require('../email');
+const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller } = require('../email');
 const { procesarCampana } = require('../campanas');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
@@ -738,8 +738,8 @@ router.delete('/api/clase-gratis/registros/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- Control de aforo (correo "confirma tu lugar" + tope de cupo + lista
-// de espera) ----
+// ---- Control de aforo (correo "¿Asistirás?" con botones Sí/No + tope de
+// cupo por horario, numero de inscrito) ----
 router.get('/api/clase-gratis/confirmaciones/resumen', requireAdmin, (req, res) => {
   const contenido = store.getContent();
   res.json({
@@ -771,32 +771,12 @@ router.get('/api/clase-gratis/confirmaciones/envio', requireAdmin, (req, res) =>
   res.json(store.getEnvioConfirmacionClaseGratis());
 });
 
-router.post('/api/clase-gratis/confirmaciones/:id/cancelar', requireAdmin, (req, res) => {
-  const item = store.cancelarConfirmacionClaseGratis(req.params.id);
-  if (!item) return res.status(404).json({ error: 'No encontrado' });
-  res.json(item);
-});
-
-// Promueve a quien lleve mas tiempo en lista de espera de ese horario, y le
-// avisa por correo que ya quedo confirmado.
-router.post('/api/clase-gratis/confirmaciones/promover', requireAdmin, async (req, res) => {
-  const { horario } = req.body || {};
-  if (!horario) return res.status(400).json({ error: 'Falta el horario.' });
-  const contenido = store.getContent();
-  const promovido = store.promoverListaEsperaClaseGratis(horario, contenido.clasegratis_fecha);
-  if (!promovido) return res.status(400).json({ error: 'No hay lugar libre o nadie en lista de espera para ese horario.' });
-  try {
-    await enviarCorreoPromovidoListaEsperaClaseGratis({
-      to: promovido.correo,
-      nombre: promovido.nombre,
-      horario: promovido.horario,
-      fecha: promovido.fecha,
-      ubicacion: contenido.clasegratis_ubicacion,
-    });
-  } catch (e) {
-    console.error(`[clase-gratis] Se promovio a ${promovido.correo} pero no se le pudo avisar:`, e.message);
-  }
-  res.json(promovido);
+// Override manual del equipo (ej. alguien avisa por telefono que ya no
+// viene): usa la misma logica que si hubiera dado clic en "No" del correo.
+router.post('/api/clase-gratis/confirmaciones/:id/marcar-no-asiste', requireAdmin, (req, res) => {
+  const resultado = store.responderClaseGratis(req.params.id, 'no');
+  if (!resultado) return res.status(404).json({ error: 'No encontrado' });
+  res.json(resultado.item);
 });
 
 const ETIQUETA_SEGMENTO_CLASE_GRATIS = {
@@ -827,8 +807,12 @@ router.get('/api/clase-gratis/registros/excel', requireAdmin, async (req, res) =
   libro.creator = 'Endulcora';
   libro.created = new Date();
 
+  const ETIQUETA_ASISTENCIA_CLASE_GRATIS = { si: 'Sí', no: 'No', '': 'Sin responder' };
+
   const usados = new Set();
   const columnas = [
+    { header: 'N° inscrito', key: 'numeroInscrito', width: 11 },
+    { header: '¿Asistirá?', key: 'asistencia', width: 12 },
     { header: 'Nombre', key: 'nombre', width: 26 },
     { header: 'WhatsApp', key: 'whatsapp', width: 16 },
     { header: 'Correo', key: 'correo', width: 28 },
@@ -865,10 +849,19 @@ router.get('/api/clase-gratis/registros/excel', requireAdmin, async (req, res) =
       celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5A623' } };
     });
 
+    // Primero los que ya tienen numero (en orden de gafete, para que sirva
+    // directo como lista de acomodo), despues el resto por nombre.
     grupo.filas
-      .sort((a, b) => a.nombre.localeCompare(b.nombre))
+      .sort((a, b) => {
+        if (a.numeroInscrito && b.numeroInscrito) return a.numeroInscrito - b.numeroInscrito;
+        if (a.numeroInscrito) return -1;
+        if (b.numeroInscrito) return 1;
+        return a.nombre.localeCompare(b.nombre);
+      })
       .forEach((r) => {
         hoja.addRow({
+          numeroInscrito: r.numeroInscrito || '',
+          asistencia: r.asistencia === 'si' && !r.numeroInscrito ? 'Sí (cupo lleno)' : (ETIQUETA_ASISTENCIA_CLASE_GRATIS[r.asistencia] || 'Sin responder'),
           nombre: r.nombre,
           whatsapp: r.whatsapp,
           correo: r.correo,

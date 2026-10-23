@@ -680,11 +680,14 @@ router.post('/clase-gratis/registro', (req, res) => {
   });
 });
 
-// Confirma el lugar de alguien en la clase gratis (control de aforo, tope
-// de 50 por horario) -- dos formas de llegar aqui:
-// 1. Desde el correo personal: trae id+token (el link de ese correo).
+// Registra si alguien va o no a la clase gratis (control de aforo, tope de
+// 100 por horario, se reinicia por horario -- ver store.responderClaseGratis)
+// -- dos formas de llegar aqui:
+// 1. Desde el correo personal: trae id+token+respuesta (los botones Sí/No
+//    de ese correo).
 // 2. Desde el link compartido en el grupo de WhatsApp: trae correo (la
-//    persona lo escribe en la pagina publica /confirmar-clase).
+//    persona lo escribe en la pagina publica /confirmar-clase) -- siempre
+//    cuenta como "Sí", ya que no tiene botones.
 router.post('/clase-gratis/confirmar', (req, res) => {
   const b = req.body || {};
   let registro = null;
@@ -696,9 +699,11 @@ router.post('/clase-gratis/confirmar', (req, res) => {
   if (!registro) {
     return res.status(404).json({ error: 'No encontramos tu registro. Revisa que el correo sea el mismo con el que te registraste.' });
   }
-  const { item, resultado } = store.confirmarRegistroClaseGratis(registro.id);
+  const respuesta = b.respuesta === 'no' ? 'no' : 'si';
+  const { item, resultado } = store.responderClaseGratis(registro.id, respuesta);
   const contenido = store.getContent();
-  const calendarLink = resultado !== 'listaEspera'
+  const vaAVenir = resultado === 'confirmado' || resultado === 'yaConfirmado';
+  const calendarLink = vaAVenir
     ? linkAgregarCalendario({
         titulo: 'Clase gratis Endulcora — Pan de muerto',
         fecha: item.fecha,
@@ -707,12 +712,14 @@ router.post('/clase-gratis/confirmar', (req, res) => {
       })
     : '';
   res.json({
-    resultado, // 'confirmado' | 'yaConfirmado' | 'listaEspera'
+    resultado, // 'confirmado' | 'yaConfirmado' | 'declinado' | 'yaRespondidoNo' | 'cupoLleno'
     nombre: item.nombre,
     horario: item.horario,
     fecha: item.fecha,
     ubicacion: contenido.clasegratis_ubicacion,
+    numeroInscrito: item.numeroInscrito,
     calendarLink,
+    linkClasesEnVivo: !vaAVenir ? '/clases-en-vivo' : '',
   });
 });
 

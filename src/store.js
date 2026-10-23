@@ -87,9 +87,9 @@ const DEFAULT_CONTENT = {
   // y en la pantalla de "ya quedaste registrado". Distinto del WhatsApp
   // general del sitio.
   clasegratis_whatsapp_grupo: 'https://chat.whatsapp.com/JZE84n4ZOB11tHdKwLs7dY',
-  // Fecha limite (AAAA-MM-DD) para confirmar el lugar en la clase gratis
-  // (control de aforo, ver confirmarRegistroClaseGratis) -- despues de esta
-  // fecha, el equipo puede promover a quien este en lista de espera.
+  // Fecha limite (AAAA-MM-DD) sugerida en el correo para contestar si se va
+  // a asistir (ver responderClaseGratis) -- el aforo real se decide por
+  // orden de llegada de quien contesta "Sí" primero, no por esta fecha.
   clasegratis_confirmacion_limite: '2026-10-24',
   // Link de invitacion al grupo de WhatsApp "Comunidad Endulcora". Se usa
   // en varios lados: paso obligatorio para ver la clase en vivo sin pagar
@@ -1142,8 +1142,8 @@ async function init() {
       data._migFechaRegistrosClaseGratis = true;
       changed = true;
     }
-    // Confirmacion de asistencia con tope de cupo + lista de espera (control
-    // de aforo de la clase gratis, ver confirmarRegistroClaseGratis).
+    // Confirmacion de asistencia con tope de cupo (control de aforo de la
+    // clase gratis, ver responderClaseGratis).
     if (!data._migConfirmacionClaseGratis) {
       (data.registrosClaseGratis || []).forEach((r) => {
         if (typeof r.confirmToken !== 'string' || !r.confirmToken) r.confirmToken = crypto.randomUUID();
@@ -1155,6 +1155,29 @@ async function init() {
         if (typeof r.recordatorioMismoDiaClaseEnviado !== 'boolean') r.recordatorioMismoDiaClaseEnviado = false;
       });
       data._migConfirmacionClaseGratis = true;
+      changed = true;
+    }
+    // "Modo carrera": el correo ahora trae dos botones (Sí/No) en vez de uno
+    // solo, y a quien contesta Sí con lugar se le asigna un numero de
+    // inscrito (se reinicia por horario). Quien ya habia quedado confirmado
+    // con el flujo viejo se re-numera aqui mismo, en el orden en que se
+    // confirmo, para no perder su lugar ya ganado.
+    if (!data._migAsistenciaNumeroClaseGratis) {
+      const contadorPorHorario = {};
+      (data.registrosClaseGratis || [])
+        .filter((r) => r.confirmado)
+        .sort((a, b) => new Date(a.confirmadoEn || 0) - new Date(b.confirmadoEn || 0))
+        .forEach((r) => {
+          const clave = `${r.fecha}|||${r.horario}`;
+          contadorPorHorario[clave] = (contadorPorHorario[clave] || 0) + 1;
+          r.numeroInscrito = contadorPorHorario[clave];
+          r.asistencia = 'si';
+        });
+      (data.registrosClaseGratis || []).forEach((r) => {
+        if (typeof r.asistencia !== 'string') r.asistencia = '';
+        if (r.numeroInscrito === undefined) r.numeroInscrito = null;
+      });
+      data._migAsistenciaNumeroClaseGratis = true;
       changed = true;
     }
     // Primera vez que se agregan precio/anticipo/cupo/slug a los talleres
@@ -3148,12 +3171,13 @@ module.exports = {
       compro: '', // '' sin marcar, o 'taller' | 'recetario' si asistio y compro
       seHizoMiembro: false,
       segmento: '',
-      // Control de aforo (ver confirmarRegistroClaseGratis): token unico
-      // para el link personal del correo "confirma tu lugar".
+      // Control de aforo (ver responderClaseGratis): token unico para el
+      // link personal del correo "confirma tu lugar".
       confirmToken: crypto.randomUUID(),
-      confirmado: false,
+      asistencia: '', // '' sin responder, 'si' | 'no' (lo que contesto en el correo)
+      confirmado: false, // true solo si contesto 'si' Y alcanzo numero (tiene lugar)
+      numeroInscrito: null, // su "gafete": 1..CUPO, se reinicia por horario
       confirmadoEn: null,
-      enListaEspera: false,
       correoConfirmarEnviado: false,
       recordatorio2diasClaseEnviado: false,
       recordatorioMismoDiaClaseEnviado: false,
@@ -3187,9 +3211,9 @@ module.exports = {
     save(data);
   },
 
-  // ---- Control de aforo de la clase gratis (correo "confirma tu lugar" +
-  // tope de cupo + lista de espera) ----
-  CUPO_CLASE_GRATIS_POR_HORARIO: 50,
+  // ---- Control de aforo de la clase gratis (correo con botones Sí/No +
+  // tope de cupo, numero de inscrito por horario) ----
+  CUPO_CLASE_GRATIS_POR_HORARIO: 100,
 
   getRegistroClaseGratisPorToken(id, token) {
     const item = load().registrosClaseGratis.find((r) => r.id === Number(id));
@@ -3213,69 +3237,56 @@ module.exports = {
     return candidatos[0] || null;
   },
 
-  contarConfirmadosClaseGratis(horario, fecha) {
-    return load().registrosClaseGratis.filter((r) => r.horario === horario && r.fecha === fecha && r.confirmado).length;
-  },
-
-  // Confirma el lugar si todavia hay cupo en su horario (primero en
-  // confirmar, primero en entrar); si ya no hay, lo deja en lista de
-  // espera. Es idempotente: si ya estaba confirmado, no hace nada (no se
-  // vuelve a contar ni se manda dos veces).
-  confirmarRegistroClaseGratis(id) {
+  // Registra la respuesta del boton Sí/No del correo (o del formulario con
+  // el link compartido, que siempre manda respuesta 'si'). El numero de
+  // inscrito ("gafete") se asigna aqui mismo, en el momento, contando a
+  // quienes ya tienen numero en ESE horario+fecha -- como todo pasa en un
+  // solo paso sincrono (sin esperar nada en medio), dos personas no pueden
+  // recibir el mismo numero aunque le den clic al mismo tiempo. Si el
+  // horario ya tiene los 100 numeros repartidos, cae en 'cupoLleno' (misma
+  // pagina que 'declinado': invitacion a ver la transmision en vivo). Es
+  // idempotente para quien ya tiene numero: reabrir su link solo le vuelve
+  // a mostrar el mismo.
+  responderClaseGratis(id, respuesta) {
     const data = load();
     const item = data.registrosClaseGratis.find((r) => r.id === Number(id));
     if (!item) return null;
-    if (item.confirmado) return { item, resultado: 'yaConfirmado' };
-    const confirmados = data.registrosClaseGratis.filter(
-      (r) => r.horario === item.horario && r.fecha === item.fecha && r.confirmado
+
+    if (respuesta === 'no') {
+      const yaHabiaDichoNo = item.asistencia === 'no';
+      item.asistencia = 'no';
+      item.confirmado = false;
+      item.numeroInscrito = null;
+      item.confirmadoEn = null;
+      save(data);
+      return { item, resultado: yaHabiaDichoNo ? 'yaRespondidoNo' : 'declinado' };
+    }
+
+    // respuesta === 'si'
+    if (item.confirmado && item.numeroInscrito) {
+      return { item, resultado: 'yaConfirmado' };
+    }
+    const inscritosEnHorario = data.registrosClaseGratis.filter(
+      (r) => r.horario === item.horario && r.fecha === item.fecha && r.confirmado && r.numeroInscrito
     ).length;
-    if (confirmados < this.CUPO_CLASE_GRATIS_POR_HORARIO) {
+    if (inscritosEnHorario < this.CUPO_CLASE_GRATIS_POR_HORARIO) {
+      item.asistencia = 'si';
       item.confirmado = true;
+      item.numeroInscrito = inscritosEnHorario + 1;
       item.confirmadoEn = new Date().toISOString();
-      item.enListaEspera = false;
       save(data);
       return { item, resultado: 'confirmado' };
     }
-    item.enListaEspera = true;
-    save(data);
-    return { item, resultado: 'listaEspera' };
-  },
-
-  // El equipo la usa cuando alguien avisa que no va a poder ir: libera su
-  // lugar (no promueve a nadie solo -- eso lo hace el admin a proposito
-  // con promoverListaEsperaClaseGratis, para poder avisarle a esa persona).
-  cancelarConfirmacionClaseGratis(id) {
-    const data = load();
-    const item = data.registrosClaseGratis.find((r) => r.id === Number(id));
-    if (!item) return null;
+    item.asistencia = 'si';
     item.confirmado = false;
-    item.confirmadoEn = null;
+    item.numeroInscrito = null;
     save(data);
-    return item;
-  },
-
-  // Toma a quien lleva mas tiempo en la lista de espera de ese horario y lo
-  // confirma (si de verdad hay un lugar libre) -- el admin manda despues el
-  // correo de "se libero tu lugar" con lo que regresa aqui.
-  promoverListaEsperaClaseGratis(horario, fecha) {
-    const data = load();
-    const confirmados = data.registrosClaseGratis.filter(
-      (r) => r.horario === horario && r.fecha === fecha && r.confirmado
-    ).length;
-    if (confirmados >= this.CUPO_CLASE_GRATIS_POR_HORARIO) return null;
-    const siguiente = data.registrosClaseGratis
-      .filter((r) => r.horario === horario && r.fecha === fecha && r.enListaEspera && !r.confirmado)
-      .sort((a, b) => a.id - b.id)[0];
-    if (!siguiente) return null;
-    siguiente.confirmado = true;
-    siguiente.confirmadoEn = new Date().toISOString();
-    siguiente.enListaEspera = false;
-    save(data);
-    return siguiente;
+    return { item, resultado: 'cupoLleno' };
   },
 
   // Para el panel de /admin: cuantos hay por horario -- registrados,
-  // confirmados (contra el tope de 50) y en lista de espera.
+  // inscritos con numero (contra el tope), los que dijeron que no y los
+  // que dijeron que si pero ya no alcanzaron numero (cupo lleno).
   resumenConfirmacionesClaseGratis(fecha) {
     const data = load();
     const deEstaFecha = data.registrosClaseGratis.filter((r) => r.fecha === fecha);
@@ -3285,8 +3296,10 @@ module.exports = {
       return {
         horario,
         registrados: delHorario.length,
-        confirmados: delHorario.filter((r) => r.confirmado).length,
-        enListaEspera: delHorario.filter((r) => r.enListaEspera && !r.confirmado).length,
+        confirmados: delHorario.filter((r) => r.confirmado && r.numeroInscrito).length,
+        declinados: delHorario.filter((r) => r.asistencia === 'no').length,
+        cupoLleno: delHorario.filter((r) => r.asistencia === 'si' && !r.confirmado).length,
+        sinResponder: delHorario.filter((r) => !r.asistencia).length,
         cupo: this.CUPO_CLASE_GRATIS_POR_HORARIO,
       };
     });

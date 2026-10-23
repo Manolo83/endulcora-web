@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confirma tu lugar · Endulcora</title>
 <meta name="robots" content="noindex, nofollow">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Poppins:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -13,7 +13,7 @@
     theme: {
       extend: {
         colors: { carbon: '#1B0720', vino: '#4E1454', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', verde: '#1E7A46' },
-        fontFamily: { titulo: ['"Baloo 2"', 'sans-serif'], cuerpo: ['Poppins', 'sans-serif'] }
+        fontFamily: { titulo: ['"Baloo 2"', 'sans-serif'], cuerpo: ['Poppins', 'sans-serif'], numero: ['"Bebas Neue"', 'sans-serif'] }
       }
     }
   }
@@ -22,6 +22,19 @@
   body { background: #FBF4E9; }
   .spinner { border: 3px solid rgba(0,0,0,.1); border-top-color: #7A2E7E; border-radius: 50%; width: 20px; height: 20px; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .bib {
+    position: relative;
+    background: #F5A623;
+    background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.14) 0 10px, transparent 10px 20px);
+    border-radius: 16px;
+    padding: 22px 18px 24px;
+  }
+  .bib::before, .bib::after {
+    content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%;
+    background: #FBF4E9; top: 10px;
+  }
+  .bib::before { left: 10px; }
+  .bib::after { right: 10px; }
 </style>
 </head>
 <body class="font-cuerpo text-carbon antialiased">
@@ -47,15 +60,27 @@
     <!-- Cargando (cuando llega del correo personal, con id+token) -->
     <div id="vistaCargando" class="hidden py-6">
       <div class="spinner mx-auto"></div>
-      <p class="mt-4 text-base text-carbon/60">Confirmando tu lugar…</p>
+      <p class="mt-4 text-base text-carbon/60">Un momento…</p>
     </div>
 
-    <!-- Resultado -->
-    <div id="vistaResultado" class="hidden">
-      <div id="resultadoIcono" class="mx-auto mt-2 text-5xl"></div>
-      <p id="resultadoMensaje" class="mt-3 text-base leading-relaxed text-carbon/80"></p>
-      <div id="resultadoDetalle" class="mt-4 rounded-2xl bg-crema/60 p-4 text-sm text-carbon/70"></div>
+    <!-- Resultado: ficha con numero de inscrito (confirmado) -->
+    <div id="vistaBib" class="hidden">
+      <div class="bib mt-4">
+        <p class="font-ui text-[10px] font-700 uppercase tracking-[.2em] text-vino">Endulcora · Pan de muerto</p>
+        <p id="bibHorario" class="font-titulo text-sm text-vino"></p>
+        <p id="bibNumero" class="font-numero leading-none text-carbon" style="font-size:88px;"></p>
+        <p id="bibNombre" class="font-700 text-base text-carbon"></p>
+      </div>
+      <p class="mt-3 text-sm font-700 text-vino">Muestra esta ficha al llegar — es tu pase de entrada.</p>
+      <div id="bibDetalle" class="mt-4 rounded-2xl bg-crema/60 p-4 text-sm text-carbon/70 text-left"></div>
       <a id="botonCalendario" href="#" target="_blank" class="mt-5 hidden items-center justify-center gap-2 rounded-full bg-flama px-6 py-3 text-sm font-700 text-vino hover:brightness-95 transition">📅 Agregar a mi calendario</a>
+    </div>
+
+    <!-- Resultado: invitacion a transmision en vivo (no viene, o cupo lleno) -->
+    <div id="vistaInvitacion" class="hidden">
+      <div class="mx-auto mt-2 grid h-14 w-14 place-items-center rounded-full bg-vino text-2xl text-crema">▶</div>
+      <p id="invitacionMensaje" class="mt-3 text-base leading-relaxed text-carbon/80"></p>
+      <a id="botonClasesEnVivo" href="/clases-en-vivo" class="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-vino px-6 py-3 text-sm font-700 text-crema hover:bg-morado transition">Ver transmisión en vivo</a>
     </div>
 
     <p id="error" class="mt-4 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
@@ -86,35 +111,41 @@ async function confirmar(body) {
 function mostrarResultado(data) {
   document.getElementById('vistaFormulario').classList.add('hidden');
   document.getElementById('vistaCargando').classList.add('hidden');
-  const vista = document.getElementById('vistaResultado');
-  vista.classList.remove('hidden');
-
-  const icono = document.getElementById('resultadoIcono');
-  const mensaje = document.getElementById('resultadoMensaje');
-  const detalle = document.getElementById('resultadoDetalle');
   const titulo = document.getElementById('titulo');
 
   if (data.resultado === 'confirmado' || data.resultado === 'yaConfirmado') {
-    titulo.textContent = '¡Lugar confirmado!';
-    icono.textContent = '✅';
-    mensaje.textContent = data.resultado === 'yaConfirmado' ? 'Ya tenías tu lugar confirmado — nos vemos ahí.' : 'Tu lugar quedó confirmado. Nos vemos en la clase.';
+    titulo.textContent = '¡Ya quedaste inscrito!';
+    document.getElementById('vistaBib').classList.remove('hidden');
+    document.getElementById('bibHorario').textContent = data.horario ? `Horario: ${data.horario}` : '';
+    document.getElementById('bibNumero').textContent = String(data.numeroInscrito || '').padStart(3, '0');
+    document.getElementById('bibNombre').textContent = data.nombre ? `Hola, ${data.nombre}` : '';
+    document.getElementById('bibDetalle').innerHTML = `
+      ${data.fecha ? `<p>📅 ${escapeHtml(formatoFecha(data.fecha))}</p>` : ''}
+      ${data.horario ? `<p class="mt-1">🕐 Horario: ${escapeHtml(data.horario)}</p>` : ''}
+      ${data.ubicacion ? `<p class="mt-1">📍 ${escapeHtml(data.ubicacion)}</p>` : ''}
+    `;
     if (data.calendarLink) {
       const btn = document.getElementById('botonCalendario');
       btn.href = data.calendarLink;
       btn.classList.remove('hidden');
       btn.classList.add('inline-flex');
     }
-  } else if (data.resultado === 'listaEspera') {
-    titulo.textContent = 'Quedaste en lista de espera';
-    icono.textContent = '⏳';
-    mensaje.textContent = 'Tu horario ya alcanzó su cupo. Quedaste en lista de espera — te avisamos por correo si se libera un lugar.';
+    return;
   }
 
-  detalle.innerHTML = `
-    ${data.fecha ? `<p>📅 ${escapeHtml(formatoFecha(data.fecha))}</p>` : ''}
-    ${data.horario ? `<p class="mt-1">🕐 Horario: ${escapeHtml(data.horario)}</p>` : ''}
-    ${data.ubicacion ? `<p class="mt-1">📍 ${escapeHtml(data.ubicacion)}</p>` : ''}
-  `;
+  // 'declinado' | 'yaRespondidoNo' | 'cupoLleno'
+  document.getElementById('vistaInvitacion').classList.remove('hidden');
+  const mensaje = document.getElementById('invitacionMensaje');
+  if (data.resultado === 'cupoLleno') {
+    titulo.textContent = 'Ese horario ya se llenó';
+    mensaje.textContent = 'Tu horario ya alcanzó su cupo de 100 personas. No te la pierdas: síguela en vivo desde endulcora.com.';
+  } else {
+    titulo.textContent = 'Gracias por avisarnos';
+    mensaje.textContent = 'Quedó anotado que no podrás venir. Te invitamos a ver la Master Class en vivo desde endulcora.com.';
+  }
+  if (data.linkClasesEnVivo) {
+    document.getElementById('botonClasesEnVivo').href = data.linkClasesEnVivo;
+  }
 }
 
 function mostrarError(msg) {
@@ -128,10 +159,11 @@ function mostrarError(msg) {
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
   const token = params.get('token');
+  const va = params.get('va') === 'no' ? 'no' : 'si';
 
   if (id && token) {
     document.getElementById('vistaCargando').classList.remove('hidden');
-    confirmar({ id, token }).then(mostrarResultado).catch((e) => mostrarError(e.message));
+    confirmar({ id, token, respuesta: va }).then(mostrarResultado).catch((e) => mostrarError(e.message));
     return;
   }
 
@@ -143,7 +175,7 @@ function mostrarError(msg) {
     err.classList.add('hidden');
     spinner.classList.remove('hidden');
     try {
-      const data = await confirmar({ correo: document.getElementById('correoInput').value.trim() });
+      const data = await confirmar({ correo: document.getElementById('correoInput').value.trim(), respuesta: 'si' });
       mostrarResultado(data);
     } catch (e) {
       spinner.classList.add('hidden');

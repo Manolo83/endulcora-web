@@ -1177,10 +1177,10 @@
 
       <div class="mt-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Control de aforo — confirmación de lugar</h3>
-          <button type="button" id="btnMandarConfirmaciones" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Mandar correo "Confirma tu lugar"</button>
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Control de aforo — ¿Asistirás?</h3>
+          <button type="button" id="btnMandarConfirmaciones" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Mandar correo "¿Asistirás?"</button>
         </div>
-        <p class="mt-1 text-xs text-carbon/50">Tope de <span id="claseGratisCupo">50</span> por horario, por orden de llegada. El resto queda en lista de espera y se le avisa por correo si se libera un lugar.</p>
+        <p class="mt-1 text-xs text-carbon/50">Tope de <span id="claseGratisCupo">100</span> por horario (se reinicia en cada horario), por orden de llegada de quien conteste "Sí" primero. A quien no alcanza lugar, o contesta "No", se le invita a ver la transmisión en vivo.</p>
         <p id="claseGratisEnvioEstado" class="mt-2 hidden text-sm font-600 text-vino"></p>
 
         <div class="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-crema/60 p-4">
@@ -3798,27 +3798,11 @@ async function cargarConfirmacionesClaseGratis(){
     $('claseGratisLinkCompartible').textContent = data.linkCompartible;
     const cont = $('claseGratisResumenHorarios');
     cont.innerHTML = !data.resumen.length ? '<p class="text-sm text-carbon/50">Sin registros todavía.</p>' : data.resumen.map(h => `
-      <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-vino/10 px-4 py-3">
-        <div>
-          <p class="text-sm font-700 text-vino">${escapeHtml(h.horario)}</p>
-          <p class="text-xs text-carbon/50">${h.registrados} registrados · <strong class="${h.confirmados >= h.cupo ? 'text-red-600' : 'text-verde'}">${h.confirmados}/${h.cupo} confirmados</strong>${h.enListaEspera ? ` · ${h.enListaEspera} en lista de espera` : ''}</p>
-        </div>
-        ${h.enListaEspera > 0 && h.confirmados < h.cupo ? `<button type="button" class="btnPromoverEspera rounded-full border border-vino/25 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition" data-horario="${escapeHtml(h.horario)}">Promover 1 de la lista de espera</button>` : ''}
+      <div class="rounded-xl border border-vino/10 px-4 py-3">
+        <p class="text-sm font-700 text-vino">${escapeHtml(h.horario)}</p>
+        <p class="text-xs text-carbon/50">${h.registrados} registrados · <strong class="${h.confirmados >= h.cupo ? 'text-red-600' : 'text-verde'}">${h.confirmados}/${h.cupo} inscritos</strong> · ${h.declinados} dijeron que no · ${h.cupoLleno} se quedaron sin lugar · ${h.sinResponder} sin responder</p>
       </div>
     `).join('');
-    cont.querySelectorAll('.btnPromoverEspera').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        btn.disabled = true;
-        try{
-          const r = await api('/admin/api/clase-gratis/confirmaciones/promover', { method: 'POST', body: JSON.stringify({ horario: btn.dataset.horario }) });
-          toast(`${r.nombre} fue promovido y avisado por correo`);
-          cargarConfirmacionesClaseGratis();
-        }catch(e){
-          toast(e.message);
-          btn.disabled = false;
-        }
-      });
-    });
     revisarEnvioConfirmacionesEnCurso();
   }catch(e){
     toast(e.message);
@@ -3871,9 +3855,11 @@ async function cargarClaseGratis(){
       cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Todavía no hay registros.</p>';
       return;
     }
-    cont.innerHTML = `<table class="w-full min-w-[960px] text-sm">
+    cont.innerHTML = `<table class="w-full min-w-[1120px] text-sm">
       <thead>
         <tr class="border-b border-vino/10 text-left font-ui text-[11px] uppercase tracking-wider text-carbon/45">
+          <th class="px-5 py-3 font-600">N°</th>
+          <th class="px-5 py-3 font-600">¿Asistirá?</th>
           <th class="px-5 py-3 font-600">Nombre</th>
           <th class="px-5 py-3 font-600">Contacto</th>
           <th class="px-5 py-3 font-600">Horario</th>
@@ -3889,6 +3875,8 @@ async function cargarClaseGratis(){
       <tbody>
         ${REGISTROS_CLASE_GRATIS.map(r => `
           <tr class="border-b border-vino/10 last:border-0 align-top" data-row-id="${r.id}">
+            <td class="px-5 py-3 text-carbon/80 font-700">${r.numeroInscrito || '—'}</td>
+            <td class="px-5 py-3 text-carbon/70">${r.asistencia === 'si' ? (r.numeroInscrito ? '<span class="text-verde font-600">Sí</span>' : '<span class="text-red-600 font-600">Sí (sin lugar)</span>') : r.asistencia === 'no' ? '<span class="text-carbon/50">No</span>' : '<span class="text-carbon/30">Sin responder</span>'}</td>
             <td class="px-5 py-3 text-carbon/80">${escapeHtml(r.nombre)}</td>
             <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(r.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(r.correo)}</div></td>
             <td class="px-5 py-3 text-carbon/70">${escapeHtml(r.horario)}</td>
