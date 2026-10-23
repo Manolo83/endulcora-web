@@ -156,9 +156,14 @@ body { background: #FBF4E9; }
       </button>
     </div>
     <p id="avisoSinVideoClase" class="mt-4 hidden rounded-2xl bg-crema/60 p-4 text-sm text-carbon/60">Esta clase no tiene grabación disponible — descarga su recetario aquí abajo.</p>
-    <button type="button" id="btnVerRecetarioClase" class="mt-4 hidden inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
-      Ver recetario
-    </button>
+    <div class="mt-4 flex flex-wrap items-center gap-3">
+      <button type="button" id="btnVerRecetarioClase" class="hidden inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        Ver recetario
+      </button>
+      <a id="linkDescargarRecetarioClase" href="#" class="hidden inline-flex items-center gap-2 rounded-full border border-vino/30 px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+        Descargar recetario
+      </a>
+    </div>
     <div id="visorRecetarioClase" class="mt-4 hidden overflow-hidden rounded-2xl ring-1 ring-vino/10">
       <iframe id="iframeRecetarioClase" title="Recetario de la clase" class="h-[70vh] w-full" style="border:0;"></iframe>
     </div>
@@ -323,6 +328,9 @@ function abrirModalVideo(id){
   delete iframeRecetario.dataset.url;
   btnRecetario.classList.toggle('hidden', !clase.recetarioDisponible);
   btnRecetario.dataset.claseId = clase.id;
+  const linkDescarga = document.getElementById('linkDescargarRecetarioClase');
+  linkDescarga.classList.toggle('hidden', !clase.recetarioDisponible);
+  linkDescarga.href = `/api/membresia/biblioteca-clases/${clase.id}/recetario?descargar=1`;
 }
 function cerrarModalVideo(){
   document.getElementById('modalVideo').classList.add('hidden');

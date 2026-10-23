@@ -270,8 +270,9 @@ router.get('/biblioteca-clases', (req, res) => {
 });
 
 // Recetario que acompaña a una clase grabada especifica. Igual que el
-// recetario/revista mensual: revisa la membresia en cada solicitud y se
-// sirve "inline" para leerse dentro de la misma pagina.
+// recetario/revista mensual: revisa la membresia en cada solicitud. Por
+// defecto se sirve "inline" para leerse dentro de la misma pagina;
+// ?descargar=1 lo manda como descarga real (boton "Descargar recetario").
 router.get('/biblioteca-clases/:id/recetario', (req, res) => {
   if (!esAdmin(req)) {
     const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
@@ -284,7 +285,9 @@ router.get('/biblioteca-clases/:id/recetario', (req, res) => {
   const filename = path.basename(clase.recetarioUrl);
   const rutaCompleta = path.join(UPLOAD_DIR, filename);
   if (!fs.existsSync(rutaCompleta)) return res.status(404).send('No pudimos encontrar el recetario en este momento.');
-  res.setHeader('Content-Disposition', `inline; filename="${(clase.recetarioNombre || `Recetario${path.extname(filename)}`).replace(/"/g, '')}"`);
+  const nombreDescarga = (clase.recetarioNombre || `Recetario${path.extname(filename)}`).replace(/"/g, '');
+  const disposicion = req.query.descargar ? 'attachment' : 'inline';
+  res.setHeader('Content-Disposition', `${disposicion}; filename="${nombreDescarga}"`);
   res.sendFile(rutaCompleta);
 });
 
