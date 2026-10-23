@@ -827,6 +827,11 @@ async function init() {
       { slug: 'tablas-de-charcuteria', carpetaSeed: 'tablas-charcuteria', archivo: 'Portada_Foto.jpg' },
       { slug: 'fresas-cubiertas', carpetaSeed: 'fresas-cubiertas', archivo: 'Portada_Foto.jpg' },
       { slug: 'barbacoa', carpetaSeed: 'barbacoa', archivo: 'Portada_Foto.jpg' },
+      { slug: 'aguas-michoacanas', carpetaSeed: 'aguas-michoacanas', archivo: 'Portada_Foto.jpg' },
+      { slug: 'galletas-decoradas', carpetaSeed: 'galletas-decoradas', archivo: 'Portada_Foto.jpg' },
+      { slug: 'gomas-y-gomitas', carpetaSeed: 'gomas-y-gomitas', archivo: 'Portada_Foto.jpg' },
+      { slug: 'pan-de-muerto-gourmet', carpetaSeed: 'pan-de-muerto-gourmet', archivo: 'Portada_Foto.jpg' },
+      { slug: 'pasteleria-cientifica-para-diabeticos', carpetaSeed: 'pasteleria-cientifica-diabeticos', archivo: 'Portada_Foto.jpg' },
     ];
     for (const p of PORTADAS_REALES) {
       const flag = `_migPortadaReal_${p.slug}`;
