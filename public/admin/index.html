@@ -1969,6 +1969,7 @@ async function cargarBibliotecaClasesAdmin(){
           <p class="text-xs text-carbon/40">${escapeHtml(c.fecha || '')} · ${c.youtubeId ? 'ID video: ' + escapeHtml(c.youtubeId) : 'Sin grabación'} · Recetario: ${c.recetarioUrl ? '✓ cargado' : 'sin cargar'}</p>
         </div>
         <div class="flex shrink-0 items-center gap-2">
+          <button type="button" data-id="${c.id}" data-titulo="${escapeHtml(c.titulo)}" class="btnEditarClaseBib rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Editar título</button>
           <label class="cursor-pointer rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
             ${c.recetarioUrl ? 'Cambiar recetario' : 'Agregar recetario'}
             <input type="file" accept="application/pdf" data-id="${c.id}" class="hidden inputRecetarioClaseBib">
@@ -1976,6 +1977,20 @@ async function cargarBibliotecaClasesAdmin(){
           <button type="button" data-id="${c.id}" class="btnBorrarClaseBib rounded-full border border-red-200 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
         </div>
       </div>`).join('');
+    cont.querySelectorAll('.btnEditarClaseBib').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const nuevo = prompt('Nuevo título de la clase:', btn.dataset.titulo);
+        if(nuevo === null) return;
+        if(!nuevo.trim()){ toast('El título no puede quedar vacío'); return; }
+        try{
+          await api(`/admin/api/clases/biblioteca/${btn.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ titulo: nuevo.trim() }) });
+          toast('Título actualizado');
+          cargarBibliotecaClasesAdmin();
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
     cont.querySelectorAll('.inputRecetarioClaseBib').forEach(input => {
       input.addEventListener('change', async () => {
         const file = input.files[0];

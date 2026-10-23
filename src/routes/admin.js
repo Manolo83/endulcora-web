@@ -1566,6 +1566,30 @@ router.post('/api/clases/biblioteca', requireAdmin, (req, res) => {
   res.status(201).json(item);
 });
 
+// Corrige el titulo/fecha/descripcion/video de una clase ya dada de alta
+// (ej. un error de dedo al capturarla) sin tener que borrarla y perder su
+// recetario ya subido.
+router.patch('/api/clases/biblioteca/:id', requireAdmin, (req, res) => {
+  const { titulo, descripcion, youtubeUrl, fecha } = req.body || {};
+  const patch = {};
+  if (titulo !== undefined) {
+    if (!String(titulo).trim()) return res.status(400).json({ error: 'Ponle un título a la clase.' });
+    patch.titulo = String(titulo).trim();
+  }
+  if (descripcion !== undefined) patch.descripcion = String(descripcion).trim();
+  if (fecha !== undefined) patch.fecha = fecha;
+  if (youtubeUrl !== undefined) {
+    const youtubeId = extraerIdYoutube(youtubeUrl);
+    if (youtubeUrl && String(youtubeUrl).trim() && !youtubeId) {
+      return res.status(400).json({ error: 'Ese link de YouTube no se reconoce. Pega uno válido o deja el campo vacío.' });
+    }
+    patch.youtubeId = youtubeId || '';
+  }
+  const item = store.updateClaseBiblioteca(req.params.id, patch);
+  if (!item) return res.status(404).json({ error: 'No se encontró esa clase.' });
+  res.json(item);
+});
+
 router.delete('/api/clases/biblioteca/:id', requireAdmin, (req, res) => {
   store.deleteClaseBiblioteca(req.params.id);
   res.json({ ok: true });
