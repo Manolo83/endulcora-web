@@ -409,10 +409,18 @@ router.get('/talleres/:slug', (req, res) => {
     .sort((a, b) => a.fecha.localeCompare(b.fecha))
     .map((s) => ({ slug: s.slug, fecha: s.fecha, horario: s.horario, cupoRestante: s.cupoRestante }));
 
+  // Un solo link de venta por taller, sin importar cuantas fechas tenga: el
+  // anuncio siempre manda al slug de la fecha MAS TEMPRANA (el "canonico").
+  // Si alguien entra por el slug de otra fecha (un link viejo, o uno que no
+  // se actualizo), la pagina lo manda sola al canonico en vez de abrir una
+  // segunda pagina de venta para el mismo taller.
+  const canonicalSlug = [sesion, ...otrasFechas].sort((a, b) => a.fecha.localeCompare(b.fecha))[0].slug;
+
   res.json({
     ...sesion,
     sede: sede ? { id: sede.id, nombre: sede.nombre, direccion: sede.direccion, mapaLink: sede.mapaLink } : null,
     otrasFechas,
+    canonicalSlug,
   });
 });
 

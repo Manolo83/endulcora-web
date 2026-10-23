@@ -348,6 +348,15 @@ async function cargarTaller(){
     return;
   }
 
+  // Un solo link de venta por taller: si este slug no es el canonico (ej.
+  // alguien entro por el link de una fecha vieja), se manda solo al
+  // canonico — nunca se queda abierta una segunda pagina para el mismo
+  // taller.
+  if(data.canonicalSlug && data.canonicalSlug !== slug){
+    window.location.replace(`/talleres/${encodeURIComponent(data.canonicalSlug)}`);
+    return;
+  }
+
   document.getElementById('estadoCargando').classList.add('hidden');
   document.getElementById('contenidoTaller').classList.remove('hidden');
   pintarTaller(data);
@@ -363,7 +372,7 @@ function fechaCortaBoton(fechaISO){
 function pintarBotonesFecha(t){
   const bloque = document.getElementById('bloqueFechas');
   const cont = document.getElementById('fechaBotones');
-  const todas = [{ slug, fecha: t.fecha, horario: t.horario, cupoRestante: t.cupoRestante, actual: true }]
+  const todas = [{ slug: t.slug, fecha: t.fecha, horario: t.horario, cupoRestante: t.cupoRestante, actual: true }]
     .concat((t.otrasFechas || []).map(o => ({ ...o, actual: false })))
     .sort((a, b) => a.fecha.localeCompare(b.fecha));
 
@@ -468,17 +477,16 @@ function pintarTaller(t){
 }
 
 async function seleccionarFecha(nuevoSlug){
-  if(!nuevoSlug || nuevoSlug === slug) return;
+  if(!nuevoSlug || (TALLER && nuevoSlug === TALLER.slug)) return;
+  // Se queda en la misma URL a propósito: un solo link de venta por
+  // taller, aunque tenga varias fechas — cambiar de fecha aquí nunca debe
+  // "navegar" a otra página.
   const cont = document.getElementById('fechaBotones');
   cont.style.opacity = '.5';
   try{
     const res = await fetch(`/api/talleres/${encodeURIComponent(nuevoSlug)}`);
     if(!res.ok) throw new Error('no encontrado');
     const data = await res.json();
-    slug = nuevoSlug;
-    history.pushState({ slug }, '', `/talleres/${encodeURIComponent(slug)}`);
-    const canonical = document.querySelector('link[rel="canonical"]');
-    if(canonical) canonical.href = window.location.href;
     pintarTaller(data);
     document.getElementById('formCompraTaller').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }catch(e){
