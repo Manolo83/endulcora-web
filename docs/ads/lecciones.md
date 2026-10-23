@@ -198,3 +198,29 @@ vendiendo (29 o 31 oct).
 REGLA: ningun numero que venga de mi memoria o de un resumen anterior se
 usa para decidir un corte. Se vuelve a leer de la cuenta en el momento. Los
 numeros envejecen en horas.
+
+---
+
+## Leccion 14 — La cuenta corre en hora de Los Angeles, no de CDMX
+
+Durante dos dias lei mal los cortes de dia: pedi "hoy" a media mañana de
+CDMX y me salieron numeros minusculos, y asumi que el dia apenas
+arrancaba. Llegue a decirle a Manolo que las 300 visitas del experimento
+de sitio caian "mañana" cuando en realidad faltaban cinco dias.
+
+Lo verifique leyendo `timezone_name` a nivel cuenta:
+
+    America/Los_Angeles
+
+O sea una hora ATRAS de Ciudad de Mexico. Consecuencias practicas:
+
+- El dia de la cuenta cierra a la 1:00 AM hora CDMX, no a medianoche.
+- Lo que pasa entre medianoche y la 1 AM en CDMX cuenta para el dia
+  ANTERIOR en los reportes.
+- `date_preset: today` a las 9 AM de CDMX trae solo 8 horas de dia, y
+  esas son las horas de menos trafico. No se juzga nada con eso.
+- Un `end_time` que diga `-0700` esta en hora de la cuenta, no de CDMX.
+
+REGLA: antes de comparar dias o de proyectar un ritmo, confirmar en que
+huso corre la cuenta. Y nunca extrapolar un ritmo diario desde una lectura
+de `today`: se usa `yesterday` (dia completo) o `last_7d`.
