@@ -756,6 +756,39 @@ async function init() {
         carpetaSeed: 'barbacoa',
         archivos: { ebook: 'Endulcora_Barbacoa_eBook.pdf', anexo: 'Endulcora_Barbacoa_Calculadora_Costos_Merma_Precios.xlsx', app: 'Endulcora_Barbacoa_APP.html', paquete: 'Paquete_Completo.zip' },
       },
+      // Los 5 que mando Manuel el 23 oct — sin paquete completo (no se
+      // incluyo ese zip), la portada se genera sola de la primera pagina
+      // del PDF como con cualquier otro que no trae foto profesional.
+      {
+        tituloBase: 'Aguas Michoacanas',
+        categoria: 'ebook',
+        carpetaSeed: 'aguas-michoacanas',
+        archivos: { ebook: 'EBOOK_AGUAS_MICHOACANAS_Endulcora.pdf', anexo: 'ANEXO_1_Aguas_Michoacanas_Costeo_Merma_Precios_Endulcora.xlsx', app: 'ANEXO_2_Aguas_Michoacanas_APP_Costos_Endulcora.html' },
+      },
+      {
+        tituloBase: 'Galletas Decoradas',
+        categoria: 'ebook',
+        carpetaSeed: 'galletas-decoradas',
+        archivos: { ebook: 'EBOOK_GALLETAS_DECORADAS_Endulcora.pdf', anexo: 'ANEXO_1_Galletas_Decoradas_Costeo_Merma_Precios_Endulcora.xlsx', app: 'ANEXO_2_Galletas_Decoradas_APP_Costos_Endulcora.html' },
+      },
+      {
+        tituloBase: 'Gomas y Gomitas',
+        categoria: 'ebook',
+        carpetaSeed: 'gomas-y-gomitas',
+        archivos: { ebook: 'EBOOK_GOMAS_Y_GOMITAS_Endulcora.pdf', anexo: 'ANEXO_1_Gomitas_Costeo_Merma_Precios_Endulcora.xlsx', app: 'ANEXO_2_Gomitas_APP_Costos_Endulcora.html' },
+      },
+      {
+        tituloBase: 'Pan de Muerto Gourmet',
+        categoria: 'ebook',
+        carpetaSeed: 'pan-de-muerto-gourmet',
+        archivos: { ebook: 'EBOOK_PAN_DE_MUERTO_GOURMET_Endulcora.pdf', anexo: 'ANEXO_1_Pan_de_Muerto_Costeo_Merma_Precios_Endulcora.xlsx', app: 'ANEXO_2_Pan_de_Muerto_APP_Costos_Endulcora.html' },
+      },
+      {
+        tituloBase: 'Pastelería Científica para Diabéticos',
+        categoria: 'ebook',
+        carpetaSeed: 'pasteleria-cientifica-diabeticos',
+        archivos: { ebook: 'EBOOK_PASTELERIA_CIENTIFICA_DIABETICOS_Endulcora.pdf', anexo: 'ANEXO_1_Pasteleria_Diabeticos_Costeo_Merma_Precios_Endulcora.xlsx', app: 'ANEXO_2_Pasteleria_Diabeticos_APP_Costos_Endulcora.html' },
+      },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
       const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
