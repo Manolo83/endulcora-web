@@ -157,6 +157,11 @@ body { background: #FBF4E9; }
 
       <!-- Tarjeta de compra -->
       <div class="rounded-3xl bg-white p-6 shadow-[0_2px_0_rgba(78,20,84,.06)] ring-1 ring-vino/10 sm:p-7">
+        <div id="bloqueFechas" class="mb-5 hidden">
+          <p class="mb-2 font-ui text-[11px] uppercase tracking-wider text-humo">Elige tu fecha</p>
+          <div id="fechaBotones" class="flex flex-wrap gap-2"></div>
+        </div>
+
         <div class="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p class="font-ui text-[11px] uppercase tracking-wider text-humo">Precio total</p>
@@ -316,7 +321,7 @@ document.getElementById('modalPrivacidadTaller').addEventListener('click', (e) =
   if (e.target.id === 'modalPrivacidadTaller') cerrarModalPrivacidadTaller();
 });
 
-const slug = decodeURIComponent(window.location.pathname.replace(/^\/talleres\//, '').replace(/\/$/, ''));
+let slug = decodeURIComponent(window.location.pathname.replace(/^\/talleres\//, '').replace(/\/$/, ''));
 let TALLER = null;
 let NUMERO_WHATSAPP = '5665271901';
 
@@ -332,10 +337,11 @@ async function cargarTaller(){
   try{ contenido = await (await fetch('/api/content')).json(); }catch(e){}
   if(contenido.whatsapp_numero) NUMERO_WHATSAPP = contenido.whatsapp_numero;
 
+  let data;
   try{
     const res = await fetch(`/api/talleres/${encodeURIComponent(slug)}`);
     if(!res.ok) throw new Error('no encontrado');
-    TALLER = await res.json();
+    data = await res.json();
   }catch(e){
     document.getElementById('estadoCargando').classList.add('hidden');
     document.getElementById('estadoNoEncontrado').classList.remove('hidden');
@@ -344,6 +350,47 @@ async function cargarTaller(){
 
   document.getElementById('estadoCargando').classList.add('hidden');
   document.getElementById('contenidoTaller').classList.remove('hidden');
+  pintarTaller(data);
+}
+
+const DIAS_SEMANA_CORTO = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+function fechaCortaBoton(fechaISO){
+  if(!fechaISO) return '';
+  const d = new Date(`${fechaISO}T00:00:00`);
+  return `${DIAS_SEMANA_CORTO[d.getDay()]} ${d.getDate()}`;
+}
+
+function pintarBotonesFecha(t){
+  const bloque = document.getElementById('bloqueFechas');
+  const cont = document.getElementById('fechaBotones');
+  const todas = [{ slug, fecha: t.fecha, horario: t.horario, cupoRestante: t.cupoRestante, actual: true }]
+    .concat((t.otrasFechas || []).map(o => ({ ...o, actual: false })))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+  if(todas.length < 2){
+    bloque.classList.add('hidden');
+    cont.innerHTML = '';
+    return;
+  }
+  bloque.classList.remove('hidden');
+  cont.innerHTML = todas.map(o => {
+    const agotada = o.estado === 'agotado' || o.cupoRestante === 0;
+    const base = 'rounded-full px-4 py-2 font-ui text-[12px] font-700 uppercase tracking-wider transition';
+    if(o.actual){
+      return `<span class="${base} bg-vino text-crema">${escapeHtml(fechaCortaBoton(o.fecha))}${o.horario ? ' · ' + escapeHtml(o.horario.split('–')[0].trim()) : ''}</span>`;
+    }
+    if(agotada){
+      return `<span class="${base} bg-humo/15 text-humo/70 line-through">${escapeHtml(fechaCortaBoton(o.fecha))}</span>`;
+    }
+    return `<button type="button" data-slug="${escapeHtml(o.slug)}" class="${base} boton-vivo border border-vino/25 text-vino hover:bg-vino/10 cambiarFecha">${escapeHtml(fechaCortaBoton(o.fecha))}${o.horario ? ' · ' + escapeHtml(o.horario.split('–')[0].trim()) : ''}</button>`;
+  }).join('');
+  cont.querySelectorAll('.cambiarFecha').forEach(btn => {
+    btn.addEventListener('click', () => seleccionarFecha(btn.dataset.slug));
+  });
+}
+
+function pintarTaller(t){
+  TALLER = t;
 
   if(typeof fbq === 'function'){
     fbq('track', 'ViewContent', {
@@ -355,7 +402,8 @@ async function cargarTaller(){
     });
   }
 
-  const t = TALLER;
+  pintarBotonesFecha(t);
+
   document.title = `${t.titulo} · Endulcora`;
   document.getElementById('tTitulo').textContent = t.titulo || '';
   document.getElementById('tDescripcion').textContent = t.descripcion || '';
@@ -416,6 +464,25 @@ async function cargarTaller(){
     document.getElementById('formCompraTaller').classList.add('hidden');
     document.getElementById('bloqueAgotado').classList.remove('hidden');
     document.getElementById('bloqueAgotado').textContent = 'Este taller todavía no tiene precio configurado. Escríbenos por WhatsApp para apartar tu lugar.';
+  }
+}
+
+async function seleccionarFecha(nuevoSlug){
+  if(!nuevoSlug || nuevoSlug === slug) return;
+  const cont = document.getElementById('fechaBotones');
+  cont.style.opacity = '.5';
+  try{
+    const res = await fetch(`/api/talleres/${encodeURIComponent(nuevoSlug)}`);
+    if(!res.ok) throw new Error('no encontrado');
+    const data = await res.json();
+    slug = nuevoSlug;
+    history.pushState({ slug }, '', `/talleres/${encodeURIComponent(slug)}`);
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if(canonical) canonical.href = window.location.href;
+    pintarTaller(data);
+    document.getElementById('formCompraTaller').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }catch(e){
+    cont.style.opacity = '1';
   }
 }
 

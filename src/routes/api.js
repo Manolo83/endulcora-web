@@ -395,9 +395,24 @@ router.get('/talleres/:slug', (req, res) => {
   const sesion = store.getSesionTallerPorSlug(req.params.slug);
   if (!sesion) return res.status(404).json({ error: 'Ese taller ya no está disponible.' });
   const sede = store.getSedes().find((s) => s.id === sesion.sedeId);
+
+  // Otras fechas del MISMO taller (mismo titulo y sede) — varios talleres
+  // se anuncian con "jueves o sabado" en una sola imagen, pero cada fecha
+  // es su propia pagina/sesion; sin esto, la mitad de quien le da clic al
+  // anuncio cae en la fecha que no queria y no tiene forma de cambiarse sin
+  // preguntar por WhatsApp. Se ofrecen las que todavia sirven para comprar
+  // (no agotadas, no ya pasadas).
+  const hoyISO = new Date().toISOString().slice(0, 10);
+  const otrasFechas = store.getSesionesTaller(sede ? sede.id : undefined)
+    .filter((s) => s.id !== sesion.id && s.titulo === sesion.titulo
+      && s.fecha >= hoyISO && s.estado !== 'agotado' && s.cupoRestante !== 0)
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    .map((s) => ({ slug: s.slug, fecha: s.fecha, horario: s.horario, cupoRestante: s.cupoRestante }));
+
   res.json({
     ...sesion,
     sede: sede ? { id: sede.id, nombre: sede.nombre, direccion: sede.direccion, mapaLink: sede.mapaLink } : null,
+    otrasFechas,
   });
 });
 
