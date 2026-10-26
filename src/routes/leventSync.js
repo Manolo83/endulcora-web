@@ -145,7 +145,25 @@ router.get('/contactos', requiereClaveSync, (req, res) => {
       esPrimeraVez: !r.yaTomoTaller,
     }));
 
-  res.json({ marca: 'endulcora', contactos: [...contactosUsuarios, ...contactosTalleres, ...contactosQr, ...contactosSubscribers, ...contactosPedidosInvitado, ...contactosClaseGratis, ...contactosVideoEnVivo] });
+  // Lista de campañas de correo masivo (la que se arma en /admin > Campañas,
+  // con los CSV importados y los formularios que aceptaron promociones): es
+  // la base grande de Endulcora. Va primero para que, si la persona tambien
+  // aparece en otro formulario, esos datos mas completos queden encima.
+  // Quien se dio de baja no se manda como contacto: se manda aparte en
+  // "bajas", para que Levent tampoco le escriba desde ninguna marca.
+  const listaCampanas = store.getContactosCampana().filter((c) => c.email);
+  const contactosListaCampanas = listaCampanas
+    .filter((c) => c.activo !== false)
+    .map((c) => ({
+      email: c.email,
+      telefono: c.telefono || '',
+      nombre: c.nombre || '',
+      categoriasInteres: ['origen:lista-campanas', ...(c.etiquetas || [])],
+      aceptaPromociones: true,
+    }));
+  const bajas = listaCampanas.filter((c) => c.activo === false).map((c) => c.email);
+
+  res.json({ marca: 'endulcora', bajas, contactos: [...contactosListaCampanas, ...contactosUsuarios, ...contactosTalleres, ...contactosQr, ...contactosSubscribers, ...contactosPedidosInvitado, ...contactosClaseGratis, ...contactosVideoEnVivo] });
 });
 
 module.exports = router;
