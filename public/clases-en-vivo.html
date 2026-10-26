@@ -808,7 +808,6 @@ let videoIdPendienteUltimaClase = null;
 function crearReproductorUltimaClase(videoId){
   reproductorUltimaClase = new YT.Player('iframeUltimaClaseHost', {
     videoId: videoId,
-    host: 'https://www.youtube-nocookie.com',
     width: '100%',
     height: '100%',
     playerVars: { controls: 0, modestbranding: 1, rel: 0, disablekb: 1, fs: 0, iv_load_policy: 3, playsinline: 1 },
@@ -861,7 +860,6 @@ let videoIdActualClaseEnVivo = null;
 function crearReproductorClaseEnVivo(videoId){
   reproductorClaseEnVivo = new YT.Player('iframeClaseEnVivoHost', {
     videoId: videoId,
-    host: 'https://www.youtube-nocookie.com',
     width: '100%',
     height: '100%',
     playerVars: { controls: 0, modestbranding: 1, rel: 0, disablekb: 1, fs: 0, iv_load_policy: 3, playsinline: 1, autoplay: 1 },

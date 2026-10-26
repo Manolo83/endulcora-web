@@ -567,7 +567,6 @@ function solicitarIframeApi(){
 function crearReproductorVideo(videoId){
   reproductorVideo = new YT.Player('iframeVideoMesHost', {
     videoId: videoId,
-    host: 'https://www.youtube-nocookie.com',
     width: '100%',
     height: '100%',
     playerVars: {
@@ -778,7 +777,6 @@ let videoIdPendienteBiblioteca = null;
 function crearReproductorBiblioteca(videoId){
   reproductorBiblioteca = new YT.Player('iframeModalBibliotecaHost', {
     videoId: videoId,
-    host: 'https://www.youtube-nocookie.com',
     width: '100%',
     height: '100%',
     playerVars: { controls: 0, modestbranding: 1, rel: 0, disablekb: 1, fs: 0, iv_load_policy: 3, playsinline: 1, autoplay: 1 },
