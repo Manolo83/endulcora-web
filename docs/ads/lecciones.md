@@ -224,3 +224,42 @@ O sea una hora ATRAS de Ciudad de Mexico. Consecuencias practicas:
 REGLA: antes de comparar dias o de proyectar un ritmo, confirmar en que
 huso corre la cuenta. Y nunca extrapolar un ritmo diario desde una lectura
 de `today`: se usa `yesterday` (dia completo) o `last_7d`.
+
+---
+
+## Leccion 15 — La metrica del anuncio no es la metrica del negocio
+
+Del 23 al 27 de octubre le reporte a Manolo "0 compras" todas las mañanas
+sobre el experimento de compra en sitio. Hasta le dije que se preparara
+porque el 28 el numero iba a ser cero.
+
+El 27 el me dijo que veia 2 ventas en la pagina. Fui al pixel directo
+(`ads_get_dataset_stats`, dataset 1302735011542499) y habia recibido SIETE
+eventos Purchase: uno el 21 oct y seis el domingo 25 oct (tres a las 7 PM
+y tres a las 11 PM, hora CDMX). De esos, 2 eran talleres.
+
+La cuenta de anuncios reportaba cero porque `omni_purchase` a nivel
+anuncio, campaña o cuenta solo cuenta compras que Meta logra ATRIBUIR a un
+clic en un anuncio. Las compras que entran por WhatsApp, organico, los
+lives o trafico directo no aparecen ahi nunca.
+
+Reporte el numero de atribucion diciendo que era el numero de ventas. Son
+cosas distintas y la diferencia pudo costarle una decision: estuvo a dos
+dias de apagar un canal que si estaba vendiendo.
+
+REGLA: cuando la pregunta del negocio es "¿se esta vendiendo?", se lee el
+PIXEL (ads_get_dataset_stats, evento Purchase), no la metrica del anuncio.
+La metrica del anuncio solo responde "¿este anuncio se lleva el credito?".
+Al reportar, decir SIEMPRE cual de las dos es:
+  - "X compras en el sitio" → pixel
+  - "X compras atribuidas a los anuncios" → cuenta de anuncios
+Nunca usar la segunda como si fuera la primera.
+
+OJO 1: el pixel cuenta TODAS las compras del sitio, ebooks incluidos. Para
+saber cuantas son talleres hay que preguntarle a Manolo o mirar el admin;
+desde la cuenta de anuncios no se distingue.
+
+OJO 2: lo mismo aplica a InitiateCheckout y AddToCart. El 25 oct el pixel
+recibio 3 InitiateCheckout y 4 AddToCart mientras los anuncios reportaban
+1 y 1. Siempre que un numero de conversion se vea sospechosamente bajo,
+contrastarlo contra el pixel antes de concluir nada.
