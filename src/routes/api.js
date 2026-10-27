@@ -82,6 +82,13 @@ router.post('/galeria/:id/comentarios', requireCliente, (req, res) => {
   res.status(201).json(comentario);
 });
 
+// Con el mes de regalo apagado en /admin (clase_regalo_membresia_activo =
+// 'false') se vuelve al comportamiento anterior: el boton del live entrega
+// el PDF directo a quien tiene acceso a la clase.
+function recetarioDirectoSiRegaloApagado(contenido) {
+  return contenido.clase_regalo_membresia_activo === 'false' ? (contenido.clase_recetario_url || '') : '';
+}
+
 router.get('/content', (req, res) => {
   const contenido = store.getContent();
   // El link para entrar a la clase en vivo y el recetario de regalo solo se
@@ -89,10 +96,12 @@ router.get('/content', (req, res) => {
   // ahora). Con el cobro encendido se quitan de aqui — se revelan solo a
   // quien ya pago, desde GET /api/clase-en-vivo — para que nadie se los
   // salte pidiendo esta ruta publica directamente.
+  // El recetario de la clase en vivo ya nunca se manda por aqui: es
+  // exclusivo para miembros (o se gana con el mes de regalo del live).
   if (contenido.clase_cobro_activo === 'true') {
-    res.json({ ...contenido, clase_url: '', clase_recetario_url: '', clase_youtube_id: '' });
+    res.json({ ...contenido, clase_url: '', clase_recetario_url: '', clase_recetario_nombre: '', clase_youtube_id: '' });
   } else {
-    res.json(contenido);
+    res.json({ ...contenido, clase_recetario_url: recetarioDirectoSiRegaloApagado(contenido), clase_recetario_nombre: recetarioDirectoSiRegaloApagado(contenido) ? contenido.clase_recetario_nombre : '' });
   }
 });
 
@@ -167,8 +176,10 @@ router.get('/clase-en-vivo', (req, res) => {
       tieneAcceso,
       url: tieneAcceso ? (contenido.clase_url || '') : '',
       youtubeId: tieneAcceso ? (contenido.clase_youtube_id || '') : '',
-      recetarioUrl: tieneAcceso ? (contenido.clase_recetario_url || '') : '',
-      recetarioNombre: tieneAcceso ? (contenido.clase_recetario_nombre || '') : '',
+      // El PDF ya no se expone aqui: se descarga por /api/membresia/recetario-live
+      // (miembros) o se ofrece el mes de regalo (quien no es miembro).
+      recetarioDisponible: tieneAcceso && !!contenido.clase_recetario_url,
+      recetarioUrlDirecto: tieneAcceso ? recetarioDirectoSiRegaloApagado(contenido) : '',
       temas: store.TEMAS_CLASE_GRATIS,
       comunidadLink: contenido.comunidad_whatsapp_link || '',
     });
@@ -184,8 +195,8 @@ router.get('/clase-en-vivo', (req, res) => {
     tieneAcceso,
     url: tieneAcceso ? (contenido.clase_url || '') : '',
     youtubeId: tieneAcceso ? (contenido.clase_youtube_id || '') : '',
-    recetarioUrl: tieneAcceso ? (contenido.clase_recetario_url || '') : '',
-    recetarioNombre: tieneAcceso ? (contenido.clase_recetario_nombre || '') : '',
+    recetarioDisponible: tieneAcceso && !!contenido.clase_recetario_url,
+    recetarioUrlDirecto: tieneAcceso ? recetarioDirectoSiRegaloApagado(contenido) : '',
   });
 });
 
@@ -252,8 +263,8 @@ router.post('/clase-en-vivo/confirmar-comunidad', (req, res) => {
     ok: true,
     url: contenido.clase_url || '',
     youtubeId: contenido.clase_youtube_id || '',
-    recetarioUrl: contenido.clase_recetario_url || '',
-    recetarioNombre: contenido.clase_recetario_nombre || '',
+    recetarioDisponible: !!contenido.clase_recetario_url,
+    recetarioUrlDirecto: recetarioDirectoSiRegaloApagado(contenido),
   });
 });
 

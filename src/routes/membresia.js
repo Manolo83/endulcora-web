@@ -6,6 +6,8 @@ const store = require('../store');
 const { SITE_URL, UPLOAD_DIR } = require('../config');
 const { requireCliente } = require('./auth');
 const { contarPaginasPDF, generarPaginaLecturaPDF } = require('../caratula');
+const regalo = require('../membresiaRegalo');
+const { enviarCorreoRegaloActivado } = require('../email');
 
 const router = express.Router();
 
@@ -17,7 +19,67 @@ function mpClient() {
   return new MercadoPagoConfig({ accessToken });
 }
 
+// Crea la suscripcion mensual en Mercado Pago y regresa el link para que la
+// clienta registre su tarjeta. Con primerCobro (fecha futura) el primer
+// cargo se programa para ese dia en vez de hacerse de inmediato — asi
+// funciona el mes de regalo.
+async function crearSuscripcion(client, usuario, { reason = 'Membresía Endulcora', primerCobro = null, backUrl = `${SITE_URL}/membresia` } = {}) {
+  const autoRecurring = {
+    frequency: 1,
+    frequency_type: 'months',
+    transaction_amount: PRECIO_MEMBRESIA,
+    currency_id: 'MXN',
+  };
+  if (primerCobro) autoRecurring.start_date = new Date(primerCobro).toISOString();
+  const preapproval = new PreApproval(client);
+  return preapproval.create({
+    body: {
+      reason,
+      auto_recurring: autoRecurring,
+      payer_email: usuario.email,
+      external_reference: String(usuario.id),
+      back_url: backUrl,
+      notification_url: `${SITE_URL}/api/membresia/webhook`,
+      status: 'pending',
+    },
+  });
+}
+
 router.post('/suscribirse', requireCliente, async (req, res) => {
+  const client = mpClient();
+  if (!client) return res.status(503).json({ error: 'Los pagos todavía no están configurados.' });
+
+  const usuario = store.getUserById(req.session.userId);
+  if (!usuario) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
+  // Quien cancelo durante su mes de regalo sigue "activa" hasta que se le
+  // acabe; puede volver a domiciliar su membresia antes, y el primer cobro
+  // se programa para el dia en que termina el regalo (no se le cobra doble).
+  const reactivaRegalo = usuario.membresiaEstado === 'activa' && regalo.regaloActivo(usuario) && usuario.membresiaRegaloCancelada;
+  if (usuario.membresiaEstado === 'activa' && !reactivaRegalo) {
+    return res.status(400).json({ error: 'Ya tienes la membresía activa.' });
+  }
+
+  try {
+    const creado = await crearSuscripcion(client, usuario, { primerCobro: reactivaRegalo ? usuario.membresiaRegaloHasta : null });
+    store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id });
+    res.status(201).json({ url: creado.init_point });
+  } catch (err) {
+    const detalle = (err && err.cause && JSON.stringify(err.cause)) || (err && err.message) || String(err);
+    console.error('[membresia] Error al crear la suscripción:', detalle);
+    res.status(502).json({ error: 'No se pudo iniciar la suscripción. Intenta de nuevo en un momento.' });
+  }
+});
+
+// Boton "Descarga aqui el recetario" del live: 1 mes de membresia de regalo
+// para quien nunca ha sido miembro. Registra su tarjeta en Mercado Pago
+// (paga $0 hoy) y el primer cobro de $100 se programa a los 30 dias. Se
+// guarda una copia del recetario del live de hoy en su cuenta, para que lo
+// pueda descargar aunque la semana siguiente se suba otro.
+router.post('/suscribirse-regalo', requireCliente, async (req, res) => {
+  const contenido = store.getContent();
+  if (contenido.clase_regalo_membresia_activo === 'false') {
+    return res.status(400).json({ error: 'El mes de regalo no está disponible en este momento.' });
+  }
   const client = mpClient();
   if (!client) return res.status(503).json({ error: 'Los pagos todavía no están configurados.' });
 
@@ -26,31 +88,28 @@ router.post('/suscribirse', requireCliente, async (req, res) => {
   if (usuario.membresiaEstado === 'activa') {
     return res.status(400).json({ error: 'Ya tienes la membresía activa.' });
   }
+  if (!regalo.esElegibleRegalo(usuario)) {
+    return res.status(400).json({ error: 'El mes de regalo es solo para quien nunca ha sido miembro. Puedes hacerte miembro por $100 al mes.' });
+  }
 
   try {
-    const preapproval = new PreApproval(client);
-    const creado = await preapproval.create({
-      body: {
-        reason: 'Membresía Endulcora',
-        auto_recurring: {
-          frequency: 1,
-          frequency_type: 'months',
-          transaction_amount: PRECIO_MEMBRESIA,
-          currency_id: 'MXN',
-        },
-        payer_email: usuario.email,
-        external_reference: String(usuario.id),
-        back_url: `${SITE_URL}/membresia`,
-        notification_url: `${SITE_URL}/api/membresia/webhook`,
-        status: 'pending',
-      },
+    const creado = await crearSuscripcion(client, usuario, {
+      reason: 'Membresía Endulcora · 1 mes de regalo',
+      primerCobro: regalo.fechaFinRegalo(),
+      backUrl: `${SITE_URL}/membresia?regalo=1`,
     });
-    store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id });
+    store.updateUser(usuario.id, {
+      membresiaPreapprovalId: creado.id,
+      regaloPreapprovalId: creado.id,
+      membresiaOrigen: 'regalo_live',
+      regaloRecetarioUrl: contenido.clase_recetario_url || '',
+      regaloRecetarioNombre: contenido.clase_recetario_nombre || '',
+    });
     res.status(201).json({ url: creado.init_point });
   } catch (err) {
     const detalle = (err && err.cause && JSON.stringify(err.cause)) || (err && err.message) || String(err);
-    console.error('[membresia] Error al crear la suscripción:', detalle);
-    res.status(502).json({ error: 'No se pudo iniciar la suscripción. Intenta de nuevo en un momento.' });
+    console.error('[membresia] Error al crear la suscripción de regalo:', detalle);
+    res.status(502).json({ error: 'No se pudo activar tu mes de regalo. Intenta de nuevo en un momento.' });
   }
 });
 
@@ -128,10 +187,49 @@ function aplicarEstadoDesdePreapprovalInfo(info) {
   const usuario = (info.external_reference && store.getUserById(info.external_reference)) || store.getUserByPreapprovalId(String(info.id));
   if (!usuario) return false;
 
+  const idInfo = String(info.id);
   const nuevoEstado = MAPA_ESTADO_PREAPPROVAL[info.status] || info.status;
-  if (usuario.membresiaEstado === nuevoEstado && usuario.membresiaPreapprovalId === String(info.id)) return false;
+  // Aviso de una suscripcion que ya no es la suya actual (p.ej. la del
+  // regalo que cancelo, despues de volver a domiciliar con otra): no debe
+  // quitarle el acceso que le da la nueva.
+  if (usuario.membresiaPreapprovalId && usuario.membresiaPreapprovalId !== idInfo && nuevoEstado !== 'activa') return false;
 
-  const patch = { membresiaEstado: nuevoEstado, membresiaPreapprovalId: String(info.id) };
+  // Durante el mes de regalo, cancelar (o que Mercado Pago pause la
+  // suscripcion) solo detiene el cobro futuro: conserva el acceso hasta el
+  // ultimo dia del regalo, y el programador de automatizaciones se lo quita
+  // ese dia (ver revisarRegalosMembresia).
+  if (nuevoEstado !== 'activa' && usuario.membresiaEstado === 'activa' && regalo.regaloActivo(usuario)) {
+    if (usuario.membresiaRegaloCancelada) return false;
+    store.updateUser(usuario.id, { membresiaRegaloCancelada: true });
+    return true;
+  }
+
+  const reactivoRegalo = nuevoEstado === 'activa' && usuario.membresiaRegaloCancelada;
+  if (usuario.membresiaEstado === nuevoEstado && usuario.membresiaPreapprovalId === idInfo && !reactivoRegalo) return false;
+
+  const patch = { membresiaEstado: nuevoEstado, membresiaPreapprovalId: idInfo };
+  // Volvio a domiciliar antes de que se acabara su regalo cancelado.
+  if (reactivoRegalo) patch.membresiaRegaloCancelada = false;
+  // Activacion de la suscripcion del mes de regalo: arranca el contador.
+  // Termina el dia del primer cobro programado en Mercado Pago.
+  const activaRegalo = nuevoEstado === 'activa' && usuario.regaloPreapprovalId === idInfo && !usuario.membresiaRegaloHasta;
+  // Anti "regalo doble": esa cuenta de Mercado Pago ya activo un regalo con
+  // otra cuenta de endulcora.com. No se le da acceso y se cancela la
+  // suscripcion en Mercado Pago (nunca se le cobra nada por ella).
+  if (activaRegalo && regalo.payerYaUsoRegalo(info.payer_id, usuario.id)) {
+    store.updateUser(usuario.id, { membresiaEstado: 'cancelada', regaloRechazado: true });
+    cancelarPreapprovalEnMercadoPago(idInfo);
+    console.warn(`[membresia] Regalo rechazado a ${usuario.email}: la cuenta de Mercado Pago ${info.payer_id} ya lo había usado.`);
+    return true;
+  }
+  if (activaRegalo) {
+    if (info.payer_id) patch.regaloPayerId = String(info.payer_id);
+    const inicioCobro = info.auto_recurring && info.auto_recurring.start_date ? new Date(info.auto_recurring.start_date) : null;
+    const hasta = inicioCobro && !isNaN(inicioCobro) && inicioCobro > new Date() ? inicioCobro : regalo.fechaFinRegalo();
+    patch.membresiaRegaloHasta = hasta.toISOString();
+    patch.membresiaRegaloCancelada = false;
+    patch.regaloRecordatoriosEnviados = [];
+  }
   // Solo se reinicia el "reloj" de la biblioteca de clases cuando de
   // verdad se activa desde un estado que no era activo (alta nueva o
   // reactivacion) — no en cada cobro mensual de quien ya seguia activo.
@@ -145,8 +243,20 @@ function aplicarEstadoDesdePreapprovalInfo(info) {
       patch.membresiaPrimeraActivacion = new Date().toISOString();
     }
   }
-  store.updateUser(usuario.id, patch);
+  const actualizado = store.updateUser(usuario.id, patch);
+  if (activaRegalo) {
+    enviarCorreoRegaloActivado({ to: actualizado.email, nombre: actualizado.nombre, siteUrl: SITE_URL, hasta: actualizado.membresiaRegaloHasta })
+      .catch((e) => console.error('[membresia] No se pudo mandar el correo de bienvenida del regalo a', actualizado.email, e.message));
+  }
   return true;
+}
+
+function cancelarPreapprovalEnMercadoPago(preapprovalId) {
+  const client = mpClient();
+  if (!client) return;
+  new PreApproval(client)
+    .update({ id: preapprovalId, body: { status: 'cancelled' } })
+    .catch((e) => console.error('[membresia] No se pudo cancelar la suscripción', preapprovalId, e.message));
 }
 
 // Trae de Mercado Pago el estado real de una suscripcion y lo aplica al
@@ -207,12 +317,22 @@ router.post('/cancelar', requireCliente, async (req, res) => {
     store.updateUser(usuario.id, { membresiaEstado: 'cancelada' });
     return res.json({ ok: true });
   }
+  const enRegalo = regalo.regaloActivo(usuario);
+  if (enRegalo && usuario.membresiaRegaloCancelada) {
+    return res.status(400).json({ error: 'Tu membresía ya está cancelada; conservas el acceso hasta que termine tu mes de regalo.' });
+  }
 
   const client = mpClient();
   if (!client) return res.status(503).json({ error: 'Los pagos todavía no están configurados.' });
   try {
     const preapproval = new PreApproval(client);
     await preapproval.update({ id: usuario.membresiaPreapprovalId, body: { status: 'cancelled' } });
+    // En su mes de regalo no se le cobra nada, pero conserva el acceso
+    // hasta el ultimo dia que se le regalo.
+    if (enRegalo) {
+      store.updateUser(usuario.id, { membresiaRegaloCancelada: true });
+      return res.json({ ok: true, conservaAccesoHasta: usuario.membresiaRegaloHasta });
+    }
     store.updateUser(usuario.id, { membresiaEstado: 'cancelada' });
     res.json({ ok: true });
   } catch (err) {
@@ -226,12 +346,33 @@ function esAdmin(req) {
   return !!(req.session && req.session.isAdmin);
 }
 
-router.get('/estado', (req, res) => {
-  if (esAdmin(req)) return res.json({ activa: true, estado: 'activa', esAdmin: true });
+function miembroActivoDeRequest(req) {
+  const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+  return usuario && usuario.membresiaEstado === 'activa' ? usuario : null;
+}
+
+router.get('/estado', async (req, res) => {
+  const contenido = store.getContent();
+  const regaloEnLive = contenido.clase_regalo_membresia_activo !== 'false';
+  if (esAdmin(req)) return res.json({ activa: true, estado: 'activa', esAdmin: true, regalo: null, elegibleRegalo: false, regaloEnLive });
   if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
-  const usuario = store.getUserById(req.session.userId);
+  let usuario = store.getUserById(req.session.userId);
   if (!usuario) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
-  res.json({ activa: usuario.membresiaEstado === 'activa', estado: usuario.membresiaEstado });
+  // Al volver de Mercado Pago (?sincronizar=1) el aviso del webhook puede
+  // tardar unos segundos: se pregunta directo para no mostrarle "sin
+  // membresia" justo despues de haber registrado su tarjeta.
+  if (req.query.sincronizar && usuario.membresiaEstado !== 'activa' && usuario.membresiaPreapprovalId) {
+    await sincronizarEstadoDePreapproval(usuario.membresiaPreapprovalId);
+    usuario = store.getUserById(usuario.id);
+  }
+  res.json({
+    activa: usuario.membresiaEstado === 'activa',
+    estado: usuario.membresiaEstado,
+    regalo: regalo.resumenRegalo(usuario),
+    elegibleRegalo: regalo.esElegibleRegalo(usuario),
+    regaloRechazado: !!usuario.regaloRechazado,
+    regaloEnLive,
+  });
 });
 
 router.get('/contenido', (req, res) => {
@@ -308,6 +449,34 @@ router.get('/recetario', (req, res) => {
   if (!fs.existsSync(rutaCompleta)) return res.status(404).send('No pudimos encontrar el recetario en este momento.');
   const nombreDescarga = contenido.recetarioNombre || `Recetario${path.extname(filename)}`;
   res.download(rutaCompleta, nombreDescarga);
+});
+
+function enviarArchivoSubido(res, url, nombre, textoNoEncontrado) {
+  const filename = path.basename(url);
+  const rutaCompleta = path.join(UPLOAD_DIR, filename);
+  if (!fs.existsSync(rutaCompleta)) return res.status(404).send(textoNoEncontrado);
+  res.download(rutaCompleta, (nombre || `Recetario${path.extname(filename)}`).replace(/"/g, ''));
+}
+
+// Recetario de la clase en vivo de esta semana. Ya no se expone el link de
+// /uploads en la pagina del live: los miembros activos lo descargan por
+// aqui (y quien no es miembro recibe la oferta del mes de regalo).
+router.get('/recetario-live', (req, res) => {
+  if (!esAdmin(req) && !miembroActivoDeRequest(req)) {
+    return res.status(403).send('Necesitas una membresía activa para descargar el recetario.');
+  }
+  const contenido = store.getContent();
+  if (!contenido.clase_recetario_url) return res.status(404).send('Esta clase todavía no tiene recetario.');
+  enviarArchivoSubido(res, contenido.clase_recetario_url, contenido.clase_recetario_nombre, 'No pudimos encontrar el recetario en este momento.');
+});
+
+// Recetario del live en el que activo su mes de regalo (copia guardada en
+// su cuenta en ese momento).
+router.get('/recetario-regalo', (req, res) => {
+  const usuario = miembroActivoDeRequest(req);
+  if (!usuario) return res.status(403).send('Necesitas una membresía activa para descargar el recetario.');
+  if (!usuario.regaloRecetarioUrl) return res.status(404).send('No hay recetario guardado en tu cuenta.');
+  enviarArchivoSubido(res, usuario.regaloRecetarioUrl, usuario.regaloRecetarioNombre, 'No pudimos encontrar el recetario en este momento.');
 });
 
 // Lectura de la revista mensual: igual que el recetario, revisa la

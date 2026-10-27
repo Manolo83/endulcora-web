@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const sharp = require('sharp');
 const ExcelJS = require('exceljs');
 const store = require('../store');
+const regalo = require('../membresiaRegalo');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL, GOOGLE_SHEETS } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
@@ -218,8 +219,19 @@ router.delete('/api/content/leadmagnet-pdf', requireAdmin, (req, res) => {
   res.json({ content });
 });
 
-// Recetario de regalo de la clase en vivo: se entrega junto con el link
-// para entrar (misma proteccion si hay cobro activo).
+// El PDF del recetario del live puede seguir en uso despues de quitarlo de
+// la clase: en la biblioteca de clases (al "pasar a la biblioteca") o
+// guardado en la cuenta de quien activo su mes de regalo en ese live. Solo
+// se borra del disco si ya nadie lo usa.
+function borrarRecetarioLiveSiNoSeUsa(url) {
+  if (!url) return;
+  const enBiblioteca = store.getBibliotecaClases().some((c) => c.recetarioUrl === url);
+  const enRegalos = store.getUsers().some((u) => u.regaloRecetarioUrl === url);
+  if (!enBiblioteca && !enRegalos) borrarSiEsSubida(url);
+}
+
+// Recetario de regalo de la clase en vivo: lo descargan los miembros
+// activos, y quien no es miembro lo recibe con su mes de membresia de regalo.
 router.post('/api/content/clase-recetario', requireAdmin, uploadDocumento.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Falta el archivo.' });
   const anterior = store.getContent().clase_recetario_url;
@@ -227,14 +239,14 @@ router.post('/api/content/clase-recetario', requireAdmin, uploadDocumento.single
     clase_recetario_url: `/uploads/${req.file.filename}`,
     clase_recetario_nombre: req.file.originalname,
   });
-  borrarSiEsSubida(anterior);
+  borrarRecetarioLiveSiNoSeUsa(anterior);
   res.json({ content });
 });
 
 router.delete('/api/content/clase-recetario', requireAdmin, (req, res) => {
   const anterior = store.getContent().clase_recetario_url;
   const content = store.updateContent({ clase_recetario_url: '', clase_recetario_nombre: '' });
-  borrarSiEsSubida(anterior);
+  borrarRecetarioLiveSiNoSeUsa(anterior);
   res.json({ content });
 });
 
@@ -1469,9 +1481,28 @@ router.get('/api/users', requireAdmin, (req, res) => {
       nombre: u.nombre || '',
       telefono: telefonoConLada,
       membresiaEstado: u.membresiaEstado || 'ninguna',
+      regalo: regalo.resumenRegalo(u),
+      regaloRechazado: !!u.regaloRechazado,
+      origenRegalo: u.membresiaOrigen === 'regalo_live' && !!u.membresiaRegaloHasta,
     };
   });
   res.json(usuarios);
+});
+
+// ---- Mes de membresia de regalo desde el live: resumen para /admin ----
+router.get('/api/membresia/regalos-resumen', requireAdmin, (req, res) => {
+  const ahora = new Date();
+  const conRegalo = store.getUsers().filter((u) => u.membresiaRegaloHasta);
+  const terminados = conRegalo.filter((u) => new Date(u.membresiaRegaloHasta) <= ahora);
+  res.json({
+    activados: conRegalo.length,
+    enRegalo: conRegalo.filter((u) => regalo.regaloActivo(u, ahora)).length,
+    // Ya paso su mes de regalo y sigue activa: su primer cobro se hizo (o
+    // Mercado Pago lo esta reintentando).
+    pagando: terminados.filter((u) => u.membresiaEstado === 'activa').length,
+    cancelaron: conRegalo.filter((u) => u.membresiaRegaloCancelada || (new Date(u.membresiaRegaloHasta) <= ahora && u.membresiaEstado !== 'activa')).length,
+    rechazados: store.getUsers().filter((u) => u.regaloRechazado).length,
+  });
 });
 
 // ---- Clientes: restablecer contraseña olvidada (manual, vía WhatsApp) ----

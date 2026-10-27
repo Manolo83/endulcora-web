@@ -71,6 +71,11 @@ const DEFAULT_CONTENT = {
   // que el link para entrar, nunca se manda por separado.
   clase_recetario_url: '',
   clase_recetario_nombre: '',
+  // Boton "Descarga aqui el recetario" del live: en vez de entregar el PDF
+  // directo, ofrece 1 mes de membresia de regalo (suscripcion domiciliada
+  // en Mercado Pago con el primer cobro a los 30 dias) a quien nunca ha
+  // sido miembro. 'false' regresa al comportamiento anterior en ese live.
+  clase_regalo_membresia_activo: 'true',
   // ---- Clase gratis en sala (p.ej. Pan de Muerto): registro en el sitio +
   // oferta del día. Independiente de la "clase en vivo" (esa es online).
   clasegratis_activo: 'false',
@@ -309,6 +314,20 @@ async function init() {
       if (typeof u.membresiaActivaDesde !== 'string') { u.membresiaActivaDesde = ''; changed = true; }
       if (typeof u.fotoPerfilUrl !== 'string') { u.fotoPerfilUrl = ''; changed = true; }
       if (typeof u.registroRecordatorioEnviado !== 'boolean') { u.registroRecordatorioEnviado = false; changed = true; }
+      // Mes de membresia de regalo desde el live (ver src/membresiaRegalo.js).
+      // Vacios para todas las cuentas que ya existian: a nadie se le activa
+      // nada retroactivamente.
+      if (typeof u.membresiaOrigen !== 'string') { u.membresiaOrigen = ''; changed = true; }
+      if (typeof u.membresiaRegaloHasta !== 'string') { u.membresiaRegaloHasta = ''; changed = true; }
+      if (typeof u.membresiaRegaloCancelada !== 'boolean') { u.membresiaRegaloCancelada = false; changed = true; }
+      if (!Array.isArray(u.regaloRecordatoriosEnviados)) { u.regaloRecordatoriosEnviados = []; changed = true; }
+      if (typeof u.regaloRecetarioUrl !== 'string') { u.regaloRecetarioUrl = ''; changed = true; }
+      if (typeof u.regaloRecetarioNombre !== 'string') { u.regaloRecetarioNombre = ''; changed = true; }
+      if (typeof u.regaloPreapprovalId !== 'string') { u.regaloPreapprovalId = ''; changed = true; }
+      // Cuenta de Mercado Pago con la que se activo el regalo, y si se le
+      // nego por ya haberlo usado antes con otra cuenta (anti "regalo doble").
+      if (typeof u.regaloPayerId !== 'string') { u.regaloPayerId = ''; changed = true; }
+      if (typeof u.regaloRechazado !== 'boolean') { u.regaloRechazado = false; changed = true; }
       // Numero de suscriptor: fecha en la que se activo la membresia por
       // primera vez en su historia (no se vuelve a tocar despues, aunque
       // cancele y se vuelva a suscribir). A quien ya tenia membresia antes
@@ -2467,6 +2486,15 @@ module.exports = {
       membresiaActivaDesde: '',
       membresiaPrimeraActivacion: '',
       registroRecordatorioEnviado: false,
+      membresiaOrigen: '',
+      membresiaRegaloHasta: '',
+      membresiaRegaloCancelada: false,
+      regaloRecordatoriosEnviados: [],
+      regaloRecetarioUrl: '',
+      regaloRecetarioNombre: '',
+      regaloPreapprovalId: '',
+      regaloPayerId: '',
+      regaloRechazado: false,
       createdAt: new Date().toISOString(),
     };
     data.users.push(item);

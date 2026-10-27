@@ -5,6 +5,7 @@
 // falta una cola de trabajos real para este volumen.
 const store = require('./store');
 const email = require('./email');
+const regalo = require('./membresiaRegalo');
 const { SITE_URL } = require('./config');
 
 // Dias de espera entre cada paso de la secuencia (el paso 0, la receta
@@ -74,6 +75,36 @@ async function revisarRecordatoriosMembresia() {
   }
 }
 
+// Mes de membresia de regalo desde el live: recordatorios a los 15, 3 y 1
+// dias (el aviso dentro de su cuenta se calcula en vivo en
+// /api/membresia/estado, este es el del correo), y al terminar el regalo se
+// le quita el acceso a quien cancelo durante el.
+async function revisarRegalosMembresia() {
+  const ahora = new Date();
+  for (const usuario of store.getUsers()) {
+    if (usuario.membresiaEstado !== 'activa') continue;
+    const pendiente = regalo.recordatorioPendiente(usuario, ahora);
+    if (!pendiente) continue;
+    try {
+      await email.enviarCorreoRecordatorioRegalo({
+        to: usuario.email,
+        nombre: usuario.nombre,
+        siteUrl: SITE_URL,
+        dias: pendiente.dias,
+        hasta: usuario.membresiaRegaloHasta,
+        cancelada: usuario.membresiaRegaloCancelada,
+      });
+      const enviados = new Set([...(usuario.regaloRecordatoriosEnviados || []), ...pendiente.marcarComoEnviados]);
+      store.updateUser(usuario.id, { regaloRecordatoriosEnviados: [...enviados] });
+    } catch (e) {
+      console.error('No se pudo mandar el recordatorio del mes de regalo a', usuario.email, e.message);
+    }
+  }
+  for (const usuario of regalo.getRegalosVencidosCancelados(ahora)) {
+    store.updateUser(usuario.id, { membresiaEstado: 'cancelada' });
+  }
+}
+
 let corriendo = false;
 async function revisarAutomatizaciones() {
   if (corriendo) return;
@@ -93,4 +124,25 @@ function iniciarAutomatizaciones() {
   setInterval(revisarAutomatizaciones, INTERVALO_MS);
 }
 
-module.exports = { iniciarAutomatizaciones, revisarAutomatizaciones };
+// Los recordatorios del mes de regalo corren aparte de revisarAutomatizaciones
+// (que esta pausada a peticion del dueño del sitio, ver server.js): estos si
+// se pidieron, y son avisos de un cobro proximo que siempre deben salir.
+let corriendoRegalos = false;
+async function revisarRegalosSinTraslape() {
+  if (corriendoRegalos) return;
+  corriendoRegalos = true;
+  try {
+    await revisarRegalosMembresia();
+  } catch (e) {
+    console.error('Error revisando los meses de regalo:', e.message);
+  } finally {
+    corriendoRegalos = false;
+  }
+}
+
+function iniciarAutomatizacionRegalos() {
+  revisarRegalosSinTraslape();
+  setInterval(revisarRegalosSinTraslape, INTERVALO_MS);
+}
+
+module.exports = { iniciarAutomatizaciones, revisarAutomatizaciones, iniciarAutomatizacionRegalos, revisarRegalosMembresia };

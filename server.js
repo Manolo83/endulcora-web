@@ -578,6 +578,10 @@ store.init()
     // nada (ver src/googleSheets.js) — los recordatorios por correo si
     // corren.
     require('./src/automatizacionesTaller').iniciarAutomatizacionesTaller();
+    // Mes de membresia de regalo desde el live: correos a los 15, 3 y 1
+    // dias de que termine, y fin del acceso de quien cancelo durante el
+    // regalo. Independiente del interruptor pausado de arriba.
+    require('./src/automatizaciones').iniciarAutomatizacionRegalos();
     // Confirmacion de lugar de la clase gratis (control de aforo con tope
     // de cupo) y sus recordatorios a quien ya confirmo.
     require('./src/confirmacionClaseGratis').iniciarAutomatizacionClaseGratis();

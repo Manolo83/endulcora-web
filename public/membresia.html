@@ -213,6 +213,32 @@ body { background: #FBF4E9; }
       <button type="button" id="btnCancelarMembresia" class="font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cancelar membresía</button>
     </div>
 
+    <!-- Mes de membresia de regalo (activado desde el boton del live) -->
+    <div id="avisoRegalo" class="mt-6 hidden flex-wrap items-center justify-between gap-3 rounded-2xl border px-5 py-4">
+      <p id="avisoRegaloTexto" class="min-w-0 flex-1 text-sm text-carbon/80"></p>
+      <button type="button" id="btnReactivarRegaloAviso" class="hidden rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Reactivar membresía</button>
+    </div>
+    <div id="bloqueRegalo" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+      <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
+        <div id="anilloRegalo" class="grid h-32 w-32 shrink-0 place-items-center rounded-full" style="background:conic-gradient(#F5A623 0deg, rgba(78,20,84,.09) 0)">
+          <div class="grid h-[100px] w-[100px] place-items-center content-center rounded-full bg-white text-center">
+            <span id="diasRegalo" class="font-display text-4xl leading-none text-vino">30</span>
+            <span id="diasRegaloEtiqueta" class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">días</span>
+          </div>
+        </div>
+        <div class="min-w-0 flex-1 text-center sm:text-left">
+          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Membresía de regalo</p>
+          <h3 id="tituloRegalo" class="mt-1 font-display text-2xl leading-tight text-vino"></h3>
+          <p id="detalleRegalo" class="mt-2 text-sm text-carbon/65"></p>
+          <div class="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
+            <a id="linkRecetarioRegalo" href="/api/membresia/recetario-regalo" class="hidden items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Descargar recetario del live</a>
+            <button type="button" id="btnReactivarRegalo" class="hidden rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Reactivar membresía</button>
+          </div>
+          <p id="errorRegalo" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+        </div>
+      </div>
+    </div>
+
     <div id="bloqueGrupoWhatsapp" class="mt-6 hidden rounded-3xl bg-[#25D366]/10 p-6 ring-1 ring-[#25D366]/30">
       <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-[#128C4A]">Grupo de miembros</p>
       <p class="mt-1 text-sm text-carbon/70">Únete al grupo de WhatsApp exclusivo para miembros de Endulcora.</p>
@@ -414,8 +440,17 @@ async function cargarVistaMembresia(){
     return;
   }
   try{
-    const res = await fetch('/api/membresia/estado');
+    // Al volver de Mercado Pago (?regalo=1) se confirma directo con Mercado
+    // Pago, por si el aviso automatico todavia no llega.
+    const vieneDeMp = new URLSearchParams(location.search).has('regalo');
+    const res = await fetch('/api/membresia/estado' + (vieneDeMp ? '?sincronizar=1' : ''));
     const data = await res.json();
+    pintarRegalo(data.regalo);
+    if(data.regaloRechazado && !data.activa){
+      const err = document.getElementById('ofertaError');
+      err.textContent = 'Esa cuenta de Mercado Pago ya había usado su mes de regalo, así que no se activó (no se hizo ningún cargo). Puedes hacerte miembro por $100 al mes.';
+      err.classList.remove('hidden');
+    }
     if(data.activa){
       mostrarVista('miembro');
       document.getElementById('nombreUsuarioMembresia').textContent = SESION.user.nombre;
@@ -429,6 +464,74 @@ async function cargarVistaMembresia(){
     mostrarVista('oferta');
   }
 }
+
+/* ---------- Mes de membresia de regalo: contador y aviso ---------- */
+let REGALO = null;
+function fechaRegalo(iso){
+  return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
+}
+function pintarRegalo(r){
+  REGALO = r || null;
+  const bloque = document.getElementById('bloqueRegalo');
+  const aviso = document.getElementById('avisoRegalo');
+  if(!r){
+    bloque.classList.add('hidden');
+    aviso.classList.add('hidden');
+    aviso.classList.remove('flex');
+    return;
+  }
+  const d = r.diasRestantes;
+  const fecha = fechaRegalo(r.hasta);
+  bloque.classList.remove('hidden');
+  document.getElementById('diasRegalo').textContent = d;
+  document.getElementById('diasRegaloEtiqueta').textContent = d === 1 ? 'día' : 'días';
+  const grados = Math.max(0, Math.min(360, (d / r.diasTotales) * 360));
+  document.getElementById('anilloRegalo').style.background = `conic-gradient(${d <= 3 ? '#b42318' : '#F5A623'} ${grados}deg, rgba(78,20,84,.09) 0)`;
+  document.getElementById('tituloRegalo').textContent = d === 1 ? 'Te queda 1 día de regalo' : `Te quedan ${d} días de regalo`;
+  document.getElementById('detalleRegalo').textContent = r.cancelada
+    ? `Cancelaste tu membresía: conservas todo hasta el ${fecha} y no se te cobrará nada. Si quieres seguir, reactívala antes de esa fecha.`
+    : `Tu mes gratis termina el ${fecha}. Ese día se hará tu primer cargo de $100 y tu membresía seguirá activa sin que hagas nada.`;
+  const linkRecetario = document.getElementById('linkRecetarioRegalo');
+  linkRecetario.classList.toggle('hidden', !r.recetarioDisponible);
+  linkRecetario.classList.toggle('inline-flex', r.recetarioDisponible);
+  document.getElementById('btnReactivarRegalo').classList.toggle('hidden', !r.cancelada);
+  document.getElementById('btnCancelarMembresia').classList.toggle('hidden', r.cancelada);
+
+  // Aviso dentro de su cuenta a partir de los 15 dias (rojo a los 3).
+  if(r.mostrarAviso){
+    const cuando = d === 1 ? '<strong>mañana</strong>' : `en <strong>${d} días</strong>`;
+    document.getElementById('avisoRegaloTexto').innerHTML = r.cancelada
+      ? `Tu acceso termina ${cuando} (el ${fecha}). Reactiva tu membresía domiciliada para no perder tu recetario, el taller y los eBooks.`
+      : `Tu mes de regalo termina ${cuando}. El ${fecha} se renueva tu membresía por $100 con tu tarjeta guardada.`;
+    const urgente = d <= 3;
+    aviso.classList.toggle('bg-[#fde8e4]', urgente);
+    aviso.classList.toggle('border-red-300', urgente);
+    aviso.classList.toggle('bg-[#fff4df]', !urgente);
+    aviso.classList.toggle('border-flama/60', !urgente);
+    document.getElementById('btnReactivarRegaloAviso').classList.toggle('hidden', !r.cancelada);
+    aviso.classList.remove('hidden');
+    aviso.classList.add('flex');
+  }else{
+    aviso.classList.add('hidden');
+    aviso.classList.remove('flex');
+  }
+}
+
+async function reactivarDesdeRegalo(){
+  const err = document.getElementById('errorRegalo');
+  err.classList.add('hidden');
+  try{
+    const res = await fetch('/api/membresia/suscribirse', { method: 'POST' });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo reactivar tu membresía');
+    window.location.href = data.url;
+  }catch(e){
+    err.textContent = e.message;
+    err.classList.remove('hidden');
+  }
+}
+document.getElementById('btnReactivarRegalo').addEventListener('click', reactivarDesdeRegalo);
+document.getElementById('btnReactivarRegaloAviso').addEventListener('click', reactivarDesdeRegalo);
 
 async function cargarSesion(){
   try{
@@ -537,11 +640,19 @@ document.getElementById('btnSuscribirse').addEventListener('click', async () => 
 });
 
 document.getElementById('btnCancelarMembresia').addEventListener('click', async () => {
-  if(!confirm('¿Seguro que quieres cancelar tu membresía? Perderás el acceso al recetario y al taller del mes de inmediato.')) return;
+  const mensaje = REGALO
+    ? `¿Seguro que quieres cancelar tu membresía? No se te cobrará nada y conservas el acceso hasta el ${fechaRegalo(REGALO.hasta)}, cuando termina tu mes de regalo.`
+    : '¿Seguro que quieres cancelar tu membresía? Perderás el acceso al recetario y al taller del mes de inmediato.';
+  if(!confirm(mensaje)) return;
   try{
     const res = await fetch('/api/membresia/cancelar', { method: 'POST' });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo cancelar la membresía');
+    // En el mes de regalo conserva el acceso: solo se actualiza el contador.
+    if(data.conservaAccesoHasta){
+      cargarVistaMembresia();
+      return;
+    }
     mostrarVista('oferta');
   }catch(e){
     alert(e.message);

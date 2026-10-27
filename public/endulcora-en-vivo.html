@@ -280,10 +280,14 @@ body { background: #FBF4E9; }
           </div>
         </div>
 
-        <!-- Recetario de regalo de la clase (se sube desde /admin > Clase en vivo) -->
+        <!-- Recetario de regalo de la clase (se sube desde /admin > Clase en vivo).
+             Miembros activos: lo descargan directo. Quien nunca ha sido
+             miembro: se le ofrece 1 mes de membresia de regalo (ver
+             modalRegaloLive). -->
         <div id="bloqueRecetarioLive" class="hidden shrink-0 rounded-2xl bg-crema/10 p-6 text-center lg:w-64">
           <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">Recetario de regalo</p>
-          <a id="linkRecetarioLive" href="#" target="_blank" class="mt-4 inline-flex w-full items-center justify-center rounded-full bg-flama px-5 py-3 text-center font-ui text-[12px] font-700 uppercase leading-tight tracking-wide text-carbon hover:brightness-105 transition">Descarga aquí el recetario</a>
+          <button type="button" id="btnRecetarioLive" class="mt-4 inline-flex w-full items-center justify-center rounded-full bg-flama px-5 py-3 text-center font-ui text-[12px] font-700 uppercase leading-tight tracking-wide text-carbon hover:brightness-105 transition">Descarga aquí el recetario</button>
+          <p id="textoRecetarioLive" class="mt-3 hidden text-[12px] leading-snug text-crema/70">Incluye <strong class="text-flama">1 mes de membresía gratis</strong>. Después $100/mes, cancela cuando quieras.</p>
         </div>
       </div>
     </div>
@@ -301,6 +305,81 @@ body { background: #FBF4E9; }
 
   </div>
 </main>
+
+<!-- Mes de membresia de regalo (boton "Descarga aqui el recetario") -->
+<div id="modalRegaloLive" class="fixed inset-0 z-[60] hidden items-center justify-center bg-carbon/55 p-4">
+  <div class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 sm:p-7" role="dialog" aria-modal="true" aria-labelledby="tituloRegaloLive">
+    <div class="flex items-start justify-between gap-4">
+      <span id="chipRegaloLive" class="inline-flex rounded-full bg-flama px-3 py-1 font-ui text-[10.5px] font-700 uppercase tracking-widest text-carbon">Regalo del live</span>
+      <button type="button" onclick="cerrarModalRegaloLive()" aria-label="Cerrar" class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-carbon/50 hover:bg-vino/10 hover:text-vino">✕</button>
+    </div>
+    <h3 id="tituloRegaloLive" class="mt-3 font-display text-2xl leading-tight text-vino">Tu recetario + 1 mes de membresía gratis</h3>
+
+    <!-- Paso: oferta (con o sin sesion) -->
+    <div id="regaloPasoOferta">
+      <ul class="mt-4 grid gap-2 text-sm text-carbon/80">
+        <li class="flex gap-2.5"><span class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-flama/25 text-[11px] font-700 text-vino">✓</span><span><strong class="text-vino">Recetario de hoy</strong>, listo para descargar en tu cuenta</span></li>
+        <li class="flex gap-2.5"><span class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-flama/25 text-[11px] font-700 text-vino">✓</span><span>Recetario y revista del mes, taller online mensual</span></li>
+        <li class="flex gap-2.5"><span class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-flama/25 text-[11px] font-700 text-vino">✓</span><span>Lectura ilimitada de todos los eBooks</span></li>
+        <li class="flex gap-2.5"><span class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-flama/25 text-[11px] font-700 text-vino">✓</span><span>Biblioteca de clases grabadas</span></li>
+      </ul>
+
+      <!-- Sin sesion: primero crear cuenta o entrar -->
+      <div id="regaloLiveInvitado" class="mt-5 hidden">
+        <div class="flex gap-4 border-b border-vino/10">
+          <button type="button" id="tabRegistroRegalo" class="border-b-2 border-vino px-1 pb-2 font-ui text-[12px] font-700 uppercase tracking-wider text-vino">Crear cuenta</button>
+          <button type="button" id="tabLoginRegalo" class="border-b-2 border-transparent px-1 pb-2 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon/40">Ya tengo cuenta</button>
+        </div>
+        <form id="formRegistroRegalo" class="mt-4 grid gap-2.5">
+          <input id="registroRegaloNombre" type="text" required placeholder="Tu nombre" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm outline-none focus:border-vino/40">
+          <input id="registroRegaloEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm outline-none focus:border-vino/40">
+          <input id="registroRegaloTelefono" type="tel" required inputmode="numeric" placeholder="Teléfono (10 dígitos)" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm outline-none focus:border-vino/40">
+          <input id="registroRegaloPassword" type="password" required minlength="6" placeholder="Contraseña (mínimo 6 caracteres)" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm outline-none focus:border-vino/40">
+          <button type="submit" class="mt-1 rounded-full bg-vino py-3 font-ui text-[12.5px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Crear cuenta y continuar</button>
+        </form>
+        <form id="formLoginRegalo" class="mt-4 hidden grid gap-2.5">
+          <input id="loginRegaloEmail" type="email" required placeholder="Correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm outline-none focus:border-vino/40">
+          <input id="loginRegaloPassword" type="password" required placeholder="Contraseña" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm outline-none focus:border-vino/40">
+          <button type="submit" class="mt-1 rounded-full bg-vino py-3 font-ui text-[12.5px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Entrar y continuar</button>
+        </form>
+      </div>
+
+      <!-- Con sesion y elegible: activar en Mercado Pago -->
+      <div id="regaloLiveActivar" class="mt-5 hidden">
+        <button type="button" id="btnActivarRegaloLive" class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition disabled:opacity-60">
+          <span id="spinnerRegaloLive" class="hidden h-4 w-4 animate-spin rounded-full border-2 border-carbon/30 border-t-carbon"></span>
+          Activar mi mes gratis
+        </button>
+        <p id="letraChicaRegaloLive" class="mt-3 text-[12px] leading-relaxed text-carbon/60"></p>
+      </div>
+
+      <!-- Con sesion pero ya fue miembro (o ya uso su regalo): oferta normal -->
+      <div id="regaloLiveNoElegible" class="mt-5 hidden">
+        <p class="rounded-xl bg-crema px-4 py-3 text-sm text-carbon/75">El mes de regalo es solo para quien nunca ha sido miembro. Hazte miembro y descarga el recetario de hoy junto con todo el contenido.</p>
+        <button type="button" id="btnMembresiaNormalRegalo" class="mt-4 inline-flex w-full items-center justify-center rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition disabled:opacity-60">Hazte miembro · $100/mes</button>
+        <p class="mt-3 text-[12px] text-carbon/50">Pago seguro con Mercado Pago. Cancela cuando quieras.</p>
+      </div>
+    </div>
+
+    <!-- Paso: esperando que termine en la ventana de Mercado Pago -->
+    <div id="regaloPasoEsperando" class="mt-5 hidden">
+      <div class="flex items-center gap-3 rounded-xl bg-crema px-4 py-3 text-sm text-carbon/75">
+        <span class="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-vino/20 border-t-vino"></span>
+        Termina el registro de tu tarjeta en la ventana de Mercado Pago. Esta pantalla se actualiza sola.
+      </div>
+      <button type="button" id="btnReabrirMpRegalo" class="mt-3 font-ui text-[11px] uppercase tracking-widest text-vino underline">Volver a abrir Mercado Pago</button>
+    </div>
+
+    <!-- Paso: listo -->
+    <div id="regaloPasoListo" class="mt-5 hidden">
+      <p class="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">¡Listo! Ya eres miembro Endulcora. Tienes <strong id="diasRegaloListo">30</strong> días de regalo.</p>
+      <a href="/api/membresia/recetario-regalo" class="mt-4 inline-flex w-full items-center justify-center rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Descargar mi recetario</a>
+      <a href="/membresia" class="mt-3 inline-flex w-full items-center justify-center rounded-full border border-vino/25 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Ver mi membresía</a>
+    </div>
+
+    <p id="errorRegaloLive" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+  </div>
+</div>
 
 <!-- Modal del aviso de privacidad (para el registro gratis de la clase) -->
 <div id="modalPrivacidadVideoLive" class="fixed inset-0 z-[60] hidden items-center justify-center bg-carbon/50 p-4">
@@ -418,13 +497,9 @@ function mostrarAccesoConcedidoLive(c){
     mostrarPlaceholderVideo(true);
     document.getElementById('bloqueClaseEnVivoPlayer').classList.add('hidden');
   }
-  const bloqueRecetario = document.getElementById('bloqueRecetarioLive');
-  if(c.recetarioUrl){
-    document.getElementById('linkRecetarioLive').href = c.recetarioUrl;
-    bloqueRecetario.classList.remove('hidden');
-  }else{
-    bloqueRecetario.classList.add('hidden');
-  }
+  RECETARIO_LIVE.directo = c.recetarioUrlDirecto || '';
+  document.getElementById('bloqueRecetarioLive').classList.toggle('hidden', !c.recetarioDisponible);
+  actualizarBotonRecetarioLive();
 }
 
 async function cargarAccesoClaseLive(){
@@ -839,6 +914,8 @@ async function cargarEstadoMembresiaLive(){
     const res = await fetch('/api/membresia/estado');
     const data = await res.json();
     mostrarVistaMembresiaLive(data.activa ? 'membresiaLiveActiva' : 'membresiaLiveOferta');
+    RECETARIO_LIVE.estado = res.ok ? data : null;
+    actualizarBotonRecetarioLive();
   }catch(e){
     mostrarVistaMembresiaLive('membresiaLiveOferta');
   }
@@ -928,6 +1005,210 @@ document.getElementById('btnMembresiaLive').addEventListener('click', async () =
     spinner.classList.add('hidden');
     btn.disabled = false;
   }
+});
+</script>
+
+<script>
+/* ---------- Recetario del live + mes de membresia de regalo ----------
+   - Miembro activo: descarga directa (/api/membresia/recetario-live).
+   - Nunca ha sido miembro: 1 mes de membresia de regalo. Registra su
+     tarjeta en Mercado Pago (paga $0 hoy) y el primer cobro es a los 30 dias.
+   - Ya fue miembro antes (o ya uso su regalo): oferta normal de $100/mes.
+   - Con el regalo apagado en /admin: PDF directo como antes. */
+const RECETARIO_LIVE = { directo: '', estado: null, urlMp: '', sondeo: null };
+
+async function cargarEstadoRegaloLive(sincronizar){
+  if(!SESION_LIVE.isLoggedIn){ RECETARIO_LIVE.estado = null; return null; }
+  try{
+    const res = await fetch('/api/membresia/estado' + (sincronizar ? '?sincronizar=1' : ''));
+    RECETARIO_LIVE.estado = res.ok ? await res.json() : null;
+  }catch(e){
+    RECETARIO_LIVE.estado = null;
+  }
+  return RECETARIO_LIVE.estado;
+}
+
+function actualizarBotonRecetarioLive(){
+  const e = RECETARIO_LIVE.estado;
+  const ofreceRegalo = !RECETARIO_LIVE.directo && !(e && e.activa) && (!e || e.elegibleRegalo);
+  document.getElementById('textoRecetarioLive').classList.toggle('hidden', !ofreceRegalo);
+}
+
+function mostrarPasoRegaloLive(paso){
+  ['regaloPasoOferta', 'regaloPasoEsperando', 'regaloPasoListo'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById(paso).classList.remove('hidden');
+}
+
+function pintarOfertaRegaloLive(){
+  const e = RECETARIO_LIVE.estado;
+  ['regaloLiveInvitado', 'regaloLiveActivar', 'regaloLiveNoElegible'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  const elegible = !SESION_LIVE.isLoggedIn || (e && e.elegibleRegalo);
+  document.getElementById('tituloRegaloLive').textContent = elegible ? 'Tu recetario + 1 mes de membresía gratis' : 'Descarga el recetario siendo miembro';
+  document.getElementById('chipRegaloLive').textContent = elegible ? 'Regalo del live' : 'Membresía Endulcora';
+  if(!SESION_LIVE.isLoggedIn){
+    document.getElementById('regaloLiveInvitado').classList.remove('hidden');
+  }else if(elegible){
+    const fin = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
+    document.getElementById('letraChicaRegaloLive').textContent = `Hoy pagas $0. Mercado Pago guarda tu tarjeta y el ${fin} se hace tu primer cargo de $100; después, $100 cada mes. Te avisamos 15, 3 y 1 días antes. Puedes cancelar cuando quieras desde tu cuenta.`;
+    document.getElementById('regaloLiveActivar').classList.remove('hidden');
+  }else{
+    document.getElementById('regaloLiveNoElegible').classList.remove('hidden');
+  }
+}
+
+function errorRegaloLive(msg){
+  const box = document.getElementById('errorRegaloLive');
+  box.textContent = msg || '';
+  box.classList.toggle('hidden', !msg);
+}
+
+function abrirModalRegaloLive(){
+  errorRegaloLive('');
+  pintarOfertaRegaloLive();
+  mostrarPasoRegaloLive('regaloPasoOferta');
+  const modal = document.getElementById('modalRegaloLive');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  if(typeof fbq === 'function') fbq('track', 'ViewContent', { content_name: 'Mes de regalo (live)' });
+}
+function cerrarModalRegaloLive(){
+  const modal = document.getElementById('modalRegaloLive');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  if(RECETARIO_LIVE.sondeo){ clearInterval(RECETARIO_LIVE.sondeo); RECETARIO_LIVE.sondeo = null; }
+}
+document.getElementById('modalRegaloLive').addEventListener('click', (e) => {
+  if (e.target.id === 'modalRegaloLive') cerrarModalRegaloLive();
+});
+
+document.getElementById('btnRecetarioLive').addEventListener('click', async () => {
+  if(RECETARIO_LIVE.directo){
+    window.open(RECETARIO_LIVE.directo, '_blank', 'noopener');
+    return;
+  }
+  const e = await cargarEstadoRegaloLive();
+  actualizarBotonRecetarioLive();
+  if(e && e.activa){
+    window.location.href = '/api/membresia/recetario-live';
+    return;
+  }
+  abrirModalRegaloLive();
+});
+
+async function despuesDeSesionRegaloLive(user){
+  SESION_LIVE = { isLoggedIn: true, user };
+  actualizarLoginChatClase();
+  cargarEstadoMembresiaLive();
+  const e = await cargarEstadoRegaloLive();
+  actualizarBotonRecetarioLive();
+  if(e && e.activa){
+    cerrarModalRegaloLive();
+    window.location.href = '/api/membresia/recetario-live';
+    return;
+  }
+  pintarOfertaRegaloLive();
+}
+
+function cambiarTabRegalo(registro){
+  const activo = ['border-vino', 'text-vino'], inactivo = ['border-transparent', 'text-carbon/40'];
+  const tReg = document.getElementById('tabRegistroRegalo'), tLog = document.getElementById('tabLoginRegalo');
+  (registro ? tReg : tLog).classList.add(...activo); (registro ? tReg : tLog).classList.remove(...inactivo);
+  (registro ? tLog : tReg).classList.add(...inactivo); (registro ? tLog : tReg).classList.remove(...activo);
+  document.getElementById('formRegistroRegalo').classList.toggle('hidden', !registro);
+  document.getElementById('formLoginRegalo').classList.toggle('hidden', registro);
+}
+document.getElementById('tabRegistroRegalo').addEventListener('click', () => cambiarTabRegalo(true));
+document.getElementById('tabLoginRegalo').addEventListener('click', () => cambiarTabRegalo(false));
+
+document.getElementById('formRegistroRegalo').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorRegaloLive('');
+  try{
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: document.getElementById('registroRegaloNombre').value.trim(),
+        email: document.getElementById('registroRegaloEmail').value.trim(),
+        telefono: document.getElementById('registroRegaloTelefono').value.trim(),
+        password: document.getElementById('registroRegaloPassword').value,
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo crear la cuenta');
+    await despuesDeSesionRegaloLive(data.user);
+  }catch(err){
+    errorRegaloLive(err.message);
+  }
+});
+
+document.getElementById('formLoginRegalo').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorRegaloLive('');
+  try{
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('loginRegaloEmail').value.trim(),
+        password: document.getElementById('loginRegaloPassword').value,
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar sesión');
+    await despuesDeSesionRegaloLive(data.user);
+  }catch(err){
+    errorRegaloLive(err.message);
+  }
+});
+
+// Mientras la clienta registra su tarjeta en la ventana de Mercado Pago, se
+// pregunta cada 5 s si ya quedo activa (hasta 10 minutos).
+function esperarActivacionRegaloLive(){
+  mostrarPasoRegaloLive('regaloPasoEsperando');
+  if(RECETARIO_LIVE.sondeo) clearInterval(RECETARIO_LIVE.sondeo);
+  const limite = Date.now() + 10 * 60 * 1000;
+  RECETARIO_LIVE.sondeo = setInterval(async () => {
+    const e = await cargarEstadoRegaloLive(true);
+    if(e && e.activa){
+      clearInterval(RECETARIO_LIVE.sondeo); RECETARIO_LIVE.sondeo = null;
+      document.getElementById('diasRegaloListo').textContent = e.regalo ? e.regalo.diasRestantes : 30;
+      mostrarPasoRegaloLive('regaloPasoListo');
+      actualizarBotonRecetarioLive();
+      cargarEstadoMembresiaLive();
+      if(typeof fbq === 'function') fbq('track', 'StartTrial', { value: 0, currency: 'MXN', predicted_ltv: 300 });
+    }else if(e && e.regaloRechazado){
+      clearInterval(RECETARIO_LIVE.sondeo); RECETARIO_LIVE.sondeo = null;
+      pintarOfertaRegaloLive();
+      mostrarPasoRegaloLive('regaloPasoOferta');
+      errorRegaloLive('Esa cuenta de Mercado Pago ya usó su mes de regalo. No se hizo ningún cargo. Puedes hacerte miembro por $100 al mes.');
+    }else if(Date.now() > limite){
+      clearInterval(RECETARIO_LIVE.sondeo); RECETARIO_LIVE.sondeo = null;
+    }
+  }, 5000);
+}
+
+async function iniciarSuscripcionDesdeModal(ruta, btn){
+  errorRegaloLive('');
+  btn.disabled = true;
+  document.getElementById('spinnerRegaloLive').classList.remove('hidden');
+  try{
+    const res = await fetch(ruta, { method: 'POST' });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo continuar. Intenta de nuevo.');
+    RECETARIO_LIVE.urlMp = data.url;
+    if(typeof fbq === 'function') fbq('track', 'InitiateCheckout', { content_name: ruta.includes('regalo') ? 'Mes de regalo (live)' : 'Membresía (live)' });
+    abrirCheckoutVentana(data.url);
+    esperarActivacionRegaloLive();
+  }catch(err){
+    errorRegaloLive(err.message);
+  }finally{
+    btn.disabled = false;
+    document.getElementById('spinnerRegaloLive').classList.add('hidden');
+  }
+}
+document.getElementById('btnActivarRegaloLive').addEventListener('click', (e) => iniciarSuscripcionDesdeModal('/api/membresia/suscribirse-regalo', e.currentTarget));
+document.getElementById('btnMembresiaNormalRegalo').addEventListener('click', (e) => iniciarSuscripcionDesdeModal('/api/membresia/suscribirse', e.currentTarget));
+document.getElementById('btnReabrirMpRegalo').addEventListener('click', () => {
+  if(RECETARIO_LIVE.urlMp) abrirCheckoutVentana(RECETARIO_LIVE.urlMp);
 });
 </script>
 

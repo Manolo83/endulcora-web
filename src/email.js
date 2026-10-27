@@ -664,7 +664,94 @@ async function enviarCorreoRecordatorioMembresia({ to, nombre, siteUrl }) {
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+// ---- Mes de membresia de regalo desde el live ----
+function fechaLegible(iso) {
+  return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', timeZone: 'America/Mexico_City' });
+}
+
+function plantillaRegalo({ nombre, titulo, parrafos, caja, botonTexto, siteUrl, letraChica }) {
+  return `
+    <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+      <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+      <h1 style="font-size:20px;color:#4E1454;">¡Hola${nombre ? ` ${escapeHtml(nombre)}` : ''}!</h1>
+      ${titulo ? `<p style="font-size:15px;font-weight:700;color:#4E1454;">${titulo}</p>` : ''}
+      ${parrafos.map((p) => `<p style="font-size:14px;line-height:1.6;">${p}</p>`).join('')}
+      ${caja ? `<div style="background:#FBF4E9;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.6;margin-top:12px;">${caja}</div>` : ''}
+      <p style="margin-top:18px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">${botonTexto}</a></p>
+      ${letraChica ? `<p style="margin-top:16px;font-size:12px;color:#7a6a7e;line-height:1.5;">${letraChica}</p>` : ''}
+      <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">Recibiste este correo porque activaste tu mes de membresía de regalo en endulcora.com.</p>
+    </div>
+  `;
+}
+
+async function enviarCorreoRegaloActivado({ to, nombre, siteUrl, hasta }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: 'Tu mes de regalo en Endulcora ya está activo',
+    html: plantillaRegalo({
+      nombre,
+      siteUrl,
+      titulo: 'Gracias por acompañarnos en el live.',
+      parrafos: [
+        'Tu recetario y todo el contenido de la membresía ya están en tu cuenta: recetario y revista del mes, taller online, biblioteca de clases grabadas y lectura ilimitada de eBooks.',
+      ],
+      caja: `<b>Tu mes de regalo termina el ${fechaLegible(hasta)}.</b> Ese día se hará tu primer cargo de $100 MXN con la tarjeta que registraste en Mercado Pago, y tu membresía seguirá activa mes a mes.`,
+      botonTexto: 'Ir a mi membresía',
+      letraChica: 'Te avisaremos 15, 3 y 1 días antes. Si no quieres continuar, cancela desde tu cuenta antes de esa fecha y no se hará ningún cargo.',
+    }),
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
+// Recordatorio a los 15, 3 y 1 dias de que termine el regalo. Si cancelo
+// durante el regalo, el mismo recordatorio la invita a volver a domiciliar
+// su membresia antes de perder el acceso.
+async function enviarCorreoRecordatorioRegalo({ to, nombre, siteUrl, dias, hasta, cancelada }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const cuando = dias === 1 ? 'mañana' : `en ${dias} días`;
+  const fecha = fechaLegible(hasta);
+  let subject;
+  let parrafos;
+  let caja;
+  let botonTexto;
+  let letraChica;
+  if (cancelada) {
+    subject = dias === 1 ? 'Mañana pierdes tu acceso a Endulcora' : `Tu acceso a Endulcora termina ${cuando}`;
+    parrafos = [
+      `Cancelaste tu membresía, así que tu acceso termina ${cuando}. Después ya no podrás descargar tu recetario ni ver el taller, la revista, la biblioteca de clases y los eBooks.`,
+      'Si quieres seguir, vuelve a activar tu membresía domiciliada. No se te cobra nada antes de que termine tu mes de regalo.',
+    ];
+    caja = `<b>Te ${dias === 1 ? 'queda 1 día' : `quedan ${dias} días`}.</b> Si la reactivas, tu primer cargo de $100 MXN sería el ${fecha}.`;
+    botonTexto = 'Reactivar mi membresía';
+  } else {
+    subject = dias === 1 ? 'Mañana se renueva tu membresía Endulcora' : `Tu mes de regalo en Endulcora termina ${cuando}`;
+    parrafos = [
+      dias >= 15
+        ? 'Ya disfrutaste la mitad de tu mes de regalo. Todavía tienes el recetario del mes, la revista, el taller online y todos los eBooks.'
+        : `Tu mes de regalo termina ${cuando}. Para no perder tu acceso no tienes que hacer nada: tu membresía se renueva sola con tu tarjeta domiciliada.`,
+    ];
+    caja = `<b>Te ${dias === 1 ? 'queda 1 día' : `quedan ${dias} días`}.</b> Primer cargo: $100 MXN el ${fecha}, con la tarjeta que registraste en Mercado Pago.`;
+    botonTexto = 'Ver mi membresía';
+    letraChica = 'Si no quieres continuar, cancela desde tu cuenta antes de esa fecha y no se hará ningún cargo.';
+  }
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject,
+    html: plantillaRegalo({ nombre, siteUrl, parrafos, caja, botonTexto, letraChica }),
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 module.exports = {
+  enviarCorreoRegaloActivado,
+  enviarCorreoRecordatorioRegalo,
   enviarCorreoConfirmacionCompra,
   enviarCorreoConfirmacionInscripcionTaller,
   enviarCorreoConfirmacionPagoTaller,
