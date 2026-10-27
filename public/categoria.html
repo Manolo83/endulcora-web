@@ -187,70 +187,98 @@ document.getElementById('anioFooter').textContent = new Date().getFullYear();
 
 const PREFIJO_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
 
-// Los 4 apartados en los que se divide el catalogo de eBooks (ver
-// APARTADOS_EBOOKS en src/store.js -- misma lista, slugs y nombres, para
-// que coincida con lo que se asigna desde /admin).
-const APARTADOS_EBOOKS = [
-  { slug: 'panaderia', nombre: 'Panadería y Repostería', desc: 'Pan, galletas, pasteles y masa madre.' },
-  { slug: 'mexicana', nombre: 'Comida Mexicana', desc: 'Tamales, antojitos y platillos tradicionales.' },
-  { slug: 'internacional', nombre: 'Comida Internacional', desc: 'Sushi, pizza, cocina española y más.' },
-  { slug: 'especiales', nombre: 'Snacks, Mesas y Especiales', desc: 'Botanas, mesas de montaje y recetas para necesidades especiales.' },
+// Degradados de respaldo para el mosaico, por si hay mas apartados que
+// colores (se repiten en ciclo -- un apartado nuevo creado desde /admin
+// igual se ve bien, sin tener que tocar este archivo).
+const DEGRADADOS_MOSAICO = [
+  'linear-gradient(135deg,#7A2E7E,#4E1454)',
+  'linear-gradient(135deg,#F5A623,#B3361F)',
+  'linear-gradient(135deg,#1E7A46,#4E1454)',
+  'linear-gradient(135deg,#4E1454,#1B0720)',
+  'linear-gradient(135deg,#B3361F,#7A2E7E)',
+  'linear-gradient(135deg,#1E7A46,#1B0720)',
 ];
-const DEGRADADO_POR_APARTADO = {
-  panaderia: 'linear-gradient(135deg,#7A2E7E,#4E1454)',
-  mexicana: 'linear-gradient(135deg,#F5A623,#B3361F)',
-  internacional: 'linear-gradient(135deg,#1E7A46,#4E1454)',
-  especiales: 'linear-gradient(135deg,#4E1454,#1B0720)',
-};
-
-const INFO_CATEGORIA = {
-  tienda: { titulo: 'Tienda', desc: 'Todo lo que tenemos para vender: eBooks y anexos.', filtro: null },
-  ebooks: { titulo: 'eBooks', desc: 'Elige un apartado para ver sus manuales técnicos, listos para descargar.', filtro: 'ebook', mosaico: true },
-  anexos: { titulo: 'Anexos', desc: 'Hojas de cálculo de costeo, listas para usar.', filtro: 'anexo' },
-};
-APARTADOS_EBOOKS.forEach((a) => {
-  INFO_CATEGORIA[`ebooks-${a.slug}`] = { titulo: a.nombre, desc: a.desc, filtro: 'ebook', apartado: a.slug };
-});
 
 const seg = window.location.pathname.replace(/^\/|\/$/g, '') || 'tienda';
-const info = INFO_CATEGORIA[seg] || INFO_CATEGORIA.tienda;
+let info = { titulo: 'Tienda', desc: 'Todo lo que tenemos para vender: eBooks y anexos.', filtro: null };
+let APARTADOS_EBOOKS = [];
 
-document.getElementById('tituloPagina').textContent = `${info.titulo} · Endulcora`;
-document.getElementById('metaDescripcion').setAttribute('content', info.desc);
-document.getElementById('linkCanonico').setAttribute('href', `https://www.endulcora.com/${seg}`);
-document.getElementById('ogUrl').setAttribute('content', `https://www.endulcora.com/${seg}`);
-document.getElementById('ogTitulo').setAttribute('content', `${info.titulo} · Endulcora`);
-document.getElementById('ogDescripcion').setAttribute('content', info.desc);
-document.getElementById('h1Categoria').textContent = info.titulo;
-document.getElementById('descripcionCategoria').textContent = info.desc;
-
-// Mosaico de apartados (solo /ebooks): reemplaza el buscador+catalogo por
-// las 4 tarjetas para elegir apartado.
-if(info.mosaico){
-  document.getElementById('bloqueBuscador').classList.add('hidden');
-  document.getElementById('listaProductos').classList.add('hidden');
-  const mosaico = document.getElementById('mosaicoApartados');
-  mosaico.classList.remove('hidden');
-  mosaico.classList.add('grid');
-  mosaico.innerHTML = APARTADOS_EBOOKS.map((a) => `
-    <a href="/ebooks-${a.slug}" class="tarjeta-viva group relative flex min-h-[170px] items-end overflow-hidden rounded-3xl p-7 text-crema shadow-[0_2px_0_rgba(78,20,84,.08)]" style="background:${DEGRADADO_POR_APARTADO[a.slug]};">
-      <div class="relative">
-        <h2 class="font-display text-2xl leading-tight">${escapeHtml(a.nombre)}</h2>
-        <p class="mt-2 text-[13px] text-crema/85">${escapeHtml(a.desc)}</p>
-      </div>
-    </a>`).join('');
+// Los apartados (/ebooks-<slug>) son administrables desde /admin: no es
+// una lista fija aqui, se resuelven contra lo que de verdad existe.
+async function resolverCategoria(){
+  const INFO_CATEGORIA = {
+    tienda: { titulo: 'Tienda', desc: 'Todo lo que tenemos para vender: eBooks y anexos.', filtro: null },
+    ebooks: { titulo: 'eBooks', desc: 'Elige un apartado para ver sus manuales técnicos, listos para descargar.', filtro: 'ebook', mosaico: true },
+    anexos: { titulo: 'Anexos', desc: 'Hojas de cálculo de costeo, listas para usar.', filtro: 'anexo' },
+  };
+  if(INFO_CATEGORIA[seg]){
+    info = INFO_CATEGORIA[seg];
+    // El mosaico necesita la lista de apartados aunque la URL no traiga uno.
+    if(info.mosaico){
+      try{
+        const res = await fetch('/api/apartados-ebooks');
+        APARTADOS_EBOOKS = await res.json();
+      }catch(e){ APARTADOS_EBOOKS = []; }
+    }
+    return;
+  }
+  if(seg.startsWith('ebooks-')){
+    try{
+      const res = await fetch('/api/apartados-ebooks');
+      APARTADOS_EBOOKS = await res.json();
+    }catch(e){ APARTADOS_EBOOKS = []; }
+    const slug = seg.slice('ebooks-'.length);
+    const apartado = APARTADOS_EBOOKS.find(a => a.slug === slug);
+    if(apartado){
+      info = { titulo: apartado.nombre, desc: apartado.desc || `eBooks de ${apartado.nombre}.`, filtro: 'ebook', apartado: apartado.slug };
+      return;
+    }
+  }
+  info = INFO_CATEGORIA.tienda;
 }
 
-// Subnav de apartados (solo en las paginas /ebooks-<apartado>): para
-// saltar de un apartado a otro sin tener que regresar a /ebooks.
-if(info.apartado){
-  const subnav = document.getElementById('subnavApartados');
-  subnav.classList.remove('hidden');
-  subnav.classList.add('flex');
-  subnav.innerHTML = `<a href="/ebooks" class="rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Todos los apartados</a>` +
-    APARTADOS_EBOOKS.map((a) => `
-      <a href="/ebooks-${a.slug}" class="rounded-full px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider transition ${a.slug === info.apartado ? 'bg-vino text-crema' : 'border border-vino/20 text-vino hover:border-vino'}">${escapeHtml(a.nombre)}</a>`
-    ).join('');
+function pintarMetaYEncabezado(){
+  document.getElementById('tituloPagina').textContent = `${info.titulo} · Endulcora`;
+  document.getElementById('metaDescripcion').setAttribute('content', info.desc);
+  document.getElementById('linkCanonico').setAttribute('href', `https://www.endulcora.com/${seg}`);
+  document.getElementById('ogUrl').setAttribute('content', `https://www.endulcora.com/${seg}`);
+  document.getElementById('ogTitulo').setAttribute('content', `${info.titulo} · Endulcora`);
+  document.getElementById('ogDescripcion').setAttribute('content', info.desc);
+  document.getElementById('h1Categoria').textContent = info.titulo;
+  document.getElementById('descripcionCategoria').textContent = info.desc;
+}
+
+function pintarMosaicoYSubnav(){
+  // Mosaico de apartados (solo /ebooks): reemplaza el buscador+catalogo
+  // por una tarjeta por apartado para elegir cual ver.
+  if(info.mosaico){
+    document.getElementById('bloqueBuscador').classList.add('hidden');
+    document.getElementById('listaProductos').classList.add('hidden');
+    const mosaico = document.getElementById('mosaicoApartados');
+    mosaico.classList.remove('hidden');
+    mosaico.classList.add('grid');
+    mosaico.innerHTML = !APARTADOS_EBOOKS.length
+      ? '<p class="text-sm text-carbon/50 sm:col-span-2">Todavía no hay apartados configurados.</p>'
+      : APARTADOS_EBOOKS.map((a, i) => `
+      <a href="/ebooks-${a.slug}" class="tarjeta-viva group relative flex min-h-[170px] items-end overflow-hidden rounded-3xl p-7 text-crema shadow-[0_2px_0_rgba(78,20,84,.08)]" style="background:${DEGRADADOS_MOSAICO[i % DEGRADADOS_MOSAICO.length]};">
+        <div class="relative">
+          <h2 class="font-display text-2xl leading-tight">${escapeHtml(a.nombre)}</h2>
+          ${a.desc ? `<p class="mt-2 text-[13px] text-crema/85">${escapeHtml(a.desc)}</p>` : ''}
+        </div>
+      </a>`).join('');
+  }
+
+  // Subnav de apartados (solo en las paginas /ebooks-<apartado>): para
+  // saltar de un apartado a otro sin tener que regresar a /ebooks.
+  if(info.apartado){
+    const subnav = document.getElementById('subnavApartados');
+    subnav.classList.remove('hidden');
+    subnav.classList.add('flex');
+    subnav.innerHTML = `<a href="/ebooks" class="rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Todos los apartados</a>` +
+      APARTADOS_EBOOKS.map((a) => `
+        <a href="/ebooks-${a.slug}" class="rounded-full px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider transition ${a.slug === info.apartado ? 'bg-vino text-crema' : 'border border-vino/20 text-vino hover:border-vino'}">${escapeHtml(a.nombre)}</a>`
+      ).join('');
+  }
 }
 
 function actualizarBadgeCarrito(){
@@ -330,7 +358,13 @@ async function cargar(){
   pintar();
 }
 document.getElementById('buscador').addEventListener('input', pintar);
-cargar();
+
+(async function inicializar(){
+  await resolverCategoria();
+  pintarMetaYEncabezado();
+  pintarMosaicoYSubnav();
+  cargar();
+})();
 </script>
 </body>
 </html>

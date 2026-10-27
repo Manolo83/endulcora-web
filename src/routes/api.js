@@ -336,6 +336,12 @@ router.get('/products', (req, res) => {
   res.json(store.getProducts());
 });
 
+// Apartados del catalogo de eBooks (/ebooks-<slug>), para el mosaico y el
+// filtrado publico en /categoria.html.
+router.get('/apartados-ebooks', (req, res) => {
+  res.json(store.getApartadosEbooks());
+});
+
 router.get('/cursos', (req, res) => {
   res.json(store.getCursos());
 });

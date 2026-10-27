@@ -67,6 +67,7 @@
       <a href="#seccionVistaPrevia" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Vista previa</a>
       <a href="#seccionContenido" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Contenido general</a>
       <a href="#seccionProductos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Productos</a>
+      <a href="#seccionApartadosEbooks" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Apartados de eBooks</a>
       <a href="#seccionCursos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Cursos</a>
       <a href="#seccionBlog" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Blog</a>
       <a href="#seccionCalendario" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Calendario</a>
@@ -470,11 +471,8 @@
           <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Apartado (solo eBooks, para /ebooks-...)</span>
           <select id="prodApartado" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
             <option value="">Sin apartado</option>
-            <option value="panaderia">Panadería y Repostería</option>
-            <option value="mexicana">Comida Mexicana</option>
-            <option value="internacional">Comida Internacional</option>
-            <option value="especiales">Snacks, Mesas y Especiales</option>
           </select>
+          <a href="#seccionApartadosEbooks" class="mt-1 inline-block text-[11px] text-morado underline hover:text-vino">¿Falta un apartado? Créalo aquí abajo</a>
         </label>
         <label class="flex items-center gap-2 sm:col-span-2">
           <input type="checkbox" id="prodEsPaquete" class="h-4 w-4 rounded border-vino/25">
@@ -589,6 +587,31 @@
       </div>
 
       <div id="listaProductosAdmin" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
+    <!-- APARTADOS DE EBOOKS -->
+    <section id="seccionApartadosEbooks" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Apartados de eBooks</h2>
+      <p class="mt-1 text-sm text-carbon/60">Las secciones en las que se divide el catálogo (ej. "Comida Mexicana"), cada una con su propia página pública en /ebooks-&lt;apartado&gt;. Asigna cada eBook a uno desde su formulario en <a href="#seccionProductos" class="underline hover:text-vino">Productos</a>.</p>
+
+      <form id="formApartadoEbook" class="mt-4 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10 sm:grid-cols-2">
+        <input type="hidden" id="apartadoEditandoId" value="">
+        <p id="apartadoModoTexto" class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado sm:col-span-2">Nuevo apartado</p>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Nombre</span>
+          <input id="apartadoNombre" type="text" required placeholder="ej. Repostería sin Gluten" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <label class="block">
+          <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Descripción corta (opcional)</span>
+          <input id="apartadoDesc" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+        </label>
+        <div class="flex items-center gap-3 sm:col-span-2">
+          <button type="submit" class="rounded-full bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar</button>
+          <button type="button" id="btnCancelarApartado" class="hidden rounded-full border border-vino/20 px-6 py-3 font-ui text-[13px] font-600 uppercase tracking-wider text-vino">Cancelar edición</button>
+        </div>
+      </form>
+
+      <div id="listaApartadosEbooks" class="mt-6 space-y-2"></div>
     </section>
 
     <!-- CURSOS -->
@@ -1508,6 +1531,7 @@ function mostrarDashboard(mostrar){
     cargarContactosCampana();
     cargarCampanasEnviadas();
     cargarProductosAdmin();
+    cargarApartadosEbooksAdmin();
     cargarBlogAdmin();
     cargarSedes();
     cargarVentas();
@@ -2449,7 +2473,10 @@ $('btnQuitarAsistenteIcono').addEventListener('click', async () => {
 /* ---------- Productos ---------- */
 const ETIQUETA_CATEGORIA = { ebook: 'eBook', anexo: 'Anexo', recetario: 'Recetario' };
 const PREFIJO_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
-const ETIQUETA_APARTADO = { panaderia: 'Panadería y Repostería', mexicana: 'Comida Mexicana', internacional: 'Comida Internacional', especiales: 'Snacks, Mesas y Especiales' };
+function etiquetaApartado(slug){
+  const a = APARTADOS_EBOOKS_CACHE.find(x => x.slug === slug);
+  return a ? a.nombre : slug;
+}
 let PRODUCTOS_ADMIN_CACHE = [];
 
 function pintarListaProductosRelacionados(seleccionados){
@@ -2510,6 +2537,97 @@ function resetFormProducto(){
   pintarListaProductosRelacionados([]);
 }
 
+/* ---------- Apartados de eBooks ---------- */
+let APARTADOS_EBOOKS_CACHE = [];
+
+function pintarSelectApartados(valorActual){
+  const sel = $('prodApartado');
+  const actual = valorActual !== undefined ? valorActual : sel.value;
+  sel.innerHTML = '<option value="">Sin apartado</option>' +
+    APARTADOS_EBOOKS_CACHE.map(a => `<option value="${escapeHtml(a.slug)}">${escapeHtml(a.nombre)}</option>`).join('');
+  sel.value = actual || '';
+}
+
+async function cargarApartadosEbooksAdmin(){
+  const cont = $('listaApartadosEbooks');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
+  try{
+    APARTADOS_EBOOKS_CACHE = await api('/admin/api/apartados-ebooks');
+    pintarSelectApartados();
+    if(!APARTADOS_EBOOKS_CACHE.length){
+      cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay apartados.</p>';
+      return;
+    }
+    cont.innerHTML = APARTADOS_EBOOKS_CACHE.map(a => `
+      <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-vino/10 bg-white px-5 py-3.5">
+        <div>
+          <p class="text-sm font-700 text-carbon/85">${escapeHtml(a.nombre)}</p>
+          <p class="text-xs text-carbon/50">${a.desc ? escapeHtml(a.desc) + ' · ' : ''}<a href="/ebooks-${escapeHtml(a.slug)}" target="_blank" class="underline hover:text-vino">/ebooks-${escapeHtml(a.slug)}</a></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" data-id="${a.id}" class="btnEditarApartado rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Editar</button>
+          <button type="button" data-id="${a.id}" class="btnBorrarApartado text-xs text-red-500 hover:text-red-700 hover:underline">Borrar</button>
+        </div>
+      </div>`).join('');
+
+    cont.querySelectorAll('.btnEditarApartado').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const a = APARTADOS_EBOOKS_CACHE.find(x => x.id === Number(btn.dataset.id));
+        if(!a) return;
+        $('apartadoEditandoId').value = a.id;
+        $('apartadoModoTexto').textContent = `Editando: ${a.nombre}`;
+        $('apartadoNombre').value = a.nombre;
+        $('apartadoDesc').value = a.desc || '';
+        $('btnCancelarApartado').classList.remove('hidden');
+        document.getElementById('seccionApartadosEbooks').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    cont.querySelectorAll('.btnBorrarApartado').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('¿Borrar este apartado? Los eBooks que lo tengan asignado se quedan "sin apartado" (no se borran).')) return;
+        try{
+          await api(`/admin/api/apartados-ebooks/${btn.dataset.id}`, { method: 'DELETE' });
+          toast('Apartado borrado');
+          cargarApartadosEbooksAdmin();
+          cargarProductosAdmin();
+        }catch(e){
+          toast(e.message);
+        }
+      });
+    });
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function resetFormApartado(){
+  $('formApartadoEbook').reset();
+  $('apartadoEditandoId').value = '';
+  $('apartadoModoTexto').textContent = 'Nuevo apartado';
+  $('btnCancelarApartado').classList.add('hidden');
+}
+$('btnCancelarApartado').addEventListener('click', resetFormApartado);
+
+$('formApartadoEbook').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('apartadoEditandoId').value;
+  const payload = { nombre: $('apartadoNombre').value.trim(), desc: $('apartadoDesc').value.trim() };
+  if(!payload.nombre) return;
+  try{
+    if(id){
+      await api(`/admin/api/apartados-ebooks/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+      toast('Apartado actualizado');
+    }else{
+      await api('/admin/api/apartados-ebooks', { method: 'POST', body: JSON.stringify(payload) });
+      toast('Apartado creado');
+    }
+    resetFormApartado();
+    cargarApartadosEbooksAdmin();
+  }catch(e){
+    toast(e.message);
+  }
+});
+
 async function cargarProductosAdmin(){
   const cont = $('listaProductosAdmin');
   cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
@@ -2527,7 +2645,7 @@ async function cargarProductosAdmin(){
       <article class="overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
         <div class="aspect-video w-full bg-vino/10" style="${p.imagen ? `background-image:url('${p.imagen}');background-size:cover;background-position:center;` : ''}"></div>
         <div class="p-4">
-          <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${escapeHtml(ETIQUETA_CATEGORIA[p.categoria] || 'eBook')}${p.apartado ? ` · ${escapeHtml(ETIQUETA_APARTADO[p.apartado] || p.apartado)}` : ''} · ${escapeHtml(p.etiqueta || '')} ${p.esPaquete ? '<span class="ml-1 rounded-full bg-flama px-2 py-0.5 text-[10px] font-700 text-carbon">PAQUETE</span>' : ''} ${p.ocultoEnCatalogo ? '<span class="ml-1 rounded-full bg-carbon/10 px-2 py-0.5 text-[10px] font-700 text-carbon/60">OCULTO</span>' : ''}</p>
+          <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${escapeHtml(ETIQUETA_CATEGORIA[p.categoria] || 'eBook')}${p.apartado ? ` · ${escapeHtml(etiquetaApartado(p.apartado))}` : ''} · ${escapeHtml(p.etiqueta || '')} ${p.esPaquete ? '<span class="ml-1 rounded-full bg-flama px-2 py-0.5 text-[10px] font-700 text-carbon">PAQUETE</span>' : ''} ${p.ocultoEnCatalogo ? '<span class="ml-1 rounded-full bg-carbon/10 px-2 py-0.5 text-[10px] font-700 text-carbon/60">OCULTO</span>' : ''}</p>
           <p class="mt-1 font-titulo text-lg tracking-wide text-vino">${escapeHtml(p.titulo || '')}</p>
           <p class="mt-1 text-sm text-carbon/70">$${escapeHtml(p.precio || '0')} MXN</p>
           <p class="mt-2 text-xs ${p.archivo ? 'text-green-700' : 'text-humo'}">${p.archivo ? `Archivo: ${escapeHtml(p.archivoNombre || 'adjunto')}` : 'Sin archivo para entregar todavía'}</p>
@@ -2566,7 +2684,7 @@ async function cargarProductosAdmin(){
         $('productoModoTexto').textContent = `Editando: ${p.titulo}`;
         $('btnCancelarProducto').classList.remove('hidden');
         $('prodCategoria').value = p.categoria || 'ebook';
-        $('prodApartado').value = p.apartado || '';
+        pintarSelectApartados(p.apartado || '');
         $('prodEsPaquete').checked = !!p.esPaquete;
         $('prodOculto').checked = !!p.ocultoEnCatalogo;
         $('prodEtiqueta').value = p.etiqueta || '';

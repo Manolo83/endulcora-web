@@ -276,10 +276,14 @@ app.get('/blog', (req, res) => {
 
 // Paginas de catalogo, propias y separadas de la pagina principal (para
 // anunciar sin que la gente tenga que bajar por todo el sitio). Los
-// /ebooks-<apartado> son los 4 apartados en los que se divide el catalogo
-// de eBooks (ver APARTADOS_EBOOKS en store.js); /ebooks de entrada es el
-// mosaico para elegir uno, no el listado completo.
-app.get(['/tienda', '/ebooks', '/anexos', '/recetarios', '/ebooks-panaderia', '/ebooks-mexicana', '/ebooks-internacional', '/ebooks-especiales'], (req, res) => {
+// /ebooks-<apartado> son los apartados en los que se divide el catalogo de
+// eBooks (administrables desde /admin, ver store.getApartadosEbooks) --
+// esta ruta acepta cualquier slug (letras/numeros/guiones) para que un
+// apartado nuevo funcione sin tener que tocar codigo ni volver a hacer
+// deploy; si el slug no existe de verdad, categoria.html lo resuelve como
+// "Tienda" (mismo fallback que ya tenia para cualquier otra ruta rara).
+// /ebooks de entrada es el mosaico para elegir uno, no el listado completo.
+app.get(['/tienda', '/ebooks', '/anexos', '/recetarios', /^\/ebooks-[a-z0-9]+(?:-[a-z0-9]+)*$/], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'categoria.html'));
 });
 
@@ -490,10 +494,7 @@ app.get('/sitemap.xml', (req, res) => {
     { loc: '/', prioridad: '1.0', frecuencia: 'weekly' },
     { loc: '/tienda', prioridad: '0.8', frecuencia: 'weekly' },
     { loc: '/ebooks', prioridad: '0.8', frecuencia: 'weekly' },
-    { loc: '/ebooks-panaderia', prioridad: '0.7', frecuencia: 'weekly' },
-    { loc: '/ebooks-mexicana', prioridad: '0.7', frecuencia: 'weekly' },
-    { loc: '/ebooks-internacional', prioridad: '0.7', frecuencia: 'weekly' },
-    { loc: '/ebooks-especiales', prioridad: '0.7', frecuencia: 'weekly' },
+    ...store.getApartadosEbooks().map((a) => ({ loc: `/ebooks-${a.slug}`, prioridad: '0.7', frecuencia: 'weekly' })),
     { loc: '/anexos', prioridad: '0.8', frecuencia: 'weekly' },
     { loc: '/recetarios', prioridad: '0.8', frecuencia: 'weekly' },
     { loc: '/calendario', prioridad: '0.6', frecuencia: 'weekly' },

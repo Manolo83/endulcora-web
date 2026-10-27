@@ -327,6 +327,30 @@ router.delete('/api/products/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- Apartados del catalogo de eBooks (/ebooks-<slug>): se pueden crear
+// nuevos, renombrar, o borrar desde /admin sin tocar codigo ----
+router.get('/api/apartados-ebooks', requireAdmin, (req, res) => {
+  res.json(store.getApartadosEbooks());
+});
+
+router.post('/api/apartados-ebooks', requireAdmin, (req, res) => {
+  const { nombre, desc } = req.body || {};
+  if (!nombre || !String(nombre).trim()) return res.status(400).json({ error: 'Ponle un nombre al apartado.' });
+  const item = store.addApartadoEbook({ nombre, desc });
+  res.status(201).json(item);
+});
+
+router.patch('/api/apartados-ebooks/:id', requireAdmin, (req, res) => {
+  const item = store.updateApartadoEbook(req.params.id, req.body || {});
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
+router.delete('/api/apartados-ebooks/:id', requireAdmin, (req, res) => {
+  store.deleteApartadoEbook(req.params.id);
+  res.json({ ok: true });
+});
+
 // ---- Cursos presenciales/en línea (modalidad + duración, sin archivo
 // descargable — se agenda por WhatsApp al comprar, ver src/email.js) ----
 router.get('/api/cursos', requireAdmin, (req, res) => {

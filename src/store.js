@@ -223,6 +223,7 @@ function datosPorDefecto() {
     promosTaller: [],
     subscribers: [],
     sedes: DEFAULT_SEDES.map((nombre, i) => ({ id: i + 1, nombre, imagenFondo: '', direccion: '', mapaLink: '' })),
+    apartadosEbooks: [],
     sesionesTaller: [],
     inscripcionesTaller: [],
     recetariosTaller: [],
@@ -1241,6 +1242,18 @@ async function init() {
       data._migApartadosEbooks = true;
       changed = true;
     }
+    // Los apartados mismos pasan de una lista fija en el codigo a registros
+    // de verdad en data.apartadosEbooks (administrables desde /admin: se
+    // pueden crear nuevos o editar/borrar). Se siembran los mismos 4 slugs
+    // que ya trae el campo "apartado" de cada eBook (ver migracion de
+    // arriba), para no dejar huerfano a ninguno.
+    if (!data._migApartadosEbooksCatalogo) {
+      if (!data.apartadosEbooks.length) {
+        data.apartadosEbooks = APARTADOS_EBOOKS_SEED.map((a, i) => ({ id: i + 1, orden: i, ...a }));
+      }
+      data._migApartadosEbooksCatalogo = true;
+      changed = true;
+    }
     // Primera vez que se agregan precio/anticipo/cupo/slug a los talleres
     // (para la futura pagina publica por slug y el cobro real): a las
     // sesiones y a las inscripciones que ya existian se les rellenan los
@@ -1723,12 +1736,13 @@ function reemplazarEtiquetaSegmento(data, email, nuevaEtiqueta) {
 // sala (opcional, sirve para decidir el tema de las siguientes clases).
 const TEMAS_CLASE_GRATIS = ['panaderia', 'chocolate', 'reposteria', 'velas', 'cocina_salada'];
 
-// Apartados del catalogo de eBooks (ver migracion _migApartadosEbooks mas
-// abajo y el campo "apartado" en cada producto categoria==='ebook'). Separa
-// el catalogo en secciones en vez de un solo listado largo -- /admin usa
-// esta misma lista para el selector, y /ebooks-<slug> para las paginas
-// publicas filtradas.
-const APARTADOS_EBOOKS = [
+// Semilla de los 4 apartados originales del catalogo de eBooks (ver
+// migracion _migApartadosEbooksCatalogo mas abajo). De aqui en adelante
+// viven en data.apartadosEbooks (administrables desde /admin: se pueden
+// crear nuevos, editar nombre/descripcion, o borrar) -- esto es solo lo
+// que se usa UNA VEZ para crear los primeros 4 con los mismos slugs que
+// ya traian los eBooks existentes en su campo "apartado".
+const APARTADOS_EBOOKS_SEED = [
   { slug: 'panaderia', nombre: 'Panadería y Repostería', desc: 'Pan, galletas, pasteles y masa madre.' },
   { slug: 'mexicana', nombre: 'Comida Mexicana', desc: 'Tamales, antojitos y platillos tradicionales.' },
   { slug: 'internacional', nombre: 'Comida Internacional', desc: 'Sushi, pizza, cocina española y más.' },
@@ -2105,6 +2119,61 @@ module.exports = {
     const data = load();
     const item = data.products.find((p) => p.id === Number(id));
     data.products = data.products.filter((p) => p.id !== Number(id));
+    save(data);
+    return item;
+  },
+
+  // ---- Apartados del catalogo de eBooks (/ebooks-<slug>, ver /admin >
+  // Productos): administrables de verdad, no una lista fija en el codigo --
+  // se pueden crear nuevos, renombrar, o borrar (sin perder los eBooks: los
+  // que tenian ese apartado se quedan sin apartado, no se borran). ----
+  getApartadosEbooks() {
+    return [...load().apartadosEbooks].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+  },
+  getApartadoEbookPorSlug(slug) {
+    return load().apartadosEbooks.find((a) => a.slug === slug) || null;
+  },
+  addApartadoEbook({ nombre, desc }) {
+    const data = load();
+    const nombreLimpio = String(nombre || '').trim();
+    if (!nombreLimpio) return null;
+    let slug = slugify(nombreLimpio) || 'apartado';
+    let intento = slug;
+    let n = 2;
+    while (data.apartadosEbooks.some((a) => a.slug === intento)) {
+      intento = `${slug}-${n}`;
+      n += 1;
+    }
+    const item = {
+      id: nextId(data.apartadosEbooks),
+      orden: data.apartadosEbooks.length,
+      slug: intento,
+      nombre: nombreLimpio,
+      desc: String(desc || '').trim(),
+    };
+    data.apartadosEbooks.push(item);
+    save(data);
+    return item;
+  },
+  // El slug no se puede editar una vez creado (es parte de la URL publica
+  // /ebooks-<slug> -- cambiarlo rompería links ya compartidos/anunciados).
+  updateApartadoEbook(id, patch) {
+    const data = load();
+    const item = data.apartadosEbooks.find((a) => a.id === Number(id));
+    if (!item) return null;
+    if (typeof patch.nombre === 'string' && patch.nombre.trim()) item.nombre = patch.nombre.trim();
+    if (typeof patch.desc === 'string') item.desc = patch.desc.trim();
+    save(data);
+    return item;
+  },
+  deleteApartadoEbook(id) {
+    const data = load();
+    const item = data.apartadosEbooks.find((a) => a.id === Number(id));
+    if (!item) return null;
+    data.apartadosEbooks = data.apartadosEbooks.filter((a) => a.id !== Number(id));
+    // Los eBooks que tenian este apartado no se borran, solo se quedan sin
+    // apartado (vuelven a aparecer en /admin para asignarles uno nuevo).
+    data.products.forEach((p) => { if (p.apartado === item.slug) p.apartado = ''; });
     save(data);
     return item;
   },
@@ -3217,7 +3286,6 @@ module.exports = {
   TEMAS_CLASE_GRATIS,
   ESTADOS_MEXICO,
   HORARIOS_VALIDOS_TALLER,
-  APARTADOS_EBOOKS,
   etiquetasZona,
   getRegistrosClaseGratis() {
     return [...load().registrosClaseGratis].sort((a, b) => b.id - a.id);
