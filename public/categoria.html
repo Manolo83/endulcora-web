@@ -142,7 +142,12 @@ body { background: #FBF4E9; }
   <h1 id="h1Categoria" class="font-display text-3xl text-vino sm:text-4xl">Tienda</h1>
   <p id="descripcionCategoria" class="mt-2 max-w-xl text-[15px] leading-relaxed text-carbon/70">Manuales, hojas de costeo y recetarios listos para usar.</p>
 
-  <div class="relative mt-6 max-w-md">
+  <!-- Mosaico de apartados: solo se ve al entrar a /ebooks, en vez del catalogo completo de un jalón -->
+  <div id="mosaicoApartados" class="mt-8 hidden grid-cols-1 gap-5 sm:grid-cols-2"></div>
+
+  <div id="subnavApartados" class="mt-2 hidden flex-wrap items-center gap-2"></div>
+
+  <div id="bloqueBuscador" class="relative mt-6 max-w-md">
     <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-carbon/40" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
     <input id="buscador" type="text" placeholder="Buscar…" class="w-full rounded-full border border-vino/15 bg-white py-3 pl-11 pr-4 text-sm text-carbon placeholder:text-carbon/40 focus:border-vino/40 focus:outline-none">
   </div>
@@ -181,11 +186,31 @@ function formatoMonto(n){
 document.getElementById('anioFooter').textContent = new Date().getFullYear();
 
 const PREFIJO_POR_CATEGORIA = { ebook: 'ebooks', anexo: 'anexos', recetario: 'recetarios' };
+
+// Los 4 apartados en los que se divide el catalogo de eBooks (ver
+// APARTADOS_EBOOKS en src/store.js -- misma lista, slugs y nombres, para
+// que coincida con lo que se asigna desde /admin).
+const APARTADOS_EBOOKS = [
+  { slug: 'panaderia', nombre: 'Panadería y Repostería', desc: 'Pan, galletas, pasteles y masa madre.' },
+  { slug: 'mexicana', nombre: 'Comida Mexicana', desc: 'Tamales, antojitos y platillos tradicionales.' },
+  { slug: 'internacional', nombre: 'Comida Internacional', desc: 'Sushi, pizza, cocina española y más.' },
+  { slug: 'especiales', nombre: 'Snacks, Mesas y Especiales', desc: 'Botanas, mesas de montaje y recetas para necesidades especiales.' },
+];
+const DEGRADADO_POR_APARTADO = {
+  panaderia: 'linear-gradient(135deg,#7A2E7E,#4E1454)',
+  mexicana: 'linear-gradient(135deg,#F5A623,#B3361F)',
+  internacional: 'linear-gradient(135deg,#1E7A46,#4E1454)',
+  especiales: 'linear-gradient(135deg,#4E1454,#1B0720)',
+};
+
 const INFO_CATEGORIA = {
   tienda: { titulo: 'Tienda', desc: 'Todo lo que tenemos para vender: eBooks y anexos.', filtro: null },
-  ebooks: { titulo: 'eBooks', desc: 'Manuales técnicos completos, listos para descargar.', filtro: 'ebook' },
+  ebooks: { titulo: 'eBooks', desc: 'Elige un apartado para ver sus manuales técnicos, listos para descargar.', filtro: 'ebook', mosaico: true },
   anexos: { titulo: 'Anexos', desc: 'Hojas de cálculo de costeo, listas para usar.', filtro: 'anexo' },
 };
+APARTADOS_EBOOKS.forEach((a) => {
+  INFO_CATEGORIA[`ebooks-${a.slug}`] = { titulo: a.nombre, desc: a.desc, filtro: 'ebook', apartado: a.slug };
+});
 
 const seg = window.location.pathname.replace(/^\/|\/$/g, '') || 'tienda';
 const info = INFO_CATEGORIA[seg] || INFO_CATEGORIA.tienda;
@@ -198,6 +223,35 @@ document.getElementById('ogTitulo').setAttribute('content', `${info.titulo} · E
 document.getElementById('ogDescripcion').setAttribute('content', info.desc);
 document.getElementById('h1Categoria').textContent = info.titulo;
 document.getElementById('descripcionCategoria').textContent = info.desc;
+
+// Mosaico de apartados (solo /ebooks): reemplaza el buscador+catalogo por
+// las 4 tarjetas para elegir apartado.
+if(info.mosaico){
+  document.getElementById('bloqueBuscador').classList.add('hidden');
+  document.getElementById('listaProductos').classList.add('hidden');
+  const mosaico = document.getElementById('mosaicoApartados');
+  mosaico.classList.remove('hidden');
+  mosaico.classList.add('grid');
+  mosaico.innerHTML = APARTADOS_EBOOKS.map((a) => `
+    <a href="/ebooks-${a.slug}" class="tarjeta-viva group relative flex min-h-[170px] items-end overflow-hidden rounded-3xl p-7 text-crema shadow-[0_2px_0_rgba(78,20,84,.08)]" style="background:${DEGRADADO_POR_APARTADO[a.slug]};">
+      <div class="relative">
+        <h2 class="font-display text-2xl leading-tight">${escapeHtml(a.nombre)}</h2>
+        <p class="mt-2 text-[13px] text-crema/85">${escapeHtml(a.desc)}</p>
+      </div>
+    </a>`).join('');
+}
+
+// Subnav de apartados (solo en las paginas /ebooks-<apartado>): para
+// saltar de un apartado a otro sin tener que regresar a /ebooks.
+if(info.apartado){
+  const subnav = document.getElementById('subnavApartados');
+  subnav.classList.remove('hidden');
+  subnav.classList.add('flex');
+  subnav.innerHTML = `<a href="/ebooks" class="rounded-full border border-vino/20 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Todos los apartados</a>` +
+    APARTADOS_EBOOKS.map((a) => `
+      <a href="/ebooks-${a.slug}" class="rounded-full px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider transition ${a.slug === info.apartado ? 'bg-vino text-crema' : 'border border-vino/20 text-vino hover:border-vino'}">${escapeHtml(a.nombre)}</a>`
+    ).join('');
+}
 
 function actualizarBadgeCarrito(){
   let carrito = [];
@@ -243,6 +297,7 @@ function tarjetaProducto(p){
 let TODOS = [];
 
 function pintar(){
+  if(info.mosaico) return; // el mosaico de apartados no usa buscador ni catalogo
   const q = document.getElementById('buscador').value.trim().toLowerCase();
   // Los productos que forman parte de algún paquete no se muestran como
   // tarjetas propias en el catálogo: solo se compran dentro de la página
@@ -253,6 +308,7 @@ function pintar(){
   });
   let items = TODOS.filter(p => !componentesDePaquete.has(p.id) && !p.ocultoEnCatalogo);
   if(info.filtro) items = items.filter(p => (p.categoria || 'ebook') === info.filtro);
+  if(info.apartado) items = items.filter(p => p.apartado === info.apartado);
   if(q){
     items = items.filter(p => `${p.titulo || ''} ${p.subtitulo || ''} ${p.etiqueta || ''} ${p.descripcionCorta || ''}`.toLowerCase().includes(q));
   }

@@ -567,6 +567,7 @@ async function init() {
           productosRelacionados: [],
           esPaquete: false,
           ocultoEnCatalogo: false,
+          apartado: '',
         };
         item.slug = slugUnico(titulo, data.products, item.id);
         data.products.push(item);
@@ -1196,6 +1197,50 @@ async function init() {
       data._migPrecioEbooks200 = true;
       changed = true;
     }
+    // Divide el catalogo de eBooks en 4 apartados (ver APARTADOS_EBOOKS),
+    // para que /ebooks deje de ser un solo listado largo. Asigna el
+    // apartado por titulo exacto a los eBooks que ya existen; cualquier
+    // eBook nuevo que se agregue despues se le asigna a mano desde /admin.
+    if (!data._migApartadosEbooks) {
+      const APARTADO_POR_TITULO = {
+        'pan de muerto': 'panaderia',
+        'pan de muerto gourmet': 'panaderia',
+        'panqués y pound cakes gourmet': 'panaderia',
+        'galletas decoradas': 'panaderia',
+        'macarons': 'panaderia',
+        'pastelería básica': 'panaderia',
+        'masa madre': 'panaderia',
+        'fresas cubiertas': 'panaderia',
+        'galletas tipo new york': 'panaderia',
+        'tamales oaxaqueños': 'mexicana',
+        'tamales regionales': 'mexicana',
+        'panadería mexicana salada': 'mexicana',
+        'tacos de canasta': 'mexicana',
+        'barbacoa': 'mexicana',
+        'nogada de autor': 'mexicana',
+        'aguas michoacanas': 'mexicana',
+        'dulces mexicanos tradicionales': 'mexicana',
+        'coctelería mexicana': 'mexicana',
+        'tiramisú douyin': 'internacional',
+        'cocina española': 'internacional',
+        'pizza': 'internacional',
+        'sushi': 'internacional',
+        'palomitas gourmet de autor': 'especiales',
+        'tablas de charcutería': 'especiales',
+        'postres en vaso': 'especiales',
+        'gomas y gomitas': 'especiales',
+        'velas comestibles': 'especiales',
+        'pastelería científica para diabéticos': 'especiales',
+        'repostería para diabéticos': 'especiales',
+      };
+      (data.products || []).forEach((p) => {
+        if (p.categoria !== 'ebook' || p.esPaquete || p.ocultoEnCatalogo) return;
+        const apartado = APARTADO_POR_TITULO[(p.titulo || '').trim().toLowerCase()];
+        if (apartado) p.apartado = apartado;
+      });
+      data._migApartadosEbooks = true;
+      changed = true;
+    }
     // Primera vez que se agregan precio/anticipo/cupo/slug a los talleres
     // (para la futura pagina publica por slug y el cobro real): a las
     // sesiones y a las inscripciones que ya existian se les rellenan los
@@ -1678,6 +1723,18 @@ function reemplazarEtiquetaSegmento(data, email, nuevaEtiqueta) {
 // sala (opcional, sirve para decidir el tema de las siguientes clases).
 const TEMAS_CLASE_GRATIS = ['panaderia', 'chocolate', 'reposteria', 'velas', 'cocina_salada'];
 
+// Apartados del catalogo de eBooks (ver migracion _migApartadosEbooks mas
+// abajo y el campo "apartado" en cada producto categoria==='ebook'). Separa
+// el catalogo en secciones en vez de un solo listado largo -- /admin usa
+// esta misma lista para el selector, y /ebooks-<slug> para las paginas
+// publicas filtradas.
+const APARTADOS_EBOOKS = [
+  { slug: 'panaderia', nombre: 'Panadería y Repostería', desc: 'Pan, galletas, pasteles y masa madre.' },
+  { slug: 'mexicana', nombre: 'Comida Mexicana', desc: 'Tamales, antojitos y platillos tradicionales.' },
+  { slug: 'internacional', nombre: 'Comida Internacional', desc: 'Sushi, pizza, cocina española y más.' },
+  { slug: 'especiales', nombre: 'Snacks, Mesas y Especiales', desc: 'Botanas, mesas de montaje y recetas para necesidades especiales.' },
+];
+
 // Los 32 estados de la Republica Mexicana, para formularios de registro que
 // piden de donde es quien se inscribe (sirve para campañas dirigidas por
 // zona). Se guarda tal cual (con acentos) porque es lo que se ve en listas
@@ -2021,6 +2078,7 @@ module.exports = {
       productosRelacionados: [],
       esPaquete: false,
       ocultoEnCatalogo: false,
+      apartado: '',
       ...fields,
     };
     item.slug = slugUnico(item.slug || item.titulo, data.products, item.id);
@@ -3159,6 +3217,7 @@ module.exports = {
   TEMAS_CLASE_GRATIS,
   ESTADOS_MEXICO,
   HORARIOS_VALIDOS_TALLER,
+  APARTADOS_EBOOKS,
   etiquetasZona,
   getRegistrosClaseGratis() {
     return [...load().registrosClaseGratis].sort((a, b) => b.id - a.id);
