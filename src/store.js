@@ -540,7 +540,7 @@ async function init() {
     // Para agregar un producto nuevo a esta lista: sube sus 3 archivos a
     // seed-archivos/<carpetaSeed>/ y agrega una entrada a
     // FAMILIAS_A_DESGLOSAR. Cada entrada corre una sola vez.
-    const PRECIOS_LINEA_EBOOKS = { ebook: '99', anexo: '50', app: '50', paquete: '149' };
+    const PRECIOS_LINEA_EBOOKS = { ebook: '200', anexo: '50', app: '50', paquete: '250' };
     async function crearFamiliaEbookDesglosada({ tituloBase, categoria, carpetaSeed, archivos }) {
       const SEED_DIR = path.join(__dirname, '..', 'seed-archivos', carpetaSeed);
       const nuevoProducto = (titulo, categoriaItem, precio, boton, nombreArchivo) => {
@@ -1178,6 +1178,22 @@ async function init() {
         if (r.numeroInscrito === undefined) r.numeroInscrito = null;
       });
       data._migAsistenciaNumeroClaseGratis = true;
+      changed = true;
+    }
+    // Sube el precio de los ebooks ya existentes: $99 -> $200 el PDF
+    // principal (lo que SI se ve en el catalogo), $149 -> $250 el paquete
+    // completo (ebook + anexo, misma relacion que antes: PDF + $50). El
+    // anexo Excel y la app HTML se quedan en $50 -- no cambian.
+    if (!data._migPrecioEbooks200) {
+      (data.products || []).forEach((p) => {
+        if (p.categoria !== 'ebook') return;
+        if (p.esPaquete) {
+          p.precio = '250';
+        } else if (!p.ocultoEnCatalogo) {
+          p.precio = '200';
+        }
+      });
+      data._migPrecioEbooks200 = true;
       changed = true;
     }
     // Primera vez que se agregan precio/anticipo/cupo/slug a los talleres
