@@ -71,11 +71,6 @@ const DEFAULT_CONTENT = {
   // que el link para entrar, nunca se manda por separado.
   clase_recetario_url: '',
   clase_recetario_nombre: '',
-  // Boton "Descarga aqui el recetario" del live: en vez de entregar el PDF
-  // directo, ofrece 1 mes de membresia de regalo (suscripcion domiciliada
-  // en Mercado Pago con el primer cobro a los 30 dias) a quien nunca ha
-  // sido miembro. 'false' regresa al comportamiento anterior en ese live.
-  clase_regalo_membresia_activo: 'true',
   // ---- Clase gratis en sala (p.ej. Pan de Muerto): registro en el sitio +
   // oferta del día. Independiente de la "clase en vivo" (esa es online).
   clasegratis_activo: 'false',

@@ -213,6 +213,10 @@ body { background: #FBF4E9; }
       <button type="button" id="btnCancelarMembresia" class="font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cancelar membresía</button>
     </div>
 
+    <!-- Ancla del boton "Descarga aqui el recetario" del live: los
+         recetarios solo se descargan desde esta pagina. -->
+    <div id="recetarios" class="scroll-mt-28"></div>
+
     <!-- Mes de membresia de regalo (activado desde el boton del live) -->
     <div id="avisoRegalo" class="mt-6 hidden flex-wrap items-center justify-between gap-3 rounded-2xl border px-5 py-4">
       <p id="avisoRegaloTexto" class="min-w-0 flex-1 text-sm text-carbon/80"></p>
@@ -237,6 +241,13 @@ body { background: #FBF4E9; }
           <p id="errorRegalo" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
         </div>
       </div>
+    </div>
+
+    <div id="bloqueRecetarioLive" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Recetario de la clase en vivo</p>
+      <a href="/api/membresia/recetario-live" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        Descargar recetario del live
+      </a>
     </div>
 
     <div id="bloqueGrupoWhatsapp" class="mt-6 hidden rounded-3xl bg-[#25D366]/10 p-6 ring-1 ring-[#25D366]/30">
@@ -398,6 +409,7 @@ async function cargarContenidoMembresia(){
     if(!res.ok) throw new Error('No se pudo cargar el contenido');
     const c = await res.json();
 
+    document.getElementById('bloqueRecetarioLive').classList.toggle('hidden', !c.recetarioLiveDisponible);
     if(c.recetarioDisponible){
       document.getElementById('bloqueRecetarioMes').classList.remove('hidden');
       document.getElementById('recetarioMesEtiqueta').textContent = c.recetarioMes || 'este mes';
@@ -416,9 +428,11 @@ async function cargarContenidoMembresia(){
       document.getElementById('linkGrupoWhatsapp').href = c.whatsappGrupoUrl;
       document.getElementById('bloqueGrupoWhatsapp').classList.remove('hidden');
     }
-    if(!c.recetarioDisponible && !(c.videoMostrar && c.videoYoutubeId) && !c.revistaDisponible){
+    if(!c.recetarioDisponible && !c.recetarioLiveDisponible && !(c.videoMostrar && c.videoYoutubeId) && !c.revistaDisponible && !REGALO){
       document.getElementById('sinContenidoAviso').classList.remove('hidden');
     }
+    // Viene del boton del recetario en el live: lo lleva directo ahi.
+    if(location.hash === '#recetarios') document.getElementById('recetarios').scrollIntoView({ behavior: 'smooth' });
   }catch(e){
     document.getElementById('sinContenidoAviso').classList.remove('hidden');
   }

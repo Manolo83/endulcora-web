@@ -82,13 +82,6 @@ router.post('/galeria/:id/comentarios', requireCliente, (req, res) => {
   res.status(201).json(comentario);
 });
 
-// Con el mes de regalo apagado en /admin (clase_regalo_membresia_activo =
-// 'false') se vuelve al comportamiento anterior: el boton del live entrega
-// el PDF directo a quien tiene acceso a la clase.
-function recetarioDirectoSiRegaloApagado(contenido) {
-  return contenido.clase_regalo_membresia_activo === 'false' ? (contenido.clase_recetario_url || '') : '';
-}
-
 router.get('/content', (req, res) => {
   const contenido = store.getContent();
   // El link para entrar a la clase en vivo y el recetario de regalo solo se
@@ -101,7 +94,7 @@ router.get('/content', (req, res) => {
   if (contenido.clase_cobro_activo === 'true') {
     res.json({ ...contenido, clase_url: '', clase_recetario_url: '', clase_recetario_nombre: '', clase_youtube_id: '' });
   } else {
-    res.json({ ...contenido, clase_recetario_url: recetarioDirectoSiRegaloApagado(contenido), clase_recetario_nombre: recetarioDirectoSiRegaloApagado(contenido) ? contenido.clase_recetario_nombre : '' });
+    res.json({ ...contenido, clase_recetario_url: '', clase_recetario_nombre: '' });
   }
 });
 
@@ -176,10 +169,10 @@ router.get('/clase-en-vivo', (req, res) => {
       tieneAcceso,
       url: tieneAcceso ? (contenido.clase_url || '') : '',
       youtubeId: tieneAcceso ? (contenido.clase_youtube_id || '') : '',
-      // El PDF ya no se expone aqui: se descarga por /api/membresia/recetario-live
-      // (miembros) o se ofrece el mes de regalo (quien no es miembro).
+      // El PDF ya no se expone aqui: el recetario solo se descarga desde
+      // /membresia (miembros activos). A quien no es miembro, el boton del
+      // live le ofrece el mes de regalo.
       recetarioDisponible: tieneAcceso && !!contenido.clase_recetario_url,
-      recetarioUrlDirecto: tieneAcceso ? recetarioDirectoSiRegaloApagado(contenido) : '',
       temas: store.TEMAS_CLASE_GRATIS,
       comunidadLink: contenido.comunidad_whatsapp_link || '',
     });
@@ -196,7 +189,6 @@ router.get('/clase-en-vivo', (req, res) => {
     url: tieneAcceso ? (contenido.clase_url || '') : '',
     youtubeId: tieneAcceso ? (contenido.clase_youtube_id || '') : '',
     recetarioDisponible: tieneAcceso && !!contenido.clase_recetario_url,
-    recetarioUrlDirecto: tieneAcceso ? recetarioDirectoSiRegaloApagado(contenido) : '',
   });
 });
 
@@ -264,7 +256,6 @@ router.post('/clase-en-vivo/confirmar-comunidad', (req, res) => {
     url: contenido.clase_url || '',
     youtubeId: contenido.clase_youtube_id || '',
     recetarioDisponible: !!contenido.clase_recetario_url,
-    recetarioUrlDirecto: recetarioDirectoSiRegaloApagado(contenido),
   });
 });
 

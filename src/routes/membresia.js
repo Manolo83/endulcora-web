@@ -77,9 +77,6 @@ router.post('/suscribirse', requireCliente, async (req, res) => {
 // pueda descargar aunque la semana siguiente se suba otro.
 router.post('/suscribirse-regalo', requireCliente, async (req, res) => {
   const contenido = store.getContent();
-  if (contenido.clase_regalo_membresia_activo === 'false') {
-    return res.status(400).json({ error: 'El mes de regalo no está disponible en este momento.' });
-  }
   const client = mpClient();
   if (!client) return res.status(503).json({ error: 'Los pagos todavía no están configurados.' });
 
@@ -352,9 +349,7 @@ function miembroActivoDeRequest(req) {
 }
 
 router.get('/estado', async (req, res) => {
-  const contenido = store.getContent();
-  const regaloEnLive = contenido.clase_regalo_membresia_activo !== 'false';
-  if (esAdmin(req)) return res.json({ activa: true, estado: 'activa', esAdmin: true, regalo: null, elegibleRegalo: false, regaloEnLive });
+  if (esAdmin(req)) return res.json({ activa: true, estado: 'activa', esAdmin: true, regalo: null, elegibleRegalo: false });
   if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
   let usuario = store.getUserById(req.session.userId);
   if (!usuario) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
@@ -371,7 +366,6 @@ router.get('/estado', async (req, res) => {
     regalo: regalo.resumenRegalo(usuario),
     elegibleRegalo: regalo.esElegibleRegalo(usuario),
     regaloRechazado: !!usuario.regaloRechazado,
-    regaloEnLive,
   });
 });
 
@@ -383,7 +377,18 @@ router.get('/contenido', (req, res) => {
     }
   }
   const { recetarioUrl, revistaUrl, ...resto } = store.getContenidoMembresia();
-  res.json({ ...resto, recetarioDisponible: !!recetarioUrl, revistaDisponible: !!revistaUrl });
+  // Recetario de la clase en vivo de esta semana: solo se descarga aqui, en
+  // la pagina de membresia. A quien activo su regalo en ese mismo live ya
+  // se le muestra en su bloque de regalo, asi que no se repite.
+  const claseRecetario = store.getContent().clase_recetario_url || '';
+  const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+  const yaEnSuRegalo = !!(usuario && regalo.regaloActivo(usuario) && usuario.regaloRecetarioUrl === claseRecetario);
+  res.json({
+    ...resto,
+    recetarioDisponible: !!recetarioUrl,
+    revistaDisponible: !!revistaUrl,
+    recetarioLiveDisponible: !!claseRecetario && !yaEnSuRegalo,
+  });
 });
 
 // No se expone el link directo del recetario (igual que el resto de
@@ -459,8 +464,9 @@ function enviarArchivoSubido(res, url, nombre, textoNoEncontrado) {
 }
 
 // Recetario de la clase en vivo de esta semana. Ya no se expone el link de
-// /uploads en la pagina del live: los miembros activos lo descargan por
-// aqui (y quien no es miembro recibe la oferta del mes de regalo).
+// /uploads: el boton del live (y /membresia) lo descargan por aqui, y se
+// revisa en cada descarga que tenga membresia activa, comprada o de regalo.
+// Quien no es miembro recibe en el live la oferta del mes de regalo.
 router.get('/recetario-live', (req, res) => {
   if (!esAdmin(req) && !miembroActivoDeRequest(req)) {
     return res.status(403).send('Necesitas una membresía activa para descargar el recetario.');

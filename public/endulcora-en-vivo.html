@@ -281,8 +281,9 @@ body { background: #FBF4E9; }
         </div>
 
         <!-- Recetario de regalo de la clase (se sube desde /admin > Clase en vivo).
-             Miembros activos: lo descargan directo. Quien nunca ha sido
-             miembro: se le ofrece 1 mes de membresia de regalo (ver
+             Se descarga aqui mismo, pero solo con membresia activa (comprada
+             o de regalo): el servidor la revisa en cada descarga. A quien no
+             es miembro se le ofrece 1 mes de membresia de regalo (ver
              modalRegaloLive). -->
         <div id="bloqueRecetarioLive" class="hidden shrink-0 rounded-2xl bg-crema/10 p-6 text-center lg:w-64">
           <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">Recetario de regalo</p>
@@ -324,6 +325,13 @@ body { background: #FBF4E9; }
         <li class="flex gap-2.5"><span class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-flama/25 text-[11px] font-700 text-vino">✓</span><span>Biblioteca de clases grabadas</span></li>
       </ul>
 
+      <!-- Pasos para activar el regalo: el actual se resalta segun la sesion -->
+      <ol id="pasosRegaloLive" class="mt-5 grid gap-2 rounded-2xl bg-crema/70 p-4 text-[13px] text-carbon/55">
+        <li data-paso="1" class="flex items-start gap-2.5"><span class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-vino/10 text-[11px] font-700">1</span><span>Crea tu cuenta en Endulcora (o entra si ya tienes).</span></li>
+        <li data-paso="2" class="flex items-start gap-2.5"><span class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-vino/10 text-[11px] font-700">2</span><span>En la ventana de <strong>Mercado Pago</strong> registras tu tarjeta de crédito o débito. Hoy pagas <strong>$0</strong>.</span></li>
+        <li data-paso="3" class="flex items-start gap-2.5"><span class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-vino/10 text-[11px] font-700">3</span><span>Descargas tu recetario aquí mismo, sin salir del live.</span></li>
+      </ol>
+
       <!-- Sin sesion: primero crear cuenta o entrar -->
       <div id="regaloLiveInvitado" class="mt-5 hidden">
         <div class="flex gap-4 border-b border-vino/10">
@@ -348,7 +356,7 @@ body { background: #FBF4E9; }
       <div id="regaloLiveActivar" class="mt-5 hidden">
         <button type="button" id="btnActivarRegaloLive" class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition disabled:opacity-60">
           <span id="spinnerRegaloLive" class="hidden h-4 w-4 animate-spin rounded-full border-2 border-carbon/30 border-t-carbon"></span>
-          Activar mi mes gratis
+          Continuar a Mercado Pago
         </button>
         <p id="letraChicaRegaloLive" class="mt-3 text-[12px] leading-relaxed text-carbon/60"></p>
       </div>
@@ -365,16 +373,16 @@ body { background: #FBF4E9; }
     <div id="regaloPasoEsperando" class="mt-5 hidden">
       <div class="flex items-center gap-3 rounded-xl bg-crema px-4 py-3 text-sm text-carbon/75">
         <span class="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-vino/20 border-t-vino"></span>
-        Termina el registro de tu tarjeta en la ventana de Mercado Pago. Esta pantalla se actualiza sola.
+        Registra tu tarjeta en la ventana de Mercado Pago. Cuando termines, esta pantalla se actualiza sola.
       </div>
       <button type="button" id="btnReabrirMpRegalo" class="mt-3 font-ui text-[11px] uppercase tracking-widest text-vino underline">Volver a abrir Mercado Pago</button>
     </div>
 
     <!-- Paso: listo -->
     <div id="regaloPasoListo" class="mt-5 hidden">
-      <p class="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">¡Listo! Ya eres miembro Endulcora. Tienes <strong id="diasRegaloListo">30</strong> días de regalo.</p>
-      <a href="/api/membresia/recetario-regalo" class="mt-4 inline-flex w-full items-center justify-center rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Descargar mi recetario</a>
-      <a href="/membresia" class="mt-3 inline-flex w-full items-center justify-center rounded-full border border-vino/25 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Ver mi membresía</a>
+      <p id="textoRegaloListo" class="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">¡Listo! Ya eres miembro Endulcora.</p>
+      <a href="/api/membresia/recetario-live" class="mt-4 inline-flex w-full items-center justify-center rounded-full bg-flama py-3.5 text-center font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Descargar mi recetario</a>
+      <p class="mt-3 text-center text-[12px] text-carbon/50">También lo encuentras siempre en tu <a href="/membresia" target="_blank" class="underline hover:text-vino">página de membresía</a>.</p>
     </div>
 
     <p id="errorRegaloLive" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
@@ -497,7 +505,6 @@ function mostrarAccesoConcedidoLive(c){
     mostrarPlaceholderVideo(true);
     document.getElementById('bloqueClaseEnVivoPlayer').classList.add('hidden');
   }
-  RECETARIO_LIVE.directo = c.recetarioUrlDirecto || '';
   document.getElementById('bloqueRecetarioLive').classList.toggle('hidden', !c.recetarioDisponible);
   actualizarBotonRecetarioLive();
 }
@@ -1010,12 +1017,13 @@ document.getElementById('btnMembresiaLive').addEventListener('click', async () =
 
 <script>
 /* ---------- Recetario del live + mes de membresia de regalo ----------
-   - Miembro activo: descarga directa (/api/membresia/recetario-live).
+   El recetario se descarga aqui mismo, solo con membresia activa (la ruta
+   /api/membresia/recetario-live la vuelve a revisar en el servidor).
+   - Miembro activo (compro o tiene su mes de regalo): descarga directa.
    - Nunca ha sido miembro: 1 mes de membresia de regalo. Registra su
      tarjeta en Mercado Pago (paga $0 hoy) y el primer cobro es a los 30 dias.
-   - Ya fue miembro antes (o ya uso su regalo): oferta normal de $100/mes.
-   - Con el regalo apagado en /admin: PDF directo como antes. */
-const RECETARIO_LIVE = { directo: '', estado: null, urlMp: '', sondeo: null };
+   - Ya fue miembro antes (o ya uso su regalo): oferta normal de $100/mes. */
+const RECETARIO_LIVE = { estado: null, urlMp: '', sondeo: null };
 
 async function cargarEstadoRegaloLive(sincronizar){
   if(!SESION_LIVE.isLoggedIn){ RECETARIO_LIVE.estado = null; return null; }
@@ -1030,7 +1038,7 @@ async function cargarEstadoRegaloLive(sincronizar){
 
 function actualizarBotonRecetarioLive(){
   const e = RECETARIO_LIVE.estado;
-  const ofreceRegalo = !RECETARIO_LIVE.directo && !(e && e.activa) && (!e || e.elegibleRegalo);
+  const ofreceRegalo = !(e && e.activa) && (!e || e.elegibleRegalo);
   document.getElementById('textoRecetarioLive').classList.toggle('hidden', !ofreceRegalo);
 }
 
@@ -1045,11 +1053,20 @@ function pintarOfertaRegaloLive(){
   const elegible = !SESION_LIVE.isLoggedIn || (e && e.elegibleRegalo);
   document.getElementById('tituloRegaloLive').textContent = elegible ? 'Tu recetario + 1 mes de membresía gratis' : 'Descarga el recetario siendo miembro';
   document.getElementById('chipRegaloLive').textContent = elegible ? 'Regalo del live' : 'Membresía Endulcora';
+  // Resalta el paso en el que va: 1 = crear cuenta, 2 = tarjeta en Mercado Pago.
+  const pasoActual = SESION_LIVE.isLoggedIn ? 2 : 1;
+  document.getElementById('pasosRegaloLive').classList.toggle('hidden', !elegible);
+  document.querySelectorAll('#pasosRegaloLive li').forEach(li => {
+    const n = Number(li.dataset.paso);
+    li.classList.toggle('text-vino', n === pasoActual);
+    li.classList.toggle('font-600', n === pasoActual);
+    li.classList.toggle('line-through', n < pasoActual);
+  });
   if(!SESION_LIVE.isLoggedIn){
     document.getElementById('regaloLiveInvitado').classList.remove('hidden');
   }else if(elegible){
     const fin = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
-    document.getElementById('letraChicaRegaloLive').textContent = `Hoy pagas $0. Mercado Pago guarda tu tarjeta y el ${fin} se hace tu primer cargo de $100; después, $100 cada mes. Te avisamos 15, 3 y 1 días antes. Puedes cancelar cuando quieras desde tu cuenta.`;
+    document.getElementById('letraChicaRegaloLive').textContent = `Se abre la ventana segura de Mercado Pago para registrar tu tarjeta; Endulcora nunca ve tus datos. Hoy no se te cobra nada: el ${fin} se hace tu primer cargo de $100 y después $100 cada mes. Te avisamos 15, 3 y 1 días antes, y puedes cancelar cuando quieras desde tu cuenta.`;
     document.getElementById('regaloLiveActivar').classList.remove('hidden');
   }else{
     document.getElementById('regaloLiveNoElegible').classList.remove('hidden');
@@ -1081,15 +1098,17 @@ document.getElementById('modalRegaloLive').addEventListener('click', (e) => {
   if (e.target.id === 'modalRegaloLive') cerrarModalRegaloLive();
 });
 
+// La ruta responde como descarga (attachment): el navegador baja el PDF y
+// el live sigue corriendo en esta misma pagina.
+function descargarRecetarioLive(){
+  window.location.href = '/api/membresia/recetario-live';
+}
+
 document.getElementById('btnRecetarioLive').addEventListener('click', async () => {
-  if(RECETARIO_LIVE.directo){
-    window.open(RECETARIO_LIVE.directo, '_blank', 'noopener');
-    return;
-  }
   const e = await cargarEstadoRegaloLive();
   actualizarBotonRecetarioLive();
   if(e && e.activa){
-    window.location.href = '/api/membresia/recetario-live';
+    descargarRecetarioLive();
     return;
   }
   abrirModalRegaloLive();
@@ -1103,7 +1122,7 @@ async function despuesDeSesionRegaloLive(user){
   actualizarBotonRecetarioLive();
   if(e && e.activa){
     cerrarModalRegaloLive();
-    window.location.href = '/api/membresia/recetario-live';
+    descargarRecetarioLive();
     return;
   }
   pintarOfertaRegaloLive();
@@ -1170,7 +1189,9 @@ function esperarActivacionRegaloLive(){
     const e = await cargarEstadoRegaloLive(true);
     if(e && e.activa){
       clearInterval(RECETARIO_LIVE.sondeo); RECETARIO_LIVE.sondeo = null;
-      document.getElementById('diasRegaloListo').textContent = e.regalo ? e.regalo.diasRestantes : 30;
+      document.getElementById('textoRegaloListo').textContent = e.regalo
+        ? `¡Listo! Ya eres miembro Endulcora. Tienes ${e.regalo.diasRestantes} días de regalo.`
+        : '¡Listo! Ya eres miembro Endulcora.';
       mostrarPasoRegaloLive('regaloPasoListo');
       actualizarBotonRecetarioLive();
       cargarEstadoMembresiaLive();
