@@ -1159,6 +1159,48 @@ router.get('/api/talleres/nov26-s1/links', requireAdmin, (req, res) => {
   res.json(items);
 });
 
+// Diagnostico: cuantas inscripciones a taller se pagaron de verdad a
+// traves del checkout automatico del sitio (Meta Ads -> pagina del taller
+// -> Mercado Pago), para diferenciarlas de las que se registraron a mano
+// en /admin (ej. alguien que pago por WhatsApp/transferencia). La marca
+// real es formaPago==='' (solo el checkout del sitio la deja vacia; un
+// registro manual siempre trae algo ahi) + estadoPago==='pagado'.
+router.get('/api/talleres/ventas-automatizadas', requireAdmin, (req, res) => {
+  const pagadasEnLinea = store.getInscripcionesTaller()
+    .filter((i) => i.estadoPago === 'pagado' && i.formaPago === '');
+
+  const totalVentas = pagadasEnLinea.length;
+  const totalRecaudado = pagadasEnLinea.reduce((suma, i) => suma + (Number(i.montoPagado) || 0), 0);
+
+  const porTaller = new Map();
+  pagadasEnLinea.forEach((i) => {
+    const clave = i.taller || 'Sin título';
+    if (!porTaller.has(clave)) porTaller.set(clave, { taller: clave, ventas: 0, recaudado: 0 });
+    const entrada = porTaller.get(clave);
+    entrada.ventas += 1;
+    entrada.recaudado += Number(i.montoPagado) || 0;
+  });
+
+  const fechas = pagadasEnLinea.map((i) => i.createdAt).sort();
+
+  res.json({
+    totalVentas,
+    totalRecaudado,
+    primeraVenta: fechas[0] || null,
+    ultimaVenta: fechas[fechas.length - 1] || null,
+    porTaller: [...porTaller.values()].sort((a, b) => b.ventas - a.ventas),
+    ventas: pagadasEnLinea.map((i) => ({
+      id: i.id,
+      nombre: i.nombre,
+      taller: i.taller,
+      fecha: i.fecha,
+      tipoPago: i.tipoPago,
+      montoPagado: i.montoPagado,
+      pagadoEl: i.createdAt,
+    })),
+  });
+});
+
 router.post('/api/sesiones-taller', requireAdmin, (req, res) => {
   const { sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo, hojaSheets } = req.body || {};
   if (!sedeId || !fecha || !titulo) return res.status(400).json({ error: 'Falta sede, fecha o título' });
