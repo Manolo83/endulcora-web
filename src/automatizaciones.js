@@ -93,6 +93,7 @@ async function revisarRegalosMembresia() {
         dias: pendiente.dias,
         hasta: usuario.membresiaRegaloHasta,
         cancelada: usuario.membresiaRegaloCancelada,
+        origen: usuario.membresiaOrigen,
       });
       const enviados = new Set([...(usuario.regaloRecordatoriosEnviados || []), ...pendiente.marcarComoEnviados]);
       store.updateUser(usuario.id, { regaloRecordatoriosEnviados: [...enviados] });

@@ -7,6 +7,7 @@ const { requireCliente } = require('./auth');
 const { uploadImage, uploadMedia, procesarImagenSubida, ALLOWED_VIDEO } = require('../uploads');
 const { enviarCorreoConfirmacionInscripcionTaller, enviarCorreoConfirmacionClaseGratis, linkAgregarCalendario } = require('../email');
 const { sincronizarInscripcionTaller } = require('../automatizacionesTaller');
+const acceso = require('../accesoAnticipado');
 
 const router = express.Router();
 
@@ -670,7 +671,17 @@ router.post('/clase-gratis/registro', (req, res) => {
     pais: b.pais,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
   });
-  res.status(201).json({ ok: true, id: item.id });
+  // Si el acceso anticipado ya esta abierto (el correo masivo ya salio),
+  // quien se registra ahora pasa directo a su pagina personal y recibe su
+  // correo de acceso anticipado, para no quedarse fuera del embudo.
+  const accesoYaAbierto = acceso.accesoAbierto(contenido);
+  res.status(201).json({ ok: true, id: item.id, accesoUrl: accesoYaAbierto ? `/acceso-anticipado?id=${item.id}&token=${item.confirmToken}` : '' });
+  if (accesoYaAbierto) {
+    store.marcarRecordatorioClaseGratisEnviado(item.id, 'correoConfirmarEnviado');
+    require('../confirmacionClaseGratis').mandarCorreoAcceso(item, contenido).catch((e) => {
+      console.error(`[acceso-anticipado] No se pudo mandar el correo de acceso a ${item.correo}:`, e.message);
+    });
+  }
 
   // El correo de confirmacion nunca debe tumbar el registro: la persona ya
   // quedo registrada aunque Resend falle o no este configurado. Se manda
@@ -708,6 +719,23 @@ router.post('/clase-gratis/confirmar', (req, res) => {
     return res.status(404).json({ error: 'No encontramos tu registro. Revisa que el correo sea el mismo con el que te registraste.' });
   }
   const respuesta = b.respuesta === 'no' ? 'no' : 'si';
+  // Ya no hay ficha gratis: decir "Sí" lleva al acceso anticipado. Con el
+  // link personal (id+token) se le manda directo a su pagina; con el link
+  // compartido (solo escribe su correo) se le manda su link por correo, para
+  // que nadie entre a la pagina de otra persona.
+  if (respuesta === 'si' && registro.fecha === store.getContent().clasegratis_fecha) {
+    const contenidoActual = store.getContent();
+    if (registro.accesoEstado === 'pagado' || acceso.accesoAbierto(contenidoActual)) {
+      if (b.id && b.token) {
+        return res.json({ resultado: 'accesoAnticipado', accesoUrl: `/acceso-anticipado?id=${registro.id}&token=${registro.confirmToken}` });
+      }
+      require('../confirmacionClaseGratis').mandarCorreoAcceso(registro, contenidoActual).catch((e) => {
+        console.error(`[acceso-anticipado] No se pudo reenviar el link a ${registro.correo}:`, e.message);
+      });
+      return res.json({ resultado: 'linkEnviado', nombre: registro.nombre });
+    }
+    return res.json({ resultado: 'accesoCerrado', nombre: registro.nombre });
+  }
   const { item, resultado } = store.responderClaseGratis(registro.id, respuesta);
   const contenido = store.getContent();
   const vaAVenir = resultado === 'confirmado' || resultado === 'yaConfirmado';
@@ -729,6 +757,62 @@ router.post('/clase-gratis/confirmar', (req, res) => {
     calendarLink,
     linkClasesEnVivo: !vaAVenir ? '/clases-en-vivo' : '',
   });
+});
+
+// ---- Acceso anticipado de la master class (ver src/accesoAnticipado.js) ----
+// Pagina personal del link del correo: solo con id + token del registro.
+router.get('/acceso-anticipado', (req, res) => {
+  const registro = store.getRegistroClaseGratisPorToken(req.query.id, req.query.token);
+  if (!registro) return res.status(404).json({ error: 'No encontramos tu registro. Usa el link de tu correo.' });
+  const contenido = store.getContent();
+  const esClaseActual = registro.fecha === contenido.clasegratis_fecha;
+  const { cupo, ocupadas, quedan } = acceso.estadoHorario(registro.fecha, registro.horario);
+  const usuario = store.getUserByEmail(registro.correo);
+  const sesionUsuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+  const cierre = acceso.fechaCierre(contenido);
+  const ahora = new Date();
+  const apartadoVigente = registro.accesoEstado === 'apartado' && registro.accesoApartadoHasta && new Date(registro.accesoApartadoHasta) > ahora;
+  res.json({
+    abierto: esClaseActual && acceso.accesoAbierto(contenido),
+    titulo: contenido.clasegratis_titulo || 'Master class',
+    nombre: registro.nombre,
+    correo: registro.correo,
+    fecha: registro.fecha,
+    horario: registro.horario,
+    ubicacion: contenido.clasegratis_ubicacion || '',
+    precio: acceso.precioAcceso(contenido),
+    cupo,
+    ocupadas,
+    quedan,
+    cierre: cierre ? cierre.toISOString() : null,
+    cuenta: {
+      existe: !!usuario,
+      sesionActiva: !!(usuario && sesionUsuario && sesionUsuario.id === usuario.id),
+      esMiembroActivo: !!(usuario && usuario.membresiaEstado === 'activa'),
+      membresiaHasta: usuario && usuario.membresiaOrigen === 'acceso_anticipado' ? usuario.membresiaRegaloHasta : null,
+    },
+    acceso: {
+      estado: registro.accesoEstado === 'apartado' && !apartadoVigente ? '' : registro.accesoEstado,
+      tipo: registro.accesoTipo,
+      numero: registro.accesoEstado === 'pagado' ? registro.numeroInscrito : null,
+      pasoAOnline: !!registro.accesoPasoAOnline,
+      apartadoHasta: apartadoVigente ? registro.accesoApartadoHasta : null,
+      recetarioDisponible: registro.accesoEstado === 'pagado' && !!registro.accesoRecetarioUrl,
+    },
+  });
+});
+
+// Recetario de la master class: lo pago con su acceso, asi que no depende
+// de que su membresia siga activa.
+router.get('/acceso-anticipado/recetario', (req, res) => {
+  const registro = store.getRegistroClaseGratisPorToken(req.query.id, req.query.token);
+  if (!registro || registro.accesoEstado !== 'pagado' || !registro.accesoRecetarioUrl) {
+    return res.status(404).send('No encontramos tu recetario.');
+  }
+  const filename = path.basename(registro.accesoRecetarioUrl);
+  const ruta = path.join(UPLOAD_DIR, filename);
+  if (!fs.existsSync(ruta)) return res.status(404).send('No pudimos encontrar el recetario en este momento.');
+  res.download(ruta, (registro.accesoRecetarioNombre || `Recetario${path.extname(filename)}`).replace(/"/g, ''));
 });
 
 // Estado de un pedido para la pagina de gracias: requiere el viewToken que

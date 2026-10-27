@@ -72,7 +72,11 @@ function resumenRegalo(usuario, ahora = new Date()) {
     hasta: usuario.membresiaRegaloHasta,
     diasRestantes,
     diasTotales: DIAS_REGALO,
+    // true = sin domiciliar: termina sola el ultimo dia (cancelo durante el
+    // regalo del live, o es el mes pagado de la master class).
     cancelada: !!usuario.membresiaRegaloCancelada,
+    // 'regalo_live' | 'acceso_anticipado': cambia el texto de los avisos.
+    origen: usuario.membresiaOrigen || '',
     // El aviso en su cuenta aparece a partir del primer recordatorio (15 dias).
     mostrarAviso: diasRestantes <= RECORDATORIOS_REGALO[0],
     recetarioDisponible: !!usuario.regaloRecetarioUrl,
@@ -91,6 +95,26 @@ function recordatorioPendiente(usuario, ahora = new Date()) {
   const masCercano = alcanzados[alcanzados.length - 1];
   if (enviados.includes(masCercano)) return null;
   return { hito: masCercano, dias, marcarComoEnviados: alcanzados };
+}
+
+// Mes de membresia pagado con el acceso anticipado de una master class
+// (pago unico, sin domiciliar). Usa el mismo contador, avisos y fin de
+// acceso que el regalo del live: se guarda como "sin domiciliar"
+// (membresiaRegaloCancelada) para que termine solo al dia 30, y desde
+// /membresia puede domiciliarla con su primer cargo ese mismo dia.
+function activarMesPagado(usuario, { origen, recetarioUrl = '', recetarioNombre = '', ahora = new Date() }) {
+  const patch = {
+    membresiaEstado: 'activa',
+    membresiaOrigen: origen,
+    membresiaRegaloHasta: fechaFinRegalo(ahora).toISOString(),
+    membresiaRegaloCancelada: true,
+    regaloRecordatoriosEnviados: [],
+    regaloRecetarioUrl: recetarioUrl,
+    regaloRecetarioNombre: recetarioNombre,
+    membresiaActivaDesde: ahora.toISOString().slice(0, 10),
+  };
+  if (!usuario.membresiaPrimeraActivacion) patch.membresiaPrimeraActivacion = ahora.toISOString();
+  return store.updateUser(usuario.id, patch);
 }
 
 // Regalo que ya termino: si cancelo durante el regalo se le quita el acceso
@@ -113,4 +137,5 @@ module.exports = {
   resumenRegalo,
   recordatorioPendiente,
   getRegalosVencidosCancelados,
+  activarMesPagado,
 };

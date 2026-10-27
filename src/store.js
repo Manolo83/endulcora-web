@@ -91,6 +91,20 @@ const DEFAULT_CONTENT = {
   // a asistir (ver responderClaseGratis) -- el aforo real se decide por
   // orden de llegada de quien contesta "Sí" primero, no por esta fecha.
   clasegratis_confirmacion_limite: '2026-10-24',
+  // ---- Acceso anticipado de la master class (ver src/accesoAnticipado.js) ----
+  // Ya no hay ficha gratis: la ficha presencial se obtiene pagando el
+  // acceso anticipado. Mientras haya fichas en el horario incluye ficha,
+  // coffee break, recetario y 1 mes de membresia; cuando se llenan, el
+  // mismo precio da recetario + mes de membresia (clase en linea).
+  clasegratis_cupo_horario: '50',
+  clasegratis_acceso_precio: '100',
+  // Fecha y hora (AAAA-MM-DDTHH:MM, hora de CDMX) en que se cierra la venta
+  // del acceso anticipado. Vacio = abierto hasta el dia de la clase.
+  clasegratis_acceso_cierre: '',
+  // Recetario de la master class (PDF): se manda adjunto a quien paga su
+  // acceso anticipado y queda guardado en su cuenta.
+  clasegratis_recetario_url: '',
+  clasegratis_recetario_nombre: '',
   // Link de invitacion al grupo de WhatsApp "Comunidad Endulcora". Se usa
   // en varios lados: paso obligatorio para ver la clase en vivo sin pagar
   // ni ser miembro (ver registrosVideoEnVivo / POST
@@ -1158,6 +1172,17 @@ async function init() {
       data._migFechaRegistrosClaseGratis = true;
       changed = true;
     }
+    // Acceso anticipado de la master class (ver src/accesoAnticipado.js):
+    // vacio en todos los registros que ya existian.
+    (data.registrosClaseGratis || []).forEach((r) => {
+      if (typeof r.accesoEstado !== 'string') { r.accesoEstado = ''; changed = true; }
+      if (typeof r.accesoTipo !== 'string') { r.accesoTipo = ''; changed = true; }
+      if (r.accesoApartadoHasta === undefined) { r.accesoApartadoHasta = null; changed = true; }
+      if (r.accesoOrderId === undefined) { r.accesoOrderId = null; changed = true; }
+      if (r.accesoPagadoEn === undefined) { r.accesoPagadoEn = null; changed = true; }
+      if (typeof r.accesoCorreoEnviado !== 'boolean') { r.accesoCorreoEnviado = false; changed = true; }
+      if (typeof r.accesoPasoAOnline !== 'boolean') { r.accesoPasoAOnline = false; changed = true; }
+    });
     // Confirmacion de asistencia con tope de cupo (control de aforo de la
     // clase gratis, ver responderClaseGratis).
     if (!data._migConfirmacionClaseGratis) {
@@ -3313,6 +3338,17 @@ module.exports = {
   getRegistrosClaseGratis() {
     return [...load().registrosClaseGratis].sort((a, b) => b.id - a.id);
   },
+  getRegistroClaseGratis(id) {
+    return load().registrosClaseGratis.find((r) => r.id === Number(id)) || null;
+  },
+  updateRegistroClaseGratis(id, patch) {
+    const data = load();
+    const item = data.registrosClaseGratis.find((r) => r.id === Number(id));
+    if (!item) return null;
+    Object.assign(item, patch);
+    save(data);
+    return item;
+  },
   addRegistroClaseGratis({ nombre, whatsapp, correo, fecha, horario, yaTomoTaller, interesTemas, esDeMexico, estado, pais, aceptaAvisoPrivacidad }) {
     const data = load();
     const item = {
@@ -3347,6 +3383,15 @@ module.exports = {
       correoConfirmarEnviado: false,
       recordatorio2diasClaseEnviado: false,
       recordatorioMismoDiaClaseEnviado: false,
+      // Acceso anticipado (ver src/accesoAnticipado.js): '' | 'apartado' |
+      // 'pagado'. accesoTipo: 'presencial' (con ficha) | 'online'.
+      accesoEstado: '',
+      accesoTipo: '',
+      accesoApartadoHasta: null,
+      accesoOrderId: null,
+      accesoPagadoEn: null,
+      accesoCorreoEnviado: false,
+      accesoPasoAOnline: false,
       createdAt: new Date().toISOString(),
     };
     data.registrosClaseGratis.push(item);
@@ -3380,6 +3425,12 @@ module.exports = {
   // ---- Control de aforo de la clase gratis (correo con botones Sí/No +
   // tope de cupo, numero de inscrito por horario) ----
   CUPO_CLASE_GRATIS_POR_HORARIO: 100,
+  // Fichas por horario de la master class actual (configurable en /admin).
+  // Las clases anteriores al acceso anticipado usaban el tope fijo de 100.
+  cupoClaseGratisPorHorario() {
+    const n = parseInt(load().content.clasegratis_cupo_horario, 10);
+    return Number.isInteger(n) && n > 0 ? n : this.CUPO_CLASE_GRATIS_POR_HORARIO;
+  },
 
   getRegistroClaseGratisPorToken(id, token) {
     const item = load().registrosClaseGratis.find((r) => r.id === Number(id));
@@ -3435,7 +3486,7 @@ module.exports = {
     const inscritosEnHorario = data.registrosClaseGratis.filter(
       (r) => r.horario === item.horario && r.fecha === item.fecha && r.confirmado && r.numeroInscrito
     ).length;
-    if (inscritosEnHorario < this.CUPO_CLASE_GRATIS_POR_HORARIO) {
+    if (inscritosEnHorario < this.cupoClaseGratisPorHorario()) {
       item.asistencia = 'si';
       item.confirmado = true;
       item.numeroInscrito = inscritosEnHorario + 1;
@@ -3457,16 +3508,24 @@ module.exports = {
     const data = load();
     const deEstaFecha = data.registrosClaseGratis.filter((r) => r.fecha === fecha);
     const horarios = [...new Set(deEstaFecha.map((r) => r.horario))];
+    const ahora = new Date().toISOString();
     return horarios.map((horario) => {
       const delHorario = deEstaFecha.filter((r) => r.horario === horario);
+      const pagados = delHorario.filter((r) => r.accesoEstado === 'pagado');
       return {
+        // Acceso anticipado: fichas pagadas (presencial), compras en linea,
+        // fichas apartadas mientras alguien paga, e ingreso del horario.
+        accesoPresencial: pagados.filter((r) => r.accesoTipo === 'presencial').length,
+        accesoOnline: pagados.filter((r) => r.accesoTipo === 'online').length,
+        accesoApartados: delHorario.filter((r) => r.accesoEstado === 'apartado' && r.accesoApartadoHasta && r.accesoApartadoHasta > ahora).length,
+        accesoIngreso: pagados.reduce((acc, r) => acc + (Number(r.accesoMonto) || 0), 0),
         horario,
         registrados: delHorario.length,
         confirmados: delHorario.filter((r) => r.confirmado && r.numeroInscrito).length,
         declinados: delHorario.filter((r) => r.asistencia === 'no').length,
         cupoLleno: delHorario.filter((r) => r.asistencia === 'si' && !r.confirmado).length,
         sinResponder: delHorario.filter((r) => !r.asistencia).length,
-        cupo: this.CUPO_CLASE_GRATIS_POR_HORARIO,
+        cupo: this.cupoClaseGratisPorHorario(),
       };
     });
   },
@@ -3481,6 +3540,9 @@ module.exports = {
   iniciarEnvioConfirmacionClaseGratis(registroIds) {
     const data = load();
     data.envioConfirmacionClaseGratis = {
+      // Fecha de la clase a la que pertenece este envio: el acceso
+      // anticipado se considera abierto solo para esa fecha.
+      fecha: data.content.clasegratis_fecha || '',
       registroIds,
       enviadosIds: [],
       fallidosIds: [],

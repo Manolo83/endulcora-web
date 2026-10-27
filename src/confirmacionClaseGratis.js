@@ -1,21 +1,39 @@
-// Envio masivo del correo "¿Asistirás?" de la clase gratis (dos botones
-// Sí/No, control de aforo con tope de 100 por horario, ver
-// store.responderClaseGratis y el plan aprobado con el dueño del sitio).
+// Envio masivo del correo de acceso anticipado de la master class (antes
+// "¿Asistirás?" con ficha gratis; ahora la ficha presencial se compra, ver
+// src/accesoAnticipado.js). Cada correo lleva el link personal del
+// registro: solo quien se registro puede comprar su acceso.
 // Mismo patron de resumibilidad
 // que src/campanas.js: guarda de inmediato quien ya quedo procesado, para
 // que si el servidor se reinicia a la mitad (ej. un deploy) se retome solo
 // donde se quedo en vez de perder el resto o repetir correos.
 const store = require('./store');
 const { SITE_URL } = require('./config');
-const { enviarCorreoConfirmarClaseGratis, enviarCorreoRecordatorioClaseGratis } = require('./email');
+const { enviarCorreoAccesoAnticipado, enviarCorreoRecordatorioClaseGratis } = require('./email');
+const acceso = require('./accesoAnticipado');
 
 let procesando = false;
 
-function fechaLimiteLegible(fechaISO) {
-  if (!fechaISO) return '';
-  return new Date(`${fechaISO}T00:00:00`)
-    .toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
-    .replace(',', '');
+function cierreLegible(contenido) {
+  const cierre = acceso.fechaCierre(contenido);
+  if (!cierre) return '';
+  return cierre.toLocaleString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit', timeZone: 'America/Mexico_City' });
+}
+
+// Tambien se usa al registrarse cuando el acceso anticipado ya esta abierto
+// (quien llega despues del envio masivo no se queda sin su link).
+function mandarCorreoAcceso(registro, contenido = store.getContent()) {
+  return enviarCorreoAccesoAnticipado({
+    to: registro.correo,
+    nombre: registro.nombre,
+    titulo: contenido.clasegratis_titulo,
+    fecha: registro.fecha,
+    horario: registro.horario,
+    ubicacion: contenido.clasegratis_ubicacion,
+    link: acceso.linkAcceso(SITE_URL, registro),
+    precio: acceso.precioAcceso(contenido),
+    cupo: store.cupoClaseGratisPorHorario(),
+    cierreLegible: cierreLegible(contenido),
+  });
 }
 
 async function procesarEnvioConfirmacionClaseGratis() {
@@ -40,15 +58,7 @@ async function procesarEnvioConfirmacionClaseGratis() {
       let exito = false;
       let errorMsg = '';
       try {
-        await enviarCorreoConfirmarClaseGratis({
-          to: registro.correo,
-          nombre: registro.nombre,
-          horario: registro.horario,
-          fecha: registro.fecha,
-          ubicacion: contenido.clasegratis_ubicacion,
-          confirmLink: `${SITE_URL}/confirmar-clase?id=${registro.id}&token=${registro.confirmToken}`,
-          fechaLimiteLegible: fechaLimiteLegible(contenido.clasegratis_confirmacion_limite),
-        });
+        await mandarCorreoAcceso(registro, contenido);
         exito = true;
       } catch (e) {
         errorMsg = e.message || String(e);
@@ -106,6 +116,8 @@ async function revisarRecordatoriosClaseGratis() {
           ubicacion: contenido.clasegratis_ubicacion,
           diasFaltan: tanda.diasFaltan,
           numeroWhatsapp: contenido.whatsapp_numero,
+          tituloClase: contenido.clasegratis_titulo,
+          numeroFicha: registro.numeroInscrito,
         });
         store.marcarRecordatorioClaseGratisEnviado(registro.id, tanda.campo);
       } catch (e) {
@@ -122,4 +134,4 @@ function iniciarAutomatizacionClaseGratis() {
   setInterval(() => revisarRecordatoriosClaseGratis().catch(() => {}), INTERVALO_MS);
 }
 
-module.exports = { procesarEnvioConfirmacionClaseGratis, iniciarAutomatizacionClaseGratis };
+module.exports = { procesarEnvioConfirmacionClaseGratis, iniciarAutomatizacionClaseGratis, mandarCorreoAcceso };

@@ -9,6 +9,9 @@ const { enviarCorreoConfirmacionCompra, enviarCorreoConfirmacionPagoTaller } = r
 const { enviarPurchaseCAPI } = require('../metaConversions');
 const { enviarCompraGoogle } = require('../googleAds/conversiones');
 const { avisarEquipoNuevoTaller, sincronizarInscripcionTaller } = require('../automatizacionesTaller');
+const bcrypt = require('bcryptjs');
+const acceso = require('../accesoAnticipado');
+const { enviarCorreoAccesoConfirmado } = require('../email');
 
 const router = express.Router();
 
@@ -225,6 +228,126 @@ router.post('/preference', async (req, res) => {
   }
 });
 
+// ---- Acceso anticipado de la master class (ver src/accesoAnticipado.js) ----
+// Solo desde el link personal del registro (id + token). El mes de
+// membresia va a la cuenta de endulcora.com con el correo del registro: si
+// no existe se crea aqui (pide contraseña), y si existe pide entrar.
+router.post('/acceso-anticipado', async (req, res) => {
+  const client = mpClient();
+  if (!client) return res.status(503).json({ error: 'Los pagos todavía no están configurados.' });
+
+  const b = req.body || {};
+  const registro = store.getRegistroClaseGratisPorToken(b.id, b.token);
+  if (!registro) return res.status(404).json({ error: 'No encontramos tu registro. Usa el link de tu correo.' });
+  const contenido = store.getContent();
+  if (registro.fecha !== contenido.clasegratis_fecha || !acceso.accesoAbierto(contenido)) {
+    return res.status(400).json({ error: 'El acceso anticipado para esta master class ya no está disponible.' });
+  }
+  if (registro.accesoEstado === 'pagado') {
+    return res.status(400).json({ error: 'Ya tienes tu acceso anticipado.' });
+  }
+
+  // Cuenta de endulcora.com (para su mes de membresia).
+  const password = String(b.password || '');
+  const sesionUsuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
+  let usuario = store.getUserByEmail(registro.correo);
+  if (sesionUsuario && usuario && sesionUsuario.id === usuario.id) {
+    // Ya entro con la cuenta de este correo.
+  } else if (usuario) {
+    if (!password || !bcrypt.compareSync(password, usuario.passwordHash)) {
+      return res.status(401).json({ error: `Escribe la contraseña de tu cuenta Endulcora (${registro.correo}).`, requiereLogin: true });
+    }
+    req.session.userId = usuario.id;
+  } else {
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Crea una contraseña de al menos 6 caracteres para tu cuenta.' });
+    }
+    usuario = store.addUser({
+      email: registro.correo,
+      passwordHash: bcrypt.hashSync(password, 10),
+      nombre: registro.nombre,
+      telefono: String(registro.whatsapp || '').replace(/\D/g, '').slice(-10),
+    });
+    req.session.userId = usuario.id;
+  }
+
+  const pago = acceso.prepararPago(registro.id);
+  const presencial = pago.tipo === 'presencial';
+  const precio = acceso.precioAcceso(contenido);
+  const titulo = `${presencial ? 'Acceso anticipado presencial' : 'Acceso anticipado en línea'}: ${contenido.clasegratis_titulo || 'Master class'} (${registro.horario})`;
+  const viewToken = crypto.randomBytes(24).toString('hex');
+  const order = store.addOrder({
+    items: [{ tipo: 'acceso_anticipado', itemId: registro.id, titulo, precio, cantidad: 1, registroClaseGratisId: registro.id, accesoTipo: pago.tipo }],
+    total: precio,
+    email: registro.correo,
+    userId: usuario.id,
+    viewToken,
+  });
+  store.updateRegistroClaseGratis(registro.id, { accesoOrderId: order.id });
+
+  const vuelta = `${SITE_URL}/acceso-anticipado?id=${registro.id}&token=${registro.confirmToken}`;
+  const body = {
+    items: [{ id: `acceso-${registro.id}`, title: titulo, quantity: 1, unit_price: precio, currency_id: 'MXN' }],
+    payer: { email: registro.correo },
+    external_reference: String(order.id),
+    back_urls: { success: `${vuelta}&pago=1`, pending: `${vuelta}&pago=1`, failure: `${vuelta}&pago=error` },
+    auto_return: 'approved',
+    notification_url: `${SITE_URL}/api/checkout/webhook`,
+  };
+  // La ficha queda apartada solo 30 minutos: para la presencial no se
+  // aceptan pagos que tardan dias (OXXO, transferencia) y la liga de pago
+  // vence junto con el apartado. El acceso en linea acepta todo.
+  if (presencial) {
+    body.payment_methods = { excluded_payment_types: [{ id: 'ticket' }, { id: 'atm' }, { id: 'bank_transfer' }] };
+    body.expires = true;
+    body.expiration_date_to = new Date(pago.apartadoHasta).toISOString();
+  }
+  try {
+    const resultado = await new Preference(client).create({ body });
+    store.updateOrder(order.id, { mpPreferenceId: resultado.id });
+    const usarSandbox = process.env.MP_SANDBOX === 'true';
+    const url = usarSandbox ? (resultado.sandbox_init_point || resultado.init_point) : resultado.init_point;
+    res.status(201).json({ url, tipo: pago.tipo, apartadoHasta: pago.apartadoHasta });
+  } catch (err) {
+    store.updateOrder(order.id, { estado: 'error' });
+    acceso.liberarApartado(registro.id, order.id);
+    res.status(502).json({ error: 'No se pudo iniciar el pago. Intenta de nuevo en un momento.' });
+  }
+});
+
+function procesarAccesoAnticipadoDelPedido(order, nuevoEstado) {
+  const item = (order.items || []).find((i) => i.tipo === 'acceso_anticipado');
+  if (!item) return;
+  if (nuevoEstado === 'rechazado' || nuevoEstado === 'cancelado') {
+    acceso.liberarApartado(item.registroClaseGratisId, order.id);
+    return;
+  }
+  if (nuevoEstado !== 'aprobado') return;
+  const resultado = acceso.aplicarPagoAprobado(item.registroClaseGratisId, { monto: item.precio, userId: order.userId });
+  const registro = resultado.registro;
+  if (!registro || registro.accesoCorreoEnviado) return;
+  const contenido = store.getContent();
+  enviarCorreoAccesoConfirmado({
+    to: registro.correo,
+    nombre: registro.nombre,
+    titulo: contenido.clasegratis_titulo,
+    fecha: registro.fecha,
+    horario: registro.horario,
+    ubicacion: contenido.clasegratis_ubicacion,
+    tipo: registro.accesoTipo,
+    numero: registro.numeroInscrito,
+    pasoAOnline: registro.accesoPasoAOnline,
+    membresiaHasta: resultado.membresiaHasta,
+    yaEraMiembro: resultado.yaEraMiembro,
+    recetarioUrl: registro.accesoRecetarioUrl,
+    recetarioNombre: registro.accesoRecetarioNombre,
+    siteUrl: SITE_URL,
+    link: acceso.linkAcceso(SITE_URL, registro),
+  })
+    .then(() => store.updateRegistroClaseGratis(registro.id, { accesoCorreoEnviado: true }))
+    .catch((err) => console.error(`[acceso-anticipado] No se pudo mandar el correo de confirmacion a ${registro.correo}:`, err.message));
+}
+
 router.post('/webhook', async (req, res) => {
   res.status(200).end();
 
@@ -290,6 +413,12 @@ router.post('/webhook', async (req, res) => {
       }
     }
 
+    // Acceso anticipado de la master class: ficha (o acceso en linea), mes
+    // de membresia y correo con el recetario. Manda su propio correo.
+    if (!yaSeHabiaAprobado || nuevoEstado !== 'aprobado') {
+      procesarAccesoAnticipadoDelPedido(actualizado, nuevoEstado);
+    }
+
     // Talleres: el pago confirma o libera el lugar que ya se habia
     // reservado como "pendiente" al crear la preferencia (ver /preference).
     if (['aprobado', 'rechazado', 'cancelado'].includes(nuevoEstado)) {
@@ -322,7 +451,8 @@ router.post('/webhook', async (req, res) => {
       }
     }
 
-    if (nuevoEstado === 'aprobado' && !order.correoEnviado && actualizado.email) {
+    const esAccesoAnticipado = actualizado.items.some((item) => item.tipo === 'acceso_anticipado');
+    if (nuevoEstado === 'aprobado' && !order.correoEnviado && actualizado.email && !esAccesoAnticipado) {
       const contenido = store.getContent();
       const itemTaller = actualizado.items.find((item) => item.tipo === 'taller' && item.inscripcionTallerId);
       const correoListo = itemTaller

@@ -231,11 +231,11 @@ body { background: #FBF4E9; }
           </div>
         </div>
         <div class="min-w-0 flex-1 text-center sm:text-left">
-          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Membresía de regalo</p>
+          <p id="etiquetaRegalo" class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Membresía de regalo</p>
           <h3 id="tituloRegalo" class="mt-1 font-display text-2xl leading-tight text-vino"></h3>
           <p id="detalleRegalo" class="mt-2 text-sm text-carbon/65"></p>
           <div class="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
-            <a id="linkRecetarioRegalo" href="/api/membresia/recetario-regalo" class="hidden items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Descargar recetario del live</a>
+            <a id="linkRecetarioRegalo" href="/api/membresia/recetario-regalo" class="hidden items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Descargar mi recetario</a>
             <button type="button" id="btnReactivarRegalo" class="hidden rounded-full boton-vivo bg-flama px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Reactivar membresía</button>
           </div>
           <p id="errorRegalo" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
@@ -501,10 +501,19 @@ function pintarRegalo(r){
   document.getElementById('diasRegaloEtiqueta').textContent = d === 1 ? 'día' : 'días';
   const grados = Math.max(0, Math.min(360, (d / r.diasTotales) * 360));
   document.getElementById('anilloRegalo').style.background = `conic-gradient(${d <= 3 ? '#b42318' : '#F5A623'} ${grados}deg, rgba(78,20,84,.09) 0)`;
-  document.getElementById('tituloRegalo').textContent = d === 1 ? 'Te queda 1 día de regalo' : `Te quedan ${d} días de regalo`;
-  document.getElementById('detalleRegalo').textContent = r.cancelada
-    ? `Cancelaste tu membresía: conservas todo hasta el ${fecha} y no se te cobrará nada. Si quieres seguir, reactívala antes de esa fecha.`
-    : `Tu mes gratis termina el ${fecha}. Ese día se hará tu primer cargo de $100 y tu membresía seguirá activa sin que hagas nada.`;
+  // Mes pagado con el acceso anticipado de una master class (pago unico):
+  // termina solo y renovarla es decision de la asistente.
+  const esMasterClass = r.origen === 'acceso_anticipado';
+  const unidad = esMasterClass ? 'de membresía' : 'de regalo';
+  document.getElementById('tituloRegalo').textContent = d === 1 ? `Te queda 1 día ${unidad}` : `Te quedan ${d} días ${unidad}`;
+  document.getElementById('detalleRegalo').textContent = esMasterClass
+    ? `Tu mes de membresía de la master class termina el ${fecha}. Renovarla es tu decisión: si quieres seguir, domicíliala y tu primer cargo de $100 será ese día.`
+    : r.cancelada
+      ? `Cancelaste tu membresía: conservas todo hasta el ${fecha} y no se te cobrará nada. Si quieres seguir, reactívala antes de esa fecha.`
+      : `Tu mes gratis termina el ${fecha}. Ese día se hará tu primer cargo de $100 y tu membresía seguirá activa sin que hagas nada.`;
+  document.getElementById('etiquetaRegalo').textContent = esMasterClass ? 'Membresía de la master class' : 'Membresía de regalo';
+  document.getElementById('btnReactivarRegalo').textContent = esMasterClass ? 'Domiciliar mi membresía' : 'Reactivar membresía';
+  document.getElementById('btnReactivarRegaloAviso').textContent = esMasterClass ? 'Domiciliar mi membresía' : 'Reactivar membresía';
   const linkRecetario = document.getElementById('linkRecetarioRegalo');
   linkRecetario.classList.toggle('hidden', !r.recetarioDisponible);
   linkRecetario.classList.toggle('inline-flex', r.recetarioDisponible);
@@ -514,7 +523,9 @@ function pintarRegalo(r){
   // Aviso dentro de su cuenta a partir de los 15 dias (rojo a los 3).
   if(r.mostrarAviso){
     const cuando = d === 1 ? '<strong>mañana</strong>' : `en <strong>${d} días</strong>`;
-    document.getElementById('avisoRegaloTexto').innerHTML = r.cancelada
+    document.getElementById('avisoRegaloTexto').innerHTML = esMasterClass
+      ? `Tu mes de membresía termina ${cuando} (el ${fecha}). Renovarla es tu decisión: domicíliala para no perder el taller, la revista y los eBooks.`
+      : r.cancelada
       ? `Tu acceso termina ${cuando} (el ${fecha}). Reactiva tu membresía domiciliada para no perder tu recetario, el taller y los eBooks.`
       : `Tu mes de regalo termina ${cuando}. El ${fecha} se renueva tu membresía por $100 con tu tarjeta guardada.`;
     const urgente = d <= 3;

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acceso anticipado · Endulcora</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Poppins:wght@400;500;600;700&family=Montserrat:wght@500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', verde: '#1E7A46' },
+        fontFamily: { titulo: ['"Baloo 2"', 'sans-serif'], display: ['"Baloo 2"', 'sans-serif'], cuerpo: ['Poppins', 'sans-serif'], ui: ['Montserrat', 'sans-serif'], numero: ['"Bebas Neue"', 'sans-serif'] }
+      }
+    }
+  }
+</script>
+<style>
+  body { background: #FBF4E9; }
+  .font-display, .font-titulo { font-weight: 800; }
+  .spinner { border: 3px solid rgba(0,0,0,.1); border-top-color: #7A2E7E; border-radius: 50%; width: 20px; height: 20px; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .bib {
+    position: relative;
+    background: #F5A623;
+    background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.14) 0 10px, transparent 10px 20px);
+    border-radius: 16px;
+    padding: 22px 18px 24px;
+  }
+  .bib::before, .bib::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: #FFFFFF; top: 10px; }
+  .bib::before { left: 10px; }
+  .bib::after { right: 10px; }
+  :focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<main class="mx-auto w-full max-w-lg px-5 py-10">
+  <p class="text-center font-titulo text-[12px] tracking-[.34em] text-morado">ENDULCORA</p>
+  <p id="eyebrowClase" class="mt-1 text-center font-ui text-[11px] font-700 uppercase tracking-widest text-carbon/50"></p>
+
+  <!-- Cargando -->
+  <div id="vistaCargando" class="py-10 text-center">
+    <div class="spinner mx-auto"></div>
+    <p class="mt-4 text-base text-carbon/60">Un momento…</p>
+  </div>
+
+  <!-- Error: link invalido -->
+  <div id="vistaError" class="mt-6 hidden rounded-3xl bg-white p-8 text-center shadow-xl">
+    <h1 class="font-titulo text-2xl text-vino">No encontramos tu registro</h1>
+    <p id="vistaErrorTexto" class="mt-3 text-sm text-carbon/70">Abre el botón del correo que te mandamos. Si no lo encuentras, escríbenos por WhatsApp.</p>
+  </div>
+
+  <!-- Acceso cerrado -->
+  <div id="vistaCerrado" class="mt-6 hidden rounded-3xl bg-white p-8 text-center shadow-xl">
+    <h1 class="font-titulo text-2xl text-vino">El acceso anticipado ya cerró</h1>
+    <p class="mt-3 text-sm text-carbon/70">Ya no está disponible la compra para esta master class. Puedes seguir nuestras clases en vivo.</p>
+    <a href="/endulcora-en-vivo" class="mt-5 inline-flex rounded-full bg-vino px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Ver clases en vivo</a>
+  </div>
+
+  <!-- Confirmando el pago (vuelve de Mercado Pago) -->
+  <div id="vistaConfirmando" class="mt-6 hidden rounded-3xl bg-white p-8 text-center shadow-xl">
+    <div class="spinner mx-auto"></div>
+    <h1 class="mt-4 font-titulo text-2xl text-vino">Confirmando tu pago</h1>
+    <p id="confirmandoTexto" class="mt-3 text-sm text-carbon/70">Mercado Pago nos está avisando de tu pago. Esta pantalla se actualiza sola.</p>
+  </div>
+
+  <!-- Oferta + pago -->
+  <div id="vistaOferta" class="mt-4 hidden">
+    <h1 id="saludo" class="text-center font-titulo text-3xl leading-tight text-vino"></h1>
+    <p id="pagoError" class="mt-4 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">El pago no se completó. Puedes intentarlo de nuevo.</p>
+
+    <div class="mt-5 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <span class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Fichas presenciales · <span id="horarioContador"></span></span>
+        <span id="textoQuedan" class="text-sm font-600 text-carbon/60"></span>
+      </div>
+      <div class="mt-1 flex flex-wrap items-baseline justify-between gap-2">
+        <span><span id="numOcupadas" class="font-display text-4xl text-vino">0</span> <span id="deCupo" class="text-sm text-carbon/60"></span></span>
+      </div>
+      <div class="mt-2 h-2.5 overflow-hidden rounded-full bg-vino/10"><div id="barraCupo" class="h-full rounded-full bg-flama transition-all" style="width:0%"></div></div>
+    </div>
+
+    <!-- Presencial (mientras haya fichas) -->
+    <div id="ofertaPresencial" class="mt-4 hidden rounded-3xl bg-vino p-6 text-crema shadow-xl">
+      <span id="chipPresencial" class="inline-flex rounded-full bg-flama px-3 py-1 font-ui text-[10.5px] font-700 uppercase tracking-widest text-carbon">Presencial</span>
+      <h2 class="mt-3 font-titulo text-2xl leading-tight">Ficha + coffee break + recetario + membresía</h2>
+      <ul class="mt-4 grid gap-2 text-sm">
+        <li class="flex gap-2.5"><span class="text-flama">✓</span>Ficha de asistencia asegurada</li>
+        <li class="flex gap-2.5"><span class="text-flama">✓</span>Coffee break: café, un aperitivo y degustación del producto de la clase</li>
+        <li class="flex gap-2.5"><span class="text-flama">✓</span>Recetario de la master class, en PDF a tu correo</li>
+        <li class="flex gap-2.5"><span class="text-flama">✓</span><span id="lineaMembresiaPresencial">1 mes de membresía Endulcora</span></li>
+        <li class="flex gap-2.5"><span class="text-flama">✓</span>Descuentos exclusivos para asistentes</li>
+      </ul>
+      <p class="mt-4 font-display text-4xl"><span class="precioAcceso"></span></p>
+      <p id="apartadoTexto" class="mt-2 hidden rounded-xl bg-crema/10 px-3 py-2 text-sm text-flama"></p>
+      <p class="mt-2 text-[12px] text-crema/70">Al dar clic te apartamos tu ficha 30 minutos mientras pagas con tarjeta o saldo de Mercado Pago.</p>
+    </div>
+
+    <!-- En linea (fichas agotadas) -->
+    <div id="ofertaOnline" class="mt-4 hidden rounded-3xl bg-white p-6 ring-2 ring-vino shadow-xl">
+      <span class="inline-flex rounded-full bg-red-50 px-3 py-1 font-ui text-[10.5px] font-700 uppercase tracking-widest text-red-700">Fichas presenciales agotadas</span>
+      <h2 class="mt-3 font-titulo text-2xl leading-tight text-vino">Recetario + membresía, desde tu casa</h2>
+      <ul class="mt-4 grid gap-2 text-sm">
+        <li class="flex gap-2.5 text-carbon/45 line-through"><span>✕</span>Ficha de asistencia presencial</li>
+        <li class="flex gap-2.5 text-carbon/45 line-through"><span>✕</span>Coffee break</li>
+        <li class="flex gap-2.5"><span class="text-vino">✓</span>Recetario de la master class, en PDF a tu correo</li>
+        <li class="flex gap-2.5"><span class="text-vino">✓</span><span id="lineaMembresiaOnline">1 mes de membresía: ves la clase en vivo y su grabación</span></li>
+        <li class="flex gap-2.5"><span class="text-vino">✓</span>Descuentos exclusivos para asistentes</li>
+      </ul>
+      <p class="mt-4 font-display text-4xl text-vino"><span class="precioAcceso"></span></p>
+      <p class="mt-2 text-[12px] text-carbon/60">Puedes pagar con tarjeta, OXXO o transferencia.</p>
+    </div>
+
+    <!-- Cuenta + pagar -->
+    <form id="formPagar" class="mt-4 rounded-2xl bg-white p-5 ring-1 ring-vino/10">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Tu cuenta Endulcora</p>
+      <p id="cuentaTexto" class="mt-1 text-sm text-carbon/70"></p>
+      <div id="bloquePassword" class="mt-3 hidden">
+        <label for="passwordAcceso" id="labelPassword" class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60"></label>
+        <input id="passwordAcceso" type="password" autocomplete="current-password" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm outline-none focus:border-vino/40">
+      </div>
+      <p id="errorPagar" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+      <button type="submit" id="btnPagar" class="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition disabled:opacity-60">
+        <span id="spinnerPagar" class="spinner hidden" style="border-top-color:#1B0720"></span>
+        <span id="btnPagarTexto">Continuar a Mercado Pago</span>
+      </button>
+      <p class="mt-3 text-[12px] leading-relaxed text-carbon/55">Pago único con Mercado Pago. La membresía incluida es de un mes; renovarla es tu decisión y puedes domiciliarla desde tu cuenta.</p>
+    </form>
+
+    <div class="mt-4 rounded-2xl bg-[#fff4df] p-4 text-[13px] leading-relaxed text-carbon/80 ring-1 ring-flama/50">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Promociones durante la master class</p>
+      <p class="mt-1">Habrá <strong>descuentos exclusivos para asistentes</strong> en nuestros talleres. La inscripción se hace en la sucursal. <strong>Para hacer válido el descuento, es responsabilidad de cada participante mostrar su correo o su ficha</strong> al inscribirse. Aplica para un solo taller por persona.</p>
+    </div>
+  </div>
+
+  <!-- Ya pagado: ficha o acceso en linea -->
+  <div id="vistaPagado" class="mt-4 hidden">
+    <div class="rounded-3xl bg-white p-6 text-center shadow-xl">
+      <h1 id="pagadoTitulo" class="font-titulo text-2xl text-vino"></h1>
+      <p id="pasoAOnlineAviso" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-left text-sm text-red-800">Mientras se confirmaba tu pago se ocuparon las últimas fichas presenciales, así que tu compra quedó como acceso en línea: recetario, mes de membresía y descuentos exclusivos.</p>
+      <div id="fichaPagada" class="bib mt-4 hidden">
+        <p id="fichaClase" class="font-ui text-[10px] font-700 uppercase tracking-[.2em] text-vino"></p>
+        <p id="fichaHorario" class="font-titulo text-sm text-vino"></p>
+        <p id="fichaNumero" class="font-numero leading-none text-carbon" style="font-size:88px;"></p>
+        <p id="fichaNombre" class="text-base font-700 text-carbon"></p>
+      </div>
+      <p id="fichaInstruccion" class="mt-3 hidden text-sm font-700 text-vino">Muestra esta ficha al llegar. Es tu pase de entrada y de coffee break.</p>
+      <div class="mt-4 grid grid-cols-1 gap-2 text-left text-[13px] sm:grid-cols-2">
+        <div class="rounded-xl bg-crema px-3 py-2.5"><b class="block text-vino">Recetario</b><span id="incluyeRecetario"></span></div>
+        <div class="rounded-xl bg-crema px-3 py-2.5"><b class="block text-vino">Membresía</b><span id="incluyeMembresia"></span></div>
+        <div id="incluyeCoffee" class="rounded-xl bg-crema px-3 py-2.5"><b class="block text-vino">Coffee break</b>Café, aperitivo y degustación</div>
+        <div class="rounded-xl bg-crema px-3 py-2.5"><b class="block text-vino">Descuentos exclusivos</b>En talleres, durante la master class</div>
+      </div>
+      <p class="mt-3 text-left text-[12px] leading-relaxed text-carbon/60">Para hacer válido el descuento es tu responsabilidad mostrar esta ficha o tu correo al inscribirte en sucursal. Aplica para un solo taller.</p>
+      <div class="mt-5 grid gap-2">
+        <a id="linkRecetario" href="#" class="hidden w-full items-center justify-center rounded-full bg-flama py-3 font-ui text-[12.5px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Descargar mi recetario</a>
+        <a href="/membresia" class="inline-flex w-full items-center justify-center rounded-full bg-vino py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Ir a mi membresía</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+const params = new URLSearchParams(location.search);
+const ID = params.get('id'), TOKEN = params.get('token');
+const VIENE_DE_PAGO = params.get('pago') === '1';
+const PAGO_FALLIDO = params.get('pago') === 'error';
+let ESTADO = null;
+let refresco = null;
+
+function mostrar(vista){
+  ['vistaCargando', 'vistaError', 'vistaCerrado', 'vistaConfirmando', 'vistaOferta', 'vistaPagado'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById(vista).classList.remove('hidden');
+}
+
+function fechaLegible(iso){
+  return iso ? new Date(`${iso}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+}
+function diaMes(iso){
+  return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
+}
+
+async function cargarEstado(){
+  const res = await fetch(`/api/acceso-anticipado?id=${encodeURIComponent(ID || '')}&token=${encodeURIComponent(TOKEN || '')}`);
+  if(!res.ok) throw new Error('no-encontrado');
+  ESTADO = await res.json();
+  return ESTADO;
+}
+
+function pintarContador(e){
+  document.getElementById('horarioContador').textContent = e.horario;
+  document.getElementById('numOcupadas').textContent = e.ocupadas;
+  document.getElementById('deCupo').textContent = `de ${e.cupo} ocupadas`;
+  document.getElementById('barraCupo').style.width = `${Math.min(100, (e.ocupadas / e.cupo) * 100)}%`;
+  document.getElementById('textoQuedan').textContent = e.quedan === 0 ? 'Agotadas' : (e.quedan === 1 ? 'Queda 1' : `Quedan ${e.quedan}`);
+}
+
+function pintarOferta(e){
+  document.getElementById('saludo').textContent = `Hola ${e.nombre.split(' ')[0]}, aparta tu acceso anticipado`;
+  document.querySelectorAll('.precioAcceso').forEach(el => el.textContent = `$${e.precio}`);
+  pintarContador(e);
+  const tieneApartado = e.acceso.estado === 'apartado' && e.acceso.apartadoHasta;
+  const presencial = e.quedan > 0 || tieneApartado;
+  document.getElementById('ofertaPresencial').classList.toggle('hidden', !presencial);
+  document.getElementById('ofertaOnline').classList.toggle('hidden', presencial);
+  document.getElementById('chipPresencial').textContent = e.quedan > 0 && e.quedan <= 5 ? 'Presencial · quedan pocas' : 'Presencial';
+  const lineaMiembro = 'Ya eres miembro: tu membresía sigue como está';
+  if(e.cuenta.esMiembroActivo){
+    document.getElementById('lineaMembresiaPresencial').textContent = lineaMiembro;
+    document.getElementById('lineaMembresiaOnline').textContent = lineaMiembro;
+  }
+  const apartado = document.getElementById('apartadoTexto');
+  apartado.classList.toggle('hidden', !tieneApartado);
+  if(tieneApartado){
+    apartado.textContent = `Tu ficha está apartada hasta las ${new Date(e.acceso.apartadoHasta).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}. Termina tu pago para asegurarla.`;
+    document.getElementById('btnPagarTexto').textContent = 'Terminar mi pago';
+  }
+
+  const bloque = document.getElementById('bloquePassword');
+  const input = document.getElementById('passwordAcceso');
+  if(e.cuenta.sesionActiva){
+    document.getElementById('cuentaTexto').innerHTML = `Entraste como <strong>${escapeHtml(e.correo)}</strong>. Tu mes de membresía se activa en esta cuenta.`;
+    bloque.classList.add('hidden');
+    input.required = false;
+  }else if(e.cuenta.existe){
+    document.getElementById('cuentaTexto').innerHTML = `Ya tienes cuenta con <strong>${escapeHtml(e.correo)}</strong>. Escribe tu contraseña para continuar.`;
+    document.getElementById('labelPassword').textContent = 'Contraseña de tu cuenta';
+    input.autocomplete = 'current-password';
+    bloque.classList.remove('hidden');
+    input.required = true;
+  }else{
+    document.getElementById('cuentaTexto').innerHTML = `Tu correo ya está: <strong>${escapeHtml(e.correo)}</strong>. Crea una contraseña para entrar a tu membresía.`;
+    document.getElementById('labelPassword').textContent = 'Crea tu contraseña (mínimo 6 caracteres)';
+    input.autocomplete = 'new-password';
+    input.minLength = 6;
+    bloque.classList.remove('hidden');
+    input.required = true;
+  }
+}
+
+function pintarPagado(e){
+  const presencial = e.acceso.tipo === 'presencial';
+  document.getElementById('pagadoTitulo').textContent = presencial ? '¡Listo! Esta es tu ficha' : '¡Listo! Ya tienes tu acceso en línea';
+  document.getElementById('pasoAOnlineAviso').classList.toggle('hidden', !e.acceso.pasoAOnline);
+  document.getElementById('fichaPagada').classList.toggle('hidden', !presencial);
+  document.getElementById('fichaInstruccion').classList.toggle('hidden', !presencial);
+  document.getElementById('incluyeCoffee').classList.toggle('hidden', !presencial);
+  if(presencial){
+    document.getElementById('fichaClase').textContent = `Endulcora · ${e.titulo}`;
+    document.getElementById('fichaHorario').textContent = `${fechaLegible(e.fecha)} · ${e.horario}`;
+    document.getElementById('fichaNumero').textContent = e.acceso.numero;
+    document.getElementById('fichaNombre').textContent = e.nombre;
+  }
+  document.getElementById('incluyeRecetario').textContent = e.acceso.recetarioDisponible ? 'Adjunto en tu correo y aquí abajo' : 'Te lo mandamos por correo en cuanto esté listo';
+  document.getElementById('incluyeMembresia').textContent = e.cuenta.membresiaHasta
+    ? `Activa hasta el ${diaMes(e.cuenta.membresiaHasta)}`
+    : (e.cuenta.esMiembroActivo ? 'Tu membresía sigue activa' : 'Se activa en tu cuenta');
+  const link = document.getElementById('linkRecetario');
+  if(e.acceso.recetarioDisponible){
+    link.href = `/api/acceso-anticipado/recetario?id=${encodeURIComponent(ID)}&token=${encodeURIComponent(TOKEN)}`;
+    link.classList.remove('hidden');
+    link.classList.add('inline-flex');
+  }
+}
+
+function pintar(e){
+  document.getElementById('eyebrowClase').textContent = `${e.titulo} · ${fechaLegible(e.fecha)} · ${e.horario}`;
+  if(e.acceso.estado === 'pagado'){ pintarPagado(e); mostrar('vistaPagado'); return; }
+  if(!e.abierto){ mostrar('vistaCerrado'); return; }
+  pintarOferta(e);
+  document.getElementById('pagoError').classList.toggle('hidden', !PAGO_FALLIDO);
+  mostrar('vistaOferta');
+}
+
+// Al volver de Mercado Pago se espera la confirmacion (hasta 3 minutos).
+async function esperarConfirmacion(){
+  mostrar('vistaConfirmando');
+  const limite = Date.now() + 3 * 60 * 1000;
+  while(Date.now() < limite){
+    try{
+      const e = await cargarEstado();
+      if(e.acceso.estado === 'pagado'){ pintar(e); return; }
+    }catch(err){ /* reintenta */ }
+    await new Promise(r => setTimeout(r, 4000));
+  }
+  document.getElementById('confirmandoTexto').textContent = 'Tu pago sigue en proceso. En cuanto Mercado Pago lo confirme te llegará tu ficha por correo. También puedes volver a abrir el link de tu correo.';
+}
+
+document.getElementById('formPagar').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const err = document.getElementById('errorPagar');
+  const btn = document.getElementById('btnPagar');
+  err.classList.add('hidden');
+  btn.disabled = true;
+  document.getElementById('spinnerPagar').classList.remove('hidden');
+  try{
+    const res = await fetch('/api/checkout/acceso-anticipado', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: ID, token: TOKEN, password: document.getElementById('passwordAcceso').value }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.error || 'No se pudo iniciar el pago. Intenta de nuevo.');
+    if(typeof fbq === 'function') fbq('track', 'InitiateCheckout', { value: ESTADO ? ESTADO.precio : 0, currency: 'MXN', content_name: 'Acceso anticipado master class' });
+    window.location.href = data.url;
+  }catch(e){
+    err.textContent = e.message;
+    err.classList.remove('hidden');
+    btn.disabled = false;
+    document.getElementById('spinnerPagar').classList.add('hidden');
+    // Puede haber cambiado el contador (p. ej. se acabaron las fichas).
+    cargarEstado().then(pintar).catch(() => {});
+  }
+});
+
+(async function arrancar(){
+  if(!ID || !TOKEN){ mostrar('vistaError'); return; }
+  try{
+    const e = await cargarEstado();
+    if(VIENE_DE_PAGO && e.acceso.estado !== 'pagado'){ esperarConfirmacion(); return; }
+    pintar(e);
+    // El contador se actualiza solo mientras la persona ve la oferta.
+    refresco = setInterval(async () => {
+      if(document.getElementById('vistaOferta').classList.contains('hidden')) return;
+      try{ const nuevo = await cargarEstado(); if(nuevo.acceso.estado === 'pagado' || !nuevo.abierto) pintar(nuevo); else { pintarContador(nuevo); } }catch(err){}
+    }, 20000);
+  }catch(err){
+    mostrar('vistaError');
+  }
+})();
+</script>
+</body>
+</html>

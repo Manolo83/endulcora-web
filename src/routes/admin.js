@@ -8,6 +8,7 @@ const sharp = require('sharp');
 const ExcelJS = require('exceljs');
 const store = require('../store');
 const regalo = require('../membresiaRegalo');
+const acceso = require('../accesoAnticipado');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL, GOOGLE_SHEETS } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
@@ -247,6 +248,34 @@ router.delete('/api/content/clase-recetario', requireAdmin, (req, res) => {
   const anterior = store.getContent().clase_recetario_url;
   const content = store.updateContent({ clase_recetario_url: '', clase_recetario_nombre: '' });
   borrarRecetarioLiveSiNoSeUsa(anterior);
+  res.json({ content });
+});
+
+// Recetario de la master class (acceso anticipado): se manda adjunto a quien
+// paga y queda guardado en su registro y en su cuenta, asi que el archivo
+// anterior solo se borra si ya nadie lo tiene.
+function borrarRecetarioMasterClassSiNoSeUsa(url) {
+  if (!url) return;
+  const enRegistros = store.getRegistrosClaseGratis().some((r) => r.accesoRecetarioUrl === url);
+  const enCuentas = store.getUsers().some((u) => u.regaloRecetarioUrl === url);
+  if (!enRegistros && !enCuentas) borrarSiEsSubida(url);
+}
+
+router.post('/api/content/clasegratis-recetario', requireAdmin, uploadDocumento.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Falta el archivo.' });
+  const anterior = store.getContent().clasegratis_recetario_url;
+  const content = store.updateContent({
+    clasegratis_recetario_url: `/uploads/${req.file.filename}`,
+    clasegratis_recetario_nombre: req.file.originalname,
+  });
+  borrarRecetarioMasterClassSiNoSeUsa(anterior);
+  res.json({ content });
+});
+
+router.delete('/api/content/clasegratis-recetario', requireAdmin, (req, res) => {
+  const anterior = store.getContent().clasegratis_recetario_url;
+  const content = store.updateContent({ clasegratis_recetario_url: '', clasegratis_recetario_nombre: '' });
+  borrarRecetarioMasterClassSiNoSeUsa(anterior);
   res.json({ content });
 });
 
@@ -779,9 +808,11 @@ router.delete('/api/clase-gratis/registros/:id', requireAdmin, (req, res) => {
 router.get('/api/clase-gratis/confirmaciones/resumen', requireAdmin, (req, res) => {
   const contenido = store.getContent();
   res.json({
-    cupoPorHorario: store.CUPO_CLASE_GRATIS_POR_HORARIO,
+    cupoPorHorario: store.cupoClaseGratisPorHorario(),
     resumen: store.resumenConfirmacionesClaseGratis(contenido.clasegratis_fecha),
     linkCompartible: `${SITE_URL}/confirmar-clase`,
+    accesoAbierto: acceso.accesoAbierto(contenido),
+    precioAcceso: acceso.precioAcceso(contenido),
   });
 });
 
@@ -849,6 +880,7 @@ router.get('/api/clase-gratis/registros/excel', requireAdmin, async (req, res) =
   const columnas = [
     { header: 'N° inscrito', key: 'numeroInscrito', width: 11 },
     { header: '¿Asistirá?', key: 'asistencia', width: 12 },
+    { header: 'Acceso anticipado', key: 'acceso', width: 20 },
     { header: 'Nombre', key: 'nombre', width: 26 },
     { header: 'WhatsApp', key: 'whatsapp', width: 16 },
     { header: 'Correo', key: 'correo', width: 28 },
@@ -897,6 +929,7 @@ router.get('/api/clase-gratis/registros/excel', requireAdmin, async (req, res) =
       .forEach((r) => {
         hoja.addRow({
           numeroInscrito: r.numeroInscrito || '',
+          acceso: r.accesoEstado === 'pagado' ? (r.accesoTipo === 'presencial' ? 'Pagado · presencial' : 'Pagado · en línea') : '',
           asistencia: r.asistencia === 'si' && !r.numeroInscrito ? 'Sí (cupo lleno)' : (ETIQUETA_ASISTENCIA_CLASE_GRATIS[r.asistencia] || 'Sin responder'),
           nombre: r.nombre,
           whatsapp: r.whatsapp,

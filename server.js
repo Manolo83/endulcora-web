@@ -102,6 +102,8 @@ const checkoutLimiter = rateLimit({
   message: { error: 'Demasiados intentos de compra. Intenta de nuevo en unos minutos.' },
 });
 app.use('/api/checkout/preference', checkoutLimiter);
+// Tambien pide la contraseña de la cuenta: mismo limite que el login.
+app.use('/api/checkout/acceso-anticipado', clienteAuthLimiter);
 
 const newsletterLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -297,6 +299,11 @@ app.get('/calendario', (req, res) => {
 // correo" en su lugar.
 app.get('/confirmar-clase', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'confirmar-clase.html'));
+});
+
+// Acceso anticipado de la master class: link personal del correo.
+app.get('/acceso-anticipado', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'acceso-anticipado.html'));
 });
 
 // /talleres: mismo calendario que /calendario (filtro por sede), pero desde
