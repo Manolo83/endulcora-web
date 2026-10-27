@@ -1201,6 +1201,57 @@ router.get('/api/talleres/ventas-automatizadas', requireAdmin, (req, res) => {
   });
 });
 
+// Verificacion de verdad contra Mercado Pago (no confia solo en que el
+// webhook haya avisado): revisa cada pedido de taller que en nuestra base
+// SIGUE sin estar "aprobado" y le pregunta directo a la API de Mercado
+// Pago, por external_reference, si de verdad se pago. Es de SOLO LECTURA
+// -- no corrige nada aqui, solo reporta si hay pagos reales que el conteo
+// de arriba se esta perdiendo porque el aviso del webhook nunca llego.
+router.get('/api/talleres/ventas-automatizadas/verificar-mp', requireAdmin, async (req, res) => {
+  const accessToken = process.env.MP_ACCESS_TOKEN;
+  if (!accessToken) return res.status(400).json({ error: 'Mercado Pago no esta configurado (falta MP_ACCESS_TOKEN).' });
+
+  const { MercadoPagoConfig, Payment } = require('mercadopago');
+  const client = new MercadoPagoConfig({ accessToken });
+  const payment = new Payment(client);
+
+  const pedidosTallerSinAprobar = store.getOrders().filter(
+    (o) => o.estado !== 'aprobado' && (o.items || []).some((it) => it.tipo === 'taller')
+  );
+
+  const encontradosPagados = [];
+  const errores = [];
+  for (const orden of pedidosTallerSinAprobar) {
+    try {
+      const resultado = await payment.search({ options: { external_reference: String(orden.id) } });
+      const pagoAprobado = (resultado.results || []).find((p) => p.status === 'approved');
+      if (pagoAprobado) {
+        const itemTaller = orden.items.find((it) => it.tipo === 'taller');
+        encontradosPagados.push({
+          ordenId: orden.id,
+          estadoEnNuestraBase: orden.estado,
+          mpPaymentId: pagoAprobado.id,
+          mpStatus: pagoAprobado.status,
+          montoAprobado: pagoAprobado.transaction_amount,
+          fechaAprobadoEnMP: pagoAprobado.date_approved,
+          taller: itemTaller ? itemTaller.titulo : '',
+          inscripcionTallerId: itemTaller ? itemTaller.inscripcionTallerId : null,
+          correo: orden.email,
+        });
+      }
+    } catch (e) {
+      errores.push({ ordenId: orden.id, error: e.message || String(e) });
+    }
+  }
+
+  res.json({
+    pedidosRevisados: pedidosTallerSinAprobar.length,
+    pagosRealesNoReflejados: encontradosPagados.length,
+    detalle: encontradosPagados,
+    errores,
+  });
+});
+
 router.post('/api/sesiones-taller', requireAdmin, (req, res) => {
   const { sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo, hojaSheets } = req.body || {};
   if (!sedeId || !fecha || !titulo) return res.status(400).json({ error: 'Falta sede, fecha o título' });
