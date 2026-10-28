@@ -1,6 +1,7 @@
 const store = require('./store');
 const { SITE_URL } = require('./config');
-const { enviarCorreoCampana } = require('./email');
+const { enviarCorreoCampana, enviarCorreoBuenFin } = require('./email');
+const promoBuenFin = require('./promoBuenFin');
 
 // Sin ramp-up: por decision del negocio, cada campaña manda a todos sus
 // contactos de una sola vez (sin repartir el envio en varios dias). El
@@ -26,7 +27,15 @@ async function procesarCampana(campanaId) {
     const campana = store.getCampanaCorreo(campanaId);
     if (!campana || campana.estado === 'terminada' || campana.estado === 'cancelada') return;
 
-    const yaProcesados = new Set([...(campana.enviadosIds || []), ...(campana.fallidosIds || [])]);
+    const yaProcesados = new Set([...(campana.enviadosIds || []), ...(campana.fallidosIds || []), ...(campana.omitidosIds || [])]);
+    const esBuenFin = campana.plantilla === 'buen-fin';
+    // Si la promocion ya cerro (o se apago en /admin) no se manda un correo
+    // que lleva a una pagina cerrada.
+    if (esBuenFin && !promoBuenFin.promoAbierta()) {
+      store.actualizarCampanaCorreo(campanaId, { estado: 'cancelada', terminadaAt: new Date().toISOString(), ultimoError: 'La promoción ya cerró; se detuvo el envío.' });
+      return;
+    }
+    const datosBuenFin = esBuenFin ? promoBuenFin.datosCorreo(campana.ebookIds) : null;
     const mapaContactos = new Map(store.getContactosCampana().map((c) => [c.id, c]));
     const pendientesTotal = (campana.contactoIds || []).filter((id) => !yaProcesados.has(id));
 
@@ -43,11 +52,23 @@ async function procesarCampana(campanaId) {
       .filter(Boolean);
 
     for (const contacto of paraProcesar) {
+      // Se revisa en cada contacto: alguien cancelo a la mitad, o ya compro.
+      const actual = store.getCampanaCorreo(campanaId);
+      if (!actual || actual.estado === 'cancelada') return;
+      if (esBuenFin) {
+        const fresco = store.getContactosCampana().find((c) => c.id === contacto.id);
+        if (!fresco || fresco.activo === false || promoBuenFin.correosQueYaCompraron().has(contacto.email)) {
+          store.omitirContactoCampana(campanaId, contacto.id);
+          continue;
+        }
+      }
       let exito = false;
       let errorMsg = '';
       try {
         const unsubscribeUrl = `${SITE_URL}/desuscribir?id=${contacto.id}&token=${contacto.unsubToken}`;
-        await enviarCorreoCampana({
+        if (esBuenFin) {
+          await enviarCorreoBuenFin({ to: contacto.email, asunto: campana.asunto, nombre: contacto.nombre, unsubscribeUrl, ...datosBuenFin });
+        } else await enviarCorreoCampana({
           to: contacto.email,
           nombre: contacto.nombre,
           asunto: campana.asunto,

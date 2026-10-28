@@ -273,6 +273,9 @@ const CLAVE_GUARDADO = 'endulcora-buenfin-elegidos';
 // La seleccion se recuerda en esta pestaña por si regresa de Mercado Pago
 // sin completar el pago; al cerrar la pestaña se olvida.
 function guardarSeleccion(){ try{ sessionStorage.setItem(CLAVE_GUARDADO, JSON.stringify([...ELEGIDOS])); }catch(e){} }
+// Si llego desde el correo a la comunidad (?origen=correo) se recuerda en
+// la pestaña para medir esa venta aunque navegue o regrese de Mercado Pago.
+function leerOrigen(){ try{ return sessionStorage.getItem('buenFinOrigen') || ''; }catch(e){ return ''; } }
 function leerSeleccion(){ try{ return JSON.parse(sessionStorage.getItem(CLAVE_GUARDADO) || '[]'); }catch(e){ return []; } }
 
 // Regla literal de la promo: cada 4 cuestan el paquete, los sueltos el
@@ -463,6 +466,7 @@ document.getElementById('formPago').addEventListener('submit', async (e) => {
       body: JSON.stringify({
         ids: [...ELEGIDOS],
         email: document.getElementById('correoPago').value.trim(),
+        origen: leerOrigen(),
         fbp: leerCookie('_fbp'),
         fbc: leerCookie('_fbc'),
         gclid: leerCookie('gclid'),
@@ -529,6 +533,11 @@ document.getElementById('formPago').addEventListener('submit', async (e) => {
   // eBooks que sigan en la promocion.
   const disponibles = new Set(PROMO.ebooks.map(e => e.id));
   leerSeleccion().forEach(id => { if(disponibles.has(id)) ELEGIDOS.add(id); });
+  // Cada portada del correo trae ?eb=<id>: ese eBook llega ya elegido.
+  const params = new URLSearchParams(location.search);
+  if(params.get('origen') === 'correo'){ try{ sessionStorage.setItem('buenFinOrigen', 'correo'); }catch(e){} }
+  const desdeCorreo = Number(params.get('eb'));
+  if(disponibles.has(desdeCorreo)){ ELEGIDOS.add(desdeCorreo); guardarSeleccion(); }
   if(new URLSearchParams(location.search).get('pago') === 'error'){
     const aviso = document.getElementById('avisoError');
     aviso.classList.remove('hidden');

@@ -13,7 +13,7 @@ const promoBuenFin = require('../promoBuenFin');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL, GOOGLE_SHEETS } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
-const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller } = require('../email');
+const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller, enviarCorreoBuenFin, htmlCorreoBuenFin } = require('../email');
 const { procesarCampana } = require('../campanas');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
@@ -294,6 +294,68 @@ router.get('/api/buen-fin/resumen', requireAdmin, (req, res) => {
     precioPaquete: c.precioPaquete,
     ...promoBuenFin.resumenVentas(),
   });
+});
+
+// ---- Correo de la promocion a la comunidad ----
+// Se manda a toda la lista de contactos (cuentas, compras, suscriptores y
+// registros que aceptaron promociones), menos quien se dio de baja y quien
+// ya compro en la promocion. Usa el mismo envio de las campañas: se retoma
+// solo si el servidor se reinicia y se puede cancelar desde Campañas.
+function ultimaCampanaBuenFin() {
+  return store.getCampanasCorreo().find((c) => c.plantilla === 'buen-fin') || null;
+}
+
+router.get('/api/buen-fin/correo', requireAdmin, (req, res) => {
+  const { destinatarios, ...conteos } = promoBuenFin.audienciaCorreo();
+  const ultima = ultimaCampanaBuenFin();
+  res.json({
+    ...conteos,
+    destinatarios: destinatarios.length,
+    abierta: promoBuenFin.promoAbierta(),
+    asunto: promoBuenFin.asuntoCorreo(),
+    masVendidos: promoBuenFin.masVendidos(4).map((e) => e.titulo),
+    ultima: ultima
+      ? { id: ultima.id, estado: ultima.estado, total: ultima.total, enviados: ultima.enviados, fallidos: ultima.fallidos, omitidos: ultima.omitidos || 0, createdAt: ultima.createdAt, ultimoError: ultima.ultimoError || '' }
+      : null,
+  });
+});
+
+// Vista previa exacta del correo (se abre en otra pestaña desde /admin).
+router.get('/api/buen-fin/correo/vista', requireAdmin, (req, res) => {
+  res.type('html').send(htmlCorreoBuenFin({ nombre: 'Laura', unsubscribeUrl: '#', ...promoBuenFin.datosCorreo() }));
+});
+
+function asuntoValido(asunto) {
+  const a = String(asunto || '').trim().slice(0, 150);
+  return a || promoBuenFin.asuntoCorreo();
+}
+
+router.post('/api/buen-fin/correo/prueba', requireAdmin, async (req, res) => {
+  const correo = String((req.body || {}).email || '').trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) return res.status(400).json({ error: 'Escribe el correo donde quieres recibir la prueba.' });
+  try {
+    await enviarCorreoBuenFin({ to: correo, asunto: `[PRUEBA] ${asuntoValido(req.body.asunto)}`, nombre: 'Laura', unsubscribeUrl: `${SITE_URL}/`, ...promoBuenFin.datosCorreo() });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(502).json({ error: e.message || 'No se pudo mandar la prueba.' });
+  }
+});
+
+router.post('/api/buen-fin/correo/enviar', requireAdmin, (req, res) => {
+  if (!promoBuenFin.promoAbierta()) return res.status(400).json({ error: 'La promoción está cerrada: actívala o mueve la fecha de fin antes de mandar el correo.' });
+  const ultima = ultimaCampanaBuenFin();
+  if (ultima && ultima.estado === 'enviando') return res.status(409).json({ error: 'Ya hay un envío de este correo en curso.' });
+  const { destinatarios } = promoBuenFin.audienciaCorreo();
+  if (!destinatarios.length) return res.status(400).json({ error: 'No hay contactos a quién mandarle.' });
+  const campana = store.addCampanaCorreo({
+    asunto: asuntoValido((req.body || {}).asunto),
+    cuerpoHtml: '',
+    plantilla: 'buen-fin',
+    ebookIds: promoBuenFin.masVendidos(4).map((e) => e.id),
+    contactoIds: destinatarios.map((c) => c.id),
+  });
+  res.status(202).json(campana);
+  procesarCampana(campana.id).catch(() => {});
 });
 
 // ---- Carrusel de imagenes del inicio (publicidad) ----

@@ -1121,6 +1121,15 @@ async function init() {
       data._migBackfillContactosCampanaPedidos = true;
       changed = true;
     }
+    // Repite la pasada para las compras pagadas despues de la primera (antes
+    // de que updateOrder sumara al comprador a la lista).
+    if (!data._migBackfillContactosCampanaPedidos2) {
+      (data.orders || []).forEach((o) => {
+        if (o.estado === 'aprobado' && o.email) upsertContactoCampana(data, { email: o.email });
+      });
+      data._migBackfillContactosCampanaPedidos2 = true;
+      changed = true;
+    }
     // Curso de Masa Madre (presencial, 5 sesiones): oferta de la clase
     // gratis en sala. precioMembresia vacio = sin rebaja para miembros,
     // pendiente de que direccion lo confirme; se puede editar despues desde
@@ -2418,6 +2427,10 @@ module.exports = {
     const item = data.orders.find((o) => o.id === Number(id));
     if (!item) return null;
     Object.assign(item, patch, { updatedAt: new Date().toISOString() });
+    // Toda compra pagada entra a la lista de contactos (tambien la de
+    // invitados, que no crean cuenta), para que no se queden fuera de los
+    // correos a la comunidad.
+    if (patch.estado === 'aprobado' && item.email) upsertContactoCampana(data, { email: item.email });
     save(data);
     return item;
   },
@@ -3733,7 +3746,7 @@ module.exports = {
   getCampanaCorreo(id) {
     return load().campanasCorreo.find((c) => c.id === Number(id)) || null;
   },
-  addCampanaCorreo({ asunto, cuerpoHtml, imagenes, archivos, videoUrl, botonTexto, contactoIds }) {
+  addCampanaCorreo({ asunto, cuerpoHtml, imagenes, archivos, videoUrl, botonTexto, contactoIds, plantilla, ebookIds }) {
     const data = load();
     const item = {
       id: nextId(data.campanasCorreo),
@@ -3746,8 +3759,13 @@ module.exports = {
       // (lo que ya hacia antes), pero si el link no es un video (ej. la
       // pagina de compra de un taller) se puede poner otro texto.
       botonTexto: String(botonTexto || '').trim(),
+      // plantilla 'buen-fin': correo con diseño propio de la promocion (ver
+      // src/campanas.js); ebookIds son las portadas que lleva.
+      plantilla: plantilla || '',
+      ebookIds: ebookIds || [],
       contactoIds: contactoIds || [],
       enviadosIds: [],
+      omitidosIds: [],
       fallidosIds: [],
       total: (contactoIds || []).length,
       enviados: 0,
@@ -3758,6 +3776,18 @@ module.exports = {
       terminadaAt: null,
     };
     data.campanasCorreo.push(item);
+    save(data);
+    return item;
+  },
+  // Contacto que ya no se debe procesar (ej. compro en la promocion
+  // mientras el envio iba avanzando): no cuenta como enviado ni fallido.
+  omitirContactoCampana(id, contactoId) {
+    const data = load();
+    const item = data.campanasCorreo.find((c) => c.id === Number(id));
+    if (!item) return null;
+    if (!Array.isArray(item.omitidosIds)) item.omitidosIds = [];
+    item.omitidosIds.push(contactoId);
+    item.omitidos = item.omitidosIds.length;
     save(data);
     return item;
   },

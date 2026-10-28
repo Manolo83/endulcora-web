@@ -240,7 +240,7 @@ router.post('/buen-fin', async (req, res) => {
   if (!promoBuenFin.promoAbierta(contenido)) {
     return res.status(400).json({ error: 'Esta promoción ya terminó.' });
   }
-  const { ids, email, fbp, fbc, gclid, gbraid, wbraid } = req.body || {};
+  const { ids, email, origen, fbp, fbc, gclid, gbraid, wbraid } = req.body || {};
   const correo = String(email || '').trim().toLowerCase();
   if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe tu correo: ahí te mandamos tus eBooks.' });
   const pedidos = Array.isArray(ids) ? [...new Set(ids.map(Number))] : [];
@@ -268,7 +268,10 @@ router.post('/buen-fin', async (req, res) => {
     gbraid: typeof gbraid === 'string' ? gbraid.slice(0, 200) : null,
     wbraid: typeof wbraid === 'string' ? wbraid.slice(0, 200) : null,
   });
-  store.updateOrder(order.id, { promo: 'buen-fin', promoDetalle: { paquetes, sueltos } });
+  // origen 'correo': llego desde el correo a la comunidad (para saber
+  // cuantas ventas trajo el correo y cuantas WhatsApp).
+  const promoOrigen = origen === 'correo' ? 'correo' : '';
+  store.updateOrder(order.id, { promo: 'buen-fin', promoDetalle: { paquetes, sueltos }, promoOrigen });
   try {
     const resultado = await new Preference(client).create({
       body: {

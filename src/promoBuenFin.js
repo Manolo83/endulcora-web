@@ -78,7 +78,10 @@ function repartirPrecios(cantidad, c = configPromo()) {
 // del admin).
 function resumenVentas() {
   const pedidos = store.getOrders ? store.getOrders().filter((o) => o.promo === 'buen-fin' && o.estado === 'aprobado') : [];
+  const delCorreo = pedidos.filter((o) => o.promoOrigen === 'correo');
   return {
+    comprasCorreo: delCorreo.length,
+    ingresoCorreo: delCorreo.reduce((acc, o) => acc + (Number(o.total) || 0), 0),
     compras: pedidos.length,
     ebooks: pedidos.reduce((acc, o) => acc + (o.items || []).length, 0),
     ingreso: pedidos.reduce((acc, o) => acc + (Number(o.total) || 0), 0),
@@ -86,3 +89,91 @@ function resumenVentas() {
 }
 
 module.exports = { configPromo, promoAbierta, ebooksPromo, calcularTotal, repartirPrecios, resumenVentas, fechaCDMX };
+
+// ---- Correo de la promocion a la comunidad ----
+// Precio normal mas comun entre los eBooks de la promo (el "Antes $200").
+function precioNormalTipico(ebooks = ebooksPromo()) {
+  const conteo = {};
+  ebooks.forEach((e) => {
+    const p = parseFloat(String(e.precio || '').replace(/[^0-9.]/g, ''));
+    if (p) conteo[p] = (conteo[p] || 0) + 1;
+  });
+  const top = Object.entries(conteo).sort((a, b) => b[1] - a[1])[0];
+  return top ? Number(top[0]) : 200;
+}
+
+// Los eBooks de la promo mas vendidos (todas las compras pagadas, no solo
+// las de la promo); si hay pocos datos se completa en orden del catalogo.
+function masVendidos(n = 4) {
+  const ebooks = ebooksPromo();
+  const ventas = new Map();
+  (store.getOrders ? store.getOrders() : [])
+    .filter((o) => o.estado === 'aprobado')
+    .forEach((o) => (o.items || []).forEach((i) => {
+      if (i.tipo === 'producto') ventas.set(Number(i.itemId), (ventas.get(Number(i.itemId)) || 0) + (Number(i.cantidad) || 1));
+    }));
+  return ebooks
+    .map((e, orden) => ({ e, orden, v: ventas.get(e.id) || 0 }))
+    .sort((a, b) => b.v - a.v || a.orden - b.orden)
+    .slice(0, n)
+    .map((x) => x.e);
+}
+
+// Correos que ya compraron en la promocion (no se les vuelve a mandar).
+function correosQueYaCompraron() {
+  return new Set(
+    (store.getOrders ? store.getOrders() : [])
+      .filter((o) => o.promo === 'buen-fin' && o.estado === 'aprobado' && o.email)
+      .map((o) => String(o.email).trim().toLowerCase())
+  );
+}
+
+// A quien le llega: toda la lista de contactos (cuentas, compras,
+// suscriptores y registros que aceptaron promociones), menos quien se dio
+// de baja y quien ya compro en la promocion.
+function audienciaCorreo() {
+  const contactos = store.getContactosCampana();
+  const compraron = correosQueYaCompraron();
+  const activos = contactos.filter((c) => c.activo !== false);
+  const destinatarios = activos.filter((c) => !compraron.has(c.email));
+  return {
+    contactos: contactos.length,
+    bajas: contactos.length - activos.length,
+    yaCompraron: activos.length - destinatarios.length,
+    destinatarios,
+  };
+}
+
+module.exports.precioNormalTipico = precioNormalTipico;
+module.exports.masVendidos = masVendidos;
+module.exports.correosQueYaCompraron = correosQueYaCompraron;
+module.exports.audienciaCorreo = audienciaCorreo;
+
+// Datos del correo con los precios y la fecha vigentes al momento de mandar
+// (si se mueve el precio o la fecha en /admin, el correo sale actualizado).
+// ebookIds: los que se eligieron al crear el envio; los que ya salieron de
+// la promocion se omiten.
+function datosCorreo(ebookIds) {
+  const { SITE_URL } = require('./config');
+  const contenido = store.getContent();
+  const c = configPromo(contenido);
+  const todos = ebooksPromo();
+  const porId = new Map(todos.map((e) => [e.id, e]));
+  const elegidos = (ebookIds || masVendidos(4).map((e) => e.id)).map((id) => porId.get(Number(id))).filter(Boolean);
+  return {
+    siteUrl: SITE_URL,
+    precioUno: c.precioUno,
+    precioPaquete: c.precioPaquete,
+    precioNormal: precioNormalTipico(todos),
+    fin: c.fin,
+    whatsapp: contenido.whatsapp_numero || '',
+    ebooks: elegidos.map((e) => ({ id: e.id, titulo: e.titulo, imagen: e.imagen || '' })),
+  };
+}
+
+function asuntoCorreo(c = configPromo()) {
+  return `LLEGÓ EL BUEN FIN A ENDULCORA 🎉 Tus eBooks desde $${Math.round((c.precioPaquete / 4) * 100) / 100}`;
+}
+
+module.exports.datosCorreo = datosCorreo;
+module.exports.asuntoCorreo = asuntoCorreo;
