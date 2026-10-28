@@ -3296,6 +3296,17 @@ module.exports = {
         });
       });
     });
+    // Curso Chocolateria del 23 nov: esta en el sitio y NO en el calendario
+    // oficial que Manuel mando el 28 oct. Viene del Excel de Drive, que se
+    // sincroniza solo cada 30 min (ver syncCalendarioTalleres) y que por
+    // diseño nunca borra, solo agrega: si se borrara de aqui, volveria a
+    // aparecer en la siguiente vuelta. Por eso se marca "agotado" en vez de
+    // borrarse — asi deja de venderse, la sincronizacion lo ve existir y no
+    // lo vuelve a crear, y nadie que se haya inscrito queda apuntado a un
+    // taller fantasma. Para quitarlo del todo hay que sacarlo del Excel.
+    const sobra = data.sesionesTaller.find((s) => s.fecha === '2026-11-23'
+      && normalizar(s.titulo).includes('chocolat'));
+    if (sobra && sobra.estado !== 'agotado') { sobra.estado = 'agotado'; cambios += 1; }
     if (cambios) save(data);
     return cambios;
   },
