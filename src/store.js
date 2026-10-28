@@ -3138,6 +3138,7 @@ module.exports = {
     nombre, whatsapp, correo, sesionTallerId, taller, fecha, sede, horario, montoAnticipo,
     comoSeEntero, preferencias, cumpleDia, cumpleMes, esDeMexico, estado, pais,
     esPrimeraVez, aceptaPromociones, aceptaAvisoPrivacidad,
+    fbp, fbc, gclid, gbraid, wbraid,
   }) {
     const data = load();
     const item = {
@@ -3166,6 +3167,14 @@ module.exports = {
       esPrimeraVez: !!esPrimeraVez,
       aceptaPromociones: !!aceptaPromociones,
       aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
+      // De donde llego, igual que en los pedidos: los ids de clic que trae su
+      // navegador. "comoSeEntero" es lo que la persona dice; esto es lo que
+      // de verdad paso. Ver src/origenTrafico.js.
+      fbp: fbp || null,
+      fbc: fbc || null,
+      gclid: gclid || null,
+      gbraid: gbraid || null,
+      wbraid: wbraid || null,
       // Control real del pago (Fase 1 del cobro de talleres): por ahora
       // toda inscripcion nueva entra "pendiente" sin monto, hasta que el
       // flujo de pago de la Fase 2/3 (o el admin a mano, mientras tanto) la

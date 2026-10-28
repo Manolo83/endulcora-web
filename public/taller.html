@@ -325,6 +325,26 @@ let slug = decodeURIComponent(window.location.pathname.replace(/^\/talleres\//, 
 let TALLER = null;
 let NUMERO_WHATSAPP = '5665271901';
 
+// Ids de clic que dejan los anuncios en el navegador: _fbc lo escribe Meta
+// cuando alguien le da clic a uno suyo, _fbp lo pone el pixel en cualquier
+// visita, y gclid/gbraid/wbraid son los de Google (vienen en la URL). Se
+// mandan al cobrar para que la venta se guarde sabiendo de donde llego.
+function leerCookie(nombre){
+  const match = document.cookie.match(new RegExp(`(?:^|; )${nombre}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function idsDeClic(){
+  const url = new URLSearchParams(window.location.search);
+  return {
+    fbp: leerCookie('_fbp'),
+    fbc: leerCookie('_fbc'),
+    gclid: url.get('gclid'),
+    gbraid: url.get('gbraid'),
+    wbraid: url.get('wbraid'),
+  };
+}
+
 function textoCupo(t){
   if(t.estado === 'agotado' || t.cupoRestante === 0) return 'Agotado';
   if(t.cupoRestante === null || t.cupoRestante === undefined) return 'Disponible';
@@ -531,6 +551,10 @@ document.getElementById('formCompraTaller').addEventListener('submit', async (e)
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: datos.get('correo').trim(),
+        // De donde llego: los ids de clic que dejan los anuncios. Sin esto,
+        // la venta se guarda sin origen y Meta no la puede amarrar a ningun
+        // clic. Ver src/origenTrafico.js.
+        ...idsDeClic(),
         items: [{
           tipo: 'taller',
           sesionTallerId: TALLER.id,

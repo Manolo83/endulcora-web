@@ -3933,6 +3933,15 @@ function etiquetaOrigen(o){
   </p>`;
 }
 
+// Lo mismo, en la tabla de inscritos a talleres: ahi va apretado, asi que
+// solo la etiqueta y la nota debajo.
+function celdaOrigen(i){
+  const origen = i.origen || { clave: 'sin_dato', etiqueta: 'Sin dato' };
+  const estilo = ESTILO_ORIGEN[origen.clave] || ESTILO_ORIGEN.sin_dato;
+  const nota = origen.nota ? `<div class="mt-1 text-[10px] leading-tight text-carbon/40">${escapeHtml(origen.nota)}</div>` : '';
+  return `<span class="whitespace-nowrap rounded-full px-2 py-0.5 font-ui text-[10px] font-600 uppercase tracking-wider ${estilo}">${escapeHtml(origen.etiqueta)}</span>${nota}`;
+}
+
 // Resumen de arriba: de donde llego la gente que SI pago. Deja fuera los
 // pedidos que nunca se cobraron (pendientes, rechazados, abandonados), porque
 // contarlos como ventas infla el total y no responde la pregunta. Los cobros
@@ -4187,6 +4196,7 @@ async function cargarInscripcionesTaller(){
               <th class="px-5 py-3 font-600">Horario</th>
               <th class="px-5 py-3 font-600">Anticipo (nota)</th>
               <th class="px-5 py-3 font-600">¿Cómo se enteró?</th>
+              <th class="px-5 py-3 font-600">Origen real</th>
               <th class="px-5 py-3 font-600">Preferencias</th>
               <th class="px-5 py-3 font-600">Zona</th>
               <th class="px-5 py-3 font-600">Pago</th>
@@ -4203,6 +4213,7 @@ async function cargarInscripcionesTaller(){
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.horario)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.montoAnticipo)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.comoSeEntero || '—')}</td>
+                <td class="px-5 py-3">${celdaOrigen(i)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.preferencias || '—')}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(formatoZona(i))}</td>
                 <td class="px-5 py-3">
@@ -4311,11 +4322,12 @@ $('formInscripcionManual').addEventListener('submit', async (e) => {
 
 $('btnExportarInscripcionesTaller').addEventListener('click', () => {
   if(!INSCRIPCIONES_TALLER.length){ toast('No hay inscripciones para exportar'); return; }
-  const encabezado = 'nombre,whatsapp,correo,taller,fecha,sede,horario,monto_anticipo,como_se_entero,preferencias,cumpleanos,primera_vez,acepta_promociones,registrado_el';
+  const encabezado = 'nombre,whatsapp,correo,taller,fecha,sede,horario,monto_anticipo,como_se_entero,origen_real,preferencias,cumpleanos,primera_vez,acepta_promociones,registrado_el';
   const csvCelda = (v) => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
   const filas = [encabezado, ...INSCRIPCIONES_TALLER.map(i => [
     i.nombre, i.whatsapp, i.correo, i.taller, i.fecha, i.sede, i.horario, i.montoAnticipo,
     i.comoSeEntero || '',
+    (i.origen && i.origen.etiqueta) || 'Sin dato',
     i.preferencias || '',
     i.cumpleDia && i.cumpleMes ? `${i.cumpleDia}-${MESES_CORTOS[i.cumpleMes]}` : '',
     i.esPrimeraVez ? 'si' : 'no',

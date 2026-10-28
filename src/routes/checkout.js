@@ -11,6 +11,7 @@ const bcrypt = require('bcryptjs');
 const acceso = require('../accesoAnticipado');
 const promoBuenFin = require('../promoBuenFin');
 const entregas = require('../entregas');
+const origenTrafico = require('../origenTrafico');
 const { enviarCorreoAccesoConfirmado } = require('../email');
 
 const router = express.Router();
@@ -131,6 +132,9 @@ router.post('/preference', async (req, res) => {
         pais: linea.pais,
         aceptaPromociones: linea.aceptaPromociones,
         aceptaAvisoPrivacidad: linea.aceptaAvisoPrivacidad,
+        // Los mismos ids de clic que se guardan en el pedido, para poder ver
+        // el origen tambien en la lista de inscritos.
+        ...origenTrafico.idsDeClic({ fbp, fbc, gclid, gbraid, wbraid }),
       });
       store.actualizarPagoInscripcionTaller(inscripcion.id, { tipoPago, estadoPago: 'pendiente', vencePendienteEn });
       // Igual que el formulario gratuito: se intenta mandar a "Inscritos
