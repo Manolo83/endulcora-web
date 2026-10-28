@@ -1207,6 +1207,22 @@ async function init() {
       data._migRecetarioPanDeMuerto = true;
       changed = true;
     }
+    // PDF del Recetario Pan de Muerto (oferta de la clase gratis), que se
+    // creo sin archivo: es el mismo PDF del eBook Pan de Muerto que mando el
+    // equipo. No pisa un archivo que ya se haya subido en /admin.
+    if (!data._migArchivoRecetarioPanDeMuerto) {
+      const recetario = data.products.find((p) => p.titulo === 'Recetario Pan de Muerto' && p.categoria === 'recetario');
+      const actual = recetario && recetario.archivo ? path.join(UPLOAD_DIR, path.basename(recetario.archivo)) : '';
+      const origen = path.join(__dirname, '..', 'seed-archivos', 'pan-de-muerto', 'Endulcora_Pan_de_Muerto_eBook.pdf');
+      if (recetario && !(actual && fs.existsSync(actual)) && fs.existsSync(origen)) {
+        const destino = `${crypto.randomUUID()}.pdf`;
+        fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+        recetario.archivo = `/uploads/${destino}`;
+        recetario.archivoNombre = 'Recetario Pan de Muerto - Endulcora.pdf';
+      }
+      data._migArchivoRecetarioPanDeMuerto = true;
+      changed = true;
+    }
     // Los registros de la clase gratis que ya existian (de antes de que se
     // guardara la fecha en cada uno) se marcan con la fecha configurada
     // actualmente, para no dejarlos sin fecha en el Excel agrupado.
