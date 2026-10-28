@@ -3103,6 +3103,10 @@ module.exports = {
   // usan; los demas se quedan con el arte del anuncio, para que la pagina
   // no salga vacia el dia que el anuncio empieza a mandar gente.
   //
+  // Cinco talleres se repiten en la semana 1 y ahi ya tenian foto, asi que
+  // apuntan al mismo archivo en talleres-nov26-s1 en vez de copiarlo: una
+  // sola foto por taller, sin dos versiones que se puedan desfasar.
+  //
   // Cuando llega una foto de producto para un taller que traia el arte, se
   // cambia sola. El cambio se hace SOLO si la foto que tiene hoy es byte
   // por byte el arte que pusimos nosotros (se compara la huella sha256):
@@ -3142,7 +3146,7 @@ module.exports = {
     const DEFINICIONES_NOV26_S2A4 = [
       {
         sede: sedeNativitas, clave: 'tiramis', titulo: 'Tiramisú Douyin',
-        fechas: ['2026-11-12', '2026-11-14'], horario: HORARIO_MANANA, imagen: '20261112_TiramisuDouyin_NATIVITAS_1x1.jpg',
+        fechas: ['2026-11-12', '2026-11-14'], horario: HORARIO_MANANA, imagen: '20261112_TiramisuDouyin_NATIVITAS_1x1.jpg', fotoReal: '../talleres-nov26-s1/tiramisu.jpg',
         descripcion: 'El tiramisú en molde con capas visibles que se volvió tendencia. Aprende a hacerlo en cuatro sabores, con una crema estable que no se escurre. Taller presencial de 4 horas, para principiantes.',
         queAprendes: 'Preparas tiramisú en 4 sabores: mango, frutos rojos, cookies and cream y pistacho. Además aprendes crema estable que no se escurre, capas visibles y parejas en molde, remojo justo de la base, y conservación en frío.',
       },
@@ -3154,7 +3158,7 @@ module.exports = {
       },
       {
         sede: sedeNativitas, clave: 'galletas ny', titulo: 'Galletas NY',
-        fechas: ['2026-11-13', '2026-11-15'], horario: HORARIO_MANANA, imagen: '20261113_GalletasNY_NATIVITAS_1x1.jpg',
+        fechas: ['2026-11-13', '2026-11-15'], horario: HORARIO_MANANA, imagen: '20261113_GalletasNY_NATIVITAS_1x1.jpg', fotoReal: '../talleres-nov26-s1/galletasny.jpg',
         descripcion: 'La galleta gruesa estilo Nueva York, con orilla dorada y centro suave. Aprende a hacer una masa que no se extiende en el horno y a sacarla en el punto exacto. Taller presencial de 4 horas, para principiantes.',
         queAprendes: 'Preparas 5 galletas rellenas: conejito de chocolate intenso con relleno cremoso, corazón red velvet, volcán de chocolate y avellana con centro líquido, caramelo de galleta especiada y carrot cake rellena. Además aprendes la masa que no se extiende en el horno, reposo en frío y porcionado, el punto de horneado para un centro suave, y conservación y empaque.',
       },
@@ -3226,19 +3230,19 @@ module.exports = {
       },
       {
         sede: sedeDivision, clave: 'vela', titulo: 'Velas Comestibles',
-        fechas: ['2026-11-12', '2026-11-14'], horario: HORARIO_MANANA, imagen: '20261112_VelasComestibles_DIVISION_1x1.jpg',
+        fechas: ['2026-11-12', '2026-11-14'], horario: HORARIO_MANANA, imagen: '20261112_VelasComestibles_DIVISION_1x1.jpg', fotoReal: '../talleres-nov26-s1/velas.jpg',
         descripcion: 'Parece una vela. Se enciende. Y se come. Tres velas comestibles con mecha comestible y flama controlada. Taller presencial de 4 horas.',
         queAprendes: 'Preparas 3 velas comestibles: base de mantequilla (cremosa y suave), base de chocolate (intensa, para acompañar postres) y de frutos rojos (entre dulzor y acidez). Además aprendes mecha comestible y control de flama, estabilización de la grasa, decoración de cada vela, y conservación y cadena de frío.',
       },
       {
         sede: sedeDivision, clave: 'cheesecake', titulo: 'Cheesecakes Horneados',
-        fechas: ['2026-11-13', '2026-11-15'], horario: HORARIO_MANANA, imagen: '20261113_CheesecakesHorneados_DIVISION_1x1.jpg',
+        fechas: ['2026-11-13', '2026-11-15'], horario: HORARIO_MANANA, imagen: '20261113_CheesecakesHorneados_DIVISION_1x1.jpg', fotoReal: '../talleres-nov26-s1/cheesecake.jpg',
         descripcion: 'El cheesecake horneado tiene fama de difícil: se agrieta, se hunde o queda arenoso. Aquí aprendes la técnica completa para que salga liso y cremoso cada vez, desde la base de galleta hasta el desmolde. Taller presencial de 4 horas, para principiantes.',
         queAprendes: 'Preparas 3 cheesecakes: New York clásico (denso y cremoso, horneado a baño maría), de zarzamora con compota casera y decoración tipo swirl, y estilo tortuga con base de nuez, caramelo, ganache y nueces. Además aprendes base de galleta firme que no se desmorona, batido sin aire para una textura lisa, horneado a baño maría sin grietas, y enfriado, desmolde y conservación.',
       },
       {
         sede: sedeDivision, clave: 'charcuter', titulo: 'Tablas de Charcutería',
-        fechas: ['2026-11-14'], horario: HORARIO_TARDE, imagen: '20261114_TablasDeCharcuteria_DIVISION_1x1.jpg',
+        fechas: ['2026-11-14'], horario: HORARIO_TARDE, imagen: '20261114_TablasDeCharcuteria_DIVISION_1x1.jpg', fotoReal: '../talleres-nov26-s1/charcuteria.jpg',
         descripcion: 'La tabla que se roba la reunión. Aprende a elegir, cortar y acomodar quesos, carnes frías, fruta y crujientes para armar tablas abundantes y bien equilibradas. Taller vespertino de 4 horas, para principiantes.',
         queAprendes: 'Armas tu propia tabla de 15x25 cm con rosas de charcutería, plisados en abanico, geometría en quesos y zonificación estética. Además aprendes maridaje de texturas, elección de quesos y carnes frías, corte de quesos según su textura, y conservación y empaque para llevar.',
       },
