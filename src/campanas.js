@@ -28,14 +28,19 @@ async function procesarCampana(campanaId) {
     if (!campana || campana.estado === 'terminada' || campana.estado === 'cancelada') return;
 
     const yaProcesados = new Set([...(campana.enviadosIds || []), ...(campana.fallidosIds || []), ...(campana.omitidosIds || [])]);
-    const esBuenFin = campana.plantilla === 'buen-fin';
+    // 'buen-fin' (lanzamiento) o un recordatorio 'buen-fin-tres-dias' /
+    // 'buen-fin-ultimo-dia' (ver src/recordatoriosBuenFin.js).
+    const esBuenFin = String(campana.plantilla || '').startsWith('buen-fin');
+    const variante = campana.plantilla === 'buen-fin' ? 'lanzamiento' : String(campana.plantilla || '').replace(/^buen-fin-/, '');
     // Si la promocion ya cerro (o se apago en /admin) no se manda un correo
     // que lleva a una pagina cerrada.
     if (esBuenFin && !promoBuenFin.promoAbierta()) {
       store.actualizarCampanaCorreo(campanaId, { estado: 'cancelada', terminadaAt: new Date().toISOString(), ultimoError: 'La promoción ya cerró; se detuvo el envío.' });
       return;
     }
-    const datosBuenFin = esBuenFin ? promoBuenFin.datosCorreo(campana.ebookIds) : null;
+    const datosBuenFin = esBuenFin
+      ? { ...promoBuenFin.datosCorreo(campana.ebookIds), variante, comprasComunidad: promoBuenFin.resumenVentas().compras }
+      : null;
     const mapaContactos = new Map(store.getContactosCampana().map((c) => [c.id, c]));
     const pendientesTotal = (campana.contactoIds || []).filter((id) => !yaProcesados.has(id));
 

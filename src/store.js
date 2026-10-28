@@ -110,6 +110,9 @@ const DEFAULT_CONTENT = {
   // precio_paquete. Se apaga sola en buenfin_fin (hora CDMX, AAAA-MM-DDTHH:MM);
   // para extenderla (p. ej. a diciembre) basta con mover esa fecha.
   buenfin_activo: 'true',
+  // Recordatorios automaticos (quedan 3 dias, ultimo dia) y "Tus eBooks te
+  // esperan" para pagos a medias (ver src/recordatoriosBuenFin.js).
+  buenfin_recordatorios_activo: 'true',
   buenfin_inicio: '',
   buenfin_fin: '2026-11-30T23:59',
   buenfin_precio_uno: '100',

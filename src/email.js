@@ -900,19 +900,24 @@ async function enviarCorreoRecordatorioRegalo({ to, nombre, siteUrl, dias, hasta
 // HTML con tablas y estilos en linea (lo que si respetan Gmail, Outlook y
 // Apple Mail). htmlCorreoBuenFin se usa tambien para la vista previa del
 // admin, asi lo que se ve ahi es exactamente lo que se manda.
-function htmlCorreoBuenFin({ nombre, unsubscribeUrl, siteUrl, precioUno, precioPaquete, precioNormal, fin, ebooks, whatsapp }) {
+function htmlCorreoBuenFin({ nombre, unsubscribeUrl, siteUrl, precioUno, precioPaquete, precioNormal, fin, ebooks, whatsapp, variante = 'lanzamiento', comprasComunidad = 0, elegidos = [] }) {
   const pesos = (n) => `$${formatoMonto(n)}`;
   const link = (extra = '') => `${siteUrl}/buen-fin?origen=correo${extra}`;
   const porLibro = precioPaquete / 4;
   const ahorro = precioNormal * 4 - precioPaquete;
   const finFecha = fin ? fin.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Mexico_City' }) : '';
+  // finHora ("11:59 p.m.") a media frase; finHoraFin sin el punto final
+  // cuando la frase termina justo despues (para no dejar "p.m..").
   const finHora = fin ? fin.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Mexico_City' }) : '';
+  const finHoraFin = finHora.replace(/\.$/, '');
   const tel = String(whatsapp || '').replace(/\D/g, '');
   const telVisible = tel.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
+  const hola = `Hola${nombre ? ` ${escapeHtml(nombre)}` : ''}:`;
   const boton = (href, texto, fondo, color, tam = 14) =>
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 18px;"><tr><td align="center" style="background:${fondo};border-radius:999px;"><a href="${href}" style="display:block;padding:15px 12px;font-family:Arial,sans-serif;font-size:${tam}px;font-weight:700;letter-spacing:.04em;color:${color};text-decoration:none;text-transform:uppercase;">${texto}</a></td></tr></table>`;
+  const urlImagen = (e) => (e.imagen ? (/^https?:\/\//.test(e.imagen) ? e.imagen : `${siteUrl}${e.imagen}`) : '');
   const portada = (e) => {
-    const img = e.imagen ? (/^https?:\/\//.test(e.imagen) ? e.imagen : `${siteUrl}${e.imagen}`) : '';
+    const img = urlImagen(e);
     return `<td width="50%" valign="top" style="padding:5px;">
       <a href="${link(`&eb=${e.id}`)}" style="display:block;text-decoration:none;color:#1B0720;background:#ffffff;border:1px solid #eadfe9;border-radius:12px;overflow:hidden;">
         ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(e.titulo)}" width="250" style="display:block;width:100%;height:auto;border:0;">` : `<div style="background:#4E1454;color:#FBF4E9;padding:46px 10px;text-align:center;font-family:Arial,sans-serif;font-weight:700;font-size:15px;">${escapeHtml(e.titulo)}</div>`}
@@ -926,22 +931,7 @@ function htmlCorreoBuenFin({ nombre, unsubscribeUrl, siteUrl, precioUno, precioP
   const filas = [];
   for (let i = 0; i < ebooks.length; i += 2) filas.push(`<tr>${portada(ebooks[i])}${ebooks[i + 1] ? portada(ebooks[i + 1]) : '<td width="50%"></td>'}</tr>`);
   const paso = (n, texto) => `<tr><td width="30" valign="top" style="padding:4px 0;"><div style="width:22px;height:22px;line-height:22px;border-radius:50%;background:#4E1454;color:#FBF4E9;text-align:center;font-size:12px;font-weight:700;">${n}</div></td><td style="padding:4px 0;font-size:14px;color:#1B0720;">${texto}</td></tr>`;
-
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>El Buen Fin llegó a Endulcora</title></head>
-<body style="margin:0;padding:0;background:#FBF4E9;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Solo para quienes ya son parte de Endulcora: eBooks a ${pesos(precioUno)} o 4 por ${pesos(precioPaquete)}.&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF4E9;"><tr><td align="center" style="padding:20px 10px;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;font-family:Arial,sans-serif;color:#1B0720;">
-  <tr><td style="background:#4E1454;padding:30px 24px;text-align:center;">
-    <div style="display:inline-block;background:#C8312B;color:#ffffff;font-size:10px;font-weight:700;letter-spacing:.16em;padding:4px 12px;border-radius:999px;">SOLO COMUNIDAD ENDULCORA</div>
-    <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#F5A623;margin-top:14px;">Endulcora · eBooks</div>
-    <div style="font-size:32px;line-height:1.05;font-weight:800;color:#FBF4E9;margin-top:8px;">¡El Buen Fin llegó a Endulcora!</div>
-    <div style="font-size:15px;color:#e9dcea;margin-top:10px;">Todos nuestros eBooks a mitad de precio, y 4 por ${pesos(precioPaquete)}.</div>
-  </td></tr>
-  <tr><td style="padding:24px 22px 6px;font-size:15px;line-height:1.6;">
-    <p style="margin:0 0 12px;">Hola${nombre ? ` ${escapeHtml(nombre)}` : ''}:</p>
-    <p style="margin:0 0 18px;">Gracias por ser parte de Endulcora. Te adelantamos el Buen Fin: <b>todos nuestros eBooks a mitad de precio</b>${finFecha ? `, solo hasta el ${finFecha}` : ''}.</p>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+  const ofertas = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
       <td width="50%" style="padding:0 5px 0 0;" valign="top"><div style="border:1px solid #eadfe9;border-radius:14px;padding:14px 8px;text-align:center;">
         <s style="font-size:12px;color:#8a7d8d;">Antes ${pesos(precioNormal)}</s>
         <div style="font-size:40px;font-weight:800;color:#C8312B;line-height:1.05;">${pesos(precioUno)}</div>
@@ -952,12 +942,95 @@ function htmlCorreoBuenFin({ nombre, unsubscribeUrl, siteUrl, precioUno, precioP
         <div style="font-size:16px;font-weight:700;color:#4E1454;">4 eBooks</div>
         <div style="font-size:12px;font-weight:700;color:#1f7a4d;">${pesos(porLibro)} c/u · ahorras ${pesos(ahorro)}</div></div></td>
     </tr></table>
-    <div style="height:14px;"></div>
-    ${boton(link(), 'Elegir mis eBooks →', '#F5A623', '#1B0720', 15)}
-    ${ebooks.length ? `<p style="margin:4px 0 8px;text-align:center;font-size:19px;font-weight:800;color:#4E1454;">Los más vendidos</p>
+    <div style="height:14px;"></div>`;
+  const reloj = (titulo, detalle) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#1B0720;border-radius:14px;"><tr><td style="padding:14px 16px;text-align:center;">
+      <div style="font-size:22px;font-weight:800;color:#F5A623;">${titulo}</div>
+      <div style="font-size:13px;color:#e9dcea;margin-top:4px;">${detalle}</div>
+    </td></tr></table>
+    <div style="height:16px;"></div>`;
+  const librosHtml = (titulo) => (ebooks.length ? `<p style="margin:4px 0 8px;text-align:center;font-size:19px;font-weight:800;color:#4E1454;">${titulo}</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${filas.join('')}</table>
-    <div style="height:8px;"></div>
-    ${boton(`${link()}#catalogo`, 'Ver todos los eBooks en promoción', '#4E1454', '#FBF4E9', 13)}` : ''}
+    <div style="height:8px;"></div>` : '');
+  const pruebaSocial = comprasComunidad >= 5 ? `<div style="border:1px dashed #cdb8cf;border-radius:12px;padding:10px 12px;text-align:center;font-size:14px;margin:0 0 16px;">🔥 <b>${comprasComunidad} personas</b> de la comunidad ya se llevaron sus eBooks.</div>` : '';
+  const whats = (texto) => (tel ? boton(`https://wa.me/52${tel}?text=${encodeURIComponent(texto)}`, `¿Dudas? WhatsApp ${telVisible}`, '#25D366', '#ffffff', 13) : '');
+  const ps = (texto) => `<p style="margin:0 0 18px;font-size:14px;border-left:3px solid #F5A623;padding-left:12px;"><b>P.D.</b> ${texto}</p>`;
+
+  let preheader;
+  let hero;
+  let cuerpo;
+  if (variante === 'tres-dias') {
+    preheader = `${nombre ? `${escapeHtml(nombre)}, el` : 'El'} ${finFecha.split(',')[0] || 'último día'} a medianoche tus eBooks regresan a ${pesos(precioNormal)}.`;
+    hero = `<tr><td style="background:#1B0720;padding:30px 24px;text-align:center;">
+      <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#F5A623;">Endulcora · Buen Fin</div>
+      <div style="font-size:46px;line-height:1;font-weight:800;color:#F5A623;margin-top:10px;">QUEDAN 3 DÍAS</div>
+      <div style="font-size:15px;color:#e9dcea;margin-top:10px;">El Buen Fin de Endulcora termina el ${finFecha} a las ${finHoraFin}.</div>
+    </td></tr>`;
+    cuerpo = `<p style="margin:0 0 12px;">${hola}</p>
+    <p style="margin:0 0 16px;">Te escribimos porque todavía no aprovechas el Buen Fin. Quedan 3 días para llevarte <b>todos los eBooks a mitad de precio</b>. Después regresan a ${pesos(precioNormal)} cada uno.</p>
+    ${pruebaSocial}${ofertas}
+    ${boton(link(), 'Elegir mis eBooks →', '#F5A623', '#1B0720', 15)}
+    ${librosHtml('Los más vendidos del Buen Fin')}
+    ${boton(`${link()}#catalogo`, 'Ver todos los eBooks en promoción', '#4E1454', '#FBF4E9', 13)}
+    ${reloj(`Termina el ${finFecha}`, `a las ${finHoraFin}. Después regresan a ${pesos(precioNormal)}.`)}
+    ${ps(`Si eliges 2 o 3 eBooks, te conviene llevarte 4: pagas lo mismo o menos. Con 4 eBooks pagas ${pesos(porLibro)} por cada uno.`)}
+    ${whats('Hola, tengo una duda sobre la promoción de eBooks del Buen Fin.')}`;
+  } else if (variante === 'ultimo-dia') {
+    preheader = `A las ${finHora} de hoy se acaban los eBooks a ${pesos(porLibro)}.`;
+    hero = `<tr><td style="background:#C8312B;padding:30px 24px;text-align:center;">
+      <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#ffffff;">Endulcora · Buen Fin</div>
+      <div style="font-size:40px;line-height:1.02;font-weight:800;color:#ffffff;margin-top:10px;">HOY ES EL ÚLTIMO DÍA</div>
+      <div style="font-size:15px;color:#ffe9e7;margin-top:10px;">A las ${finHora} de hoy los eBooks regresan a ${pesos(precioNormal)}.</div>
+    </td></tr>`;
+    cuerpo = `<p style="margin:0 0 12px;">${hola}</p>
+    <p style="margin:0 0 18px;">Este es el último aviso: el Buen Fin de Endulcora <b>termina hoy a medianoche</b>. Si tenías algún eBook en mente, es el momento. Mañana ya no hay 4 por ${pesos(precioPaquete)}.</p>
+    ${ofertas}
+    ${boton(link(), 'Aprovechar antes de medianoche →', '#F5A623', '#1B0720', 15)}
+    ${librosHtml('Los que más se llevaron')}
+    ${ps('Pagas con tarjeta, OXXO o transferencia y te llegan al momento a tu correo, en PDF para siempre.')}
+    ${whats('Hola, tengo una duda sobre la promoción de eBooks del Buen Fin.')}`;
+  } else if (variante === 'carrito') {
+    const n = elegidos.length;
+    const faltan = n % 4 ? 4 - (n % 4) : 0;
+    const paquetes = Math.floor(n / 4);
+    const totalElegidos = paquetes * precioPaquete + (n % 4) * precioUno;
+    const totalCompletando = (paquetes + (faltan ? 1 : 0)) * precioPaquete;
+    const ids = elegidos.map((e) => e.id).join(',');
+    const lista = elegidos.map((e) => {
+      const img = urlImagen(e);
+      return `<tr><td width="56" valign="middle" style="padding:6px 0;">${img ? `<img src="${escapeHtml(img)}" alt="" width="48" style="display:block;width:48px;height:auto;border-radius:6px;border:0;">` : '<div style="width:48px;height:64px;border-radius:6px;background:#4E1454;"></div>'}</td>
+        <td valign="middle" style="padding:6px 0 6px 8px;font-size:14px;font-weight:700;color:#4E1454;">${escapeHtml(e.titulo)}</td></tr>`;
+    }).join('');
+    preheader = 'Elegiste tus eBooks pero el pago no se completó. La promoción sigue.';
+    hero = `<tr><td style="background:#4E1454;padding:30px 24px;text-align:center;">
+      <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#F5A623;">Endulcora · Buen Fin</div>
+      <div style="font-size:34px;line-height:1.05;font-weight:800;color:#FBF4E9;margin-top:10px;">Tus eBooks te esperan</div>
+      <div style="font-size:15px;color:#e9dcea;margin-top:10px;">Elegiste ${n === 1 ? 'tu eBook' : `tus ${n} eBooks`} pero el pago no se completó.</div>
+    </td></tr>`;
+    cuerpo = `<p style="margin:0 0 12px;">${hola}</p>
+    <p style="margin:0 0 14px;">Vimos que elegiste ${n === 1 ? 'este eBook' : 'estos eBooks'} del Buen Fin y el pago se quedó a medias. Te los guardamos: con un clic regresas a la página con ${n === 1 ? 'él ya elegido' : 'todos ya elegidos'}.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF4E9;border-radius:14px;"><tr><td style="padding:10px 14px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${lista}</table>
+      <div style="border-top:1px solid #eadfe9;margin-top:6px;padding-top:8px;font-size:15px;"><b>Total: ${pesos(totalElegidos)}</b></div>
+    </td></tr></table>
+    <div style="height:16px;"></div>
+    ${boton(link(`&eb=${ids}`), 'Terminar mi compra →', '#F5A623', '#1B0720', 15)}
+    ${faltan ? `<div style="border:2px solid #F5A623;background:#fff8ea;border-radius:14px;padding:12px 14px;font-size:14px;margin:0 0 16px;">💡 Agrega ${faltan === 1 ? '1 eBook más' : `${faltan} eBooks más`} y pagas ${pesos(totalCompletando)} por ${n + faltan}${totalCompletando <= totalElegidos ? ': lo mismo o menos de lo que ibas a pagar' : ''}.</div>` : ''}
+    ${finFecha ? reloj(`La promoción termina el ${finFecha}`, `a las ${finHoraFin}. Después regresan a ${pesos(precioNormal)}.`) : ''}
+    ${ps('Puedes pagar con tarjeta, OXXO o transferencia. Si tuviste algún problema al pagar, escríbenos y te ayudamos.')}
+    ${tel ? boton(`https://wa.me/52${tel}?text=${encodeURIComponent('Hola, tuve un problema al pagar mis eBooks del Buen Fin.')}`, `¿Problemas al pagar? WhatsApp ${telVisible}`, '#25D366', '#ffffff', 13) : ''}`;
+  } else {
+    preheader = `Solo para quienes ya son parte de Endulcora: eBooks a ${pesos(precioUno)} o 4 por ${pesos(precioPaquete)}.`;
+    hero = `<tr><td style="background:#4E1454;padding:30px 24px;text-align:center;">
+    <div style="display:inline-block;background:#C8312B;color:#ffffff;font-size:10px;font-weight:700;letter-spacing:.16em;padding:4px 12px;border-radius:999px;">SOLO COMUNIDAD ENDULCORA</div>
+    <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#F5A623;margin-top:14px;">Endulcora · eBooks</div>
+    <div style="font-size:32px;line-height:1.05;font-weight:800;color:#FBF4E9;margin-top:8px;">¡El Buen Fin llegó a Endulcora!</div>
+    <div style="font-size:15px;color:#e9dcea;margin-top:10px;">Todos nuestros eBooks a mitad de precio, y 4 por ${pesos(precioPaquete)}.</div>
+  </td></tr>`;
+    cuerpo = `<p style="margin:0 0 12px;">${hola}</p>
+    <p style="margin:0 0 18px;">Gracias por ser parte de Endulcora. Te adelantamos el Buen Fin: <b>todos nuestros eBooks a mitad de precio</b>${finFecha ? `, solo hasta el ${finFecha}` : ''}.</p>
+    ${ofertas}
+    ${boton(link(), 'Elegir mis eBooks →', '#F5A623', '#1B0720', 15)}
+    ${ebooks.length ? `${librosHtml('Los más vendidos')}${boton(`${link()}#catalogo`, 'Ver todos los eBooks en promoción', '#4E1454', '#FBF4E9', 13)}` : ''}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF4E9;border-radius:14px;"><tr><td style="padding:12px 16px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
         ${paso(1, 'Eliges tus eBooks en la página.')}
@@ -965,14 +1038,20 @@ function htmlCorreoBuenFin({ nombre, unsubscribeUrl, siteUrl, precioUno, precioP
         ${paso(3, 'Te llegan <b>al momento</b> a tu correo, en PDF para siempre.')}
       </table></td></tr></table>
     <div style="height:16px;"></div>
-    ${finFecha ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#1B0720;border-radius:14px;"><tr><td style="padding:14px 16px;text-align:center;">
-      <div style="font-size:22px;font-weight:800;color:#F5A623;">Termina el ${finFecha}</div>
-      <div style="font-size:13px;color:#e9dcea;margin-top:4px;">a las ${finHora.replace(/\.$/, "")}. Después los eBooks regresan a ${pesos(precioNormal)}.</div>
-    </td></tr></table>
-    <div style="height:16px;"></div>` : ''}
+    ${finFecha ? reloj(`Termina el ${finFecha}`, `a las ${finHoraFin}. Después los eBooks regresan a ${pesos(precioNormal)}.`) : ''}
     ${boton(link(), 'Aprovechar antes de que termine →', '#F5A623', '#1B0720', 14)}
-    <p style="margin:0 0 18px;font-size:14px;border-left:3px solid #F5A623;padding-left:12px;"><b>P.D.</b> Si eliges 2 o 3 eBooks, te conviene llevarte 4: pagas lo mismo o menos. La página te va diciendo cuánto te falta.</p>
-    ${tel ? boton(`https://wa.me/52${tel}?text=${encodeURIComponent('Hola, tengo una duda sobre la promoción de eBooks del Buen Fin.')}`, `¿Dudas? WhatsApp ${telVisible}`, '#25D366', '#ffffff', 13) : ''}
+    ${ps('Si eliges 2 o 3 eBooks, te conviene llevarte 4: pagas lo mismo o menos. La página te va diciendo cuánto te falta.')}
+    ${whats('Hola, tengo una duda sobre la promoción de eBooks del Buen Fin.')}`;
+  }
+
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>El Buen Fin en Endulcora</title></head>
+<body style="margin:0;padding:0;background:#FBF4E9;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${preheader}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF4E9;"><tr><td align="center" style="padding:20px 10px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;font-family:Arial,sans-serif;color:#1B0720;">
+  ${hero}
+  <tr><td style="padding:24px 22px 6px;font-size:15px;line-height:1.6;">
+    ${cuerpo}
   </td></tr>
   <tr><td style="padding:6px 24px 26px;text-align:center;font-size:11px;line-height:1.55;color:#8a7d8d;">
     Recibiste este correo porque estás en la comunidad de endulcora.com.<br><a href="${unsubscribeUrl}" style="color:#8a7d8d;">Dejar de recibir estos correos</a>
