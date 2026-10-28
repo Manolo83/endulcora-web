@@ -216,7 +216,7 @@ async function enviarCorreoEbooksTaller({ to, nombre, titulos, siteUrl, archivos
 // el resto del contenido es igual.
 async function enviarCorreoRecordatorioTaller({
   to, nombre, taller, fecha, horario, sede, direccion, mapaLink, queAprendes,
-  tipoPago, saldo, diasFaltan, numeroWhatsapp,
+  tipoPago, saldo, diasFaltan, numeroWhatsapp, comunidadLink, arteUrl,
 }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
@@ -225,10 +225,9 @@ async function enviarCorreoRecordatorioTaller({
   const fechaLegible = fecha
     ? new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
     : '';
-  const titulo = diasFaltan === 0 ? '¡Tu taller es hoy!' : 'Tu taller es en 2 días';
-  const asunto = diasFaltan === 0
-    ? `¡Hoy es tu taller! · ${taller} · Endulcora`
-    : `Faltan 2 días para tu taller · ${taller} · Endulcora`;
+  // Correo 10 del plan de ventas: un dia antes.
+  const titulo = diasFaltan === 0 ? '¡Tu taller es hoy!' : diasFaltan === 1 ? 'Mañana cocinamos juntos' : `Tu taller es en ${diasFaltan} días`;
+  const asunto = diasFaltan === 1 ? 'Mañana cocinamos juntos' : diasFaltan === 0 ? `¡Hoy es tu taller! · ${taller} · Endulcora` : `Faltan ${diasFaltan} días para tu taller · ${taller} · Endulcora`;
 
   const { error } = await client.emails.send({
     from,
@@ -237,8 +236,9 @@ async function enviarCorreoRecordatorioTaller({
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
         <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        ${arteUrl ? `<img src="${escapeHtml(arteUrl)}" alt="" width="432" style="display:block;width:100%;max-width:432px;height:auto;border-radius:16px;margin:0 0 16px;border:0;">` : ''}
         <h1 style="font-size:20px;color:#4E1454;">${escapeHtml(titulo)}, ${escapeHtml(nombre || '')}</h1>
-        <p style="font-size:14px;line-height:1.6;">Este es tu recordatorio para que no se te pase:</p>
+        <p style="font-size:14px;line-height:1.6;">${diasFaltan === 1 ? `Mañana${horario ? ` a las <strong>${escapeHtml(horario)}</strong>` : ''} es tu taller de <strong>${escapeHtml(taller || '')}</strong>${sede ? ` en ${escapeHtml(sede)}` : ''}. Llega 10 minutos antes.` : 'Este es tu recordatorio para que no se te pase:'}</p>
         <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;">
           <tr><td style="padding:6px 0;color:#9C9C9C;width:110px;">Taller</td><td style="padding:6px 0;font-weight:700;">${escapeHtml(taller || '')}</td></tr>
           ${fechaLegible ? `<tr><td style="padding:6px 0;color:#9C9C9C;">Fecha</td><td style="padding:6px 0;">${escapeHtml(fechaLegible)}</td></tr>` : ''}
@@ -258,7 +258,7 @@ async function enviarCorreoRecordatorioTaller({
             <li>Una cuchara para degustación</li>
           </ul>
         </div>
-        <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">¿Dudas o algún cambio de último momento? Escríbenos por WhatsApp al <a href="https://wa.me/52${numeroWhatsapp || ''}" style="color:#7A2E7E;">${numeroWhatsapp || ''}</a>.</p>
+        ${pieEndulcora({ numeroWhatsapp, comunidadLink })}
       </div>
     `,
   });
@@ -475,8 +475,9 @@ async function enviarCorreoRecordatorioClaseGratis({ to, nombre, horario, fecha,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
         <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        ${arteUrl ? `<img src="${escapeHtml(arteUrl)}" alt="" width="432" style="display:block;width:100%;max-width:432px;height:auto;border-radius:16px;margin:0 0 16px;border:0;">` : ''}
         <h1 style="font-size:20px;color:#4E1454;">${escapeHtml(titulo)}, ${escapeHtml(nombre || '')}</h1>
-        <p style="font-size:14px;line-height:1.6;">Este es tu recordatorio para que no se te pase:</p>
+        <p style="font-size:14px;line-height:1.6;">${diasFaltan === 1 ? `Mañana${horario ? ` a las <strong>${escapeHtml(horario)}</strong>` : ''} es tu taller de <strong>${escapeHtml(taller || '')}</strong>${sede ? ` en ${escapeHtml(sede)}` : ''}. Llega 10 minutos antes.` : 'Este es tu recordatorio para que no se te pase:'}</p>
         <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:14px;">
           ${fechaLegible ? `<tr><td style="padding:6px 6px 6px 0;width:24px;">📅</td><td style="padding:6px 0;">${escapeHtml(fechaLegible)}</td></tr>` : ''}
           ${horario ? `<tr><td style="padding:6px 6px 6px 0;">🕐</td><td style="padding:6px 0;">Horario: ${escapeHtml(horario)}</td></tr>` : ''}
@@ -487,6 +488,54 @@ async function enviarCorreoRecordatorioClaseGratis({ to, nombre, horario, fecha,
         <p style="margin-top:12px;"><a href="${whatsappUrl}" style="background:#4E1454;color:#FBF4E9;padding:9px 18px;border-radius:999px;text-decoration:none;font-weight:700;font-size:12px;">Avisar por WhatsApp</a></p>
       </div>
     `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
+// ---- Plantilla de los correos del plan de ventas ----
+// Todos terminan con el mismo pie (WhatsApp y Comunidad de avisos) y pueden
+// llevar arriba el arte cuadrado de la masterclass o del taller.
+function pieEndulcora({ numeroWhatsapp, comunidadLink } = {}) {
+  const tel = String(numeroWhatsapp || '').replace(/\D/g, '').slice(-10);
+  const lineas = [];
+  if (tel) lineas.push(`¿Dudas? Escríbenos por WhatsApp: <a href="https://wa.me/521${tel}" style="color:#7A2E7E;">https://wa.me/521${tel}</a>`);
+  if (comunidadLink) lineas.push(`Únete a la Comunidad Endulcora para enterarte de cambios y novedades: <a href="${escapeHtml(comunidadLink)}" style="color:#7A2E7E;">${escapeHtml(comunidadLink)}</a>`);
+  if (!lineas.length) return '';
+  return `<div style="margin-top:26px;border-top:1px solid #efe4ec;padding-top:14px;font-size:12px;line-height:1.6;color:#6b5a6e;">${lineas.map((l) => `<p style="margin:0 0 6px;">${l}</p>`).join('')}</div>`;
+}
+
+function datosPie(contenido = {}) {
+  return { numeroWhatsapp: contenido.whatsapp_numero, comunidadLink: contenido.comunidad_avisos_link };
+}
+
+function botonPlan(texto, url, fondo = '#F5A623', color = '#1B0720') {
+  return `<p style="margin:18px 0 4px;"><a href="${url}" style="display:inline-block;background:${fondo};color:${color};padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;">${texto}</a></p>`;
+}
+
+// arteUrl: imagen cuadrada (URL completa). cuerpo: HTML ya armado.
+function plantillaPlan({ arteUrl, cuerpo, pie, preheader }) {
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#ffffff;">
+${preheader ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(preheader)}</div>` : ''}
+<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#1B0720;">
+  <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;margin:0 0 14px;">Endulcora</p>
+  ${arteUrl ? `<img src="${escapeHtml(arteUrl)}" alt="" width="472" style="display:block;width:100%;max-width:472px;height:auto;border-radius:16px;margin:0 0 18px;border:0;">` : ''}
+  <div style="font-size:15px;line-height:1.6;">${cuerpo}</div>
+  ${pie || ''}
+</div></body></html>`;
+}
+
+async function enviarCorreoHtml({ to, asunto, html, attachments, headers }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: asunto,
+    html,
+    ...(attachments ? { attachments } : {}),
+    ...(headers ? { headers } : {}),
   });
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
@@ -749,7 +798,7 @@ async function enviarCorreoAccesoAnticipado({ to, nombre, titulo, fecha, horario
 
 // Confirmacion de pago del acceso anticipado: su ficha (o su acceso en
 // linea), el recetario adjunto y lo que incluye.
-async function enviarCorreoAccesoConfirmado({ to, nombre, titulo, fecha, horario, ubicacion, tipo, numero, pasoAOnline, membresiaHasta, yaEraMiembro, recetarioUrl, recetarioNombre, siteUrl, link }) {
+async function enviarCorreoAccesoConfirmado({ to, nombre, titulo, fecha, horario, ubicacion, tipo, numero, pasoAOnline, membresiaHasta, yaEraMiembro, recetarioUrl, recetarioNombre, siteUrl, link, arteUrl, numeroWhatsapp, comunidadLink }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
   const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
@@ -765,35 +814,40 @@ async function enviarCorreoAccesoConfirmado({ to, nombre, titulo, fecha, horario
   const { error } = await client.emails.send({
     from,
     to,
-    subject: presencial ? `Tu ficha N.º ${numero} para ${titulo || 'la master class'}` : `Tu acceso en línea a ${titulo || 'la master class'}`,
+    subject: presencial ? 'Listo: tu lugar está asegurado' : 'Listo: tu acceso en línea está asegurado',
     html: `
       <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:24px;color:#1B0720;">
         <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        ${arteUrl ? `<img src="${escapeHtml(arteUrl)}" alt="" width="452" style="display:block;width:100%;max-width:452px;height:auto;border-radius:16px;margin:0 0 16px;border:0;">` : ''}
         <h1 style="font-size:20px;color:#4E1454;">¡Listo, ${escapeHtml(nombre || '')}!</h1>
+        <p style="font-size:14px;line-height:1.6;">Tu acceso anticipado a <strong>${escapeHtml(titulo || 'la master class')}</strong> está pagado.</p>
         ${pasoAOnline ? '<p style="font-size:14px;line-height:1.6;background:#fde8e4;border-radius:10px;padding:10px 12px;">Mientras se confirmaba tu pago se ocuparon las últimas fichas presenciales, así que tu compra quedó como <strong>acceso en línea</strong>: recetario, mes de membresía y descuentos exclusivos.</p>' : ''}
         ${presencial
           ? `<div style="margin-top:12px;border-radius:16px;background:#4E1454;color:#FBF4E9;padding:18px 20px;">
               <table style="width:100%;border-collapse:collapse;"><tr>
-                <td style="vertical-align:middle;"><p style="margin:0;font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.75;">Ficha de asistencia</p><p style="margin:4px 0 0;font-size:18px;font-weight:700;">${escapeHtml(nombre || '')}</p><p style="margin:2px 0 0;font-size:12px;opacity:.8;">${escapeHtml(titulo || '')}</p></td>
-                <td style="vertical-align:middle;text-align:right;"><p style="margin:0;font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.75;">N.º</p><p style="margin:0;font-size:44px;font-weight:800;color:#F5A623;line-height:1;">${escapeHtml(String(numero))}</p></td>
+                <td style="vertical-align:middle;color:#FBF4E9;"><p style="margin:0;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#d9c7da;">Ficha de asistencia</p><p style="margin:4px 0 0;font-size:18px;font-weight:700;color:#FBF4E9;">${escapeHtml(nombre || '')}</p><p style="margin:2px 0 0;font-size:12px;color:#e3d3e4;">${escapeHtml(titulo || '')}</p></td>
+                <td style="vertical-align:middle;text-align:right;color:#FBF4E9;"><p style="margin:0;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#d9c7da;">N.º</p><p style="margin:0;font-size:44px;font-weight:800;color:#F5A623;line-height:1;">${escapeHtml(String(numero))}</p></td>
               </tr></table>
             </div>
             <p style="font-size:14px;line-height:1.6;margin-top:12px;">Muestra esta ficha al llegar. Es tu pase de entrada y de coffee break.</p>`
           : `<p style="font-size:14px;line-height:1.6;">Tienes tu <strong>acceso en línea</strong>: ves la clase en vivo desde tu casa con tu membresía.</p>`}
         ${datosClaseHtml({ fecha, horario, ubicacion: presencial ? ubicacion : '' })}
         <div style="margin-top:16px;border-radius:14px;background:#FBF4E9;padding:14px 16px;">
-          <p style="margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7A2E7E;font-weight:700;">Lo que incluye tu acceso</p>
+          <p style="margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7A2E7E;font-weight:700;">Esto es lo que tienes</p>
           <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.7;">
-            ${presencial ? '<li>Ficha de asistencia y coffee break: café, aperitivo y degustación.</li>' : ''}
-            <li>${recetarioUrl ? 'Recetario de la master class: va adjunto en este correo.' : 'Recetario de la master class: te lo mandamos por correo en cuanto esté listo.'}</li>
-            <li>${membresiaTexto}</li>
+            ${presencial ? '<li>Tu lugar con ficha de asistencia y coffee break el día de la clase.</li>' : ''}
+            <li>${recetarioUrl ? 'Tu recetario digital: va adjunto en este correo.' : 'Tu recetario digital: te lo mandamos por correo en cuanto esté listo.'}</li>
+            <li>La grabación, que te llega después de la clase.</li>
+            <li><strong>Un mes gratis de Club Endulcora</strong>: recetario del mes, revista, taller en línea mensual, biblioteca de grabaciones y lectura de todos los ebooks. ${membresiaTexto}</li>
             <li>Descuentos exclusivos para asistentes.</li>
           </ul>
         </div>
         <div style="margin-top:12px;border-radius:14px;background:#fff4df;border:1px solid #f5c66b;padding:14px 16px;">
           <p style="margin:0;font-size:13px;line-height:1.6;">${AVISO_DESCUENTOS_MASTER_CLASS}</p>
         </div>
-        <p style="margin-top:18px;"><a href="${link}" style="background:#4E1454;color:#FBF4E9;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">${presencial ? 'Ver mi ficha' : 'Ver mi acceso'}</a></p>
+        <p style="margin-top:18px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;">Entrar a mi membresía</a></p>
+        <p style="margin-top:10px;font-size:13px;"><a href="${link}" style="color:#7A2E7E;">${presencial ? 'Ver mi ficha' : 'Ver mi acceso'}</a></p>
+        ${pieEndulcora({ numeroWhatsapp, comunidadLink })}
       </div>
     `,
     attachments,
@@ -806,7 +860,7 @@ function fechaLegible(iso) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', timeZone: 'America/Mexico_City' });
 }
 
-function plantillaRegalo({ nombre, titulo, parrafos, caja, botonTexto, siteUrl, letraChica }) {
+function plantillaRegalo({ nombre, titulo, parrafos, caja, botonTexto, siteUrl, letraChica, pie }) {
   return `
     <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
       <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
@@ -816,7 +870,8 @@ function plantillaRegalo({ nombre, titulo, parrafos, caja, botonTexto, siteUrl, 
       ${caja ? `<div style="background:#FBF4E9;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.6;margin-top:12px;">${caja}</div>` : ''}
       <p style="margin-top:18px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">${botonTexto}</a></p>
       ${letraChica ? `<p style="margin-top:16px;font-size:12px;color:#7a6a7e;line-height:1.5;">${letraChica}</p>` : ''}
-      <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">Recibiste este correo porque activaste tu mes de membresía de regalo en endulcora.com.</p>
+      ${pie || ''}
+      <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">Recibiste este correo porque activaste tu mes de membresía en endulcora.com.</p>
     </div>
   `;
 }
@@ -847,7 +902,7 @@ async function enviarCorreoRegaloActivado({ to, nombre, siteUrl, hasta }) {
 // Recordatorio a los 15, 3 y 1 dias de que termine el regalo. Si cancelo
 // durante el regalo, el mismo recordatorio la invita a volver a domiciliar
 // su membresia antes de perder el acceso.
-async function enviarCorreoRecordatorioRegalo({ to, nombre, siteUrl, dias, hasta, cancelada, origen }) {
+async function enviarCorreoRecordatorioRegalo({ to, nombre, siteUrl, dias, hasta, cancelada, origen, numeroWhatsapp, comunidadLink }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
   const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
@@ -859,15 +914,14 @@ async function enviarCorreoRecordatorioRegalo({ to, nombre, siteUrl, dias, hasta
   let botonTexto;
   let letraChica;
   if (origen === 'acceso_anticipado') {
-    // Mes pagado con el acceso anticipado de la master class (pago unico):
-    // renovarla es decision de la asistente.
-    subject = dias === 1 ? 'Mañana termina tu mes de membresía Endulcora' : `Tu mes de membresía Endulcora termina ${cuando}`;
+    // Mes gratis con el acceso anticipado de la masterclass (pago unico):
+    // correo 8 del plan de ventas. Renovarla es decision de la asistente.
+    subject = dias === 1 ? 'Tu mes gratis en Club Endulcora termina mañana' : `Tu mes gratis en Club Endulcora termina ${cuando}`;
     parrafos = [
-      `El mes de membresía que venía con tu acceso a la master class termina ${cuando}. Después ya no podrás ver el taller, la revista, la biblioteca de clases ni los eBooks.`,
-      'Renovarla es tu decisión: si quieres seguir, domicilia tu membresía desde tu cuenta. No se te cobra nada antes de que termine tu mes.',
+      `${dias === 1 ? 'Mañana' : `En ${dias} días`} termina tu mes gratis. Para seguir con tu recetario del mes, el taller en línea y todos los ebooks, quédate por <b>$100 al mes</b>, con cargo automático. Puedes cancelar cuando quieras.`,
     ];
-    caja = `<b>Te ${dias === 1 ? 'queda 1 día' : `quedan ${dias} días`}.</b> Si la domicilias, tu primer cargo de $100 MXN sería el ${fecha}.`;
-    botonTexto = 'Domiciliar mi membresía';
+    caja = `Si te quedas, tu primer cargo sería el ${fecha}, cuando termine tu mes gratis. No se te cobra nada antes.`;
+    botonTexto = 'Seguir en Club Endulcora';
   } else if (cancelada) {
     subject = dias === 1 ? 'Mañana pierdes tu acceso a Endulcora' : `Tu acceso a Endulcora termina ${cuando}`;
     parrafos = [
@@ -891,7 +945,7 @@ async function enviarCorreoRecordatorioRegalo({ to, nombre, siteUrl, dias, hasta
     from,
     to,
     subject,
-    html: plantillaRegalo({ nombre, siteUrl, parrafos, caja, botonTexto, letraChica }),
+    html: plantillaRegalo({ nombre, siteUrl, parrafos, caja, botonTexto, letraChica, pie: pieEndulcora({ numeroWhatsapp, comunidadLink }) }),
   });
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
@@ -1123,6 +1177,12 @@ async function enviarAvisoEquipoArchivoFaltante({ to, order, faltan, siteUrl }) 
 }
 
 module.exports = {
+  pieEndulcora,
+  datosPie,
+  botonPlan,
+  plantillaPlan,
+  enviarCorreoHtml,
+  AVISO_DESCUENTOS_MASTER_CLASS,
   enviarCorreoAdjuntoEbook,
   enviarAvisoEquipoArchivoFaltante,
   htmlCorreoBuenFin,

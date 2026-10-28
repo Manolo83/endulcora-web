@@ -9,13 +9,9 @@ const store = require('./store');
 const email = require('./email');
 const googleSheets = require('./googleSheets');
 const { sincronizarCalendarioFisico } = require('./syncCalendarioTalleres');
-const { EQUIPO_NOTIFICACIONES_EMAIL } = require('./config');
+const { EQUIPO_NOTIFICACIONES_EMAIL, SITE_URL } = require('./config');
 
 const INTERVALO_MS = 30 * 60 * 1000; // cada 30 minutos es de sobra para avisos de dias
-
-function fechaISO(date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
 
 // Junta la inscripcion con su sesion y su sede — lo que piden tanto el
 // recordatorio por correo como la fila de Sheets.
@@ -25,14 +21,16 @@ function datosCompletos(inscripcion) {
   return { inscripcion, sesion, sede };
 }
 
-async function revisarRecordatoriosTaller() {
-  const hoy = new Date();
-  const fechaHoy = fechaISO(hoy);
-  const fechaEn2Dias = fechaISO(new Date(hoy.getTime() + 2 * 24 * 60 * 60 * 1000));
+// Recordatorio de taller (correo 10 del plan de ventas): uno solo, el dia
+// anterior desde las 10:00 am de CDMX.
+async function revisarRecordatoriosTaller(ahora = new Date()) {
+  const diaCDMX = (d) => d.toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+  const horaCDMX = Number(ahora.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Mexico_City' }));
+  if (horaCDMX < 10) return;
+  const manana = diaCDMX(new Date(ahora.getTime() + 24 * 60 * 60 * 1000));
 
   const tandas = [
-    { campo: 'recordatorio2diasEnviado', fecha: fechaEn2Dias, diasFaltan: 2 },
-    { campo: 'recordatorioMismoDiaEnviado', fecha: fechaHoy, diasFaltan: 0 },
+    { campo: 'recordatorio1diaEnviado', fecha: manana, diasFaltan: 1 },
   ];
 
   for (const tanda of tandas) {
@@ -55,6 +53,8 @@ async function revisarRecordatoriosTaller() {
           saldo: inscripcion.saldo,
           diasFaltan: tanda.diasFaltan,
           numeroWhatsapp: contenido.whatsapp_numero,
+          comunidadLink: contenido.comunidad_avisos_link,
+          arteUrl: sesion && sesion.fotoUrl ? (/^https?:\/\//.test(sesion.fotoUrl) ? sesion.fotoUrl : `${SITE_URL}${sesion.fotoUrl}`) : '',
         });
         store.marcarRecordatorioTallerEnviado(inscripcion.id, tanda.campo);
       } catch (e) {
@@ -190,6 +190,7 @@ function iniciarAutomatizacionesTaller() {
 module.exports = {
   iniciarAutomatizacionesTaller,
   revisarAutomatizacionesTaller,
+  revisarRecordatoriosTaller,
   sincronizarInscripcionTaller,
   avisarEquipoNuevoTaller,
   hojaCalculadaPara,

@@ -8,7 +8,7 @@
 // donde se quedo en vez de perder el resto o repetir correos.
 const store = require('./store');
 const { SITE_URL } = require('./config');
-const { enviarCorreoAccesoAnticipado, enviarCorreoRecordatorioClaseGratis } = require('./email');
+const { enviarCorreoAccesoAnticipado } = require('./email');
 const acceso = require('./accesoAnticipado');
 
 let procesando = false;
@@ -85,53 +85,10 @@ function reanudarEnvioConfirmacionPendiente() {
   }, ESPERA_INICIAL_MS);
 }
 
-function fechaISO(date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
-// Recordatorio solo a quien de verdad confirmo su lugar (no a todos los
-// registrados) -- mismo criterio de 2 dias antes + el mismo dia que ya
-// corre para los talleres pagados.
-async function revisarRecordatoriosClaseGratis() {
-  const hoy = new Date();
-  const fechaHoy = fechaISO(hoy);
-  const fechaEn2Dias = fechaISO(new Date(hoy.getTime() + 2 * 24 * 60 * 60 * 1000));
-  const contenido = store.getContent();
-
-  const tandas = [
-    { campo: 'recordatorio2diasClaseEnviado', fecha: fechaEn2Dias, diasFaltan: 2 },
-    { campo: 'recordatorioMismoDiaClaseEnviado', fecha: fechaHoy, diasFaltan: 0 },
-  ];
-  for (const tanda of tandas) {
-    const pendientes = store.getRegistrosClaseGratis().filter(
-      (r) => r.confirmado && r.fecha === tanda.fecha && !r[tanda.campo]
-    );
-    for (const registro of pendientes) {
-      try {
-        await enviarCorreoRecordatorioClaseGratis({
-          to: registro.correo,
-          nombre: registro.nombre,
-          horario: registro.horario,
-          fecha: registro.fecha,
-          ubicacion: contenido.clasegratis_ubicacion,
-          diasFaltan: tanda.diasFaltan,
-          numeroWhatsapp: contenido.whatsapp_numero,
-          tituloClase: contenido.clasegratis_titulo,
-          numeroFicha: registro.numeroInscrito,
-        });
-        store.marcarRecordatorioClaseGratisEnviado(registro.id, tanda.campo);
-      } catch (e) {
-        console.error(`[clase-gratis] No se pudo mandar el recordatorio (${tanda.campo}) a ${registro.correo}:`, e.message);
-      }
-    }
-  }
-}
-
-const INTERVALO_MS = 30 * 60 * 1000;
+// Los recordatorios de antes (2 dias y el mismo dia, solo a quien pago)
+// los reemplazan los correos del plan de ventas: src/correosMasterclass.js.
 function iniciarAutomatizacionClaseGratis() {
   reanudarEnvioConfirmacionPendiente();
-  revisarRecordatoriosClaseGratis().catch(() => {});
-  setInterval(() => revisarRecordatoriosClaseGratis().catch(() => {}), INTERVALO_MS);
 }
 
 module.exports = { procesarEnvioConfirmacionClaseGratis, iniciarAutomatizacionClaseGratis, mandarCorreoAcceso };

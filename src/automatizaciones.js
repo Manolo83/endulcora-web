@@ -94,6 +94,8 @@ async function revisarRegalosMembresia() {
         hasta: usuario.membresiaRegaloHasta,
         cancelada: usuario.membresiaRegaloCancelada,
         origen: usuario.membresiaOrigen,
+        numeroWhatsapp: store.getContent().whatsapp_numero,
+        comunidadLink: store.getContent().comunidad_avisos_link,
       });
       const enviados = new Set([...(usuario.regaloRecordatoriosEnviados || []), ...pendiente.marcarComoEnviados]);
       store.updateUser(usuario.id, { regaloRecordatoriosEnviados: [...enviados] });

@@ -180,7 +180,7 @@ router.patch('/api/content', requireAdmin, (req, res) => {
   res.json(item);
 });
 
-const CAMPOS_IMAGEN_CONTENIDO = ['chef_imagen', 'asistente_icono'];
+const CAMPOS_IMAGEN_CONTENIDO = ['chef_imagen', 'asistente_icono', 'clasegratis_arte'];
 router.post('/api/content/:key/image', requireAdmin, uploadImage.single('file'), procesarImagenSubida, (req, res) => {
   const { key } = req.params;
   if (!CAMPOS_IMAGEN_CONTENIDO.includes(key)) {
@@ -650,6 +650,36 @@ router.post('/api/blog/:id/image', requireAdmin, uploadImage.single('file'), pro
 });
 
 // ---- Ventas (pedidos de Mercado Pago + cobros de membresia) ----
+// ---- Correos de la masterclass del plan de ventas (src/correosMasterclass.js) ----
+router.get('/api/masterclass/correos', requireAdmin, (req, res) => {
+  const correos = require('../correosMasterclass');
+  res.json({ ...correos.resumen(), correos: Object.entries(correos.CORREOS).map(([n, c]) => ({ n: Number(n), titulo: c.titulo })) });
+});
+
+router.get('/api/masterclass/correos/vista/:n', requireAdmin, (req, res) => {
+  const correos = require('../correosMasterclass');
+  const n = Number(req.params.n);
+  if (!correos.CORREOS[n]) return res.status(404).send('No existe.');
+  const { asunto, html } = correos.ejemplo(n);
+  res.type('html').send(html.replace('<body', `<body data-asunto="${asunto.replace(/"/g, '&quot;')}"`));
+});
+
+router.post('/api/masterclass/correos/prueba', requireAdmin, async (req, res) => {
+  const correos = require('../correosMasterclass');
+  const { enviarCorreoHtml } = require('../email');
+  const n = Number((req.body || {}).n);
+  const correo = String((req.body || {}).email || '').trim().toLowerCase();
+  if (!correos.CORREOS[n]) return res.status(400).json({ error: 'Correo no válido.' });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) return res.status(400).json({ error: 'Escribe el correo donde quieres recibir la prueba.' });
+  try {
+    const { asunto, html } = correos.ejemplo(n);
+    await enviarCorreoHtml({ to: correo, asunto: `[PRUEBA] ${asunto}`, html });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(502).json({ error: e.message || 'No se pudo mandar la prueba.' });
+  }
+});
+
 // ---- Recordatorios automaticos del Buen Fin (ver src/recordatoriosBuenFin.js) ----
 router.get('/api/buen-fin/recordatorios', requireAdmin, (req, res) => {
   res.json({

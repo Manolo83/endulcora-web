@@ -97,6 +97,26 @@ const DEFAULT_CONTENT = {
   // coffee break, recetario y 1 mes de membresia; cuando se llenan, el
   // mismo precio da recetario + mes de membresia (clase en linea).
   clasegratis_cupo_horario: '50',
+  // ---- Correos automaticos de la masterclass (src/correosMasterclass.js) ----
+  // Arte cuadrado (imagen) que va arriba de todos sus correos.
+  clasegratis_arte: '',
+  // Link para entrar a la clase en linea (correo "Empezamos en 1 hora").
+  clasegratis_link_clase: '',
+  // Link de la grabacion (correo "Tu grabacion..."); ese correo espera a que
+  // se ponga aqui.
+  clasegratis_link_grabacion: '',
+  // Duracion de cada horario, en horas (el correo de la grabacion sale 2
+  // horas despues de que termina el horario de cada persona).
+  clasegratis_duracion_horas: '2',
+  // Taller con precio especial para quienes estuvieron en la masterclass (la
+  // venta es en sucursal) y sus fechas en cada sucursal, en texto.
+  clasegratis_taller_oferta: '',
+  clasegratis_taller_fechas_nativitas: '',
+  clasegratis_taller_fechas_division: '',
+  // Interruptor de los correos 2 a 6, y fecha (AAAA-MM-DD) a partir de la
+  // cual aplican: no se mandan a masterclasses anteriores a la publicacion.
+  masterclass_correos_activo: 'true',
+  masterclass_correos_desde: '',
   clasegratis_acceso_precio: '100',
   // Fecha y hora (AAAA-MM-DDTHH:MM, hora de CDMX) en que se cierra la venta
   // del acceso anticipado. Vacio = abierto hasta el dia de la clase.
@@ -122,6 +142,9 @@ const DEFAULT_CONTENT = {
   // ni ser miembro (ver registrosVideoEnVivo / POST
   // /api/clase-en-vivo/registro y /confirmar-comunidad), e invitacion
   // opcional en el registro de clase gratis y de talleres.
+  // Comunidad de avisos de WhatsApp: va en el pie de los correos del plan
+  // de ventas (junto con el WhatsApp de dudas).
+  comunidad_avisos_link: 'https://chat.whatsapp.com/F4og9zbWdb32SoMek9rH7J',
   comunidad_whatsapp_link: 'https://chat.whatsapp.com/GazcjgRuMje3jm4V9REu2V?s=sw&p=a&mlu=4&ilr=4',
   // Precio/anticipo/cupo con los que se da de alta un taller nuevo cuando
   // se importa de un jalon (a mano desde /admin o solo desde el calendario
@@ -1175,6 +1198,13 @@ async function init() {
         paquete.archivoNombre = `${tituloBase} - Paquete completo.zip`;
       });
       data._migZipsPaquetesFaltantes = true;
+      changed = true;
+    }
+    // Correos automaticos de la masterclass: solo para masterclasses desde
+    // el dia en que se publican (no le llegan de golpe a registrados de
+    // clases que ya pasaron).
+    if (!data.content.masterclass_correos_desde) {
+      data.content.masterclass_correos_desde = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
       changed = true;
     }
     // Recetario de Pan de Muerto (suelto): oferta de la clase gratis en

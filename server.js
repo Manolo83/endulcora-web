@@ -602,6 +602,8 @@ store.init()
     require('./src/entregas').iniciarEntregasAutomaticas();
     // Recordatorios del Buen Fin (3 dias, ultimo dia) y pagos a medias.
     require('./src/recordatoriosBuenFin').iniciarRecordatoriosBuenFin();
+    // Correos 2 a 6 de la masterclass (plan de ventas).
+    require('./src/correosMasterclass').iniciarCorreosMasterclass();
     // Confirmacion de lugar de la clase gratis (control de aforo con tope
     // de cupo) y sus recordatorios a quien ya confirmo.
     require('./src/confirmacionClaseGratis').iniciarAutomatizacionClaseGratis();

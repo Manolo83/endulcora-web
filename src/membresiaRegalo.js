@@ -9,7 +9,10 @@ const store = require('./store');
 const DIAS_REGALO = 30;
 // Dias antes de que termine el regalo en los que se le avisa (en su cuenta
 // de endulcora.com y por correo). Ordenados de mayor a menor.
-const RECORDATORIOS_REGALO = [15, 3, 1];
+// Correo de aviso: uno solo, 5 dias antes de que termine (dia 25 del mes,
+// plan de ventas). El aviso dentro del sitio sale desde los 15 dias.
+const RECORDATORIOS_REGALO = [5];
+const DIAS_AVISO_SITIO = 15;
 const DIA_MS = 24 * 60 * 60 * 1000;
 
 function fechaFinRegalo(desde = new Date()) {
@@ -78,7 +81,7 @@ function resumenRegalo(usuario, ahora = new Date()) {
     // 'regalo_live' | 'acceso_anticipado': cambia el texto de los avisos.
     origen: usuario.membresiaOrigen || '',
     // El aviso en su cuenta aparece a partir del primer recordatorio (15 dias).
-    mostrarAviso: diasRestantes <= RECORDATORIOS_REGALO[0],
+    mostrarAviso: diasRestantes <= DIAS_AVISO_SITIO,
     recetarioDisponible: !!usuario.regaloRecetarioUrl,
   };
 }
@@ -93,7 +96,9 @@ function recordatorioPendiente(usuario, ahora = new Date()) {
   const alcanzados = RECORDATORIOS_REGALO.filter((h) => dias <= h);
   if (!alcanzados.length) return null;
   const masCercano = alcanzados[alcanzados.length - 1];
-  if (enviados.includes(masCercano)) return null;
+  // (enviados con un hito igual o mas cercano: incluye a quien ya recibio
+  // los avisos de antes de 3 y 1 dia, para no mandarle uno de mas).
+  if (enviados.some((h) => h <= masCercano)) return null;
   return { hito: masCercano, dias, marcarComoEnviados: alcanzados };
 }
 

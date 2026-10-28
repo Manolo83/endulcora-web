@@ -419,6 +419,9 @@ function procesarAccesoAnticipadoDelPedido(order, nuevoEstado) {
     recetarioNombre: registro.accesoRecetarioNombre,
     siteUrl: SITE_URL,
     link: acceso.linkAcceso(SITE_URL, registro),
+    arteUrl: contenido.clasegratis_arte ? (/^https?:\/\//.test(contenido.clasegratis_arte) ? contenido.clasegratis_arte : `${SITE_URL}${contenido.clasegratis_arte}`) : '',
+    numeroWhatsapp: contenido.whatsapp_numero,
+    comunidadLink: contenido.comunidad_avisos_link,
   })
     .then(() => store.updateRegistroClaseGratis(registro.id, { accesoCorreoEnviado: true }))
     .catch((err) => console.error(`[acceso-anticipado] No se pudo mandar el correo de confirmacion a ${registro.correo}:`, err.message));

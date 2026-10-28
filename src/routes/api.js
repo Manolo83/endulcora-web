@@ -5,7 +5,7 @@ const store = require('../store');
 const { UPLOAD_DIR, GOOGLE_ADS, SITE_URL } = require('../config');
 const { requireCliente } = require('./auth');
 const { uploadImage, uploadMedia, procesarImagenSubida, ALLOWED_VIDEO } = require('../uploads');
-const { enviarCorreoConfirmacionInscripcionTaller, enviarCorreoConfirmacionClaseGratis, linkAgregarCalendario } = require('../email');
+const { enviarCorreoConfirmacionInscripcionTaller, linkAgregarCalendario } = require('../email');
 const { sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 const acceso = require('../accesoAnticipado');
 const promoBuenFin = require('../promoBuenFin');
@@ -686,25 +686,14 @@ router.post('/clase-gratis/registro', (req, res) => {
   // correo de acceso anticipado, para no quedarse fuera del embudo.
   const accesoYaAbierto = acceso.accesoAbierto(contenido);
   res.status(201).json({ ok: true, id: item.id, accesoUrl: accesoYaAbierto ? `/acceso-anticipado?id=${item.id}&token=${item.confirmToken}` : '' });
-  if (accesoYaAbierto) {
-    store.marcarRecordatorioClaseGratisEnviado(item.id, 'correoConfirmarEnviado');
-    require('../confirmacionClaseGratis').mandarCorreoAcceso(item, contenido).catch((e) => {
-      console.error(`[acceso-anticipado] No se pudo mandar el correo de acceso a ${item.correo}:`, e.message);
-    });
-  }
+  // El correo de confirmacion (correo 1 del plan) ya lleva el link de su
+  // acceso anticipado cuando esta abierto: no se le manda otro aparte.
+  if (accesoYaAbierto) store.marcarRecordatorioClaseGratisEnviado(item.id, 'correoConfirmarEnviado');
 
   // El correo de confirmacion nunca debe tumbar el registro: la persona ya
   // quedo registrada aunque Resend falle o no este configurado. Se manda
   // despues de responder para no retrasar la confirmacion en pantalla.
-  enviarCorreoConfirmacionClaseGratis({
-    to: item.correo,
-    nombre: item.nombre,
-    horario: item.horario,
-    fecha: contenido.clasegratis_fecha,
-    ubicacion: contenido.clasegratis_ubicacion,
-    numeroWhatsapp: contenido.whatsapp_numero,
-    linkWhatsappGrupo: contenido.clasegratis_whatsapp_grupo,
-  }).catch((e) => {
+  require('../correosMasterclass').mandarConfirmacionRegistro(item, contenido).catch((e) => {
     console.error(`[clase-gratis] No se pudo mandar el correo de confirmacion a ${item.correo}:`, e.message);
   });
 });

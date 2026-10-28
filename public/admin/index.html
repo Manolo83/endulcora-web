@@ -384,6 +384,64 @@
               <input data-content-key="clasegratis_whatsapp_grupo" type="url" placeholder="https://chat.whatsapp.com/..." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
               <span class="mt-1 block text-xs text-carbon/50">Se invita a unirse a este grupo, tanto en el correo como en la pantalla de "ya quedaste registrado". Déjalo vacío para no mostrar esta invitación.</span>
             </label>
+            <div class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Arte de la masterclass (imagen cuadrada)</span>
+              <p class="mt-1 text-xs text-carbon/50">Va arriba de todos sus correos. Súbela en JPG o PNG (así se ve en todos los correos). La misma imagen sirve para la Comunidad y el anuncio.</p>
+              <div id="claseGratisArtePreview" class="mt-2"></div>
+              <div class="mt-2 flex flex-wrap items-center gap-3">
+                <input id="claseGratisArteInput" type="file" accept="image/jpeg,image/png" class="text-sm">
+                <button type="button" id="btnSubirClaseGratisArte" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir arte</button>
+                <button type="button" id="btnQuitarClaseGratisArte" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar</button>
+              </div>
+            </div>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link para entrar a la clase</span>
+              <input data-content-key="clasegratis_link_clase" type="url" placeholder="https://..." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <span class="mt-1 block text-xs text-carbon/50">Va en el correo "Empezamos en 1 hora".</span>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link de la grabación</span>
+              <input data-content-key="clasegratis_link_grabacion" type="url" placeholder="https://..." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <span class="mt-1 block text-xs text-carbon/50">El correo de la grabación espera a que lo pongas.</span>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Duración de cada horario (horas)</span>
+              <input data-content-key="clasegratis_duracion_horas" type="text" inputmode="decimal" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <span class="mt-1 block text-xs text-carbon/50">El correo de la grabación sale 2 horas después de que termina cada horario.</span>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Taller con precio especial</span>
+              <input data-content-key="clasegratis_taller_oferta" type="text" placeholder="Pan de Muerto Gourmet" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <span class="mt-1 block text-xs text-carbon/50">Se menciona sin precio; la venta es en sucursal. Vacío = no salen los correos 5 y 6.</span>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Fechas del taller en Nativitas</span>
+              <input data-content-key="clasegratis_taller_fechas_nativitas" type="text" placeholder="jue 19 y sáb 21 de noviembre" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Fechas del taller en División del Norte</span>
+              <input data-content-key="clasegratis_taller_fechas_division" type="text" placeholder="dom 22 de noviembre" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link de la Comunidad de avisos (pie de los correos)</span>
+              <input data-content-key="comunidad_avisos_link" type="url" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+          </div>
+          <div class="mt-5 rounded-xl border border-vino/10 p-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-carbon/60">Correos automáticos de la masterclass</p>
+              <select data-content-key="masterclass_correos_activo" class="rounded-full border border-vino/20 bg-white px-3 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino">
+                <option value="true">Activados</option>
+                <option value="false">Pausados</option>
+              </select>
+            </div>
+            <p class="mt-1 text-xs text-carbon/50">Salen solos para cada registrado. El de confirmación sale al registrarse; los demás según su fecha y horario. Guarda los cambios para pausarlos o activarlos.</p>
+            <div id="masterclassCorreosFaltan" class="mt-3"></div>
+            <div id="masterclassCorreosLista" class="mt-2 divide-y divide-vino/10"></div>
+            <label class="mt-3 block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Mandarme las pruebas a</span>
+              <input id="masterclassPruebaCorreo" type="email" placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
           </div>
           <p class="mt-4 text-xs text-carbon/40">El precio del Curso de Masa Madre se edita en la pestaña <a href="#seccionCursos" class="underline hover:text-vino">Cursos</a>; el del Recetario suelto, en <a href="#seccionProductos" class="underline hover:text-vino">Productos</a>.</p>
         </div>
@@ -1941,6 +1999,8 @@ async function cargarContenidoAdmin(){
     pintarAsistenteIcono(CONTENIDO_ACTUAL.asistente_icono);
     pintarClaseRecetario(CONTENIDO_ACTUAL.clase_recetario_url, CONTENIDO_ACTUAL.clase_recetario_nombre);
     pintarClaseGratisRecetario(CONTENIDO_ACTUAL.clasegratis_recetario_url, CONTENIDO_ACTUAL.clasegratis_recetario_nombre);
+    pintarClaseGratisArte(CONTENIDO_ACTUAL.clasegratis_arte);
+    cargarCorreosMasterclass();
     cargarBuenFinAdmin();
   }catch(e){
     toast('No se pudo cargar el contenido general');
@@ -2173,6 +2233,73 @@ $('btnCopiarMensajeBuenFin').addEventListener('click', async () => {
   const texto = $('mensajeBuenFin').textContent;
   try{ await navigator.clipboard.writeText(texto); toast('Mensaje copiado'); }
   catch(e){ toast('Selecciona el texto y cópialo'); }
+});
+
+/* ---- Correos de la masterclass (plan de ventas) ---- */
+const CUANDO_CORREO_MASTERCLASS = {
+  1: 'Al registrarse',
+  2: 'Un día antes, 10:00 am',
+  3: '1 hora antes de su horario',
+  4: '2 horas después de su horario',
+  5: 'Día 2 después de la clase, 10:00 am',
+  6: 'Día 3 después de la clase, 10:00 am',
+};
+async function cargarCorreosMasterclass(){
+  try{
+    const r = await api('/admin/api/masterclass/correos');
+    $('masterclassCorreosFaltan').innerHTML = r.faltan.length
+      ? `<p class="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">Falta configurar: ${r.faltan.map(escapeHtml).join('; ')}.</p>`
+      : '<p class="text-xs text-green-700">✓ Todo configurado.</p>';
+    $('masterclassCorreosLista').innerHTML = r.correos.map(c => `
+      <div class="flex flex-wrap items-center justify-between gap-2 py-2.5">
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-600 text-vino">${c.n}. ${escapeHtml(c.titulo)}</p>
+          <p class="text-xs text-carbon/55">${CUANDO_CORREO_MASTERCLASS[c.n] || ''}${c.n > 1 && r.aplica ? ` · ${r.conteo[c.n] || 0} de ${r.registrados} enviados` : ''}</p>
+        </div>
+        <div class="flex shrink-0 gap-2">
+          <a href="/admin/api/masterclass/correos/vista/${c.n}" target="_blank" class="rounded-full border border-vino/25 px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-wider text-vino">Ver correo</a>
+          <button type="button" class="btnPruebaMasterclass rounded-full border border-vino/25 px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-wider text-vino" data-n="${c.n}">Enviarme prueba</button>
+        </div>
+      </div>`).join('');
+  }catch(e){
+    $('masterclassCorreosLista').innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+$('masterclassCorreosLista').addEventListener('click', async (e) => {
+  const b = e.target.closest('.btnPruebaMasterclass');
+  if(!b) return;
+  b.disabled = true;
+  try{
+    await api('/admin/api/masterclass/correos/prueba', { method: 'POST', body: JSON.stringify({ n: Number(b.dataset.n), email: $('masterclassPruebaCorreo').value }) });
+    toast('Prueba enviada: revisa tu correo');
+  }catch(err){ toast(err.message); }
+  b.disabled = false;
+});
+function pintarClaseGratisArte(url){
+  $('claseGratisArtePreview').innerHTML = url
+    ? `<img src="${escapeHtml(url)}" alt="" class="h-32 w-32 rounded-xl object-cover ring-1 ring-vino/10">`
+    : '<p class="text-sm text-carbon/50">Todavía no hay arte.</p>';
+}
+$('btnSubirClaseGratisArte').addEventListener('click', async () => {
+  const archivo = $('claseGratisArteInput').files[0];
+  if(!archivo){ toast('Elige una imagen'); return; }
+  const fd = new FormData();
+  fd.append('file', archivo);
+  try{
+    const res = await fetch('/admin/api/content/clasegratis_arte/image', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir');
+    pintarClaseGratisArte(data.url);
+    toast('Arte guardado');
+    cargarCorreosMasterclass();
+  }catch(e){ toast(e.message); }
+});
+$('btnQuitarClaseGratisArte').addEventListener('click', async () => {
+  try{
+    await api('/admin/api/content/clasegratis_arte/image', { method: 'DELETE' });
+    pintarClaseGratisArte('');
+    cargarCorreosMasterclass();
+  }catch(e){ toast(e.message); }
 });
 
 function pintarClaseGratisRecetario(url, nombre){
