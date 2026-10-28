@@ -175,6 +175,10 @@ async function revisarAutomatizacionesTaller() {
     if (cambiosNov26S1 > 0) {
       console.log(`[talleres] ${cambiosNov26S1} ajustes en los talleres de nov26 semana 1 (fusion/foto/precio).`);
     }
+    const cambiosNov26S2a4 = store.asegurarTalleresNov26S2a4();
+    if (cambiosNov26S2a4 > 0) {
+      console.log(`[talleres] ${cambiosNov26S2a4} ajustes en los talleres de nov26 semanas 2 a 4 (fusion/foto/precio/horario).`);
+    }
   } catch (e) {
     console.error('[talleres] Error revisando automatizaciones:', e.message);
   } finally {

@@ -3089,6 +3089,228 @@ module.exports = {
     return cambios;
   },
 
+  // Semanas 2 a 4 de noviembre 2026 (12 al 29). Mismo mecanismo y mismas
+  // reglas de fusion que asegurarTalleresNov26S1: el calendario fisico
+  // sincroniza solo cada 30 min con titulos cortos ("Cheesecakes") y esto
+  // deja una sola sesion por taller/fecha, con la version completa.
+  //
+  // Las fechas salen del calendario oficial de noviembre que Manuel paso el
+  // 28 oct (una imagen por sede), no de notas viejas. Manzanas Navidenas y
+  // Galleta Decorada Navidena NO van aqui: quedaron en espera porque falta
+  // la foto de sus disenos.
+  //
+  // Las imagenes son los artes de anuncio, a falta de foto de producto: asi
+  // la pagina del taller no sale vacia el dia que el anuncio empieza a
+  // mandar gente. Como solo se escriben cuando fotoUrl esta vacio, en
+  // cuanto se suba una foto de verdad desde /admin esta se queda.
+  asegurarTalleresNov26S2a4() {
+    const data = load();
+    const SEED_DIR_TALLERES = path.join(__dirname, '..', 'seed-archivos', 'talleres-nov26-s2a4');
+    const normalizar = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const sedePorNombre = (nombre) => (data.sedes || []).find((s) => normalizar(s.nombre).includes(nombre));
+    const sedeNativitas = sedePorNombre('nativitas');
+    const sedeDivision = sedePorNombre('division');
+    const copiarImagen = (archivo) => {
+      const origen = path.join(SEED_DIR_TALLERES, archivo);
+      if (!fs.existsSync(origen)) return '';
+      const destino = `${crypto.randomUUID()}${path.extname(archivo)}`;
+      fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+      return `/uploads/${destino}`;
+    };
+    const HORARIO_MANANA = '10:00 am – 2:00 pm';
+    const HORARIO_TARDE = '4:00 pm – 8:00 pm';
+    const DEFINICIONES_NOV26_S2A4 = [
+      {
+        sede: sedeNativitas, clave: 'tiramis', titulo: 'Tiramisú Douyin',
+        fechas: ['2026-11-12', '2026-11-14'], horario: HORARIO_MANANA, imagen: '20261112_TiramisuDouyin_NATIVITAS_1x1.jpg',
+        descripcion: 'El tiramisú en molde con capas visibles que se volvió tendencia. Aprende a hacerlo en cuatro sabores, con una crema estable que no se escurre. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas tiramisú en 4 sabores: mango, frutos rojos, cookies and cream y pistacho. Además aprendes crema estable que no se escurre, capas visibles y parejas en molde, remojo justo de la base, y conservación en frío.',
+      },
+      {
+        sede: sedeNativitas, clave: 'sushi', titulo: 'Sushi para Principiantes',
+        fechas: ['2026-11-12', '2026-11-15'], horario: HORARIO_MANANA, imagen: '20261112_Sushi_NATIVITAS_1x1.jpg',
+        descripcion: 'Sushi en casa, aunque nunca lo hayas hecho. Desde el arroz hasta el corte perfecto. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas arroz shari (cocción y sazonado), rollo con alga por dentro, rollo con alga por fuera, sushi frito, y armas tus propios rollos con surimi, camarón, queso y verduras. Además aprendes técnicas de enrollado y cortes uniformes.',
+      },
+      {
+        sede: sedeNativitas, clave: 'galletas ny', titulo: 'Galletas NY',
+        fechas: ['2026-11-13', '2026-11-15'], horario: HORARIO_MANANA, imagen: '20261113_GalletasNY_NATIVITAS_1x1.jpg',
+        descripcion: 'La galleta gruesa estilo Nueva York, con orilla dorada y centro suave. Aprende a hacer una masa que no se extiende en el horno y a sacarla en el punto exacto. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas 5 galletas rellenas: conejito de chocolate intenso con relleno cremoso, corazón red velvet, volcán de chocolate y avellana con centro líquido, caramelo de galleta especiada y carrot cake rellena. Además aprendes la masa que no se extiende en el horno, reposo en frío y porcionado, el punto de horneado para un centro suave, y conservación y empaque.',
+      },
+      {
+        sede: sedeNativitas, clave: 'fresas cubiertas', titulo: 'Fresas Cubiertas',
+        fechas: ['2026-11-13', '2026-11-14'], horario: HORARIO_MANANA, imagen: '20261113_FresasCubiertas_NATIVITAS_1x1.jpg',
+        descripcion: 'Fresas cubiertas que se ven de aparador: limpias, brillantes y en tendencia. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Aprendes a preparar la fresa para que no sude ni se eche a perder, el fundido y manejo de la cobertura, la inmersión limpia sin "pie" ni burbujas, y decoración en tendencia: hilado, doble baño, colorantes liposolubles, matizadores metálicos y toppings crocantes.',
+      },
+      {
+        sede: sedeNativitas, clave: 'mixiote', titulo: 'Mixiotes',
+        fechas: ['2026-11-15'], horario: HORARIO_MANANA, imagen: '20261115_Mixiotes_NATIVITAS_1x1.jpg',
+        descripcion: 'Mixiotes como los de casa de la abuela. El sabor tradicional, paso a paso. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas mixiotes de carnero o cerdo, el recado para hacerlos, nopales y salsas para acompañar.',
+      },
+      {
+        sede: sedeNativitas, clave: 'pasteler', titulo: 'Pastelería Básica',
+        fechas: ['2026-11-19', '2026-11-21'], horario: HORARIO_MANANA, imagen: '20261119_PasteleriaBasica_NATIVITAS_1x1.jpg',
+        descripcion: 'Si siempre quisiste hacer pasteles, empieza aquí. Tu primer pastel, bien hecho. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas bizcochos de vainilla, chocolate y naranja. Además aprendes coberturas (chantilly, ganache y glaseado) y el montaje del pastel.',
+      },
+      {
+        sede: sedeNativitas, clave: 'laminado', titulo: 'Panes Laminados',
+        fechas: ['2026-11-19', '2026-11-22'], horario: HORARIO_MANANA, imagen: '20261119_PanesLaminados_NATIVITAS_1x1.jpg',
+        descripcion: 'Panes laminados de panadería fina, con masa danesa de capas perfectas. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas carteras, cuernitos, corbatas y chocolatines. Además aprendes la masa danesa desde cero.',
+      },
+      {
+        sede: sedeNativitas, clave: 'galleter', titulo: 'Galletería Fina para Venta',
+        fechas: ['2026-11-20', '2026-11-21'], horario: HORARIO_MANANA, imagen: '20261120_GalleteriaFina_NATIVITAS_1x1.jpg',
+        descripcion: 'Galletería fina con acabado profesional. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas galletas de bases versátiles, alfajores suaves y rellenos, tartinas con toppings, y garabatos crujientes cubiertos de chocolate.',
+      },
+      {
+        sede: sedeNativitas, clave: 'bombon', titulo: 'Bombonería',
+        fechas: ['2026-11-20', '2026-11-22'], horario: HORARIO_MANANA, imagen: '20261120_Bomboneria_NATIVITAS_1x1.jpg',
+        descripcion: 'Bombones de vaciado, como de chocolatería, con técnica profesional. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas bombones de maracuyá (tropical, fresco y equilibrado), mango con chile (dulce con un toque picante) y crema de avellana (suave y cremosa). Además aprendes la técnica de bombones de vaciado.',
+      },
+      {
+        sede: sedeNativitas, clave: 'coctel', titulo: 'Coctelería de Barrio',
+        fechas: ['2026-11-21'], horario: HORARIO_TARDE, imagen: '20261121_CocteleriaDeBarrio_NATIVITAS_1x1.jpg',
+        descripcion: 'Los clásicos de la fiesta, desde cero. Taller vespertino de 4 horas. Solo mayores de 18 años.',
+        queAprendes: 'Preparas mojito de frutos de temporada, submarinos de ron (4 versiones), michelada clásica y cubana, azulito, pulque de sabores, aguas locas "finas", veneno (petróleo) desde cero, clamatos preparados y bloody mary, y cocteles sorpresa. Además aprendes técnicas básicas de coctelería, combinación de sabores y manejo de hielo y mezclas.',
+      },
+      {
+        sede: sedeNativitas, clave: 'barbacoa', titulo: 'Barbacoa',
+        fechas: ['2026-11-22'], horario: HORARIO_MANANA, imagen: '20261122_Barbacoa_NATIVITAS_1x1.jpg',
+        descripcion: 'Barbacoa de domingo, hecha por ti: suave, deshebrada y con su consomé. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas barbacoa de res tradicional, adobo especial de chiles y especias, consomé con garbanzo y arroz, tacos de barbacoa, y salsa borracha con pulque y salsa verde. Además aprendes marinado y adobo tradicional, uso de hojas de plátano y sellado, cocción para carne suave y deshebrada, y consomé con sabor profundo.',
+      },
+      {
+        sede: sedeNativitas, clave: 'roles', titulo: 'Roles Gourmet',
+        fechas: ['2026-11-26', '2026-11-29'], horario: HORARIO_MANANA, imagen: '20261126_RolesGourmet_NATIVITAS_1x1.jpg',
+        descripcion: 'Roles esponjosos en cinco sabores, con cinco glaseados para combinar. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas 5 roles: clásico de canela, chocolate, queso con zarzamora, matcha y manzana caramelizada. Además aprendes 5 glaseados (clásico, chocolate, queso crema, limón y caramelo), masa suave y esponjosa, fermentación para volumen y textura, y horneado parejo y conservación.',
+      },
+      {
+        sede: sedeNativitas, clave: 'nixtamal', titulo: 'Nixtamalización',
+        fechas: ['2026-11-27', '2026-11-28'], horario: HORARIO_MANANA, imagen: '20261127_Nixtamalizacion_NATIVITAS_1x1.jpg',
+        descripcion: 'Masa de maíz hecha por ti, desde el grano. Del maíz a la masa, y de la masa a la mesa. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas nixtamal y masa desde cero, tortillas, sopes, quesadillas y gorditas.',
+      },
+      {
+        sede: sedeNativitas, clave: 'vintage', titulo: 'Pastel Vintage',
+        fechas: ['2026-11-27', '2026-11-29'], horario: HORARIO_MANANA, imagen: '20261127_PastelVintage_NATIVITAS_1x1.jpg',
+        descripcion: 'El pastel vintage que está de vuelta: la tendencia retro más dulce. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas bizcochos desde cero y el montaje y decoración estilo vintage. Además aprendes modelaje y coloración para acabados únicos, boquillas para bordes ondulados, guirnaldas y flores en relieve, y combinación de colores pastel y adornos elegantes.',
+      },
+      {
+        sede: sedeDivision, clave: 'vela', titulo: 'Velas Comestibles',
+        fechas: ['2026-11-12', '2026-11-14'], horario: HORARIO_MANANA, imagen: '20261112_VelasComestibles_DIVISION_1x1.jpg',
+        descripcion: 'Parece una vela. Se enciende. Y se come. Tres velas comestibles con mecha comestible y flama controlada. Taller presencial de 4 horas.',
+        queAprendes: 'Preparas 3 velas comestibles: base de mantequilla (cremosa y suave), base de chocolate (intensa, para acompañar postres) y de frutos rojos (entre dulzor y acidez). Además aprendes mecha comestible y control de flama, estabilización de la grasa, decoración de cada vela, y conservación y cadena de frío.',
+      },
+      {
+        sede: sedeDivision, clave: 'cheesecake', titulo: 'Cheesecakes Horneados',
+        fechas: ['2026-11-13', '2026-11-15'], horario: HORARIO_MANANA, imagen: '20261113_CheesecakesHorneados_DIVISION_1x1.jpg',
+        descripcion: 'El cheesecake horneado tiene fama de difícil: se agrieta, se hunde o queda arenoso. Aquí aprendes la técnica completa para que salga liso y cremoso cada vez, desde la base de galleta hasta el desmolde. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas 3 cheesecakes: New York clásico (denso y cremoso, horneado a baño maría), de zarzamora con compota casera y decoración tipo swirl, y estilo tortuga con base de nuez, caramelo, ganache y nueces. Además aprendes base de galleta firme que no se desmorona, batido sin aire para una textura lisa, horneado a baño maría sin grietas, y enfriado, desmolde y conservación.',
+      },
+      {
+        sede: sedeDivision, clave: 'charcuter', titulo: 'Tablas de Charcutería',
+        fechas: ['2026-11-14'], horario: HORARIO_TARDE, imagen: '20261114_TablasDeCharcuteria_DIVISION_1x1.jpg',
+        descripcion: 'La tabla que se roba la reunión. Aprende a elegir, cortar y acomodar quesos, carnes frías, fruta y crujientes para armar tablas abundantes y bien equilibradas. Taller vespertino de 4 horas, para principiantes.',
+        queAprendes: 'Armas tu propia tabla de 15x25 cm con rosas de charcutería, plisados en abanico, geometría en quesos y zonificación estética. Además aprendes maridaje de texturas, elección de quesos y carnes frías, corte de quesos según su textura, y conservación y empaque para llevar.',
+      },
+      {
+        sede: sedeDivision, clave: 'fresas cubiertas', titulo: 'Fresas Cubiertas',
+        fechas: ['2026-11-19', '2026-11-21'], horario: HORARIO_MANANA, imagen: '20261119_FresasCubiertas_DIVISION_1x1.jpg',
+        descripcion: 'Fresas cubiertas que se ven de aparador: limpias, brillantes y en tendencia. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Aprendes a preparar la fresa para que no sude ni se eche a perder, el fundido y manejo de la cobertura, la inmersión limpia sin "pie" ni burbujas, y decoración en tendencia: hilado, doble baño, colorantes liposolubles, matizadores metálicos y toppings crocantes.',
+      },
+      {
+        sede: sedeDivision, clave: 'empanada', titulo: 'Empanadas Argentinas',
+        fechas: ['2026-11-20', '2026-11-22'], horario: HORARIO_MANANA, imagen: '20261120_EmpanadasArgentinas_DIVISION_1x1.jpg',
+        descripcion: 'Empanadas argentinas jugosas, con masa casera y repulgue perfecto. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas rellenos de carne argentina, pollo especiado, jamón y queso, y salsa chimichurri. Además aprendes masa casera para hornear y freír, armado y sellado (repulgue), cocción en horno y fritura, y balance de sabor, jugosidad y conservación.',
+      },
+      {
+        sede: sedeDivision, clave: 'pays', titulo: 'Pays y Tartas',
+        fechas: ['2026-11-27', '2026-11-29'], horario: HORARIO_MANANA, imagen: '20261127_PaysYTartas_DIVISION_1x1.jpg',
+        descripcion: 'Pays y tartas de pastelería, con bases que no se encogen ni se humedecen. Taller presencial de 4 horas, para principiantes.',
+        queAprendes: 'Preparas 4 postres: pay de queso, pay de nuez, tarta de frutas y tarta de chocolate. Además aprendes 2 masas base (sucrée y sablé), amasado y horneado sin que se encojan, base que no se humedece ni se rompe, y rellenos cremosos, conservación y porcionado.',
+      },
+      {
+        sede: sedeDivision, clave: 'coctel', titulo: 'Coctelería de Barrio',
+        fechas: ['2026-11-28'], horario: HORARIO_TARDE, imagen: '20261128_CocteleriaDeBarrio_DIVISION_1x1.jpg',
+        descripcion: 'Los clásicos de la fiesta, desde cero. Taller vespertino de 4 horas. Solo mayores de 18 años.',
+        queAprendes: 'Preparas mojito de frutos de temporada, submarinos de ron (4 versiones), michelada clásica y cubana, azulito, pulque de sabores, aguas locas "finas", veneno (petróleo) desde cero, clamatos preparados y bloody mary, y cocteles sorpresa. Además aprendes técnicas básicas de coctelería, combinación de sabores y manejo de hielo y mezclas.',
+      },
+    ];
+    let cambios = 0;
+    DEFINICIONES_NOV26_S2A4.forEach((def) => {
+      if (!def.sede) return; // sede no encontrada: no crea nada a ciegas
+      def.fechas.forEach((fecha) => {
+        const encontradas = data.sesionesTaller.filter((s) => s.sedeId === def.sede.id && s.fecha === fecha
+          && normalizar(s.titulo).includes(def.clave));
+        let sobreviviente = encontradas.find((s) => s.fotoUrl)
+          || [...encontradas].sort((a, b) => b.titulo.length - a.titulo.length || a.id - b.id)[0];
+        if (!sobreviviente) {
+          const mismaFecha = data.sesionesTaller.filter((s) => s.sedeId === def.sede.id && s.fecha === fecha);
+          sobreviviente = {
+            id: nextId(data.sesionesTaller),
+            sedeId: def.sede.id,
+            fecha,
+            titulo: def.titulo,
+            estado: 'disponible',
+            horario: def.horario,
+            orden: mismaFecha.length,
+            slug: slugUnicoSesionTaller(data, def.titulo),
+            descripcion: '',
+            queAprendes: '',
+            fotoUrl: '',
+            precioTotal: 0,
+            anticipo: 0,
+            cupoMaximo: null,
+            hojaSheets: `${def.titulo}${esSedeDivision(def.sede.nombre) ? ' div' : ''}`,
+          };
+          data.sesionesTaller.push(sobreviviente);
+          cambios += 1;
+        }
+        if (sobreviviente.titulo.length < def.titulo.length) { sobreviviente.titulo = def.titulo; cambios += 1; }
+        // El horario SI se corrige: los vespertinos (Charcuteria, Cocteleria)
+        // llegan del calendario fisico con el horario de la manana.
+        if (sobreviviente.horario !== def.horario) { sobreviviente.horario = def.horario; cambios += 1; }
+        if (!sobreviviente.fotoUrl) { sobreviviente.fotoUrl = copiarImagen(def.imagen); cambios += 1; }
+        if (!sobreviviente.descripcion) { sobreviviente.descripcion = def.descripcion; cambios += 1; }
+        if (!sobreviviente.queAprendes) { sobreviviente.queAprendes = def.queAprendes; cambios += 1; }
+        if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 1149; cambios += 1; }
+        if (!sobreviviente.anticipo) { sobreviviente.anticipo = 400; cambios += 1; }
+        if (sobreviviente.cupoMaximo == null) { sobreviviente.cupoMaximo = 20; cambios += 1; }
+        encontradas.filter((s) => s.id !== sobreviviente.id).forEach((dup) => {
+          (data.inscripcionesTaller || []).forEach((i) => {
+            if (i.sesionTallerId === dup.id) i.sesionTallerId = sobreviviente.id;
+          });
+          data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== dup.id);
+          cambios += 1;
+        });
+      });
+    });
+    // Curso Chocolateria del 23 nov: esta en el sitio y NO en el calendario
+    // oficial que Manuel mando el 28 oct. Viene del Excel de Drive, que se
+    // sincroniza solo cada 30 min (ver syncCalendarioTalleres) y que por
+    // diseño nunca borra, solo agrega: si se borrara de aqui, volveria a
+    // aparecer en la siguiente vuelta. Por eso se marca "agotado" en vez de
+    // borrarse — asi deja de venderse, la sincronizacion lo ve existir y no
+    // lo vuelve a crear, y nadie que se haya inscrito queda apuntado a un
+    // taller fantasma. Para quitarlo del todo hay que sacarlo del Excel.
+    const sobra = data.sesionesTaller.find((s) => s.fecha === '2026-11-23'
+      && normalizar(s.titulo).includes('chocolat'));
+    if (sobra && sobra.estado !== 'agotado') { sobra.estado = 'agotado'; cambios += 1; }
+    if (cambios) save(data);
+    return cambios;
+  },
+
   // Solo lectura: para sacar el link real de cada uno de los 14 (8
   // talleres x fecha) de la campaña de noviembre semana 1, sin adivinar el
   // slug (puede haber sobrevivido el de la sesion creada por el calendario
