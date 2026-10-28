@@ -285,6 +285,14 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     </div>
   </div>
 
+  <!-- Post-it: promoción El Buen Fin (mientras está activa, le gana el lugar al de recetario del mes) -->
+  <a id="promoBuenFin" href="/buen-fin" class="postit-vivo hidden absolute right-3 top-3 z-20 w-[168px] origin-top rounded-md bg-flama px-3.5 pb-3.5 pt-6 text-carbon shadow-2xl transition hover:scale-[1.03] sm:right-8 sm:top-8 sm:w-[210px] sm:px-4 sm:pt-7">
+    <span class="absolute left-1/2 top-1.5 h-4 w-4 -translate-x-1/2 rounded-full bg-vino shadow ring-2 ring-white/70 sm:h-5 sm:w-5"></span>
+    <p class="font-titulo text-base font-800 leading-tight text-vino sm:text-xl">¡El Buen Fin llegó antes!</p>
+    <p class="mt-1.5 text-[10.5px] leading-snug text-carbon/80 sm:text-xs">eBooks a precio especial por tiempo limitado.</p>
+    <span class="mt-3 block rounded-full bg-vino px-3 py-2 text-center font-ui text-[9.5px] font-700 uppercase tracking-wider text-crema sm:text-[10px]">Ver promoción</span>
+  </a>
+
   <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:py-20 lg:grid-cols-[.95fr_1.05fr] lg:px-8 lg:py-28">
     <div>
       <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-morado/30 bg-white/60 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-vino">
@@ -2207,6 +2215,18 @@ cargarSesion();
 cargarHeroCarrusel();
 cargarCalendarioSemana();
 cargarPromoRecetarioMes();
+cargarPromoBuenFin();
+
+async function cargarPromoBuenFin(){
+  try{
+    const promo = await (await fetch('/api/buen-fin')).json();
+    if(!promo.abierta) return;
+    // Mientras el Buen Fin está activo le gana el lugar a la tarjeta del
+    // recetario del mes (se recupera sola cuando la promoción se apague).
+    document.getElementById('promoRecetarioMes').classList.add('hidden');
+    document.getElementById('promoBuenFin').classList.remove('hidden');
+  }catch(e){}
+}
 
 async function cargarPromoRecetarioMes(){
   try{
