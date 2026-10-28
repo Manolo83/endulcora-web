@@ -1474,8 +1474,12 @@
           <h2 class="font-titulo text-2xl tracking-wide text-vino">Video en vivo — registros gratis</h2>
           <p class="mt-1 text-sm text-carbon/60">Cuando la clase en vivo (lunes a jueves) no tiene cobro activo, quien no es miembro tiene que llenar este registro para ver el video — se vuelve a pedir en cada sesión. Configura el link del grupo de WhatsApp y los datos de la clase en la pestaña <a href="#seccionContenido" class="underline hover:text-vino">Contenido</a>.</p>
         </div>
-        <a href="/admin/api/clase-en-vivo/registros/excel" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Exportar Excel</a>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="btnRecordatorioVideoEnVivoHoy" class="rounded-full bg-vino px-4 py-2 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Mandar recordatorio de hoy</button>
+          <a href="/admin/api/clase-en-vivo/registros/excel" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Exportar Excel</a>
+        </div>
       </div>
+      <p id="recordatorioVideoEnVivoResultado" class="mt-2 hidden text-sm"></p>
 
       <div class="mt-4 flex flex-wrap items-center gap-4 rounded-2xl bg-vino p-6 text-crema">
         <div class="shrink-0">
@@ -4872,6 +4876,24 @@ function renderContadorVideoEnVivo(){
     <span class="rounded-full bg-crema/10 px-3 py-1.5 font-ui text-[11px] font-600 text-crema/90">${escapeHtml(f)}: <strong>${porFecha[f]}</strong></span>
   `).join('') : '<span class="font-ui text-[11px] text-crema/50">Sin registros todavía</span>';
 }
+
+$('btnRecordatorioVideoEnVivoHoy').addEventListener('click', async () => {
+  if(!confirm('¿Mandar el correo "Hoy es tu clase en vivo" a todos los que se registraron para la clase de hoy? Esta acción no se puede deshacer.')) return;
+  const btn = $('btnRecordatorioVideoEnVivoHoy');
+  const p = $('recordatorioVideoEnVivoResultado');
+  btn.disabled = true;
+  p.classList.remove('hidden');
+  p.textContent = 'Enviando…';
+  try{
+    const r = await api('/admin/api/clase-en-vivo/recordatorio-hoy', { method: 'POST' });
+    p.textContent = `Enviado a ${r.enviados} de ${r.total} registrados para hoy (${r.fecha})${r.fallidos.length ? ` — ${r.fallidos.length} fallaron` : ''}.`;
+    toast('Recordatorio mandado');
+  }catch(e){
+    p.textContent = e.message;
+  }finally{
+    btn.disabled = false;
+  }
+});
 
 async function cargarVideoEnVivoAdmin(){
   const cont = $('listaVideoEnVivo');

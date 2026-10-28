@@ -17,6 +17,7 @@ const checkoutRoutes = require('./src/routes/checkout');
 const authRoutes = require('./src/routes/auth');
 const asistenteRoutes = require('./src/routes/asistente');
 const googleAdsRoutes = require('./src/routes/googleAds');
+const reporteVentasRoutes = require('./src/routes/reporteVentas');
 const membresiaRoutes = require('./src/routes/membresia');
 const leventSyncRoutes = require('./src/routes/leventSync');
 const lexRoutes = require('./src/routes/lex');
@@ -170,6 +171,18 @@ const googleAdsLimiter = rateLimit({
   message: { error: 'Demasiadas peticiones al panel de Google Ads. Espera unos minutos.' },
 });
 app.use('/api/google-ads', googleAdsLimiter, googleAdsRoutes);
+
+// Lectura de ventas e inscripciones para decidir presupuesto de anuncios:
+// protegida por su propio token (REPORTE_VENTAS_TOKEN), solo lectura y sin
+// datos personales. Limitada igual que el resto de lo que lleva token.
+const reporteVentasLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas peticiones al reporte de ventas. Espera unos minutos.' },
+});
+app.use('/api/reporte', reporteVentasLimiter, reporteVentasRoutes);
 
 // Sincronizacion con la base de datos general de Levent: protegida por su
 // propio token y limitada, porque expone contactos aunque sean pocos campos.
