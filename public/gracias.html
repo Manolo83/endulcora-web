@@ -303,7 +303,7 @@ function pintarDescargas(pedido){
     return;
   }
   cont.innerHTML = disponibles.map(i => `
-    <a href="/api/pedidos/${ordenId}/descarga/${i.index}?token=${encodeURIComponent(pedido.descargaToken)}&archivo=1"
+    <a href="/api/pedidos/${ordenId}/descarga/${i.index}?token=${encodeURIComponent(pedido.descargaToken)}"
       class="flex items-center justify-between gap-3 rounded-2xl border border-vino/15 bg-crema/60 px-5 py-4 hover:border-vino/40 transition">
       <span class="font-ui text-sm font-600 text-vino">${escapeHtml(i.titulo || 'Descargar')}</span>
       <span class="shrink-0 rounded-full bg-vino px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-crema">Descargar</span>

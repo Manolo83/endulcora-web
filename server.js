@@ -598,6 +598,8 @@ store.init()
     require('./src/automatizaciones').iniciarAutomatizacionRegalos();
     // Revisa cada hora con Mercado Pago los pedidos que siguen pendientes.
     require('./src/revisarPagos').iniciarRevisionAutomatica();
+    // Reintenta cada hora los correos de compra que no se pudieron mandar.
+    require('./src/entregas').iniciarEntregasAutomaticas();
     // Confirmacion de lugar de la clase gratis (control de aforo con tope
     // de cupo) y sus recordatorios a quien ya confirmo.
     require('./src/confirmacionClaseGratis').iniciarAutomatizacionClaseGratis();

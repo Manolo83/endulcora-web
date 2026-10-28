@@ -1,17 +1,16 @@
 const express = require('express');
 const crypto = require('crypto');
-const path = require('path');
-const fs = require('fs');
 const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const store = require('../store');
-const { SITE_URL, UPLOAD_DIR } = require('../config');
-const { enviarCorreoConfirmacionCompra, enviarCorreoConfirmacionPagoTaller } = require('../email');
+const { SITE_URL } = require('../config');
+const { enviarCorreoConfirmacionPagoTaller } = require('../email');
 const { enviarPurchaseCAPI } = require('../metaConversions');
 const { enviarCompraGoogle } = require('../googleAds/conversiones');
 const { avisarEquipoNuevoTaller, sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 const bcrypt = require('bcryptjs');
 const acceso = require('../accesoAnticipado');
 const promoBuenFin = require('../promoBuenFin');
+const entregas = require('../entregas');
 const { enviarCorreoAccesoConfirmado } = require('../email');
 
 const router = express.Router();
@@ -558,24 +557,13 @@ async function aplicarPagoAlPedido(info) {
             numeroWhatsapp: contenido.whatsapp_numero,
           });
         })()
-      : (() => {
-          const itemsConArchivo = actualizado.items.map((item) => {
-            if (item.tipo !== 'producto') return item;
-            const producto = store.getProduct(item.itemId);
-            const archivoExiste = !!(producto && producto.archivo && fs.existsSync(path.join(UPLOAD_DIR, path.basename(producto.archivo))));
-            return { ...item, archivoDisponible: archivoExiste };
-          });
-          return enviarCorreoConfirmacionCompra({
-            to: actualizado.email,
-            order: { ...actualizado, items: itemsConArchivo },
-            siteUrl: SITE_URL,
-            numeroWhatsapp: contenido.whatsapp_numero,
-          });
-        })();
+      : entregas.mandarCorreoCompra(actualizado);
     correoListo
       .then(() => store.updateOrder(order.id, { correoEnviado: true }))
       .catch((err) => {
-        // Si el correo no se pudo enviar (ej. servicio no configurado), el pedido sigue visible en /admin > Ventas.
+        // Si el correo no se pudo enviar (ej. Resend caido), queda marcado y
+        // src/entregas.js lo reintenta cada hora; tambien se ve en Ventas.
+        entregas.registrarFalloCorreo(store.getOrder(order.id), err);
         console.error(`[checkout] No se pudo enviar el correo de confirmacion del pedido ${order.id}:`, err.message);
       });
   }

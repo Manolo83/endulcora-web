@@ -1158,7 +1158,7 @@ function iniciarModalPerfil(){
 
 const ETIQUETA_ESTADO_CLIENTE = {
   pendiente: 'Pendiente', en_proceso: 'En proceso', aprobado: 'Aprobado',
-  rechazado: 'Rechazado', cancelado: 'Cancelado', reembolsado: 'Reembolsado', error: 'Error al iniciar',
+  rechazado: 'Rechazado', cancelado: 'Cancelado', reembolsado: 'Reembolsado', error: 'Error al iniciar', abandonado: 'Pago no completado',
 };
 
 async function cargarOrdenesPerfil(){
@@ -1178,6 +1178,9 @@ async function cargarOrdenesPerfil(){
         <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${escapeHtml(ETIQUETA_ESTADO_CLIENTE[o.estado] || o.estado)} · ${new Date(o.createdAt).toLocaleDateString('es-MX')}</p>
         <ul class="mt-1 space-y-0.5 text-sm text-carbon/75">${lineas}</ul>
         <p class="mt-1 font-titulo text-base text-vino">Total: $${escapeHtml(String(o.total))} MXN</p>
+        ${o.estado === 'aprobado' && o.descargaToken && (o.items || []).some(i => i.tipo === 'producto')
+          ? `<a href="/api/pedidos/${o.id}/ebooks?token=${encodeURIComponent(o.descargaToken)}" class="mt-2 inline-block rounded-full bg-flama px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-carbon">Descargar mis archivos</a>`
+          : ''}
       </div>`;
     }).join('');
   }catch(e){

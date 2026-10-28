@@ -1031,6 +1031,16 @@
       </div>
       <p id="sincronizarPagosResultado" class="mt-2 text-sm"></p>
       <div id="revisionPendientes" class="mt-3 hidden rounded-2xl bg-white p-4 ring-1 ring-vino/10"></div>
+      <div class="mt-3 rounded-2xl bg-white p-4 ring-1 ring-vino/10">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-carbon/60">Archivos de descarga</p>
+            <p class="text-xs text-carbon/50">Revisa que cada eBook, recetario y anexo tenga su PDF bien subido.</p>
+          </div>
+          <button type="button" id="btnRevisarArchivos" class="rounded-full border border-vino/25 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Revisar archivos</button>
+        </div>
+        <div id="resultadoArchivos" class="mt-3 hidden"></div>
+      </div>
       <p class="mt-2 text-xs text-carbon/45">El sitio también revisa solo, cada hora, los pedidos pendientes de los últimos 3 días. Los que pasan 7 días sin ningún pago se marcan como "Abandonado".</p>
       <div id="listaVentas" class="mt-6 space-y-3"></div>
     </section>
@@ -3786,6 +3796,26 @@ const ETIQUETA_ESTADO = {
   abandonado: { texto: 'Abandonado', clase: 'text-carbon/40' },
 };
 
+// Entrega de archivos de un pedido pagado: estado del correo, archivos que
+// falten y botones para atender al cliente (link para WhatsApp, reenviar).
+function bloqueEntrega(o){
+  if(!o.entrega) return '';
+  const faltan = o.entrega.faltan || [];
+  const estadoCorreo = o.correoEnviado
+    ? '<span class="text-green-700">✓ Correo de descarga enviado</span>'
+    : (o.correoError
+      ? `<span class="text-red-600">El correo no salió: ${escapeHtml(o.correoError)}. Se reintenta solo cada hora.</span>`
+      : '<span class="text-carbon/50">Correo de descarga en camino…</span>');
+  return `<div class="mt-2 rounded-xl bg-crema/70 px-3 py-2 text-[13px]">
+    <p>${estadoCorreo}</p>
+    ${faltan.length ? `<p class="mt-1 text-red-600">⚠️ Falta el archivo de: ${faltan.map(escapeHtml).join(', ')}. Súbelo en Productos y luego toca "Reenviar correo".</p>` : ''}
+    <div class="mt-2 flex flex-wrap gap-2">
+      <button type="button" class="btnCopiarLinkEbooks rounded-full border border-vino/25 px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-wider text-vino hover:border-vino" data-link="${escapeHtml(o.entrega.link)}">Copiar enlace de descargas</button>
+      <button type="button" class="btnReenviarCorreo rounded-full border border-vino/25 px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-wider text-vino hover:border-vino" data-id="${o.id}">Reenviar correo</button>
+    </div>
+  </div>`;
+}
+
 // Lo que encontro la revision con Mercado Pago (o.revisionMp), mientras el
 // pedido siga en el estado que dejo la revision.
 function avisoRevisionMp(o){
@@ -3822,6 +3852,7 @@ async function cargarVentas(){
         <p class="mt-2 font-titulo text-lg tracking-wide text-vino">Total: $${escapeHtml(String(o.total))} MXN</p>
         <p class="text-sm text-carbon/60">${escapeHtml(o.email || 'sin correo')}</p>
         ${avisoRevisionMp(o)}
+        ${bloqueEntrega(o)}
       </article>`;
     }).join('');
   }catch(e){
@@ -3831,10 +3862,52 @@ async function cargarVentas(){
 
 $('btnRefrescarVentas').addEventListener('click', cargarVentas);
 $('listaVentas').addEventListener('click', async (e) => {
+  const link = e.target.closest('.btnCopiarLinkEbooks');
+  if(link){
+    try{ await navigator.clipboard.writeText(link.dataset.link); toast('Enlace copiado: pégalo en WhatsApp'); }
+    catch(err){ window.prompt('Copia este enlace:', link.dataset.link); }
+    return;
+  }
+  const reenviar = e.target.closest('.btnReenviarCorreo');
+  if(reenviar){
+    reenviar.disabled = true;
+    try{
+      const r = await api(`/admin/api/orders/${reenviar.dataset.id}/reenviar-correo`, { method: 'POST' });
+      toast(r.faltan && r.faltan.length ? `Correo reenviado a ${r.email}, pero todavía falta: ${r.faltan.join(', ')}` : `Correo reenviado a ${r.email}`);
+      cargarVentas();
+    }catch(err){ toast(err.message); reenviar.disabled = false; }
+    return;
+  }
   const b = e.target.closest('.btnCopiarCorreoVenta');
   if(!b) return;
   try{ await navigator.clipboard.writeText(b.dataset.correo); toast('Correo copiado'); }
   catch(err){ toast(b.dataset.correo); }
+});
+
+// ---- Revision de archivos de descarga ----
+const PROBLEMA_ARCHIVO = {
+  sin_archivo: ['No tiene archivo', 'text-red-600'],
+  falta_en_servidor: ['El archivo no está en el servidor: vuelve a subirlo', 'text-red-600'],
+  pdf_danado: ['El PDF parece dañado: vuelve a subirlo', 'text-red-600'],
+  muy_pesado: ['Pesa mucho: tarda en bajar con datos del celular', 'text-amber-700'],
+};
+$('btnRevisarArchivos').addEventListener('click', async () => {
+  const cont = $('resultadoArchivos');
+  cont.classList.remove('hidden');
+  cont.innerHTML = '<p class="text-sm text-carbon/50">Revisando…</p>';
+  try{
+    const lista = await api('/admin/api/archivos/revision');
+    const mb = (b) => b ? `${(b / 1048576).toFixed(1)} MB` : '';
+    const conProblema = lista.filter(a => a.problema).sort((a, b) => b.ventas - a.ventas);
+    const bien = lista.length - conProblema.length;
+    cont.innerHTML = `<p class="text-sm ${conProblema.length ? 'text-carbon/70' : 'text-green-700'}">${bien} de ${lista.length} archivos están bien.${conProblema.length ? '' : ' ✓'}</p>
+      ${conProblema.length ? `<ul class="mt-2 divide-y divide-vino/10 text-sm">${conProblema.map(a => {
+        const [texto, clase] = PROBLEMA_ARCHIVO[a.problema] || [a.problema, 'text-carbon/60'];
+        return `<li class="flex flex-wrap items-baseline justify-between gap-2 py-2"><span class="font-600 text-carbon/80">${escapeHtml(a.titulo)}${a.esPaquete ? ' <span class="text-xs text-carbon/40">(paquete)</span>' : ''}${a.oculto ? ' <span class="text-xs text-carbon/40">(oculto)</span>' : ''}</span><span class="text-xs ${clase}">${texto}${a.bytes > 52428 ? ` · ${mb(a.bytes)}` : ''}${a.ventas ? ` · ${a.ventas} vendido${a.ventas === 1 ? '' : 's'}` : ''}</span></li>`;
+      }).join('')}</ul>` : ''}`;
+  }catch(e){
+    cont.innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
 });
 
 // ---- Revisar pendientes con Mercado Pago ----

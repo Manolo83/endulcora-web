@@ -10,6 +10,7 @@ const { sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 const acceso = require('../accesoAnticipado');
 const promoBuenFin = require('../promoBuenFin');
 const { paginaDescargas } = require('../paginaDescargas');
+const entregas = require('../entregas');
 
 const router = express.Router();
 
@@ -903,14 +904,31 @@ router.get('/pedidos/:orderId/estado', (req, res) => {
   });
 });
 
-router.get('/pedidos/:orderId/descarga/:itemIndex', (req, res) => {
+// Pedido pagado + token del correo; si no, nada.
+function pedidoConToken(req, res) {
   const order = store.getOrder(req.params.orderId);
   if (!order || order.estado !== 'aprobado') {
-    return res.status(404).send('Pedido no encontrado.');
+    res.status(404).send('Pedido no encontrado.');
+    return null;
   }
   if (!order.descargaToken || req.query.token !== order.descargaToken) {
-    return res.status(403).send('Enlace no válido.');
+    res.status(403).send('Enlace no válido.');
+    return null;
   }
+  return order;
+}
+
+// Pagina "Tus eBooks" (todos los archivos del pedido).
+router.get('/pedidos/:orderId/ebooks', (req, res) => {
+  const order = pedidoConToken(req, res);
+  if (!order) return;
+  res.set('Cache-Control', 'no-store');
+  res.type('html').send(paginaDescargas(order));
+});
+
+router.get('/pedidos/:orderId/descarga/:itemIndex', (req, res) => {
+  const order = pedidoConToken(req, res);
+  if (!order) return;
   // Desde el correo (sin archivo=1) se abre la pagina "Tus eBooks", que si
   // funciona dentro de las apps de correo; sus botones bajan el PDF.
   if (req.query.archivo !== '1') {
@@ -922,22 +940,43 @@ router.get('/pedidos/:orderId/descarga/:itemIndex', (req, res) => {
     return res.status(404).send('Artículo no encontrado.');
   }
   const producto = store.getProduct(item.itemId);
+  const archivo = entregas.archivoDeProducto(producto);
   if (!producto || !producto.archivo) {
     return res.status(404).send('Este artículo todavía no tiene un archivo disponible. Escríbenos por WhatsApp al 5665271901.');
   }
-  const filename = path.basename(producto.archivo);
-  const rutaCompleta = path.join(UPLOAD_DIR, filename);
-  if (!fs.existsSync(rutaCompleta)) {
-    console.error(`[descarga] Falta el archivo de "${producto.titulo}" (producto ${producto.id}) en ${rutaCompleta}. Hay que volver a subirlo en /admin.`);
+  if (!archivo.existe) {
+    console.error(`[descarga] Falta el archivo de "${producto.titulo}" (producto ${producto.id}) en ${archivo.ruta}. Hay que volver a subirlo en /admin.`);
     return res.status(404).send('No pudimos encontrar tu archivo en este momento. Escríbenos por WhatsApp al 5665271901 y te lo mandamos directo.');
   }
-  const nombreDescarga = producto.archivoNombre || `${producto.titulo || 'archivo'}${path.extname(filename)}`;
-  res.download(rutaCompleta, nombreDescarga, (err) => {
+  const nombre = entregas.nombreDescarga(producto, archivo);
+  // ver=1 (iPhone/iPad): se abre en el visor y de ahi se guarda con
+  // Compartir. Si no, se descarga como archivo con su nombre.
+  const disposicion = req.query.ver === '1' ? 'inline' : 'attachment';
+  res.set('Cache-Control', 'private, no-store');
+  res.attachment(nombre);
+  if (disposicion === 'inline') res.set('Content-Disposition', res.get('Content-Disposition').replace(/^attachment/, 'inline'));
+  res.sendFile(archivo.ruta, (err) => {
     if (err && !res.headersSent) {
       console.error(`[descarga] Error al enviar el archivo de "${producto.titulo}":`, err.message);
       res.status(500).send('Ocurrió un error al preparar tu descarga. Escríbenos por WhatsApp al 5665271901.');
     }
   });
+});
+
+// "Mandarmelo por correo": el PDF llega como archivo adjunto.
+router.post('/pedidos/:orderId/adjunto/:itemIndex', async (req, res) => {
+  const order = store.getOrder(req.params.orderId);
+  if (!order || order.estado !== 'aprobado' || !order.descargaToken || req.query.token !== order.descargaToken) {
+    return res.status(403).json({ error: 'Enlace no válido.' });
+  }
+  try {
+    const r = await entregas.mandarAdjunto(order, Number(req.params.itemIndex));
+    if (r.error) return res.status(r.status || 400).json({ error: r.error });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(`[descarga] No se pudo mandar el adjunto del pedido ${order.id}:`, err.message);
+    res.status(502).json({ error: 'No se pudo mandar el correo en este momento. Intenta en un rato o escríbenos por WhatsApp.' });
+  }
 });
 
 module.exports = router;

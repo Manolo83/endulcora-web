@@ -10,7 +10,7 @@ function formatoMonto(n) {
   return Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
-async function enviarCorreoConfirmacionCompra({ to, order, siteUrl, numeroWhatsapp }) {
+async function enviarCorreoConfirmacionCompra({ to, order, siteUrl, numeroWhatsapp, linkEbooks }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
 
@@ -29,7 +29,7 @@ async function enviarCorreoConfirmacionCompra({ to, order, siteUrl, numeroWhatsa
         const url = `${siteUrl}/api/pedidos/${order.id}/descarga/${i}?token=${order.descargaToken}`;
         accion = `<p style="margin:8px 0 0;"><a href="${url}" style="background:#F5A623;color:#1B0720;padding:8px 18px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Descargar</a></p>`;
       } else {
-        accion = `<p style="margin:4px 0 0;font-size:13px;color:#9C9C9C;">Te lo enviaremos pronto a este correo.</p>`;
+        accion = `<p style="margin:4px 0 0;font-size:13px;color:#9C9C9C;">Estamos preparando este archivo y te lo mandamos en cuanto esté listo. Si lo necesitas ya, escríbenos por WhatsApp al ${numeroWhatsapp || ''}.</p>`;
       }
       return `
         <tr>
@@ -51,6 +51,8 @@ async function enviarCorreoConfirmacionCompra({ to, order, siteUrl, numeroWhatsa
         <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
         <h1 style="font-size:20px;color:#4E1454;">¡Gracias por tu compra!</h1>
         <p style="font-size:14px;line-height:1.6;">Confirmamos tu pago por un total de <strong>$${formatoMonto(order.total)} MXN</strong>.</p>
+        ${linkEbooks ? `<p style="margin:18px 0 6px;"><a href="${linkEbooks}" style="display:inline-block;background:#4E1454;color:#FBF4E9;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;">Ver y descargar mis eBooks</a></p>
+        <p style="margin:0;font-size:12.5px;line-height:1.5;color:#6b5a6e;">Funciona en celular, tablet y computadora. Si tu app de correo no descarga el archivo, en esa página puedes pedir que te lo mandemos como archivo adjunto o abrirlo en tu navegador. Guarda este correo: tus eBooks son tuyos para siempre.</p>` : ''}
         <table style="width:100%;border-collapse:collapse;margin-top:12px;">${filasHtml}</table>
         <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">¿Dudas con tu pedido? Escríbenos por WhatsApp al ${numeroWhatsapp || ''}.</p>
       </div>
@@ -995,7 +997,55 @@ async function enviarCorreoBuenFin({ to, asunto, ...datos }) {
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+// "Mandarmelo por correo" desde la pagina "Tus eBooks": el PDF como
+// adjunto, que cualquier app de correo sabe abrir y guardar.
+async function enviarCorreoAdjuntoEbook({ to, titulo, nombreArchivo, contenido, linkEbooks }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: `Tu eBook: ${titulo} · Endulcora`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">Aquí está tu eBook</h1>
+        <p style="font-size:14px;line-height:1.6;">Te mandamos <strong>${escapeHtml(titulo)}</strong> como archivo adjunto. Lo encuentras al final de este correo: tócalo para abrirlo y guárdalo en tu teléfono, tablet o computadora.</p>
+        <p style="font-size:13px;line-height:1.6;color:#6b5a6e;">En iPhone o iPad: abre el PDF, toca Compartir y elige "Guardar en Archivos" o "Libros". En Android: abre el PDF y toca Descargar o Guardar.</p>
+        ${linkEbooks ? `<p style="margin-top:16px;"><a href="${linkEbooks}" style="background:#F5A623;color:#1B0720;padding:10px 20px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Ver todos mis eBooks</a></p>` : ''}
+      </div>
+    `,
+    attachments: [{ filename: nombreArchivo, content: contenido }],
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
+// Aviso interno: se vendio algo cuyo archivo no esta en el servidor.
+async function enviarAvisoEquipoArchivoFaltante({ to, order, faltan, siteUrl }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: `⚠️ Falta el archivo de una venta (pedido ${order.id})`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <h1 style="font-size:18px;color:#B3261E;">Se vendió un archivo que no está en el sitio</h1>
+        <p style="font-size:14px;line-height:1.6;">El pedido ${order.id} de <strong>${escapeHtml(order.email)}</strong> está pagado, pero no hay archivo para:</p>
+        <ul style="font-size:14px;">${faltan.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
+        <p style="font-size:14px;line-height:1.6;">Súbelo en /admin › Productos y luego, en Ventas, toca "Reenviar correo" en ese pedido. Mientras tanto la clienta ve un aviso para pedirlo por WhatsApp.</p>
+        <p><a href="${siteUrl}/admin#seccionVentas" style="background:#4E1454;color:#FBF4E9;padding:10px 20px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Abrir Ventas</a></p>
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 module.exports = {
+  enviarCorreoAdjuntoEbook,
+  enviarAvisoEquipoArchivoFaltante,
   htmlCorreoBuenFin,
   enviarCorreoBuenFin,
   enviarCorreoAccesoAnticipado,

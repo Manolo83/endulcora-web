@@ -16,6 +16,7 @@ const { generarCaratulaPDF } = require('../caratula');
 const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller, enviarCorreoBuenFin, htmlCorreoBuenFin } = require('../email');
 const { procesarCampana } = require('../campanas');
 const revisarPagos = require('../revisarPagos');
+const entregas = require('../entregas');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
 const googleSheets = require('../googleSheets');
@@ -647,6 +648,27 @@ router.post('/api/blog/:id/image', requireAdmin, uploadImage.single('file'), pro
 });
 
 // ---- Ventas (pedidos de Mercado Pago + cobros de membresia) ----
+// Vuelve a mandar el correo de compra con sus botones de descarga (ej. el
+// cliente lo borro, le cayo en spam o se subio un archivo que faltaba).
+router.post('/api/orders/:id/reenviar-correo', requireAdmin, async (req, res) => {
+  const order = store.getOrder(req.params.id);
+  if (!order || order.estado !== 'aprobado') return res.status(404).json({ error: 'Pedido no encontrado o sin pagar.' });
+  if (!order.email) return res.status(400).json({ error: 'Este pedido no tiene correo.' });
+  if (!(order.items || []).some((i) => i.tipo === 'producto')) return res.status(400).json({ error: 'Este pedido no tiene archivos para descargar.' });
+  try {
+    await entregas.mandarCorreoCompra(order);
+    res.json({ ok: true, email: order.email, faltan: entregas.faltantesDelPedido(order) });
+  } catch (err) {
+    entregas.registrarFalloCorreo(order, err);
+    res.status(502).json({ error: `No se pudo mandar: ${err.message}` });
+  }
+});
+
+// Revision de todos los archivos que se venden (faltan, PDF dañado, pesado).
+router.get('/api/archivos/revision', requireAdmin, (req, res) => {
+  res.json(entregas.revisarArchivos());
+});
+
 // Revisar pendientes con Mercado Pago (ver src/revisarPagos.js): corre en
 // segundo plano y el admin consulta el avance.
 router.get('/api/orders/revisar-pendientes', requireAdmin, (req, res) => {
@@ -663,7 +685,12 @@ router.post('/api/orders/revisar-pendientes', requireAdmin, (req, res) => {
 });
 
 router.get('/api/orders', requireAdmin, (req, res) => {
-  const pedidos = store.getOrders();
+  // Pedidos pagados con archivos: link de descargas (para mandarlo por
+  // WhatsApp), estado del correo y archivos que falten.
+  const pedidos = store.getOrders().map((o) => {
+    if (o.estado !== 'aprobado' || !(o.items || []).some((i) => i.tipo === 'producto')) return o;
+    return { ...o, entrega: { link: entregas.linkEbooks(o), faltan: entregas.faltantesDelPedido(o) } };
+  });
   const pagosMembresia = store.getMembresiaPagos().map((p) => ({
     id: `membresia-${p.id}`,
     estado: p.estado,
