@@ -3700,6 +3700,23 @@ module.exports = {
 
   // ---- Contactos para campañas de correo masivo (lista propia, separada de
   // "subscribers"/"users") ----
+  // Correos de personas que de verdad hicieron algo en endulcora.com: se
+  // registraron, compraron o iniciaron una compra, se suscribieron o se
+  // inscribieron a un taller o a una clase. Deja fuera a los contactos que
+  // solo llegaron por una importacion de CSV.
+  correosConInteraccion() {
+    const data = load();
+    const correos = new Set();
+    const sumar = (v) => { const c = String(v || '').trim().toLowerCase(); if (c) correos.add(c); };
+    (data.users || []).forEach((u) => sumar(u.email));
+    (data.orders || []).forEach((o) => sumar(o.email));
+    (data.subscribers || []).forEach((x) => sumar(x.email));
+    (data.inscripcionesTaller || []).forEach((x) => sumar(x.correo));
+    (data.registrosQr || []).forEach((x) => sumar(x.correo));
+    (data.registrosClaseGratis || []).forEach((x) => sumar(x.correo));
+    (data.registrosVideoEnVivo || []).forEach((x) => sumar(x.correo));
+    return correos;
+  },
   getContactosCampana() {
     return [...load().contactosCampana]
       .map((c) => (Array.isArray(c.etiquetas) ? c : { ...c, etiquetas: [] }))

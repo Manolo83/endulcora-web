@@ -128,17 +128,21 @@ function correosQueYaCompraron() {
   );
 }
 
-// A quien le llega: toda la lista de contactos (cuentas, compras,
-// suscriptores y registros que aceptaron promociones), menos quien se dio
-// de baja y quien ya compro en la promocion.
+// A quien le llega: solo contactos que de verdad interactuaron en
+// endulcora.com (cuenta, compra, suscripcion, registro a clase o taller),
+// menos quien se dio de baja y quien ya compro en la promocion. Los que solo
+// llegaron por una importacion de CSV no reciben este correo.
 function audienciaCorreo() {
   const contactos = store.getContactosCampana();
+  const interaccion = store.correosConInteraccion();
   const compraron = correosQueYaCompraron();
-  const activos = contactos.filter((c) => c.activo !== false);
+  const delSitio = contactos.filter((c) => interaccion.has(c.email));
+  const activos = delSitio.filter((c) => c.activo !== false);
   const destinatarios = activos.filter((c) => !compraron.has(c.email));
   return {
     contactos: contactos.length,
-    bajas: contactos.length - activos.length,
+    sinInteraccion: contactos.length - delSitio.length,
+    bajas: delSitio.length - activos.length,
     yaCompraron: activos.length - destinatarios.length,
     destinatarios,
   };
