@@ -821,10 +821,13 @@ router.post('/api/clase-gratis/confirmaciones/mandar', requireAdmin, (req, res) 
   if (envioActual && envioActual.estado !== 'terminada') {
     return res.status(400).json({ error: 'Ya hay un envío en curso.' });
   }
+  // Solo a quien se registro a la master class configurada ahora (no a
+  // registros de clases anteriores).
+  const fechaActual = store.getContent().clasegratis_fecha;
   const ids = store.getRegistrosClaseGratis()
-    .filter((r) => !r.correoConfirmarEnviado)
+    .filter((r) => !r.correoConfirmarEnviado && r.fecha === fechaActual)
     .map((r) => r.id);
-  if (!ids.length) return res.status(400).json({ error: 'No hay nadie pendiente de mandarle el correo de confirmación.' });
+  if (!ids.length) return res.status(400).json({ error: 'No hay nadie pendiente de mandarle el correo de acceso anticipado.' });
   // Se marca de una vez como "ya se le mando" para que un reintento
   // posterior (ej. si llega gente nueva despues) no se lo vuelva a mandar
   // a quien ya lo recibio.

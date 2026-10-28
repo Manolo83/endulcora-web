@@ -355,6 +355,31 @@
               <input data-content-key="clasegratis_ubicacion" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
             </label>
             <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Fichas presenciales por horario</span>
+              <input data-content-key="clasegratis_cupo_horario" type="text" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <span class="mt-1 block text-xs text-carbon/50">Al llegar a este número, el acceso anticipado de ese horario cambia solo a la opción en línea.</span>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio del acceso anticipado (MXN)</span>
+              <input data-content-key="clasegratis_acceso_precio" type="text" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <span class="mt-1 block text-xs text-carbon/50">Pago único. Incluye recetario, 1 mes de membresía y, mientras haya fichas, ficha presencial con coffee break.</span>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Cierre del acceso anticipado (hora CDMX)</span>
+              <input data-content-key="clasegratis_acceso_cierre" type="datetime-local" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <span class="mt-1 block text-xs text-carbon/50">Vacío = abierto hasta el día de la clase. Se abre al mandar el correo de acceso anticipado.</span>
+            </label>
+            <div class="block sm:col-span-2">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Recetario de la master class (PDF)</span>
+              <p class="mt-1 text-xs text-carbon/50">Se manda adjunto a quien paga su acceso anticipado y queda guardado en su cuenta. Súbelo antes de mandar el correo.</p>
+              <div id="claseGratisRecetarioPreview" class="mt-2"></div>
+              <div class="mt-2 flex flex-wrap items-center gap-3">
+                <input id="claseGratisRecetarioInput" type="file" accept="application/pdf,.pdf" class="text-sm">
+                <button type="button" id="btnSubirClaseGratisRecetario" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Subir PDF</button>
+                <button type="button" id="btnQuitarClaseGratisRecetario" class="rounded-full border border-red-200 px-5 py-2.5 font-ui text-[12px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Quitar</button>
+              </div>
+            </div>
+            <label class="block">
               <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Link del grupo de WhatsApp de la clase</span>
               <input data-content-key="clasegratis_whatsapp_grupo" type="url" placeholder="https://chat.whatsapp.com/..." class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
               <span class="mt-1 block text-xs text-carbon/50">Se invita a unirse a este grupo, tanto en el correo como en la pantalla de "ya quedaste registrado". Déjalo vacío para no mostrar esta invitación.</span>
@@ -1216,14 +1241,14 @@
 
       <div class="mt-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Control de aforo — ¿Asistirás?</h3>
-          <button type="button" id="btnMandarConfirmaciones" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Mandar correo "¿Asistirás?"</button>
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Acceso anticipado — fichas por horario</h3>
+          <button type="button" id="btnMandarConfirmaciones" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Mandar correo de acceso anticipado</button>
         </div>
-        <p class="mt-1 text-xs text-carbon/50">Tope de <span id="claseGratisCupo">100</span> por horario (se reinicia en cada horario), por orden de llegada de quien conteste "Sí" primero. A quien no alcanza lugar, o contesta "No", se le invita a ver la transmisión en vivo.</p>
+        <p class="mt-1 text-xs text-carbon/50">Ya no hay ficha gratis: la ficha presencial se compra con el acceso anticipado de <strong id="claseGratisPrecioAcceso">$100</strong>. Tope de <span id="claseGratisCupo">50</span> fichas por horario, por orden de pago; al llenarse, el mismo precio da el acceso en línea. Solo quien se registró puede comprarlo, desde el link personal de su correo. <span id="claseGratisAccesoEstado" class="font-700"></span></p>
         <p id="claseGratisEnvioEstado" class="mt-2 hidden text-sm font-600 text-vino"></p>
 
         <div class="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-crema/60 p-4">
-          <p class="text-sm text-carbon/70">Link para compartir en el grupo de WhatsApp de la clase (uno solo, cada quien escribe su correo ahí):</p>
+          <p class="text-sm text-carbon/70">Link para compartir en el grupo de WhatsApp de la clase (uno solo, cada quien escribe su correo y le llega su link personal):</p>
           <code id="claseGratisLinkCompartible" class="rounded-lg bg-white px-3 py-1.5 text-xs text-vino ring-1 ring-vino/10"></code>
           <button type="button" id="btnCopiarLinkConfirmar" class="rounded-full border border-vino/25 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Copiar</button>
         </div>
@@ -1829,6 +1854,7 @@ async function cargarContenidoAdmin(){
     pintarChefImagen(CONTENIDO_ACTUAL.chef_imagen);
     pintarAsistenteIcono(CONTENIDO_ACTUAL.asistente_icono);
     pintarClaseRecetario(CONTENIDO_ACTUAL.clase_recetario_url, CONTENIDO_ACTUAL.clase_recetario_nombre);
+    pintarClaseGratisRecetario(CONTENIDO_ACTUAL.clasegratis_recetario_url, CONTENIDO_ACTUAL.clasegratis_recetario_nombre);
   }catch(e){
     toast('No se pudo cargar el contenido general');
   }
@@ -1886,6 +1912,39 @@ $('btnQuitarClaseRecetario').addEventListener('click', async () => {
   try{
     await api('/admin/api/content/clase-recetario', { method: 'DELETE' });
     pintarClaseRecetario('', '');
+    toast('Recetario quitado');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+function pintarClaseGratisRecetario(url, nombre){
+  $('claseGratisRecetarioPreview').innerHTML = url
+    ? `<p class="text-sm text-carbon/70">📄 <a href="${url}" target="_blank" class="text-vino hover:underline">${escapeHtml(nombre || 'Ver PDF')}</a></p>`
+    : '<p class="text-sm text-carbon/50">Todavía no hay recetario para esta master class.</p>';
+}
+
+$('btnSubirClaseGratisRecetario').addEventListener('click', async () => {
+  const file = $('claseGratisRecetarioInput').files[0];
+  if(!file){ toast('Elige un PDF'); return; }
+  const fd = new FormData();
+  fd.append('file', file);
+  try{
+    const res = await fetch('/admin/api/content/clasegratis-recetario', { method: 'POST', body: fd });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo subir el PDF');
+    pintarClaseGratisRecetario(data.content.clasegratis_recetario_url, data.content.clasegratis_recetario_nombre);
+    $('claseGratisRecetarioInput').value = '';
+    toast('Recetario de la master class actualizado');
+  }catch(e){
+    toast(e.message);
+  }
+});
+
+$('btnQuitarClaseGratisRecetario').addEventListener('click', async () => {
+  try{
+    await api('/admin/api/content/clasegratis-recetario', { method: 'DELETE' });
+    pintarClaseGratisRecetario('', '');
     toast('Recetario quitado');
   }catch(e){
     toast(e.message);
@@ -3933,12 +3992,19 @@ async function cargarConfirmacionesClaseGratis(){
   try{
     const data = await api('/admin/api/clase-gratis/confirmaciones/resumen');
     $('claseGratisCupo').textContent = data.cupoPorHorario;
+    $('claseGratisPrecioAcceso').textContent = `$${data.precioAcceso}`;
+    $('claseGratisAccesoEstado').textContent = data.accesoAbierto ? 'Acceso anticipado abierto.' : 'Acceso anticipado cerrado (se abre al mandar el correo).';
+    $('claseGratisAccesoEstado').className = data.accesoAbierto ? 'font-700 text-verde' : 'font-700 text-carbon/60';
     $('claseGratisLinkCompartible').textContent = data.linkCompartible;
     const cont = $('claseGratisResumenHorarios');
+    const pesos = n => `$${Number(n || 0).toLocaleString('es-MX')}`;
     cont.innerHTML = !data.resumen.length ? '<p class="text-sm text-carbon/50">Sin registros todavía.</p>' : data.resumen.map(h => `
       <div class="rounded-xl border border-vino/10 px-4 py-3">
-        <p class="text-sm font-700 text-vino">${escapeHtml(h.horario)}</p>
-        <p class="text-xs text-carbon/50">${h.registrados} registrados · <strong class="${h.confirmados >= h.cupo ? 'text-red-600' : 'text-verde'}">${h.confirmados}/${h.cupo} inscritos</strong> · ${h.declinados} dijeron que no · ${h.cupoLleno} se quedaron sin lugar · ${h.sinResponder} sin responder</p>
+        <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <p class="text-sm font-700 text-vino">${escapeHtml(h.horario)}</p>
+          <p class="text-sm font-700 text-vino">${pesos(h.accesoIngreso)}</p>
+        </div>
+        <p class="text-xs text-carbon/50">${h.registrados} registrados · <strong class="${h.confirmados >= h.cupo ? 'text-red-600' : 'text-verde'}">${h.confirmados}/${h.cupo} fichas</strong> · ${h.accesoOnline} en línea · ${h.accesoApartados} apartadas pagando · ${h.declinados} dijeron que no</p>
       </div>
     `).join('');
     revisarEnvioConfirmacionesEnCurso();
@@ -3954,7 +4020,7 @@ $('btnCopiarLinkConfirmar').addEventListener('click', async () => {
 });
 
 $('btnMandarConfirmaciones').addEventListener('click', async () => {
-  if(!confirm('¿Mandar el correo "Confirma tu lugar" a todos los registrados que todavía no lo han recibido? Esta acción no se puede deshacer.')) return;
+  if(!confirm('¿Mandar el correo de acceso anticipado a todos los registrados de esta master class que todavía no lo han recibido? Con esto se abre la venta. Esta acción no se puede deshacer.')) return;
   $('btnMandarConfirmaciones').disabled = true;
   try{
     await api('/admin/api/clase-gratis/confirmaciones/mandar', { method: 'POST' });

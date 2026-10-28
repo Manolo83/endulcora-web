@@ -310,6 +310,13 @@ form.addEventListener('submit', async (e) => {
 
     if (typeof fbq === 'function') fbq('track', 'CompleteRegistration');
 
+    // Si el acceso anticipado ya esta abierto, pasa directo a su pagina
+    // personal (tambien le llega el link por correo).
+    if (data.accesoUrl) {
+      window.location.href = data.accesoUrl;
+      return;
+    }
+
     if (WHATSAPP_GRUPO) {
       document.getElementById('linkGrupoWhatsapp').href = WHATSAPP_GRUPO;
       document.getElementById('bloqueGrupoWhatsapp').classList.remove('hidden');
