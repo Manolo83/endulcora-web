@@ -110,6 +110,14 @@ const DEFAULT_CONTENT = {
   // precio_paquete. Se apaga sola en buenfin_fin (hora CDMX, AAAA-MM-DDTHH:MM);
   // para extenderla (p. ej. a diciembre) basta con mover esa fecha.
   buenfin_activo: 'true',
+  // Nombre de la promocion del momento (Buen Fin, Hot Sale, ...): de el
+  // salen la direccion (/buen-fin, /hot-sale), los asuntos y titulos y la
+  // imagen para WhatsApp. promo_titulo vacio = "¡Llego el <nombre> a
+  // Endulcora!". promo_historial guarda las anteriores (JSON) para que sus
+  // links viejos lleven a la actual.
+  promo_nombre: 'Buen Fin',
+  promo_titulo: '',
+  promo_historial: '[]',
   // Recordatorios automaticos (quedan 3 dias, ultimo dia) y "Tus eBooks te
   // esperan" para pagos a medias (ver src/recordatoriosBuenFin.js).
   buenfin_recordatorios_activo: 'true',

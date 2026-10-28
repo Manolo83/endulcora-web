@@ -175,6 +175,24 @@ router.patch('/api/content', requireAdmin, (req, res) => {
   if (typeof body.clase_youtube_id === 'string' && body.clase_youtube_id.trim()) {
     body.clase_youtube_id = extraerIdYoutube(body.clase_youtube_id) || body.clase_youtube_id.trim();
   }
+  // Cambiar el nombre de la promocion empieza una nueva: la anterior pasa al
+  // historial (sus links viejos llevan a la nueva, ver server.js).
+  if (typeof body.promo_nombre === 'string') {
+    body.promo_nombre = body.promo_nombre.trim().slice(0, 60);
+    const anterior = promoBuenFin.configPromo();
+    if (body.promo_nombre && promoBuenFin.slugPromo(body.promo_nombre) !== anterior.slug) {
+      const historial = promoBuenFin.historialPromos().filter((h) => h.slug !== anterior.slug);
+      historial.unshift({ slug: anterior.slug, nombre: anterior.nombre, inicio: anterior.inicio ? anterior.inicio.toISOString() : null, fin: anterior.fin ? anterior.fin.toISOString() : null });
+      body.promo_historial = JSON.stringify(historial.slice(0, 30));
+      // El titulo era de la promocion anterior: se vuelve a armar con el nombre nuevo.
+      if (typeof body.promo_titulo !== 'string') body.promo_titulo = '';
+    } else {
+      delete body.promo_historial;
+    }
+  } else {
+    delete body.promo_historial;
+  }
+  if (typeof body.promo_titulo === 'string') body.promo_titulo = body.promo_titulo.trim().slice(0, 90);
   const item = store.updateContent(body);
   res.json(item);
 });
@@ -291,7 +309,11 @@ router.get('/api/buen-fin/resumen', requireAdmin, (req, res) => {
     abierta: promoBuenFin.promoAbierta(contenido),
     fin: c.fin ? c.fin.toISOString() : null,
     ebooksEnPromo: promoBuenFin.ebooksPromo().length,
-    link: `${SITE_URL}/buen-fin`,
+    link: `${SITE_URL}/${c.slug}`,
+    nombre: c.nombre,
+    titulo: c.titulo,
+    slug: c.slug,
+    historial: promoBuenFin.historialPromos(contenido),
     whatsapp: contenido.whatsapp_numero || '',
     precioUno: c.precioUno,
     precioPaquete: c.precioPaquete,
@@ -305,15 +327,25 @@ router.get('/api/buen-fin/resumen', requireAdmin, (req, res) => {
 // ya compro en la promocion. Usa el mismo envio de las campañas: se retoma
 // solo si el servidor se reinicia y se puede cancelar desde Campañas.
 function ultimaCampanaBuenFin() {
-  return store.getCampanasCorreo().find((c) => c.plantilla === 'buen-fin') || null;
+  return store.getCampanasCorreo().find((c) => c.plantilla === 'buen-fin' && promoBuenFin.esCampanaDeLaPromo(c)) || null;
+}
+
+// Contactos que ya recibieron el correo de lanzamiento de esta promocion.
+function yaRecibieronLanzamiento() {
+  const ids = new Set();
+  store.getCampanasCorreo().filter((c) => c.plantilla === 'buen-fin' && promoBuenFin.esCampanaDeLaPromo(c))
+    .forEach((c) => (c.enviadosIds || []).forEach((id) => ids.add(id)));
+  return ids;
 }
 
 router.get('/api/buen-fin/correo', requireAdmin, (req, res) => {
   const { destinatarios, ...conteos } = promoBuenFin.audienciaCorreo();
   const ultima = ultimaCampanaBuenFin();
+  const ya = yaRecibieronLanzamiento();
   res.json({
     ...conteos,
     destinatarios: destinatarios.length,
+    nuevos: destinatarios.filter((c) => !ya.has(c.id)).length,
     abierta: promoBuenFin.promoAbierta(),
     asunto: promoBuenFin.asuntoCorreo(),
     masVendidos: promoBuenFin.masVendidos(4).map((e) => e.titulo),
@@ -348,7 +380,13 @@ router.post('/api/buen-fin/correo/enviar', requireAdmin, (req, res) => {
   if (!promoBuenFin.promoAbierta()) return res.status(400).json({ error: 'La promoción está cerrada: actívala o mueve la fecha de fin antes de mandar el correo.' });
   const ultima = ultimaCampanaBuenFin();
   if (ultima && ultima.estado === 'enviando') return res.status(409).json({ error: 'Ya hay un envío de este correo en curso.' });
-  const { destinatarios } = promoBuenFin.audienciaCorreo();
+  let { destinatarios } = promoBuenFin.audienciaCorreo();
+  // Por defecto se manda a todos los que interactuaron; con soloNuevos, solo
+  // a quienes todavia no recibieron el correo de esta promocion.
+  if ((req.body || {}).soloNuevos === true) {
+    const ya = yaRecibieronLanzamiento();
+    destinatarios = destinatarios.filter((c) => !ya.has(c.id));
+  }
   if (!destinatarios.length) return res.status(400).json({ error: 'No hay contactos a quién mandarle.' });
   const campana = store.addCampanaCorreo({
     asunto: asuntoValido((req.body || {}).asunto),
@@ -357,6 +395,7 @@ router.post('/api/buen-fin/correo/enviar', requireAdmin, (req, res) => {
     ebookIds: promoBuenFin.masVendidos(4).map((e) => e.id),
     contactoIds: destinatarios.map((c) => c.id),
   });
+  store.actualizarCampanaCorreo(campana.id, { promoSlug: promoBuenFin.configPromo().slug });
   res.status(202).json(campana);
   procesarCampana(campana.id).catch(() => {});
 });
@@ -687,7 +726,7 @@ router.post('/api/buen-fin/recordatorios/prueba', requireAdmin, async (req, res)
   const correo = String(email || '').trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) return res.status(400).json({ error: 'Escribe el correo donde quieres recibir la prueba.' });
   const r = recordatoriosBuenFin.RECORDATORIOS.find((x) => x.clave === clave);
-  const asunto = r ? r.asunto : 'Tus eBooks del Buen Fin te esperan 🛒';
+  const asunto = r ? r.asunto(promoBuenFin.configPromo().nombre) : recordatoriosBuenFin.asuntoCarrito();
   try {
     await enviarCorreoBuenFin({ to: correo, asunto: `[PRUEBA] ${asunto}`, ...datosVistaRecordatorio(clave), unsubscribeUrl: `${SITE_URL}/` });
     res.json({ ok: true });

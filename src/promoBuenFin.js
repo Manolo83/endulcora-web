@@ -16,8 +16,42 @@ function numero(valor, porDefecto) {
   return Number.isFinite(n) && n > 0 ? n : porDefecto;
 }
 
+// Direcciones que ya usa el sitio: una promocion no puede llamarse igual.
+const DIRECCIONES_RESERVADAS = new Set(['admin', 'api', 'uploads', 'blog', 'calendario', 'confirmar-clase', 'acceso-anticipado', 'talleres', 'taller',
+  'inscripcion-taller', 'registro', 'clase-gratis', 'clase-gratis-sala', 'galeria', 'membresia', 'clases-en-vivo', 'endulcora-en-vivo',
+  'biblioteca-clases', 'juego', 'desuscribir', 'desuscribir-correos', 'healthz', 'ebooks', 'producto', 'productos', 'categoria', 'comunidad',
+  'gracias', 'index', 'lex', 'blog-post', 'cursos', 'anexos', 'recetarios', 'og-promo.png']);
+
+function slugPromo(nombre) {
+  const slug = String(nombre || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || 'promocion';
+  return DIRECCIONES_RESERVADAS.has(slug) ? `${slug}-promo` : slug;
+}
+
+// Promociones anteriores (para redirigir sus links viejos y el historial
+// del admin): [{ slug, nombre, inicio, fin }].
+function historialPromos(contenido = store.getContent()) {
+  try {
+    const lista = JSON.parse(contenido.promo_historial || '[]');
+    return Array.isArray(lista) ? lista : [];
+  } catch (e) {
+    return [];
+  }
+}
+
 function configPromo(contenido = store.getContent()) {
+  const nombre = String(contenido.promo_nombre || '').trim() || 'Buen Fin';
+  const titulo = String(contenido.promo_titulo || '').trim()
+    || (nombre === 'Buen Fin' ? '¡El Buen Fin llegó antes a Endulcora!' : `¡Llegó el ${nombre} a Endulcora!`);
   return {
+    nombre,
+    titulo,
+    slug: slugPromo(nombre),
     precioUno: numero(contenido.buenfin_precio_uno, 100),
     precioPaquete: numero(contenido.buenfin_precio_paquete, 200),
     fin: fechaCDMX(contenido.buenfin_fin),
@@ -77,7 +111,7 @@ function repartirPrecios(cantidad, c = configPromo()) {
 // Compras aprobadas de la promo (prueba social real en la pagina y resumen
 // del admin).
 function resumenVentas() {
-  const pedidos = store.getOrders ? store.getOrders().filter((o) => o.promo === 'buen-fin' && o.estado === 'aprobado') : [];
+  const pedidos = store.getOrders ? store.getOrders().filter((o) => o.promo === configPromo().slug && o.estado === 'aprobado') : [];
   const delCorreo = pedidos.filter((o) => o.promoOrigen === 'correo');
   return {
     comprasCorreo: delCorreo.length,
@@ -88,7 +122,7 @@ function resumenVentas() {
   };
 }
 
-module.exports = { configPromo, promoAbierta, ebooksPromo, calcularTotal, repartirPrecios, resumenVentas, fechaCDMX };
+module.exports = { slugPromo, historialPromos, configPromo, promoAbierta, ebooksPromo, calcularTotal, repartirPrecios, resumenVentas, fechaCDMX };
 
 // ---- Correo de la promocion a la comunidad ----
 // Precio normal mas comun entre los eBooks de la promo (el "Antes $200").
@@ -123,7 +157,7 @@ function masVendidos(n = 4) {
 function correosQueYaCompraron() {
   return new Set(
     (store.getOrders ? store.getOrders() : [])
-      .filter((o) => o.promo === 'buen-fin' && o.estado === 'aprobado' && o.email)
+      .filter((o) => o.promo === configPromo().slug && o.estado === 'aprobado' && o.email)
       .map((o) => String(o.email).trim().toLowerCase())
   );
 }
@@ -166,6 +200,9 @@ function datosCorreo(ebookIds) {
   const elegidos = (ebookIds || masVendidos(4).map((e) => e.id)).map((id) => porId.get(Number(id))).filter(Boolean);
   return {
     siteUrl: SITE_URL,
+    nombrePromo: c.nombre,
+    tituloPromo: c.titulo,
+    slugPromo: c.slug,
     precioUno: c.precioUno,
     precioPaquete: c.precioPaquete,
     precioNormal: precioNormalTipico(todos),
@@ -176,7 +213,7 @@ function datosCorreo(ebookIds) {
 }
 
 function asuntoCorreo(c = configPromo()) {
-  return `LLEGÓ EL BUEN FIN A ENDULCORA 🎉 Tus eBooks desde $${Math.round((c.precioPaquete / 4) * 100) / 100}`;
+  return `LLEGÓ EL ${c.nombre.toUpperCase()} A ENDULCORA 🎉 Tus eBooks desde $${Math.round((c.precioPaquete / 4) * 100) / 100}`;
 }
 
 module.exports.datosCorreo = datosCorreo;
@@ -187,7 +224,7 @@ module.exports.asuntoCorreo = asuntoCorreo;
 function masVendidosPromo(n = 4) {
   const ventas = new Map();
   (store.getOrders ? store.getOrders() : [])
-    .filter((o) => o.promo === 'buen-fin' && o.estado === 'aprobado')
+    .filter((o) => o.promo === configPromo().slug && o.estado === 'aprobado')
     .forEach((o) => (o.items || []).forEach((i) => ventas.set(Number(i.itemId), (ventas.get(Number(i.itemId)) || 0) + 1)));
   const generales = masVendidos(ebooksPromo().length);
   return generales
@@ -198,3 +235,11 @@ function masVendidosPromo(n = 4) {
 }
 
 module.exports.masVendidosPromo = masVendidosPromo;
+
+// Campañas de la promocion actual (las de antes de que existiera el nombre
+// no guardan promoSlug: son del Buen Fin).
+function esCampanaDeLaPromo(campana, slug = configPromo().slug) {
+  return (campana.promoSlug || 'buen-fin') === slug;
+}
+
+module.exports.esCampanaDeLaPromo = esCampanaDeLaPromo;

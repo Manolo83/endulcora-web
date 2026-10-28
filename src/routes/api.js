@@ -775,6 +775,8 @@ router.get('/buen-fin', (req, res) => {
   const ventas = promoBuenFin.resumenVentas();
   res.json({
     abierta,
+    nombre: c.nombre,
+    titulo: c.titulo,
     fin: c.fin ? c.fin.toISOString() : null,
     precioUno: c.precioUno,
     precioPaquete: c.precioPaquete,

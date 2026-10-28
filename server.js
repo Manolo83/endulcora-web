@@ -302,10 +302,60 @@ app.get('/confirmar-clase', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'confirmar-clase.html'));
 });
 
-// Promocion "El Buen Fin llego antes": pagina exclusiva para la comunidad
-// (sin link en el menu).
-app.get('/buen-fin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'buen-fin.html'));
+// Promocion del momento (Buen Fin, Hot Sale...): pagina exclusiva para la
+// comunidad, sin link en el menu. La direccion sale del nombre que se pone
+// en /admin (/buen-fin, /hot-sale); los links de promociones anteriores
+// llevan a la actual. Titulo, precios e imagen para WhatsApp se llenan aqui
+// para que el link compartido ya muestre la promocion correcta.
+const promoBuenFin = require('./src/promoBuenFin');
+const { imagenPromo } = require('./src/imagenPromo');
+const PLANTILLA_PROMO = fs.readFileSync(path.join(__dirname, 'src', 'paginas', 'promo.html'), 'utf8');
+const escAttr = (v) => String(v).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const pesosPromo = (n) => `$${Number(n || 0).toLocaleString('es-MX', { maximumFractionDigits: 2 })}`;
+
+function datosImagenPromo(c) {
+  return { titulo: c.titulo, precioUno: c.precioUno, precioPaquete: c.precioPaquete, precioNormal: promoBuenFin.precioNormalTipico() };
+}
+
+function urlImagenPromo(c) {
+  // El Buen Fin conserva la imagen que ya se compartio en los grupos.
+  if (c.slug === 'buen-fin' && c.titulo === '¡El Buen Fin llegó antes a Endulcora!' && c.precioUno === 100 && c.precioPaquete === 200) {
+    return `${SITE_URL}/og-buen-fin.png`;
+  }
+  const version = require('crypto').createHash('md5').update(JSON.stringify(datosImagenPromo(c))).digest('hex').slice(0, 10);
+  return `${SITE_URL}/og-promo.png?v=${version}`;
+}
+
+app.get('/og-promo.png', (req, res) => {
+  try {
+    const png = imagenPromo(datosImagenPromo(promoBuenFin.configPromo()));
+    res.set('Cache-Control', 'public, max-age=3600').type('png').send(png);
+  } catch (err) {
+    console.error('[promo] No se pudo generar la imagen para WhatsApp:', err.message);
+    res.redirect(302, '/og-image.png');
+  }
+});
+
+app.get('/:promoSlug', (req, res, next) => {
+  const c = promoBuenFin.configPromo();
+  const slug = String(req.params.promoSlug || '').toLowerCase();
+  if (slug === c.slug) {
+    const html = PLANTILLA_PROMO
+      .replace(/\{\{TITULO\}\}/g, escAttr(c.titulo))
+      .replace(/\{\{NOMBRE\}\}/g, escAttr(c.nombre))
+      .replace(/\{\{UNO\}\}/g, pesosPromo(c.precioUno))
+      .replace(/\{\{PAQUETE\}\}/g, pesosPromo(c.precioPaquete))
+      .replace(/\{\{DESDE\}\}/g, pesosPromo(c.precioPaquete / 4))
+      .replace(/\{\{URL\}\}/g, `${SITE_URL}/${c.slug}`)
+      .replace(/\{\{OG\}\}/g, urlImagenPromo(c));
+    return res.type('html').send(html);
+  }
+  const anteriores = new Set(['buen-fin', ...promoBuenFin.historialPromos().map((h) => h.slug)]);
+  if (anteriores.has(slug)) {
+    const q = req.originalUrl.indexOf('?');
+    return res.redirect(302, `/${c.slug}${q >= 0 ? req.originalUrl.slice(q) : ''}`);
+  }
+  return next();
 });
 
 // Acceso anticipado de la master class: link personal del correo.

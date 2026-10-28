@@ -18,8 +18,8 @@ const HORAS_ESPERA_CARRITO = 2;
 const HORAS_MAX_CARRITO = 72;
 
 const RECORDATORIOS = [
-  { clave: 'tres-dias', titulo: 'Quedan 3 días', asunto: '⏰ QUEDAN 3 DÍAS DEL BUEN FIN EN ENDULCORA', diasAntes: 3, hora: '10:00' },
-  { clave: 'ultimo-dia', titulo: 'Último día', asunto: '⏰ ÚLTIMO DÍA: el Buen Fin de Endulcora termina hoy', diasAntes: 0, hora: '09:00' },
+  { clave: 'tres-dias', titulo: 'Quedan 3 días', asunto: (n) => `⏰ QUEDAN 3 DÍAS DEL ${n.toUpperCase()} EN ENDULCORA`, diasAntes: 3, hora: '10:00' },
+  { clave: 'ultimo-dia', titulo: 'Último día', asunto: (n) => `⏰ ÚLTIMO DÍA: el ${n} de Endulcora termina hoy`, diasAntes: 0, hora: '09:00' },
 ];
 
 function activos(contenido = store.getContent()) {
@@ -44,14 +44,18 @@ function plantilla(clave) {
 // Campaña ya creada para este recordatorio y esta fecha de fin (aunque se
 // haya cancelado: un recordatorio cancelado a mano no se vuelve a mandar).
 function campanaDe(clave, fin) {
-  return store.getCampanasCorreo().find((c) => c.plantilla === plantilla(clave) && c.finPromo === fin.toISOString()) || null;
+  return store.getCampanasCorreo().find((c) => c.plantilla === plantilla(clave) && c.finPromo === fin.toISOString() && promoBuenFin.esCampanaDeLaPromo(c)) || null;
+}
+
+function asuntoCarrito(nombre = promoBuenFin.configPromo().nombre) {
+  return `Tus eBooks del ${nombre} te esperan 🛒`;
 }
 
 // Quienes recibieron el correo de lanzamiento, siguen suscritos y no han
 // comprado en la promocion.
 function destinatarios() {
   const recibieron = new Set();
-  store.getCampanasCorreo().filter((c) => c.plantilla === 'buen-fin').forEach((c) => (c.enviadosIds || []).forEach((id) => recibieron.add(id)));
+  store.getCampanasCorreo().filter((c) => c.plantilla === 'buen-fin' && promoBuenFin.esCampanaDeLaPromo(c)).forEach((c) => (c.enviadosIds || []).forEach((id) => recibieron.add(id)));
   const compraron = promoBuenFin.correosQueYaCompraron();
   return store.getContactosCampana().filter((c) => recibieron.has(c.id) && c.activo !== false && !compraron.has(c.email));
 }
@@ -59,7 +63,7 @@ function destinatarios() {
 // Lo que se ve en /admin: cada recordatorio con su hora y estado.
 function programacion(ahora = new Date()) {
   const contenido = store.getContent();
-  const { fin } = promoBuenFin.configPromo(contenido);
+  const { fin, nombre } = promoBuenFin.configPromo(contenido);
   const abierta = promoBuenFin.promoAbierta(contenido, ahora);
   const porMandar = destinatarios().length;
   return RECORDATORIOS.map((r, i) => {
@@ -73,7 +77,7 @@ function programacion(ahora = new Date()) {
     return {
       clave: r.clave,
       titulo: r.titulo,
-      asunto: r.asunto,
+      asunto: r.asunto(nombre),
       hora: hora ? hora.toISOString() : null,
       estado,
       destinatarios: campana ? campana.total : porMandar,
@@ -86,7 +90,7 @@ function programacion(ahora = new Date()) {
 function revisarRecordatorios(ahora = new Date()) {
   const contenido = store.getContent();
   if (!activos(contenido) || !promoBuenFin.promoAbierta(contenido, ahora)) return null;
-  const { fin } = promoBuenFin.configPromo(contenido);
+  const { fin, nombre, slug } = promoBuenFin.configPromo(contenido);
   const horaUltimo = horaRecordatorio(RECORDATORIOS[1], fin);
   for (const r of RECORDATORIOS) {
     const hora = horaRecordatorio(r, fin);
@@ -97,13 +101,13 @@ function revisarRecordatorios(ahora = new Date()) {
     const lista = destinatarios();
     if (!lista.length) continue;
     const campana = store.addCampanaCorreo({
-      asunto: r.asunto,
+      asunto: r.asunto(nombre),
       cuerpoHtml: '',
       plantilla: plantilla(r.clave),
       ebookIds: promoBuenFin.masVendidosPromo(4).map((e) => e.id),
       contactoIds: lista.map((c) => c.id),
     });
-    store.actualizarCampanaCorreo(campana.id, { finPromo: fin.toISOString() });
+    store.actualizarCampanaCorreo(campana.id, { finPromo: fin.toISOString(), promoSlug: slug });
     require('./campanas').procesarCampana(campana.id).catch(() => {});
     return campana;
   }
@@ -136,7 +140,7 @@ function candidatosCarrito(ahora = new Date()) {
   const yaAvisados = new Set(pedidos.filter((o) => o.recuperacionEnviadaAt && o.email).map((o) => o.email.toLowerCase()));
   const ultimoPorCorreo = new Map();
   pedidos
-    .filter((o) => o.promo === 'buen-fin' && ['pendiente', 'en_proceso'].includes(o.estado) && o.email)
+    .filter((o) => o.promo === promoBuenFin.configPromo().slug && ['pendiente', 'en_proceso'].includes(o.estado) && o.email)
     .forEach((o) => {
       const correo = o.email.toLowerCase();
       const previo = ultimoPorCorreo.get(correo);
@@ -171,7 +175,7 @@ async function revisarCarritos(ahora = new Date()) {
         store.updateOrder(order.id, { recuperacionOmitida: 'baja' });
         continue;
       }
-      await enviarCorreoBuenFin({ to: correo, asunto: 'Tus eBooks del Buen Fin te esperan 🛒', ...datosCarrito(store.getOrder(order.id), contacto) });
+      await enviarCorreoBuenFin({ to: correo, asunto: asuntoCarrito(), ...datosCarrito(store.getOrder(order.id), contacto) });
       store.updateOrder(order.id, { recuperacionEnviadaAt: new Date().toISOString() });
       enviados += 1;
     } catch (err) {
@@ -182,9 +186,10 @@ async function revisarCarritos(ahora = new Date()) {
 }
 
 function resumenCarritos() {
-  const pedidos = store.getOrders().filter((o) => o.recuperacionEnviadaAt);
+  const { slug } = promoBuenFin.configPromo();
+  const pedidos = store.getOrders().filter((o) => o.recuperacionEnviadaAt && o.promo === slug);
   const correos = new Set(pedidos.map((o) => o.email.toLowerCase()));
-  const recuperados = store.getOrders().filter((o) => o.promo === 'buen-fin' && o.estado === 'aprobado' && o.email && correos.has(o.email.toLowerCase())
+  const recuperados = store.getOrders().filter((o) => o.promo === promoBuenFin.configPromo().slug && o.estado === 'aprobado' && o.email && correos.has(o.email.toLowerCase())
     && pedidos.some((p) => p.email.toLowerCase() === o.email.toLowerCase() && new Date(o.createdAt) > new Date(p.recuperacionEnviadaAt)));
   return { enviados: pedidos.length, recuperados: recuperados.length };
 }
@@ -210,6 +215,7 @@ function iniciarRecordatoriosBuenFin() {
 
 module.exports = {
   RECORDATORIOS,
+  asuntoCarrito,
   horaRecordatorio,
   programacion,
   destinatarios,

@@ -274,16 +274,16 @@ router.post('/buen-fin', async (req, res) => {
   // origen 'correo': llego desde el correo a la comunidad (para saber
   // cuantas ventas trajo el correo y cuantas WhatsApp).
   const promoOrigen = origen === 'correo' ? 'correo' : '';
-  store.updateOrder(order.id, { promo: 'buen-fin', promoDetalle: { paquetes, sueltos }, promoOrigen });
+  store.updateOrder(order.id, { promo: c.slug, promoDetalle: { paquetes, sueltos }, promoOrigen });
   try {
     const resultado = await new Preference(client).create({
       body: {
-        items: resueltos.map((r) => ({ id: String(r.itemId), title: `${r.titulo} (Buen Fin)`, quantity: 1, unit_price: r.precio, currency_id: 'MXN' })),
+        items: resueltos.map((r) => ({ id: String(r.itemId), title: `${r.titulo} (${c.nombre})`, quantity: 1, unit_price: r.precio, currency_id: 'MXN' })),
         payer: { email: correo },
         external_reference: String(order.id),
         back_urls: {
           success: `${SITE_URL}/gracias?orden=${order.id}&token=${viewToken}`,
-          failure: `${SITE_URL}/buen-fin?pago=error`,
+          failure: `${SITE_URL}/${c.slug}?pago=error`,
           pending: `${SITE_URL}/gracias?orden=${order.id}&token=${viewToken}`,
         },
         auto_return: 'approved',
