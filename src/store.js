@@ -1147,6 +1147,33 @@ async function init() {
       data._migCursoMasaMadre = true;
       changed = true;
     }
+    // ZIP de los paquetes completos que se crearon sin archivo (la familia se
+    // desgloso solo con eBook + Anexo + App): sin esto se ofrecian en la
+    // pagina del eBook pero no habia nada que entregar. Solo se pone si el
+    // paquete no tiene ya un archivo que funcione (no pisa uno subido en /admin).
+    if (!data._migZipsPaquetesFaltantes) {
+      const PAQUETES_SIN_ZIP = [
+        { tituloBase: 'Aguas Michoacanas', carpetaSeed: 'aguas-michoacanas' },
+        { tituloBase: 'Galletas Decoradas', carpetaSeed: 'galletas-decoradas' },
+        { tituloBase: 'Gomas y Gomitas', carpetaSeed: 'gomas-y-gomitas' },
+        { tituloBase: 'Pan de Muerto Gourmet', carpetaSeed: 'pan-de-muerto-gourmet' },
+        { tituloBase: 'Pastelería Científica para Diabéticos', carpetaSeed: 'pasteleria-cientifica-diabeticos' },
+      ];
+      PAQUETES_SIN_ZIP.forEach(({ tituloBase, carpetaSeed }) => {
+        const paquete = data.products.find((p) => p.esPaquete && p.titulo === `${tituloBase} · Paquete completo`);
+        if (!paquete) return;
+        const actual = paquete.archivo ? path.join(UPLOAD_DIR, path.basename(paquete.archivo)) : '';
+        if (actual && fs.existsSync(actual)) return;
+        const origen = path.join(__dirname, '..', 'seed-archivos', carpetaSeed, 'Paquete_Completo.zip');
+        if (!fs.existsSync(origen)) return;
+        const destino = `${crypto.randomUUID()}.zip`;
+        fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
+        paquete.archivo = `/uploads/${destino}`;
+        paquete.archivoNombre = `${tituloBase} - Paquete completo.zip`;
+      });
+      data._migZipsPaquetesFaltantes = true;
+      changed = true;
+    }
     // Recetario de Pan de Muerto (suelto): oferta de la clase gratis en
     // sala. Oculto del catalogo general porque solo se ofrece ahi; el PDF
     // se sube despues desde /admin > Productos cuando este listo.
