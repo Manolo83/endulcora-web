@@ -9,6 +9,7 @@ const { enviarCorreoConfirmacionInscripcionTaller, enviarCorreoConfirmacionClase
 const { sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 const acceso = require('../accesoAnticipado');
 const promoBuenFin = require('../promoBuenFin');
+const { paginaDescargas } = require('../paginaDescargas');
 
 const router = express.Router();
 
@@ -909,6 +910,12 @@ router.get('/pedidos/:orderId/descarga/:itemIndex', (req, res) => {
   }
   if (!order.descargaToken || req.query.token !== order.descargaToken) {
     return res.status(403).send('Enlace no válido.');
+  }
+  // Desde el correo (sin archivo=1) se abre la pagina "Tus eBooks", que si
+  // funciona dentro de las apps de correo; sus botones bajan el PDF.
+  if (req.query.archivo !== '1') {
+    res.set('Cache-Control', 'no-store');
+    return res.type('html').send(paginaDescargas(order, { itemElegido: Number(req.params.itemIndex) }));
   }
   const item = (order.items || [])[Number(req.params.itemIndex)];
   if (!item || item.tipo !== 'producto') {
