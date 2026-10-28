@@ -9,6 +9,7 @@ const { enviarCorreoConfirmacionInscripcionTaller, enviarCorreoConfirmacionClase
 const { sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 const acceso = require('../accesoAnticipado');
 const promoBuenFin = require('../promoBuenFin');
+const origenTrafico = require('../origenTrafico');
 const { paginaDescargas } = require('../paginaDescargas');
 const entregas = require('../entregas');
 
@@ -557,6 +558,9 @@ router.post('/inscripcion-taller', async (req, res) => {
     esPrimeraVez: b.esPrimeraVez,
     aceptaPromociones: b.aceptaPromociones,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
+    // De donde llego de verdad, aparte de lo que haya contestado en
+    // "comoSeEntero". Ver src/origenTrafico.js.
+    ...origenTrafico.idsDeClic(b),
   });
 
   res.status(201).json({ ok: true, id: item.id });

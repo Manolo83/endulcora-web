@@ -17,6 +17,7 @@ const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller, enviarCo
 const { procesarCampana } = require('../campanas');
 const revisarPagos = require('../revisarPagos');
 const entregas = require('../entregas');
+const origenTrafico = require('../origenTrafico');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
 const googleSheets = require('../googleSheets');
@@ -684,40 +685,11 @@ router.post('/api/orders/revisar-pendientes', requireAdmin, (req, res) => {
   res.status(202).json({ ...revisarPagos.estadoRevision(), pendientes: revisarPagos.pedidosPendientes().length });
 });
 
-// De donde llego quien compro. Lo unico que lo PRUEBA es el id de clic:
-// Meta escribe la cookie _fbc nada mas cuando alguien le dio clic a un
-// anuncio, y gclid/gbraid/wbraid hacen lo mismo del lado de Google. Los
-// cinco se guardan en el pedido desde que se crea (ver store.addOrder).
-//
-// Ojo con _fbp: NO es un origen. El pixel lo pone en cualquier visita, venga
-// de un anuncio o no. Aqui sirve para una sola cosa, distinguir dos casos que
-// de otra forma se ven igual: si _fbp esta guardado y no hay id de clic,
-// entonces si capturamos las cookies y no hubo anuncio (llego directo de
-// verdad); si no hay ni _fbp, es que nunca las capturamos y no sabemos.
-//
-// Ese segundo caso es hoy el de TODOS los talleres: public/taller.html cobra
-// sin mandarle fbp ni fbc a /api/checkout/preference, asi que su origen se
-// guarda vacio. Por eso se reporta "Sin dato" con la razon al lado, en vez de
-// decir "Directo" y dar por bueno un dato que nunca se midio.
-function origenDePedido(order) {
-  if (order.fbc) return { clave: 'meta', etiqueta: 'Anuncio de Meta' };
-  if (order.gclid || order.gbraid || order.wbraid) {
-    return { clave: 'google', etiqueta: 'Anuncio de Google' };
-  }
-  if (order.fbp) return { clave: 'directo', etiqueta: 'Directo u orgánico' };
-  const esTaller = (order.items || []).some((i) => i.tipo === 'taller');
-  return {
-    clave: 'sin_dato',
-    etiqueta: 'Sin dato',
-    nota: esTaller ? 'la página del taller no guarda el origen' : null,
-  };
-}
-
 router.get('/api/orders', requireAdmin, (req, res) => {
   // Pedidos pagados con archivos: link de descargas (para mandarlo por
   // WhatsApp), estado del correo y archivos que falten.
   const pedidos = store.getOrders().map((o) => {
-    const conOrigen = { ...o, origen: origenDePedido(o) };
+    const conOrigen = { ...o, origen: origenTrafico.origenDe(o) };
     if (o.estado !== 'aprobado' || !(o.items || []).some((i) => i.tipo === 'producto')) return conOrigen;
     return { ...conOrigen, entrega: { link: entregas.linkEbooks(o), faltan: entregas.faltantesDelPedido(o) } };
   });
@@ -790,7 +762,9 @@ router.get('/api/newsletter', requireAdmin, (req, res) => {
 
 // ---- Inscripciones a talleres (formulario publico) ----
 router.get('/api/inscripciones-taller', requireAdmin, (req, res) => {
-  res.json(store.getInscripcionesTaller());
+  // Mismo criterio que en Ventas: "comoSeEntero" es lo que la persona dice,
+  // "origen" es lo que de verdad paso segun los ids de clic que traia.
+  res.json(store.getInscripcionesTaller().map((i) => ({ ...i, origen: origenTrafico.origenDe(i) })));
 });
 
 router.delete('/api/inscripciones-taller/:id', requireAdmin, (req, res) => {
@@ -1257,6 +1231,7 @@ router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => 
     { header: 'Horario', key: 'horario', width: 18 },
     { header: 'Anticipo', key: 'montoAnticipo', width: 12 },
     { header: '¿Cómo se enteró?', key: 'comoSeEntero', width: 20 },
+    { header: 'Origen real', key: 'origen', width: 20 },
     { header: 'Otras preferencias', key: 'preferencias', width: 28 },
     { header: 'Zona', key: 'zona', width: 18 },
     { header: '¿Primera vez?', key: 'esPrimeraVez', width: 12 },
@@ -1301,6 +1276,7 @@ router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => 
           horario: i.horario,
           montoAnticipo: i.montoAnticipo,
           comoSeEntero: i.comoSeEntero,
+          origen: origenTrafico.origenDe(i).etiqueta,
           preferencias: i.preferencias,
           zona: textoZona(i),
           esPrimeraVez: i.esPrimeraVez ? 'Sí' : 'No',
