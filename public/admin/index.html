@@ -1417,6 +1417,12 @@
         <a href="/admin/api/clase-gratis/registros/excel" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Exportar Excel</a>
       </div>
 
+      <label class="mt-4 block max-w-xs">
+        <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Ver la clase gratis de</span>
+        <select id="claseGratisFiltroFecha" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-white px-4 py-2.5 text-sm"></select>
+        <span class="mt-1 block text-xs text-carbon/50">Cada clase gratis tiene su propia fecha; aquí se juntan los registros de todas las que has hecho. Elige una para ver solo esos registros.</span>
+      </label>
+
       <div class="mt-4 flex flex-wrap items-center gap-4 rounded-2xl bg-vino p-6 text-crema">
         <div class="shrink-0">
           <p id="claseGratisContadorTotal" class="font-display text-4xl">0</p>
@@ -2046,6 +2052,7 @@ async function cargarContenidoAdmin(){
     pintarClaseRecetario(CONTENIDO_ACTUAL.clase_recetario_url, CONTENIDO_ACTUAL.clase_recetario_nombre);
     pintarClaseGratisRecetario(CONTENIDO_ACTUAL.clasegratis_recetario_url, CONTENIDO_ACTUAL.clasegratis_recetario_nombre);
     pintarClaseGratisArte(CONTENIDO_ACTUAL.clasegratis_arte);
+    if(REGISTROS_CLASE_GRATIS.length) pintarFiltroFechaClaseGratis();
     cargarCorreosMasterclass();
     cargarBuenFinAdmin();
     cargarCorreosTaller();
@@ -4685,10 +4692,41 @@ $('btnCopiarLinkClaseGratis').addEventListener('click', async () => {
 let REGISTROS_CLASE_GRATIS = [];
 const ETIQUETA_TEMA_ADMIN = { panaderia: 'Panadería', chocolate: 'Chocolate', reposteria: 'Repostería', velas: 'Velas comestibles', cocina_salada: 'Cocina salada' };
 
+function formatoFechaClaseGratis(fecha){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fecha || '');
+  if(!m) return fecha || 'Sin fecha';
+  return `${parseInt(m[3], 10)} ${MESES_CORTOS[parseInt(m[2], 10)]} ${m[1]}`;
+}
+
+function pintarFiltroFechaClaseGratis(){
+  const sel = $('claseGratisFiltroFecha');
+  const anterior = sel.value;
+  const fechas = [...new Set(REGISTROS_CLASE_GRATIS.map(r => r.fecha || ''))].sort().reverse();
+  const fechaActual = CONTENIDO_ACTUAL.clasegratis_fecha || '';
+  sel.innerHTML = `<option value="">Todas las fechas (${REGISTROS_CLASE_GRATIS.length})</option>` + fechas.map(f => {
+    const esActual = f && f === fechaActual;
+    const etiqueta = `${formatoFechaClaseGratis(f)}${esActual ? ' — clase gratis actual' : ''}`;
+    return `<option value="${escapeHtml(f)}">${escapeHtml(etiqueta)}</option>`;
+  }).join('');
+  if(fechas.includes(anterior)){
+    sel.value = anterior;
+  } else if(fechas.includes(fechaActual)){
+    sel.value = fechaActual;
+  } else {
+    sel.value = '';
+  }
+}
+
+function registrosClaseGratisFiltrados(){
+  const fecha = $('claseGratisFiltroFecha').value;
+  return fecha ? REGISTROS_CLASE_GRATIS.filter(r => r.fecha === fecha) : REGISTROS_CLASE_GRATIS;
+}
+
 function renderContadorClaseGratis(){
-  $('claseGratisContadorTotal').textContent = REGISTROS_CLASE_GRATIS.length;
+  const filtrados = registrosClaseGratisFiltrados();
+  $('claseGratisContadorTotal').textContent = filtrados.length;
   const porHorario = {};
-  REGISTROS_CLASE_GRATIS.forEach(r => {
+  filtrados.forEach(r => {
     const clave = r.horario || 'Sin horario';
     porHorario[clave] = (porHorario[clave] || 0) + 1;
   });
@@ -4766,11 +4804,27 @@ async function cargarClaseGratis(){
   cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Cargando…</p>';
   try{
     REGISTROS_CLASE_GRATIS = await api('/admin/api/clase-gratis/registros');
+    pintarFiltroFechaClaseGratis();
     renderContadorClaseGratis();
-    if(!REGISTROS_CLASE_GRATIS.length){
-      cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Todavía no hay registros.</p>';
-      return;
-    }
+    renderTablaClaseGratis();
+  }catch(e){
+    cont.innerHTML = `<p class="p-5 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('claseGratisFiltroFecha').addEventListener('change', () => {
+  renderContadorClaseGratis();
+  renderTablaClaseGratis();
+});
+
+function renderTablaClaseGratis(){
+  const cont = $('listaClaseGratis');
+  const registros = registrosClaseGratisFiltrados();
+  if(!registros.length){
+    cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Sin registros para esta fecha.</p>';
+    return;
+  }
+  try{
     cont.innerHTML = `<table class="w-full min-w-[1120px] text-sm">
       <thead>
         <tr class="border-b border-vino/10 text-left font-ui text-[11px] uppercase tracking-wider text-carbon/45">
@@ -4789,7 +4843,7 @@ async function cargarClaseGratis(){
         </tr>
       </thead>
       <tbody>
-        ${REGISTROS_CLASE_GRATIS.map(r => `
+        ${registros.map(r => `
           <tr class="border-b border-vino/10 last:border-0 align-top" data-row-id="${r.id}">
             <td class="px-5 py-3 text-carbon/80 font-700">${r.numeroInscrito || '—'}</td>
             <td class="px-5 py-3 text-carbon/70">${r.asistencia === 'si' ? (r.numeroInscrito ? '<span class="text-verde font-600">Sí</span>' : '<span class="text-red-600 font-600">Sí (sin lugar)</span>') : r.asistencia === 'no' ? '<span class="text-carbon/50">No</span>' : '<span class="text-carbon/30">Sin responder</span>'}</td>
