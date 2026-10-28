@@ -308,5 +308,12 @@ function irAlTaller(sesionId){
 
 cargarCalendario();
 </script>
+<script>
+// "Clase gratis" solo aparece en el menu cuando hay una master class
+// programada con el registro abierto (ver registroAbierto en el servidor).
+fetch('/api/clase-gratis').then(r => r.json()).then(info => {
+  if (!info.activo) document.querySelectorAll('a[href="/clase-gratis"]').forEach(a => a.remove());
+}).catch(() => {});
+</script>
 </body>
 </html>

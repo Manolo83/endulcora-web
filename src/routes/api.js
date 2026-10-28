@@ -623,9 +623,10 @@ function horariosClaseGratis(contenido) {
 
 router.get('/clase-gratis', (req, res) => {
   const contenido = store.getContent();
+  const abierto = acceso.registroAbierto(contenido);
   res.json({
-    activo: contenido.clasegratis_activo === 'true',
-    titulo: contenido.clasegratis_titulo || '',
+    activo: abierto,
+    titulo: abierto ? contenido.clasegratis_titulo || '' : '',
     descripcion: contenido.clasegratis_descripcion || '',
     fecha: contenido.clasegratis_fecha || '',
     horarios: horariosClaseGratis(contenido),
@@ -638,7 +639,7 @@ router.get('/clase-gratis', (req, res) => {
 router.post('/clase-gratis/registro', (req, res) => {
   const b = req.body || {};
   const contenido = store.getContent();
-  if (contenido.clasegratis_activo !== 'true') {
+  if (!acceso.registroAbierto(contenido)) {
     return res.status(400).json({ error: 'El registro para esta clase no está abierto en este momento.' });
   }
   const nombre = String(b.nombre || '').trim();

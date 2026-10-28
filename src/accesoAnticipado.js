@@ -35,6 +35,16 @@ function fechaCierre(contenido) {
   return Number.isNaN(fecha.getTime()) ? null : fecha;
 }
 
+// Registro de la master class abierto: "Clase gratis activa" en /admin Y una
+// fecha que todavia no pasa. Sin fecha, o con la fecha de una clase que ya
+// paso (p. ej. pan de muerto), todo queda oculto aunque se haya olvidado
+// apagarlo: nadie se puede registrar a algo que no esta programado.
+function registroAbierto(contenido = store.getContent(), ahora = new Date()) {
+  if (contenido.clasegratis_activo !== 'true') return false;
+  if (!contenido.clasegratis_fecha) return false;
+  return contenido.clasegratis_fecha >= hoyCDMX(ahora);
+}
+
 // El acceso anticipado se abre cuando el admin manda el correo de acceso
 // anticipado para la clase configurada ahora mismo, y se cierra en la fecha
 // de cierre (si hay) o al pasar el dia de la clase.
@@ -157,6 +167,7 @@ module.exports = {
   MINUTOS_APARTADO,
   precioAcceso,
   fechaCierre,
+  registroAbierto,
   accesoAbierto,
   estadoHorario,
   prepararPago,
