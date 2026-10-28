@@ -684,12 +684,42 @@ router.post('/api/orders/revisar-pendientes', requireAdmin, (req, res) => {
   res.status(202).json({ ...revisarPagos.estadoRevision(), pendientes: revisarPagos.pedidosPendientes().length });
 });
 
+// De donde llego quien compro. Lo unico que lo PRUEBA es el id de clic:
+// Meta escribe la cookie _fbc nada mas cuando alguien le dio clic a un
+// anuncio, y gclid/gbraid/wbraid hacen lo mismo del lado de Google. Los
+// cinco se guardan en el pedido desde que se crea (ver store.addOrder).
+//
+// Ojo con _fbp: NO es un origen. El pixel lo pone en cualquier visita, venga
+// de un anuncio o no. Aqui sirve para una sola cosa, distinguir dos casos que
+// de otra forma se ven igual: si _fbp esta guardado y no hay id de clic,
+// entonces si capturamos las cookies y no hubo anuncio (llego directo de
+// verdad); si no hay ni _fbp, es que nunca las capturamos y no sabemos.
+//
+// Ese segundo caso es hoy el de TODOS los talleres: public/taller.html cobra
+// sin mandarle fbp ni fbc a /api/checkout/preference, asi que su origen se
+// guarda vacio. Por eso se reporta "Sin dato" con la razon al lado, en vez de
+// decir "Directo" y dar por bueno un dato que nunca se midio.
+function origenDePedido(order) {
+  if (order.fbc) return { clave: 'meta', etiqueta: 'Anuncio de Meta' };
+  if (order.gclid || order.gbraid || order.wbraid) {
+    return { clave: 'google', etiqueta: 'Anuncio de Google' };
+  }
+  if (order.fbp) return { clave: 'directo', etiqueta: 'Directo u orgánico' };
+  const esTaller = (order.items || []).some((i) => i.tipo === 'taller');
+  return {
+    clave: 'sin_dato',
+    etiqueta: 'Sin dato',
+    nota: esTaller ? 'la página del taller no guarda el origen' : null,
+  };
+}
+
 router.get('/api/orders', requireAdmin, (req, res) => {
   // Pedidos pagados con archivos: link de descargas (para mandarlo por
   // WhatsApp), estado del correo y archivos que falten.
   const pedidos = store.getOrders().map((o) => {
-    if (o.estado !== 'aprobado' || !(o.items || []).some((i) => i.tipo === 'producto')) return o;
-    return { ...o, entrega: { link: entregas.linkEbooks(o), faltan: entregas.faltantesDelPedido(o) } };
+    const conOrigen = { ...o, origen: origenDePedido(o) };
+    if (o.estado !== 'aprobado' || !(o.items || []).some((i) => i.tipo === 'producto')) return conOrigen;
+    return { ...conOrigen, entrega: { link: entregas.linkEbooks(o), faltan: entregas.faltantesDelPedido(o) } };
   });
   const pagosMembresia = store.getMembresiaPagos().map((p) => ({
     id: `membresia-${p.id}`,
@@ -698,6 +728,9 @@ router.get('/api/orders', requireAdmin, (req, res) => {
     items: [{ cantidad: 1, titulo: 'Membresía Endulcora (mensual)', precio: p.monto }],
     total: p.monto,
     email: p.email || 'sin correo',
+    // Un cobro de membresia lo genera la suscripcion, no una visita: no tiene
+    // origen que buscar y no debe contar como "sin dato".
+    origen: { clave: 'membresia', etiqueta: 'Cobro de membresía' },
   }));
   const todos = [...pedidos, ...pagosMembresia].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   res.json(todos);
