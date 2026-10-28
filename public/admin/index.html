@@ -1428,9 +1428,9 @@
       <div class="mt-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Acceso anticipado — fichas por horario</h3>
-          <button type="button" id="btnMandarConfirmaciones" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Mandar correo de acceso anticipado</button>
+          <button type="button" id="btnMandarConfirmaciones" class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Reenviar correo de acceso anticipado</button>
         </div>
-        <p class="mt-1 text-xs text-carbon/50">Ya no hay ficha gratis: la ficha presencial se compra con el acceso anticipado de <strong id="claseGratisPrecioAcceso">$100</strong>. Tope de <span id="claseGratisCupo">50</span> fichas por horario, por orden de pago; al llenarse, el mismo precio da el acceso en línea. Solo quien se registró puede comprarlo, desde el link personal de su correo. <span id="claseGratisAccesoEstado" class="font-700"></span></p>
+        <p class="mt-1 text-xs text-carbon/50">Ya no hay ficha gratis: la ficha presencial se compra con el acceso anticipado de <strong id="claseGratisPrecioAcceso">$100</strong>. Tope de <span id="claseGratisCupo">50</span> fichas por horario, por orden de pago; al llenarse, el mismo precio da el acceso en línea. Solo quien se registró puede comprarlo, desde el link personal de su correo. El link de acceso anticipado ya va incluido en el correo de confirmación automático de cada registro nuevo; este botón solo reenvía a quien quedó pendiente. <span id="claseGratisAccesoEstado" class="font-700"></span></p>
         <p id="claseGratisEnvioEstado" class="mt-2 hidden text-sm font-600 text-vino"></p>
 
         <div class="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-crema/60 p-4">
@@ -4705,7 +4705,7 @@ async function cargarConfirmacionesClaseGratis(){
     const data = await api('/admin/api/clase-gratis/confirmaciones/resumen');
     $('claseGratisCupo').textContent = data.cupoPorHorario;
     $('claseGratisPrecioAcceso').textContent = `$${data.precioAcceso}`;
-    $('claseGratisAccesoEstado').textContent = data.accesoAbierto ? 'Acceso anticipado abierto.' : 'Acceso anticipado cerrado (se abre al mandar el correo).';
+    $('claseGratisAccesoEstado').textContent = data.accesoAbierto ? 'Acceso anticipado abierto.' : 'Acceso anticipado cerrado.';
     $('claseGratisAccesoEstado').className = data.accesoAbierto ? 'font-700 text-verde' : 'font-700 text-carbon/60';
     $('claseGratisLinkCompartible').textContent = data.linkCompartible;
     const cont = $('claseGratisResumenHorarios');
@@ -4732,7 +4732,7 @@ $('btnCopiarLinkConfirmar').addEventListener('click', async () => {
 });
 
 $('btnMandarConfirmaciones').addEventListener('click', async () => {
-  if(!confirm('¿Mandar el correo de acceso anticipado a todos los registrados de esta master class que todavía no lo han recibido? Con esto se abre la venta. Esta acción no se puede deshacer.')) return;
+  if(!confirm('¿Reenviar el correo de acceso anticipado a quienes se registraron a esta master class y todavía no lo han recibido? Quien se registre de ahora en adelante ya lo recibe solo, en su correo de confirmación. Esta acción no se puede deshacer.')) return;
   $('btnMandarConfirmaciones').disabled = true;
   try{
     await api('/admin/api/clase-gratis/confirmaciones/mandar', { method: 'POST' });

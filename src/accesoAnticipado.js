@@ -45,13 +45,15 @@ function registroAbierto(contenido = store.getContent(), ahora = new Date()) {
   return contenido.clasegratis_fecha >= hoyCDMX(ahora);
 }
 
-// El acceso anticipado se abre cuando el admin manda el correo de acceso
-// anticipado para la clase configurada ahora mismo, y se cierra en la fecha
-// de cierre (si hay) o al pasar el dia de la clase.
+// El acceso anticipado se abre en cuanto el registro de la clase esta
+// abierto (misma condicion que registroAbierto), y se cierra en la fecha de
+// cierre configurada (si hay) o al pasar el dia de la clase. Asi el primer
+// registro de la master class ya recibe su link de acceso anticipado en el
+// correo de confirmacion instantaneo, sin que el admin tenga que mandar
+// antes el correo masivo (ese boton sigue sirviendo para reenviarlo a quien
+// se registro antes de que esto se configurara bien).
 function accesoAbierto(contenido = store.getContent(), ahora = new Date()) {
-  const envio = store.getEnvioConfirmacionClaseGratis();
-  if (!envio || !envio.fecha || envio.fecha !== contenido.clasegratis_fecha) return false;
-  if (contenido.clasegratis_fecha && hoyCDMX(ahora) > contenido.clasegratis_fecha) return false;
+  if (!registroAbierto(contenido, ahora)) return false;
   const cierre = fechaCierre(contenido);
   if (cierre && ahora >= cierre) return false;
   return true;
