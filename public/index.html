@@ -2214,21 +2214,24 @@ abrirCarritoSiSeSolicito();
 cargarSesion();
 cargarHeroCarrusel();
 cargarCalendarioSemana();
-cargarPromoRecetarioMes();
-cargarPromoBuenFin();
+cargarPromoDelHero();
 
-async function cargarPromoBuenFin(){
+// Las dos tarjetas post-it del hero (Buen Fin y recetario del mes) ocupan
+// el mismo lugar y nunca van juntas: se decide una sola vez, en orden, cuál
+// de las dos se muestra -- así no importa cuál respuesta del servidor
+// llegue primero, nunca se encimen.
+async function cargarPromoDelHero(){
+  let buenFinAbierta = false;
   try{
     const promo = await (await fetch('/api/buen-fin')).json();
-    if(!promo.abierta) return;
-    // Mientras el Buen Fin está activo le gana el lugar a la tarjeta del
-    // recetario del mes (se recupera sola cuando la promoción se apague).
-    document.getElementById('promoRecetarioMes').classList.add('hidden');
-    document.getElementById('promoBuenFin').classList.remove('hidden');
+    buenFinAbierta = !!promo.abierta;
   }catch(e){}
-}
 
-async function cargarPromoRecetarioMes(){
+  if(buenFinAbierta){
+    document.getElementById('promoBuenFin').classList.remove('hidden');
+    return;
+  }
+
   try{
     const productos = await (await fetch('/api/products')).json();
     const recetario = productos.find(p => p.slug === 'recetario-del-mes');
