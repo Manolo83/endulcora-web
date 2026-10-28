@@ -1024,11 +1024,14 @@
           <p class="mt-1 text-sm text-carbon/60">Pedidos de la tienda y cobros de membresía hechos por Mercado Pago. Cuando uno diga "Aprobado", entrega el archivo o producto al correo del comprador.</p>
         </div>
         <div class="flex flex-wrap gap-2">
+          <button id="btnRevisarPendientes" class="inline-flex items-center gap-2 rounded-full bg-vino px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-crema hover:bg-morado transition disabled:opacity-50">Revisar pendientes con Mercado Pago <span id="numPendientes" class="rounded-full bg-flama px-2 text-[11px] font-700 text-carbon"></span></button>
           <button id="btnSincronizarPagosMembresia" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Traer cobros de membresía</button>
           <button id="btnRefrescarVentas" class="rounded-full border border-vino/20 px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-vino hover:border-vino transition">Actualizar</button>
         </div>
       </div>
       <p id="sincronizarPagosResultado" class="mt-2 text-sm"></p>
+      <div id="revisionPendientes" class="mt-3 hidden rounded-2xl bg-white p-4 ring-1 ring-vino/10"></div>
+      <p class="mt-2 text-xs text-carbon/45">El sitio también revisa solo, cada hora, los pedidos pendientes de los últimos 3 días. Los que pasan 7 días sin ningún pago se marcan como "Abandonado".</p>
       <div id="listaVentas" class="mt-6 space-y-3"></div>
     </section>
 
@@ -3780,13 +3783,31 @@ const ETIQUETA_ESTADO = {
   cancelado: { texto: 'Cancelado', clase: 'text-red-600' },
   reembolsado: { texto: 'Reembolsado', clase: 'text-red-600' },
   error: { texto: 'Error al iniciar', clase: 'text-red-600' },
+  abandonado: { texto: 'Abandonado', clase: 'text-carbon/40' },
 };
+
+// Lo que encontro la revision con Mercado Pago (o.revisionMp), mientras el
+// pedido siga en el estado que dejo la revision.
+function avisoRevisionMp(o){
+  const r = o.revisionMp;
+  if(!r) return '';
+  const fecha = (v) => v ? new Date(v).toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Mexico_City' }).replace(/\.$/, '') : '';
+  const copiar = o.email ? `<button type="button" class="btnCopiarCorreoVenta ml-auto rounded-full border border-current px-3 py-0.5 font-ui text-[10px] font-700 uppercase tracking-wider" data-correo="${escapeHtml(o.email)}">Copiar correo</button>` : '';
+  const caja = (clase, chip, texto, extra = '') => `<div class="mt-2 flex flex-wrap items-center gap-2 rounded-xl px-3 py-2 text-[13px] ${clase}"><span class="rounded-full bg-white px-2 py-0.5 font-ui text-[10px] font-700 uppercase tracking-wider">${chip}</span><span>${texto}</span>${extra}</div>`;
+  if(r.resultado === 'pagado' && o.estado === 'aprobado') return caja('bg-green-50 text-green-800', 'Recuperado', `Mercado Pago tenía el pago aprobado${r.pagadoEn ? ` (${fecha(r.pagadoEn)})` : ''}, pero el aviso no había llegado. Se aprobó con la revisión y se le mandó su correo.`);
+  if(r.resultado === 'en_espera' && ['pendiente', 'en_proceso'].includes(o.estado)) return caja('bg-amber-50 text-amber-800', `${r.tipo || 'Pago'} por pagar`, `Generó su pago${r.tipo ? ` en ${r.tipo}` : ''} y todavía no lo completa.${r.vence ? ` Vence el ${fecha(r.vence)}.` : ''} Si paga, se aprueba solo.`);
+  if(r.resultado === 'rechazado' && ['rechazado', 'cancelado'].includes(o.estado)) return caja('bg-red-50 text-red-700', 'Rechazado', 'Mercado Pago rechazó o canceló el pago.', copiar);
+  if(r.resultado === 'sin_pago' && o.estado === 'pendiente') return caja('bg-vino/5 text-carbon/70', 'Sin pago', `Entró a Mercado Pago pero no terminó de pagar (revisado ${fecha(r.fecha)}).`, copiar);
+  if(r.resultado === 'abandonado' && o.estado === 'abandonado') return caja('bg-vino/5 text-carbon/60', 'Abandonado', 'Pasaron 7 días y nunca hubo un pago.', copiar);
+  return '';
+}
 
 async function cargarVentas(){
   const cont = $('listaVentas');
   cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
   try{
     const items = await api('/admin/api/orders');
+    api('/admin/api/orders/revisar-pendientes').then(r => { $('numPendientes').textContent = r.pendientes || ''; if(r.enCurso) seguirRevision(); }).catch(() => {});
     if(!items.length){
       cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay ventas.</p>';
       return;
@@ -3800,6 +3821,7 @@ async function cargarVentas(){
         <ul class="mt-2 space-y-1 text-sm text-carbon/75">${lineas}</ul>
         <p class="mt-2 font-titulo text-lg tracking-wide text-vino">Total: $${escapeHtml(String(o.total))} MXN</p>
         <p class="text-sm text-carbon/60">${escapeHtml(o.email || 'sin correo')}</p>
+        ${avisoRevisionMp(o)}
       </article>`;
     }).join('');
   }catch(e){
@@ -3808,6 +3830,56 @@ async function cargarVentas(){
 }
 
 $('btnRefrescarVentas').addEventListener('click', cargarVentas);
+$('listaVentas').addEventListener('click', async (e) => {
+  const b = e.target.closest('.btnCopiarCorreoVenta');
+  if(!b) return;
+  try{ await navigator.clipboard.writeText(b.dataset.correo); toast('Correo copiado'); }
+  catch(err){ toast(b.dataset.correo); }
+});
+
+// ---- Revisar pendientes con Mercado Pago ----
+let revisionTimer = null;
+function pintarRevision(r){
+  $('numPendientes').textContent = r.pendientes || '';
+  $('btnRevisarPendientes').disabled = r.enCurso;
+  const caja = $('revisionPendientes');
+  if(r.enCurso){
+    const pct = r.total ? Math.round(r.revisados / r.total * 100) : 0;
+    caja.classList.remove('hidden');
+    caja.innerHTML = `<p class="text-sm text-carbon/60">Revisando ${r.revisados} de ${r.total}…</p><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-vino/10"><div class="h-full rounded-full bg-vino transition-all" style="width:${pct}%"></div></div>`;
+    return;
+  }
+  if(!r.terminadoAt || r.origen !== 'boton') return;
+  const c = r.conteo || {};
+  const tarjetas = [
+    [c.pagado, 'sí estaba pagado: ya se le mandó su correo', 'bg-green-50 text-green-800'],
+    [c.en_espera, 'eligió OXXO o transferencia y todavía no paga', 'bg-amber-50 text-amber-800'],
+    [c.rechazado, 'Mercado Pago rechazó el pago', 'bg-red-50 text-red-700'],
+    [c.sin_pago, 'no terminó de pagar', 'bg-vino/5 text-carbon/70'],
+    [c.abandonado, 'pasaron 7 días sin pago: Abandonado', 'bg-vino/5 text-carbon/60'],
+  ].filter(t => t[0]);
+  caja.classList.remove('hidden');
+  caja.innerHTML = `<p class="font-titulo text-lg text-vino">Revisé ${r.total} pedido${r.total === 1 ? '' : 's'} pendiente${r.total === 1 ? '' : 's'}</p>
+    ${tarjetas.length ? `<div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">${tarjetas.map(([n, t, cl]) => `<div class="rounded-xl px-3 py-2 ${cl}"><p class="font-titulo text-2xl">${n}</p><p class="text-xs">${t}</p></div>`).join('')}</div>` : '<p class="mt-1 text-sm text-carbon/60">No había pedidos pendientes.</p>'}
+    ${r.errores ? `<p class="mt-2 text-xs text-red-600">${r.errores} no se pudieron revisar (Mercado Pago no respondió). Inténtalo de nuevo en un rato.</p>` : ''}`;
+}
+async function seguirRevision(){
+  clearTimeout(revisionTimer);
+  try{
+    const r = await api('/admin/api/orders/revisar-pendientes');
+    pintarRevision(r);
+    if(r.enCurso) revisionTimer = setTimeout(seguirRevision, 1500);
+    else if(r.origen === 'boton' && r.terminadoAt && !seguirRevision.yaRecargo){ seguirRevision.yaRecargo = true; cargarVentas(); }
+  }catch(e){}
+}
+$('btnRevisarPendientes').addEventListener('click', async () => {
+  try{
+    seguirRevision.yaRecargo = false;
+    pintarRevision(await api('/admin/api/orders/revisar-pendientes', { method: 'POST' }));
+    seguirRevision();
+  }catch(e){ toast(e.message); }
+});
+
 
 $('btnSincronizarPagosMembresia').addEventListener('click', async () => {
   const resultado = $('sincronizarPagosResultado');

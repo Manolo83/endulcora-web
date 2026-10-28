@@ -596,6 +596,8 @@ store.init()
     // dias de que termine, y fin del acceso de quien cancelo durante el
     // regalo. Independiente del interruptor pausado de arriba.
     require('./src/automatizaciones').iniciarAutomatizacionRegalos();
+    // Revisa cada hora con Mercado Pago los pedidos que siguen pendientes.
+    require('./src/revisarPagos').iniciarRevisionAutomatica();
     // Confirmacion de lugar de la clase gratis (control de aforo con tope
     // de cupo) y sus recordatorios a quien ya confirmo.
     require('./src/confirmacionClaseGratis').iniciarAutomatizacionClaseGratis();

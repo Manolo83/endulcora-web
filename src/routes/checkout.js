@@ -430,146 +430,158 @@ router.post('/webhook', async (req, res) => {
   try {
     const payment = new Payment(client);
     const info = await payment.get({ id: paymentId });
-    const orderId = info.external_reference;
-    if (!orderId) return;
-    const order = store.getOrder(orderId);
-    if (!order) return;
-
-    const mapaEstado = {
-      approved: 'aprobado',
-      pending: 'pendiente',
-      in_process: 'en_proceso',
-      rejected: 'rechazado',
-      cancelled: 'cancelado',
-      refunded: 'reembolsado',
-    };
-    const nuevoEstado = mapaEstado[info.status] || info.status;
-    const yaSeHabiaAprobado = order.estado === 'aprobado';
-
-    const patch = { estado: nuevoEstado, mpPaymentId: String(info.id) };
-    if (nuevoEstado === 'aprobado' && !order.descargaToken) {
-      patch.descargaToken = crypto.randomBytes(24).toString('hex');
-    }
-    const actualizado = store.updateOrder(order.id, patch);
-
-    // Cliente real que pago: se suma a la lista de campañas de correo
-    // masivo, sea que tenga cuenta o haya comprado como invitado.
-    if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado && actualizado.email) {
-      store.importarContactosCampana([{ email: actualizado.email }]);
-    }
-
-    if (nuevoEstado === 'aprobado' && !order.capiPurchaseEnviado) {
-      await enviarPurchaseCAPI({ order: actualizado, siteUrl: SITE_URL });
-      store.updateOrder(order.id, { capiPurchaseEnviado: true });
-    }
-
-    if (nuevoEstado === 'aprobado' && !order.googleAdsEnviado) {
-      await enviarCompraGoogle({ order: actualizado });
-      store.updateOrder(order.id, { googleAdsEnviado: true });
-    }
-
-    if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado) {
-      for (const item of actualizado.items) {
-        if (item.tipo !== 'clase_en_vivo' || !item.claseFecha) continue;
-        if (store.tieneAccesoClaseEnVivo({ fecha: item.claseFecha, userId: actualizado.userId })) continue;
-        store.addAccesoClaseEnVivo({
-          fecha: item.claseFecha,
-          userId: actualizado.userId,
-          email: actualizado.email,
-          monto: item.precio,
-          orderId: actualizado.id,
-        });
-      }
-    }
-
-    // Acceso anticipado de la master class: ficha (o acceso en linea), mes
-    // de membresia y correo con el recetario. Manda su propio correo.
-    if (!yaSeHabiaAprobado || nuevoEstado !== 'aprobado') {
-      procesarAccesoAnticipadoDelPedido(actualizado, nuevoEstado);
-    }
-
-    // Talleres: el pago confirma o libera el lugar que ya se habia
-    // reservado como "pendiente" al crear la preferencia (ver /preference).
-    if (['aprobado', 'rechazado', 'cancelado'].includes(nuevoEstado)) {
-      for (const item of actualizado.items) {
-        if (item.tipo !== 'taller' || !item.inscripcionTallerId) continue;
-        if (nuevoEstado === 'aprobado') {
-          store.actualizarPagoInscripcionTaller(item.inscripcionTallerId, {
-            tipoPago: item.tipoPago,
-            montoPagado: item.precio,
-            estadoPago: 'pagado',
-            pagoId: String(info.id),
-          });
-          // Aviso interno al equipo (si esta configurado) y, cuando ya
-          // existan las credenciales, la fila en "Inscritos 2026" — ambos
-          // nunca deben tumbar la confirmacion del pago si fallan.
-          if (!yaSeHabiaAprobado) {
-            const inscripcionPagada = store.getInscripcionTaller(item.inscripcionTallerId);
-            if (inscripcionPagada) {
-              avisarEquipoNuevoTaller(inscripcionPagada).catch((err) => {
-                console.error(`[checkout] No se pudo mandar el aviso al equipo del taller (inscripcion ${inscripcionPagada.id}):`, err.message);
-              });
-              sincronizarInscripcionTaller(inscripcionPagada).catch((err) => {
-                console.error(`[checkout] No se pudo sincronizar con Google Sheets la inscripcion ${inscripcionPagada.id}:`, err.message);
-              });
-            }
-          }
-        } else {
-          store.actualizarPagoInscripcionTaller(item.inscripcionTallerId, { estadoPago: 'cancelado' });
-        }
-      }
-    }
-
-    const esAccesoAnticipado = actualizado.items.some((item) => item.tipo === 'acceso_anticipado');
-    if (nuevoEstado === 'aprobado' && !order.correoEnviado && actualizado.email && !esAccesoAnticipado) {
-      const contenido = store.getContent();
-      const itemTaller = actualizado.items.find((item) => item.tipo === 'taller' && item.inscripcionTallerId);
-      const correoListo = itemTaller
-        ? (() => {
-            const inscripcion = store.getInscripcionTaller(itemTaller.inscripcionTallerId);
-            const sesion = inscripcion ? store.getSesionesTaller().find((s) => s.id === inscripcion.sesionTallerId) : null;
-            const sedeInfo = sesion ? store.getSedes().find((s) => s.id === sesion.sedeId) : null;
-            return enviarCorreoConfirmacionPagoTaller({
-              to: actualizado.email,
-              nombre: inscripcion ? inscripcion.nombre : '',
-              taller: inscripcion ? inscripcion.taller : '',
-              fecha: inscripcion ? inscripcion.fecha : '',
-              horario: inscripcion ? inscripcion.horario : '',
-              sede: inscripcion ? inscripcion.sede : '',
-              direccion: sedeInfo ? sedeInfo.direccion : '',
-              mapaLink: sedeInfo ? sedeInfo.mapaLink : '',
-              queAprendes: sesion ? sesion.queAprendes : '',
-              tipoPago: itemTaller.tipoPago,
-              montoPagado: itemTaller.precio,
-              saldo: inscripcion ? inscripcion.saldo : null,
-              comunidadLink: contenido.comunidad_whatsapp_link || '',
-              numeroWhatsapp: contenido.whatsapp_numero,
-            });
-          })()
-        : (() => {
-            const itemsConArchivo = actualizado.items.map((item) => {
-              if (item.tipo !== 'producto') return item;
-              const producto = store.getProduct(item.itemId);
-              const archivoExiste = !!(producto && producto.archivo && fs.existsSync(path.join(UPLOAD_DIR, path.basename(producto.archivo))));
-              return { ...item, archivoDisponible: archivoExiste };
-            });
-            return enviarCorreoConfirmacionCompra({
-              to: actualizado.email,
-              order: { ...actualizado, items: itemsConArchivo },
-              siteUrl: SITE_URL,
-              numeroWhatsapp: contenido.whatsapp_numero,
-            });
-          })();
-      correoListo
-        .then(() => store.updateOrder(order.id, { correoEnviado: true }))
-        .catch((err) => {
-          // Si el correo no se pudo enviar (ej. servicio no configurado), el pedido sigue visible en /admin > Ventas.
-          console.error(`[checkout] No se pudo enviar el correo de confirmacion del pedido ${order.id}:`, err.message);
-        });
-    }
+    await aplicarPagoAlPedido(info);
   } catch (err) {
     // Si Mercado Pago reintenta despues, se procesa en el proximo intento.
   }
 });
 
+// Aplica un pago de Mercado Pago a su pedido (external_reference): estado,
+// correo con las descargas, contactos, Meta/Google, talleres y acceso
+// anticipado. Lo usa el aviso (webhook) de Mercado Pago y tambien la
+// revision de pendientes (src/revisarPagos.js), para que un pedido que se
+// recupera haga exactamente lo mismo que uno que llego por el aviso.
+async function aplicarPagoAlPedido(info) {
+  const orderId = info.external_reference;
+  if (!orderId) return null;
+  const order = store.getOrder(orderId);
+  if (!order) return null;
+
+  const mapaEstado = {
+    approved: 'aprobado',
+    pending: 'pendiente',
+    in_process: 'en_proceso',
+    rejected: 'rechazado',
+    cancelled: 'cancelado',
+    refunded: 'reembolsado',
+  };
+  const nuevoEstado = mapaEstado[info.status] || info.status;
+  const yaSeHabiaAprobado = order.estado === 'aprobado';
+
+  const patch = { estado: nuevoEstado, mpPaymentId: String(info.id) };
+  if (nuevoEstado === 'aprobado' && !order.descargaToken) {
+    patch.descargaToken = crypto.randomBytes(24).toString('hex');
+  }
+  const actualizado = store.updateOrder(order.id, patch);
+
+  // Cliente real que pago: se suma a la lista de campañas de correo
+  // masivo, sea que tenga cuenta o haya comprado como invitado.
+  if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado && actualizado.email) {
+    store.importarContactosCampana([{ email: actualizado.email }]);
+  }
+
+  if (nuevoEstado === 'aprobado' && !order.capiPurchaseEnviado) {
+    await enviarPurchaseCAPI({ order: actualizado, siteUrl: SITE_URL });
+    store.updateOrder(order.id, { capiPurchaseEnviado: true });
+  }
+
+  if (nuevoEstado === 'aprobado' && !order.googleAdsEnviado) {
+    await enviarCompraGoogle({ order: actualizado });
+    store.updateOrder(order.id, { googleAdsEnviado: true });
+  }
+
+  if (nuevoEstado === 'aprobado' && !yaSeHabiaAprobado) {
+    for (const item of actualizado.items) {
+      if (item.tipo !== 'clase_en_vivo' || !item.claseFecha) continue;
+      if (store.tieneAccesoClaseEnVivo({ fecha: item.claseFecha, userId: actualizado.userId })) continue;
+      store.addAccesoClaseEnVivo({
+        fecha: item.claseFecha,
+        userId: actualizado.userId,
+        email: actualizado.email,
+        monto: item.precio,
+        orderId: actualizado.id,
+      });
+    }
+  }
+
+  // Acceso anticipado de la master class: ficha (o acceso en linea), mes
+  // de membresia y correo con el recetario. Manda su propio correo.
+  if (!yaSeHabiaAprobado || nuevoEstado !== 'aprobado') {
+    procesarAccesoAnticipadoDelPedido(actualizado, nuevoEstado);
+  }
+
+  // Talleres: el pago confirma o libera el lugar que ya se habia
+  // reservado como "pendiente" al crear la preferencia (ver /preference).
+  if (['aprobado', 'rechazado', 'cancelado'].includes(nuevoEstado)) {
+    for (const item of actualizado.items) {
+      if (item.tipo !== 'taller' || !item.inscripcionTallerId) continue;
+      if (nuevoEstado === 'aprobado') {
+        store.actualizarPagoInscripcionTaller(item.inscripcionTallerId, {
+          tipoPago: item.tipoPago,
+          montoPagado: item.precio,
+          estadoPago: 'pagado',
+          pagoId: String(info.id),
+        });
+        // Aviso interno al equipo (si esta configurado) y, cuando ya
+        // existan las credenciales, la fila en "Inscritos 2026" — ambos
+        // nunca deben tumbar la confirmacion del pago si fallan.
+        if (!yaSeHabiaAprobado) {
+          const inscripcionPagada = store.getInscripcionTaller(item.inscripcionTallerId);
+          if (inscripcionPagada) {
+            avisarEquipoNuevoTaller(inscripcionPagada).catch((err) => {
+              console.error(`[checkout] No se pudo mandar el aviso al equipo del taller (inscripcion ${inscripcionPagada.id}):`, err.message);
+            });
+            sincronizarInscripcionTaller(inscripcionPagada).catch((err) => {
+              console.error(`[checkout] No se pudo sincronizar con Google Sheets la inscripcion ${inscripcionPagada.id}:`, err.message);
+            });
+          }
+        }
+      } else {
+        store.actualizarPagoInscripcionTaller(item.inscripcionTallerId, { estadoPago: 'cancelado' });
+      }
+    }
+  }
+
+  const esAccesoAnticipado = actualizado.items.some((item) => item.tipo === 'acceso_anticipado');
+  if (nuevoEstado === 'aprobado' && !order.correoEnviado && actualizado.email && !esAccesoAnticipado) {
+    const contenido = store.getContent();
+    const itemTaller = actualizado.items.find((item) => item.tipo === 'taller' && item.inscripcionTallerId);
+    const correoListo = itemTaller
+      ? (() => {
+          const inscripcion = store.getInscripcionTaller(itemTaller.inscripcionTallerId);
+          const sesion = inscripcion ? store.getSesionesTaller().find((s) => s.id === inscripcion.sesionTallerId) : null;
+          const sedeInfo = sesion ? store.getSedes().find((s) => s.id === sesion.sedeId) : null;
+          return enviarCorreoConfirmacionPagoTaller({
+            to: actualizado.email,
+            nombre: inscripcion ? inscripcion.nombre : '',
+            taller: inscripcion ? inscripcion.taller : '',
+            fecha: inscripcion ? inscripcion.fecha : '',
+            horario: inscripcion ? inscripcion.horario : '',
+            sede: inscripcion ? inscripcion.sede : '',
+            direccion: sedeInfo ? sedeInfo.direccion : '',
+            mapaLink: sedeInfo ? sedeInfo.mapaLink : '',
+            queAprendes: sesion ? sesion.queAprendes : '',
+            tipoPago: itemTaller.tipoPago,
+            montoPagado: itemTaller.precio,
+            saldo: inscripcion ? inscripcion.saldo : null,
+            comunidadLink: contenido.comunidad_whatsapp_link || '',
+            numeroWhatsapp: contenido.whatsapp_numero,
+          });
+        })()
+      : (() => {
+          const itemsConArchivo = actualizado.items.map((item) => {
+            if (item.tipo !== 'producto') return item;
+            const producto = store.getProduct(item.itemId);
+            const archivoExiste = !!(producto && producto.archivo && fs.existsSync(path.join(UPLOAD_DIR, path.basename(producto.archivo))));
+            return { ...item, archivoDisponible: archivoExiste };
+          });
+          return enviarCorreoConfirmacionCompra({
+            to: actualizado.email,
+            order: { ...actualizado, items: itemsConArchivo },
+            siteUrl: SITE_URL,
+            numeroWhatsapp: contenido.whatsapp_numero,
+          });
+        })();
+    correoListo
+      .then(() => store.updateOrder(order.id, { correoEnviado: true }))
+      .catch((err) => {
+        // Si el correo no se pudo enviar (ej. servicio no configurado), el pedido sigue visible en /admin > Ventas.
+        console.error(`[checkout] No se pudo enviar el correo de confirmacion del pedido ${order.id}:`, err.message);
+      });
+  }
+  return store.getOrder(order.id);
+}
+
 module.exports = router;
+module.exports.aplicarPagoAlPedido = aplicarPagoAlPedido;
+module.exports.mpClient = mpClient;

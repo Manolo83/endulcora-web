@@ -15,6 +15,7 @@ const { UPLOAD_DIR, SITE_URL, GOOGLE_SHEETS } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
 const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller, enviarCorreoBuenFin, htmlCorreoBuenFin } = require('../email');
 const { procesarCampana } = require('../campanas');
+const revisarPagos = require('../revisarPagos');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
 const googleSheets = require('../googleSheets');
@@ -646,6 +647,21 @@ router.post('/api/blog/:id/image', requireAdmin, uploadImage.single('file'), pro
 });
 
 // ---- Ventas (pedidos de Mercado Pago + cobros de membresia) ----
+// Revisar pendientes con Mercado Pago (ver src/revisarPagos.js): corre en
+// segundo plano y el admin consulta el avance.
+router.get('/api/orders/revisar-pendientes', requireAdmin, (req, res) => {
+  res.json({ ...revisarPagos.estadoRevision(), pendientes: revisarPagos.pedidosPendientes().length });
+});
+
+router.post('/api/orders/revisar-pendientes', requireAdmin, (req, res) => {
+  if (!require('./checkout').mpClient()) return res.status(503).json({ error: 'Mercado Pago todavía no está configurado.' });
+  const actual = revisarPagos.estadoRevision();
+  if (!actual.enCurso) {
+    revisarPagos.revisarPendientes({ origen: 'boton' }).catch((err) => console.error('[admin] Revisión de pendientes:', err.message));
+  }
+  res.status(202).json({ ...revisarPagos.estadoRevision(), pendientes: revisarPagos.pedidosPendientes().length });
+});
+
 router.get('/api/orders', requireAdmin, (req, res) => {
   const pedidos = store.getOrders();
   const pagosMembresia = store.getMembresiaPagos().map((p) => ({
