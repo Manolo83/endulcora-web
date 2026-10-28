@@ -3194,7 +3194,7 @@ module.exports = {
       },
       {
         sede: sedeNativitas, clave: 'bombon', titulo: 'Bombonería',
-        fechas: ['2026-11-20', '2026-11-22'], horario: HORARIO_MANANA, imagen: '20261120_Bomboneria_NATIVITAS_1x1.jpg',
+        fechas: ['2026-11-20', '2026-11-22'], horario: HORARIO_MANANA, imagen: '20261120_Bomboneria_NATIVITAS_1x1.jpg', fotoReal: 'fotos/bomboneria.jpg',
         descripcion: 'Bombones de vaciado, como de chocolatería, con técnica profesional. Taller presencial de 4 horas, para principiantes.',
         queAprendes: 'Preparas bombones de maracuyá (tropical, fresco y equilibrado), mango con chile (dulce con un toque picante) y crema de avellana (suave y cremosa). Además aprendes la técnica de bombones de vaciado.',
       },
