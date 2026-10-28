@@ -181,3 +181,20 @@ function asuntoCorreo(c = configPromo()) {
 
 module.exports.datosCorreo = datosCorreo;
 module.exports.asuntoCorreo = asuntoCorreo;
+
+// Los mas vendidos dentro de la promocion (para los recordatorios); si
+// todavia hay pocas ventas, se completa con los mas vendidos de siempre.
+function masVendidosPromo(n = 4) {
+  const ventas = new Map();
+  (store.getOrders ? store.getOrders() : [])
+    .filter((o) => o.promo === 'buen-fin' && o.estado === 'aprobado')
+    .forEach((o) => (o.items || []).forEach((i) => ventas.set(Number(i.itemId), (ventas.get(Number(i.itemId)) || 0) + 1)));
+  const generales = masVendidos(ebooksPromo().length);
+  return generales
+    .map((e, orden) => ({ e, orden, v: ventas.get(e.id) || 0 }))
+    .sort((a, b) => b.v - a.v || a.orden - b.orden)
+    .slice(0, n)
+    .map((x) => x.e);
+}
+
+module.exports.masVendidosPromo = masVendidosPromo;

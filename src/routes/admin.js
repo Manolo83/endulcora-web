@@ -18,6 +18,7 @@ const { procesarCampana } = require('../campanas');
 const revisarPagos = require('../revisarPagos');
 const entregas = require('../entregas');
 const origenTrafico = require('../origenTrafico');
+const recordatoriosBuenFin = require('../recordatoriosBuenFin');
 const { sincronizarPagosDePreapproval, sincronizarEstadoDePreapproval } = require('./membresia');
 const { ALLOWED_IMAGE, uploadImage, procesarImagenSubida, borrarSiEsSubida } = require('../uploads');
 const googleSheets = require('../googleSheets');
@@ -649,6 +650,53 @@ router.post('/api/blog/:id/image', requireAdmin, uploadImage.single('file'), pro
 });
 
 // ---- Ventas (pedidos de Mercado Pago + cobros de membresia) ----
+// ---- Recordatorios automaticos del Buen Fin (ver src/recordatoriosBuenFin.js) ----
+router.get('/api/buen-fin/recordatorios', requireAdmin, (req, res) => {
+  res.json({
+    activo: store.getContent().buenfin_recordatorios_activo !== 'false',
+    recordatorios: recordatoriosBuenFin.programacion(),
+    carritos: recordatoriosBuenFin.resumenCarritos(),
+    pendientesCarrito: recordatoriosBuenFin.candidatosCarrito().length,
+  });
+});
+
+// Correo de ejemplo de cada recordatorio (los "pagos a medias" con 3 de los
+// mas vendidos como si los hubiera elegido).
+function datosVistaRecordatorio(clave) {
+  if (clave === 'carrito') {
+    const elegidos = promoBuenFin.masVendidosPromo(3).map((e) => ({ id: e.id, titulo: e.titulo, imagen: e.imagen || '' }));
+    return { ...promoBuenFin.datosCorreo([]), variante: 'carrito', elegidos, nombre: 'Laura', unsubscribeUrl: '#' };
+  }
+  return {
+    ...promoBuenFin.datosCorreo(promoBuenFin.masVendidosPromo(4).map((e) => e.id)),
+    variante: clave,
+    comprasComunidad: promoBuenFin.resumenVentas().compras,
+    nombre: 'Laura',
+    unsubscribeUrl: '#',
+  };
+}
+const CLAVES_RECORDATORIO = ['tres-dias', 'ultimo-dia', 'carrito'];
+
+router.get('/api/buen-fin/recordatorios/vista/:clave', requireAdmin, (req, res) => {
+  if (!CLAVES_RECORDATORIO.includes(req.params.clave)) return res.status(404).send('No existe.');
+  res.type('html').send(htmlCorreoBuenFin(datosVistaRecordatorio(req.params.clave)));
+});
+
+router.post('/api/buen-fin/recordatorios/prueba', requireAdmin, async (req, res) => {
+  const { clave, email } = req.body || {};
+  if (!CLAVES_RECORDATORIO.includes(clave)) return res.status(400).json({ error: 'Recordatorio no válido.' });
+  const correo = String(email || '').trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) return res.status(400).json({ error: 'Escribe el correo donde quieres recibir la prueba.' });
+  const r = recordatoriosBuenFin.RECORDATORIOS.find((x) => x.clave === clave);
+  const asunto = r ? r.asunto : 'Tus eBooks del Buen Fin te esperan 🛒';
+  try {
+    await enviarCorreoBuenFin({ to: correo, asunto: `[PRUEBA] ${asunto}`, ...datosVistaRecordatorio(clave), unsubscribeUrl: `${SITE_URL}/` });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(502).json({ error: e.message || 'No se pudo mandar la prueba.' });
+  }
+});
+
 // Vuelve a mandar el correo de compra con sus botones de descarga (ej. el
 // cliente lo borro, le cayo en spam o se subio un archivo que faltaba).
 router.post('/api/orders/:id/reenviar-correo', requireAdmin, async (req, res) => {

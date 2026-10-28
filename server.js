@@ -600,6 +600,8 @@ store.init()
     require('./src/revisarPagos').iniciarRevisionAutomatica();
     // Reintenta cada hora los correos de compra que no se pudieron mandar.
     require('./src/entregas').iniciarEntregasAutomaticas();
+    // Recordatorios del Buen Fin (3 dias, ultimo dia) y pagos a medias.
+    require('./src/recordatoriosBuenFin').iniciarRecordatoriosBuenFin();
     // Confirmacion de lugar de la clase gratis (control de aforo con tope
     // de cupo) y sus recordatorios a quien ya confirmo.
     require('./src/confirmacionClaseGratis').iniciarAutomatizacionClaseGratis();

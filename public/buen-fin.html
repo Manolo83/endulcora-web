@@ -536,8 +536,9 @@ document.getElementById('formPago').addEventListener('submit', async (e) => {
   // Cada portada del correo trae ?eb=<id>: ese eBook llega ya elegido.
   const params = new URLSearchParams(location.search);
   if(params.get('origen') === 'correo'){ try{ sessionStorage.setItem('buenFinOrigen', 'correo'); }catch(e){} }
-  const desdeCorreo = Number(params.get('eb'));
-  if(disponibles.has(desdeCorreo)){ ELEGIDOS.add(desdeCorreo); guardarSeleccion(); }
+  // Puede traer varios separados por coma ("Tus eBooks te esperan").
+  const desdeCorreo = String(params.get('eb') || '').split(',').map(Number).filter(id => disponibles.has(id));
+  if(desdeCorreo.length){ desdeCorreo.forEach(id => ELEGIDOS.add(id)); guardarSeleccion(); }
   if(new URLSearchParams(location.search).get('pago') === 'error'){
     const aviso = document.getElementById('avisoError');
     aviso.classList.remove('hidden');
