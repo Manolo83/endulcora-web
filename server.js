@@ -604,6 +604,10 @@ store.init()
     require('./src/recordatoriosBuenFin').iniciarRecordatoriosBuenFin();
     // Correos 2 a 6 de la masterclass (plan de ventas).
     require('./src/correosMasterclass').iniciarCorreosMasterclass();
+    // Quien aparto lugar en un taller y no termino de pagar: dos avisos
+    // dentro de las 72 horas que se le guarda el lugar. Se apaga desde
+    // /admin con recuperacion_taller_activa.
+    require('./src/recuperarPagosTaller').iniciarRecuperacionPagosTaller();
     // Confirmacion de lugar de la clase gratis (control de aforo con tope
     // de cupo) y sus recordatorios a quien ya confirmo.
     require('./src/confirmacionClaseGratis').iniciarAutomatizacionClaseGratis();

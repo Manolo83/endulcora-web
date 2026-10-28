@@ -133,6 +133,9 @@ const DEFAULT_CONTENT = {
   // Recordatorios automaticos (quedan 3 dias, ultimo dia) y "Tus eBooks te
   // esperan" para pagos a medias (ver src/recordatoriosBuenFin.js).
   buenfin_recordatorios_activo: 'true',
+  // Avisos a quien aparto lugar en un taller y no termino de pagar
+  // (src/recuperarPagosTaller.js).
+  recuperacion_taller_activa: 'true',
   buenfin_inicio: '',
   buenfin_fin: '2026-11-30T23:59',
   buenfin_precio_uno: '100',

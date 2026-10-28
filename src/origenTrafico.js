@@ -13,13 +13,21 @@
 // entonces si capturamos las cookies y no hubo anuncio (llego directo de
 // verdad); si no hay ni _fbp, no capturamos nada y no sabemos.
 
-// Hasta esta fecha, ni la pagina del taller ni el formulario de inscripcion
+// Hasta este momento, ni la pagina del taller ni el formulario de inscripcion
 // mandaban las cookies al servidor, asi que de los registros anteriores no se
 // puede saber el origen: no es que no hubiera anuncio, es que nunca se midio.
 // De aqui en adelante un "Sin dato" si quiere decir algo (llego sin clic de
 // anuncio y sin cookie del pixel). Por eso la nota se pone sola y se deja de
 // poner sola, sin tener que acordarse de quitarla.
-const DESDE_QUE_SE_MIDE = '2026-10-28';
+//
+// Va como instante completo en UTC, no como fecha suelta, porque createdAt se
+// guarda en UTC y el panel lo muestra en hora de Mexico: comparar solo la
+// fecha dejaba sin nota a todo lo creado despues de las 6 PM del dia del
+// corte, que en UTC ya cuenta como el dia siguiente. Las cadenas ISO en UTC
+// se comparan bien tal cual. La hora esta puesta un poco despues del
+// despliegue a proposito: si algo cae en los minutos de duda, mejor decir
+// "no se midio" que dar por bueno un dato que quiza no se guardo.
+const DESDE_QUE_SE_MIDE = '2026-10-28T04:00:00.000Z';
 
 // Campos que viajan del navegador al servidor y se guardan en el registro.
 const CAMPOS = ['fbp', 'fbc', 'gclid', 'gbraid', 'wbraid'];
@@ -43,7 +51,7 @@ function origenDe(registro) {
     return { clave: 'google', etiqueta: 'Anuncio de Google' };
   }
   if (registro.fbp) return { clave: 'directo', etiqueta: 'Directo u orgánico' };
-  const creado = String(registro.createdAt || '').slice(0, 10);
+  const creado = String(registro.createdAt || '');
   return {
     clave: 'sin_dato',
     etiqueta: 'Sin dato',
