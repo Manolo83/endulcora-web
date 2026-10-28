@@ -389,6 +389,43 @@
         </div>
 
         <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Promoción "El Buen Fin llegó antes" (eBooks)</h3>
+            <a href="/buen-fin" target="_blank" class="font-ui text-[11px] font-700 uppercase tracking-wider text-vino underline">Ver página</a>
+          </div>
+          <p class="mt-1 text-xs text-carbon/50">Página exclusiva para la comunidad en <a href="/buen-fin" target="_blank" class="underline hover:text-vino">/buen-fin</a> (no aparece en el menú). Solo los PDFs de los eBooks, sin paquetes ni anexos: cada eBook al precio unitario y cada 4 al precio del paquete. Se apaga sola en la fecha de fin; para extenderla a diciembre basta con mover esa fecha.</p>
+          <div id="buenFinResumen" class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">¿Promoción activa?</span>
+              <select data-content-key="buenfin_activo" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+                <option value="true">Sí</option>
+                <option value="false">No</option>
+              </select>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Termina (hora CDMX)</span>
+              <input data-content-key="buenfin_fin" type="datetime-local" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio de 1 eBook (MXN)</span>
+              <input data-content-key="buenfin_precio_uno" type="text" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Precio de 4 eBooks (MXN)</span>
+              <input data-content-key="buenfin_precio_paquete" type="text" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+            </label>
+          </div>
+          <div class="mt-4 rounded-xl bg-crema/60 p-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-carbon/60">Mensaje para los grupos de WhatsApp</p>
+              <button type="button" id="btnCopiarMensajeBuenFin" class="rounded-full border border-vino/25 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Copiar</button>
+            </div>
+            <pre id="mensajeBuenFin" class="mt-2 whitespace-pre-wrap font-cuerpo text-sm text-carbon/80"></pre>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
           <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Footer y contacto</h3>
           <div class="mt-4 grid gap-4 sm:grid-cols-2">
             <label class="block sm:col-span-2">
@@ -1855,6 +1892,7 @@ async function cargarContenidoAdmin(){
     pintarAsistenteIcono(CONTENIDO_ACTUAL.asistente_icono);
     pintarClaseRecetario(CONTENIDO_ACTUAL.clase_recetario_url, CONTENIDO_ACTUAL.clase_recetario_nombre);
     pintarClaseGratisRecetario(CONTENIDO_ACTUAL.clasegratis_recetario_url, CONTENIDO_ACTUAL.clasegratis_recetario_nombre);
+    cargarBuenFinAdmin();
   }catch(e){
     toast('No se pudo cargar el contenido general');
   }
@@ -1916,6 +1954,52 @@ $('btnQuitarClaseRecetario').addEventListener('click', async () => {
   }catch(e){
     toast(e.message);
   }
+});
+
+/* ---------- Promocion Buen Fin (eBooks) ---------- */
+function mensajeBuenFin(r){
+  const fin = r.fin ? new Date(r.fin).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Mexico_City' }) : '';
+  const tel = String(r.whatsapp || '').replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
+  return [
+    '🎉 ¡EL BUEN FIN LLEGÓ ANTES A ENDULCORA! 🎉',
+    '',
+    `Solo para nuestra comunidad: TODOS los eBooks a mitad de precio 👇`,
+    '',
+    `📘 1 eBook → $${r.precioUno} (antes $200)`,
+    `🔥 4 eBooks → $${r.precioPaquete} ($${r.precioPaquete / 4} cada uno, ahorras $${800 - r.precioPaquete})`,
+    '',
+    'Eliges los tuyos, pagas y te llegan AL MOMENTO a tu correo, en PDF para siempre.',
+    '',
+    `👉 ${r.link}`,
+    '',
+    fin ? `⏰ Termina el ${fin}. No se repite el precio.` : '',
+    tel ? `¿Dudas? Escríbenos al WhatsApp ${tel} 💬` : '',
+  ].filter((l, i, a) => l !== '' || a[i - 1] !== '').join('\n');
+}
+
+async function cargarBuenFinAdmin(){
+  try{
+    const r = await api('/admin/api/buen-fin/resumen');
+    const tarjetas = [
+      [r.abierta ? 'Activa' : 'Cerrada', 'Estado'],
+      [r.compras, 'Compras'],
+      [r.ebooks, 'eBooks vendidos'],
+      [`$${Number(r.ingreso || 0).toLocaleString('es-MX')}`, 'Ingreso'],
+    ];
+    $('buenFinResumen').innerHTML = tarjetas.map(([v, t]) => `
+      <div class="rounded-xl border border-vino/10 px-4 py-3">
+        <p class="font-titulo text-2xl text-vino">${escapeHtml(String(v))}</p>
+        <p class="text-xs text-carbon/55">${t}</p>
+      </div>`).join('') + `<p class="col-span-2 text-xs text-carbon/50 sm:col-span-4">${r.ebooksEnPromo} eBooks en la promoción (los que tienen su PDF subido).</p>`;
+    $('mensajeBuenFin').textContent = mensajeBuenFin(r);
+  }catch(e){
+    $('buenFinResumen').innerHTML = `<p class="text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+$('btnCopiarMensajeBuenFin').addEventListener('click', async () => {
+  const texto = $('mensajeBuenFin').textContent;
+  try{ await navigator.clipboard.writeText(texto); toast('Mensaje copiado'); }
+  catch(e){ toast('Selecciona el texto y cópialo'); }
 });
 
 function pintarClaseGratisRecetario(url, nombre){

@@ -105,6 +105,15 @@ const DEFAULT_CONTENT = {
   // acceso anticipado y queda guardado en su cuenta.
   clasegratis_recetario_url: '',
   clasegratis_recetario_nombre: '',
+  // ---- Promocion "El Buen Fin llego antes" (/buen-fin, ver src/promoBuenFin.js) ----
+  // Pagina exclusiva para la comunidad: 1 eBook por precio_uno o 4 por
+  // precio_paquete. Se apaga sola en buenfin_fin (hora CDMX, AAAA-MM-DDTHH:MM);
+  // para extenderla (p. ej. a diciembre) basta con mover esa fecha.
+  buenfin_activo: 'true',
+  buenfin_inicio: '',
+  buenfin_fin: '2026-11-30T23:59',
+  buenfin_precio_uno: '100',
+  buenfin_precio_paquete: '200',
   // Link de invitacion al grupo de WhatsApp "Comunidad Endulcora". Se usa
   // en varios lados: paso obligatorio para ver la clase en vivo sin pagar
   // ni ser miembro (ver registrosVideoEnVivo / POST

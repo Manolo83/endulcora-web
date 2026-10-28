@@ -11,6 +11,7 @@ const { enviarCompraGoogle } = require('../googleAds/conversiones');
 const { avisarEquipoNuevoTaller, sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 const bcrypt = require('bcryptjs');
 const acceso = require('../accesoAnticipado');
+const promoBuenFin = require('../promoBuenFin');
 const { enviarCorreoAccesoConfirmado } = require('../email');
 
 const router = express.Router();
@@ -222,6 +223,71 @@ router.post('/preference', async (req, res) => {
     const usarSandbox = process.env.MP_SANDBOX === 'true';
     const url = usarSandbox ? (resultado.sandbox_init_point || resultado.init_point) : resultado.init_point;
     res.status(201).json({ url });
+  } catch (err) {
+    store.updateOrder(order.id, { estado: 'error' });
+    res.status(502).json({ error: 'No se pudo iniciar el pago. Intenta de nuevo en un momento.' });
+  }
+});
+
+// ---- Promocion "El Buen Fin llego antes" (/buen-fin) ----
+// El precio lo calcula siempre el servidor con la regla de la promo; el
+// pedido queda como cualquier compra de productos, asi que las descargas,
+// el correo con los links, Ventas y la medicion funcionan igual que siempre.
+router.post('/buen-fin', async (req, res) => {
+  const client = mpClient();
+  if (!client) return res.status(503).json({ error: 'Los pagos todavía no están configurados.' });
+  const contenido = store.getContent();
+  if (!promoBuenFin.promoAbierta(contenido)) {
+    return res.status(400).json({ error: 'Esta promoción ya terminó.' });
+  }
+  const { ids, email, fbp, fbc, gclid, gbraid, wbraid } = req.body || {};
+  const correo = String(email || '').trim().toLowerCase();
+  if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe tu correo: ahí te mandamos tus eBooks.' });
+  const pedidos = Array.isArray(ids) ? [...new Set(ids.map(Number))] : [];
+  if (!pedidos.length) return res.status(400).json({ error: 'Elige al menos un eBook.' });
+  if (pedidos.length > 200) return res.status(400).json({ error: 'Demasiados eBooks en un solo pedido.' });
+  const disponibles = new Map(promoBuenFin.ebooksPromo().map((p) => [p.id, p]));
+  const libros = pedidos.map((id) => disponibles.get(id));
+  if (libros.some((l) => !l)) return res.status(400).json({ error: 'Uno de los eBooks que elegiste ya no está en la promoción. Recarga la página.' });
+
+  const c = promoBuenFin.configPromo(contenido);
+  const precios = promoBuenFin.repartirPrecios(libros.length, c);
+  const { total, paquetes, sueltos } = promoBuenFin.calcularTotal(libros.length, c);
+  const resueltos = libros.map((p, i) => ({ tipo: 'producto', itemId: p.id, titulo: p.titulo, precio: precios[i], cantidad: 1 }));
+  const userId = req.session && req.session.userId ? req.session.userId : null;
+  const viewToken = crypto.randomBytes(24).toString('hex');
+  const order = store.addOrder({
+    items: resueltos,
+    total,
+    email: correo,
+    userId,
+    viewToken,
+    fbp: typeof fbp === 'string' ? fbp.slice(0, 200) : null,
+    fbc: typeof fbc === 'string' ? fbc.slice(0, 200) : null,
+    gclid: typeof gclid === 'string' ? gclid.slice(0, 200) : null,
+    gbraid: typeof gbraid === 'string' ? gbraid.slice(0, 200) : null,
+    wbraid: typeof wbraid === 'string' ? wbraid.slice(0, 200) : null,
+  });
+  store.updateOrder(order.id, { promo: 'buen-fin', promoDetalle: { paquetes, sueltos } });
+  try {
+    const resultado = await new Preference(client).create({
+      body: {
+        items: resueltos.map((r) => ({ id: String(r.itemId), title: `${r.titulo} (Buen Fin)`, quantity: 1, unit_price: r.precio, currency_id: 'MXN' })),
+        payer: { email: correo },
+        external_reference: String(order.id),
+        back_urls: {
+          success: `${SITE_URL}/gracias?orden=${order.id}&token=${viewToken}`,
+          failure: `${SITE_URL}/buen-fin?pago=error`,
+          pending: `${SITE_URL}/gracias?orden=${order.id}&token=${viewToken}`,
+        },
+        auto_return: 'approved',
+        notification_url: `${SITE_URL}/api/checkout/webhook`,
+      },
+    });
+    store.updateOrder(order.id, { mpPreferenceId: resultado.id });
+    const usarSandbox = process.env.MP_SANDBOX === 'true';
+    const url = usarSandbox ? (resultado.sandbox_init_point || resultado.init_point) : resultado.init_point;
+    res.status(201).json({ url, total });
   } catch (err) {
     store.updateOrder(order.id, { estado: 'error' });
     res.status(502).json({ error: 'No se pudo iniciar el pago. Intenta de nuevo en un momento.' });

@@ -9,6 +9,7 @@ const ExcelJS = require('exceljs');
 const store = require('../store');
 const regalo = require('../membresiaRegalo');
 const acceso = require('../accesoAnticipado');
+const promoBuenFin = require('../promoBuenFin');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL, GOOGLE_SHEETS } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
@@ -277,6 +278,22 @@ router.delete('/api/content/clasegratis-recetario', requireAdmin, (req, res) => 
   const content = store.updateContent({ clasegratis_recetario_url: '', clasegratis_recetario_nombre: '' });
   borrarRecetarioMasterClassSiNoSeUsa(anterior);
   res.json({ content });
+});
+
+// ---- Promocion "El Buen Fin llego antes" (/buen-fin) ----
+router.get('/api/buen-fin/resumen', requireAdmin, (req, res) => {
+  const contenido = store.getContent();
+  const c = promoBuenFin.configPromo(contenido);
+  res.json({
+    abierta: promoBuenFin.promoAbierta(contenido),
+    fin: c.fin ? c.fin.toISOString() : null,
+    ebooksEnPromo: promoBuenFin.ebooksPromo().length,
+    link: `${SITE_URL}/buen-fin`,
+    whatsapp: contenido.whatsapp_numero || '',
+    precioUno: c.precioUno,
+    precioPaquete: c.precioPaquete,
+    ...promoBuenFin.resumenVentas(),
+  });
 });
 
 // ---- Carrusel de imagenes del inicio (publicidad) ----

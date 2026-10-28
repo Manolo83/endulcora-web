@@ -8,6 +8,7 @@ const { uploadImage, uploadMedia, procesarImagenSubida, ALLOWED_VIDEO } = requir
 const { enviarCorreoConfirmacionInscripcionTaller, enviarCorreoConfirmacionClaseGratis, linkAgregarCalendario } = require('../email');
 const { sincronizarInscripcionTaller } = require('../automatizacionesTaller');
 const acceso = require('../accesoAnticipado');
+const promoBuenFin = require('../promoBuenFin');
 
 const router = express.Router();
 
@@ -757,6 +758,38 @@ router.post('/clase-gratis/confirmar', (req, res) => {
     numeroInscrito: item.numeroInscrito,
     calendarLink,
     linkClasesEnVivo: !vaAVenir ? '/clases-en-vivo' : '',
+  });
+});
+
+// ---- Promocion "El Buen Fin llego antes" (/buen-fin) ----
+// Nunca se manda la ruta del PDF: solo lo necesario para mostrar el catalogo.
+router.get('/buen-fin', (req, res) => {
+  const contenido = store.getContent();
+  const c = promoBuenFin.configPromo(contenido);
+  const abierta = promoBuenFin.promoAbierta(contenido);
+  const apartados = store.getApartadosEbooks();
+  const ventas = promoBuenFin.resumenVentas();
+  res.json({
+    abierta,
+    fin: c.fin ? c.fin.toISOString() : null,
+    precioUno: c.precioUno,
+    precioPaquete: c.precioPaquete,
+    whatsapp: contenido.whatsapp_numero || '',
+    // Prueba social solo con compras reales, y solo cuando ya son varias.
+    compras: ventas.compras >= 5 ? ventas.compras : 0,
+    apartados: apartados.map((a) => ({ slug: a.slug, nombre: a.nombre })),
+    ebooks: abierta
+      ? promoBuenFin.ebooksPromo().map((p) => ({
+          id: p.id,
+          titulo: p.titulo,
+          subtitulo: p.subtitulo || '',
+          descripcionCorta: p.descripcionCorta || '',
+          imagen: p.imagen || '',
+          apartado: p.apartado || '',
+          precioNormal: p.precio || '',
+          slug: p.slug || '',
+        }))
+      : [],
   });
 });
 

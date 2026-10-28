@@ -102,6 +102,7 @@ const checkoutLimiter = rateLimit({
   message: { error: 'Demasiados intentos de compra. Intenta de nuevo en unos minutos.' },
 });
 app.use('/api/checkout/preference', checkoutLimiter);
+app.use('/api/checkout/buen-fin', checkoutLimiter);
 // Tambien pide la contraseña de la cuenta: mismo limite que el login.
 app.use('/api/checkout/acceso-anticipado', clienteAuthLimiter);
 
@@ -299,6 +300,12 @@ app.get('/calendario', (req, res) => {
 // correo" en su lugar.
 app.get('/confirmar-clase', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'confirmar-clase.html'));
+});
+
+// Promocion "El Buen Fin llego antes": pagina exclusiva para la comunidad
+// (sin link en el menu).
+app.get('/buen-fin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'buen-fin.html'));
 });
 
 // Acceso anticipado de la master class: link personal del correo.
