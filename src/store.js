@@ -133,6 +133,15 @@ const DEFAULT_CONTENT = {
   // Recordatorios automaticos (quedan 3 dias, ultimo dia) y "Tus eBooks te
   // esperan" para pagos a medias (ver src/recordatoriosBuenFin.js).
   buenfin_recordatorios_activo: 'true',
+  // Correo 11 del plan: gracias, reseña y ebook el dia despues del taller.
+  taller_gracias_activo: 'true',
+  // Correo 13 del plan: boletin semanal de los lunes (src/boletinSemanal.js).
+  // Destacado y eBook vacios = se eligen solos; pausado = fecha (AAAA-MM-DD)
+  // del lunes que no se manda.
+  boletin_activo: 'true',
+  boletin_taller_destacado: '',
+  boletin_ebook_id: '',
+  boletin_pausado_lunes: '',
   // Avisos a quien aparto lugar en un taller y no termino de pagar
   // (src/recuperarPagosTaller.js).
   recuperacion_taller_activa: 'true',
@@ -2812,6 +2821,9 @@ module.exports = {
     if (typeof patch.descripcion === 'string') item.descripcion = patch.descripcion;
     if (typeof patch.queAprendes === 'string') item.queAprendes = patch.queAprendes;
     if (typeof patch.fotoUrl === 'string') item.fotoUrl = patch.fotoUrl;
+    // eBook del mismo tema para el correo de gracias (vacio = se elige solo
+    // por el nombre del taller).
+    if (patch.ebookRelacionadoId !== undefined) item.ebookRelacionadoId = Number(patch.ebookRelacionadoId) || null;
     if (typeof patch.hojaSheets === 'string') item.hojaSheets = patch.hojaSheets.trim();
     if (patch.precioTotal !== undefined) item.precioTotal = Number(patch.precioTotal) || 0;
     if (patch.anticipo !== undefined) item.anticipo = Number(patch.anticipo) || 0;
@@ -3163,6 +3175,16 @@ module.exports = {
   // leventSync.js).
   getInscripcionesTaller() {
     return [...load().inscripcionesTaller].sort((a, b) => b.id - a.id);
+  },
+  // Marcas de los correos y la reseña de una inscripcion (correo 11 del
+  // plan de ventas, ver src/correosTaller.js). Solo estos campos.
+  marcarInscripcionTaller(id, patch) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    ['graciasEnviado', 'resenaToken', 'resenaDejada'].forEach((k) => { if (k in patch) item[k] = patch[k]; });
+    save(data);
+    return item;
   },
   getInscripcionTaller(id) {
     return load().inscripcionesTaller.find((i) => i.id === Number(id)) || null;

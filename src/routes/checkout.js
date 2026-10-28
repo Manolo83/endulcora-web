@@ -564,8 +564,9 @@ async function aplicarPagoAlPedido(info) {
             tipoPago: itemTaller.tipoPago,
             montoPagado: itemTaller.precio,
             saldo: inscripcion ? inscripcion.saldo : null,
-            comunidadLink: contenido.comunidad_whatsapp_link || '',
+            comunidadLink: contenido.comunidad_avisos_link || '',
             numeroWhatsapp: contenido.whatsapp_numero,
+            arteUrl: sesion && sesion.fotoUrl ? (/^https?:\/\//.test(sesion.fotoUrl) ? sesion.fotoUrl : `${SITE_URL}${sesion.fotoUrl}`) : '',
           });
         })()
       : entregas.mandarCorreoCompra(actualizado);

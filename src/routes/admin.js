@@ -680,6 +680,94 @@ router.post('/api/masterclass/correos/prueba', requireAdmin, async (req, res) =>
   }
 });
 
+// ---- Correos de talleres (9, 11) y boletin de los lunes (13) del plan de ventas ----
+// Ejemplo con un taller real proximo (o el ultimo que haya).
+function sesionDeEjemplo() {
+  const sesiones = store.getSesionesTaller().filter((s) => s.titulo);
+  const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+  return sesiones.find((s) => s.fecha >= hoy && s.fotoUrl) || sesiones.find((s) => s.fecha >= hoy) || sesiones[sesiones.length - 1] || null;
+}
+
+function correoTallerDeEjemplo(n) {
+  const contenido = store.getContent();
+  const sesion = sesionDeEjemplo();
+  const sede = sesion ? store.getSedes().find((x) => x.id === sesion.sedeId) : null;
+  const arte = sesion && sesion.fotoUrl ? (/^https?:/.test(sesion.fotoUrl) ? sesion.fotoUrl : `${SITE_URL}${sesion.fotoUrl}`) : '';
+  if (n === 9) {
+    return require('../email').correoConfirmacionPagoTaller({
+      nombre: 'Rosa', taller: sesion ? sesion.titulo : 'Galletas Decoradas', fecha: sesion ? sesion.fecha : '',
+      horario: sesion ? String(sesion.horario || '').split(',')[0].trim() : '', sede: sede ? `Endulcora ${sede.nombre}` : '',
+      direccion: sede ? sede.direccion : '', mapaLink: sede ? sede.mapaLink : '', queAprendes: sesion ? sesion.queAprendes : '',
+      tipoPago: 'anticipo', saldo: sesion && sesion.precioTotal && sesion.anticipo ? sesion.precioTotal - sesion.anticipo : 0,
+      comunidadLink: contenido.comunidad_avisos_link, numeroWhatsapp: contenido.whatsapp_numero, arteUrl: arte,
+    });
+  }
+  if (n === 11) {
+    // De preferencia un taller con eBook relacionado, para ver el correo completo.
+    const ct = require('../correosTaller');
+    const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+    const conEbook = store.getSesionesTaller().find((s) => s.fecha >= hoy && s.titulo && ct.ebookDeTaller(s.titulo, s)) || sesion;
+    const ins = { id: 0, resenaToken: 'ejemplo', nombre: 'Rosa', taller: conEbook ? conEbook.titulo : 'Galletas Decoradas' };
+    return ct.correoGracias(ins, conEbook, contenido);
+  }
+  if (n === 13) {
+    const boletin = require('../boletinSemanal');
+    const { proximo } = boletin.estado();
+    const datos = boletin.armarDatos(boletin.horaEnvio(proximo.lunes), contenido);
+    return { asunto: datos.asunto, html: boletin.htmlBoletin(datos, { nombre: 'Laura', unsubscribeUrl: '#' }, contenido) };
+  }
+  return null;
+}
+
+router.get('/api/correos-taller', requireAdmin, (req, res) => {
+  const contenido = store.getContent();
+  const sesion = sesionDeEjemplo();
+  const ebook = sesion ? require('../correosTaller').ebookDeTaller(sesion.titulo, sesion) : null;
+  res.json({
+    graciasActivo: contenido.taller_gracias_activo !== 'false',
+    graciasEnviados: store.getInscripcionesTaller().filter((i) => i.graciasEnviado).length,
+    resenasDejadas: store.getInscripcionesTaller().filter((i) => i.resenaDejada).length,
+    ejemplo: sesion ? { titulo: sesion.titulo, ebook: ebook ? ebook.titulo : '' } : null,
+    boletin: require('../boletinSemanal').estado(),
+  });
+});
+
+router.get('/api/correos-taller/vista/:n', requireAdmin, (req, res) => {
+  const correo = correoTallerDeEjemplo(Number(req.params.n));
+  if (!correo) return res.status(404).send('No existe.');
+  res.type('html').send(correo.html.replace('<body', `<body data-asunto="${correo.asunto.replace(/"/g, '&quot;')}"`));
+});
+
+router.post('/api/correos-taller/prueba', requireAdmin, async (req, res) => {
+  const correo = String((req.body || {}).email || '').trim().toLowerCase();
+  const ejemplo = correoTallerDeEjemplo(Number((req.body || {}).n));
+  if (!ejemplo) return res.status(400).json({ error: 'Correo no válido.' });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) return res.status(400).json({ error: 'Escribe el correo donde quieres recibir la prueba.' });
+  try {
+    await require('../email').enviarCorreoHtml({ to: correo, asunto: `[PRUEBA] ${ejemplo.asunto}`, html: ejemplo.html });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(502).json({ error: e.message || 'No se pudo mandar la prueba.' });
+  }
+});
+
+// Ajustes del boletin: activo, taller destacado, eBook y pausar un lunes.
+router.patch('/api/boletin', requireAdmin, (req, res) => {
+  const b = req.body || {};
+  const patch = {};
+  if ('activo' in b) patch.boletin_activo = b.activo ? 'true' : 'false';
+  if ('taller' in b) patch.boletin_taller_destacado = String(b.taller || '').trim();
+  if ('ebookId' in b) patch.boletin_ebook_id = b.ebookId ? String(Number(b.ebookId) || '') : '';
+  if ('pausadoLunes' in b) {
+    const l = String(b.pausadoLunes || '');
+    if (l && !/^\d{4}-\d{2}-\d{2}$/.test(l)) return res.status(400).json({ error: 'Fecha no válida.' });
+    patch.boletin_pausado_lunes = l;
+  }
+  if ('graciasActivo' in b) patch.taller_gracias_activo = b.graciasActivo ? 'true' : 'false';
+  store.updateContent(patch);
+  res.json(require('../boletinSemanal').estado());
+});
+
 // ---- Recordatorios automaticos del Buen Fin (ver src/recordatoriosBuenFin.js) ----
 router.get('/api/buen-fin/recordatorios', requireAdmin, (req, res) => {
   res.json({
@@ -921,8 +1009,9 @@ router.post('/api/inscripciones-taller', requireAdmin, async (req, res) => {
         tipoPago: actualizado.tipoPago,
         montoPagado: actualizado.montoPagado,
         saldo: actualizado.saldo,
-        comunidadLink: contenido.comunidad_whatsapp_link || '',
+        comunidadLink: contenido.comunidad_avisos_link || '',
         numeroWhatsapp: contenido.whatsapp_numero,
+        arteUrl: sesion && sesion.fotoUrl ? (/^https?:\/\//.test(sesion.fotoUrl) ? sesion.fotoUrl : `${SITE_URL}${sesion.fotoUrl}`) : '',
       }).catch((err) => {
         console.error(`[admin] No se pudo mandar el correo de confirmacion del registro manual ${actualizado.id}:`, err.message);
       });
@@ -1603,6 +1692,14 @@ router.post('/api/sesiones-taller/fijar-precio-default', requireAdmin, (req, res
   const cupoMaximo = req.body && req.body.cupoMaximo !== undefined ? req.body.cupoMaximo : contenido.taller_cupo_default;
   const resultado = store.fijarPrecioYAnticipoTodasLasSesiones({ precioTotal, anticipo, cupoMaximo });
   res.json(resultado);
+});
+
+// eBook que saldria solo por el nombre (para mostrarlo junto al selector).
+router.get('/api/sesiones-taller/:id/ebook-automatico', requireAdmin, (req, res) => {
+  const sesion = store.getSesionesTaller().find((s) => s.id === Number(req.params.id));
+  if (!sesion) return res.status(404).json({ error: 'No encontrado' });
+  const ebook = require('../correosTaller').ebookDeTaller(sesion.titulo, null, { soloNombre: true });
+  res.json({ titulo: ebook ? ebook.titulo : '' });
 });
 
 router.delete('/api/sesiones-taller/:id', requireAdmin, (req, res) => {

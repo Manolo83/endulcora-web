@@ -302,6 +302,20 @@ app.get('/confirmar-clase', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'confirmar-clase.html'));
 });
 
+// Reseña sin cuenta desde el correo de gracias del taller (link personal).
+const correosTaller = require('./src/correosTaller');
+app.get('/resena', (req, res) => {
+  const ins = correosTaller.inscripcionConToken(req.query.i, req.query.t);
+  if (!ins) return res.status(404).send('Este enlace ya no es válido. Escríbenos por WhatsApp y te ayudamos.');
+  res.set('Cache-Control', 'no-store').type('html').send(correosTaller.paginaResena(ins));
+});
+app.post('/resena', express.urlencoded({ extended: false }), (req, res) => {
+  const ins = correosTaller.inscripcionConToken(req.query.i, req.query.t);
+  if (!ins) return res.status(404).send('Este enlace ya no es válido. Escríbenos por WhatsApp y te ayudamos.');
+  const r = correosTaller.guardarResena(ins, req.body || {});
+  res.set('Cache-Control', 'no-store').type('html').send(correosTaller.paginaResena(correosTaller.inscripcionConToken(req.query.i, req.query.t), r.error ? { error: r.error } : { enviada: true }));
+});
+
 // Promocion "El Buen Fin llego antes": pagina exclusiva para la comunidad
 // (sin link en el menu).
 app.get('/buen-fin', (req, res) => {
@@ -604,6 +618,9 @@ store.init()
     require('./src/recordatoriosBuenFin').iniciarRecordatoriosBuenFin();
     // Correos 2 a 6 de la masterclass (plan de ventas).
     require('./src/correosMasterclass').iniciarCorreosMasterclass();
+    // Correo 11 (gracias, reseña y ebook) y 13 (boletin de los lunes).
+    require('./src/correosTaller').iniciarCorreosTaller();
+    require('./src/boletinSemanal').iniciarBoletinSemanal();
     // Quien aparto lugar en un taller y no termino de pagar: dos avisos
     // dentro de las 72 horas que se le guarda el lugar. Se apaga desde
     // /admin con recuperacion_taller_activa.

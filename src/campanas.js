@@ -41,6 +41,9 @@ async function procesarCampana(campanaId) {
     const datosBuenFin = esBuenFin
       ? { ...promoBuenFin.datosCorreo(campana.ebookIds), variante, comprasComunidad: promoBuenFin.resumenVentas().compras }
       : null;
+    // Boletin de los lunes (ver src/boletinSemanal.js): los datos de la
+    // semana quedaron guardados en la campaña al crearla.
+    const esBoletin = campana.plantilla === 'boletin' && !!campana.datosBoletin;
     const mapaContactos = new Map(store.getContactosCampana().map((c) => [c.id, c]));
     const pendientesTotal = (campana.contactoIds || []).filter((id) => !yaProcesados.has(id));
 
@@ -60,9 +63,9 @@ async function procesarCampana(campanaId) {
       // Se revisa en cada contacto: alguien cancelo a la mitad, o ya compro.
       const actual = store.getCampanaCorreo(campanaId);
       if (!actual || actual.estado === 'cancelada') return;
-      if (esBuenFin) {
+      if (esBuenFin || esBoletin) {
         const fresco = store.getContactosCampana().find((c) => c.id === contacto.id);
-        if (!fresco || fresco.activo === false || promoBuenFin.correosQueYaCompraron().has(contacto.email)) {
+        if (!fresco || fresco.activo === false || (esBuenFin && promoBuenFin.correosQueYaCompraron().has(contacto.email))) {
           store.omitirContactoCampana(campanaId, contacto.id);
           continue;
         }
@@ -71,7 +74,9 @@ async function procesarCampana(campanaId) {
       let errorMsg = '';
       try {
         const unsubscribeUrl = `${SITE_URL}/desuscribir?id=${contacto.id}&token=${contacto.unsubToken}`;
-        if (esBuenFin) {
+        if (esBoletin) {
+          await require('./boletinSemanal').enviarBoletin({ to: contacto.email, nombre: contacto.nombre, unsubscribeUrl, datos: campana.datosBoletin });
+        } else if (esBuenFin) {
           await enviarCorreoBuenFin({ to: contacto.email, asunto: campana.asunto, nombre: contacto.nombre, unsubscribeUrl, ...datosBuenFin });
         } else await enviarCorreoCampana({
           to: contacto.email,
