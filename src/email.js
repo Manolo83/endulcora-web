@@ -1122,6 +1122,74 @@ async function enviarAvisoEquipoArchivoFaltante({ to, order, faltan, siteUrl }) 
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+
+// Pago de taller a medias: aparto lugar, llego a Mercado Pago y no termino.
+// Lo manda src/recuperarPagosTaller.js, dos veces dentro de las 72 horas que
+// de verdad se le guarda el lugar.
+//
+// Convence con cosas ciertas, no con trucos: su lugar existe y esta
+// apartado, la fecha en que se libera es la real, el cupo que se menciona
+// sale de la base y solo se menciona si de verdad queda poco, y la salida
+// barata (pagar solo el anticipo) es una opcion que ya existe en el sitio.
+// Nada de contadores falsos ni "quedan 2 lugares" inventados: si llega y ve
+// que era mentira, se pierde la venta y la confianza en todo lo demas.
+async function enviarCorreoRecuperacionTaller({
+  to, nombre, taller, fechaTaller, horario, sede, monto, venceEn, lugares,
+  anticipo, link, esUltimo, unsubscribeUrl, numeroWhatsapp,
+}) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+
+  const hola = nombre ? `${nombre}, ` : '';
+  const asunto = esUltimo
+    ? `${nombre ? nombre + ', t' : 'T'}u lugar en ${taller} se libera mañana`
+    : `${nombre ? nombre + ', t' : 'T'}u lugar en ${taller} sigue apartado`;
+
+  const entrada = esUltimo
+    ? `Te escribimos una última vez: tu lugar en <strong>${taller}</strong> sigue guardado, pero se libera <strong>${venceEn}</strong>. Después de esa hora vuelve a la lista y se lo puede llevar alguien más.`
+    : `${hola}apartaste tu lugar en <strong>${taller}</strong> y el pago quedó a medias. No pasa nada: <strong>te lo seguimos guardando hasta ${venceEn}</strong>.`;
+
+  const detalle = `
+    <table style="width:100%;border-collapse:collapse;margin:18px 0;background:#FBF4E9;border-radius:14px;">
+      <tr><td style="padding:16px 18px;">
+        <p style="margin:0;font-size:15px;font-weight:700;color:#4E1454;">${taller}</p>
+        <p style="margin:6px 0 0;font-size:14px;color:#1B0720;text-transform:capitalize;">${fechaTaller}</p>
+        ${horario ? `<p style="margin:2px 0 0;font-size:14px;color:#1B0720;">${horario}</p>` : ''}
+        ${sede ? `<p style="margin:2px 0 0;font-size:14px;color:#1B0720;">Sucursal ${sede}</p>` : ''}
+        <p style="margin:10px 0 0;font-size:14px;color:#7A2E7E;">Te falta pagar <strong>$${formatoMonto(monto)} MXN</strong></p>
+      </td></tr>
+    </table>`;
+
+  // Solo si de verdad quedan pocos y el dato salio de la base.
+  const escasez = lugares
+    ? `<p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:#1B0720;">De este taller quedan <strong>${lugares} ${lugares === 1 ? 'lugar' : 'lugares'}</strong>, contando el tuyo.</p>`
+    : '';
+
+  // La objeción más común es el monto. Si había elegido pagar completo, se le
+  // recuerda que con el anticipo basta para asegurarlo.
+  const salida = anticipo
+    ? `<p style="margin:14px 0 0;font-size:14px;line-height:1.6;color:#1B0720;">Si ahorita no te acomoda el pago completo, <strong>con $${formatoMonto(anticipo)} de anticipo tu lugar queda asegurado</strong> y lo demás lo liquidas el día del taller.</p>`
+    : '';
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+      <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+      <h1 style="font-size:20px;color:#4E1454;margin:6px 0 14px;">${esUltimo ? 'Último aviso de tu lugar' : 'Tu lugar sigue apartado'}</h1>
+      <p style="margin:0 0 14px;font-size:14px;line-height:1.6;">${entrada}</p>
+      ${detalle}
+      ${escasez}
+      <p style="margin:18px 0 6px;"><a href="${link}" style="display:inline-block;background:#4E1454;color:#FBF4E9;padding:13px 26px;border-radius:999px;text-decoration:none;font-weight:700;font-size:15px;">Terminar mi pago</a></p>
+      ${salida}
+      <p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#6b5a6e;">Si ya pagaste, ignora este correo: a veces el aviso del banco tarda unas horas en llegarnos.${numeroWhatsapp ? ` ¿Algún problema con el pago? Escríbenos por WhatsApp al ${numeroWhatsapp}.` : ''}</p>
+      ${unsubscribeUrl ? `<p style="margin:20px 0 0;font-size:11px;color:#9C9C9C;"><a href="${unsubscribeUrl}" style="color:#9C9C9C;">Darme de baja de estos correos</a></p>` : ''}
+    </div>`;
+
+  const { error } = await client.emails.send({ from, to, subject: asunto, html });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+  return { ok: true };
+}
+
 module.exports = {
   enviarCorreoAdjuntoEbook,
   enviarAvisoEquipoArchivoFaltante,
@@ -1135,6 +1203,7 @@ module.exports = {
   enviarCorreoConfirmacionInscripcionTaller,
   enviarCorreoConfirmacionPagoTaller,
   enviarCorreoRecordatorioTaller,
+  enviarCorreoRecuperacionTaller,
   enviarCorreoRecetarioTaller,
   enviarCorreoEbooksTaller,
   enviarAvisoEquipoNuevoTaller,
