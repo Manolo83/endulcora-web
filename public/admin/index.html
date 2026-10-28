@@ -3832,6 +3832,54 @@ function avisoRevisionMp(o){
   return '';
 }
 
+// El servidor ya decide el origen de cada venta (ver origenDePedido en
+// src/routes/admin.js). Aqui solo se le pone color.
+const ESTILO_ORIGEN = {
+  meta: 'bg-vino/10 text-vino',
+  google: 'bg-vino/10 text-vino',
+  directo: 'bg-carbon/5 text-carbon/60',
+  sin_dato: 'bg-amber-50 text-amber-700',
+  membresia: 'bg-carbon/5 text-carbon/60',
+};
+
+function etiquetaOrigen(o){
+  const origen = o.origen || { clave: 'sin_dato', etiqueta: 'Sin dato' };
+  const estilo = ESTILO_ORIGEN[origen.clave] || ESTILO_ORIGEN.sin_dato;
+  const nota = origen.nota ? `<span class="text-carbon/45"> — ${escapeHtml(origen.nota)}</span>` : '';
+  return `<p class="mt-3 text-[12px]">
+    <span class="rounded-full px-2.5 py-1 font-ui font-600 uppercase tracking-wider ${estilo}">${escapeHtml(origen.etiqueta)}</span>${nota}
+  </p>`;
+}
+
+// Resumen de arriba: de donde llego la gente que SI pago. Deja fuera los
+// pedidos que nunca se cobraron (pendientes, rechazados, abandonados), porque
+// contarlos como ventas infla el total y no responde la pregunta. Los cobros
+// de membresia tampoco cuentan: los genera la suscripcion, no una visita.
+function resumenOrigenVentas(items){
+  const cuenta = {};
+  let total = 0;
+  items.forEach(o => {
+    if(o.estado !== 'aprobado') return;
+    const clave = (o.origen && o.origen.clave) || 'sin_dato';
+    if(clave === 'membresia') return;
+    cuenta[clave] = (cuenta[clave] || 0) + 1;
+    total += 1;
+  });
+  if(!total) return '';
+  const nombres = {
+    meta: 'de anuncio de Meta',
+    google: 'de anuncio de Google',
+    directo: 'directas u orgánicas',
+    sin_dato: 'sin dato de origen',
+  };
+  const partes = ['meta','google','directo','sin_dato']
+    .filter(k => cuenta[k])
+    .map(k => `<strong>${cuenta[k]}</strong> ${nombres[k]}`);
+  return `<p class="mb-4 rounded-2xl bg-white px-5 py-4 text-sm text-carbon/70 ring-1 ring-vino/10">
+    De las ${total} ventas pagadas: ${partes.join(' · ')}.
+  </p>`;
+}
+
 async function cargarVentas(){
   const cont = $('listaVentas');
   cont.innerHTML = '<p class="text-sm text-carbon/50">Cargando…</p>';
@@ -3842,7 +3890,7 @@ async function cargarVentas(){
       cont.innerHTML = '<p class="text-sm text-carbon/50">Todavía no hay ventas.</p>';
       return;
     }
-    cont.innerHTML = items.map(o => {
+    cont.innerHTML = resumenOrigenVentas(items) + items.map(o => {
       const estado = ETIQUETA_ESTADO[o.estado] || { texto: o.estado, clase: 'text-humo' };
       const lineas = (o.items || []).map(i => `<li>${i.cantidad}× ${escapeHtml(i.titulo)} — $${escapeHtml(String(i.precio))} c/u</li>`).join('');
       return `
@@ -3851,6 +3899,7 @@ async function cargarVentas(){
         <ul class="mt-2 space-y-1 text-sm text-carbon/75">${lineas}</ul>
         <p class="mt-2 font-titulo text-lg tracking-wide text-vino">Total: $${escapeHtml(String(o.total))} MXN</p>
         <p class="text-sm text-carbon/60">${escapeHtml(o.email || 'sin correo')}</p>
+        ${etiquetaOrigen(o)}
         ${avisoRevisionMp(o)}
         ${bloqueEntrega(o)}
       </article>`;
