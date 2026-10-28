@@ -20,6 +20,16 @@ const PESO_ALTO_BYTES = 40 * 1024 * 1024;
 const MAX_ADJUNTOS_POR_LIBRO_DIA = 3;
 const MAX_INTENTOS_CORREO = 6;
 
+// Productos que se entregan como archivo (eBooks, recetarios, anexos y
+// paquetes completos). Si su archivo no esta, no se ofrecen ni se venden.
+function esDigital(producto) {
+  return !!producto && (['ebook', 'recetario', 'anexo'].includes(producto.categoria) || producto.esPaquete || !!producto.archivo);
+}
+
+function sePuedeEntregar(producto) {
+  return !esDigital(producto) || archivoDeProducto(producto).existe;
+}
+
 // Estado real del archivo de un producto en el disco.
 function archivoDeProducto(producto) {
   if (!producto || !producto.archivo) return { existe: false, bytes: 0, esPdf: false, ruta: '' };
@@ -179,6 +189,8 @@ function iniciarEntregasAutomaticas() {
 }
 
 module.exports = {
+  esDigital,
+  sePuedeEntregar,
   archivoDeProducto,
   archivosDelPedido,
   faltantesDelPedido,

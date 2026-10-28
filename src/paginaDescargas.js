@@ -34,16 +34,17 @@ function paginaDescargas(order, { itemElegido } = {}) {
     disponible: archivo.existe,
     peso: tamano(archivo.bytes),
     adjuntable: archivo.existe && archivo.bytes <= entregas.MAX_ADJUNTO_BYTES,
+    tipo: ({ '.pdf': 'PDF', '.zip': 'ZIP', '.xlsx': 'Excel', '.xls': 'Excel', '.html': 'App', '.htm': 'App' })[archivo.extension] || 'Archivo',
     url: `/api/pedidos/${order.id}/descarga/${i}?token=${token}&archivo=1`,
   }));
   const linkWhats = (texto) => `https://wa.me/52${whatsapp}?text=${encodeURIComponent(texto)}`;
 
   const filas = libros.map((l) => `
       <li class="libro${l.i === itemElegido ? ' elegido' : ''}" id="libro-${l.i}">
-        <div class="info"><b>${esc(l.titulo)}</b><span>${l.disponible ? `PDF · ${l.peso}` : 'Estamos preparando este archivo'}</span></div>
+        <div class="info"><b>${esc(l.titulo)}</b><span>${l.disponible ? `${l.tipo} · ${l.peso}` : 'Estamos preparando este archivo'}</span></div>
         <div class="acciones">
           ${l.disponible
-            ? `<a class="boton descargar" href="${esc(l.url)}">Descargar PDF</a>
+            ? `<a class="boton descargar" href="${esc(l.url)}">Descargar${l.tipo === 'PDF' ? ' PDF' : ''}</a>
                ${l.adjuntable ? `<button class="boton suave adjunto" type="button" data-i="${l.i}">Mandármelo por correo</button>` : ''}`
             : `<a class="boton suave" href="${esc(linkWhats(`Hola, no puedo descargar "${l.titulo}" de mi pedido ${order.id}.`))}">Pedirlo por WhatsApp</a>`}
         </div>

@@ -373,14 +373,16 @@ function resumenProducto(r) {
 router.get('/productos/:slug', (req, res) => {
   const producto = store.getProductBySlug(req.params.slug);
   if (!producto) return res.status(404).json({ error: 'No encontrado' });
+  // No se ofrece nada que no se pueda entregar (ej. un paquete completo
+  // cuyo ZIP todavia no se sube).
   const relacionados = (producto.productosRelacionados || [])
     .map((id) => store.getProduct(id))
-    .filter(Boolean)
+    .filter((x) => x && entregas.sePuedeEntregar(x))
     .map(resumenProducto);
   // Paquetes que incluyen este producto como componente, aunque el paquete
   // no lo tenga ligado desde este lado (se liga una sola vez, del paquete al componente).
   const paquetesQueLoIncluyen = store.getProducts()
-    .filter((x) => x.esPaquete && x.id !== producto.id && (x.productosRelacionados || []).includes(producto.id))
+    .filter((x) => x.esPaquete && x.id !== producto.id && (x.productosRelacionados || []).includes(producto.id) && entregas.sePuedeEntregar(x))
     .map(resumenProducto);
   res.json({ ...producto, productosRelacionadosInfo: relacionados, paquetesQueLoIncluyen });
 });

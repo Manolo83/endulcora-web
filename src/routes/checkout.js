@@ -160,6 +160,10 @@ router.post('/preference', async (req, res) => {
     if (!item) {
       return res.status(404).json({ error: `"${linea.titulo || 'Un artículo'}" ya no esta disponible.` });
     }
+    if (linea.tipo === 'producto' && !entregas.sePuedeEntregar(item)) {
+      console.error(`[checkout] Se intentó comprar "${item.titulo}" (producto ${item.id}) pero no tiene archivo: hay que subirlo en /admin.`);
+      return res.status(409).json({ error: `"${item.titulo}" no está disponible por el momento. Quítalo del carrito o escríbenos por WhatsApp.` });
+    }
     // El precio de membresia (si el producto tiene uno) solo se usa cuando
     // la sesion actual es realmente de un cliente con membresia activa —
     // nunca se confia en nada que mande el carrito del navegador.
