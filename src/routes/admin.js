@@ -13,7 +13,7 @@ const promoBuenFin = require('../promoBuenFin');
 const { requireAdmin, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL, GOOGLE_SHEETS } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
-const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller, enviarCorreoBuenFin, htmlCorreoBuenFin } = require('../email');
+const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller, enviarCorreoBuenFin, htmlCorreoBuenFin, enviarCorreoRecordatorioVideoEnVivo } = require('../email');
 const { procesarCampana } = require('../campanas');
 const revisarPagos = require('../revisarPagos');
 const entregas = require('../entregas');
@@ -1174,6 +1174,42 @@ router.get('/api/clase-en-vivo/registros', requireAdmin, (req, res) => {
 router.delete('/api/clase-en-vivo/registros/:id', requireAdmin, (req, res) => {
   store.deleteRegistroVideoEnVivo(req.params.id);
   res.json({ ok: true });
+});
+
+// Recordatorio "hoy es tu clase" a quien se registro para la sesion de HOY
+// (ver clase_dia_semana/clase_hora/clase_fecha_especifica en Contenido --
+// la misma formula con la que se calculo la fecha de cada registro al
+// anotarse). No es automatico: se manda a mano desde este boton, cuando el
+// equipo decide que ya esta listo para enviarse.
+router.post('/api/clase-en-vivo/recordatorio-hoy', requireAdmin, async (req, res) => {
+  const contenido = store.getContent();
+  const fechaHoy = store.proximaFechaClaseEnVivo(contenido.clase_dia_semana, contenido.clase_hora, contenido.clase_fecha_especifica);
+  const registrosHoy = store.getRegistrosVideoEnVivo().filter((r) => r.fecha === fechaHoy && r.correo && !r.recordatorioHoyEnviado);
+  if (!registrosHoy.length) {
+    return res.status(400).json({ error: `No hay nadie pendiente de recordatorio para la clase de hoy (${fechaHoy}) -- o ya no hay registros, o ya se les mandó a todos.` });
+  }
+  const pie = require('../email').pieEndulcora(require('../email').datosPie(contenido));
+  let enviados = 0;
+  const fallidos = [];
+  for (const registro of registrosHoy) {
+    try {
+      await enviarCorreoRecordatorioVideoEnVivo({
+        to: registro.correo,
+        nombre: registro.nombre,
+        titulo: contenido.clase_titulo,
+        descripcion: contenido.clase_descripcion,
+        hora: contenido.clase_hora,
+        link: `${SITE_URL}/endulcora-en-vivo`,
+        pie,
+      });
+      store.marcarRecordatorioHoyVideoEnVivoEnviado(registro.id);
+      enviados += 1;
+    } catch (e) {
+      fallidos.push({ correo: registro.correo, error: e.message || String(e) });
+    }
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+  res.json({ fecha: fechaHoy, total: registrosHoy.length, enviados, fallidos });
 });
 
 router.get('/api/clase-en-vivo/registros/excel', requireAdmin, async (req, res) => {

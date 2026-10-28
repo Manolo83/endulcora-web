@@ -1390,6 +1390,13 @@ async function init() {
       data._migApartadosEbooksCatalogo = true;
       changed = true;
     }
+    if (!data._migRecordatorioHoyVideoEnVivo) {
+      (data.registrosVideoEnVivo || []).forEach((r) => {
+        if (typeof r.recordatorioHoyEnviado !== 'boolean') r.recordatorioHoyEnviado = false;
+      });
+      data._migRecordatorioHoyVideoEnVivo = true;
+      changed = true;
+    }
     // Primera vez que se agregan precio/anticipo/cupo/slug a los talleres
     // (para la futura pagina publica por slug y el cobro real): a las
     // sesiones y a las inscripciones que ya existian se les rellenan los
@@ -3717,6 +3724,10 @@ module.exports = {
       // confirmarComunidadVideoEnVivo). Util para saber quien solo llenó el
       // formulario pero no se unió de verdad al grupo.
       comunidadConfirmada: false,
+      // Recordatorio manual de "hoy es tu clase" (ver POST
+      // /admin/api/clase-en-vivo/recordatorio-hoy): evita que un segundo
+      // clic en el boton le vuelva a mandar el correo a quien ya lo recibio.
+      recordatorioHoyEnviado: false,
       createdAt: new Date().toISOString(),
     };
     data.registrosVideoEnVivo.push(item);
@@ -3750,6 +3761,14 @@ module.exports = {
     const data = load();
     data.registrosVideoEnVivo = data.registrosVideoEnVivo.filter((r) => r.id !== Number(id));
     save(data);
+  },
+  marcarRecordatorioHoyVideoEnVivoEnviado(id) {
+    const data = load();
+    const item = data.registrosVideoEnVivo.find((r) => r.id === Number(id));
+    if (!item) return null;
+    item.recordatorioHoyEnviado = true;
+    save(data);
+    return item;
   },
 
   // ---- Biblioteca de clases en vivo grabadas (exclusiva para miembros) ----

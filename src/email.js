@@ -540,6 +540,29 @@ async function enviarCorreoHtml({ to, asunto, html, attachments, headers }) {
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+// Recordatorio de "hoy es tu clase en vivo gratis" para quien se registró en
+// /clases-en-vivo o /endulcora-en-vivo (registrosVideoEnVivo) -- a mano
+// desde /admin, no corre solo (a diferencia del embudo de la masterclass en
+// src/correosMasterclass.js, que es un evento distinto con su propio
+// registro/cobro).
+function correoRecordatorioVideoEnVivo({ nombre, titulo, descripcion, hora, link, arteUrl, pie }) {
+  const tituloLimpio = String(titulo || 'tu clase en vivo').replace(/\n/g, ' ').trim();
+  const cuerpo = `<p>Hola${nombre ? ` ${escapeHtml(nombre)}` : ''}:</p>
+    <p>Hoy es tu clase en vivo gratis: <strong>${escapeHtml(tituloLimpio)}</strong>${hora ? `, a las <strong>${escapeHtml(hora)}</strong>` : ''}.</p>
+    ${descripcion ? `<p style="font-size:14px;color:#4b3f4e;">${escapeHtml(descripcion)}</p>` : ''}
+    ${botonPlan('Entrar a la clase', link)}
+    <p style="font-size:13px;color:#6b5a6e;">Se transmite en vivo por esta misma página — entra desde ahí a la hora de la clase.</p>`;
+  return {
+    asunto: `Hoy es tu clase en vivo: ${tituloLimpio}`,
+    html: plantillaPlan({ arteUrl, cuerpo, pie, preheader: hora ? `Hoy a las ${hora}` : 'Hoy' }),
+  };
+}
+
+async function enviarCorreoRecordatorioVideoEnVivo(datos) {
+  const { asunto, html } = correoRecordatorioVideoEnVivo(datos);
+  await enviarCorreoHtml({ to: datos.to, asunto, html });
+}
+
 function escapeHtml(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
@@ -1250,6 +1273,7 @@ module.exports = {
   botonPlan,
   plantillaPlan,
   enviarCorreoHtml,
+  enviarCorreoRecordatorioVideoEnVivo,
   AVISO_DESCUENTOS_MASTER_CLASS,
   enviarCorreoAdjuntoEbook,
   enviarAvisoEquipoArchivoFaltante,
