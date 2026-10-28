@@ -519,9 +519,36 @@ router.post('/api/blog/:id/image', requireAdmin, uploadImage.single('file'), pro
   res.status(201).json(item);
 });
 
+// De donde llego quien compro. Lo unico que lo PRUEBA es el id de clic:
+// Meta escribe la cookie _fbc nada mas cuando alguien le dio clic a un
+// anuncio, y gclid/gbraid/wbraid hacen lo mismo del lado de Google.
+//
+// Ojo con _fbp: NO es un origen. El pixel lo pone en cualquier visita, venga
+// de un anuncio o no. Aqui sirve para una sola cosa, distinguir dos casos que
+// de otra forma se ven igual: si _fbp esta guardado y no hay id de clic,
+// entonces si capturamos las cookies y no hubo anuncio (llego directo de
+// verdad); si no hay ni _fbp, es que nunca las capturamos y no sabemos.
+//
+// Ese segundo caso es hoy el de TODOS los talleres: la pagina del taller
+// cobra sin mandarle fbp ni fbc al servidor, asi que su origen se guarda
+// vacio. Por eso se reporta como "Sin dato" y no como "Directo".
+function origenDePedido(order) {
+  if (order.fbc) return { clave: 'meta', etiqueta: 'Anuncio de Meta' };
+  if (order.gclid || order.gbraid || order.wbraid) {
+    return { clave: 'google', etiqueta: 'Anuncio de Google' };
+  }
+  if (order.fbp) return { clave: 'directo', etiqueta: 'Directo u orgánico' };
+  const esTaller = (order.items || []).some((i) => i.tipo === 'taller');
+  return {
+    clave: 'sin_dato',
+    etiqueta: 'Sin dato',
+    nota: esTaller ? 'la página del taller no guarda el origen' : null,
+  };
+}
+
 // ---- Ventas (pedidos de Mercado Pago + cobros de membresia) ----
 router.get('/api/orders', requireAdmin, (req, res) => {
-  const pedidos = store.getOrders();
+  const pedidos = store.getOrders().map((p) => ({ ...p, origen: origenDePedido(p) }));
   const pagosMembresia = store.getMembresiaPagos().map((p) => ({
     id: `membresia-${p.id}`,
     estado: p.estado,
@@ -529,6 +556,9 @@ router.get('/api/orders', requireAdmin, (req, res) => {
     items: [{ cantidad: 1, titulo: 'Membresía Endulcora (mensual)', precio: p.monto }],
     total: p.monto,
     email: p.email || 'sin correo',
+    // Un cobro de membresia lo genera la suscripcion, no una visita: no tiene
+    // origen que buscar y no debe contar como "sin dato".
+    origen: { clave: 'membresia', etiqueta: 'Cobro de membresía' },
   }));
   const todos = [...pedidos, ...pagosMembresia].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   res.json(todos);
