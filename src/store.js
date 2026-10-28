@@ -3099,10 +3099,14 @@ module.exports = {
   // Galleta Decorada Navidena NO van aqui: quedaron en espera porque falta
   // la foto de sus disenos.
   //
-  // Las imagenes son los artes de anuncio, a falta de foto de producto: asi
-  // la pagina del taller no sale vacia el dia que el anuncio empieza a
-  // mandar gente. Como solo se escriben cuando fotoUrl esta vacio, en
-  // cuanto se suba una foto de verdad desde /admin esta se queda.
+  // La foto: los talleres que ya tienen foto de producto (fotoReal) la
+  // usan; los demas se quedan con el arte del anuncio, para que la pagina
+  // no salga vacia el dia que el anuncio empieza a mandar gente.
+  //
+  // Cuando llega una foto de producto para un taller que traia el arte, se
+  // cambia sola. El cambio se hace SOLO si la foto que tiene hoy es byte
+  // por byte el arte que pusimos nosotros (se compara la huella sha256):
+  // una foto subida a mano desde /admin nunca se pisa.
   asegurarTalleresNov26S2a4() {
     const data = load();
     const SEED_DIR_TALLERES = path.join(__dirname, '..', 'seed-archivos', 'talleres-nov26-s2a4');
@@ -3116,6 +3120,22 @@ module.exports = {
       const destino = `${crypto.randomUUID()}${path.extname(archivo)}`;
       fs.copyFileSync(origen, path.join(UPLOAD_DIR, destino));
       return `/uploads/${destino}`;
+    };
+    // Huella del contenido, para saber si la foto que tiene hoy la sesion
+    // sigue siendo EXACTAMENTE el arte provisional que pusimos nosotros. Si
+    // alguien subio otra desde /admin la huella ya no coincide y no se
+    // toca: nunca se pisa una foto puesta a mano.
+    const huella = (ruta) => {
+      try { return crypto.createHash('sha256').update(fs.readFileSync(ruta)).digest('hex'); }
+      catch (e) { return ''; }
+    };
+    const sigueSiendoNuestroArte = (fotoUrl, archivoArte) => {
+      if (!fotoUrl || !fotoUrl.startsWith('/uploads/')) return false;
+      const actual = path.join(UPLOAD_DIR, path.basename(fotoUrl));
+      const arte = path.join(SEED_DIR_TALLERES, archivoArte);
+      if (!fs.existsSync(actual) || !fs.existsSync(arte)) return false;
+      const h = huella(actual);
+      return !!h && h === huella(arte);
     };
     const HORARIO_MANANA = '10:00 am – 2:00 pm';
     const HORARIO_TARDE = '4:00 pm – 8:00 pm';
@@ -3152,7 +3172,7 @@ module.exports = {
       },
       {
         sede: sedeNativitas, clave: 'pasteler', titulo: 'Pastelería Básica',
-        fechas: ['2026-11-19', '2026-11-21'], horario: HORARIO_MANANA, imagen: '20261119_PasteleriaBasica_NATIVITAS_1x1.jpg',
+        fechas: ['2026-11-19', '2026-11-21'], horario: HORARIO_MANANA, imagen: '20261119_PasteleriaBasica_NATIVITAS_1x1.jpg', fotoReal: 'fotos/pasteleria-basica.jpg',
         descripcion: 'Si siempre quisiste hacer pasteles, empieza aquí. Tu primer pastel, bien hecho. Taller presencial de 4 horas, para principiantes.',
         queAprendes: 'Preparas bizcochos de vainilla, chocolate y naranja. Además aprendes coberturas (chantilly, ganache y glaseado) y el montaje del pastel.',
       },
@@ -3164,7 +3184,7 @@ module.exports = {
       },
       {
         sede: sedeNativitas, clave: 'galleter', titulo: 'Galletería Fina para Venta',
-        fechas: ['2026-11-20', '2026-11-21'], horario: HORARIO_MANANA, imagen: '20261120_GalleteriaFina_NATIVITAS_1x1.jpg',
+        fechas: ['2026-11-20', '2026-11-21'], horario: HORARIO_MANANA, imagen: '20261120_GalleteriaFina_NATIVITAS_1x1.jpg', fotoReal: 'fotos/galleteria-fina.jpg',
         descripcion: 'Galletería fina con acabado profesional. Taller presencial de 4 horas, para principiantes.',
         queAprendes: 'Preparas galletas de bases versátiles, alfajores suaves y rellenos, tartinas con toppings, y garabatos crujientes cubiertos de chocolate.',
       },
@@ -3200,7 +3220,7 @@ module.exports = {
       },
       {
         sede: sedeNativitas, clave: 'vintage', titulo: 'Pastel Vintage',
-        fechas: ['2026-11-27', '2026-11-29'], horario: HORARIO_MANANA, imagen: '20261127_PastelVintage_NATIVITAS_1x1.jpg',
+        fechas: ['2026-11-27', '2026-11-29'], horario: HORARIO_MANANA, imagen: '20261127_PastelVintage_NATIVITAS_1x1.jpg', fotoReal: 'fotos/pastel-vintage.jpg',
         descripcion: 'El pastel vintage que está de vuelta: la tendencia retro más dulce. Taller presencial de 4 horas, para principiantes.',
         queAprendes: 'Preparas bizcochos desde cero y el montaje y decoración estilo vintage. Además aprendes modelaje y coloración para acabados únicos, boquillas para bordes ondulados, guirnaldas y flores en relieve, y combinación de colores pastel y adornos elegantes.',
       },
@@ -3230,13 +3250,13 @@ module.exports = {
       },
       {
         sede: sedeDivision, clave: 'empanada', titulo: 'Empanadas Argentinas',
-        fechas: ['2026-11-20', '2026-11-22'], horario: HORARIO_MANANA, imagen: '20261120_EmpanadasArgentinas_DIVISION_1x1.jpg',
+        fechas: ['2026-11-20', '2026-11-22'], horario: HORARIO_MANANA, imagen: '20261120_EmpanadasArgentinas_DIVISION_1x1.jpg', fotoReal: 'fotos/empanadas-argentinas.jpg',
         descripcion: 'Empanadas argentinas jugosas, con masa casera y repulgue perfecto. Taller presencial de 4 horas, para principiantes.',
         queAprendes: 'Preparas rellenos de carne argentina, pollo especiado, jamón y queso, y salsa chimichurri. Además aprendes masa casera para hornear y freír, armado y sellado (repulgue), cocción en horno y fritura, y balance de sabor, jugosidad y conservación.',
       },
       {
         sede: sedeDivision, clave: 'pays', titulo: 'Pays y Tartas',
-        fechas: ['2026-11-27', '2026-11-29'], horario: HORARIO_MANANA, imagen: '20261127_PaysYTartas_DIVISION_1x1.jpg',
+        fechas: ['2026-11-27', '2026-11-29'], horario: HORARIO_MANANA, imagen: '20261127_PaysYTartas_DIVISION_1x1.jpg', fotoReal: 'fotos/pays-y-tartas.jpg',
         descripcion: 'Pays y tartas de pastelería, con bases que no se encogen ni se humedecen. Taller presencial de 4 horas, para principiantes.',
         queAprendes: 'Preparas 4 postres: pay de queso, pay de nuez, tarta de frutas y tarta de chocolate. Además aprendes 2 masas base (sucrée y sablé), amasado y horneado sin que se encojan, base que no se humedece ni se rompe, y rellenos cremosos, conservación y porcionado.',
       },
@@ -3281,7 +3301,23 @@ module.exports = {
         // El horario SI se corrige: los vespertinos (Charcuteria, Cocteleria)
         // llegan del calendario fisico con el horario de la manana.
         if (sobreviviente.horario !== def.horario) { sobreviviente.horario = def.horario; cambios += 1; }
-        if (!sobreviviente.fotoUrl) { sobreviviente.fotoUrl = copiarImagen(def.imagen); cambios += 1; }
+        if (!sobreviviente.fotoUrl) {
+          // Foto de producto si ya llego; si no, el arte del anuncio, para
+          // que la pagina no salga vacia cuando el anuncio mande gente.
+          sobreviviente.fotoUrl = copiarImagen(def.fotoReal || def.imagen);
+          cambios += 1;
+        } else if (def.fotoReal && sigueSiendoNuestroArte(sobreviviente.fotoUrl, def.imagen)) {
+          // Llego la foto de producto y la puesta sigue siendo nuestro arte
+          // provisional: se cambia y se borra el arte que quedo suelto.
+          const nueva = copiarImagen(def.fotoReal);
+          if (nueva) {
+            // Se borra el arte que queda suelto. Si falla no importa: en el
+            // peor caso queda un archivo huerfano, nunca una pagina rota.
+            try { fs.unlinkSync(path.join(UPLOAD_DIR, path.basename(sobreviviente.fotoUrl))); } catch (e) { /* ya no estaba */ }
+            sobreviviente.fotoUrl = nueva;
+            cambios += 1;
+          }
+        }
         if (!sobreviviente.descripcion) { sobreviviente.descripcion = def.descripcion; cambios += 1; }
         if (!sobreviviente.queAprendes) { sobreviviente.queAprendes = def.queAprendes; cambios += 1; }
         if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 1149; cambios += 1; }
