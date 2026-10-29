@@ -1385,7 +1385,11 @@
         </form>
       </div>
 
-      <div id="listaInscripcionesTaller" class="mt-6 space-y-6"></div>
+      <label class="mt-6 flex items-center gap-2 text-sm text-carbon/70">
+        <input id="chkSoloPagadosTaller" type="checkbox" checked class="h-4 w-4 rounded border-vino/30">
+        Mostrar solo quien ya pagó (para contar lugares reales y decidir si se da el taller)
+      </label>
+      <div id="listaInscripcionesTaller" class="mt-3 space-y-6"></div>
     </section>
 
     <!-- QR DE REGISTRO -->
@@ -4446,11 +4450,32 @@ async function cargarInscripcionesTaller(){
   cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Cargando…</p>';
   try{
     INSCRIPCIONES_TALLER = await api('/admin/api/inscripciones-taller');
-    if(!INSCRIPCIONES_TALLER.length){
-      cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Todavía no hay inscripciones.</p>';
-      return;
-    }
-    const grupos = agruparInscripcionesTaller(INSCRIPCIONES_TALLER);
+    renderInscripcionesTaller();
+  }catch(e){
+    cont.innerHTML = `<p class="p-5 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+$('chkSoloPagadosTaller').addEventListener('change', renderInscripcionesTaller);
+
+function renderInscripcionesTaller(){
+  const cont = $('listaInscripcionesTaller');
+  if(!INSCRIPCIONES_TALLER.length){
+    cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Todavía no hay inscripciones.</p>';
+    return;
+  }
+  // Quien solo inicio el pago y no lo termino (o abandono el checkout) no
+  // ocupa lugar de verdad -- igual que el cupo restante, que ya cuenta solo
+  // a quien tiene estadoPago 'pagado'. Mostrar a todos por default confunde
+  // el aforo real del taller.
+  const soloPagados = $('chkSoloPagadosTaller').checked;
+  const lista = soloPagados ? INSCRIPCIONES_TALLER.filter(i => i.estadoPago === 'pagado') : INSCRIPCIONES_TALLER;
+  if(!lista.length){
+    cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Nadie ha pagado todavía. Quita el filtro de arriba para ver también a quien sigue pendiente.</p>';
+    return;
+  }
+  try{
+    const grupos = agruparInscripcionesTaller(lista);
     cont.innerHTML = grupos.map(g => `
       <div class="overflow-hidden overflow-x-auto rounded-2xl bg-white ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-2 bg-vino/5 px-5 py-3">
