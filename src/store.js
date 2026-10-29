@@ -86,7 +86,7 @@ const DEFAULT_CONTENT = {
   // https://chat.whatsapp.com/...). Se muestra en el correo de confirmacion
   // y en la pantalla de "ya quedaste registrado". Distinto del WhatsApp
   // general del sitio.
-  clasegratis_whatsapp_grupo: 'https://chat.whatsapp.com/JZE84n4ZOB11tHdKwLs7dY',
+  clasegratis_whatsapp_grupo: 'https://chat.whatsapp.com/Fk4F3fomJpj1nl0h8IWNHq',
   // Fecha limite (AAAA-MM-DD) sugerida en el correo para contestar si se va
   // a asistir (ver responderClaseGratis) -- el aforo real se decide por
   // orden de llegada de quien contesta "Sí" primero, no por esta fecha.
