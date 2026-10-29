@@ -157,7 +157,7 @@ const DEFAULT_CONTENT = {
   // Comunidad de avisos de WhatsApp: va en el pie de los correos del plan
   // de ventas (junto con el WhatsApp de dudas).
   comunidad_avisos_link: 'https://chat.whatsapp.com/F4og9zbWdb32SoMek9rH7J',
-  comunidad_whatsapp_link: 'https://chat.whatsapp.com/GazcjgRuMje3jm4V9REu2V?s=sw&p=a&mlu=4&ilr=4',
+  comunidad_whatsapp_link: 'https://chat.whatsapp.com/Fk4F3fomJpj1nl0h8IWNHq',
   // Precio/anticipo/cupo con los que se da de alta un taller nuevo cuando
   // se importa de un jalon (a mano desde /admin o solo desde el calendario
   // fisico en Google Sheets, ver src/syncCalendarioTalleres.js) — todos los
