@@ -1288,6 +1288,7 @@ async function init() {
       if (r.accesoPagadoEn === undefined) { r.accesoPagadoEn = null; changed = true; }
       if (typeof r.accesoCorreoEnviado !== 'boolean') { r.accesoCorreoEnviado = false; changed = true; }
       if (typeof r.accesoPasoAOnline !== 'boolean') { r.accesoPasoAOnline = false; changed = true; }
+      if (typeof r.accesoFueraDeZona !== 'boolean') { r.accesoFueraDeZona = false; changed = true; }
     });
     // Confirmacion de asistencia con tope de cupo (control de aforo de la
     // clase gratis, ver responderClaseGratis).
@@ -3793,6 +3794,7 @@ module.exports = {
       accesoPagadoEn: null,
       accesoCorreoEnviado: false,
       accesoPasoAOnline: false,
+      accesoFueraDeZona: false,
       createdAt: new Date().toISOString(),
     };
     data.registrosClaseGratis.push(item);

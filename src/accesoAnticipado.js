@@ -63,6 +63,13 @@ function apartadoVigente(r, ahora = new Date()) {
   return r.accesoEstado === 'apartado' && r.accesoTipo === 'presencial' && r.accesoApartadoHasta && new Date(r.accesoApartadoHasta) > ahora;
 }
 
+// La ficha presencial (lugar en sala, coffee break) solo tiene sentido para
+// quien de verdad puede llegar a la sede. Quien registro una zona fuera de
+// CDMX siempre pasa a acceso en linea, sin importar el cupo del horario.
+function esDeCDMX(registro) {
+  return !!registro.esDeMexico && registro.estado === 'Ciudad de México';
+}
+
 // Fichas ocupadas del horario: las ya asignadas mas las apartadas mientras
 // alguien paga.
 function estadoHorario(fecha, horario, { excluirId = null, ahora = new Date() } = {}) {
@@ -82,6 +89,12 @@ function prepararPago(registroId, ahora = new Date()) {
   if (!registro) return null;
   if (apartadoVigente(registro, ahora)) {
     return { tipo: 'presencial', apartadoHasta: registro.accesoApartadoHasta };
+  }
+  // Fuera de CDMX: directo a acceso en linea, sin apartar ficha (ese cupo
+  // le sirve a alguien que si puede asistir).
+  if (!esDeCDMX(registro)) {
+    store.updateRegistroClaseGratis(registro.id, { accesoEstado: '', accesoTipo: 'online', accesoApartadoHasta: null });
+    return { tipo: 'online', apartadoHasta: null };
   }
   const { quedan } = estadoHorario(registro.fecha, registro.horario, { excluirId: registro.id, ahora });
   if (quedan > 0) {
@@ -111,13 +124,18 @@ function aplicarPagoAprobado(registroId, { monto, userId, ahora = new Date() } =
 
   const contenido = store.getContent();
   const quiereFicha = registro.accesoTipo === 'presencial';
+  // Red de seguridad: aunque prepararPago ya no aparta ficha fuera de CDMX,
+  // esto cubre cualquier registro que haya llegado aqui como 'presencial'
+  // sin ser de CDMX (ej. un caso viejo o un cambio manual desde /admin).
+  const puedeFicha = quiereFicha && esDeCDMX(registro);
   // Si su apartado ya habia vencido y en ese rato se llenaron las fichas,
   // recibe el acceso en linea (mismo precio) y se le avisa en el correo.
-  const hayFicha = quiereFicha && estadoHorario(registro.fecha, registro.horario, { excluirId: registro.id, ahora }).quedan > 0;
+  const hayFicha = puedeFicha && estadoHorario(registro.fecha, registro.horario, { excluirId: registro.id, ahora }).quedan > 0;
   const patch = {
     accesoEstado: 'pagado',
     accesoTipo: hayFicha ? 'presencial' : 'online',
-    accesoPasoAOnline: quiereFicha && !hayFicha,
+    accesoPasoAOnline: puedeFicha && !hayFicha,
+    accesoFueraDeZona: quiereFicha && !esDeCDMX(registro),
     accesoApartadoHasta: null,
     accesoPagadoEn: ahora.toISOString(),
     accesoMonto: Number(monto) || precioAcceso(contenido),
@@ -172,6 +190,7 @@ module.exports = {
   registroAbierto,
   accesoAbierto,
   estadoHorario,
+  esDeCDMX,
   prepararPago,
   aplicarPagoAprobado,
   liberarApartado,

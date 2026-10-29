@@ -816,6 +816,7 @@ router.get('/acceso-anticipado', (req, res) => {
     ocupadas,
     quedan,
     cierre: cierre ? cierre.toISOString() : null,
+    esDeCDMX: acceso.esDeCDMX(registro),
     cuenta: {
       existe: !!usuario,
       sesionActiva: !!(usuario && sesionUsuario && sesionUsuario.id === usuario.id),
@@ -827,6 +828,7 @@ router.get('/acceso-anticipado', (req, res) => {
       tipo: registro.accesoTipo,
       numero: registro.accesoEstado === 'pagado' ? registro.numeroInscrito : null,
       pasoAOnline: !!registro.accesoPasoAOnline,
+      fueraDeZona: !!registro.accesoFueraDeZona,
       apartadoHasta: apartadoVigente ? registro.accesoApartadoHasta : null,
       recetarioDisponible: registro.accesoEstado === 'pagado' && !!registro.accesoRecetarioUrl,
     },

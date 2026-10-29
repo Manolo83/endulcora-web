@@ -808,7 +808,7 @@ async function enviarCorreoAccesoAnticipado({ to, nombre, titulo, fecha, horario
 
 // Confirmacion de pago del acceso anticipado: su ficha (o su acceso en
 // linea), el recetario adjunto y lo que incluye.
-async function enviarCorreoAccesoConfirmado({ to, nombre, titulo, fecha, horario, ubicacion, tipo, numero, pasoAOnline, membresiaHasta, yaEraMiembro, recetarioUrl, recetarioNombre, siteUrl, link, arteUrl, numeroWhatsapp, comunidadLink }) {
+async function enviarCorreoAccesoConfirmado({ to, nombre, titulo, fecha, horario, ubicacion, tipo, numero, pasoAOnline, fueraDeZona, membresiaHasta, yaEraMiembro, recetarioUrl, recetarioNombre, siteUrl, link, arteUrl, numeroWhatsapp, comunidadLink }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
   const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
@@ -832,6 +832,7 @@ async function enviarCorreoAccesoConfirmado({ to, nombre, titulo, fecha, horario
         <h1 style="font-size:20px;color:#4E1454;">¡Listo, ${escapeHtml(nombre || '')}!</h1>
         <p style="font-size:14px;line-height:1.6;">Tu acceso anticipado a <strong>${escapeHtml(titulo || 'la master class')}</strong> está pagado.</p>
         ${pasoAOnline ? '<p style="font-size:14px;line-height:1.6;background:#fde8e4;border-radius:10px;padding:10px 12px;">Mientras se confirmaba tu pago se ocuparon las últimas fichas presenciales, así que tu compra quedó como <strong>acceso en línea</strong>: recetario, mes de membresía y descuentos exclusivos.</p>' : ''}
+        ${fueraDeZona ? '<p style="font-size:14px;line-height:1.6;background:#FBF4E9;border-radius:10px;padding:10px 12px;">La ficha presencial (lugar en sala y coffee break) es solo para quienes residen en CDMX, por la sede de la clase. Tu acceso incluye recetario, mes de membresía y descuentos exclusivos.</p>' : ''}
         ${presencial
           ? `<div style="margin-top:12px;border-radius:16px;background:#4E1454;color:#FBF4E9;padding:18px 20px;">
               <table style="width:100%;border-collapse:collapse;"><tr>

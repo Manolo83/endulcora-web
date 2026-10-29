@@ -102,8 +102,9 @@
 
     <!-- En linea (fichas agotadas) -->
     <div id="ofertaOnline" class="mt-4 hidden rounded-3xl bg-white p-6 ring-2 ring-vino shadow-xl">
-      <span class="inline-flex rounded-full bg-red-50 px-3 py-1 font-ui text-[10.5px] font-700 uppercase tracking-widest text-red-700">Fichas presenciales agotadas</span>
+      <span id="chipOnline" class="inline-flex rounded-full bg-red-50 px-3 py-1 font-ui text-[10.5px] font-700 uppercase tracking-widest text-red-700">Fichas presenciales agotadas</span>
       <h2 class="mt-3 font-titulo text-2xl leading-tight text-vino">Recetario + membresía, desde tu casa</h2>
+      <p id="fueraDeZonaTexto" class="mt-1 hidden text-sm text-carbon/60">La ficha presencial (lugar en sala y coffee break) es solo para quienes residen en CDMX, por la sede de la clase.</p>
       <ul class="mt-4 grid gap-2 text-sm">
         <li class="flex gap-2.5 text-carbon/45 line-through"><span>✕</span>Ficha de asistencia presencial</li>
         <li class="flex gap-2.5 text-carbon/45 line-through"><span>✕</span>Coffee break</li>
@@ -142,6 +143,7 @@
     <div class="rounded-3xl bg-white p-6 text-center shadow-xl">
       <h1 id="pagadoTitulo" class="font-titulo text-2xl text-vino"></h1>
       <p id="pasoAOnlineAviso" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-left text-sm text-red-800">Mientras se confirmaba tu pago se ocuparon las últimas fichas presenciales, así que tu compra quedó como acceso en línea: recetario, mes de membresía y descuentos exclusivos.</p>
+      <p id="fueraDeZonaAviso" class="mt-3 hidden rounded-xl bg-crema px-4 py-3 text-left text-sm text-carbon/70">La ficha presencial (lugar en sala y coffee break) es solo para quienes residen en CDMX, por la sede de la clase. Tu acceso incluye recetario, mes de membresía y descuentos exclusivos.</p>
       <div id="fichaPagada" class="bib mt-4 hidden">
         <p id="fichaClase" class="font-ui text-[10px] font-700 uppercase tracking-[.2em] text-vino"></p>
         <p id="fichaHorario" class="font-titulo text-sm text-vino"></p>
@@ -207,10 +209,14 @@ function pintarOferta(e){
   document.querySelectorAll('.precioAcceso').forEach(el => el.textContent = `$${e.precio}`);
   pintarContador(e);
   const tieneApartado = e.acceso.estado === 'apartado' && e.acceso.apartadoHasta;
-  const presencial = e.quedan > 0 || tieneApartado;
+  // Fuera de CDMX nunca se ofrece la ficha presencial, sin importar el
+  // cupo del horario (no es que se hayan agotado, es que no aplica).
+  const presencial = e.esDeCDMX && (e.quedan > 0 || tieneApartado);
   document.getElementById('ofertaPresencial').classList.toggle('hidden', !presencial);
   document.getElementById('ofertaOnline').classList.toggle('hidden', presencial);
   document.getElementById('chipPresencial').textContent = e.quedan > 0 && e.quedan <= 5 ? 'Presencial · quedan pocas' : 'Presencial';
+  document.getElementById('chipOnline').textContent = e.esDeCDMX ? 'Fichas presenciales agotadas' : 'Acceso en línea';
+  document.getElementById('fueraDeZonaTexto').classList.toggle('hidden', e.esDeCDMX);
   const lineaMiembro = 'Ya eres miembro: tu membresía sigue como está';
   if(e.cuenta.esMiembroActivo){
     document.getElementById('lineaMembresiaPresencial').textContent = lineaMiembro;
@@ -249,6 +255,7 @@ function pintarPagado(e){
   const presencial = e.acceso.tipo === 'presencial';
   document.getElementById('pagadoTitulo').textContent = presencial ? '¡Listo! Esta es tu ficha' : '¡Listo! Ya tienes tu acceso en línea';
   document.getElementById('pasoAOnlineAviso').classList.toggle('hidden', !e.acceso.pasoAOnline);
+  document.getElementById('fueraDeZonaAviso').classList.toggle('hidden', !e.acceso.fueraDeZona);
   document.getElementById('fichaPagada').classList.toggle('hidden', !presencial);
   document.getElementById('fichaInstruccion').classList.toggle('hidden', !presencial);
   document.getElementById('incluyeCoffee').classList.toggle('hidden', !presencial);

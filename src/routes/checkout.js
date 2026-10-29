@@ -413,6 +413,7 @@ function procesarAccesoAnticipadoDelPedido(order, nuevoEstado) {
     tipo: registro.accesoTipo,
     numero: registro.numeroInscrito,
     pasoAOnline: registro.accesoPasoAOnline,
+    fueraDeZona: registro.accesoFueraDeZona,
     membresiaHasta: resultado.membresiaHasta,
     yaEraMiembro: resultado.yaEraMiembro,
     recetarioUrl: registro.accesoRecetarioUrl,
