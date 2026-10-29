@@ -156,7 +156,7 @@ const DEFAULT_CONTENT = {
   // opcional en el registro de clase gratis y de talleres.
   // Comunidad de avisos de WhatsApp: va en el pie de los correos del plan
   // de ventas (junto con el WhatsApp de dudas).
-  comunidad_avisos_link: 'https://chat.whatsapp.com/F4og9zbWdb32SoMek9rH7J',
+  comunidad_avisos_link: 'https://chat.whatsapp.com/Fk4F3fomJpj1nl0h8IWNHq',
   comunidad_whatsapp_link: 'https://chat.whatsapp.com/Fk4F3fomJpj1nl0h8IWNHq',
   // Precio/anticipo/cupo con los que se da de alta un taller nuevo cuando
   // se importa de un jalon (a mano desde /admin o solo desde el calendario
