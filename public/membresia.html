@@ -189,6 +189,18 @@ body { background: #FBF4E9; }
     </form>
   </div>
 
+  <!-- Con sesion, sin membresia activa, nunca ha sido miembro: invitacion de 1 mes gratis -->
+  <div id="bloqueRegaloInvitacion" class="mt-8 hidden rounded-3xl bg-flama p-6 text-carbon sm:p-8">
+    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Invitación especial</p>
+    <h2 class="mt-2 font-display text-2xl text-vino">Tu primer mes es gratis</h2>
+    <p class="mt-3 text-sm text-carbon/80">Registra tu tarjeta con Mercado Pago — no se te cobra nada hoy — y
+      disfruta 30 días de membresía completa. Si no cancelas antes, al terminar el mes se cobran $100 y
+      continúas como miembro; puedes cancelar cuando quieras, sin compromiso.</p>
+    <button type="button" id="btnActivarRegaloInvitacion" class="mt-5 inline-flex items-center justify-center gap-2 rounded-full boton-vivo bg-vino px-7 py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+      <span id="regaloInvitacionSpinner" class="spinner hidden"></span> Activar mi mes gratis
+    </button>
+  </div>
+
   <!-- Con sesion, sin membresia activa: oferta -->
   <div id="bloqueOferta" class="mt-8 hidden rounded-3xl bg-vino p-6 text-crema sm:p-8">
     <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">$100 MXN / mes</p>
@@ -472,6 +484,7 @@ async function cargarVistaMembresia(){
       cargarBibliotecaMembresia();
       cargarBibliotecaEbooks();
     }else{
+      document.getElementById('bloqueRegaloInvitacion').classList.toggle('hidden', !data.elegibleRegalo);
       mostrarVista('oferta');
     }
   }catch(e){
@@ -655,6 +668,30 @@ document.getElementById('btnSuscribirse').addEventListener('click', async () => 
     const res = await fetch('/api/membresia/suscribirse', { method: 'POST' });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo iniciar la suscripción');
+    window.location.href = data.url;
+  }catch(e){
+    err.textContent = e.message;
+    err.classList.remove('hidden');
+    spinner.classList.add('hidden');
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('btnActivarRegaloInvitacion').addEventListener('click', async () => {
+  const err = document.getElementById('ofertaError');
+  const spinner = document.getElementById('regaloInvitacionSpinner');
+  const btn = document.getElementById('btnActivarRegaloInvitacion');
+  err.classList.add('hidden');
+  spinner.classList.remove('hidden');
+  btn.disabled = true;
+  try{
+    const res = await fetch('/api/membresia/suscribirse-regalo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ origen: 'invitacion_whatsapp' }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo activar tu mes de regalo');
     window.location.href = data.url;
   }catch(e){
     err.textContent = e.message;

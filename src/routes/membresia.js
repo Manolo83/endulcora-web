@@ -89,19 +89,28 @@ router.post('/suscribirse-regalo', requireCliente, async (req, res) => {
     return res.status(400).json({ error: 'El mes de regalo es solo para quien nunca ha sido miembro. Puedes hacerte miembro por $100 al mes.' });
   }
 
+  // Por defecto viene del boton del live (como siempre). El unico otro
+  // origen valido hoy es la invitacion que se manda por WhatsApp a quien
+  // nunca ha sido miembro, que activa desde /membresia directamente y no
+  // tiene un recetario de "la clase de hoy" que adjuntarle.
+  const origen = (req.body && req.body.origen) === 'invitacion_whatsapp' ? 'invitacion_whatsapp' : 'regalo_live';
+
   try {
     const creado = await crearSuscripcion(client, usuario, {
       reason: 'Membresía Endulcora · 1 mes de regalo',
       primerCobro: regalo.fechaFinRegalo(),
       backUrl: `${SITE_URL}/membresia?regalo=1`,
     });
-    store.updateUser(usuario.id, {
+    const patch = {
       membresiaPreapprovalId: creado.id,
       regaloPreapprovalId: creado.id,
-      membresiaOrigen: 'regalo_live',
-      regaloRecetarioUrl: contenido.clase_recetario_url || '',
-      regaloRecetarioNombre: contenido.clase_recetario_nombre || '',
-    });
+      membresiaOrigen: origen,
+    };
+    if (origen === 'regalo_live') {
+      patch.regaloRecetarioUrl = contenido.clase_recetario_url || '';
+      patch.regaloRecetarioNombre = contenido.clase_recetario_nombre || '';
+    }
+    store.updateUser(usuario.id, patch);
     res.status(201).json({ url: creado.init_point });
   } catch (err) {
     const detalle = (err && err.cause && JSON.stringify(err.cause)) || (err && err.message) || String(err);
