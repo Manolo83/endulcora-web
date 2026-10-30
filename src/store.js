@@ -96,7 +96,7 @@ const DEFAULT_CONTENT = {
   // acceso anticipado. Mientras haya fichas en el horario incluye ficha,
   // coffee break, recetario y 1 mes de membresia; cuando se llenan, el
   // mismo precio da recetario + mes de membresia (clase en linea).
-  clasegratis_cupo_horario: '50',
+  clasegratis_cupo_horario: '40',
   // ---- Correos automaticos de la masterclass (src/correosMasterclass.js) ----
   // Arte cuadrado (imagen) que va arriba de todos sus correos.
   clasegratis_arte: '',
