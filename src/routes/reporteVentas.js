@@ -123,6 +123,8 @@ router.get('/inscripciones', (req, res) => {
         cupo_restante: sesion && typeof sesion.cupoRestante === 'number' ? sesion.cupoRestante : null,
         inscritos: 0,
         pagados: 0,
+        pagados_en_linea: 0,
+        pagados_por_fuera: 0,
         pendientes: 0,
         origen: {},
         como_dicen_que_se_enteraron: {},
@@ -130,20 +132,34 @@ router.get('/inscripciones', (req, res) => {
     }
     const g = porTaller[clave];
     g.inscritos += 1;
-    if (i.estadoPago === 'pagado') g.pagados += 1;
-    else if (i.estadoPago === 'pendiente') g.pendientes += 1;
+    if (i.estadoPago === 'pagado') {
+      g.pagados += 1;
+      if (String(i.formaPago || '').trim()) g.pagados_por_fuera += 1;
+      else g.pagados_en_linea += 1;
+    } else if (i.estadoPago === 'pendiente') g.pendientes += 1;
     const o = origenTrafico.origenDe(i).clave;
     g.origen[o] = (g.origen[o] || 0) + 1;
     const dice = i.comoSeEntero || 'sin respuesta';
     g.como_dicen_que_se_enteraron[dice] = (g.como_dicen_que_se_enteraron[dice] || 0) + 1;
   });
 
+  // Quien pago en linea y quien pago por fuera. El registro manual (venta
+  // cerrada por WhatsApp o en sucursal) siempre deja algo en formaPago; si
+  // viene vacio, el cobro paso por Mercado Pago desde el sitio. Sin esta
+  // separacion no se puede saber si la landing esta vendiendo sola o si
+  // las ventas las sigue cerrando una persona a mano.
+  const pagados = inscripciones.filter((i) => i.estadoPago === 'pagado');
+  const enLinea = pagados.filter((i) => !String(i.formaPago || '').trim());
+
   res.json({
     rango: { desde: r.desde.toISOString(), hasta: r.hasta.toISOString() },
     totales: {
       inscritos: inscripciones.length,
-      pagados: inscripciones.filter((i) => i.estadoPago === 'pagado').length,
+      pagados: pagados.length,
+      pagados_en_linea: enLinea.length,
+      pagados_por_fuera: pagados.length - enLinea.length,
     },
+    por_forma_de_pago: contar(pagados, (i) => String(i.formaPago || '').trim() || 'en_linea'),
     por_origen: contar(inscripciones, (i) => origenTrafico.origenDe(i).clave),
     por_taller: porTaller,
   });
