@@ -348,6 +348,18 @@ app.get('/talleres', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'calendario.html'));
 });
 
+// /talleres-landing: una sola pagina para todos los anuncios genericos de
+// "talleres" (no de uno en especifico). Elige el taller de un menu
+// desplegable y, al llenar el formulario, NO manda a pagar de inmediato —
+// solo guarda el lead (igual que /talleres/<slug>) y dispara el correo de
+// info+pago en paralelo (ver enviarCorreoInfoYPagoTaller en checkout.js).
+// El menu se arma solo desde /api/sesiones-taller, que ya trae el
+// calendario actualizado por el sincronizador automatico — no hay nada
+// que tocar aqui cuando cambien los talleres de la semana.
+app.get('/talleres-landing', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'talleres-landing.html'));
+});
+
 // Pagina propia por taller (ej. /talleres/pizza-artesanal-nov): foto,
 // descripcion, fecha/hora/sede con mapa, precio, cupo y botones de compra.
 // Igual que /ebooks/:slug, se inyectan las etiquetas Open Graph en el

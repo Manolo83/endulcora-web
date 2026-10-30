@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YZNFKC6PS8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-YZNFKC6PS8');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talleres presenciales · Endulcora</title>
+<meta name="description" content="Elige el taller de tu interés y te mandamos por correo toda la información y tu lugar para apartar.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.endulcora.com/talleres-landing">
+<meta name="theme-color" content="#1B0720">
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1302735011542499');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1302735011542499&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
+<!-- Open Graph / Facebook / WhatsApp / Meta Ads -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.endulcora.com/talleres-landing">
+<meta property="og:site_name" content="Endulcora · Estudio Gastronómico">
+<meta property="og:title" content="Talleres presenciales · Endulcora">
+<meta property="og:description" content="Elige el taller de tu interés y te mandamos por correo toda la información y tu lugar para apartar.">
+<meta property="og:image" content="https://www.endulcora.com/og-image.png">
+<meta property="og:locale" content="es_MX">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { carbon: '#1B0720', vino: '#4E1454', uva: '#5C2360', morado: '#7A2E7E', flama: '#F5A623', crema: '#FBF4E9', humo: '#9C9C9C' },
+        fontFamily: {
+          display: ['"Baloo 2"', 'sans-serif'],
+          titulo: ['"Baloo 2"', 'sans-serif'],
+          cuerpo: ['Poppins', 'sans-serif'],
+          ui: ['Montserrat', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { background: #FBF4E9; }
+.font-display, .font-titulo { font-weight: 800; }
+.boton-vivo { transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease; }
+.boton-vivo:hover { transform: translateY(-2px) scale(1.03); }
+.boton-vivo:active { transform: scale(.95); }
+.spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation: girar .7s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+:focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .boton-vivo:hover, .boton-vivo:active { transform:none; }
+}
+</style>
+</head>
+<body class="font-cuerpo text-carbon antialiased">
+
+<header class="sticky top-0 z-50 bg-crema/95 backdrop-blur border-b border-vino/10">
+  <div class="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-5 lg:px-8">
+    <a href="/" class="flex items-center">
+      <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+    </a>
+  </div>
+</header>
+
+<main class="mx-auto max-w-xl px-5 py-10 lg:py-16">
+  <div class="text-center">
+    <div class="mx-auto mb-4 h-1 w-20 rounded-full bg-flama"></div>
+    <h1 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Elige tu taller</h1>
+    <p class="mt-3 text-[15px] leading-relaxed text-carbon/70">Déjanos tus datos y te mandamos por correo toda la información del taller que elijas, junto con tu link para apartar tu lugar.</p>
+  </div>
+
+  <div id="estadoCargando" class="mt-10 text-center text-carbon/50">Cargando talleres…</div>
+
+  <div id="sinTalleres" class="mt-10 hidden rounded-2xl bg-white p-6 text-center ring-1 ring-vino/10">
+    <p class="text-sm text-carbon/70">No tenemos talleres disponibles en este momento. Escríbenos por WhatsApp y te avisamos en cuanto abramos nuevas fechas.</p>
+  </div>
+
+  <div id="bloqueSelector" class="mt-10 hidden rounded-3xl bg-white p-6 shadow-[0_2px_0_rgba(78,20,84,.06)] ring-1 ring-vino/10 sm:p-7">
+    <label for="selectTaller" class="mb-2 block font-ui text-[11px] font-700 uppercase tracking-widest text-vino">¿Qué taller te interesa?</label>
+    <select id="selectTaller" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm">
+      <option value="">Elige un taller…</option>
+    </select>
+  </div>
+
+  <div id="bloqueForm" class="mt-6 hidden rounded-3xl bg-white p-6 shadow-[0_2px_0_rgba(78,20,84,.06)] ring-1 ring-vino/10 sm:p-7">
+    <div class="rounded-2xl bg-crema/70 px-4 py-3">
+      <p id="resumenTitulo" class="font-titulo text-base text-vino"></p>
+      <p id="resumenFecha" class="mt-0.5 text-xs text-carbon/60"></p>
+      <p id="resumenSede" class="mt-0.5 text-xs text-carbon/60"></p>
+    </div>
+
+    <form id="formLandingTaller" class="mt-5 grid gap-3">
+      <input id="lNombre" name="nombre" type="text" required autocomplete="name" placeholder="Tu nombre completo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+      <input id="lWhatsapp" name="whatsapp" type="tel" required autocomplete="tel" placeholder="Tu WhatsApp" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+      <input id="lCorreo" name="correo" type="email" required autocomplete="email" placeholder="Tu correo" class="w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-2.5 text-sm">
+
+      <label class="flex items-start gap-3 text-sm text-carbon/80">
+        <input id="lAceptaPrivacidad" name="aceptaAvisoPrivacidad" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-vino/30">
+        <span>He leído y acepto el <a href="#" onclick="abrirModalPrivacidadLanding(event)" class="text-vino underline">aviso de privacidad</a>. *</span>
+      </label>
+      <label class="flex items-start gap-3 text-sm text-carbon/80">
+        <input id="lAceptaPromociones" name="aceptaPromociones" type="checkbox" class="mt-0.5 h-4 w-4 rounded border-vino/30">
+        <span>Quiero recibir promociones y avisos de Endulcora.</span>
+      </label>
+
+      <p id="formError" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+
+      <button type="submit" id="btnEnviarLanding" class="mt-1 flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition disabled:opacity-60">
+        <span id="spinnerLanding" class="spinner hidden"></span>
+        Quiero la info y mi lugar
+      </button>
+    </form>
+  </div>
+
+  <div id="bloqueExito" class="mt-6 hidden rounded-3xl bg-vino p-7 text-center text-crema">
+    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">¡Listo!</p>
+    <h2 class="mt-2 font-display text-2xl">Revisa tu correo</h2>
+    <p class="mt-3 text-sm leading-relaxed text-crema/85">Te mandamos toda la información de <strong id="exitoTallerNombre"></strong> y tu link para apartar tu lugar. Si no lo ves en unos minutos, revisa spam o promociones.</p>
+  </div>
+
+  <a id="linkWhatsappAyuda" href="#" target="_blank" rel="noopener"
+    class="mt-6 flex w-full items-center justify-center gap-2 rounded-full boton-vivo border border-vino/25 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">
+    ¿Dudas? Escríbenos por WhatsApp
+  </a>
+</main>
+
+<!-- Modal del aviso de privacidad -->
+<div id="modalPrivacidadLanding" class="fixed inset-0 z-[60] hidden items-center justify-center bg-carbon/50 p-4">
+  <div class="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6">
+    <div class="flex items-center justify-between gap-4">
+      <h3 class="font-titulo text-xl text-vino">Aviso de privacidad</h3>
+      <button type="button" onclick="cerrarModalPrivacidadLanding()" aria-label="Cerrar" class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-carbon/50 hover:bg-vino/10 hover:text-vino">✕</button>
+    </div>
+    <div id="textoPrivacidadLanding" class="mt-4 space-y-3 text-sm leading-relaxed text-carbon/75"></div>
+  </div>
+</div>
+
+<script>
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function leerCookie(nombre){
+  const match = document.cookie.match(new RegExp(`(?:^|; )${nombre}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+// Ids de clic que dejan los anuncios en el navegador: _fbc lo escribe Meta
+// cuando alguien le da clic a uno suyo, _fbp lo pone el pixel en cualquier
+// visita, y gclid/gbraid/wbraid son los de Google (vienen en la URL). Se
+// mandan al guardar el formulario para que el lead se guarde sabiendo de
+// donde llego, igual que en /talleres/<slug>.
+function idsDeClic(){
+  const url = new URLSearchParams(window.location.search);
+  return {
+    fbp: leerCookie('_fbp'),
+    fbc: leerCookie('_fbc'),
+    gclid: url.get('gclid'),
+    gbraid: url.get('gbraid'),
+    wbraid: url.get('wbraid'),
+  };
+}
+function fechaLegible(fecha){
+  if(!fecha) return '';
+  return new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+async function abrirModalPrivacidadLanding(e){
+  if (e) e.preventDefault();
+  const modal = document.getElementById('modalPrivacidadLanding');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  const cont = document.getElementById('textoPrivacidadLanding');
+  cont.innerHTML = '<p class="text-carbon/50">Cargando…</p>';
+  try{
+    const c = await fetch('/api/content').then(r => r.json());
+    const texto = c.legal_privacidad || '';
+    cont.innerHTML = texto.split('\n\n').map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+  }catch(err){
+    cont.innerHTML = '<p class="text-red-600">No se pudo cargar el aviso de privacidad.</p>';
+  }
+}
+function cerrarModalPrivacidadLanding(){
+  const modal = document.getElementById('modalPrivacidadLanding');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+document.getElementById('modalPrivacidadLanding').addEventListener('click', (e) => {
+  if (e.target.id === 'modalPrivacidadLanding') cerrarModalPrivacidadLanding();
+});
+
+let SESIONES = [];
+let ELEGIDA = null;
+
+// Mismo calendario que /talleres y /admin (store.getSesionesTaller), asi
+// que se mantiene solo con el sincronizador automatico del calendario
+// fisico (src/syncCalendarioTalleres.js): no hay nada que actualizar aqui
+// a mano semana con semana.
+async function cargarTalleres(){
+  try{
+    const [sesiones, sedes, contenido] = await Promise.all([
+      fetch('/api/sesiones-taller').then(r => r.json()),
+      fetch('/api/sedes').then(r => r.json()),
+      fetch('/api/content').then(r => r.json()),
+    ]);
+    const numeroWhatsapp = contenido.whatsapp_numero || '5665271901';
+    document.getElementById('linkWhatsappAyuda').href = `https://wa.me/521${numeroWhatsapp}`;
+
+    const hoyISO = new Date().toISOString().slice(0, 10);
+    const mapaSedes = Object.fromEntries((sedes || []).map(s => [s.id, s.nombre]));
+    SESIONES = (sesiones || [])
+      .filter(s => s.fecha >= hoyISO && s.estado !== 'agotado' && s.cupoRestante !== 0
+        && (parseFloat(String(s.anticipo || 0).replace(/,/g, '')) > 0))
+      .sort((a, b) => a.fecha.localeCompare(b.fecha))
+      .map(s => ({ ...s, sedeNombre: mapaSedes[s.sedeId] || '' }));
+
+    document.getElementById('estadoCargando').classList.add('hidden');
+    if (!SESIONES.length) {
+      document.getElementById('sinTalleres').classList.remove('hidden');
+      return;
+    }
+    const select = document.getElementById('selectTaller');
+    select.innerHTML = '<option value="">Elige un taller…</option>' + SESIONES.map(s =>
+      `<option value="${s.id}">${escapeHtml(s.titulo)} — ${escapeHtml(fechaLegible(s.fecha))}${s.sedeNombre ? ' · ' + escapeHtml(s.sedeNombre) : ''}</option>`
+    ).join('');
+    document.getElementById('bloqueSelector').classList.remove('hidden');
+  }catch(e){
+    document.getElementById('estadoCargando').textContent = 'No se pudo cargar el calendario. Intenta de nuevo en un momento.';
+  }
+}
+
+document.getElementById('selectTaller').addEventListener('change', (e) => {
+  const id = Number(e.target.value);
+  ELEGIDA = SESIONES.find(s => s.id === id) || null;
+  const bloque = document.getElementById('bloqueForm');
+  document.getElementById('bloqueExito').classList.add('hidden');
+  if (!ELEGIDA) { bloque.classList.add('hidden'); return; }
+  document.getElementById('resumenTitulo').textContent = ELEGIDA.titulo || '';
+  document.getElementById('resumenFecha').textContent = [fechaLegible(ELEGIDA.fecha), ELEGIDA.horario].filter(Boolean).join(' · ');
+  document.getElementById('resumenSede').textContent = ELEGIDA.sedeNombre || '';
+  bloque.classList.remove('hidden');
+  bloque.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (typeof fbq === 'function') {
+    fbq('track', 'ViewContent', {
+      content_ids: [String(ELEGIDA.id)],
+      content_type: 'product',
+      value: parseFloat(String(ELEGIDA.anticipo || 0).replace(/,/g, '')) || 0,
+      currency: 'MXN',
+    });
+  }
+});
+
+document.getElementById('formLandingTaller').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('formError');
+  err.classList.add('hidden');
+  if (!ELEGIDA) {
+    err.textContent = 'Elige un taller de la lista.';
+    err.classList.remove('hidden');
+    return;
+  }
+  const datos = new FormData(e.target);
+  const btn = document.getElementById('btnEnviarLanding');
+  const spinner = document.getElementById('spinnerLanding');
+  btn.disabled = true;
+  spinner.classList.remove('hidden');
+  try{
+    const res = await fetch('/api/checkout/preference', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: datos.get('correo').trim(),
+        ...idsDeClic(),
+        items: [{
+          tipo: 'taller',
+          sesionTallerId: ELEGIDA.id,
+          nombre: datos.get('nombre').trim(),
+          whatsapp: datos.get('whatsapp').trim(),
+          aceptaPromociones: !!datos.get('aceptaPromociones'),
+          aceptaAvisoPrivacidad: !!datos.get('aceptaAvisoPrivacidad'),
+        }],
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'No se pudo enviar tu solicitud.');
+    // Lead: el evento estandar de Meta para un formulario de contacto
+    // completado (no InitiateCheckout/AddPaymentInfo, porque aqui no se
+    // manda a pagar de inmediato — el pago vive en el correo).
+    if (typeof fbq === 'function') {
+      fbq('track', 'Lead', {
+        content_ids: [String(ELEGIDA.id)],
+        content_type: 'product',
+        value: parseFloat(String(ELEGIDA.anticipo || 0).replace(/,/g, '')) || 0,
+        currency: 'MXN',
+      });
+    }
+    document.getElementById('exitoTallerNombre').textContent = ELEGIDA.titulo || 'tu taller';
+    document.getElementById('bloqueForm').classList.add('hidden');
+    document.getElementById('bloqueExito').classList.remove('hidden');
+    document.getElementById('bloqueExito').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    e.target.reset();
+  }catch(err2){
+    err.textContent = err2.message;
+    err.classList.remove('hidden');
+  }finally{
+    btn.disabled = false;
+    spinner.classList.add('hidden');
+  }
+});
+
+cargarTalleres();
+</script>
+</body>
+</html>
