@@ -178,6 +178,18 @@ async function enviarCorreoInfoYPagoTaller({
       ? `Tu lugar se aparta con <strong>$${formatoMonto(monto)} de anticipo</strong>${saldo ? `; el resto ($${formatoMonto(saldo)}) se paga el día del taller.` : '.'}`
       : `Apartas tu lugar pagando el <strong>total de $${formatoMonto(monto)}</strong>.`}</p>`;
   const boton = link ? botonPlan(`Apartar mi lugar — $${formatoMonto(monto)}`, link, '#4E1454', '#FBF4E9') : '';
+  // Boton de WhatsApp con el taller y la fecha ya escritos en el mensaje.
+  // Quien llega a este correo ya dejo sus datos y eligio fecha, asi que la
+  // conversacion empieza con todo el contexto; y es la persona quien escribe
+  // primero, o sea que la ventana de 24 h la abre ella, no nosotros.
+  const telWhats = String(numeroWhatsapp || '').replace(/\D/g, '').slice(-10);
+  const mensajeWhats = encodeURIComponent(
+    `Hola, me interesa el taller de ${taller || ''}${fechaLegible ? ` del ${fechaLegible.replace(',', '')}` : ''}${nombre ? `. Soy ${nombre}` : ''}.`,
+  );
+  const botonWhats = telWhats
+    ? `<p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#6b5a6e;">¿Tienes una duda antes de apartar?</p>${
+      botonPlan('Escribir por WhatsApp', `https://wa.me/521${telWhats}?text=${mensajeWhats}`, '#25D366', '#ffffff')}`
+    : '';
   const salida = tipoPago === 'completo'
     ? '<p style="font-size:13px;line-height:1.6;color:#6b5a6e;">Si ahorita no te acomoda el pago completo, escríbenos y te ayudamos a cambiarlo por el anticipo.</p>'
     : '';
@@ -186,7 +198,7 @@ async function enviarCorreoInfoYPagoTaller({
     asunto: `Tu lugar en ${taller || 'tu taller'} — toda la info + tu apartado`,
     html: plantillaPlan({
       arteUrl,
-      cuerpo: `${cuerpo}${boton}${salida}`,
+      cuerpo: `${cuerpo}${boton}${botonWhats}${salida}`,
       pie: pieEndulcora({ numeroWhatsapp, comunidadLink }),
     }),
   });
