@@ -155,4 +155,71 @@ router.get('/recuperacion', (req, res) => {
   res.json(require('../recuperarPagosTaller').resumen());
 });
 
+// Como va la master class: cuanta gente se registro y, sobre todo, cuantas
+// fichas de acceso anticipado se pagaron. Los registros no llenan la sala
+// — las fichas si — asi que es el numero con el que se decide si subir o
+// bajar el presupuesto de esa campaña.
+//
+// Igual que el resto del archivo: solo conteos. Ni un nombre, ni un correo,
+// ni un telefono.
+router.get('/masterclass', (req, res) => {
+  const acceso = require('../accesoAnticipado');
+  const contenido = store.getContent();
+  const fecha = String(req.query.fecha || contenido.clasegratis_fecha || '').trim();
+  const todos = store.getRegistrosClaseGratis();
+  const registros = fecha ? todos.filter((r) => r.fecha === fecha) : todos;
+  const cupo = store.cupoClaseGratisPorHorario();
+  const ahora = new Date();
+
+  const pagado = (r) => r.accesoEstado === 'pagado';
+  const apartadoVigente = (r) => r.accesoEstado === 'apartado'
+    && r.accesoApartadoHasta && new Date(r.accesoApartadoHasta) > ahora;
+
+  const porHorario = {};
+  registros.forEach((r) => {
+    const h = r.horario || 'sin-horario';
+    if (!porHorario[h]) porHorario[h] = { registros: 0, fichas_pagadas: 0, online_pagado: 0, apartadas: 0, quedan: cupo };
+    const g = porHorario[h];
+    g.registros += 1;
+    if (pagado(r) && r.accesoTipo === 'presencial') g.fichas_pagadas += 1;
+    else if (pagado(r) && r.accesoTipo === 'online') g.online_pagado += 1;
+    if (apartadoVigente(r)) g.apartadas += 1;
+    g.quedan = Math.max(0, cupo - g.fichas_pagadas - g.apartadas);
+  });
+
+  const porDia = {};
+  registros.forEach((r) => {
+    const d = String(r.createdAt || '').slice(0, 10) || 'sin-fecha';
+    porDia[d] = (porDia[d] || 0) + 1;
+  });
+
+  const fichas = registros.filter((r) => pagado(r) && r.accesoTipo === 'presencial');
+  const online = registros.filter((r) => pagado(r) && r.accesoTipo === 'online');
+
+  res.json({
+    fecha,
+    titulo: contenido.clasegratis_titulo || '',
+    registro_abierto: acceso.registroAbierto(contenido),
+    precio_acceso: acceso.precioAcceso(contenido),
+    cupo_por_horario: cupo,
+    aforo_total: cupo * Object.keys(porHorario).length,
+    totales: {
+      registros: registros.length,
+      fichas_presenciales_pagadas: fichas.length,
+      acceso_online_pagado: online.length,
+      apartados_sin_pagar: registros.filter(apartadoVigente).length,
+      ingreso_acceso: registros.filter(pagado).reduce((s, r) => s + (Number(r.accesoMonto) || 0), 0),
+      // Cuantos de los registrados acaban comprando su acceso: el numero
+      // que dice si la campaña trae gente que de verdad va a ir.
+      conversion_registro_a_pago: registros.length
+        ? Number(((fichas.length + online.length) / registros.length * 100).toFixed(2))
+        : 0,
+    },
+    de_mexico: registros.filter((r) => r.esDeMexico).length,
+    del_extranjero: registros.filter((r) => !r.esDeMexico).length,
+    por_horario: porHorario,
+    registros_por_dia: porDia,
+  });
+});
+
 module.exports = router;
