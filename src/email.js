@@ -146,6 +146,52 @@ async function enviarCorreoConfirmacionPagoTaller({ to, ...datos }) {
   await enviarCorreoHtml({ to, asunto, html });
 }
 
+// Correo que sale en paralelo al pago instantaneo: se manda apenas alguien
+// llena el formulario de /talleres/<slug>, tenga o no termine de pagar ahi
+// mismo. Lleva el mismo link de Mercado Pago que ya se le mostro en
+// pantalla, para que pueda retomarlo desde su correo si no pago al toque.
+// PERSUASIVO CON COSAS CIERTAS, NO CON TRUCOS (misma regla que
+// enviarCorreoRecuperacionTaller): el cupo solo se menciona si de verdad
+// queda poco (cupoRestanteTaller), y el anticipo solo se ofrece como salida
+// mas barata a quien de verdad eligio pagar completo.
+async function enviarCorreoInfoYPagoTaller({
+  to, nombre, taller, fecha, horario, sede, direccion, mapaLink, queAprendes,
+  tipoPago, monto, saldo, lugares, link, numeroWhatsapp, comunidadLink, arteUrl,
+}) {
+  const fechaLegible = fecha
+    ? new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
+    : '';
+  const cuerpo = `
+    <p>Hola${nombre ? ` ${escapeHtml(nombre)}` : ''}:</p>
+    <p>Vimos que te interesó el taller de <strong>${escapeHtml(taller || '')}</strong>. Aquí tienes todo lo que necesitas para decidir y apartar tu lugar.</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;background:#FBF4E9;border-radius:14px;">
+      <tr><td style="padding:16px 18px;">
+        <p style="margin:0;font-size:15px;font-weight:700;color:#4E1454;">${escapeHtml(taller || '')}</p>
+        ${fechaLegible ? `<p style="margin:6px 0 0;font-size:14px;color:#1B0720;text-transform:capitalize;">${escapeHtml(fechaLegible)}</p>` : ''}
+        ${horario ? `<p style="margin:2px 0 0;font-size:14px;color:#1B0720;">${escapeHtml(horario)}</p>` : ''}
+        ${sede || direccion ? `<p style="margin:2px 0 0;font-size:14px;color:#1B0720;">${escapeHtml([sede, direccion].filter(Boolean).join(' · '))}${mapaLink ? ` · <a href="${escapeHtml(mapaLink)}" style="color:#7A2E7E;">Ver mapa</a>` : ''}</p>` : ''}
+      </td></tr>
+    </table>
+    ${queAprendes ? `<p style="font-size:14px;line-height:1.6;"><strong>Qué aprenderás:</strong> ${escapeHtml(queAprendes)}</p>` : ''}
+    ${lugares ? `<p style="font-size:14px;line-height:1.6;">De este taller quedan <strong>${lugares} ${lugares === 1 ? 'lugar' : 'lugares'}</strong> — el cupo se ocupa por orden de pago, no de registro.</p>` : ''}
+    <p style="font-size:14px;line-height:1.6;">${tipoPago === 'anticipo'
+      ? `Tu lugar se aparta con <strong>$${formatoMonto(monto)} de anticipo</strong>${saldo ? `; el resto ($${formatoMonto(saldo)}) se paga el día del taller.` : '.'}`
+      : `Apartas tu lugar pagando el <strong>total de $${formatoMonto(monto)}</strong>.`}</p>`;
+  const boton = link ? botonPlan(`Apartar mi lugar — $${formatoMonto(monto)}`, link, '#4E1454', '#FBF4E9') : '';
+  const salida = tipoPago === 'completo'
+    ? '<p style="font-size:13px;line-height:1.6;color:#6b5a6e;">Si ahorita no te acomoda el pago completo, escríbenos y te ayudamos a cambiarlo por el anticipo.</p>'
+    : '';
+  return enviarCorreoHtml({
+    to,
+    asunto: `Tu lugar en ${taller || 'tu taller'} — toda la info + tu apartado`,
+    html: plantillaPlan({
+      arteUrl,
+      cuerpo: `${cuerpo}${boton}${salida}`,
+      pie: pieEndulcora({ numeroWhatsapp, comunidadLink }),
+    }),
+  });
+}
+
 // Recetario del taller: se manda desde el portal de Lex en cuanto marca
 // que esa persona asistio. "archivo" es la ruta publica del PDF que se
 // subio para ese taller (ej. "/uploads/xxxx.pdf"); Resend lo descarga de
@@ -1274,6 +1320,7 @@ module.exports = {
   enviarCorreoConfirmacionCompra,
   enviarCorreoConfirmacionInscripcionTaller,
   enviarCorreoConfirmacionPagoTaller,
+  enviarCorreoInfoYPagoTaller,
   correoConfirmacionPagoTaller,
   enviarCorreoRecordatorioTaller,
   enviarCorreoRecuperacionTaller,

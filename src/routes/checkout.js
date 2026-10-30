@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const store = require('../store');
 const { SITE_URL } = require('../config');
-const { enviarCorreoConfirmacionPagoTaller } = require('../email');
+const { enviarCorreoConfirmacionPagoTaller, enviarCorreoInfoYPagoTaller } = require('../email');
 const { enviarPurchaseCAPI } = require('../metaConversions');
 const { enviarCompraGoogle } = require('../googleAds/conversiones');
 const { avisarEquipoNuevoTaller, sincronizarInscripcionTaller } = require('../automatizacionesTaller');
@@ -230,6 +230,42 @@ router.post('/preference', async (req, res) => {
     const usarSandbox = process.env.MP_SANDBOX === 'true';
     const url = usarSandbox ? (resultado.sandbox_init_point || resultado.init_point) : resultado.init_point;
     res.status(201).json({ url });
+
+    // En paralelo al pago instantaneo (no lo reemplaza): a quien venia por
+    // un taller se le manda tambien la info + este mismo link por correo,
+    // para retomarlo si no termina de pagar ahi mismo. Nunca debe tumbar la
+    // respuesta ya enviada ni el pago en curso si falla.
+    const itemsTaller = order.email ? resueltos.filter((r) => r.tipo === 'taller') : [];
+    if (itemsTaller.length) {
+      const contenido = store.getContent();
+      for (const item of itemsTaller) {
+        const inscripcion = store.getInscripcionTaller(item.inscripcionTallerId);
+        const sesion = store.getSesionesTaller().find((s) => s.id === item.sesionTallerId);
+        const sedeInfo = sesion ? store.getSedes().find((s) => s.id === sesion.sedeId) : null;
+        const precioTotal = sesion ? parsePrecio(sesion.precioTotal) : 0;
+        enviarCorreoInfoYPagoTaller({
+          to: order.email,
+          nombre: inscripcion ? inscripcion.nombre : '',
+          taller: sesion ? sesion.titulo : '',
+          fecha: sesion ? sesion.fecha : '',
+          horario: sesion ? sesion.horario : '',
+          sede: sedeInfo ? sedeInfo.nombre : '',
+          direccion: sedeInfo ? sedeInfo.direccion : '',
+          mapaLink: sedeInfo ? sedeInfo.mapaLink : '',
+          queAprendes: sesion ? sesion.queAprendes : '',
+          tipoPago: item.tipoPago,
+          monto: item.precio,
+          saldo: item.tipoPago === 'anticipo' && precioTotal ? Math.max(0, precioTotal - item.precio) : null,
+          lugares: sesion && typeof sesion.cupoRestante === 'number' && sesion.cupoRestante > 0 && sesion.cupoRestante <= 5 ? sesion.cupoRestante : null,
+          link: url,
+          numeroWhatsapp: contenido.whatsapp_numero,
+          comunidadLink: contenido.comunidad_avisos_link,
+          arteUrl: sesion && sesion.fotoUrl ? (/^https?:\/\//.test(sesion.fotoUrl) ? sesion.fotoUrl : `${SITE_URL}${sesion.fotoUrl}`) : '',
+        }).catch((err) => {
+          console.error(`[checkout] No se pudo mandar el correo de info+pago del taller (pedido ${order.id}):`, err.message);
+        });
+      }
+    }
   } catch (err) {
     store.updateOrder(order.id, { estado: 'error' });
     res.status(502).json({ error: 'No se pudo iniciar el pago. Intenta de nuevo en un momento.' });
