@@ -822,6 +822,10 @@ router.get('/acceso-anticipado', (req, res) => {
       sesionActiva: !!(usuario && sesionUsuario && sesionUsuario.id === usuario.id),
       esMiembroActivo: !!(usuario && usuario.membresiaEstado === 'activa'),
       membresiaHasta: usuario && usuario.membresiaOrigen === 'acceso_anticipado' ? usuario.membresiaRegaloHasta : null,
+      // true mientras su mes de membresia (el del acceso anticipado) no
+      // tiene tarjeta domiciliada: con esto la pagina de gracias puede
+      // ofrecerle domiciliarla ahi mismo, sin que tenga que ir a /membresia.
+      membresiaSinDomiciliar: !!(usuario && usuario.membresiaOrigen === 'acceso_anticipado' && usuario.membresiaRegaloCancelada),
     },
     acceso: {
       estado: registro.accesoEstado === 'apartado' && !apartadoVigente ? '' : registro.accesoEstado,

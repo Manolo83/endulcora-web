@@ -162,6 +162,18 @@
         <a id="linkRecetario" href="#" class="hidden w-full items-center justify-center rounded-full bg-flama py-3 font-ui text-[12.5px] font-700 uppercase tracking-wider text-carbon hover:brightness-105 transition">Descargar mi recetario</a>
         <a href="/membresia" class="inline-flex w-full items-center justify-center rounded-full bg-vino py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Ir a mi membresía</a>
       </div>
+
+      <div id="bloqueDomiciliar" class="mt-5 hidden rounded-2xl bg-flama px-5 py-5 text-left">
+        <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Antes de que se te olvide</p>
+        <p class="mt-2 text-sm leading-relaxed text-carbon/85">Tu mes de membresía termina solo y hoy no se te cobra nada más. Si quieres seguir después sin tener que volver a entrar, registra tu tarjeta ahora: no se te cobra hasta que termine tu mes gratis, y puedes cancelar cuando quieras.</p>
+        <p id="domiciliarError" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+        <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button type="button" id="btnDomiciliarAcceso" class="inline-flex items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+            <span id="spinnerDomiciliar" class="spinner hidden"></span> Registrar mi tarjeta
+          </button>
+          <button type="button" id="btnAhoraNoDomiciliar" class="inline-flex items-center justify-center rounded-full border border-carbon/20 bg-white/50 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon/70 hover:bg-white transition">Ahora no</button>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -275,7 +287,34 @@ function pintarPagado(e){
     link.classList.remove('hidden');
     link.classList.add('inline-flex');
   }
+  // Oferta de domiciliar: solo si sigue en el sitio con su sesion activa
+  // (se creo justo antes de pagar) y su mes de membresia todavia no tiene
+  // tarjeta domiciliada.
+  document.getElementById('bloqueDomiciliar').classList.toggle('hidden', !(e.cuenta.sesionActiva && e.cuenta.membresiaSinDomiciliar));
 }
+
+document.getElementById('btnDomiciliarAcceso').addEventListener('click', async () => {
+  const err = document.getElementById('domiciliarError');
+  const btn = document.getElementById('btnDomiciliarAcceso');
+  const spinner = document.getElementById('spinnerDomiciliar');
+  err.classList.add('hidden');
+  btn.disabled = true;
+  spinner.classList.remove('hidden');
+  try{
+    const res = await fetch('/api/membresia/suscribirse', { method: 'POST' });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'No se pudo registrar tu tarjeta. Intenta de nuevo.');
+    window.location.href = data.url;
+  }catch(e){
+    err.textContent = e.message;
+    err.classList.remove('hidden');
+    btn.disabled = false;
+    spinner.classList.add('hidden');
+  }
+});
+document.getElementById('btnAhoraNoDomiciliar').addEventListener('click', () => {
+  document.getElementById('bloqueDomiciliar').classList.add('hidden');
+});
 
 function pintar(e){
   document.getElementById('eyebrowClase').textContent = `${e.titulo} · ${fechaLegible(e.fecha)} · ${e.horario}`;

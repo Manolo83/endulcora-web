@@ -515,18 +515,22 @@ function pintarRegalo(r){
   const grados = Math.max(0, Math.min(360, (d / r.diasTotales) * 360));
   document.getElementById('anilloRegalo').style.background = `conic-gradient(${d <= 3 ? '#b42318' : '#F5A623'} ${grados}deg, rgba(78,20,84,.09) 0)`;
   // Mes pagado con el acceso anticipado de una master class (pago unico):
-  // termina solo y renovarla es decision de la asistente.
-  const esMasterClass = r.origen === 'acceso_anticipado';
-  const unidad = esMasterClass ? 'de membresía' : 'de regalo';
+  // SOLO mientras no se haya domiciliado (r.cancelada) termina solo y
+  // renovarla es decision de la asistente. En cuanto domicilia su tarjeta
+  // (r.cancelada pasa a false), se comporta exactamente igual que el
+  // regalo del live o la invitacion por WhatsApp: se cobra solo si no
+  // cancela antes — el origen ya no importa para decidir el texto.
+  const esMasterClassSinDomiciliar = r.origen === 'acceso_anticipado' && r.cancelada;
+  const unidad = esMasterClassSinDomiciliar ? 'de membresía' : 'de regalo';
   document.getElementById('tituloRegalo').textContent = d === 1 ? `Te queda 1 día ${unidad}` : `Te quedan ${d} días ${unidad}`;
-  document.getElementById('detalleRegalo').textContent = esMasterClass
-    ? `Tu mes de membresía de la master class termina el ${fecha}. Renovarla es tu decisión: si quieres seguir, domicíliala y tu primer cargo de $100 será ese día.`
+  document.getElementById('detalleRegalo').textContent = esMasterClassSinDomiciliar
+    ? `Tienes ${d === 1 ? '1 día' : `${d} días`} para decidir si quieres domiciliar tu membresía, antes de que termine el ${fecha}. Si no haces nada, tu membresía simplemente termina — no se te cobra nada.`
     : r.cancelada
-      ? `Cancelaste tu membresía: conservas todo hasta el ${fecha} y no se te cobrará nada. Si quieres seguir, reactívala antes de esa fecha.`
-      : `Tu mes gratis termina el ${fecha}. Ese día se hará tu primer cargo de $100 y tu membresía seguirá activa sin que hagas nada.`;
-  document.getElementById('etiquetaRegalo').textContent = esMasterClass ? 'Membresía de la master class' : 'Membresía de regalo';
-  document.getElementById('btnReactivarRegalo').textContent = esMasterClass ? 'Domiciliar mi membresía' : 'Reactivar membresía';
-  document.getElementById('btnReactivarRegaloAviso').textContent = esMasterClass ? 'Domiciliar mi membresía' : 'Reactivar membresía';
+      ? `Cancelaste tu membresía: conservas todo hasta el ${fecha} y no se te cobrará nada. Tienes hasta esa fecha para reactivarla si quieres seguir.`
+      : `Tienes ${d === 1 ? '1 día' : `${d} días`} para cancelar antes de que se haga tu cobro automático de $100 el ${fecha}. Si no haces nada, tu membresía se renueva sola con tu tarjeta.`;
+  document.getElementById('etiquetaRegalo').textContent = r.origen === 'acceso_anticipado' ? 'Membresía de la master class' : 'Membresía de regalo';
+  document.getElementById('btnReactivarRegalo').textContent = esMasterClassSinDomiciliar ? 'Domiciliar mi membresía' : 'Reactivar membresía';
+  document.getElementById('btnReactivarRegaloAviso').textContent = esMasterClassSinDomiciliar ? 'Domiciliar mi membresía' : 'Reactivar membresía';
   const linkRecetario = document.getElementById('linkRecetarioRegalo');
   linkRecetario.classList.toggle('hidden', !r.recetarioDisponible);
   linkRecetario.classList.toggle('inline-flex', r.recetarioDisponible);
@@ -536,11 +540,11 @@ function pintarRegalo(r){
   // Aviso dentro de su cuenta a partir de los 15 dias (rojo a los 3).
   if(r.mostrarAviso){
     const cuando = d === 1 ? '<strong>mañana</strong>' : `en <strong>${d} días</strong>`;
-    document.getElementById('avisoRegaloTexto').innerHTML = esMasterClass
-      ? `Tu mes de membresía termina ${cuando} (el ${fecha}). Renovarla es tu decisión: domicíliala para no perder el taller, la revista y los eBooks.`
+    document.getElementById('avisoRegaloTexto').innerHTML = esMasterClassSinDomiciliar
+      ? `Tienes ${cuando} para decidir si quieres domiciliar tu membresía (termina el ${fecha}). Si no haces nada, no se te cobra nada y tu acceso simplemente se apaga.`
       : r.cancelada
       ? `Tu acceso termina ${cuando} (el ${fecha}). Reactiva tu membresía domiciliada para no perder tu recetario, el taller y los eBooks.`
-      : `Tu mes de regalo termina ${cuando}. El ${fecha} se renueva tu membresía por $100 con tu tarjeta guardada.`;
+      : `Tienes ${cuando} para cancelar antes del cobro automático de $100 (el ${fecha}). Si no haces nada, tu membresía se renueva sola con tu tarjeta guardada.`;
     const urgente = d <= 3;
     aviso.classList.toggle('bg-[#fde8e4]', urgente);
     aviso.classList.toggle('border-red-300', urgente);
