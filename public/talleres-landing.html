@@ -149,8 +149,12 @@ body { background: #FBF4E9; }
 
     <div id="bloqueExito" class="mt-6 hidden rounded-3xl bg-vino p-7 text-center text-crema">
       <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">¡Listo!</p>
-      <h2 class="mt-2 font-display text-2xl">Revisa tu correo</h2>
-      <p class="mt-3 text-sm leading-relaxed text-crema/85">Te mandamos toda la información de <strong id="exitoTallerNombre"></strong> y tu link para apartar tu lugar. Si no lo ves en unos minutos, revisa spam o promociones.</p>
+      <h2 class="mt-2 font-display text-2xl">Aparta tu lugar</h2>
+      <p class="mt-3 text-sm leading-relaxed text-crema/85">Ya guardamos tus datos para <strong id="exitoTallerNombre"></strong>. El cupo se ocupa por orden de pago, no de registro.</p>
+      <a id="btnPagarAhora" href="#" class="mt-5 hidden w-full items-center justify-center rounded-full boton-vivo bg-flama py-3.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:brightness-110 transition">
+        Apartar mi lugar ahora
+      </a>
+      <p class="mt-4 text-xs leading-relaxed text-crema/70">También te mandamos todo por correo, con la información completa, por si prefieres decidirlo con calma. Si no lo ves en unos minutos, revisa spam o promociones.</p>
     </div>
 
     <a id="linkWhatsappAyuda" href="#" target="_blank" rel="noopener"
@@ -392,6 +396,29 @@ document.getElementById('formLandingTaller').addEventListener('submit', async (e
         value: parseFloat(String(ELEGIDA.anticipo || 0).replace(/,/g, '')) || 0,
         currency: 'MXN',
       });
+    }
+    // El link de pago se muestra aqui mismo, no solo en el correo: quien
+    // acaba de llenar el formulario esta caliente ahora, y mandarlo a su
+    // bandeja pierde a todo el que no abre el correo. El correo sigue
+    // saliendo igual, como segunda oportunidad.
+    const btnPagar = document.getElementById('btnPagarAhora');
+    if (data.url) {
+      btnPagar.href = data.url;
+      btnPagar.classList.remove('hidden');
+      btnPagar.classList.add('flex');
+      btnPagar.onclick = () => {
+        if (typeof fbq === 'function') {
+          fbq('track', 'InitiateCheckout', {
+            content_ids: [String(ELEGIDA.id)],
+            content_type: 'product',
+            value: parseFloat(String(ELEGIDA.anticipo || 0).replace(/,/g, '')) || 0,
+            currency: 'MXN',
+          });
+        }
+      };
+    } else {
+      btnPagar.classList.add('hidden');
+      btnPagar.classList.remove('flex');
     }
     document.getElementById('exitoTallerNombre').textContent = ELEGIDA.titulo || 'tu taller';
     document.getElementById('bloqueForm').classList.add('hidden');
