@@ -159,7 +159,13 @@ body { background: #FBF4E9; }
 .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
 .reveal.visible { opacity: 1; transform: none; }
 
-.rule-flama { background-image: linear-gradient(90deg,#F5A623 0 22px,transparent 22px); height: 3px; }
+.rule-flama { position: relative; background-image: linear-gradient(90deg,#F5A623 0 22px,transparent 22px); height: 3px; }
+.rule-flama::after { content:''; position:absolute; left:27px; top:50%; width:6px; height:6px; border-radius:50%; background:#F5A623; transform:translateY(-50%); }
+
+.boton-brillante { box-shadow: 0 10px 26px -6px rgba(245,166,35,.45); }
+.boton-brillante:hover { box-shadow: 0 14px 30px -6px rgba(245,166,35,.55); }
+
+.textura-puntos { background-image: radial-gradient(circle, rgba(78,20,84,.07) 1.4px, transparent 1.8px); background-size: 20px 20px; }
 
 input[type=range] { -webkit-appearance:none; appearance:none; height:4px; border-radius:99px; background:#e6d9c6; outline:none; }
 input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#7A2E7E; border:3px solid #F5A623; cursor:pointer; }
@@ -319,7 +325,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
       </p>
 
       <div class="mt-9 flex flex-wrap gap-4">
-        <a href="/tienda" class="boton-shimmer relative inline-flex items-center gap-2 overflow-hidden rounded-full boton-vivo bg-flama px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
+        <a href="/tienda" class="boton-shimmer boton-brillante relative inline-flex items-center gap-2 overflow-hidden rounded-full boton-vivo bg-flama px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>
           <span id="heroCtaPrimario">Ir a la tienda</span>
         </a>
@@ -467,6 +473,8 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
   </div>
 </section>
 
+<svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-white" aria-hidden="true"><path d="M0,22 C220,2 460,38 720,20 C980,4 1220,34 1440,16 L1440,40 L0,40 Z" fill="#FAECD5"/></svg>
+
 <!-- ══════════════ ANUNCIOS (dinámico, desde el panel de administración) ══════════════ -->
 <section id="anuncios" class="scroll-mt-24 bg-flama/10 py-14">
   <div class="mx-auto max-w-7xl px-5 lg:px-8">
@@ -569,8 +577,9 @@ trufada, paso a paso</h2>
 </section>
 
 <!-- ══════════════ SIMULADOR ══════════════ -->
-<section id="simulador" class="scroll-mt-24 bg-crema py-20 lg:py-28">
-  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+<section id="simulador" class="scroll-mt-24 relative overflow-hidden bg-crema py-20 lg:py-28">
+  <div class="textura-puntos pointer-events-none absolute inset-0"></div>
+  <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
 
     <div class="reveal mb-12 max-w-2xl">
       <div class="rule-flama mb-5 w-24"></div>
@@ -680,6 +689,8 @@ trufada, paso a paso</h2>
   </div>
 </section>
 
+<svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-crema" aria-hidden="true"><path d="M0,16 C240,36 480,4 720,22 C960,38 1200,8 1440,24 L1440,40 L0,40 Z" fill="#FFFFFF"/></svg>
+
 <!-- ══════════════ RESEÑAS ══════════════ -->
 <section id="resenas" class="scroll-mt-24 bg-white py-20 lg:py-24">
   <div class="mx-auto max-w-7xl px-5 lg:px-8">
@@ -726,8 +737,10 @@ trufada, paso a paso</h2>
   </div>
 </section>
 
+<svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-white" aria-hidden="true"><path d="M0,24 C260,4 500,36 760,18 C1020,2 1260,30 1440,14 L1440,40 L0,40 Z" fill="#FBF4E9"/></svg>
+
 <!-- ══════════════ FOOTER ══════════════ -->
-<footer class="border-t border-vino/10 bg-crema pt-16 text-carbon">
+<footer class="bg-crema pt-16 text-carbon">
   <div class="mx-auto max-w-7xl px-5 lg:px-8">
     <div class="grid gap-12 pb-14 md:grid-cols-2 lg:grid-cols-4">
 
@@ -786,7 +799,7 @@ trufada, paso a paso</h2>
           <label for="correoFooter" class="sr-only">Tu correo</label>
           <input id="correoFooter" type="email" placeholder="tu@correo.com"
             class="w-full rounded-full border border-vino/20 bg-white px-4 py-2.5 text-sm text-carbon placeholder:text-carbon/35">
-          <button type="button" onclick="suscribir()" class="shrink-0 rounded-full boton-vivo bg-flama px-5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">Enviar</button>
+          <button type="button" onclick="suscribir()" class="boton-brillante shrink-0 rounded-full boton-vivo bg-flama px-5 font-ui text-[12px] font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">Enviar</button>
         </div>
       </div>
     </div>
