@@ -15,8 +15,23 @@ mismo taller**, cada uno con su presupuesto. Dos anuncios en un mismo conjunto n
 sirve — Meta le da casi todo a uno y el otro se queda con migajas (pasó con el
 arte "D Manos", que recibió el 7% del gasto teniendo mejor CTR).
 
-**Verificado el 31 de octubre:** el botón de WhatsApp manda al **5665271901**, el
-correcto. No hay que volver a ponerlo en duda.
+## El número de WhatsApp
+
+**El número de ventas es 5575933916.** Es el original y al que siempre llegaron
+las campañas. Toda la estructura apunta ahí.
+
+El **5665271901 NO es el número de ventas.** Estuvo conectado a la página por
+error y se quitó el 31 de octubre de 2026. Aun así viene impreso en la banda
+inferior de todos los artes de taller de octubre y noviembre
+("WHATSAPP 5665271901 · Escribe la palabra ..."), así que **los artes hay que
+rehacerlos con el 5575933916**. Quien le pica al botón llega bien; quien lee el
+arte y teclea el número a mano, no.
+
+El destino no se puede leer desde la API de anuncios: los conjuntos solo
+guardan `page_id` 605291926236098 y el número vive en la cuenta de WhatsApp
+conectada a la página, en Business Suite. **Nunca darlo por verificado sin
+verlo**: el 30 de octubre se registró aquí como verificado basándose en lo que
+dijo otra persona, y era falso.
 
 ### Por qué
 
