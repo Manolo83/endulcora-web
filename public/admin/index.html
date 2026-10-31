@@ -27,6 +27,13 @@
   .admin-seccion-toggle:hover { opacity: .75; }
   .admin-chevron { display: inline-block; margin-left: .5rem; transition: transform .15s ease; color: rgba(122,46,126,.5); }
   .admin-chevron.abierta { transform: rotate(90deg); }
+  .admin-chevron-grupo { display: inline-block; font-size: 10px; transition: transform .15s ease; }
+  .admin-nav-grupo-btn.abierto .admin-chevron-grupo { transform: rotate(180deg); }
+  .admin-resaltado { animation: admin-pulso 1.1s ease 2; border-radius: 1rem; }
+  @keyframes admin-pulso {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,166,35,0); }
+    30% { box-shadow: 0 0 0 6px rgba(245,166,35,.45); }
+  }
 </style>
 </head>
 <body class="font-cuerpo text-carbon antialiased">
@@ -63,28 +70,55 @@
         <button id="btnLogout" class="rounded-full bg-carbon px-4 py-2 font-ui text-[12px] font-600 uppercase tracking-wider text-crema hover:bg-vino transition">Salir</button>
       </div>
     </div>
-    <nav class="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-5 pb-3 font-ui text-[12px] font-600 uppercase tracking-wider text-vino/70">
-      <a href="#seccionVistaPrevia" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Vista previa</a>
-      <a href="#seccionContenido" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Contenido general</a>
-      <a href="#seccionProductos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Productos</a>
-      <a href="#seccionApartadosEbooks" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Apartados de eBooks</a>
-      <a href="#seccionCursos" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Cursos</a>
-      <a href="#seccionBlog" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Blog</a>
-      <a href="#seccionCalendario" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Calendario</a>
-      <a href="#seccionLegales" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Legales</a>
-      <a href="#seccionVentas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Ventas</a>
-      <a href="#seccionClientes" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clientes</a>
-      <a href="#seccionMembresia" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Membresía</a>
-      <a href="#seccionSuscriptores" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Suscriptores</a>
-      <a href="#seccionInscripcionesTaller" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Inscripciones a talleres</a>
-      <a href="#seccionRegistrosQr" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">QR de registro</a>
-      <a href="#seccionClaseGratis" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clase gratis</a>
-      <a href="#seccionVideoEnVivo" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Video en vivo</a>
-      <a href="#seccionCampanas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Campañas de correo</a>
-      <a href="#seccionResenas" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Reseñas</a>
-      <a href="#seccionComunidad" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Comunidad</a>
-      <a href="#seccionAnuncios" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Anuncios</a>
-      <a href="#seccionGaleria" class="shrink-0 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Galería</a>
+    <div class="mx-auto max-w-6xl px-5 pb-4">
+      <div class="relative">
+        <input id="adminBuscador" type="text" autocomplete="off" placeholder="Buscar un campo o sección… (ej. “whatsapp”, “tope”)"
+          class="w-full rounded-full border border-vino/15 bg-crema/60 px-5 py-2.5 font-cuerpo text-sm text-carbon placeholder:text-carbon/40 focus:border-vino/40 focus:outline-none">
+        <div id="adminBuscadorResultados" class="absolute left-0 right-0 top-full z-30 mt-2 hidden max-h-96 overflow-y-auto rounded-2xl bg-white p-2 text-left shadow-2xl ring-1 ring-vino/10"></div>
+      </div>
+    </div>
+    <nav id="adminNav" class="mx-auto flex max-w-6xl flex-wrap gap-2 px-5 pb-4 font-ui text-[12px] font-600 uppercase tracking-wider text-vino/70">
+      <div class="admin-nav-grupo relative">
+        <button type="button" class="admin-nav-grupo-btn flex items-center gap-1 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Sitio <span class="admin-chevron-grupo">▾</span></button>
+        <div class="admin-nav-grupo-panel absolute left-0 top-full z-20 mt-2 hidden w-56 flex flex-col gap-1 rounded-2xl bg-white p-2 normal-case tracking-normal shadow-2xl ring-1 ring-vino/10">
+          <a href="#seccionVistaPrevia" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Vista previa</a>
+          <a href="#seccionContenido" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Contenido general</a>
+          <a href="#seccionProductos" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Productos</a>
+          <a href="#seccionBlog" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Blog</a>
+          <a href="#seccionGaleria" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Galería</a>
+          <a href="#seccionLegales" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Legales</a>
+        </div>
+      </div>
+      <div class="admin-nav-grupo relative">
+        <button type="button" class="admin-nav-grupo-btn flex items-center gap-1 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Ventas y clientes <span class="admin-chevron-grupo">▾</span></button>
+        <div class="admin-nav-grupo-panel absolute left-0 top-full z-20 mt-2 hidden w-56 flex flex-col gap-1 rounded-2xl bg-white p-2 normal-case tracking-normal shadow-2xl ring-1 ring-vino/10">
+          <a href="#seccionVentas" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Ventas</a>
+          <a href="#seccionClientes" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Clientes</a>
+          <a href="#seccionMembresia" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Membresía</a>
+          <a href="#seccionApartadosEbooks" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Apartados de eBooks</a>
+        </div>
+      </div>
+      <div class="admin-nav-grupo relative">
+        <button type="button" class="admin-nav-grupo-btn flex items-center gap-1 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clases y talleres <span class="admin-chevron-grupo">▾</span></button>
+        <div class="admin-nav-grupo-panel absolute left-0 top-full z-20 mt-2 hidden w-56 flex flex-col gap-1 rounded-2xl bg-white p-2 normal-case tracking-normal shadow-2xl ring-1 ring-vino/10">
+          <a href="#seccionCursos" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Cursos</a>
+          <a href="#seccionCalendario" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Calendario</a>
+          <a href="#seccionInscripcionesTaller" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Inscripciones a talleres</a>
+          <a href="#seccionClaseGratis" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Clase gratis</a>
+          <a href="#seccionVideoEnVivo" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Video en vivo</a>
+          <a href="#seccionRegistrosQr" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">QR de registro</a>
+        </div>
+      </div>
+      <div class="admin-nav-grupo relative">
+        <button type="button" class="admin-nav-grupo-btn flex items-center gap-1 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Marketing <span class="admin-chevron-grupo">▾</span></button>
+        <div class="admin-nav-grupo-panel absolute left-0 top-full z-20 mt-2 hidden w-56 flex flex-col gap-1 rounded-2xl bg-white p-2 normal-case tracking-normal shadow-2xl ring-1 ring-vino/10">
+          <a href="#seccionCampanas" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Campañas de correo</a>
+          <a href="#seccionAnuncios" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Anuncios</a>
+          <a href="#seccionComunidad" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Comunidad</a>
+          <a href="#seccionResenas" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Reseñas</a>
+          <a href="#seccionSuscriptores" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Suscriptores</a>
+        </div>
+      </div>
     </nav>
   </header>
 
@@ -5810,8 +5844,118 @@ function inicializarAcordeonAdmin(){
       requestAnimationFrame(() => $(inicialId).scrollIntoView({ block: 'start' }));
     }
   }
+  return estados;
 }
-inicializarAcordeonAdmin();
+
+// Los 4 botones de categoria de arriba (Sitio, Ventas y clientes, Clases y
+// talleres, Marketing): cada uno abre/cierra su propio panel con los links
+// de siempre (los mismos <a href="#seccionX">, el click de esos ya lo
+// maneja inicializarAcordeonAdmin). Solo un panel abierto a la vez, y se
+// cierran al elegir un link o al hacer click fuera.
+function inicializarNavAgrupada(){
+  const grupos = Array.from(document.querySelectorAll('.admin-nav-grupo'));
+  const cerrarTodos = () => grupos.forEach((g) => {
+    g.querySelector('.admin-nav-grupo-panel').classList.add('hidden');
+    g.querySelector('.admin-nav-grupo-btn').classList.remove('abierto');
+  });
+  grupos.forEach((grupo) => {
+    const btn = grupo.querySelector('.admin-nav-grupo-btn');
+    const panel = grupo.querySelector('.admin-nav-grupo-panel');
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const yaAbierto = !panel.classList.contains('hidden');
+      cerrarTodos();
+      if(!yaAbierto){ panel.classList.remove('hidden'); btn.classList.add('abierto'); }
+    });
+    panel.querySelectorAll('a').forEach((a) => a.addEventListener('click', cerrarTodos));
+  });
+  document.addEventListener('click', cerrarTodos);
+}
+
+// Buscador del panel: indexa cada etiqueta de campo (los <span> de
+// "Nombre del campo") y cada tarjeta (<h3>) dentro de las secciones, para
+// saltar directo ahi sin tener que acordarse en que pestaña vive. Se
+// construye una sola vez al cargar (el panel no agrega/quita campos en
+// caliente, solo filas dentro de listas que ya tienen su propia busqueda).
+function inicializarBusquedaAdmin(estadosSecciones){
+  const input = document.getElementById('adminBuscador');
+  const panel = document.getElementById('adminBuscadorResultados');
+  if(!input || !panel) return;
+
+  const nombrePorSeccion = {};
+  document.querySelectorAll('#adminNav a[href^="#seccion"]').forEach((a) => {
+    nombrePorSeccion[a.getAttribute('href').slice(1)] = a.textContent.trim();
+  });
+
+  const indice = [];
+  document.querySelectorAll('#vistaDashboard main > section[id^="seccion"]').forEach((section) => {
+    const contexto = nombrePorSeccion[section.id] || section.id;
+    section.querySelectorAll('h2, h3').forEach((titulo) => {
+      const texto = titulo.textContent.replace('▸', '').trim();
+      if(!texto) return;
+      const elemento = titulo.closest('[class*="rounded-2xl"]') || titulo;
+      indice.push({ texto, contexto, elemento, destino: section.id });
+    });
+    section.querySelectorAll('span').forEach((span) => {
+      const cls = span.className || '';
+      if(typeof cls !== 'string' || !cls.includes('uppercase') || !cls.includes('tracking-widest') || !cls.includes('text-carbon/60')) return;
+      const texto = span.textContent.trim();
+      if(texto.length < 2) return;
+      const elemento = span.closest('label') || span.parentElement;
+      if(!elemento) return;
+      indice.push({ texto, contexto, elemento, destino: section.id });
+    });
+  });
+
+  function normalizar(s){
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+
+  function cerrarPanel(){ panel.classList.add('hidden'); panel.innerHTML = ''; }
+
+  function irA(resultado){
+    cerrarPanel();
+    input.value = '';
+    const info = estadosSecciones && estadosSecciones.get(resultado.destino);
+    if(info) info.abrir();
+    requestAnimationFrame(() => {
+      resultado.elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      resultado.elemento.classList.add('admin-resaltado');
+      setTimeout(() => resultado.elemento.classList.remove('admin-resaltado'), 2300);
+    });
+  }
+
+  input.addEventListener('input', () => {
+    const q = normalizar(input.value.trim());
+    if(q.length < 2){ cerrarPanel(); return; }
+    const coincidencias = indice.filter((r) => normalizar(r.texto).includes(q)).slice(0, 8);
+    if(!coincidencias.length){
+      panel.innerHTML = '<p class="px-3 py-3 text-sm text-carbon/40">Sin resultados</p>';
+      panel.classList.remove('hidden');
+      return;
+    }
+    panel.innerHTML = coincidencias.map((r, i) => `
+      <button type="button" data-i="${i}" class="block w-full rounded-xl px-3 py-2 text-left hover:bg-vino/5">
+        <span class="block font-cuerpo text-sm font-600 text-carbon">${escapeHtml(r.texto)}</span>
+        <span class="block font-ui text-[11px] uppercase tracking-wider text-carbon/40">${escapeHtml(r.contexto)}</span>
+      </button>
+    `).join('');
+    panel.classList.remove('hidden');
+    panel.querySelectorAll('button[data-i]').forEach((btn) => {
+      btn.addEventListener('click', () => irA(coincidencias[Number(btn.dataset.i)]));
+    });
+  });
+  input.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape'){ cerrarPanel(); input.blur(); }
+  });
+  document.addEventListener('click', (e) => {
+    if(e.target !== input && !panel.contains(e.target)) cerrarPanel();
+  });
+}
+
+const adminEstadosSecciones = inicializarAcordeonAdmin();
+inicializarNavAgrupada();
+inicializarBusquedaAdmin(adminEstadosSecciones);
 
 verificarSesion();
 </script>
