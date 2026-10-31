@@ -79,6 +79,11 @@ body { background: #FBF4E9; }
     <p class="mt-2 text-sm text-carbon/60">Síguenos para enterarte de la próxima fecha.</p>
   </div>
 
+  <div id="bloqueTodoLleno" class="hidden rounded-3xl bg-white p-8 text-center ring-1 ring-vino/10">
+    <p class="font-display text-xl text-vino">Se agotaron los lugares de esta clase</p>
+    <p class="mt-2 text-sm text-carbon/60">Todos los horarios llegaron a su cupo. Síguenos para enterarte de la próxima fecha.</p>
+  </div>
+
   <form id="formClaseGratis" class="hidden space-y-4 rounded-3xl bg-white p-6 shadow-[0_2px_0_rgba(78,20,84,.06)] ring-1 ring-vino/10 sm:p-8" novalidate>
     <div class="mb-2 text-center">
       <h1 id="tituloClase" class="font-display text-2xl text-vino"></h1>
@@ -253,8 +258,14 @@ async function cargarClaseGratis(){
 
     const selectHorario = document.getElementById('campoHorario');
     selectHorario.innerHTML = info.horarios.map(h => `
-      <option value="${escapeHtml(h.horario)}">${escapeHtml(h.horario)}</option>
+      <option value="${escapeHtml(h.horario)}" ${h.lleno ? 'disabled' : ''}>${escapeHtml(h.horario)}${h.lleno ? ' — Agotado' : ''}</option>
     `).join('');
+    // Si el primer horario de la lista ya esta agotado, el <select> no debe
+    // quedarse mostrando una opcion deshabilitada: se preselecciona el
+    // primero que todavia tenga lugar.
+    const primerDisponible = info.horarios.find(h => !h.lleno);
+    if (primerDisponible) selectHorario.value = primerDisponible.horario;
+    const todosLlenos = info.horarios.length > 0 && info.horarios.every(h => h.lleno);
 
     document.getElementById('opcionesTemas').innerHTML = info.temas.map(t => `
       <label class="flex items-center gap-2">
@@ -266,6 +277,11 @@ async function cargarClaseGratis(){
     if (!info.horarios.length) {
       form.classList.add('hidden');
       document.getElementById('bloqueSinClase').classList.remove('hidden');
+      return;
+    }
+    if (todosLlenos) {
+      form.classList.add('hidden');
+      document.getElementById('bloqueTodoLleno').classList.remove('hidden');
       return;
     }
 

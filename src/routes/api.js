@@ -623,11 +623,15 @@ router.post('/registro', (req, res) => {
 // El "registro vive en el sitio", no en WhatsApp. Los horarios siempre
 // estan abiertos, sin tope de cupo.
 function horariosClaseGratis(contenido) {
+  const cupo = store.cupoRegistroClaseGratisPorHorario();
   return String(contenido.clasegratis_horarios || '')
     .split(',')
     .map((h) => h.trim())
     .filter(Boolean)
-    .map((horario) => ({ horario }));
+    .map((horario) => ({
+      horario,
+      lleno: store.contarRegistrosClaseGratisPorHorario(contenido.clasegratis_fecha, horario) >= cupo,
+    }));
 }
 
 router.get('/clase-gratis', (req, res) => {
@@ -667,6 +671,7 @@ router.post('/clase-gratis/registro', (req, res) => {
   const horariosDisponibles = horariosClaseGratis(contenido);
   const elegido = horariosDisponibles.find((h) => h.horario === horario);
   if (!elegido) return res.status(400).json({ error: 'Elige un horario válido.' });
+  if (elegido.lleno) return res.status(400).json({ error: 'Ese horario ya está agotado. Elige otro horario.', horarioLleno: true });
 
   const item = store.addRegistroClaseGratis({
     nombre,
@@ -681,6 +686,9 @@ router.post('/clase-gratis/registro', (req, res) => {
     pais: b.pais,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
   });
+  // addRegistroClaseGratis devuelve null si el horario se llenó justo entre
+  // la revisión de arriba y este insert (dos personas al mismo tiempo).
+  if (!item) return res.status(400).json({ error: 'Ese horario se acaba de llenar. Elige otro horario.', horarioLleno: true });
   // Si el acceso anticipado ya esta abierto (el correo masivo ya salio),
   // quien se registra ahora pasa directo a su pagina personal y recibe su
   // correo de acceso anticipado, para no quedarse fuera del embudo.

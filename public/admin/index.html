@@ -348,7 +348,12 @@
             <label class="block">
               <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Horarios (separados por coma)</span>
               <input data-content-key="clasegratis_horarios" type="text" placeholder="11:00 am, 1:00 pm, 4:00 pm" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
-              <span class="mt-1 block text-xs text-carbon/50">Siempre están abiertos, sin tope de cupo — no se puede llenar un horario.</span>
+              <span class="mt-1 block text-xs text-carbon/50">Al llegar al tope de registros de un horario (abajo), el formulario público lo marca "Agotado" y deja de ofrecerlo.</span>
+            </label>
+            <label class="block">
+              <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Tope de registros por horario</span>
+              <input data-content-key="clasegratis_cupo_registro_horario" type="text" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
+              <span class="mt-1 block text-xs text-carbon/50">Cuántas personas se pueden registrar en total por horario (400 por defecto). No tiene que ver con las "fichas presenciales" de abajo.</span>
             </label>
             <label class="block sm:col-span-2">
               <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Ubicación (para el correo de confirmación)</span>

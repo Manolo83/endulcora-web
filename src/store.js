@@ -97,6 +97,11 @@ const DEFAULT_CONTENT = {
   // coffee break, recetario y 1 mes de membresia; cuando se llenan, el
   // mismo precio da recetario + mes de membresia (clase en linea).
   clasegratis_cupo_horario: '40',
+  // Tope de REGISTROS (no de fichas) que puede tener un horario de la clase
+  // gratis antes de que el formulario publico deje de ofrecerlo. Es un
+  // concepto distinto a clasegratis_cupo_horario (ese es el tope, mas chico,
+  // de fichas presenciales del acceso anticipado).
+  clasegratis_cupo_registro_horario: '400',
   // ---- Correos automaticos de la masterclass (src/correosMasterclass.js) ----
   // Arte cuadrado (imagen) que va arriba de todos sus correos.
   clasegratis_arte: '',
@@ -3753,6 +3758,16 @@ module.exports = {
   },
   addRegistroClaseGratis({ nombre, whatsapp, correo, fecha, horario, yaTomoTaller, interesTemas, esDeMexico, estado, pais, aceptaAvisoPrivacidad }) {
     const data = load();
+    const fechaTrim = String(fecha || '').trim();
+    const horarioTrim = String(horario || '').trim();
+    // Tope de registros del horario: se cuenta y se revisa en el mismo paso
+    // sincrono que el push de abajo (sin await en medio), asi que dos
+    // registros no pueden colarse juntos al mismo cupo lleno aunque lleguen
+    // al mismo tiempo -- mismo principio que responderClaseGratis.
+    const inscritosEnHorario = data.registrosClaseGratis.filter(
+      (r) => r.fecha === fechaTrim && r.horario === horarioTrim
+    ).length;
+    if (inscritosEnHorario >= this.cupoRegistroClaseGratisPorHorario()) return null;
     const item = {
       id: nextId(data.registrosClaseGratis),
       nombre: String(nombre || '').trim(),
@@ -3761,8 +3776,8 @@ module.exports = {
       // Copia de la fecha configurada al momento del registro: si mas
       // adelante se reusa este formulario para otra clase en otra fecha,
       // cada registro conserva a cual clase pertenecia de verdad.
-      fecha: String(fecha || '').trim(),
-      horario: String(horario || '').trim(),
+      fecha: fechaTrim,
+      horario: horarioTrim,
       yaTomoTaller: !!yaTomoTaller,
       interesTemas: Array.isArray(interesTemas) ? interesTemas.filter((t) => TEMAS_CLASE_GRATIS.includes(t)) : [],
       // De donde es quien se registra, para poder dirigir campañas por zona
@@ -3833,6 +3848,19 @@ module.exports = {
   cupoClaseGratisPorHorario() {
     const n = parseInt(load().content.clasegratis_cupo_horario, 10);
     return Number.isInteger(n) && n > 0 ? n : this.CUPO_CLASE_GRATIS_POR_HORARIO;
+  },
+
+  // Tope de registros (antes de cualquier confirmacion) por horario — al
+  // llegarle, /clase-gratis.html dice "Agotado" en ese horario y el POST
+  // /api/clase-gratis/registro lo rechaza (ver addRegistroClaseGratis).
+  CUPO_REGISTRO_CLASE_GRATIS_POR_HORARIO: 400,
+  cupoRegistroClaseGratisPorHorario() {
+    const n = parseInt(load().content.clasegratis_cupo_registro_horario, 10);
+    return Number.isInteger(n) && n > 0 ? n : this.CUPO_REGISTRO_CLASE_GRATIS_POR_HORARIO;
+  },
+  contarRegistrosClaseGratisPorHorario(fecha, horario) {
+    const data = load();
+    return data.registrosClaseGratis.filter((r) => r.fecha === fecha && r.horario === horario).length;
   },
 
   getRegistroClaseGratisPorToken(id, token) {
