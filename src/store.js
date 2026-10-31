@@ -168,7 +168,7 @@ const DEFAULT_CONTENT = {
   taller_cupo_default: '20',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
-  whatsapp_numero: '5665271901',
+  whatsapp_numero: '5575933916',
   legal_privacidad:
     'Endulcora · Estudio Gastronómico, con domicilio en Ciudad de México, es responsable del tratamiento de tus datos personales.\n\nQué recabamos. Nombre, correo electrónico y teléfono, y los datos de facturación cuando los solicitas.\n\nPara qué. Entregar tus compras digitales, darte acceso a tus cursos, emitir comprobantes y avisarte de nuevas publicaciones. No vendemos ni compartimos tus datos con terceros ajenos a estos fines.\n\nCon quién los compartimos. Endulcora forma parte del grupo de marcas acompañadas por Levent (junto con Crenef, Instituto Justo, Silman y futuros proyectos del grupo). Tus datos de contacto y de compra pueden compartirse entre estas marcas únicamente para campañas de mercadotecnia, publicidad (como Meta Ads y Google Ads) y análisis interno de mercado — nunca se venden ni se comparten con nadie fuera de este grupo.\n\nTus derechos ARCO. Puedes acceder, rectificar, cancelar u oponerte al uso de tus datos —incluido oponerte específicamente a que se compartan con las demás marcas del grupo— escribiendo a nuestro WhatsApp. Respondemos en un máximo de 20 días hábiles.',
   legal_terminos:

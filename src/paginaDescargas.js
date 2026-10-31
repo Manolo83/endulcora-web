@@ -26,7 +26,7 @@ function correoOculto(email) {
 
 function paginaDescargas(order, { itemElegido } = {}) {
   const contenido = store.getContent();
-  const whatsapp = String(contenido.whatsapp_numero || '5665271901').replace(/\D/g, '');
+  const whatsapp = String(contenido.whatsapp_numero || '5575933916').replace(/\D/g, '');
   const token = encodeURIComponent(order.descargaToken);
   const libros = entregas.archivosDelPedido(order).map(({ i, titulo, archivo }) => ({
     i,

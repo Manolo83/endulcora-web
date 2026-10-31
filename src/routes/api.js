@@ -943,11 +943,11 @@ router.get('/pedidos/:orderId/descarga/:itemIndex', (req, res) => {
   const producto = store.getProduct(item.itemId);
   const archivo = entregas.archivoDeProducto(producto);
   if (!producto || !producto.archivo) {
-    return res.status(404).send('Este artículo todavía no tiene un archivo disponible. Escríbenos por WhatsApp al 5665271901.');
+    return res.status(404).send('Este artículo todavía no tiene un archivo disponible. Escríbenos por WhatsApp al 5575933916.');
   }
   if (!archivo.existe) {
     console.error(`[descarga] Falta el archivo de "${producto.titulo}" (producto ${producto.id}) en ${archivo.ruta}. Hay que volver a subirlo en /admin.`);
-    return res.status(404).send('No pudimos encontrar tu archivo en este momento. Escríbenos por WhatsApp al 5665271901 y te lo mandamos directo.');
+    return res.status(404).send('No pudimos encontrar tu archivo en este momento. Escríbenos por WhatsApp al 5575933916 y te lo mandamos directo.');
   }
   const nombre = entregas.nombreDescarga(producto, archivo);
   // ver=1 (iPhone/iPad): se abre en el visor y de ahi se guarda con
@@ -959,7 +959,7 @@ router.get('/pedidos/:orderId/descarga/:itemIndex', (req, res) => {
   res.sendFile(archivo.ruta, (err) => {
     if (err && !res.headersSent) {
       console.error(`[descarga] Error al enviar el archivo de "${producto.titulo}":`, err.message);
-      res.status(500).send('Ocurrió un error al preparar tu descarga. Escríbenos por WhatsApp al 5665271901.');
+      res.status(500).send('Ocurrió un error al preparar tu descarga. Escríbenos por WhatsApp al 5575933916.');
     }
   });
 });

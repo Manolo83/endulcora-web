@@ -242,7 +242,7 @@ async function cargarTalleres(){
       fetch('/api/sedes').then(r => r.json()),
       fetch('/api/content').then(r => r.json()),
     ]);
-    const numeroWhatsapp = contenido.whatsapp_numero || '5665271901';
+    const numeroWhatsapp = contenido.whatsapp_numero || '5575933916';
     document.getElementById('linkWhatsappAyuda').href = `https://wa.me/521${numeroWhatsapp}`;
 
     const hoyISO = new Date().toISOString().slice(0, 10);
