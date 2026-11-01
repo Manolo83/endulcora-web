@@ -63,6 +63,9 @@ body { background: #FBF4E9; }
 :focus-visible { outline: 3px solid #F5A623; outline-offset: 3px; }
 .campo-registro { width: 100%; border-radius: 0.9rem; border: 1px solid rgba(78,20,84,.18); background: #fff; padding: 0.85rem 1rem; font-size: 1rem; color: #1B0720; }
 .campo-registro:focus { border-color: #4E1454; }
+.pastilla-horario { transition: transform .15s cubic-bezier(.34,1.56,.64,1), background .15s ease, color .15s ease; }
+.pastilla-horario:not(:disabled):hover { transform: translateY(-1px); }
+@media (prefers-reduced-motion: reduce) { .pastilla-horario, .pastilla-horario:not(:disabled):hover { transition: none; transform: none; } }
 </style>
 </head>
 <body class="font-cuerpo text-carbon antialiased">
@@ -95,10 +98,11 @@ body { background: #FBF4E9; }
     <input id="campoWhatsapp" name="whatsapp" type="tel" required autocomplete="tel" class="campo-registro" placeholder="Tu WhatsApp">
     <input id="campoCorreo" name="correo" type="email" required autocomplete="email" class="campo-registro" placeholder="Tu correo">
 
-    <label class="block">
+    <div>
       <span class="mb-1.5 block text-xs font-600 text-carbon/60">Horario</span>
-      <select id="campoHorario" name="horario" required class="campo-registro"></select>
-    </label>
+      <div id="grupoHorario" class="flex flex-wrap gap-2"></div>
+      <input type="hidden" id="campoHorarioValor" name="horario">
+    </div>
 
     <div>
       <span class="mb-1.5 block text-xs font-600 text-carbon/60">¿Ya tomaste un taller con nosotros?</span>
@@ -240,6 +244,35 @@ const btnEnviar = document.getElementById('btnEnviarRegistro');
 let WHATSAPP_GRUPO = '';
 let COMUNIDAD_LINK = '';
 
+// Pinta el horario como pastillas seleccionables (en vez del <select> de
+// antes): mas facil de tocar en el celular y se ve de un vistazo cual ya
+// esta agotado. El valor elegido vive en el input oculto #campoHorarioValor,
+// que FormData sigue leyendo igual que antes con el mismo name="horario".
+function pintarGrupoHorario(horarios){
+  const cont = document.getElementById('grupoHorario');
+  const valor = document.getElementById('campoHorarioValor');
+  if (!valor.value || !horarios.some(h => h.horario === valor.value && !h.lleno)) {
+    const primerDisponible = horarios.find(h => !h.lleno);
+    valor.value = primerDisponible ? primerDisponible.horario : '';
+  }
+  const pintar = () => {
+    cont.innerHTML = horarios.map(h => {
+      const activo = h.horario === valor.value;
+      const clases = h.lleno
+        ? 'cursor-not-allowed bg-crema/60 text-carbon/30 ring-1 ring-vino/10 line-through'
+        : activo
+          ? 'bg-vino text-crema'
+          : 'bg-white text-vino ring-1 ring-vino/25 hover:bg-vino/5';
+      return `<button type="button" data-horario="${escapeHtml(h.horario)}" ${h.lleno ? 'disabled' : ''} class="pastilla-horario rounded-full px-4 py-2 font-ui text-[12px] font-700 uppercase tracking-wider ${clases}">${escapeHtml(h.horario)}${h.lleno ? ' · Agotado' : ''}</button>`;
+    }).join('');
+    cont.querySelectorAll('[data-horario]').forEach(btn => btn.addEventListener('click', () => {
+      valor.value = btn.dataset.horario;
+      pintar();
+    }));
+  };
+  pintar();
+}
+
 async function cargarClaseGratis(){
   try{
     const info = await fetch('/api/clase-gratis').then(r => r.json());
@@ -256,15 +289,7 @@ async function cargarClaseGratis(){
       document.getElementById('fechaClase').textContent = new Date(info.fecha + 'T00:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
-    const selectHorario = document.getElementById('campoHorario');
-    selectHorario.innerHTML = info.horarios.map(h => `
-      <option value="${escapeHtml(h.horario)}" ${h.lleno ? 'disabled' : ''}>${escapeHtml(h.horario)}${h.lleno ? ' — Agotado' : ''}</option>
-    `).join('');
-    // Si el primer horario de la lista ya esta agotado, el <select> no debe
-    // quedarse mostrando una opcion deshabilitada: se preselecciona el
-    // primero que todavia tenga lugar.
-    const primerDisponible = info.horarios.find(h => !h.lleno);
-    if (primerDisponible) selectHorario.value = primerDisponible.horario;
+    pintarGrupoHorario(info.horarios);
     const todosLlenos = info.horarios.length > 0 && info.horarios.every(h => h.lleno);
 
     document.getElementById('opcionesTemas').innerHTML = info.temas.map(t => `
@@ -296,6 +321,12 @@ cargarClaseGratis();
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorBox.classList.add('hidden');
+
+  if (!document.getElementById('campoHorarioValor').value) {
+    errorBox.textContent = 'Elige un horario.';
+    errorBox.classList.remove('hidden');
+    return;
+  }
 
   const datos = new FormData(form);
   const yaTomoTaller = datos.get('yaTomoTaller');
