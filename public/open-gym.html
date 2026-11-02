@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Gym | BlackRock Academy</title>
+<meta name="description" content="Regístrate al Open Gym de BlackRock Academy. Costo: $50 MXN.">
+<meta property="og:title" content="Open Gym | BlackRock Academy">
+<meta property="og:description" content="Regístrate al Open Gym de BlackRock Academy. Costo: $50 MXN.">
+<meta property="og:image" content="/blackrock-logo.jpg">
+<link rel="icon" href="/blackrock-logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --negro: #0b0b0d;
+    --blanco: #ffffff;
+    --azul: #1f45e6;
+    --morado: #7b3d9b;
+    --magenta: #e5127a;
+    --coral: #f47152;
+    --gris: #6b6b75;
+    --borde: #d9d9e0;
+    --degradado: linear-gradient(180deg, var(--azul) 0%, var(--morado) 40%, var(--magenta) 75%, var(--coral) 100%);
+    --degradado-h: linear-gradient(90deg, var(--azul) 0%, var(--morado) 35%, var(--magenta) 70%, var(--coral) 100%);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background: var(--negro);
+    color: var(--negro);
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+    position: relative;
+  }
+  /* El "sol" degradado del logo, detrás de todo */
+  .sol {
+    position: fixed;
+    top: -22vmax;
+    left: 50%;
+    width: 70vmax;
+    height: 70vmax;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: var(--degradado);
+    opacity: .55;
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* Silueta de montañas al pie */
+  .montanas {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    width: 100%;
+    height: 22vh;
+    pointer-events: none;
+    z-index: 0;
+  }
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 32px 16px 64px;
+  }
+  .tarjeta {
+    background: var(--blanco);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.55);
+  }
+  .tarjeta::before {
+    content: '';
+    display: block;
+    height: 8px;
+    background: var(--degradado-h);
+  }
+  .encabezado {
+    text-align: center;
+    padding: 24px 24px 8px;
+  }
+  .encabezado img {
+    width: 220px;
+    max-width: 70%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  .titulo {
+    margin: 4px 0 0;
+    font-family: 'Kaushan Script', cursive;
+    font-weight: 400;
+    font-size: clamp(2.6rem, 11vw, 3.4rem);
+    line-height: 1;
+    background: var(--degradado-h);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding: 0 6px 6px;
+  }
+  .subtitulo {
+    margin: 6px 0 0;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    font-size: .9rem;
+    color: var(--negro);
+  }
+  .costo {
+    margin: 20px 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: var(--negro);
+    color: var(--blanco);
+  }
+  .costo .monto {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 2.4rem;
+    line-height: 1;
+    background: linear-gradient(90deg, var(--magenta), var(--coral));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    white-space: nowrap;
+  }
+  .costo .monto small { font-size: .9rem; letter-spacing: .08em; }
+  .costo p { margin: 0; font-size: .92rem; line-height: 1.4; color: #e6e6ec; }
+
+  form { padding: 20px 24px 28px; }
+  .campo { margin-bottom: 18px; }
+  label, .etiqueta {
+    display: block;
+    margin-bottom: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: .85rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  input[type="text"], input[type="tel"], input[type="email"] {
+    width: 100%;
+    padding: 14px 16px;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--negro);
+    background: #fafafb;
+    border: 2px solid var(--borde);
+    border-radius: 12px;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus {
+    border-color: var(--morado);
+    box-shadow: 0 0 0 4px rgba(123, 61, 155, .15);
+  }
+  .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .opcion { position: relative; }
+  .opcion input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .opcion span {
+    display: block;
+    text-align: center;
+    padding: 14px 10px;
+    border: 2px solid var(--borde);
+    border-radius: 12px;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    transition: all .15s;
+    background: #fafafb;
+  }
+  .opcion input:checked + span {
+    border-color: var(--negro);
+    background: var(--negro);
+    color: var(--blanco);
+  }
+  .opcion input:focus-visible + span { box-shadow: 0 0 0 4px rgba(123, 61, 155, .25); }
+  .boton {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 16px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--degradado-h);
+    color: var(--blanco);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(229, 18, 122, .3);
+    transition: transform .1s, filter .15s;
+  }
+  .boton:hover { filter: brightness(1.08); }
+  .boton:active { transform: translateY(1px); }
+  .boton[disabled] { opacity: .6; cursor: wait; }
+  .boton.secundario {
+    background: var(--negro);
+    box-shadow: none;
+  }
+  .error {
+    display: none;
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fdecef;
+    color: #a3123f;
+    font-size: .92rem;
+  }
+  .error.visible { display: block; }
+
+  .exito { display: none; padding: 8px 24px 28px; text-align: center; }
+  .exito.visible { display: block; }
+  .exito h2 {
+    margin: 8px 0 6px;
+    font-family: 'Kaushan Script', cursive;
+    font-weight: 400;
+    font-size: 2.2rem;
+  }
+  .exito p { margin: 0 0 18px; color: var(--gris); line-height: 1.5; }
+  .pago-pendiente {
+    padding: 14px;
+    border: 2px dashed var(--borde);
+    border-radius: 12px;
+    color: var(--gris);
+    font-size: .95rem;
+  }
+  .nota { margin-top: 14px; font-size: .8rem; color: var(--gris); text-align: center; }
+  footer {
+    margin-top: 22px;
+    text-align: center;
+    color: #9a9aa6;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: .2em;
+    font-size: .75rem;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div class="sol" aria-hidden="true"></div>
+  <svg class="montanas" viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 200 L0 150 L180 70 L260 120 L430 20 L560 110 L700 40 L860 130 L1000 60 L1200 140 L1200 200 Z" fill="#000"/>
+  </svg>
+
+  <main>
+    <div class="tarjeta">
+      <div class="encabezado">
+        <img src="/blackrock-logo.jpg" alt="BlackRock Academy" width="220" height="210">
+        <h1 class="titulo">Open Gym</h1>
+        <p class="subtitulo">Registro · BlackRock Academy</p>
+      </div>
+
+      <div class="costo">
+        <div class="monto">$50 <small>MXN</small></div>
+        <p>El Open Gym tiene un costo de <strong>50 pesos</strong>. Al terminar tu registro te mostramos el link para realizar tu pago.</p>
+      </div>
+
+      <form id="formulario" novalidate>
+        <div class="error" id="error" role="alert"></div>
+
+        <div class="campo">
+          <label for="nombre">Nombre completo</label>
+          <input type="text" id="nombre" name="nombre" autocomplete="name" maxlength="120" required placeholder="Tu nombre y apellidos">
+        </div>
+
+        <div class="campo">
+          <label for="telefono">Teléfono</label>
+          <input type="tel" id="telefono" name="telefono" autocomplete="tel" inputmode="tel" maxlength="20" required placeholder="10 dígitos">
+        </div>
+
+        <div class="campo">
+          <label for="correo">Correo electrónico</label>
+          <input type="email" id="correo" name="correo" autocomplete="email" maxlength="160" required placeholder="tucorreo@ejemplo.com">
+        </div>
+
+        <div class="campo" role="radiogroup" aria-labelledby="etiqueta-asistira">
+          <span class="etiqueta" id="etiqueta-asistira">¿Vas a asistir al Open Gym?</span>
+          <div class="opciones">
+            <label class="opcion"><input type="radio" name="asistira" value="si" required><span>Sí, asistiré</span></label>
+            <label class="opcion"><input type="radio" name="asistira" value="no"><span>No podré</span></label>
+          </div>
+        </div>
+
+        <button type="submit" class="boton" id="enviar">Registrarme</button>
+      </form>
+
+      <div class="exito" id="exito-si">
+        <h2>¡Nos vemos!</h2>
+        <p>Tu registro quedó listo. Para asegurar tu lugar, realiza tu pago de <strong>$50 MXN</strong>.</p>
+        <div id="zona-pago"></div>
+      </div>
+
+      <div class="exito" id="exito-no">
+        <h2>¡Gracias!</h2>
+        <p>Registramos que esta vez no podrás asistir. Te esperamos en el próximo Open Gym.</p>
+      </div>
+    </div>
+
+    <footer>BlackRock Academy</footer>
+  </main>
+
+<script>
+  // ========================================================================
+  // LINK DE PAGO (PENDIENTE): pega aquí el link de pago cuando lo tengas,
+  // por ejemplo 'https://mpago.la/xxxxxx'. Mientras esté vacío, la página
+  // muestra "Link de pago próximamente".
+  // ========================================================================
+  const LINK_PAGO = '';
+
+  const form = document.getElementById('formulario');
+  const error = document.getElementById('error');
+  const boton = document.getElementById('enviar');
+
+  function mostrarError(msg) {
+    error.textContent = msg;
+    error.classList.add('visible');
+    error.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function pintarPago() {
+    const zona = document.getElementById('zona-pago');
+    zona.textContent = '';
+    if (LINK_PAGO) {
+      const a = document.createElement('a');
+      a.className = 'boton';
+      a.href = LINK_PAGO;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = 'Pagar $50';
+      zona.appendChild(a);
+    } else {
+      const div = document.createElement('div');
+      div.className = 'pago-pendiente';
+      div.textContent = 'Link de pago próximamente. Te lo compartiremos muy pronto.';
+      zona.appendChild(div);
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    error.classList.remove('visible');
+
+    const nombre = form.nombre.value.trim();
+    const telefono = form.telefono.value.trim();
+    const correo = form.correo.value.trim();
+    const asistira = (form.querySelector('input[name="asistira"]:checked') || {}).value;
+
+    if (!nombre) return mostrarError('Escribe tu nombre completo.');
+    if (!/^[0-9+\s()-]{7,20}$/.test(telefono)) return mostrarError('Escribe un número de teléfono válido.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) return mostrarError('Escribe un correo válido.');
+    if (!asistira) return mostrarError('Dinos si vas a asistir al Open Gym.');
+
+    boton.disabled = true;
+    boton.textContent = 'Enviando…';
+    try {
+      const res = await fetch('/api/open-gym/registro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, telefono, correo, asistira }),
+      });
+      const datos = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(datos.error || 'No se pudo completar tu registro. Intenta de nuevo.');
+      form.style.display = 'none';
+      if (datos.asistira) {
+        pintarPago();
+        document.getElementById('exito-si').classList.add('visible');
+      } else {
+        document.getElementById('exito-no').classList.add('visible');
+      }
+    } catch (err) {
+      mostrarError(err.message);
+    } finally {
+      boton.disabled = false;
+      boton.textContent = 'Registrarme';
+    }
+  });
+</script>
+</body>
+</html>

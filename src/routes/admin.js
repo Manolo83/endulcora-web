@@ -1080,6 +1080,45 @@ router.delete('/api/registros-qr/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---- Open Gym BlackRock Academy: lista de registros y descarga en Excel ----
+router.get('/api/open-gym/registros', requireAdmin, (req, res) => {
+  res.json(store.getRegistrosOpenGym());
+});
+
+router.delete('/api/open-gym/registros/:id', requireAdmin, (req, res) => {
+  store.deleteRegistroOpenGym(req.params.id);
+  res.json({ ok: true });
+});
+
+router.get('/api/open-gym/registros/excel', requireAdmin, async (req, res) => {
+  const registros = store.getRegistrosOpenGym();
+  const libro = new ExcelJS.Workbook();
+  libro.creator = 'BlackRock Academy';
+  libro.created = new Date();
+  const hoja = libro.addWorksheet('Open Gym');
+  hoja.columns = [
+    { header: 'Nombre completo', key: 'nombre', width: 32 },
+    { header: 'Teléfono', key: 'telefono', width: 18 },
+    { header: 'Correo', key: 'correo', width: 32 },
+    { header: '¿Asistirá?', key: 'asistira', width: 12 },
+    { header: 'Fecha de registro', key: 'createdAt', width: 20 },
+  ];
+  hoja.getRow(1).font = { bold: true };
+  registros.forEach((r) => {
+    hoja.addRow({
+      nombre: r.nombre,
+      telefono: r.telefono,
+      correo: r.correo,
+      asistira: r.asistira ? 'Sí' : 'No',
+      createdAt: new Date(r.createdAt).toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }),
+    });
+  });
+  res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.set('Content-Disposition', 'attachment; filename="open-gym-blackrock.xlsx"');
+  await libro.xlsx.write(res);
+  res.end();
+});
+
 // ---- Clase gratis en sala (p.ej. Pan de Muerto): registros + segmentacion
 // al cierre del dia (ver src/routes/api.js para el registro publico y
 // clasegratis_* en /api/content para la configuracion del evento) ----

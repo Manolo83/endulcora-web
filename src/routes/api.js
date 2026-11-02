@@ -649,6 +649,20 @@ router.get('/clase-gratis', (req, res) => {
   });
 });
 
+// Registro al Open Gym de BlackRock Academy (pagina /open-gym).
+router.post('/open-gym/registro', (req, res) => {
+  const b = req.body || {};
+  const nombre = String(b.nombre || '').trim();
+  const telefono = String(b.telefono || '').trim();
+  const correo = String(b.correo || '').trim();
+  if (!nombre || nombre.length > 120) return res.status(400).json({ error: 'Escribe tu nombre completo.' });
+  if (!WHATSAPP_RE.test(telefono)) return res.status(400).json({ error: 'Escribe un número de teléfono válido.' });
+  if (!EMAIL_RE.test(correo) || correo.length > 160) return res.status(400).json({ error: 'Escribe un correo válido.' });
+  if (b.asistira !== 'si' && b.asistira !== 'no') return res.status(400).json({ error: 'Dinos si vas a asistir al Open Gym.' });
+  const item = store.addRegistroOpenGym({ nombre, telefono, correo, asistira: b.asistira === 'si' });
+  res.status(201).json({ ok: true, id: item.id, asistira: item.asistira });
+});
+
 router.post('/clase-gratis/registro', (req, res) => {
   const b = req.body || {};
   const contenido = store.getContent();

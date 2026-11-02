@@ -295,6 +295,7 @@ function datosPorDefecto() {
     recetariosTaller: [],
     registrosQr: [],
     registrosClaseGratis: [],
+    registrosOpenGymBlackrock: [],
     envioConfirmacionClaseGratis: null,
     registrosVideoEnVivo: [],
     bibliotecaClases: [],
@@ -3742,6 +3743,33 @@ module.exports = {
   ESTADOS_MEXICO,
   HORARIOS_VALIDOS_TALLER,
   etiquetasZona,
+  // ---- Open Gym de BlackRock Academy (/open-gym): registro simple, sin
+  // cupo ni correos. Costo fijo de $50; el link de pago va en la pagina. ----
+  getRegistrosOpenGym() {
+    const data = load();
+    return [...(data.registrosOpenGymBlackrock || [])].sort((a, b) => b.id - a.id);
+  },
+  addRegistroOpenGym({ nombre, telefono, correo, asistira }) {
+    const data = load();
+    if (!Array.isArray(data.registrosOpenGymBlackrock)) data.registrosOpenGymBlackrock = [];
+    const item = {
+      id: nextId(data.registrosOpenGymBlackrock),
+      nombre: String(nombre || '').trim().slice(0, 120),
+      telefono: String(telefono || '').trim().slice(0, 20),
+      correo: String(correo || '').trim().toLowerCase().slice(0, 160),
+      asistira: !!asistira,
+      createdAt: new Date().toISOString(),
+    };
+    data.registrosOpenGymBlackrock.push(item);
+    save(data);
+    return item;
+  },
+  deleteRegistroOpenGym(id) {
+    const data = load();
+    if (!Array.isArray(data.registrosOpenGymBlackrock)) return;
+    data.registrosOpenGymBlackrock = data.registrosOpenGymBlackrock.filter((r) => r.id !== Number(id));
+    save(data);
+  },
   getRegistrosClaseGratis() {
     return [...load().registrosClaseGratis].sort((a, b) => b.id - a.id);
   },

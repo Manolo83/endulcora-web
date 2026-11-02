@@ -142,6 +142,7 @@ const claseGratisLimiter = rateLimit({
   message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
 });
 app.use('/api/clase-gratis/registro', claseGratisLimiter);
+app.use('/api/open-gym/registro', claseGratisLimiter);
 
 const asistenteLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
@@ -396,6 +397,10 @@ app.get('/inscripcion-taller', (req, res) => {
 
 app.get('/registro', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'registro.html'));
+});
+
+app.get('/open-gym', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'open-gym.html'));
 });
 
 app.get('/clase-gratis', (req, res) => {
