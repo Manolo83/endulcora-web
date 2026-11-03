@@ -1865,6 +1865,7 @@ function slugClaseGratis(fecha) {
 // Recalcula las etiquetas "clase-gratis:<clase>" y "<clase>:acceso-pagado" /
 // "<clase>:sin-acceso" de los contactos a partir de los registros. Es
 // idempotente; se corre al abrir la lista de contactos.
+let huellaEtiquetasClaseGratis = '';
 function sincronizarEtiquetasClaseGratis(data) {
   const porCorreo = new Map();
   (data.registrosClaseGratis || []).forEach((r) => {
@@ -4183,7 +4184,15 @@ module.exports = {
   },
   getContactosCampana() {
     const d = load();
-    if (sincronizarEtiquetasClaseGratis(d)) save(d);
+    // Solo recalcula las etiquetas si cambiaron los registros (cuantos hay
+    // y cuantos pagaron): esta lista se pide muchas veces y son 15 mil
+    // contactos.
+    const regs = d.registrosClaseGratis || [];
+    const huella = `${regs.length}:${regs.filter((r) => r.accesoEstado === 'pagado').length}:${(d.contactosCampana || []).length}`;
+    if (huella !== huellaEtiquetasClaseGratis) {
+      huellaEtiquetasClaseGratis = huella;
+      if (sincronizarEtiquetasClaseGratis(d)) save(d);
+    }
     return [...d.contactosCampana]
       .map((c) => (Array.isArray(c.etiquetas) ? c : { ...c, etiquetas: [] }))
       .sort((a, b) => b.id - a.id);
