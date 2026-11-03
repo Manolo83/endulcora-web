@@ -617,6 +617,71 @@ function escapeHtml(s) {
 // Gmail y Yahoo exigen esto para no marcar como spam a quien manda correo en
 // volumen, y con eso el "darse de baja" es de un clic, sin que el cliente de
 // correo tenga que abrir el link.
+// Arma el cuerpo de una campaña de texto con bloques de diseño, para que
+// quien escribe en /admin > Campañas solo pegue texto:
+//   ⚠️ al inicio de un párrafo      -> barra roja de urgencia
+//   líneas que empiezan con ✅      -> caja de beneficios (las otras líneas
+//                                       del párrafo van de título / precio)
+//   HORARIOS: 9:00 AM | 12:00 PM    -> botones de horarios
+//   párrafo entero en **negritas**  -> frase destacada en franja
+//   link de wa.me                   -> botón verde de WhatsApp
+//   [BOTON]                         -> repite el botón principal ahí
+// El botón principal sale después de la caja de beneficios y al final.
+function bloquesCampana(cuerpoHtml, { videoUrl, botonTexto } = {}) {
+  const negritas = (t) => t.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  const boton = videoUrl
+    ? `<tr><td align="center" style="padding:18px 28px 22px;"><a href="${videoUrl}" style="display:inline-block;background:#d62839;color:#ffffff;text-decoration:none;font-weight:bold;font-size:17px;padding:17px 34px;border-radius:40px;letter-spacing:1px;">${escapeHtml(botonTexto || '▶ Ver video')}</a></td></tr>`
+    : '';
+  const parrafos = [];
+  String(cuerpoHtml).replace(/<p[^>]*>([\s\S]*?)<\/p>/g, (_, p) => { parrafos.push(p); return ''; });
+  const filas = [];
+  const arriba = [];
+  let botonUsado = false;
+  parrafos.forEach((p) => {
+    const lineas = p.split(/<br\s*\/?>/).map((l) => l.trim()).filter(Boolean);
+    const texto = p.replace(/<br\s*\/?>/g, ' ').trim();
+    if (/^\[BOTON\]$/i.test(texto)) { filas.push(boton); botonUsado = true; return; }
+    if (/^⚠/.test(texto)) {
+      arriba.push(`<tr><td style="background:#d62839;color:#ffffff;text-align:center;padding:12px 18px;font-size:14px;font-weight:bold;letter-spacing:1px;">${negritas(texto)}</td></tr>`);
+      return;
+    }
+    if (/^HORARIOS?:/i.test(texto)) {
+      const hs = texto.replace(/^HORARIOS?:/i, '').split(/[|,·]/).map((h) => h.trim()).filter(Boolean);
+      const celdas = hs.map((h) => `<td align="center" style="background:#6b1d2f;color:#ffffff;border-radius:10px;padding:12px 4px;font-weight:bold;font-size:15px;">${h}</td>`).join('<td width="6"></td>');
+      filas.push(`<tr><td style="padding:10px 28px 14px;"><table width="100%" cellpadding="0" cellspacing="0"><tr>${celdas}</tr></table></td></tr>`);
+      return;
+    }
+    const conCheck = lineas.filter((l) => /^✅/.test(l));
+    if (conCheck.length >= 2) {
+      const antes = [];
+      const despues = [];
+      let vioCheck = false;
+      lineas.forEach((l) => { if (/^✅/.test(l)) vioCheck = true; else (vioCheck ? despues : antes).push(l); });
+      filas.push(`<tr><td style="padding:8px 28px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#fff7e6;border:2px solid #F5A623;border-radius:12px;"><tr><td style="padding:18px 20px;font-size:16px;line-height:1.9;">
+        ${antes.map((l) => `<div style="font-weight:bold;color:#6b1d2f;font-size:17px;margin-bottom:6px;">${negritas(l)}</div>`).join('')}
+        ${conCheck.map((l) => `<div>${negritas(l)}</div>`).join('')}
+        ${despues.map((l) => `<div style="margin-top:10px;font-size:20px;color:#d62839;font-weight:bold;">${negritas(l)}</div>`).join('')}
+      </td></tr></table></td></tr>`);
+      if (boton && !botonUsado) { filas.push(boton); botonUsado = true; }
+      return;
+    }
+    const wa = texto.match(/https?:\/\/wa\.me\/[^\s<"]+/);
+    if (wa) {
+      const previo = texto.replace(wa[0], '').replace(/[:\s]+$/, '').trim();
+      filas.push(`<tr><td align="center" style="padding:6px 28px 20px;font-size:15px;">${previo ? `<div style="margin-bottom:10px;">${negritas(previo)}</div>` : ''}<a href="${wa[0]}" style="display:inline-block;background:#25D366;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:12px 26px;border-radius:40px;">Escríbenos por WhatsApp</a></td></tr>`);
+      return;
+    }
+    if (/^\*\*[^*]+\*\*$/.test(texto)) {
+      filas.push(`<tr><td style="padding:6px 28px;"><div style="background:#6b1d2f;color:#ffffff;border-radius:12px;padding:16px 18px;text-align:center;font-size:17px;font-weight:bold;line-height:1.4;">${texto.replace(/\*\*/g, '')}</div></td></tr>`);
+      return;
+    }
+    const conLinks = negritas(p).replace(/(https?:\/\/[^\s<"]+)/g, (u) => `<a href="${u}" style="color:#6b1d2f;font-weight:bold;">${u}</a>`);
+    filas.push(`<tr><td style="padding:6px 28px;font-size:16px;line-height:1.6;"><p style="margin:0 0 8px;">${conLinks}</p></td></tr>`);
+  });
+  if (boton) filas.push(boton.replace('background:#d62839', 'background:#F5A623').replace('color:#ffffff;text-decoration', 'color:#2b1a1f;text-decoration'));
+  return { arriba: arriba.join('\n'), cuerpo: filas.join('\n') };
+}
+
 async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribeUrl, imagenes, archivos, videoUrl, botonTexto }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
@@ -636,6 +701,7 @@ async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribe
   // asi no hay que mandar los archivos completos en cada peticion a la API.
   const attachments = archivos && archivos.length ? archivos : undefined;
 
+  const bloques = bloquesCampana(cuerpoHtml, { videoUrl, botonTexto });
   const { error } = await client.emails.send({
     from,
     to,
@@ -647,12 +713,10 @@ async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribe
           <div style="color:#F5A623;font-size:12px;font-weight:bold;letter-spacing:3px;">ENDULCORA</div>
           <div style="font-size:24px;font-weight:bold;line-height:1.25;margin-top:8px;">${escapeHtml(asunto)}</div>
         </td></tr>
+        ${bloques.arriba}
         ${(imagenes || []).map((url) => `<tr><td style="padding:0;"><img src="${url}" alt="" width="600" style="display:block;width:100%;height:auto;border:0;"></td></tr>`).join('')}
-        <tr><td style="padding:26px 28px 6px;font-size:16px;line-height:1.6;">
-          ${nombre ? `<p style="margin:0 0 14px;">Hola <b>${escapeHtml(String(nombre).trim().split(/\s+/)[0])}</b>:</p>` : ''}
-          ${String(cuerpoHtml).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/(https?:\/\/[^\s<"]+)/g, (u) => `<a href="${u}" style="color:#6b1d2f;font-weight:bold;">${u}</a>`)}
-        </td></tr>
-        ${videoUrl ? `<tr><td align="center" style="padding:14px 28px 26px;"><a href="${videoUrl}" style="display:inline-block;background:#d62839;color:#ffffff;text-decoration:none;font-weight:bold;font-size:17px;padding:16px 32px;border-radius:40px;letter-spacing:1px;">${escapeHtml(botonTexto || '▶ Ver video')}</a></td></tr>` : ''}
+        ${nombre ? `<tr><td style="padding:24px 28px 4px;font-size:17px;">Hola <b>${escapeHtml(String(nombre).trim().split(/\s+/)[0])}</b>:</td></tr>` : '<tr><td style="padding:12px;"></td></tr>'}
+        ${bloques.cuerpo}
         <tr><td style="background:#6b1d2f;color:#f3dfe3;text-align:center;padding:18px;font-size:12px;line-height:1.6;">
           Endulcora · Escuela de repostería · CDMX<br>Recibiste este correo porque estás en la lista de contactos de Endulcora.<br>
           <a href="${unsubscribeUrl}" style="color:#F5A623;">Dejar de recibir estos correos</a>
