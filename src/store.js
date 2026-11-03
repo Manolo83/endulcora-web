@@ -3507,7 +3507,7 @@ module.exports = {
     return load().inscripcionesTaller.find((i) => i.id === Number(id)) || null;
   },
   addInscripcionTaller({
-    nombre, whatsapp, correo, sesionTallerId, taller, fecha, sede, horario, montoAnticipo,
+    nombre, whatsapp, correo, sesionTallerId, taller, fecha, sede, horario, montoAnticipo, folioAnticipo,
     comoSeEntero, preferencias, cumpleDia, cumpleMes, esDeMexico, estado, pais,
     esPrimeraVez, aceptaPromociones, aceptaAvisoPrivacidad,
     fbp, fbc, gclid, gbraid, wbraid,
@@ -3527,6 +3527,7 @@ module.exports = {
       sede: String(sede || '').trim(),
       horario: String(horario || '').trim(),
       montoAnticipo: String(montoAnticipo || '').trim(),
+      folioAnticipo: String(folioAnticipo || '').trim(),
       comoSeEntero: String(comoSeEntero || '').trim(),
       preferencias: String(preferencias || '').trim().slice(0, 500),
       cumpleDia: Number(cumpleDia) || null,
