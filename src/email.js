@@ -883,7 +883,7 @@ async function enviarCorreoAccesoConfirmado({ to, nombre, titulo, fecha, horario
   const membresiaTexto = yaEraMiembro
     ? 'Tu membresía Endulcora sigue activa como hasta ahora.'
     : membresiaHasta
-      ? `Tu membresía Endulcora está activa hasta el ${new Date(membresiaHasta).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', timeZone: 'America/Mexico_City' })}. Es de un mes: renovarla es tu decisión y puedes domiciliarla desde tu cuenta.`
+      ? `Tu membresía Endulcora está activa hasta el ${new Date(membresiaHasta).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', timeZone: 'America/Mexico_City' })}. Para activarla registra tu tarjeta en tu cuenta (hoy no se te cobra nada): al terminar tu mes se cobran $100 y sigue sola cada mes hasta que canceles.`
       : 'Tu mes de membresía se activa en tu cuenta de endulcora.com con este mismo correo.';
   const attachments = recetarioUrl
     ? [{ filename: recetarioNombre || 'Recetario.pdf', path: `${siteUrl}${recetarioUrl}` }]
@@ -923,7 +923,7 @@ async function enviarCorreoAccesoConfirmado({ to, nombre, titulo, fecha, horario
         <div style="margin-top:12px;border-radius:14px;background:#fff4df;border:1px solid #f5c66b;padding:14px 16px;">
           <p style="margin:0;font-size:13px;line-height:1.6;">${AVISO_DESCUENTOS_MASTER_CLASS}</p>
         </div>
-        <p style="margin-top:18px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;">Entrar a mi membresía</a></p>
+        <p style="margin-top:18px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;">${!yaEraMiembro && membresiaHasta ? 'Activar mi membresía (registrar tarjeta)' : 'Entrar a mi membresía'}</a></p>
         <p style="margin-top:10px;font-size:13px;"><a href="${link}" style="color:#7A2E7E;">${presencial ? 'Ver mi ficha' : 'Ver mi acceso'}</a></p>
         ${pieEndulcora({ numeroWhatsapp, comunidadLink })}
       </div>
