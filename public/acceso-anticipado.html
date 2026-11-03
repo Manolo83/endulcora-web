@@ -182,6 +182,7 @@ function escapeHtml(s){
 }
 const params = new URLSearchParams(location.search);
 const ID = params.get('id'), TOKEN = params.get('token');
+let SESION_ACTIVA = false;
 const VIENE_DE_PAGO = params.get('pago') === '1';
 const PAGO_FALLIDO = params.get('pago') === 'error';
 let ESTADO = null;
@@ -288,7 +289,8 @@ function pintarPagado(e){
   // Oferta de domiciliar: solo si sigue en el sitio con su sesion activa
   // (se creo justo antes de pagar) y su mes de membresia todavia no tiene
   // tarjeta domiciliada.
-  document.getElementById('bloqueDomiciliar').classList.toggle('hidden', !(e.cuenta.sesionActiva && e.cuenta.membresiaSinDomiciliar));
+  document.getElementById('bloqueDomiciliar').classList.toggle('hidden', !e.cuenta.membresiaSinDomiciliar);
+  SESION_ACTIVA = !!e.cuenta.sesionActiva;
 }
 
 document.getElementById('btnDomiciliarAcceso').addEventListener('click', async () => {
@@ -298,6 +300,9 @@ document.getElementById('btnDomiciliarAcceso').addEventListener('click', async (
   err.classList.add('hidden');
   btn.disabled = true;
   spinner.classList.remove('hidden');
+  // Si entro desde el link del correo sin sesion, primero inicia sesion
+  // en /membresia (ahi mismo registra su tarjeta).
+  if(!SESION_ACTIVA){ window.location.href = '/membresia'; return; }
   try{
     const res = await fetch('/api/membresia/suscribirse', { method: 'POST' });
     const data = await res.json();
