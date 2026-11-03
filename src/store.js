@@ -1777,6 +1777,7 @@ async function init() {
       data.products.push(item);
       changed = true;
     }
+    if (sincronizarEtiquetasClaseGratis(data)) changed = true;
     if (changed) await persistirAhora();
   } else {
     data = datosPorDefecto();
@@ -1853,6 +1854,47 @@ function proximaFechaClaseISO(diaSemana, hora, fechaEspecifica) {
 // registros sirvan para algo mas que quedarse guardados sin usarse. Regresa
 // true si se agrego, false si ya existia (y se actualizo), o null si el
 // correo no era valido.
+// Etiqueta de campaña de cada clase gratis según su fecha, para poder
+// filtrar en /admin > Campañas a quién se registró a cuál (antes todas
+// quedaban como "pan-de-muerto").
+const SLUGS_CLASE_GRATIS = { '2026-10-26': 'pan-de-muerto', '2026-11-09': 'galletas-ny' };
+function slugClaseGratis(fecha) {
+  return SLUGS_CLASE_GRATIS[fecha] || (fecha ? String(fecha) : 'sin-fecha');
+}
+
+// Recalcula las etiquetas "clase-gratis:<clase>" y "<clase>:acceso-pagado" /
+// "<clase>:sin-acceso" de los contactos a partir de los registros. Es
+// idempotente; se corre al abrir la lista de contactos.
+function sincronizarEtiquetasClaseGratis(data) {
+  const porCorreo = new Map();
+  (data.registrosClaseGratis || []).forEach((r) => {
+    const correo = String(r.correo || '').trim().toLowerCase();
+    if (!correo) return;
+    const slug = slugClaseGratis(r.fecha);
+    const set = porCorreo.get(correo) || new Set();
+    set.add(`clase-gratis:${slug}`);
+    set.add(r.accesoEstado === 'pagado' ? `${slug}:acceso-pagado` : `${slug}:sin-acceso`);
+    porCorreo.set(correo, set);
+  });
+  const slugs = new Set([...Object.values(SLUGS_CLASE_GRATIS)]);
+  (data.registrosClaseGratis || []).forEach((r) => slugs.add(slugClaseGratis(r.fecha)));
+  const esDeClase = (e) => e.startsWith('clase-gratis:')
+    || [...slugs].some((sl) => e === `${sl}:acceso-pagado` || e === `${sl}:sin-acceso`);
+  let cambio = false;
+  (data.contactosCampana || []).forEach((c) => {
+    const correctas = porCorreo.get(c.email);
+    if (!correctas) return;
+    const actuales = Array.isArray(c.etiquetas) ? c.etiquetas : [];
+    const otras = actuales.filter((e) => !esDeClase(e));
+    const nuevas = [...otras, ...correctas];
+    if (nuevas.length !== actuales.length || nuevas.some((e) => !actuales.includes(e))) {
+      c.etiquetas = nuevas;
+      cambio = true;
+    }
+  });
+  return cambio;
+}
+
 function upsertContactoCampana(data, { email, nombre, telefono, etiquetas }) {
   const correo = String(email || '').trim().toLowerCase();
   if (!correo || !correo.includes('@')) return null;
@@ -3817,7 +3859,7 @@ module.exports = {
       email: item.correo,
       nombre: item.nombre,
       telefono: item.whatsapp,
-      etiquetas: ['clase-gratis:pan-de-muerto', ...etiquetasZona(item)],
+      etiquetas: [`clase-gratis:${slugClaseGratis(item.fecha)}`, `${slugClaseGratis(item.fecha)}:sin-acceso`, ...etiquetasZona(item)],
     });
     save(data);
     return item;
@@ -4139,7 +4181,9 @@ module.exports = {
     return correos;
   },
   getContactosCampana() {
-    return [...load().contactosCampana]
+    const d = load();
+    if (sincronizarEtiquetasClaseGratis(d)) save(d);
+    return [...d.contactosCampana]
       .map((c) => (Array.isArray(c.etiquetas) ? c : { ...c, etiquetas: [] }))
       .sort((a, b) => b.id - a.id);
   },
