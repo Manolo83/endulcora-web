@@ -276,7 +276,7 @@ function pintarPagado(e){
     document.getElementById('fichaNumero').textContent = e.acceso.numero;
     document.getElementById('fichaNombre').textContent = e.nombre;
   }
-  document.getElementById('incluyeRecetario').textContent = e.acceso.recetarioDisponible ? 'Adjunto en tu correo y aquí abajo' : 'Te lo mandamos por correo en cuanto esté listo';
+  document.getElementById('incluyeRecetario').textContent = e.acceso.recetarioDisponible ? 'Adjunto en tu correo y aquí abajo' : 'Te lo mandamos por correo un día antes de la clase';
   document.getElementById('incluyeMembresia').textContent = e.cuenta.membresiaHasta
     ? `Activa hasta el ${diaMes(e.cuenta.membresiaHasta)}`
     : (e.cuenta.esMiembroActivo ? 'Tu membresía sigue activa' : 'Se activa en tu cuenta');

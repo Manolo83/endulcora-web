@@ -161,8 +161,10 @@ function aplicarPagoAprobado(registroId, { monto, userId, ahora = new Date() } =
     } else {
       const conMes = regalo.activarMesPagado(usuario, {
         origen: 'acceso_anticipado',
-        recetarioUrl: patch.accesoRecetarioUrl,
-        recetarioNombre: patch.accesoRecetarioNombre,
+        // El recetario se entrega un dia antes de la clase (ver
+        // correosMasterclass.js), no al pagar.
+        recetarioUrl: '',
+        recetarioNombre: '',
         ahora,
       });
       membresiaHasta = conMes.membresiaRegaloHasta;

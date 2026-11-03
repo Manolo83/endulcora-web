@@ -978,7 +978,7 @@ async function enviarCorreoAccesoConfirmado({ to, nombre, titulo, fecha, horario
           <p style="margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7A2E7E;font-weight:700;">Esto es lo que tienes</p>
           <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.7;">
             ${presencial ? '<li>Tu lugar con ficha de asistencia y coffee break el día de la clase.</li>' : ''}
-            <li>${recetarioUrl ? 'Tu recetario digital: va adjunto en este correo.' : 'Tu recetario digital: te lo mandamos por correo en cuanto esté listo.'}</li>
+            <li>${recetarioUrl ? 'Tu recetario digital: va adjunto en este correo.' : 'Tu recetario digital: te lo mandamos por correo un día antes de la clase.'}</li>
             <li>La grabación, que te llega después de la clase.</li>
             <li><strong>Un mes gratis de Club Endulcora</strong>: recetario del mes, revista, taller en línea mensual, biblioteca de grabaciones y lectura de todos los ebooks. ${membresiaTexto}</li>
             <li>Descuentos exclusivos para asistentes.</li>

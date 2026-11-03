@@ -849,7 +849,7 @@ router.get('/acceso-anticipado', (req, res) => {
       pasoAOnline: !!registro.accesoPasoAOnline,
       fueraDeZona: !!registro.accesoFueraDeZona,
       apartadoHasta: apartadoVigente ? registro.accesoApartadoHasta : null,
-      recetarioDisponible: registro.accesoEstado === 'pagado' && !!registro.accesoRecetarioUrl,
+      recetarioDisponible: registro.accesoEstado === 'pagado' && !!registro.accesoRecetarioUrl && !!registro.accesoRecetarioCorreoEnviado,
     },
   });
 });
@@ -858,7 +858,7 @@ router.get('/acceso-anticipado', (req, res) => {
 // de que su membresia siga activa.
 router.get('/acceso-anticipado/recetario', (req, res) => {
   const registro = store.getRegistroClaseGratisPorToken(req.query.id, req.query.token);
-  if (!registro || registro.accesoEstado !== 'pagado' || !registro.accesoRecetarioUrl) {
+  if (!registro || registro.accesoEstado !== 'pagado' || !registro.accesoRecetarioUrl || !registro.accesoRecetarioCorreoEnviado) {
     return res.status(404).send('No encontramos tu recetario.');
   }
   const filename = path.basename(registro.accesoRecetarioUrl);

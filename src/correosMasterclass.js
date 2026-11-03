@@ -221,11 +221,42 @@ async function mandarConfirmacionRegistro(registro, contenido = store.getContent
 }
 
 let corriendo = false;
+// Recetario de la master class: se manda solo un dia antes (10:00 am CDMX)
+// a quien pago su acceso anticipado; quien paga despues lo recibe en la
+// siguiente vuelta (cada 5 min), hasta que termina el dia de la clase.
+async function mandarRecetarios(ahora, pausaMs) {
+  const contenido = store.getContent();
+  const url = contenido.clasegratis_recetario_url;
+  const fecha = contenido.clasegratis_fecha;
+  if (!url || !fecha) return 0;
+  if (ahora < enCDMX(fecha, -1, '10:00') || ahora >= enCDMX(fecha, 1, '00:00')) return 0;
+  const { enviarCorreoRecetarioAcceso } = require('./email');
+  let n = 0;
+  const pagados = store.getRegistrosClaseGratis().filter((r) => r.fecha === fecha && r.accesoEstado === 'pagado' && !r.accesoRecetarioCorreoEnviado && r.correo);
+  for (const r of pagados) {
+    try {
+      const actual = store.updateRegistroClaseGratis(r.id, {
+        accesoRecetarioUrl: r.accesoRecetarioUrl || url,
+        accesoRecetarioNombre: r.accesoRecetarioNombre || contenido.clasegratis_recetario_nombre || '',
+      });
+      const link = `${SITE_URL}/api/acceso-anticipado/recetario?id=${actual.id}&token=${actual.confirmToken}`;
+      await enviarCorreoRecetarioAcceso({ to: actual.correo, nombre: actual.nombre, titulo: temaDe(contenido), link });
+      store.updateRegistroClaseGratis(r.id, { accesoRecetarioCorreoEnviado: new Date().toISOString() });
+      n += 1;
+      if (pausaMs) await new Promise((ok) => setTimeout(ok, pausaMs));
+    } catch (err) {
+      console.error(`[masterclass] No se pudo mandar el recetario a ${r.correo}:`, err.message);
+    }
+  }
+  return n;
+}
+
 async function revisar(ahora = new Date(), { pausaMs = 250 } = {}) {
   if (corriendo) return { enviados: 0 };
   corriendo = true;
   let enviados = 0;
   try {
+    enviados += await mandarRecetarios(ahora, pausaMs);
     const contenido = store.getContent();
     if (contenido.masterclass_correos_activo === 'false') return { enviados };
     const desde = contenido.masterclass_correos_desde || hoyCDMX(ahora);
