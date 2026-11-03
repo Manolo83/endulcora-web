@@ -527,11 +527,26 @@ router.post('/inscripcion-taller', async (req, res) => {
   if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
   if (!sesionTallerId) return res.status(400).json({ error: 'Elige el taller al que te inscribes desde el calendario.' });
   // Solo se inscribe quien ya pago su anticipo: se pide el folio del
-  // comprobante (puede repetirse si una persona aparto para varias) para
-  // poder cuadrar los depositos.
+  // comprobante, que no puede repetirse. Si el anticipo cubre a varias
+  // personas, se registran todas en este mismo envio y cada una queda con
+  // su parte del monto (p. ej. $2,000 entre 5 = $400 cada una).
   const folioAnticipo = String(b.folioAnticipo || '').trim().slice(0, 60);
-  if (!String(b.montoAnticipo || '').trim()) return res.status(400).json({ error: 'Escribe el monto de tu anticipo.' });
+  const montoTotal = parseFloat(String(b.montoAnticipo || '').replace(/[^0-9.]/g, ''));
+  if (!(montoTotal > 0)) return res.status(400).json({ error: 'Escribe el monto de tu anticipo (solo el número, p. ej. 2000).' });
   if (folioAnticipo.replace(/[^0-9a-z]/gi, '').length < 4) return res.status(400).json({ error: 'Escribe el folio del comprobante de tu anticipo. Para inscribirte necesitas haber pagado tu anticipo.' });
+  if (store.folioAnticipoUsado(folioAnticipo)) return res.status(400).json({ error: 'Ese folio ya se usó en otra inscripción. Si pagaste por varias personas, regístralas a todas juntas aquí mismo con «¿Para cuántas personas es tu anticipo?». Si crees que es un error, escríbenos por WhatsApp.' });
+  const numPersonas = Math.floor(Number(b.personasAnticipo) || 1);
+  if (numPersonas < 1 || numPersonas > 50) return res.status(400).json({ error: 'Escribe para cuántas personas es tu anticipo (1 o más).' });
+  const acompanantes = Array.isArray(b.acompanantes) ? b.acompanantes.slice(0, numPersonas - 1) : [];
+  if (acompanantes.length !== numPersonas - 1) return res.status(400).json({ error: 'Llena los datos de todas las personas de tu anticipo.' });
+  for (let k = 0; k < acompanantes.length; k++) {
+    const p = acompanantes[k] || {};
+    const n = k + 2;
+    if (!String(p.nombre || '').trim()) return res.status(400).json({ error: `Escribe el nombre de la persona ${n}.` });
+    if (!WHATSAPP_RE.test(String(p.whatsapp || '').trim())) return res.status(400).json({ error: `Escribe un WhatsApp válido para la persona ${n}.` });
+    if (!EMAIL_RE.test(String(p.correo || '').trim())) return res.status(400).json({ error: `Escribe un correo válido para la persona ${n}.` });
+  }
+  const montoPorPersona = Math.round((montoTotal / numPersonas) * 100) / 100;
   const errorZona = errorZonaInvalida(b);
   if (errorZona) return res.status(400).json({ error: errorZona });
   if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para inscribirte.' });
@@ -544,17 +559,23 @@ router.post('/inscripcion-taller', async (req, res) => {
   if (sesion.estado === 'agotado') return res.status(400).json({ error: 'Ese taller ya está agotado. Elige otra fecha o sede.' });
   const sedeInfo = store.getSedes().find((s) => s.id === sesion.sedeId);
 
-  const item = store.addInscripcionTaller({
-    nombre,
-    whatsapp,
-    correo,
+  const personas = [{ nombre, whatsapp, correo }, ...acompanantes.map((p) => ({
+    nombre: String(p.nombre).trim(), whatsapp: String(p.whatsapp).trim(), correo: String(p.correo).trim(),
+  }))];
+  const items = personas.map((persona, k) => store.addInscripcionTaller({
+    nombre: persona.nombre,
+    whatsapp: persona.whatsapp,
+    correo: persona.correo,
     sesionTallerId: sesion.id,
     taller: sesion.titulo,
     fecha: sesion.fecha,
     sede: sedeInfo ? sedeInfo.nombre : '',
     horario: sesion.horario || '',
-    montoAnticipo: b.montoAnticipo,
+    montoAnticipo: String(montoPorPersona),
     folioAnticipo,
+    personasAnticipo: numPersonas,
+    montoTotalAnticipo: String(montoTotal),
+    anticipoPagadoPor: k === 0 ? '' : nombre,
     comoSeEntero: b.comoSeEntero,
     preferencias: b.preferencias,
     cumpleDia: b.cumpleDia,
@@ -568,14 +589,15 @@ router.post('/inscripcion-taller', async (req, res) => {
     // De donde llego de verdad, aparte de lo que haya contestado en
     // "comoSeEntero". Ver src/origenTrafico.js.
     ...origenTrafico.idsDeClic(b),
-  });
+  }));
 
-  res.status(201).json({ ok: true, id: item.id });
+  res.status(201).json({ ok: true, id: items[0].id, ids: items.map((i) => i.id) });
 
+  const contenido = store.getContent();
+  for (const item of items) {
   // El correo de confirmacion nunca debe tumbar la inscripcion: la persona
   // ya quedo registrada aunque Resend falle o no este configurado. Se manda
   // despues de responder para no retrasar la confirmacion en pantalla.
-  const contenido = store.getContent();
   enviarCorreoConfirmacionInscripcionTaller({
     to: item.correo,
     nombre: item.nombre,
@@ -597,6 +619,7 @@ router.post('/inscripcion-taller', async (req, res) => {
   sincronizarInscripcionTaller(item).catch((e) => {
     console.error(`[inscripcion-taller] No se pudo sincronizar con Google Sheets la inscripcion ${item.id}:`, e.message);
   });
+  }
 });
 
 // Formulario corto para el QR de captura (pensado para escanearse desde el

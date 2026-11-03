@@ -137,14 +137,23 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4E1454; }
     </div>
 
     <div>
-      <label class="etiqueta-inscripcion" for="campoMontoAnticipo">Monto de anticipo (MXN)</label>
-      <input id="campoMontoAnticipo" name="montoAnticipo" type="text" required class="campo-inscripcion" placeholder="Ej. $200">
+      <label class="etiqueta-inscripcion" for="campoPersonasAnticipo">¿Para cuántas personas es tu anticipo? *</label>
+      <input id="campoPersonasAnticipo" name="personasAnticipo" type="number" min="1" step="1" value="1" required inputmode="numeric" class="campo-inscripcion">
+      <p class="mt-1.5 text-xs text-carbon/55">Si pagaste por varias personas, registra aquí los datos de cada una.</p>
+    </div>
+
+    <div id="bloqueAcompanantes" class="hidden space-y-4"></div>
+
+    <div>
+      <label class="etiqueta-inscripcion" for="campoMontoAnticipo">Monto total de tu anticipo (MXN) *</label>
+      <input id="campoMontoAnticipo" name="montoAnticipo" type="text" required inputmode="decimal" class="campo-inscripcion" placeholder="Ej. 400">
+      <p id="textoMontoPorPersona" class="mt-1.5 hidden text-xs font-700 text-vino"></p>
     </div>
 
     <div>
       <label class="etiqueta-inscripcion" for="campoFolioAnticipo">Folio del comprobante de tu anticipo</label>
       <input id="campoFolioAnticipo" name="folioAnticipo" type="text" required maxlength="60" class="campo-inscripcion" placeholder="Número de folio o referencia de tu pago">
-      <p class="mt-1.5 text-xs text-carbon/55">Para inscribirte necesitas haber pagado tu anticipo. Si pagaste por varias personas, cada una usa el mismo folio.</p>
+      <p class="mt-1.5 text-xs text-carbon/55">Para inscribirte necesitas haber pagado tu anticipo. Cada folio se usa una sola vez: si pagaste por varias personas, regístralas a todas en este mismo formulario.</p>
     </div>
 
     <div>
@@ -431,6 +440,47 @@ function idsDeClic(){
   };
 }
 
+const campoPersonas = document.getElementById('campoPersonasAnticipo');
+const bloqueAcomp = document.getElementById('bloqueAcompanantes');
+const campoMonto = document.getElementById('campoMontoAnticipo');
+const textoPorPersona = document.getElementById('textoMontoPorPersona');
+function numPersonasAnticipo(){ return Math.max(1, Math.floor(Number(campoPersonas.value) || 1)); }
+function escapeAttr(v){ return String(v || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function pintarAcompanantes(){
+  const n = Math.min(numPersonasAnticipo(), 50);
+  const previos = [...bloqueAcomp.querySelectorAll('.acomp')].map(d => ({
+    nombre: d.querySelector('[data-c=nombre]').value, whatsapp: d.querySelector('[data-c=whatsapp]').value, correo: d.querySelector('[data-c=correo]').value,
+  }));
+  let html = '';
+  for(let k = 2; k <= n; k++){
+    const p = previos[k-2] || { nombre:'', whatsapp:'', correo:'' };
+    html += `<div class="acomp rounded-2xl border border-vino/15 bg-crema/40 p-4">
+      <p class="mb-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino">Persona ${k}</p>
+      <div class="space-y-3">
+        <input data-c="nombre" type="text" class="campo-inscripcion" placeholder="Nombre completo" value="${escapeAttr(p.nombre)}">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <input data-c="whatsapp" type="tel" class="campo-inscripcion" placeholder="WhatsApp" value="${escapeAttr(p.whatsapp)}">
+          <input data-c="correo" type="email" class="campo-inscripcion" placeholder="Correo" value="${escapeAttr(p.correo)}">
+        </div>
+      </div>
+    </div>`;
+  }
+  bloqueAcomp.innerHTML = html;
+  bloqueAcomp.classList.toggle('hidden', n < 2);
+  pintarMontoPorPersona();
+}
+function pintarMontoPorPersona(){
+  const n = numPersonasAnticipo();
+  const total = parseFloat(String(campoMonto.value).replace(/[^0-9.]/g, ''));
+  if(n > 1 && total > 0){
+    const parte = Math.round(total / n * 100) / 100;
+    textoPorPersona.textContent = `Se registra $${parte.toLocaleString('es-MX')} de anticipo a cada una de las ${n} personas.`;
+    textoPorPersona.classList.remove('hidden');
+  } else textoPorPersona.classList.add('hidden');
+}
+campoPersonas.addEventListener('input', pintarAcompanantes);
+campoMonto.addEventListener('input', pintarMontoPorPersona);
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorBox.classList.add('hidden');
@@ -444,6 +494,12 @@ form.addEventListener('submit', async (e) => {
     sesionTallerId: datos.get('sesionTallerId'),
     montoAnticipo: datos.get('montoAnticipo'),
     folioAnticipo: datos.get('folioAnticipo'),
+    personasAnticipo: numPersonasAnticipo(),
+    acompanantes: [...bloqueAcomp.querySelectorAll('.acomp')].map(d => ({
+      nombre: d.querySelector('[data-c=nombre]').value.trim(),
+      whatsapp: d.querySelector('[data-c=whatsapp]').value.trim(),
+      correo: d.querySelector('[data-c=correo]').value.trim(),
+    })),
     comoSeEntero: datos.get('comoSeEntero'),
     preferencias: datos.get('preferencias'),
     cumpleDia: datos.get('cumpleDia'),
