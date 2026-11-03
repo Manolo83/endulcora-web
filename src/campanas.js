@@ -1,5 +1,18 @@
 const store = require('./store');
 const { SITE_URL } = require('./config');
+
+// Si el boton de la campana apunta a /acceso-anticipado (sin datos), a cada
+// contacto se le pone SU link personal de pago (id + token de su registro a
+// la clase gratis vigente). Si no tiene registro, se le manda a /clase-gratis.
+function linkBotonPersonal(url, contacto) {
+  if (!url || !/\/acceso-anticipado\/?$/i.test(String(url).trim())) return url;
+  const correo = String(contacto.email || '').toLowerCase();
+  const fechaActual = store.getContent().clasegratis_fecha || '';
+  const registros = store.getRegistrosClaseGratis().filter((r) => String(r.correo || '').toLowerCase() === correo);
+  const registro = registros.find((r) => r.fecha === fechaActual) || registros[0];
+  if (!registro) return `${SITE_URL}/clase-gratis`;
+  return require('./accesoAnticipado').linkAcceso(SITE_URL, registro);
+}
 const { enviarCorreoCampana, enviarCorreoBuenFin } = require('./email');
 const promoBuenFin = require('./promoBuenFin');
 
@@ -86,7 +99,7 @@ async function procesarCampana(campanaId) {
           unsubscribeUrl,
           imagenes: campana.imagenes,
           archivos: campana.archivos,
-          videoUrl: campana.videoUrl,
+          videoUrl: linkBotonPersonal(campana.videoUrl, contacto),
           botonTexto: campana.botonTexto,
         });
         exito = true;
