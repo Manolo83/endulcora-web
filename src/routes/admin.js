@@ -274,7 +274,22 @@ router.post('/api/content/clasegratis-recetario', requireAdmin, uploadDocumento.
     clasegratis_recetario_nombre: req.file.originalname,
   });
   borrarRecetarioMasterClassSiNoSeUsa(anterior);
-  res.json({ content });
+  // Quien ya habia pagado su acceso de esta master class sin recetario
+  // (porque aun no se subia) lo recibe ahora: queda en su registro y se le
+  // manda por correo el link para descargarlo.
+  const pendientes = store.getRegistrosClaseGratis().filter((r) => r.fecha === content.clasegratis_fecha
+    && r.accesoEstado === 'pagado' && !r.accesoRecetarioUrl);
+  (async () => { for (const r of pendientes) {
+    const actualizado = store.updateRegistroClaseGratis(r.id, {
+      accesoRecetarioUrl: content.clasegratis_recetario_url,
+      accesoRecetarioNombre: content.clasegratis_recetario_nombre,
+    });
+    const link = `${SITE_URL}/api/acceso-anticipado/recetario?id=${actualizado.id}&token=${actualizado.confirmToken}`;
+    await require('../email').enviarCorreoRecetarioAcceso({ to: actualizado.correo, nombre: actualizado.nombre, titulo: content.clasegratis_titulo, link })
+      .catch((e) => console.error('[recetario-master-class] No se pudo mandar a', actualizado.correo, e.message));
+    await new Promise((ok) => setTimeout(ok, 600));
+  } })();
+  res.json({ content, recetarioEnviadoA: pendientes.length });
 });
 
 router.delete('/api/content/clasegratis-recetario', requireAdmin, (req, res) => {
