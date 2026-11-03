@@ -1,6 +1,32 @@
 const store = require('./store');
 const { SITE_URL } = require('./config');
 
+function escaparHtml(t) {
+  return String(t || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+// Correo con diseño propio: se reemplazan {nombre}, {baja} y {link_acceso}.
+function armarHtmlPersonal(html, contacto, unsubscribeUrl) {
+  const nombre = String(contacto.nombre || '').trim().split(/\s+/)[0] || 'Hola';
+  const link = linkBotonPersonal(`${SITE_URL}/acceso-anticipado`, contacto);
+  return String(html)
+    .split('{nombre}').join(escaparHtml(nombre))
+    .split('{baja}').join(unsubscribeUrl)
+    .split('{link_acceso}').join(link);
+}
+async function enviarCorreoHtml({ to, asunto, html, unsubscribeUrl }) {
+  const { Resend } = require('resend');
+  if (!process.env.RESEND_API_KEY) throw new Error('El envío de correos todavía no está configurado.');
+  const client = new Resend(process.env.RESEND_API_KEY);
+  const { error } = await client.emails.send({
+    from: process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>',
+    to,
+    subject: asunto,
+    html,
+    headers: { 'List-Unsubscribe': `<${unsubscribeUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 // Si el boton de la campana apunta a /acceso-anticipado (sin datos), a cada
 // contacto se le pone SU link personal de pago (id + token de su registro a
 // la clase gratis vigente). Si no tiene registro, se le manda a /clase-gratis.
@@ -91,6 +117,13 @@ async function procesarCampana(campanaId) {
           await require('./boletinSemanal').enviarBoletin({ to: contacto.email, nombre: contacto.nombre, unsubscribeUrl, datos: campana.datosBoletin });
         } else if (esBuenFin) {
           await enviarCorreoBuenFin({ to: contacto.email, asunto: campana.asunto, nombre: contacto.nombre, unsubscribeUrl, ...datosBuenFin });
+        } else if (campana.plantilla === 'html') {
+          await enviarCorreoHtml({
+            to: contacto.email,
+            asunto: campana.asunto,
+            html: armarHtmlPersonal(campana.cuerpoHtml, contacto, unsubscribeUrl),
+            unsubscribeUrl,
+          });
         } else await enviarCorreoCampana({
           to: contacto.email,
           nombre: contacto.nombre,
