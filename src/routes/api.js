@@ -526,6 +526,12 @@ router.post('/inscripcion-taller', async (req, res) => {
   if (!WHATSAPP_RE.test(whatsapp)) return res.status(400).json({ error: 'Escribe un número de WhatsApp válido.' });
   if (!EMAIL_RE.test(correo)) return res.status(400).json({ error: 'Escribe un correo válido.' });
   if (!sesionTallerId) return res.status(400).json({ error: 'Elige el taller al que te inscribes desde el calendario.' });
+  // Solo se inscribe quien ya pago su anticipo: se pide el folio del
+  // comprobante (puede repetirse si una persona aparto para varias) para
+  // poder cuadrar los depositos.
+  const folioAnticipo = String(b.folioAnticipo || '').trim().slice(0, 60);
+  if (!String(b.montoAnticipo || '').trim()) return res.status(400).json({ error: 'Escribe el monto de tu anticipo.' });
+  if (folioAnticipo.replace(/[^0-9a-z]/gi, '').length < 4) return res.status(400).json({ error: 'Escribe el folio del comprobante de tu anticipo. Para inscribirte necesitas haber pagado tu anticipo.' });
   const errorZona = errorZonaInvalida(b);
   if (errorZona) return res.status(400).json({ error: errorZona });
   if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para inscribirte.' });
@@ -548,6 +554,7 @@ router.post('/inscripcion-taller', async (req, res) => {
     sede: sedeInfo ? sedeInfo.nombre : '',
     horario: sesion.horario || '',
     montoAnticipo: b.montoAnticipo,
+    folioAnticipo,
     comoSeEntero: b.comoSeEntero,
     preferencias: b.preferencias,
     cumpleDia: b.cumpleDia,

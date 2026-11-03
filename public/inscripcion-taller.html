@@ -138,7 +138,13 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4E1454; }
 
     <div>
       <label class="etiqueta-inscripcion" for="campoMontoAnticipo">Monto de anticipo (MXN)</label>
-      <input id="campoMontoAnticipo" name="montoAnticipo" type="text" class="campo-inscripcion" placeholder="Ej. $200">
+      <input id="campoMontoAnticipo" name="montoAnticipo" type="text" required class="campo-inscripcion" placeholder="Ej. $200">
+    </div>
+
+    <div>
+      <label class="etiqueta-inscripcion" for="campoFolioAnticipo">Folio del comprobante de tu anticipo</label>
+      <input id="campoFolioAnticipo" name="folioAnticipo" type="text" required maxlength="60" class="campo-inscripcion" placeholder="Número de folio o referencia de tu pago">
+      <p class="mt-1.5 text-xs text-carbon/55">Para inscribirte necesitas haber pagado tu anticipo. Si pagaste por varias personas, cada una usa el mismo folio.</p>
     </div>
 
     <div>
@@ -437,6 +443,7 @@ form.addEventListener('submit', async (e) => {
     correo: datos.get('correo'),
     sesionTallerId: datos.get('sesionTallerId'),
     montoAnticipo: datos.get('montoAnticipo'),
+    folioAnticipo: datos.get('folioAnticipo'),
     comoSeEntero: datos.get('comoSeEntero'),
     preferencias: datos.get('preferencias'),
     cumpleDia: datos.get('cumpleDia'),
