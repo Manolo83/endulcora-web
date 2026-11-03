@@ -452,7 +452,9 @@ function procesarAccesoAnticipadoDelPedido(order, nuevoEstado) {
     fueraDeZona: registro.accesoFueraDeZona,
     membresiaHasta: resultado.membresiaHasta,
     yaEraMiembro: resultado.yaEraMiembro,
-    recetarioUrl: registro.accesoRecetarioUrl,
+    // El recetario no va en la confirmacion: se manda un dia antes de la
+    // clase (ver mandarRecetarios en src/correosMasterclass.js).
+    recetarioUrl: '',
     recetarioNombre: registro.accesoRecetarioNombre,
     siteUrl: SITE_URL,
     link: acceso.linkAcceso(SITE_URL, registro),

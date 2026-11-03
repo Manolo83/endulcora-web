@@ -978,7 +978,7 @@ async function enviarCorreoAccesoConfirmado({ to, nombre, titulo, fecha, horario
           <p style="margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7A2E7E;font-weight:700;">Esto es lo que tienes</p>
           <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.7;">
             ${presencial ? '<li>Tu lugar con ficha de asistencia y coffee break el día de la clase.</li>' : ''}
-            <li>${recetarioUrl ? 'Tu recetario digital: va adjunto en este correo.' : 'Tu recetario digital: te lo mandamos por correo en cuanto esté listo.'}</li>
+            <li>${recetarioUrl ? 'Tu recetario digital: va adjunto en este correo.' : 'Tu recetario digital: te lo mandamos por correo un día antes de la clase.'}</li>
             <li>La grabación, que te llega después de la clase.</li>
             <li><strong>Un mes gratis de Club Endulcora</strong>: recetario del mes, revista, taller en línea mensual, biblioteca de grabaciones y lectura de todos los ebooks. ${membresiaTexto}</li>
             <li>Descuentos exclusivos para asistentes.</li>
@@ -1388,7 +1388,37 @@ async function enviarCorreoRecuperacionTaller({
   return { ok: true };
 }
 
+// Recetario de la master class que se subio despues de que la persona ya
+// habia pagado su acceso anticipado: se le avisa con el link para bajarlo.
+async function enviarCorreoRecetarioAcceso({ to, nombre, titulo, link }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: `Ya está tu recetario de ${titulo || 'la master class'} 🍪`,
+    html: `
+      <div style="background:#f3ece4;padding:20px 10px;font-family:Arial,Helvetica,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;color:#2b1a1f;">
+        <tr><td style="background:#6b1d2f;color:#ffffff;text-align:center;padding:26px 24px;">
+          <div style="color:#F5A623;font-size:12px;font-weight:bold;letter-spacing:3px;">ENDULCORA</div>
+          <div style="font-size:24px;font-weight:bold;line-height:1.25;margin-top:8px;">Tu recetario ya está listo</div>
+        </td></tr>
+        <tr><td style="padding:26px 28px;font-size:16px;line-height:1.6;">
+          <p style="margin:0 0 14px;">Hola <b>${escapeHtml(String(nombre || '').trim().split(/\s+/)[0] || '')}</b>:</p>
+          <p style="margin:0 0 14px;">Como parte de tu acceso anticipado a <b>${escapeHtml(titulo || 'la master class')}</b>, aquí tienes tu recetario. Descárgalo y tenlo a la mano el día de la clase.</p>
+        </td></tr>
+        <tr><td align="center" style="padding:0 28px 28px;"><a href="${link}" style="display:inline-block;background:#d62839;color:#ffffff;text-decoration:none;font-weight:bold;font-size:17px;padding:16px 32px;border-radius:40px;">DESCARGAR MI RECETARIO</a></td></tr>
+        <tr><td style="background:#6b1d2f;color:#f3dfe3;text-align:center;padding:18px;font-size:12px;">Endulcora · Escuela de repostería · CDMX</td></tr>
+      </table></div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 module.exports = {
+  enviarCorreoRecetarioAcceso,
   pieEndulcora,
   datosPie,
   botonPlan,
