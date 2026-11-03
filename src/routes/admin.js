@@ -10,7 +10,7 @@ const store = require('../store');
 const regalo = require('../membresiaRegalo');
 const acceso = require('../accesoAnticipado');
 const promoBuenFin = require('../promoBuenFin');
-const { requireAdmin, checkPassword } = require('../auth');
+const { requireAdmin, requireAdminOLectura, checkPassword } = require('../auth');
 const { UPLOAD_DIR, SITE_URL, GOOGLE_SHEETS } = require('../config');
 const { generarCaratulaPDF } = require('../caratula');
 const { enviarCorreoRevistaMensual, enviarCorreoConfirmacionPagoTaller, enviarCorreoBuenFin, htmlCorreoBuenFin, enviarCorreoRecordatorioVideoEnVivo } = require('../email');
@@ -852,7 +852,7 @@ router.post('/api/orders/revisar-pendientes', requireAdmin, (req, res) => {
   res.status(202).json({ ...revisarPagos.estadoRevision(), pendientes: revisarPagos.pedidosPendientes().length });
 });
 
-router.get('/api/orders', requireAdmin, (req, res) => {
+router.get('/api/orders', requireAdminOLectura, (req, res) => {
   // Pedidos pagados con archivos: link de descargas (para mandarlo por
   // WhatsApp), estado del correo y archivos que falten.
   const pedidos = store.getOrders().map((o) => {
@@ -928,7 +928,7 @@ router.get('/api/newsletter', requireAdmin, (req, res) => {
 });
 
 // ---- Inscripciones a talleres (formulario publico) ----
-router.get('/api/inscripciones-taller', requireAdmin, (req, res) => {
+router.get('/api/inscripciones-taller', requireAdminOLectura, (req, res) => {
   // Mismo criterio que en Ventas: "comoSeEntero" es lo que la persona dice,
   // "origen" es lo que de verdad paso segun los ids de clic que traia.
   res.json(store.getInscripcionesTaller().map((i) => ({ ...i, origen: origenTrafico.origenDe(i) })));
@@ -1084,7 +1084,7 @@ router.delete('/api/registros-qr/:id', requireAdmin, (req, res) => {
 // ---- Clase gratis en sala (p.ej. Pan de Muerto): registros + segmentacion
 // al cierre del dia (ver src/routes/api.js para el registro publico y
 // clasegratis_* en /api/content para la configuracion del evento) ----
-router.get('/api/clase-gratis/registros', requireAdmin, (req, res) => {
+router.get('/api/clase-gratis/registros', requireAdminOLectura, (req, res) => {
   res.json(store.getRegistrosClaseGratis());
 });
 
@@ -1403,7 +1403,7 @@ function textoZona(item) {
   return item.estado || 'México';
 }
 
-router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => {
+router.get('/api/inscripciones-taller/excel', requireAdminOLectura, async (req, res) => {
   const inscripciones = store.getInscripcionesTaller();
 
   // Una lista (pestaña) por cada sesion real del calendario (sesionTallerId):
@@ -1502,7 +1502,7 @@ router.get('/api/inscripciones-taller/excel', requireAdmin, async (req, res) => 
 });
 
 // ---- Sedes (calendario de talleres presenciales) ----
-router.get('/api/sedes', requireAdmin, (req, res) => {
+router.get('/api/sedes', requireAdminOLectura, (req, res) => {
   res.json(store.getSedes());
 });
 
@@ -1552,7 +1552,7 @@ router.delete('/api/sedes/:id/imagen', requireAdmin, (req, res) => {
 // pueda mostrar un horario real y consistente.
 const HORARIOS_VALIDOS = store.HORARIOS_VALIDOS_TALLER;
 
-router.get('/api/sesiones-taller', requireAdmin, (req, res) => {
+router.get('/api/sesiones-taller', requireAdminOLectura, (req, res) => {
   res.json(store.getSesionesTaller(req.query.sedeId));
 });
 
