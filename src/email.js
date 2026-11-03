@@ -641,14 +641,23 @@ async function enviarCorreoCampana({ to, nombre, asunto, cuerpoHtml, unsubscribe
     to,
     subject: asunto,
     html: `
-      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
-        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
-        ${imagenesHtml}
-        ${nombre ? `<p style="font-size:14px;">Hola ${escapeHtml(nombre)},</p>` : ''}
-        <div style="font-size:14px;line-height:1.6;">${cuerpoHtml}</div>
-        ${videoHtml}
-        <p style="margin-top:28px;font-size:11px;color:#9C9C9C;">Recibiste este correo porque estás en la lista de contactos de Endulcora.<br><a href="${unsubscribeUrl}" style="color:#9C9C9C;">Dejar de recibir estos correos</a></p>
-      </div>
+      <div style="background:#f3ece4;padding:20px 10px;font-family:Arial,Helvetica,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;color:#2b1a1f;">
+        <tr><td style="background:#6b1d2f;color:#ffffff;text-align:center;padding:26px 24px;">
+          <div style="color:#F5A623;font-size:12px;font-weight:bold;letter-spacing:3px;">ENDULCORA</div>
+          <div style="font-size:24px;font-weight:bold;line-height:1.25;margin-top:8px;">${escapeHtml(asunto)}</div>
+        </td></tr>
+        ${(imagenes || []).map((url) => `<tr><td style="padding:0;"><img src="${url}" alt="" width="600" style="display:block;width:100%;height:auto;border:0;"></td></tr>`).join('')}
+        <tr><td style="padding:26px 28px 6px;font-size:16px;line-height:1.6;">
+          ${nombre ? `<p style="margin:0 0 14px;">Hola <b>${escapeHtml(String(nombre).trim().split(/\s+/)[0])}</b>:</p>` : ''}
+          ${String(cuerpoHtml).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/(https?:\/\/[^\s<"]+)/g, (u) => `<a href="${u}" style="color:#6b1d2f;font-weight:bold;">${u}</a>`)}
+        </td></tr>
+        ${videoUrl ? `<tr><td align="center" style="padding:14px 28px 26px;"><a href="${videoUrl}" style="display:inline-block;background:#d62839;color:#ffffff;text-decoration:none;font-weight:bold;font-size:17px;padding:16px 32px;border-radius:40px;letter-spacing:1px;">${escapeHtml(botonTexto || '▶ Ver video')}</a></td></tr>` : ''}
+        <tr><td style="background:#6b1d2f;color:#f3dfe3;text-align:center;padding:18px;font-size:12px;line-height:1.6;">
+          Endulcora · Escuela de repostería · CDMX<br>Recibiste este correo porque estás en la lista de contactos de Endulcora.<br>
+          <a href="${unsubscribeUrl}" style="color:#F5A623;">Dejar de recibir estos correos</a>
+        </td></tr>
+      </table></div>
     `,
     ...(attachments ? { attachments } : {}),
     headers: {
