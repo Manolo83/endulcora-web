@@ -3504,6 +3504,15 @@ module.exports = {
     save(data);
     return item;
   },
+  // El folio del comprobante de anticipo solo se usa en una inscripcion
+  // (un grupo comparte el suyo en un solo envio). Se compara sin espacios,
+  // guiones ni mayusculas.
+  folioAnticipoUsado(folio) {
+    const n = (f) => String(f || '').replace(/[^0-9a-z]/gi, '').toLowerCase();
+    const buscado = n(folio);
+    if (!buscado) return false;
+    return load().inscripcionesTaller.some((i) => n(i.folioAnticipo) === buscado);
+  },
   getInscripcionTaller(id) {
     return load().inscripcionesTaller.find((i) => i.id === Number(id)) || null;
   },
@@ -3512,6 +3521,7 @@ module.exports = {
     comoSeEntero, preferencias, cumpleDia, cumpleMes, esDeMexico, estado, pais,
     esPrimeraVez, aceptaPromociones, aceptaAvisoPrivacidad,
     fbp, fbc, gclid, gbraid, wbraid,
+    personasAnticipo, montoTotalAnticipo, anticipoPagadoPor,
   }) {
     const data = load();
     const item = {
@@ -3529,6 +3539,11 @@ module.exports = {
       horario: String(horario || '').trim(),
       montoAnticipo: String(montoAnticipo || '').trim(),
       folioAnticipo: String(folioAnticipo || '').trim(),
+      // Anticipo de grupo: una persona paga por varias; cada inscrito queda
+      // con su parte (montoAnticipo) y aqui se guarda el total y quien pago.
+      personasAnticipo: Number(personasAnticipo) || 1,
+      montoTotalAnticipo: String(montoTotalAnticipo || montoAnticipo || '').trim(),
+      anticipoPagadoPor: String(anticipoPagadoPor || '').trim(),
       comoSeEntero: String(comoSeEntero || '').trim(),
       preferencias: String(preferencias || '').trim().slice(0, 500),
       cumpleDia: Number(cumpleDia) || null,
