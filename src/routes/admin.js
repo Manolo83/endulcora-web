@@ -357,6 +357,7 @@ router.post('/api/buen-fin/correo/enviar', requireAdmin, (req, res) => {
     plantilla: 'buen-fin',
     ebookIds: promoBuenFin.masVendidos(4).map((e) => e.id),
     contactoIds: destinatarios.map((c) => c.id),
+    plantilla: esHtmlCompleto ? 'html' : '',
   });
   res.status(202).json(campana);
   procesarCampana(campana.id).catch(() => {});
@@ -2314,7 +2315,11 @@ router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
   if (!destinatarios.length) return res.status(400).json({ error: 'No hay contactos seleccionados a quién enviarle.' });
 
   const asuntoLimpio = String(asunto).trim();
-  const cuerpoHtml = String(cuerpo).trim()
+  // Si el contenido es un correo con diseño (HTML completo pegado tal cual),
+  // se manda así, sin la plantilla de texto. Acepta {nombre}, {baja} y
+  // {link_acceso} (link personal de pago del acceso anticipado).
+  const esHtmlCompleto = /^<(!doctype|html|table|div)/i.test(String(cuerpo).trim());
+  const cuerpoHtml = esHtmlCompleto ? String(cuerpo).trim() : String(cuerpo).trim()
     .split(/\n{2,}/)
     .map((parrafo) => `<p style="margin:0 0 14px;">${escapeHtmlAdmin(parrafo).replace(/\n/g, '<br>')}</p>`)
     .join('');
