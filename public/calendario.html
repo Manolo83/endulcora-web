@@ -139,8 +139,8 @@ body { background: #FBF4E9; }
           <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-humo"></span> Agotado</span>
         </div>
       </div>
-      <div id="calendarioGrid" class="mt-6 grid grid-cols-7 gap-1.5 sm:gap-2">
-        <p class="col-span-7 text-sm text-carbon/50">Cargando calendario…</p>
+      <div id="calendarioGrid" class="mt-6">
+        <p class="text-sm text-carbon/50">Cargando calendario…</p>
       </div>
     </div>
   </div>
@@ -251,41 +251,73 @@ function textoRangoSemana(inicio){
   return `${inicio.getDate()} ${NOMBRES_MES_CORTO[inicio.getMonth()]} – ${fin.getDate()} ${NOMBRES_MES_CORTO[fin.getMonth()]} ${fin.getFullYear()}`;
 }
 
+let carruselIdx = 0;
+let carruselTimer = null;
+const NOMBRES_DIA_LARGO = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
 function pintarCalendario(){
   document.getElementById('calendarioMesTexto').textContent = textoRangoSemana(semanaActual);
-
-  const sesionesPorFecha = {};
-  SESIONES.forEach(s => { (sesionesPorFecha[s.fecha] = sesionesPorFecha[s.fecha] || []).push(s); });
-
-  let celdas = NOMBRES_DIA.map(d => `<div class="pb-1 text-center font-ui text-[10px] font-700 uppercase tracking-wider text-carbon/40">${d}</div>`).join('');
-
-  const hoy = new Date();
-  const fechaISOHoy = fechaISO(hoy);
-
-  for(let i = 0; i < 7; i++){
-    const fechaDia = new Date(semanaActual.getFullYear(), semanaActual.getMonth(), semanaActual.getDate() + i);
-    const dia = fechaDia.getDate();
-    const fecha = fechaISO(fechaDia);
-    const sesiones = (sesionesPorFecha[fecha] || []).sort((a,b) => (a.orden ?? 0) - (b.orden ?? 0));
-    const esHoy = fecha === fechaISOHoy;
-    const esPasado = fecha < fechaISOHoy;
-    const chips = sesiones.map(s => {
-      const info = esPasado ? ESTADO_INFO.agotado : (ESTADO_INFO[s.estado] || ESTADO_INFO.disponible);
-      const accion = (esPasado || s.estado === 'agotado') ? '' : `data-sesion="${s.id}"`;
-      const etiqueta = esPasado ? 'No disponible' : info.texto;
-      return `<button type="button" ${accion} class="chipSesion w-full truncate rounded-md px-1.5 py-1 text-left text-[10px] leading-tight text-crema transition ${info.clase}" title="${escapeHtml(s.titulo)} · ${etiqueta}">${escapeHtml(s.titulo)}</button>`;
-    }).join('');
-    celdas += `
-      <div class="min-h-[90px] rounded-lg border p-1.5 sm:min-h-[120px] ${esHoy ? 'border-flama bg-[#FDF1D8]' : 'border-vino/10 bg-white/90'}">
-        <span class="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-flama/25 px-1 font-ui text-[10px] font-700 text-vino">${dia}</span>
-        <div class="mt-1 space-y-1">${chips}</div>
-      </div>`;
+  const ini = fechaISO(semanaActual);
+  const fin = fechaISO(new Date(semanaActual.getFullYear(), semanaActual.getMonth(), semanaActual.getDate() + 6));
+  const hoyISO = fechaISO(new Date());
+  const lista = SESIONES.filter(s => s.fecha >= ini && s.fecha <= fin)
+    .sort((a,b) => a.fecha.localeCompare(b.fecha) || (a.orden ?? 0) - (b.orden ?? 0));
+  const cont = document.getElementById('calendarioGrid');
+  clearInterval(carruselTimer);
+  carruselIdx = 0;
+  if(!lista.length){
+    cont.innerHTML = '<div class="rounded-2xl bg-white/90 p-10 text-center text-sm text-carbon/60">No hay talleres esta semana en esta sede. Usa las flechas para ver otras semanas.</div>';
+    return;
   }
-
-  document.getElementById('calendarioGrid').innerHTML = celdas;
-  document.querySelectorAll('.chipSesion[data-sesion]').forEach(btn => {
-    btn.addEventListener('click', () => irAlTaller(Number(btn.dataset.sesion)));
-  });
+  const slides = lista.map(s => {
+    const pasado = s.fecha < hoyISO;
+    const info = pasado ? { texto: 'Ya pasó', clase: 'bg-humo' } : (ESTADO_INFO[s.estado] || ESTADO_INFO.disponible);
+    const clic = !pasado && s.estado !== 'agotado';
+    const d = new Date(s.fecha + 'T00:00:00');
+    const fechaTxt = `${NOMBRES_DIA_LARGO[d.getDay()]} ${d.getDate()} de ${NOMBRES_MES[d.getMonth()].toLowerCase()}`;
+    const arte = s.fotoUrl
+      ? `<img src="${escapeHtml(s.fotoUrl)}" alt="${escapeHtml(s.titulo)}" class="h-full w-full object-contain bg-vino/5" loading="lazy">`
+      : `<div class="grid h-full w-full place-items-center bg-vino p-8 text-center font-display text-3xl text-crema">${escapeHtml(s.titulo)}</div>`;
+    return `<button type="button" ${clic ? `data-sesion="${s.id}"` : 'disabled'} class="slideTaller relative block aspect-square w-full shrink-0 snap-center overflow-hidden ${clic ? 'cursor-pointer' : 'cursor-default'}">
+      ${arte}
+      <span class="absolute left-3 top-3 rounded-full ${info.clase.split(' ')[0]} px-3 py-1 font-ui text-[11px] font-700 uppercase tracking-wider text-white shadow">${info.texto}</span>
+      <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-4 pb-4 pt-10 text-left text-white">
+        <span class="block font-ui text-[11px] uppercase tracking-widest opacity-80">${fechaTxt}</span>
+        <span class="block font-titulo text-lg leading-tight">${escapeHtml(s.titulo)}</span>
+        ${clic ? '<span class="mt-1 inline-block font-ui text-[11px] font-700 uppercase tracking-wider text-flama">Aparta tu lugar →</span>' : ''}
+      </span>
+    </button>`;
+  }).join('');
+  const puntos = lista.map((_, i) => `<button type="button" data-i="${i}" aria-label="Taller ${i+1}" class="puntoCarrusel h-2.5 rounded-full transition-all bg-vino/25"></button>`).join('');
+  cont.innerHTML = `
+    <div class="relative mx-auto max-w-xl">
+      <div class="overflow-hidden rounded-2xl shadow-lg ring-1 ring-vino/10">
+        <div id="carruselPista" class="flex transition-transform duration-700 ease-out">${slides}</div>
+      </div>
+      ${lista.length > 1 ? `
+      <button type="button" id="carruselPrev" aria-label="Anterior" class="absolute left-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-xl text-vino shadow hover:bg-white">‹</button>
+      <button type="button" id="carruselNext" aria-label="Siguiente" class="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-xl text-vino shadow hover:bg-white">›</button>
+      <div class="mt-4 flex justify-center gap-2">${puntos}</div>` : ''}
+    </div>`;
+  cont.querySelectorAll('.slideTaller[data-sesion]').forEach(btn => btn.addEventListener('click', () => irAlTaller(Number(btn.dataset.sesion))));
+  const total = lista.length;
+  const ir = i => {
+    carruselIdx = (i + total) % total;
+    document.getElementById('carruselPista').style.transform = `translateX(-${carruselIdx * 100}%)`;
+    cont.querySelectorAll('.puntoCarrusel').forEach((p, j) => { p.className = `puntoCarrusel h-2.5 rounded-full transition-all ${j === carruselIdx ? 'w-6 bg-vino' : 'w-2.5 bg-vino/25'}`; });
+  };
+  const reiniciar = () => { clearInterval(carruselTimer); if(total > 1) carruselTimer = setInterval(() => ir(carruselIdx + 1), 5000); };
+  if(total > 1){
+    document.getElementById('carruselPrev').addEventListener('click', () => { ir(carruselIdx - 1); reiniciar(); });
+    document.getElementById('carruselNext').addEventListener('click', () => { ir(carruselIdx + 1); reiniciar(); });
+    cont.querySelectorAll('.puntoCarrusel').forEach(p => p.addEventListener('click', () => { ir(Number(p.dataset.i)); reiniciar(); }));
+    let x0 = null;
+    const pista = document.getElementById('carruselPista');
+    pista.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+    pista.addEventListener('touchend', e => { if(x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if(Math.abs(dx) > 40){ ir(carruselIdx + (dx < 0 ? 1 : -1)); reiniciar(); } x0 = null; });
+  }
+  ir(0);
+  reiniciar();
 }
 
 // Si el taller ya tiene slug y precio configurados en /admin, se manda a su
