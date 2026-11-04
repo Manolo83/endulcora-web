@@ -11,8 +11,10 @@ const DIAS_REGALO = 30;
 // de endulcora.com y por correo). Ordenados de mayor a menor.
 // Correo de aviso: uno solo, 5 dias antes de que termine (dia 25 del mes,
 // plan de ventas). El aviso dentro del sitio sale desde los 15 dias.
-const RECORDATORIOS_REGALO = [5];
-const DIAS_AVISO_SITIO = 15;
+// 4 nov 2026 (Manuel): mes gratis para todos; avisos por correo a los 7,
+// 3 y 1 dias, y el contador siempre visible en su cuenta.
+const RECORDATORIOS_REGALO = [7, 3, 1];
+const DIAS_AVISO_SITIO = DIAS_REGALO;
 const DIA_MS = 24 * 60 * 60 * 1000;
 
 function fechaFinRegalo(desde = new Date()) {
@@ -35,14 +37,21 @@ function yaTuvoMembresiaORegalo(u) {
 //   2. Cuenta nueva con el mismo telefono que otra que ya lo tuvo: no.
 //   3. Cuenta nueva con todo distinto pero la misma cuenta de Mercado Pago:
 //      se detecta al activarse (ver payerYaUsoRegalo) y se cancela sola.
+// 4 nov 2026 (Manuel): el mes gratis es para todos, tambien para quien ya
+// fue miembro antes. Lo unico que se cuida es que cada persona lo use UNA
+// vez (si no, bastaria cancelar y volver a pedirlo cada mes): misma cuenta,
+// mismo telefono o misma cuenta de Mercado Pago (ver payerYaUsoRegalo).
+function yaUsoRegalo(u) {
+  return !!(u.regaloPayerId || u.regaloRechazado);
+}
 function esElegibleRegalo(usuario) {
   if (!usuario) return false;
   if (usuario.membresiaEstado === 'activa') return false;
-  if (yaTuvoMembresiaORegalo(usuario)) return false;
+  if (yaUsoRegalo(usuario)) return false;
   const tel = ultimos10Digitos(usuario.telefono);
   if (tel.length === 10) {
     const mismoTelefono = store.getUsers().some(
-      (u) => u.id !== usuario.id && ultimos10Digitos(u.telefono) === tel && yaTuvoMembresiaORegalo(u)
+      (u) => u.id !== usuario.id && ultimos10Digitos(u.telefono) === tel && yaUsoRegalo(u)
     );
     if (mismoTelefono) return false;
   }

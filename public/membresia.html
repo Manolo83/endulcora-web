@@ -189,7 +189,7 @@ body { background: #FBF4E9; }
     </form>
   </div>
 
-  <!-- Con sesion, sin membresia activa, nunca ha sido miembro: invitacion de 1 mes gratis -->
+  <!-- Con sesion, sin membresia activa y sin haber usado su mes gratis: invitacion de 1 mes gratis -->
   <div id="bloqueRegaloInvitacion" class="mt-8 hidden rounded-3xl bg-flama p-6 text-carbon sm:p-8">
     <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Invitación especial</p>
     <h2 class="mt-2 font-display text-2xl text-vino">Tu primer mes es gratis</h2>
@@ -486,6 +486,9 @@ async function cargarVistaMembresia(){
     }else{
       document.getElementById('bloqueRegaloInvitacion').classList.toggle('hidden', !data.elegibleRegalo);
       mostrarVista('oferta');
+      // Con el mes gratis disponible, esa es la oferta: no se muestra ademas
+      // la de pagar $100 desde hoy.
+      if(data.elegibleRegalo) document.getElementById('bloqueOferta').classList.add('hidden');
     }
   }catch(e){
     mostrarVista('oferta');

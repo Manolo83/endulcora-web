@@ -59,6 +59,24 @@ router.post('/suscribirse', requireCliente, async (req, res) => {
     return res.status(400).json({ error: 'Ya tienes la membresía activa.' });
   }
 
+  // Mes gratis para todos (4 nov 2026): quien todavia no lo usa registra su
+  // tarjeta hoy y el primer cobro de $100 llega a los 30 dias.
+  if (!reactivaRegalo && regalo.esElegibleRegalo(usuario)) {
+    try {
+      const creado = await crearSuscripcion(client, usuario, {
+        reason: 'Membresía Endulcora · 1 mes gratis',
+        primerCobro: regalo.fechaFinRegalo(),
+        backUrl: `${SITE_URL}/membresia?regalo=1`,
+      });
+      store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id, regaloPreapprovalId: creado.id, regaloSolicitadoEn: new Date().toISOString(), membresiaOrigen: 'mes_gratis' });
+      return res.status(201).json({ url: creado.init_point });
+    } catch (err) {
+      const detalle = (err && err.cause && JSON.stringify(err.cause)) || (err && err.message) || String(err);
+      console.error('[membresia] Error al crear la suscripción con mes gratis:', detalle);
+      return res.status(502).json({ error: 'No se pudo activar tu mes gratis. Intenta de nuevo en un momento.' });
+    }
+  }
+
   try {
     const creado = await crearSuscripcion(client, usuario, { primerCobro: reactivaRegalo ? usuario.membresiaRegaloHasta : null });
     store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id });
@@ -86,7 +104,7 @@ router.post('/suscribirse-regalo', requireCliente, async (req, res) => {
     return res.status(400).json({ error: 'Ya tienes la membresía activa.' });
   }
   if (!regalo.esElegibleRegalo(usuario)) {
-    return res.status(400).json({ error: 'El mes de regalo es solo para quien nunca ha sido miembro. Puedes hacerte miembro por $100 al mes.' });
+    return res.status(400).json({ error: 'Ya usaste tu mes gratis. Puedes seguir como miembro por $100 al mes.' });
   }
 
   // Por defecto viene del boton del live (como siempre). El unico otro
@@ -104,6 +122,7 @@ router.post('/suscribirse-regalo', requireCliente, async (req, res) => {
     const patch = {
       membresiaPreapprovalId: creado.id,
       regaloPreapprovalId: creado.id,
+      regaloSolicitadoEn: new Date().toISOString(),
       membresiaOrigen: origen,
     };
     if (origen === 'regalo_live') {
@@ -218,7 +237,14 @@ function aplicarEstadoDesdePreapprovalInfo(info) {
   if (reactivoRegalo) patch.membresiaRegaloCancelada = false;
   // Activacion de la suscripcion del mes de regalo: arranca el contador.
   // Termina el dia del primer cobro programado en Mercado Pago.
-  const activaRegalo = nuevoEstado === 'activa' && usuario.regaloPreapprovalId === idInfo && !usuario.membresiaRegaloHasta;
+  // Se activa el mes gratis una sola vez por suscripcion. Quien ya tuvo un
+  // mes (p. ej. el de la master class) trae membresiaRegaloHasta viejo: si
+  // es de antes de que pidiera este mes gratis, igual se activa.
+  const hastaPrevio = usuario.membresiaRegaloHasta ? new Date(usuario.membresiaRegaloHasta) : null;
+  const pedidoEn = usuario.regaloSolicitadoEn ? new Date(usuario.regaloSolicitadoEn) : null;
+  const activaRegalo = nuevoEstado === 'activa' && usuario.regaloPreapprovalId === idInfo
+    && usuario.regaloActivadoId !== idInfo
+    && (!hastaPrevio || (pedidoEn && hastaPrevio < pedidoEn));
   // Anti "regalo doble": esa cuenta de Mercado Pago ya activo un regalo con
   // otra cuenta de endulcora.com. No se le da acceso y se cancela la
   // suscripcion en Mercado Pago (nunca se le cobra nada por ella).
@@ -235,6 +261,7 @@ function aplicarEstadoDesdePreapprovalInfo(info) {
     patch.membresiaRegaloHasta = hasta.toISOString();
     patch.membresiaRegaloCancelada = false;
     patch.regaloRecordatoriosEnviados = [];
+    patch.regaloActivadoId = idInfo;
   }
   // Solo se reinicia el "reloj" de la biblioteca de clases cuando de
   // verdad se activa desde un estado que no era activo (alta nueva o
