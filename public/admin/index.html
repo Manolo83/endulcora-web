@@ -1787,33 +1787,68 @@ async function api(url, options = {}){
   return data;
 }
 
+// Antes se pedian ~20 listas al entrar (15 mil contactos, ventas,
+// clientes...) aunque solo se viera una seccion: el panel tardaba. Ahora
+// lo basico carga al entrar y cada seccion pesada se pide cuando se
+// acerca a la pantalla (al bajar o al dar clic en el menu).
+const CARGA_DIFERIDA = [
+  ['listaHeroCarrusel', () => cargarHeroCarrusel()],
+  ['listaClaseBiblioteca', () => cargarBibliotecaClasesAdmin()],
+  ['listaContactosCampana', () => cargarContactosCampana()],
+  ['listaCampanasEnviadas', () => cargarCampanasEnviadas()],
+  ['listaBlogAdmin', () => cargarBlogAdmin()],
+  ['listaVentas', () => cargarVentas()],
+  ['listaClientes', () => cargarClientesLista()],
+  ['resumenRegalos', () => cargarResumenRegalos()],
+  ['listaSuscriptores', () => cargarSuscriptores()],
+  ['listaInscripcionesTaller', () => cargarInscripcionesTaller()],
+  ['listaRegistrosQr', () => cargarRegistrosQr()],
+  ['listaClaseGratis', () => cargarClaseGratis()],
+  ['claseGratisCupo', () => cargarConfirmacionesClaseGratis()],
+  ['listaVideoEnVivo', () => cargarVideoEnVivoAdmin()],
+  ['listaCursosAdmin', () => cargarCursosAdmin()],
+  ['listaResenas', () => cargarResenas()],
+  ['listaComunidadAdmin', () => cargarComunidadAdmin()],
+  ['listaAnunciosAdmin', () => cargarAnuncios()],
+  ['listaGaleriaAdmin', () => cargarGaleria()],
+];
+let cargaDiferidaLista = false;
+function prepararCargaDiferida(){
+  if(cargaDiferidaLista) return;
+  cargaDiferidaLista = true;
+  const pendientes = CARGA_DIFERIDA.map(([id, fn]) => ({ el: $(id), fn }));
+  const sinVer = pendientes.filter(p => !p.el || !('IntersectionObserver' in window));
+  sinVer.forEach(p => p.fn());
+  const obs = 'IntersectionObserver' in window ? new IntersectionObserver((entradas) => {
+    entradas.forEach(e => {
+      if(!e.isIntersecting) return;
+      obs.unobserve(e.target);
+      const p = pendientes.find(x => x.el === e.target);
+      if(p && !p.hecho){ p.hecho = true; p.fn(); }
+    });
+  }, { rootMargin: '600px 0px' }) : null;
+  if(obs) pendientes.filter(p => p.el).forEach(p => obs.observe(p.el));
+  // Lo que siga sin pedirse (secciones ocultas o que nadie ha visto) se
+  // carga despues, de una en una, para que nada quede vacio.
+  setTimeout(async () => {
+    for (const p of pendientes) {
+      if (!p.el || p.hecho) continue;
+      if (obs) obs.unobserve(p.el);
+      p.hecho = true;
+      try { await p.fn(); } catch (e) {}
+    }
+  }, 5000);
+}
+
 function mostrarDashboard(mostrar){
   $('vistaLogin').classList.toggle('hidden', mostrar);
   $('vistaDashboard').classList.toggle('hidden', !mostrar);
   if(mostrar){
     cargarContenidoAdmin();
-    cargarHeroCarrusel();
-    cargarBibliotecaClasesAdmin();
-    cargarContactosCampana();
-    cargarCampanasEnviadas();
     cargarProductosAdmin();
     cargarApartadosEbooksAdmin();
-    cargarBlogAdmin();
     cargarSedes();
-    cargarVentas();
-    cargarClientesLista();
-    cargarResumenRegalos();
-    cargarSuscriptores();
-    cargarInscripcionesTaller();
-    cargarRegistrosQr();
-    cargarClaseGratis();
-    cargarConfirmacionesClaseGratis();
-    cargarVideoEnVivoAdmin();
-    cargarCursosAdmin();
-    cargarResenas();
-    cargarComunidadAdmin();
-    cargarAnuncios();
-    cargarGaleria();
+    prepararCargaDiferida();
   }
 }
 
@@ -2708,6 +2743,7 @@ function actualizarResumenSeleccionCampana(){
   $('campanaSeleccionResumen').textContent = `${SELECCIONADOS_CAMPANA.size} contacto(s) seleccionado(s) para el próximo envío`;
 }
 
+let LIMITE_CONTACTOS_VISIBLES = 300;
 function pintarContactosCampana(lista){
   ULTIMA_LISTA_MOSTRADA = lista;
   const cont = $('listaContactosCampana');
@@ -2722,7 +2758,11 @@ function pintarContactosCampana(lista){
     cont.innerHTML = '<p class="p-4 text-sm text-carbon/40">Todavía no has importado ningún contacto.</p>';
     return;
   }
-  cont.innerHTML = lista.map(c => `
+  // Pintar 15 mil filas trababa el panel: se pintan las primeras y el
+  // resto con "Mostrar más". La seleccion vive en SELECCIONADOS_CAMPANA,
+  // no en las casillas, asi que "seleccionar todos" sigue abarcando todo.
+  const visibles = lista.slice(0, LIMITE_CONTACTOS_VISIBLES);
+  cont.innerHTML = visibles.map(c => `
     <div class="flex items-center justify-between gap-3 border-b border-vino/5 px-4 py-2.5 last:border-0">
       <label class="flex min-w-0 items-center gap-3">
         <input type="checkbox" class="chkContactoCampana h-4 w-4 shrink-0 rounded border-vino/25" data-id="${c.id}" ${SELECCIONADOS_CAMPANA.has(c.id) ? 'checked' : ''} ${c.activo === false ? 'disabled' : ''}>
@@ -2734,6 +2774,10 @@ function pintarContactosCampana(lista){
       </label>
       <button type="button" data-id="${c.id}" class="btnBorrarContactoCampana shrink-0 rounded-full border border-red-200 px-3 py-1 font-ui text-[10px] font-600 uppercase tracking-wider text-red-600 hover:border-red-400 transition">Borrar</button>
     </div>`).join('');
+  if(lista.length > visibles.length){
+    cont.insertAdjacentHTML('beforeend', `<button type="button" id="btnMasContactos" class="w-full px-4 py-3 text-sm font-600 text-vino hover:bg-vino/5">Mostrar más (${visibles.length} de ${lista.length})</button>`);
+    $('btnMasContactos').addEventListener('click', () => { LIMITE_CONTACTOS_VISIBLES += 500; pintarContactosCampana(lista); });
+  }
   cont.querySelectorAll('.chkContactoCampana').forEach(chk => {
     chk.addEventListener('change', () => {
       const id = Number(chk.dataset.id);
