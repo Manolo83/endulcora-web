@@ -1487,6 +1487,22 @@ async function init() {
       data._migVentasExtraTaller = true;
       changed = true;
     }
+    // Inscripciones del formulario con folio de anticipo que quedaron
+    // "pendiente": cuentan como pagadas por transferencia (4 nov 2026).
+    if (!data._migFolioPagadoTaller) {
+      (data.inscripcionesTaller || []).forEach((i) => {
+        if (String(i.folioAnticipo || '').trim() && i.estadoPago !== 'pagado') {
+          i.tipoPago = 'anticipo';
+          i.estadoPago = 'pagado';
+          i.montoPagado = parseFloat(String(i.montoAnticipo || '').replace(/[^0-9.]/g, '')) || 0;
+          i.formaPago = 'Transferencia';
+          const ses = (data.sesionesTaller || []).find((x) => x.id === i.sesionTallerId);
+          i.saldo = ses && ses.precioTotal ? Math.max(0, ses.precioTotal - i.montoPagado) : null;
+        }
+      });
+      data._migFolioPagadoTaller = true;
+      changed = true;
+    }
     // Asistencia y recetario (portal de Lex, Fase 3).
     if (!data._migAsistenciaTaller) {
       (data.inscripcionesTaller || []).forEach((i) => {
