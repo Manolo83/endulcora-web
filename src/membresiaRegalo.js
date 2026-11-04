@@ -37,13 +37,10 @@ function yaTuvoMembresiaORegalo(u) {
 //   2. Cuenta nueva con el mismo telefono que otra que ya lo tuvo: no.
 //   3. Cuenta nueva con todo distinto pero la misma cuenta de Mercado Pago:
 //      se detecta al activarse (ver payerYaUsoRegalo) y se cancela sola.
-// 4 nov 2026 (Manuel): el mes gratis es para todos, tambien para quien ya
-// fue miembro antes. Lo unico que se cuida es que cada persona lo use UNA
-// vez (si no, bastaria cancelar y volver a pedirlo cada mes): misma cuenta,
-// mismo telefono o misma cuenta de Mercado Pago (ver payerYaUsoRegalo).
-function yaUsoRegalo(u) {
-  return !!(u.regaloPayerId || u.regaloRechazado);
-}
+// Mes gratis SOLO para quien nunca ha sido miembro (Manuel, 4 nov 2026):
+// quien ya fue miembro y cancelo vuelve pagando. Una vez por persona:
+// misma cuenta, mismo telefono o misma cuenta de Mercado Pago.
+const yaUsoRegalo = yaTuvoMembresiaORegalo;
 function esElegibleRegalo(usuario) {
   if (!usuario) return false;
   if (usuario.membresiaEstado === 'activa') return false;
