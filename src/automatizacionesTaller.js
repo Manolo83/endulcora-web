@@ -175,6 +175,8 @@ async function revisarAutomatizacionesTaller() {
     if (cambiosNov26S1 > 0) {
       console.log(`[talleres] ${cambiosNov26S1} ajustes en los talleres de nov26 semana 1 (fusion/foto/precio).`);
     }
+    const ajustesCalNov26 = store.ajustarCalendarioNov26();
+    if (ajustesCalNov26 > 0) console.log(`[talleres] ${ajustesCalNov26} ajustes al calendario de noviembre (Manzanas 26, Galleta Decorada Navidena).`);
     const cambiosNov26S2a4 = store.asegurarTalleresNov26S2a4();
     if (cambiosNov26S2a4 > 0) {
       console.log(`[talleres] ${cambiosNov26S2a4} ajustes en los talleres de nov26 semanas 2 a 4 (fusion/foto/precio/horario).`);

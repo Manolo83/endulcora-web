@@ -3176,6 +3176,37 @@ module.exports = {
   // cambia sola. El cambio se hace SOLO si la foto que tiene hoy es byte
   // por byte el arte que pusimos nosotros (se compara la huella sha256):
   // una foto subida a mano desde /admin nunca se pisa.
+  // Ajustes al calendario de noviembre 2026 que pidio Manuel el 4 nov:
+  // Manzanas Navidenas de Division va el jueves 26 (no el miercoles 25) y
+  // Galleta Decorada Navidena se da en Nativitas el 26 y el 28. Corre en
+  // cada revision porque la sincronizacion con la hoja del calendario puede
+  // volver a crear la del 25; esa solo se quita si nadie se ha inscrito.
+  ajustarCalendarioNov26() {
+    const normalizar = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const sedes = this.getSedes();
+    const division = sedes.find((x) => normalizar(x.nombre).includes('division'));
+    const nativitas = sedes.find((x) => normalizar(x.nombre).includes('nativitas'));
+    const sesiones = () => this.getSesionesTaller();
+    const buscar = (sede, fecha, clave) => sesiones().find((x) => sede && x.sedeId === sede.id && x.fecha === fecha && normalizar(x.titulo).includes(clave));
+    const inscritos = (id) => this.getInscripcionesTaller().filter((i) => i.sesionTallerId === id).length;
+    let cambios = 0;
+    const m25 = buscar(division, '2026-11-25', 'manzana');
+    if (m25) {
+      if (!buscar(division, '2026-11-26', 'manzana')) { this.updateSesionTaller(m25.id, { fecha: '2026-11-26' }); cambios++; }
+      else if (!inscritos(m25.id)) { this.deleteSesionTaller(m25.id); cambios++; }
+    }
+    const c = this.getContent();
+    ['2026-11-26', '2026-11-28'].forEach((fecha) => {
+      if (nativitas && !buscar(nativitas, fecha, 'galleta decorada')) {
+        this.addSesionTaller({
+          sedeId: nativitas.id, fecha, titulo: 'Galleta Decorada Navideña', horario: '10:00 am – 2:00 pm',
+          precioTotal: c.taller_precio_default, anticipo: c.taller_anticipo_default, cupoMaximo: c.taller_cupo_default,
+        });
+        cambios++;
+      }
+    });
+    return cambios;
+  },
   asegurarTalleresNov26S2a4() {
     const data = load();
     const SEED_DIR_TALLERES = path.join(__dirname, '..', 'seed-archivos', 'talleres-nov26-s2a4');
