@@ -1426,7 +1426,7 @@
 
       <label class="mt-6 flex items-center gap-2 text-sm text-carbon/70">
         <input id="chkSoloPagadosTaller" type="checkbox" checked class="h-4 w-4 rounded border-vino/30">
-        Mostrar solo quien ya pagó (para contar lugares reales y decidir si se da el taller)
+        Mostrar solo quien ya pagó o dejó folio de anticipo (para contar lugares reales y decidir si se da el taller)
       </label>
       <div id="listaInscripcionesTaller" class="mt-3 space-y-6"></div>
     </section>
@@ -4508,7 +4508,10 @@ function renderInscripcionesTaller(){
   // a quien tiene estadoPago 'pagado'. Mostrar a todos por default confunde
   // el aforo real del taller.
   const soloPagados = $('chkSoloPagadosTaller').checked;
-  const lista = soloPagados ? INSCRIPCIONES_TALLER.filter(i => i.estadoPago === 'pagado') : INSCRIPCIONES_TALLER;
+  // Quien se inscribe con el formulario publico ya pago su anticipo y deja
+  // el folio del comprobante: tambien cuenta como pagado aunque el pago no
+  // haya pasado por Mercado Pago.
+  const lista = soloPagados ? INSCRIPCIONES_TALLER.filter(i => i.estadoPago === 'pagado' || String(i.folioAnticipo || '').trim()) : INSCRIPCIONES_TALLER;
   if(!lista.length){
     cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Nadie ha pagado todavía. Quita el filtro de arriba para ver también a quien sigue pendiente.</p>';
     return;
