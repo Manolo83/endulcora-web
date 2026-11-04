@@ -590,6 +590,11 @@ router.post('/inscripcion-taller', async (req, res) => {
     // "comoSeEntero". Ver src/origenTrafico.js.
     ...origenTrafico.idsDeClic(b),
   }));
+  // Quien se inscribe con su folio de transferencia ya pago su anticipo:
+  // queda inscrito y pagado en automatico (decision de Manuel, 4 nov 2026).
+  items.forEach((it) => store.actualizarPagoInscripcionTaller(it.id, {
+    tipoPago: 'anticipo', estadoPago: 'pagado', montoPagado: montoPorPersona, formaPago: 'Transferencia',
+  }));
 
   res.status(201).json({ ok: true, id: items[0].id, ids: items.map((i) => i.id) });
 
