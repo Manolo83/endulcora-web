@@ -1809,10 +1809,26 @@ function load() {
   return data;
 }
 
+// Los datos viven en memoria y se guardan completos (un solo JSON) en
+// Postgres. Antes cada save() encolaba su propia escritura: con 15 mil
+// contactos, varias escrituras seguidas serializaban todo una y otra vez y
+// trababan el servidor (el panel se sentia lento). Ahora los save() que
+// llegan mientras hay una escritura en curso se juntan en UNA sola
+// escritura siguiente, que ya lleva todos los cambios.
+let escrituraPendiente = false;
 function save() {
+  if (escrituraPendiente) return;
+  escrituraPendiente = true;
   colaEscritura = colaEscritura
-    .then(() => persistirAhora())
-    .catch((e) => console.error('[store] No se pudo guardar en la base de datos:', e.message));
+    .then(() => new Promise((r) => setTimeout(r, 200)))
+    .then(() => {
+      escrituraPendiente = false;
+      return persistirAhora();
+    })
+    .catch((e) => {
+      escrituraPendiente = false;
+      console.error('[store] No se pudo guardar en la base de datos:', e.message);
+    });
 }
 
 function flush() {
