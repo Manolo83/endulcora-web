@@ -1583,6 +1583,7 @@
         <input id="campanaContactosBuscador" type="search" placeholder="Buscar por correo, nombre o etiqueta (ej. segmento:asistio_compro)…" class="mt-3 w-full max-w-sm rounded-full border border-vino/15 bg-crema/60 px-4 py-2 text-sm outline-none focus:border-vino/40">
         <div class="mt-3 flex flex-wrap items-center gap-3">
           <button type="button" id="btnSeleccionarTodosContactos" class="rounded-full border border-vino/25 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/5 transition">Seleccionar TODOS los contactos activos</button>
+          <button type="button" id="btnSeleccionarCdmx" class="rounded-full border border-vino/25 bg-vino/5 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:bg-vino/10 transition" title="Solo contactos activos con teléfono que empieza con 55 o 56">Vive en CDMX o alrededores</button>
           <button type="button" id="btnQuitarSeleccionContactos" class="rounded-full border border-carbon/15 px-4 py-1.5 font-ui text-[11px] font-600 uppercase tracking-wider text-carbon/50 hover:border-carbon/40 transition">Quitar toda la selección</button>
         </div>
         <label class="mt-3 flex items-center gap-2 text-sm text-carbon/70">
@@ -2802,6 +2803,20 @@ $('btnSeleccionarTodosContactos').addEventListener('click', () => {
   const activos = CONTACTOS_CAMPANA.filter(c => c.activo !== false);
   if(!confirm(`¿Seleccionar los ${activos.length} contactos activos? Se les mandará el correo a todos ellos.`)) return;
   SELECCIONADOS_CAMPANA = new Set(activos.map(c => c.id));
+  pintarContactosCampana(ULTIMA_LISTA_MOSTRADA.length ? ULTIMA_LISTA_MOSTRADA : CONTACTOS_CAMPANA);
+});
+
+// "Vive en CDMX o alrededores": contactos activos cuyo telefono (ultimos 10
+// digitos) empieza con 55 o 56.
+function esTelefonoCdmx(tel){
+  const d = String(tel || '').replace(/\D/g, '');
+  return d.length >= 10 && /^5[56]/.test(d.slice(-10));
+}
+$('btnSeleccionarCdmx').addEventListener('click', () => {
+  const cdmx = CONTACTOS_CAMPANA.filter(c => c.activo !== false && esTelefonoCdmx(c.telefono));
+  if(!cdmx.length){ alert('No hay contactos activos con teléfono 55 o 56.'); return; }
+  if(!confirm(`¿Seleccionar los ${cdmx.length} contactos que viven en CDMX o alrededores (teléfono 55 o 56)? Se les mandará el correo solo a ellos.`)) return;
+  SELECCIONADOS_CAMPANA = new Set(cdmx.map(c => c.id));
   pintarContactosCampana(ULTIMA_LISTA_MOSTRADA.length ? ULTIMA_LISTA_MOSTRADA : CONTACTOS_CAMPANA);
 });
 
