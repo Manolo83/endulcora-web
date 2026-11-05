@@ -3582,7 +3582,7 @@ module.exports = {
   addInscripcionTaller({
     nombre, whatsapp, correo, sesionTallerId, taller, fecha, sede, horario, montoAnticipo, folioAnticipo,
     comoSeEntero, preferencias, cumpleDia, cumpleMes, esDeMexico, estado, pais,
-    esPrimeraVez, aceptaPromociones, aceptaAvisoPrivacidad,
+    esPrimeraVez, recibioPromocion, aceptaPromociones, aceptaAvisoPrivacidad,
     fbp, fbc, gclid, gbraid, wbraid,
     personasAnticipo, montoTotalAnticipo, anticipoPagadoPor,
   }) {
@@ -3617,6 +3617,8 @@ module.exports = {
       estado: esDeMexico && ESTADOS_MEXICO.includes(estado) ? estado : '',
       pais: !esDeMexico ? String(pais || '').trim().slice(0, 80) : '',
       esPrimeraVez: !!esPrimeraVez,
+      // 'si' / 'no' / '' (registros de antes de que existiera la pregunta).
+      recibioPromocion: ['si', 'no'].includes(recibioPromocion) ? recibioPromocion : '',
       aceptaPromociones: !!aceptaPromociones,
       aceptaAvisoPrivacidad: !!aceptaAvisoPrivacidad,
       // De donde llego, igual que en los pedidos: los ids de clic que trae su

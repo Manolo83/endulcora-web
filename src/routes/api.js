@@ -549,6 +549,7 @@ router.post('/inscripcion-taller', async (req, res) => {
   const montoPorPersona = Math.round((montoTotal / numPersonas) * 100) / 100;
   const errorZona = errorZonaInvalida(b);
   if (errorZona) return res.status(400).json({ error: errorZona });
+  if (!['si', 'no'].includes(b.recibioPromocion)) return res.status(400).json({ error: 'Dinos si recibiste alguna promoción (sí o no).' });
   if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para inscribirte.' });
 
   const sesion = store.getSesionesTaller().find((s) => s.id === sesionTallerId);
@@ -584,6 +585,7 @@ router.post('/inscripcion-taller', async (req, res) => {
     estado: b.estado,
     pais: b.pais,
     esPrimeraVez: b.esPrimeraVez,
+    recibioPromocion: b.recibioPromocion,
     aceptaPromociones: b.aceptaPromociones,
     aceptaAvisoPrivacidad: b.aceptaAvisoPrivacidad,
     // De donde llego de verdad, aparte de lo que haya contestado en

@@ -190,6 +190,14 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4E1454; }
     </div>
 
     <div>
+      <span class="etiqueta-inscripcion">¿Recibiste alguna promoción para este taller?</span>
+      <div class="flex gap-5">
+        <label class="flex items-center gap-2 text-sm text-carbon/80"><input type="radio" name="recibioPromocion" value="si" required class="h-4 w-4">Sí</label>
+        <label class="flex items-center gap-2 text-sm text-carbon/80"><input type="radio" name="recibioPromocion" value="no" required class="h-4 w-4">No</label>
+      </div>
+    </div>
+
+    <div>
       <span class="etiqueta-inscripcion">¿Es tu primera vez en un taller con nosotros?</span>
       <div class="flex gap-5">
         <label class="flex items-center gap-2 text-sm text-carbon/80"><input type="radio" name="esPrimeraVez" value="si" class="h-4 w-4">Sí, es mi primera vez</label>
@@ -508,6 +516,7 @@ form.addEventListener('submit', async (e) => {
     estado: esDeMexico === 'si' ? datos.get('estado') : '',
     pais: esDeMexico === 'no' ? datos.get('pais') : '',
     esPrimeraVez: datos.get('esPrimeraVez') === 'si',
+    recibioPromocion: datos.get('recibioPromocion') || '',
     aceptaPromociones: datos.get('aceptaPromociones') === 'on',
     aceptaAvisoPrivacidad: datos.get('aceptaAvisoPrivacidad') === 'on',
     ...idsDeClic(),
