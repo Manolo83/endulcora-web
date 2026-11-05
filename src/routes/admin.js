@@ -1440,6 +1440,7 @@ router.get('/api/inscripciones-taller/excel', requireAdminOLectura, async (req, 
     { header: 'Otras preferencias', key: 'preferencias', width: 28 },
     { header: 'Zona', key: 'zona', width: 18 },
     { header: '¿Primera vez?', key: 'esPrimeraVez', width: 12 },
+    { header: '¿Recibió promoción?', key: 'recibioPromocion', width: 14 },
     { header: 'Registrado el', key: 'createdAt', width: 18 },
   ];
 
@@ -1487,6 +1488,7 @@ router.get('/api/inscripciones-taller/excel', requireAdminOLectura, async (req, 
           preferencias: i.preferencias,
           zona: textoZona(i),
           esPrimeraVez: i.esPrimeraVez ? 'Sí' : 'No',
+          recibioPromocion: i.recibioPromocion === 'si' ? 'Sí' : i.recibioPromocion === 'no' ? 'No' : '',
           createdAt: new Date(i.createdAt).toLocaleDateString('es-MX'),
         });
       });

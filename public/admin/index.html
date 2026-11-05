@@ -4574,6 +4574,7 @@ function renderInscripcionesTaller(){
               <th class="px-5 py-3 font-600">Contacto</th>
               <th class="px-5 py-3 font-600">Horario</th>
               <th class="px-5 py-3 font-600">Anticipo (nota)</th>
+              <th class="px-5 py-3 font-600">¿Recibió promoción?</th>
               <th class="px-5 py-3 font-600">¿Cómo se enteró?</th>
               <th class="px-5 py-3 font-600">Origen real</th>
               <th class="px-5 py-3 font-600">Preferencias</th>
@@ -4591,6 +4592,7 @@ function renderInscripcionesTaller(){
                 <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(i.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(i.correo)}</div></td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.horario)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.montoAnticipo)}${i.folioAnticipo ? `<div class="text-xs text-carbon/50">Folio: ${escapeHtml(i.folioAnticipo)}</div>` : ''}${(i.personasAnticipo || 1) > 1 ? `<div class="text-xs text-carbon/50">Grupo de ${i.personasAnticipo} · total $${escapeHtml(i.montoTotalAnticipo)}${i.anticipoPagadoPor ? ` · pagó ${escapeHtml(i.anticipoPagadoPor)}` : ''}</div>` : ''}</td>
+                <td class="px-5 py-3">${i.recibioPromocion === 'si' ? '<span class="rounded-full bg-emerald-100 px-2.5 py-0.5 font-ui text-[11px] font-600 text-emerald-700">Sí</span>' : i.recibioPromocion === 'no' ? '<span class="rounded-full bg-carbon/10 px-2.5 py-0.5 font-ui text-[11px] font-600 text-carbon/60">No</span>' : '<span class="text-carbon/40">—</span>'}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.comoSeEntero || '—')}</td>
                 <td class="px-5 py-3">${celdaOrigen(i)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.preferencias || '—')}</td>
@@ -4701,7 +4703,7 @@ $('formInscripcionManual').addEventListener('submit', async (e) => {
 
 $('btnExportarInscripcionesTaller').addEventListener('click', () => {
   if(!INSCRIPCIONES_TALLER.length){ toast('No hay inscripciones para exportar'); return; }
-  const encabezado = 'nombre,whatsapp,correo,taller,fecha,sede,horario,monto_anticipo,folio_anticipo,como_se_entero,origen_real,preferencias,cumpleanos,primera_vez,acepta_promociones,registrado_el';
+  const encabezado = 'nombre,whatsapp,correo,taller,fecha,sede,horario,monto_anticipo,folio_anticipo,como_se_entero,origen_real,preferencias,cumpleanos,primera_vez,recibio_promocion,acepta_promociones,registrado_el';
   const csvCelda = (v) => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
   const filas = [encabezado, ...INSCRIPCIONES_TALLER.map(i => [
     i.nombre, i.whatsapp, i.correo, i.taller, i.fecha, i.sede, i.horario, i.montoAnticipo, i.folioAnticipo || '',
@@ -4710,6 +4712,7 @@ $('btnExportarInscripcionesTaller').addEventListener('click', () => {
     i.preferencias || '',
     i.cumpleDia && i.cumpleMes ? `${i.cumpleDia}-${MESES_CORTOS[i.cumpleMes]}` : '',
     i.esPrimeraVez ? 'si' : 'no',
+    i.recibioPromocion || '',
     i.aceptaPromociones ? 'si' : 'no',
     i.createdAt,
   ].map(csvCelda).join(','))];
