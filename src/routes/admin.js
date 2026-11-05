@@ -357,7 +357,6 @@ router.post('/api/buen-fin/correo/enviar', requireAdmin, (req, res) => {
     plantilla: 'buen-fin',
     ebookIds: promoBuenFin.masVendidos(4).map((e) => e.id),
     contactoIds: destinatarios.map((c) => c.id),
-    plantilla: esHtmlCompleto ? 'html' : '',
   });
   res.status(202).json(campana);
   procesarCampana(campana.id).catch(() => {});
@@ -2344,6 +2343,7 @@ router.post('/api/campanas/enviar', requireAdmin, (req, res) => {
     videoUrl: videoUrlLimpia,
     botonTexto: botonTextoLimpio,
     contactoIds: destinatarios.map((c) => c.id),
+    plantilla: esHtmlCompleto ? 'html' : '',
   });
   res.status(202).json(campana);
   procesarCampana(campana.id).catch(() => {});
