@@ -3558,6 +3558,13 @@ module.exports = {
   getInscripcionesTaller() {
     return [...load().inscripcionesTaller].sort((a, b) => b.id - a.id);
   },
+  // Lo que ve el equipo (lista de inscritos en /admin, su Excel y el portal
+  // de Lex): solo quien termino el flujo de venta. Las compras en linea que
+  // se quedaron sin pagar siguen guardadas (apartan cupo un rato y sirven
+  // para recuperar pagos), pero no aparecen como inscritos.
+  getInscripcionesTallerConfirmadas() {
+    return this.getInscripcionesTaller().filter((i) => !(i.comoSeEntero === 'Pago en línea (endulcora.com)' && i.estadoPago !== 'pagado'));
+  },
   // Marcas de los correos y la reseña de una inscripcion (correo 11 del
   // plan de ventas, ver src/correosTaller.js). Solo estos campos.
   marcarInscripcionTaller(id, patch) {
