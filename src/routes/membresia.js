@@ -397,7 +397,7 @@ router.get('/estado', async (req, res) => {
     usuario = store.getUserById(usuario.id);
   }
   res.json({
-    activa: usuario.membresiaEstado === 'activa',
+    activa: usuario.membresiaEstado === 'activa' || !!req.session.vistaPreviaMasterclass,
     estado: usuario.membresiaEstado,
     regalo: regalo.resumenRegalo(usuario),
     elegibleRegalo: regalo.esElegibleRegalo(usuario),
@@ -436,7 +436,7 @@ function registroMasterclassConRecetario(usuario) {
 }
 
 router.get('/contenido', (req, res) => {
-  if (!esAdmin(req)) {
+  if (!esAdmin(req) && !(req.session && req.session.vistaPreviaMasterclass)) {
     const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
     if (!usuario || usuario.membresiaEstado !== 'activa') {
       return res.status(403).json({ error: 'Necesitas una membresía activa para ver este contenido.' });
