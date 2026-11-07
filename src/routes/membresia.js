@@ -405,6 +405,17 @@ router.get('/estado', async (req, res) => {
   });
 });
 
+// Recetario de la master class (acceso anticipado): se guarda en su
+// membresia. Se busca por el correo de su cuenta el registro pagado al que
+// ya se le entrego (desde un dia antes de la clase).
+function registroMasterclassConRecetario(usuario) {
+  if (!usuario || !usuario.email) return null;
+  const correo = String(usuario.email).toLowerCase();
+  const lista = store.getRegistrosClaseGratis().filter((r) => String(r.correo || '').toLowerCase() === correo
+    && r.accesoEstado === 'pagado' && r.accesoRecetarioUrl && r.accesoRecetarioCorreoEnviado);
+  return lista.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)))[0] || null;
+}
+
 router.get('/contenido', (req, res) => {
   if (!esAdmin(req)) {
     const usuario = req.session && req.session.userId ? store.getUserById(req.session.userId) : null;
@@ -424,6 +435,11 @@ router.get('/contenido', (req, res) => {
     recetarioDisponible: !!recetarioUrl,
     revistaDisponible: !!revistaUrl,
     recetarioLiveDisponible: !!claseRecetario && !yaEnSuRegalo,
+    recetarioMasterclass: (() => {
+      const r = registroMasterclassConRecetario(usuario)
+        || (esAdmin(req) && store.getContent().clasegratis_recetario_url ? { fecha: store.getContent().clasegratis_fecha } : null);
+      return r ? { titulo: store.getContent().clasegratis_titulo || 'Master class', fecha: r.fecha } : null;
+    })(),
   });
 });
 
@@ -510,6 +526,26 @@ router.get('/recetario-live', (req, res) => {
   const contenido = store.getContent();
   if (!contenido.clase_recetario_url) return res.status(404).send('Esta clase todavía no tiene recetario.');
   enviarArchivoSubido(res, contenido.clase_recetario_url, contenido.clase_recetario_nombre, 'No pudimos encontrar el recetario en este momento.');
+});
+
+router.get('/recetario-masterclass', (req, res) => {
+  const c = store.getContent();
+  if (esAdmin(req) && c.clasegratis_recetario_url) return enviarArchivoSubido(res, c.clasegratis_recetario_url, c.clasegratis_recetario_nombre, 'No pudimos encontrar el recetario en este momento.');
+  const usuario = miembroActivoDeRequest(req);
+  if (!usuario) return res.status(403).send('Necesitas una membresía activa para descargar el recetario.');
+  const r = registroMasterclassConRecetario(usuario);
+  if (!r) return res.status(404).send('No hay recetario de master class en tu cuenta.');
+  enviarArchivoSubido(res, r.accesoRecetarioUrl, r.accesoRecetarioNombre, 'No pudimos encontrar el recetario en este momento.');
+});
+
+// Link del correo del recetario: entra a su cuenta (el token es el mismo
+// del link personal de su acceso anticipado) y lo lleva a su membresia,
+// donde esta guardado el recetario.
+router.get('/entrar-masterclass', (req, res) => {
+  const registro = store.getRegistroClaseGratisPorToken(req.query.id, req.query.token);
+  const usuario = registro && registro.accesoEstado === 'pagado' ? store.getUserByEmail(registro.correo) : null;
+  if (usuario && req.session) req.session.userId = usuario.id;
+  res.redirect('/membresia#recetario-masterclass');
 });
 
 // Recetario del live en el que activo su mes de regalo (copia guardada en
