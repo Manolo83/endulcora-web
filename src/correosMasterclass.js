@@ -250,6 +250,21 @@ function asegurarRecetarioIncluido() {
   console.log(`[masterclass] Recetario incluido cargado para ${contenido.clasegratis_fecha}.`);
 }
 
+function detalleRecetario(contenido, registro = {}) {
+  const f = contenido.clasegratis_fecha ? new Date(`${contenido.clasegratis_fecha}T12:00:00${OFFSET_CDMX}`) : null;
+  const dia = f ? f.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Mexico_City' }) : '';
+  const partes = [dia && dia.charAt(0).toUpperCase() + dia.slice(1), registro.horario ? `${registro.horario} h` : ''].filter(Boolean);
+  return partes.join(' · ');
+}
+
+// Prueba del correo del recetario (desde /admin): mismo diseño, a un solo correo.
+async function pruebaRecetario(to) {
+  const contenido = store.getContent();
+  const { enviarCorreoRecetarioAcceso } = require('./email');
+  const link = contenido.clasegratis_recetario_url ? `${SITE_URL}${contenido.clasegratis_recetario_url}` : SITE_URL;
+  await enviarCorreoRecetarioAcceso({ to, nombre: 'Manuel', titulo: `Masterclass ${temaDe(contenido)}`, link, detalle: detalleRecetario(contenido, { horario: '12:00' }), ubicacion: contenido.clasegratis_ubicacion || '' });
+}
+
 async function mandarRecetarios(ahora, pausaMs) {
   try { asegurarRecetarioIncluido(); } catch (e) { console.error('[masterclass] No se pudo cargar el recetario incluido:', e.message); }
   const contenido = store.getContent();
@@ -267,7 +282,7 @@ async function mandarRecetarios(ahora, pausaMs) {
         accesoRecetarioNombre: r.accesoRecetarioNombre || contenido.clasegratis_recetario_nombre || '',
       });
       const link = `${SITE_URL}/api/acceso-anticipado/recetario?id=${actual.id}&token=${actual.confirmToken}`;
-      await enviarCorreoRecetarioAcceso({ to: actual.correo, nombre: actual.nombre, titulo: temaDe(contenido), link });
+      await enviarCorreoRecetarioAcceso({ to: actual.correo, nombre: actual.nombre, titulo: `Masterclass ${temaDe(contenido)}`, link, detalle: detalleRecetario(contenido, actual), ubicacion: contenido.clasegratis_ubicacion || '' });
       store.updateRegistroClaseGratis(r.id, { accesoRecetarioCorreoEnviado: new Date().toISOString() });
       n += 1;
       if (pausaMs) await new Promise((ok) => setTimeout(ok, pausaMs));
@@ -359,4 +374,5 @@ function iniciarCorreosMasterclass() {
   setInterval(() => revisar().catch(() => {}), 5 * 60 * 1000);
 }
 
-module.exports = { CORREOS, horaInicio, ventanas, revisar, resumen, ejemplo, mandarConfirmacionRegistro, iniciarCorreosMasterclass, temaDe };
+module.exports = {
+  pruebaRecetario, CORREOS, horaInicio, ventanas, revisar, resumen, ejemplo, mandarConfirmacionRegistro, iniciarCorreosMasterclass, temaDe };

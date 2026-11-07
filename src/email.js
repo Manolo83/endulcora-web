@@ -1390,29 +1390,32 @@ async function enviarCorreoRecuperacionTaller({
 
 // Recetario de la master class que se subio despues de que la persona ya
 // habia pagado su acceso anticipado: se le avisa con el link para bajarlo.
-async function enviarCorreoRecetarioAcceso({ to, nombre, titulo, link }) {
+async function enviarCorreoRecetarioAcceso({ to, nombre, titulo, link, detalle = '', ubicacion = '' }) {
   const client = resendClient();
   if (!client) throw new Error('El envío de correos todavía no está configurado.');
   const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
   const { error } = await client.emails.send({
     from,
     to,
-    subject: `Ya está tu recetario de ${titulo || 'la master class'} 🍪`,
-    html: `
-      <div style="background:#f3ece4;padding:20px 10px;font-family:Arial,Helvetica,sans-serif;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;color:#2b1a1f;">
-        <tr><td style="background:#6b1d2f;color:#ffffff;text-align:center;padding:26px 24px;">
-          <div style="color:#F5A623;font-size:12px;font-weight:bold;letter-spacing:3px;">ENDULCORA</div>
-          <div style="font-size:24px;font-weight:bold;line-height:1.25;margin-top:8px;">Tu recetario ya está listo</div>
-        </td></tr>
-        <tr><td style="padding:26px 28px;font-size:16px;line-height:1.6;">
-          <p style="margin:0 0 14px;">Hola <b>${escapeHtml(String(nombre || '').trim().split(/\s+/)[0] || '')}</b>:</p>
-          <p style="margin:0 0 14px;">Como parte de tu acceso anticipado a <b>${escapeHtml(titulo || 'la master class')}</b>, aquí tienes tu recetario. Descárgalo y tenlo a la mano el día de la clase.</p>
-        </td></tr>
-        <tr><td align="center" style="padding:0 28px 28px;"><a href="${link}" style="display:inline-block;background:#d62839;color:#ffffff;text-decoration:none;font-weight:bold;font-size:17px;padding:16px 32px;border-radius:40px;">DESCARGAR MI RECETARIO</a></td></tr>
-        <tr><td style="background:#6b1d2f;color:#f3dfe3;text-align:center;padding:18px;font-size:12px;">Endulcora · Escuela de repostería · CDMX</td></tr>
-      </table></div>
-    `,
+    subject: `🍪 ¡Ya casi! Aquí está tu recetario de la ${titulo || 'master class'}`,
+    // Diseño aprobado por Manuel (7 nov 2026) para el recetario del acceso anticipado.
+    html: `<div style="margin:0;background:#f3ece4;font-family:Arial,Helvetica,sans-serif;color:#2b1a1f;padding:16px 10px">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden">
+<tr><td style="background:#6b1d2f;color:#fff;text-align:center;padding:24px 20px">
+<div style="color:#F5A623;font-size:20px;font-weight:bold;letter-spacing:1px">${escapeHtml(String(titulo || 'MASTERCLASS').toUpperCase())}</div>
+${detalle ? `<div style="color:#f3dfe3;font-size:13px;margin-top:4px">${escapeHtml(detalle)}</div>` : ''}
+<div style="margin:14px 0 0;font-size:24px;line-height:1.25;font-weight:bold">¡NOMBRE, ya casi! 🍪🎉</div></td></tr>
+<tr><td style="padding:22px 24px 6px;font-size:16px;line-height:1.55;text-align:center">
+¡Qué emoción tenerte! Tu <b>lugar está asegurado</b> y muy pronto vas a hornear con nosotros. 🤤<br><br>
+Aquí está <b>tu recetario</b>, uno de los beneficios de tu acceso anticipado:</td></tr>
+<tr><td align="center" style="padding:14px 24px 6px">
+<a href="${link}" style="display:inline-block;background:#d62839;color:#fff;text-decoration:none;font-weight:bold;font-size:17px;padding:16px 30px;border-radius:40px">📖 DESCARGAR MI RECETARIO</a></td></tr>
+${ubicacion ? `<tr><td style="padding:16px 24px 0;font-size:14px;line-height:1.6;text-align:center;color:#6e6e68">📍 ${escapeHtml(ubicacion)}<br>⏰ Llega 10 minutos antes de tu horario</td></tr>` : ''}
+<tr><td style="padding:16px 24px 22px;font-size:17px;text-align:center;font-weight:bold;color:#6b1d2f">¡Te esperamos con mucho gusto! 💛</td></tr>
+<tr><td align="center" style="padding:0 24px 22px">
+<a href="https://wa.me/5215575933916?text=Hola%2C%20tengo%20una%20duda%20de%20la%20masterclass" style="display:inline-block;background:#25D366;color:#fff;text-decoration:none;font-weight:bold;font-size:14px;padding:11px 22px;border-radius:40px">¿Dudas? WhatsApp</a></td></tr>
+<tr><td style="background:#6b1d2f;color:#f3dfe3;text-align:center;padding:14px;font-size:11px">Endulcora · Escuela de repostería · CDMX</td></tr>
+</table></div>`.replace('NOMBRE', `${escapeHtml(String(nombre || '').trim().split(/\s+/)[0] || '')}`),
   });
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }

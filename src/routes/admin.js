@@ -664,6 +664,17 @@ router.get('/api/masterclass/correos/vista/:n', requireAdmin, (req, res) => {
   res.type('html').send(html.replace('<body', `<body data-asunto="${asunto.replace(/"/g, '&quot;')}"`));
 });
 
+router.post('/api/masterclass/recetario/prueba', requireAdmin, async (req, res) => {
+  const correo = String((req.body || {}).email || '').trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) return res.status(400).json({ error: 'Escribe el correo donde quieres recibir la prueba.' });
+  try {
+    await require('../correosMasterclass').pruebaRecetario(correo);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(502).json({ error: e.message || 'No se pudo mandar la prueba.' });
+  }
+});
+
 router.post('/api/masterclass/correos/prueba', requireAdmin, async (req, res) => {
   const correos = require('../correosMasterclass');
   const { enviarCorreoHtml } = require('../email');
