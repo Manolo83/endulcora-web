@@ -255,6 +255,15 @@ body { background: #FBF4E9; }
       </div>
     </div>
 
+    <div id="recetario-masterclass" class="mt-6 hidden rounded-3xl bg-white p-6 ring-2 ring-flama">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Beneficio de tu acceso anticipado</p>
+      <h3 id="tituloRecetarioMasterclass" class="mt-1 font-display text-2xl leading-tight text-vino">Recetario de la master class</h3>
+      <p class="mt-2 text-sm text-carbon/65">Tu lugar ya está asegurado. Aquí tienes tu recetario, guardado en tu membresía para que lo descargues cuando quieras.</p>
+      <a href="/api/membresia/recetario-masterclass" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
+        Descargar mi recetario
+      </a>
+    </div>
+
     <div id="bloqueRecetarioLive" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
       <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Recetario de la clase en vivo</p>
       <a href="/api/membresia/recetario-live" class="mt-4 inline-flex items-center gap-2 rounded-full boton-vivo bg-vino px-6 py-3 font-ui text-[13px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
@@ -422,6 +431,12 @@ async function cargarContenidoMembresia(){
     const c = await res.json();
 
     document.getElementById('bloqueRecetarioLive').classList.toggle('hidden', !c.recetarioLiveDisponible);
+    if(c.recetarioMasterclass){
+      const bloqueMc = document.getElementById('recetario-masterclass');
+      document.getElementById('tituloRecetarioMasterclass').textContent = `Recetario · ${String(c.recetarioMasterclass.titulo).replace(/^\s*(master\s*class|masterclass)\s*:\s*/i, 'Master class ')}`;
+      bloqueMc.classList.remove('hidden');
+      if(location.hash === '#recetario-masterclass') setTimeout(() => bloqueMc.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+    }
     if(c.recetarioDisponible){
       document.getElementById('bloqueRecetarioMes').classList.remove('hidden');
       document.getElementById('recetarioMesEtiqueta').textContent = c.recetarioMes || 'este mes';
@@ -440,7 +455,7 @@ async function cargarContenidoMembresia(){
       document.getElementById('linkGrupoWhatsapp').href = c.whatsappGrupoUrl;
       document.getElementById('bloqueGrupoWhatsapp').classList.remove('hidden');
     }
-    if(!c.recetarioDisponible && !c.recetarioLiveDisponible && !(c.videoMostrar && c.videoYoutubeId) && !c.revistaDisponible && !REGALO){
+    if(!c.recetarioMasterclass && !c.recetarioDisponible && !c.recetarioLiveDisponible && !(c.videoMostrar && c.videoYoutubeId) && !c.revistaDisponible && !REGALO){
       document.getElementById('sinContenidoAviso').classList.remove('hidden');
     }
     // Viene del boton del recetario en el live: lo lleva directo ahi.

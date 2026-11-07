@@ -261,7 +261,7 @@ function detalleRecetario(contenido, registro = {}) {
 async function pruebaRecetario(to) {
   const contenido = store.getContent();
   const { enviarCorreoRecetarioAcceso } = require('./email');
-  const link = contenido.clasegratis_recetario_url ? `${SITE_URL}${contenido.clasegratis_recetario_url}` : SITE_URL;
+  const link = `${SITE_URL}/membresia#recetario-masterclass`;
   await enviarCorreoRecetarioAcceso({ to, nombre: 'Manuel', titulo: `Masterclass ${temaDe(contenido)}`, link, detalle: detalleRecetario(contenido, { horario: '12:00' }), ubicacion: contenido.clasegratis_ubicacion || '' });
 }
 
@@ -281,7 +281,7 @@ async function mandarRecetarios(ahora, pausaMs) {
         accesoRecetarioUrl: r.accesoRecetarioUrl || url,
         accesoRecetarioNombre: r.accesoRecetarioNombre || contenido.clasegratis_recetario_nombre || '',
       });
-      const link = `${SITE_URL}/api/acceso-anticipado/recetario?id=${actual.id}&token=${actual.confirmToken}`;
+      const link = `${SITE_URL}/api/membresia/entrar-masterclass?id=${actual.id}&token=${actual.confirmToken}`;
       await enviarCorreoRecetarioAcceso({ to: actual.correo, nombre: actual.nombre, titulo: `Masterclass ${temaDe(contenido)}`, link, detalle: detalleRecetario(contenido, actual), ubicacion: contenido.clasegratis_ubicacion || '' });
       store.updateRegistroClaseGratis(r.id, { accesoRecetarioCorreoEnviado: new Date().toISOString() });
       n += 1;

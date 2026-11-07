@@ -1407,9 +1407,9 @@ ${detalle ? `<div style="color:#f3dfe3;font-size:13px;margin-top:4px">${escapeHt
 <div style="margin:14px 0 0;font-size:24px;line-height:1.25;font-weight:bold">¡NOMBRE, ya casi! 🍪🎉</div></td></tr>
 <tr><td style="padding:22px 24px 6px;font-size:16px;line-height:1.55;text-align:center">
 ¡Qué emoción tenerte! Tu <b>lugar está asegurado</b> y muy pronto vas a hornear con nosotros. 🤤<br><br>
-Aquí está <b>tu recetario</b>, uno de los beneficios de tu acceso anticipado:</td></tr>
+Tu <b>recetario</b> ya te espera en <b>tu membresía Endulcora</b> (tu mes gratis del acceso anticipado). Entra, descárgalo y conoce todo lo que incluye:</td></tr>
 <tr><td align="center" style="padding:14px 24px 6px">
-<a href="${link}" style="display:inline-block;background:#d62839;color:#fff;text-decoration:none;font-weight:bold;font-size:17px;padding:16px 30px;border-radius:40px">📖 DESCARGAR MI RECETARIO</a></td></tr>
+<a href="${link}" style="display:inline-block;background:#d62839;color:#fff;text-decoration:none;font-weight:bold;font-size:17px;padding:16px 30px;border-radius:40px">📖 VER MI RECETARIO EN MI MEMBRESÍA</a></td></tr>
 ${ubicacion ? `<tr><td style="padding:16px 24px 0;font-size:14px;line-height:1.6;text-align:center;color:#6e6e68">📍 ${escapeHtml(ubicacion)}<br>⏰ Llega 10 minutos antes de tu horario</td></tr>` : ''}
 <tr><td style="padding:16px 24px 22px;font-size:17px;text-align:center;font-weight:bold;color:#6b1d2f">¡Te esperamos con mucho gusto! 💛</td></tr>
 <tr><td align="center" style="padding:0 24px 22px">
