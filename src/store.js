@@ -129,6 +129,7 @@ const DEFAULT_CONTENT = {
   // Recetario de la master class (PDF): se manda adjunto a quien paga su
   // acceso anticipado y queda guardado en su cuenta.
   clasegratis_recetario_url: '',
+  clasegratis_recetario_incluido_puesto: '',
   clasegratis_recetario_nombre: '',
   // ---- Promocion "El Buen Fin llego antes" (/buen-fin, ver src/promoBuenFin.js) ----
   // Pagina exclusiva para la comunidad: 1 eBook por precio_uno o 4 por

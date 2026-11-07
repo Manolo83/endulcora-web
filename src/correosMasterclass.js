@@ -224,7 +224,34 @@ let corriendo = false;
 // Recetario de la master class: se manda solo un dia antes (10:00 am CDMX)
 // a quien pago su acceso anticipado; quien paga despues lo recibe en la
 // siguiente vuelta (cada 5 min), hasta que termina el dia de la clase.
+// Recetario que Manuel aprobo para la masterclass de Galletas NY (9 nov
+// 2026): si nadie lo subio en /admin, se copia una vez a uploads y queda
+// cargado como si se hubiera subido ahi (se puede cambiar o quitar en /admin).
+const RECETARIOS_INCLUIDOS = {
+  '2026-11-09': { archivo: 'Endulcora_Recetario_MasterClass_Galletas_NY.pdf', nombre: 'Recetario Galletas NY Endulcora.pdf' },
+};
+function asegurarRecetarioIncluido() {
+  const contenido = store.getContent();
+  const incluido = RECETARIOS_INCLUIDOS[contenido.clasegratis_fecha];
+  if (!incluido || contenido.clasegratis_recetario_url || contenido.clasegratis_recetario_incluido_puesto) return;
+  const fs = require('fs');
+  const path = require('path');
+  const { UPLOAD_DIR } = require('./config');
+  const origen = path.join(__dirname, '..', 'seed-archivos', 'recetarios-masterclass', incluido.archivo);
+  if (!fs.existsSync(origen)) return;
+  const nombreArchivo = `recetario-masterclass-${contenido.clasegratis_fecha}.pdf`;
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  fs.copyFileSync(origen, path.join(UPLOAD_DIR, nombreArchivo));
+  store.updateContent({
+    clasegratis_recetario_url: `/uploads/${nombreArchivo}`,
+    clasegratis_recetario_nombre: incluido.nombre,
+    clasegratis_recetario_incluido_puesto: '1',
+  });
+  console.log(`[masterclass] Recetario incluido cargado para ${contenido.clasegratis_fecha}.`);
+}
+
 async function mandarRecetarios(ahora, pausaMs) {
+  try { asegurarRecetarioIncluido(); } catch (e) { console.error('[masterclass] No se pudo cargar el recetario incluido:', e.message); }
   const contenido = store.getContent();
   const url = contenido.clasegratis_recetario_url;
   const fecha = contenido.clasegratis_fecha;
