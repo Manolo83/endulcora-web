@@ -70,7 +70,22 @@ body { background: #FBF4E9; }
 .spinner { border: 3px solid rgba(78,20,84,.2); border-top-color: #4E1454; border-radius: 50%; width: 16px; height: 16px; animation: girar .7s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* Portal de miembros: secciones y carrusel 3D (Cover Flow) */
+.panel-portal { animation: entrarPanel .25s ease; }
+@keyframes entrarPanel { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:none; } }
+.coverflow { position: relative; height: var(--cf-alto, 300px); perspective: 1100px; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
+.coverflow:active { cursor: grabbing; }
+.coverflow-pista { position: absolute; inset: 0; transform-style: preserve-3d; }
+.coverflow-item { position: absolute; left: 50%; top: 14px; width: var(--cf-ancho, 170px); margin-left: calc(var(--cf-ancho, 170px) / -2); transition: transform .45s cubic-bezier(.22,.8,.3,1), opacity .45s ease, filter .45s ease; will-change: transform; -webkit-box-reflect: below 4px linear-gradient(transparent 70%, rgba(255,255,255,.22)); }
+.coverflow-item .cf-portada { border-radius: 10px; overflow: hidden; box-shadow: 0 14px 30px rgba(43,12,46,.35); background: #2b0c2e; }
+.coverflow-item img { display:block; width:100%; height:100%; object-fit: cover; pointer-events: none; }
+.coverflow-flecha { position:absolute; top: 40%; z-index: 300; display:grid; place-items:center; width: 38px; height: 38px; border-radius: 9999px; background: rgba(255,255,255,.92); color:#4E1454; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+.coverflow-flecha:disabled { opacity:.25; }
+.coverflow-titulo { min-height: 3.2em; }
+.nav-portal a[aria-current="page"] { color: #4E1454; }
+.nav-portal a[aria-current="page"] .nav-punto { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
+  .coverflow-item { transition: none; }
   html { scroll-behavior: auto; }
   .boton-vivo:hover, .boton-vivo:active { transform:none; }
 }
@@ -117,7 +132,7 @@ body { background: #FBF4E9; }
 <main class="mx-auto max-w-3xl px-5 py-10">
   <p class="font-titulo text-[11px] tracking-[.3em] text-flama">MEMBRESÍA</p>
   <h1 class="mt-2 font-display text-3xl text-vino sm:text-4xl">Membresía Endulcora</h1>
-  <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-carbon/70">Recetario del mes, taller online mensual y acceso de lectura a toda la biblioteca de eBooks, exclusivos para miembros, por $100 MXN al mes. Cobro automático cada mes — cancela cuando quieras y pierdes el acceso de inmediato.</p>
+  <p id="introMembresia" class="mt-3 max-w-xl text-[15px] leading-relaxed text-carbon/70">Recetario del mes, taller online mensual y acceso de lectura a toda la biblioteca de eBooks, exclusivos para miembros, por $100 MXN al mes. Cobro automático cada mes — cancela cuando quieras y pierdes el acceso de inmediato.</p>
 
   <!-- Comparativa: se oculta solo si ya eres miembro activo -->
   <div id="comparativaMembresia" class="mt-10 overflow-hidden rounded-3xl bg-white ring-1 ring-vino/10">
@@ -219,11 +234,44 @@ body { background: #FBF4E9; }
   </div>
 
   <!-- Con membresia activa: contenido -->
-  <div id="bloqueMiembro" class="mt-8 hidden">
-    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white px-5 py-3 ring-1 ring-vino/10">
-      <p class="font-ui text-[11px] uppercase tracking-widest text-carbon/50">Membresía activa · <span id="nombreUsuarioMembresia" class="text-vino"></span></p>
-      <button type="button" id="btnCancelarMembresia" class="font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cancelar membresía</button>
+  <div id="bloqueMiembro" class="mt-8 hidden pb-24 sm:pb-0">
+    <!-- Navegacion del portal: arriba en computadora, barra fija abajo en celular -->
+    <nav class="nav-portal fixed inset-x-0 bottom-0 z-50 border-t border-vino/10 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:sticky sm:top-20 sm:inset-x-auto sm:bottom-auto sm:mb-6 sm:rounded-full sm:border sm:shadow-sm" aria-label="Secciones de tu membresía">
+      <div class="mx-auto grid max-w-xl grid-cols-4">
+        <a href="#inicio" data-panel="inicio" class="flex flex-col items-center gap-0.5 py-2.5 font-ui text-[10px] font-700 uppercase tracking-wider text-carbon/45 transition sm:flex-row sm:justify-center sm:gap-2 sm:text-[11px]">
+          <svg viewBox="0 0 24 24" class="h-6 w-6 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio<span class="nav-punto h-1 w-1 rounded-full bg-flama opacity-0 sm:hidden"></span></a>
+        <a href="#ebooks" data-panel="ebooks" class="flex flex-col items-center gap-0.5 py-2.5 font-ui text-[10px] font-700 uppercase tracking-wider text-carbon/45 transition sm:flex-row sm:justify-center sm:gap-2 sm:text-[11px]">
+          <svg viewBox="0 0 24 24" class="h-6 w-6 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h7"/></svg>eBooks<span class="nav-punto h-1 w-1 rounded-full bg-flama opacity-0 sm:hidden"></span></a>
+        <a href="#clases" data-panel="clases" class="flex flex-col items-center gap-0.5 py-2.5 font-ui text-[10px] font-700 uppercase tracking-wider text-carbon/45 transition sm:flex-row sm:justify-center sm:gap-2 sm:text-[11px]">
+          <svg viewBox="0 0 24 24" class="h-6 w-6 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>Clases<span class="nav-punto h-1 w-1 rounded-full bg-flama opacity-0 sm:hidden"></span></a>
+        <a href="#cuenta" data-panel="cuenta" class="flex flex-col items-center gap-0.5 py-2.5 font-ui text-[10px] font-700 uppercase tracking-wider text-carbon/45 transition sm:flex-row sm:justify-center sm:gap-2 sm:text-[11px]">
+          <svg viewBox="0 0 24 24" class="h-6 w-6 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Cuenta<span class="nav-punto h-1 w-1 rounded-full bg-flama opacity-0 sm:hidden"></span></a>
+      </div>
+    </nav>
+
+    <!-- Buscador unico: eBooks y clases -->
+    <div class="relative">
+      <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-carbon/35" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="buscadorPortal" type="search" placeholder="Busca un eBook o una clase…" autocomplete="off" class="w-full rounded-full border border-vino/15 bg-white py-3 pl-11 pr-4 text-[15px] outline-none ring-0 focus:border-vino/40">
     </div>
+    <div id="panelBusqueda" class="panel-portal mt-6 hidden">
+      <p id="busquedaResumen" class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado"></p>
+      <div id="busquedaResultados" class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"></div>
+    </div>
+
+    <div id="panelCuenta" class="panel-portal mt-6 hidden">
+    <div class="rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Membresía activa</p>
+      <h3 id="nombreUsuarioMembresia" class="mt-1 font-display text-2xl text-vino"></h3>
+      <p class="mt-2 text-sm text-carbon/65">Tu membresía incluye el recetario y la revista de cada mes, el taller online mensual, la biblioteca de clases grabadas y la lectura de todos los eBooks.</p>
+      <div class="mt-5 flex flex-wrap gap-2">
+        <a href="https://wa.me/525575933916" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-white">Ayuda por WhatsApp</a>
+      </div>
+      <button type="button" id="btnCancelarMembresia" class="mt-6 font-ui text-[11px] uppercase tracking-wider text-carbon/40 hover:text-red-500 transition">Cancelar membresía</button>
+    </div>
+    </div>
+
+    <div id="panelInicio" class="panel-portal">
 
     <!-- Ancla del boton "Descarga aqui el recetario" del live: los
          recetarios solo se descargan desde esta pagina. -->
@@ -297,7 +345,27 @@ body { background: #FBF4E9; }
       <a id="linkRevistaRespaldo" href="/api/membresia/revista" target="_blank" rel="noopener" class="mt-3 hidden font-ui text-[11px] uppercase tracking-widest text-carbon/40 hover:text-vino transition">¿No se ve bien aquí? Ábrela en otra pestaña</a>
     </div>
 
-    <div id="bloqueVideoMes" class="mt-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
+    <p id="sinContenidoAviso" class="mt-6 hidden rounded-2xl bg-white p-6 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Todavía no hay recetario, revista ni video publicados este mes. Vuelve pronto.</p>
+
+    <div class="mt-6 grid grid-cols-2 gap-3">
+      <a href="#ebooks" class="rounded-3xl bg-vino p-5 text-crema"><p class="font-ui text-[10px] font-700 uppercase tracking-widest text-flama">Biblioteca</p><p class="mt-1 font-display text-xl leading-tight">eBooks</p><p class="mt-1 text-xs text-crema/70">Léelos todos</p></a>
+      <a href="#clases" class="rounded-3xl bg-morado p-5 text-crema"><p class="font-ui text-[10px] font-700 uppercase tracking-widest text-flama">Biblioteca</p><p class="mt-1 font-display text-xl leading-tight">Clases</p><p class="mt-1 text-xs text-crema/70">Tus grabaciones</p></a>
+    </div>
+    </div>
+
+    <div id="panelEbooks" class="panel-portal mt-6 hidden">
+    <div id="bloqueBibliotecaEbooks">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Biblioteca de eBooks</p>
+      <h3 class="mt-1 font-display text-2xl text-vino">Lee todo el catálogo</h3>
+      <p class="mt-1 text-sm text-carbon/60">Desliza las portadas y toca la del centro para leer. Si quieres descargar o imprimir un eBook, cómpralo aparte desde su ficha.</p>
+      <div id="gridBibliotecaEbooks" class="mt-4 space-y-4"></div>
+      <p id="bibliotecaEbooksVacia" class="hidden mt-2 text-sm text-carbon/50">Todavía no hay eBooks disponibles para leer.</p>
+    </div>
+
+    </div>
+
+    <div id="panelClases" class="panel-portal mt-6 hidden">
+    <div id="bloqueVideoMes" class="mb-6 hidden rounded-3xl bg-white p-6 ring-1 ring-vino/10">
       <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Taller de <span id="videoMesEtiqueta"></span></p>
       <h3 id="videoTitulo" class="mt-1 font-titulo text-lg text-vino"></h3>
       <div id="videoContenedor" class="relative mt-4 aspect-video w-full select-none overflow-hidden rounded-2xl bg-carbon" oncontextmenu="return false" ondragstart="return false">
@@ -311,27 +379,14 @@ body { background: #FBF4E9; }
       </div>
     </div>
 
-    <p id="sinContenidoAviso" class="mt-6 hidden rounded-2xl bg-white p-6 text-center text-sm text-carbon/50 ring-1 ring-vino/10">Todavía no hay recetario, revista ni video publicados este mes. Vuelve pronto.</p>
-
-    <div id="bloqueBibliotecaEbooks" class="mt-6 rounded-3xl bg-white p-6 ring-1 ring-vino/10">
-      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Biblioteca de eBooks</p>
-      <h3 class="mt-1 font-titulo text-lg text-vino">Lee todo el catálogo, incluido en tu membresía</h3>
-      <p class="mt-1 text-sm text-carbon/60">Lectura dentro de la página — si quieres descargar un eBook o imprimirlo, cómpralo por separado desde su ficha.</p>
-      <div id="gridBibliotecaEbooks" class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
-      <p id="bibliotecaEbooksVacia" class="hidden mt-2 text-sm text-carbon/50">Todavía no hay eBooks disponibles para leer.</p>
-    </div>
-
-    <div id="bloqueBibliotecaMembresia" class="mt-6 rounded-3xl bg-white p-6 ring-1 ring-vino/10">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Biblioteca de clases</p>
-          <h3 class="mt-1 font-titulo text-lg text-vino">Todas tus grabaciones</h3>
-        </div>
-        <input id="buscadorBibliotecaMembresia" type="search" placeholder="Buscar por nombre…" class="w-full max-w-[220px] rounded-full border border-vino/15 bg-crema/60 px-4 py-2 text-sm outline-none focus:border-vino/40">
-      </div>
-      <div id="gridBibliotecaMembresia" class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+    <div id="bloqueBibliotecaMembresia">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-morado">Biblioteca de clases</p>
+      <h3 class="mt-1 font-display text-2xl text-vino">Todas tus grabaciones</h3>
+      <p class="mt-1 text-sm text-carbon/60">Desliza y toca la clase del centro para verla.</p>
+      <div id="gridBibliotecaMembresia" class="mt-4 space-y-4"></div>
       <p id="bibliotecaMembresiaVacia" class="hidden mt-2 text-sm text-carbon/50">Todavía no hay clases grabadas.</p>
       <p id="bibliotecaMembresiaSinResultados" class="hidden mt-2 text-sm text-carbon/50">Ninguna clase coincide con tu búsqueda.</p>
+    </div>
     </div>
   </div>
 </main>
@@ -417,6 +472,10 @@ document.getElementById('anioFooter').textContent = new Date().getFullYear();
 let SESION = { isLoggedIn: false, user: null, esAdmin: false };
 
 function mostrarVista(nombre){
+  if(nombre === 'miembro') setTimeout(() => mostrarPanelPortal(panelDesdeHash()), 0);
+  const wa = document.querySelector('a[aria-label="Escríbenos por WhatsApp"]');
+  if(wa) wa.classList.toggle('max-sm:hidden', nombre === 'miembro');
+  document.getElementById('introMembresia').classList.toggle('hidden', nombre === 'miembro');
   const bloques = { invitado: 'bloqueInvitado', oferta: 'bloqueOferta', miembro: 'bloqueMiembro' };
   Object.values(bloques).forEach(id => document.getElementById(id).classList.add('hidden'));
   document.getElementById(bloques[nombre]).classList.remove('hidden');
@@ -830,32 +889,103 @@ async function cargarBibliotecaEbooks(){
     const res = await fetch('/api/membresia/ebooks');
     if(!res.ok) throw new Error();
     BIBLIOTECA_EBOOKS = await res.json();
+    try{ APARTADOS_PORTAL = await (await fetch('/api/apartados-ebooks')).json(); }catch(e){ APARTADOS_PORTAL = []; }
     pintarBibliotecaEbooks();
   }catch(e){
     // Si falla, la seccion se queda vacia sin tronar el resto de la pagina.
   }
 }
 
+let APARTADOS_PORTAL = [];
 function pintarBibliotecaEbooks(){
-  const grid = document.getElementById('gridBibliotecaEbooks');
+  const cont = document.getElementById('gridBibliotecaEbooks');
   document.getElementById('bibliotecaEbooksVacia').classList.toggle('hidden', BIBLIOTECA_EBOOKS.length !== 0);
-  grid.innerHTML = BIBLIOTECA_EBOOKS.map(e => `
-    <button type="button" data-id="${e.id}" class="tarjetaEbookBiblioteca group overflow-hidden rounded-2xl bg-crema/60 text-left ring-1 ring-vino/10 transition hover:ring-vino/30">
-      <div class="relative aspect-[3/4] w-full overflow-hidden bg-carbon">
-        ${e.imagen ? `<img src="${escapeHtml(e.imagen)}" alt="" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy">` : ''}
-        <span class="absolute inset-0 grid place-items-center bg-carbon/20 opacity-0 transition group-hover:opacity-100">
-          <span class="rounded-full bg-white/90 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino">Leer</span>
-        </span>
-      </div>
-      <div class="p-4">
-        <h4 class="font-titulo text-base text-vino">${escapeHtml(e.titulo)}</h4>
-        ${e.subtitulo ? `<p class="mt-1 line-clamp-2 text-xs text-carbon/60">${escapeHtml(e.subtitulo)}</p>` : ''}
-        <p class="mt-1.5 font-ui text-[10px] uppercase tracking-widest text-carbon/40">${e.totalPaginas} páginas</p>
-      </div>
-    </button>`).join('');
-  document.querySelectorAll('.tarjetaEbookBiblioteca').forEach(btn => {
-    btn.addEventListener('click', () => abrirLectorEbook(Number(btn.dataset.id)));
+  const grupos = [];
+  APARTADOS_PORTAL.forEach(a => {
+    const items = BIBLIOTECA_EBOOKS.filter(e => e.apartado === a.slug);
+    if(items.length) grupos.push({ nombre: a.nombre, desc: a.desc || '', items });
   });
+  const sueltos = BIBLIOTECA_EBOOKS.filter(e => !APARTADOS_PORTAL.some(a => a.slug === e.apartado));
+  if(sueltos.length) grupos.push({ nombre: grupos.length ? 'Más eBooks' : 'Todos los eBooks', desc: '', items: sueltos });
+  cont.innerHTML = grupos.map((g, i) => `
+    <section class="overflow-hidden rounded-3xl bg-gradient-to-b from-[#2b0c2e] to-[#4E1454] pt-5 text-crema">
+      <div class="flex items-end justify-between gap-3 px-5">
+        <div><h4 class="font-display text-xl leading-tight">${escapeHtml(g.nombre)}</h4>${g.desc ? `<p class="mt-0.5 text-xs text-crema/60">${escapeHtml(g.desc)}</p>` : ''}</div>
+        <span class="shrink-0 font-ui text-[10px] uppercase tracking-widest text-crema/50">${g.items.length} eBook${g.items.length === 1 ? '' : 's'}</span>
+      </div>
+      <div class="cf-ebooks" data-grupo="${i}"></div>
+    </section>`).join('');
+  cont.querySelectorAll('.cf-ebooks').forEach(el => {
+    const g = grupos[Number(el.dataset.grupo)];
+    crearCoverflow(el, g.items, {
+      ancho: 150, alto: 300, proporcion: 4/3,
+      portada: e => e.imagen ? `<img src="${escapeHtml(e.imagen)}" alt="" loading="lazy">` : `<div class="grid h-full place-items-center p-3 text-center font-titulo text-sm text-crema">${escapeHtml(e.titulo)}</div>`,
+      titulo: e => `<p class="font-titulo text-base text-crema">${escapeHtml(e.titulo)}</p><p class="mt-0.5 font-ui text-[10px] uppercase tracking-widest text-crema/50">${e.totalPaginas} páginas · toca para leer</p>`,
+      abrir: e => abrirLectorEbook(e.id),
+    });
+  });
+}
+
+/* ---------- Carrusel 3D (Cover Flow) ---------- */
+function crearCoverflow(host, items, op){
+  const ancho = Math.min(op.ancho, Math.round(window.innerWidth * 0.46));
+  const altoPortada = Math.round(ancho * op.proporcion);
+  host.innerHTML = `
+    <div class="coverflow" style="--cf-ancho:${ancho}px;--cf-alto:${altoPortada + 70}px">
+      <div class="coverflow-pista">${items.map((it, i) => `
+        <div class="coverflow-item" data-i="${i}"><div class="cf-portada" style="height:${altoPortada}px">${op.portada(it)}</div></div>`).join('')}
+      </div>
+      <button type="button" class="coverflow-flecha left-2" aria-label="Anterior"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button type="button" class="coverflow-flecha right-2" aria-label="Siguiente"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="coverflow-titulo px-5 pb-5 text-center"></div>`;
+  const zona = host.querySelector('.coverflow');
+  const tarjetas = [...host.querySelectorAll('.coverflow-item')];
+  const [btnAnt, btnSig] = host.querySelectorAll('.coverflow-flecha');
+  const titulo = host.querySelector('.coverflow-titulo');
+  let actual = 0, arrastre = 0;
+  const paso = ancho * 0.42;
+  function pintar(){
+    tarjetas.forEach((t, i) => {
+      const d = i - actual + arrastre / paso;
+      const ad = Math.abs(d);
+      const x = d === 0 ? 0 : Math.sign(d) * (ancho * 0.55 + (ad - 1) * paso * 0.9) * Math.min(ad, 1) + (ad < 1 ? 0 : 0);
+      const xr = ad < 1 ? d * ancho * 0.55 : x;
+      const rot = Math.max(-55, Math.min(55, -d * 55));
+      const z = -Math.min(ad, 4) * 90;
+      t.style.transform = `translateX(${xr}px) translateZ(${z}px) rotateY(${rot}deg)`;
+      t.style.zIndex = String(200 - Math.round(ad * 10));
+      t.style.opacity = ad > 4 ? '0' : String(1 - Math.min(ad, 4) * 0.12);
+      t.style.filter = ad < 0.5 ? 'none' : 'brightness(.7)';
+    });
+    btnAnt.disabled = actual === 0;
+    btnSig.disabled = actual === items.length - 1;
+    titulo.innerHTML = op.titulo(items[actual]);
+  }
+  function ir(i){ actual = Math.max(0, Math.min(items.length - 1, i)); arrastre = 0; pintar(); }
+  btnAnt.addEventListener('click', e => { e.stopPropagation(); ir(actual - 1); });
+  btnSig.addEventListener('click', e => { e.stopPropagation(); ir(actual + 1); });
+  let x0 = null, movio = false;
+  zona.addEventListener('pointerdown', e => { if(e.target.closest('.coverflow-flecha')) return; x0 = e.clientX; movio = false; tarjetas.forEach(t => t.style.transition = 'none'); });
+  zona.addEventListener('pointermove', e => { if(x0 === null) return; arrastre = e.clientX - x0; if(Math.abs(arrastre) > 6) movio = true; pintar(); });
+  function soltar(e){
+    if(x0 === null) return;
+    tarjetas.forEach(t => t.style.transition = '');
+    const saltos = Math.round(-arrastre / paso);
+    x0 = null;
+    if(movio){ ir(actual + saltos); return; }
+    arrastre = 0;
+    const t = e.target.closest && e.target.closest('.coverflow-item');
+    if(!t) return pintar();
+    const i = Number(t.dataset.i);
+    if(i === actual) op.abrir(items[i]); else ir(i);
+  }
+  zona.addEventListener('pointerup', soltar);
+  zona.addEventListener('pointercancel', () => { x0 = null; tarjetas.forEach(t => t.style.transition = ''); ir(actual); });
+  zona.addEventListener('pointerleave', e => { if(x0 !== null) soltar(e); });
+  zona.tabIndex = 0;
+  zona.addEventListener('keydown', e => { if(e.key === 'ArrowLeft') ir(actual - 1); if(e.key === 'ArrowRight') ir(actual + 1); if(e.key === 'Enter') op.abrir(items[actual]); });
+  ir(Math.min(items.length - 1, Math.floor((items.length - 1) / 2) > 2 ? 1 : 0));
 }
 
 let lectorEbookActual = null;
@@ -932,36 +1062,62 @@ async function cargarBibliotecaMembresia(){
 }
 
 function pintarBibliotecaMembresia(lista){
-  const grid = document.getElementById('gridBibliotecaMembresia');
+  const cont = document.getElementById('gridBibliotecaMembresia');
   document.getElementById('bibliotecaMembresiaVacia').classList.toggle('hidden', BIBLIOTECA_MIEMBRO.length !== 0);
-  document.getElementById('bibliotecaMembresiaSinResultados').classList.toggle('hidden', !(BIBLIOTECA_MIEMBRO.length && lista.length === 0));
-  grid.innerHTML = lista.map(c => `
-    <button type="button" data-id="${c.id}" class="tarjetaClaseBiblioteca group overflow-hidden rounded-2xl bg-crema/60 text-left ring-1 ring-vino/10 transition hover:ring-vino/30">
-      <div class="relative aspect-video w-full overflow-hidden ${c.youtubeId ? 'bg-carbon' : 'bg-vino/90'}">
-        ${c.youtubeId ? `
-        <img src="https://img.youtube.com/vi/${encodeURIComponent(c.youtubeId)}/hqdefault.jpg" alt="" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy">
-        <span class="absolute inset-0 grid place-items-center bg-carbon/20 opacity-0 transition group-hover:opacity-100">
-          <span class="grid h-12 w-12 place-items-center rounded-full bg-white/90 text-vino"><svg viewBox="0 0 24 24" class="h-6 w-6 translate-x-0.5" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-        </span>` : `
-        <div class="grid h-full w-full place-items-center">
-          <svg viewBox="0 0 24 24" class="h-10 w-10 text-crema/70" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5M9 13h6M9 17h6"/></svg>
-        </div>`}
-      </div>
-      <div class="p-4">
-        <p class="font-ui text-[10px] font-700 uppercase tracking-widest text-morado">${escapeHtml(new Date((c.fecha||'')+'T00:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}))}</p>
-        <h4 class="mt-1 font-titulo text-base text-vino">${escapeHtml(c.titulo)}</h4>
-        ${c.descripcion ? `<p class="mt-1 line-clamp-2 text-xs text-carbon/60">${escapeHtml(c.descripcion)}</p>` : ''}
-      </div>
-    </button>`).join('');
-  document.querySelectorAll('.tarjetaClaseBiblioteca').forEach(btn => {
-    btn.addEventListener('click', () => abrirModalBibliotecaMembresia(Number(btn.dataset.id)));
+  document.getElementById('bibliotecaMembresiaSinResultados').classList.add('hidden');
+  if(!lista.length){ cont.innerHTML = ''; return; }
+  const ordenada = [...lista].sort((a, b) => String(b.fecha || '').localeCompare(String(a.fecha || '')));
+  cont.innerHTML = `<section class="overflow-hidden rounded-3xl bg-gradient-to-b from-[#2b0c2e] to-[#4E1454] pt-5 text-crema">
+      <div class="flex items-end justify-between gap-3 px-5"><h4 class="font-display text-xl">Clases grabadas</h4><span class="font-ui text-[10px] uppercase tracking-widest text-crema/50">${ordenada.length} clase${ordenada.length === 1 ? '' : 's'}</span></div>
+      <div id="cfClases"></div></section>`;
+  crearCoverflow(document.getElementById('cfClases'), ordenada, {
+    ancho: 240, alto: 220, proporcion: 9/16,
+    portada: c => c.youtubeId
+      ? `<img src="https://img.youtube.com/vi/${encodeURIComponent(c.youtubeId)}/hqdefault.jpg" alt="" loading="lazy">`
+      : `<div class="grid h-full place-items-center bg-vino p-3 text-center font-titulo text-sm text-crema">${escapeHtml(c.titulo)}</div>`,
+    titulo: c => `<p class="font-ui text-[10px] font-700 uppercase tracking-widest text-flama">${escapeHtml(c.fecha ? new Date(c.fecha + 'T00:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}) : '')}</p><p class="mt-0.5 font-titulo text-base text-crema">${escapeHtml(c.titulo)}</p><p class="mt-0.5 font-ui text-[10px] uppercase tracking-widest text-crema/50">Toca para ver</p>`,
+    abrir: c => abrirModalBibliotecaMembresia(c.id),
   });
 }
 
-document.getElementById('buscadorBibliotecaMembresia').addEventListener('input', (e) => {
+/* ---------- Secciones del portal y buscador unico ---------- */
+const PANELES_PORTAL = { inicio: 'panelInicio', ebooks: 'panelEbooks', clases: 'panelClases', cuenta: 'panelCuenta' };
+function mostrarPanelPortal(nombre){
+  if(!PANELES_PORTAL[nombre]) nombre = 'inicio';
+  Object.entries(PANELES_PORTAL).forEach(([k, id]) => document.getElementById(id).classList.toggle('hidden', k !== nombre));
+  document.getElementById('panelBusqueda').classList.add('hidden');
+  document.querySelectorAll('.nav-portal a').forEach(a => {
+    if(a.dataset.panel === nombre) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
+  const b = document.getElementById('buscadorPortal');
+  if(b.value){ b.value = ''; }
+}
+function panelDesdeHash(){
+  const h = location.hash.replace('#', '');
+  if(PANELES_PORTAL[h]) return h;
+  return 'inicio';
+}
+window.addEventListener('hashchange', () => {
+  if(document.getElementById('bloqueMiembro').classList.contains('hidden')) return;
+  mostrarPanelPortal(panelDesdeHash());
+  window.scrollTo({ top: document.getElementById('bloqueMiembro').offsetTop - 90, behavior: 'smooth' });
+});
+document.getElementById('buscadorPortal').addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase();
-  const filtrada = !q ? BIBLIOTECA_MIEMBRO : BIBLIOTECA_MIEMBRO.filter(c => (c.titulo||'').toLowerCase().includes(q) || (c.descripcion||'').toLowerCase().includes(q));
-  pintarBibliotecaMembresia(filtrada);
+  const panelBusqueda = document.getElementById('panelBusqueda');
+  if(!q){ mostrarPanelPortal(panelDesdeHash()); return; }
+  Object.values(PANELES_PORTAL).forEach(id => document.getElementById(id).classList.add('hidden'));
+  panelBusqueda.classList.remove('hidden');
+  document.querySelectorAll('.nav-portal a').forEach(a => a.removeAttribute('aria-current'));
+  const ebooks = BIBLIOTECA_EBOOKS.filter(x => `${x.titulo} ${x.subtitulo || ''}`.toLowerCase().includes(q));
+  const clases = BIBLIOTECA_MIEMBRO.filter(x => `${x.titulo || ''} ${x.descripcion || ''}`.toLowerCase().includes(q));
+  const total = ebooks.length + clases.length;
+  document.getElementById('busquedaResumen').textContent = total ? `${total} resultado${total === 1 ? '' : 's'}` : 'Nada coincide con tu búsqueda';
+  document.getElementById('busquedaResultados').innerHTML =
+    ebooks.map(x => `<button type="button" data-ebook="${x.id}" class="overflow-hidden rounded-2xl bg-white text-left ring-1 ring-vino/10"><div class="aspect-[3/4] bg-carbon">${x.imagen ? `<img src="${escapeHtml(x.imagen)}" alt="" class="h-full w-full object-cover" loading="lazy">` : ''}</div><div class="p-3"><p class="font-ui text-[9px] font-700 uppercase tracking-widest text-morado">eBook</p><p class="font-titulo text-sm text-vino">${escapeHtml(x.titulo)}</p></div></button>`).join('') +
+    clases.map(x => `<button type="button" data-clase="${x.id}" class="overflow-hidden rounded-2xl bg-white text-left ring-1 ring-vino/10"><div class="aspect-video bg-carbon">${x.youtubeId ? `<img src="https://img.youtube.com/vi/${encodeURIComponent(x.youtubeId)}/hqdefault.jpg" alt="" class="h-full w-full object-cover" loading="lazy">` : ''}</div><div class="p-3"><p class="font-ui text-[9px] font-700 uppercase tracking-widest text-morado">Clase</p><p class="font-titulo text-sm text-vino">${escapeHtml(x.titulo)}</p></div></button>`).join('');
+  document.querySelectorAll('#busquedaResultados [data-ebook]').forEach(b => b.addEventListener('click', () => abrirLectorEbook(Number(b.dataset.ebook))));
+  document.querySelectorAll('#busquedaResultados [data-clase]').forEach(b => b.addEventListener('click', () => abrirModalBibliotecaMembresia(Number(b.dataset.clase))));
 });
 
 /* Reproductor protegido para el modal de la biblioteca (mismo patron que

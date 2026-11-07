@@ -649,6 +649,7 @@ router.get('/ebooks', async (req, res) => {
       titulo: p.titulo,
       subtitulo: p.subtitulo || '',
       imagen: p.imagen || '',
+      apartado: p.apartado || '',
       totalPaginas: await paginasDeProducto(p),
     }))
   );
