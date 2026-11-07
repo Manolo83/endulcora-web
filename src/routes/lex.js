@@ -122,7 +122,7 @@ router.get('/api/talleres', requireLex, (req, res) => {
   const hoy = hoyISO();
   const sedes = store.getSedes();
   const sedesPorId = new Map(sedes.map((s) => [s.id, s]));
-  const inscripciones = store.getInscripcionesTaller();
+  const inscripciones = store.getInscripcionesTallerConfirmadas();
   const porSesion = new Map();
   inscripciones.forEach((i) => {
     if (!porSesion.has(i.sesionTallerId)) porSesion.set(i.sesionTallerId, []);
@@ -160,7 +160,7 @@ router.get('/api/talleres/:id/inscritos', requireLex, (req, res) => {
   const sesion = store.getSesionesTaller().find((s) => s.id === Number(req.params.id));
   if (!sesion) return res.status(404).json({ error: 'Taller no encontrado' });
   const sede = store.getSedes().find((s) => s.id === sesion.sedeId);
-  const inscritos = store.getInscripcionesTaller()
+  const inscritos = store.getInscripcionesTallerConfirmadas()
     .filter((i) => i.sesionTallerId === sesion.id)
     .map((i) => ({
       id: i.id,

@@ -941,7 +941,7 @@ router.get('/api/newsletter', requireAdmin, (req, res) => {
 router.get('/api/inscripciones-taller', requireAdminOLectura, (req, res) => {
   // Mismo criterio que en Ventas: "comoSeEntero" es lo que la persona dice,
   // "origen" es lo que de verdad paso segun los ids de clic que traia.
-  res.json(store.getInscripcionesTaller().map((i) => ({ ...i, origen: origenTrafico.origenDe(i) })));
+  res.json(store.getInscripcionesTallerConfirmadas().map((i) => ({ ...i, origen: origenTrafico.origenDe(i) })));
 });
 
 router.delete('/api/inscripciones-taller/:id', requireAdmin, (req, res) => {
@@ -1414,7 +1414,7 @@ function textoZona(item) {
 }
 
 router.get('/api/inscripciones-taller/excel', requireAdminOLectura, async (req, res) => {
-  const inscripciones = store.getInscripcionesTaller();
+  const inscripciones = store.getInscripcionesTallerConfirmadas();
 
   // Una lista (pestaña) por cada sesion real del calendario (sesionTallerId):
   // asi cada pestaña es la lista de asistencia de una sesion en concreto,
