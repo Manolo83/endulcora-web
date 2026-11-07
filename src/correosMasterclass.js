@@ -261,7 +261,7 @@ function detalleRecetario(contenido, registro = {}) {
 async function pruebaRecetario(to) {
   const contenido = store.getContent();
   const { enviarCorreoRecetarioAcceso } = require('./email');
-  const link = `${SITE_URL}/membresia#recetario-masterclass`;
+  const link = require('./routes/membresia').linkVistaMasterclass(to);
   await enviarCorreoRecetarioAcceso({ to, nombre: 'Manuel', titulo: `Masterclass ${temaDe(contenido)}`, link, detalle: detalleRecetario(contenido, { horario: '12:00' }), ubicacion: contenido.clasegratis_ubicacion || '' });
 }
 

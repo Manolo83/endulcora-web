@@ -408,6 +408,25 @@ router.get('/estado', async (req, res) => {
 // Recetario de la master class (acceso anticipado): se guarda en su
 // membresia. Se busca por el correo de su cuenta el registro pagado al que
 // ya se le entrego (desde un dia antes de la clase).
+// Vista previa para las pruebas del correo (se mandan a quien las pide
+// desde /admin): link firmado, valido 7 dias, que muestra el recuadro del
+// recetario en la membresia de esa cuenta aunque no haya pagado el acceso.
+const crypto = require('crypto');
+function firmaVistaMasterclass(correo, vence) {
+  return crypto.createHmac('sha256', process.env.SESSION_SECRET || 'cambia-esta-clave-en-las-variables-de-entorno')
+    .update(`vista-masterclass:${String(correo).toLowerCase()}:${vence}`).digest('hex').slice(0, 32);
+}
+function linkVistaMasterclass(correo) {
+  const vence = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  return `${SITE_URL}/api/membresia/entrar-masterclass?vista=${firmaVistaMasterclass(correo, vence)}&e=${encodeURIComponent(correo)}&x=${vence}`;
+}
+function registroVistaPrevia(req) {
+  const c = store.getContent();
+  if (!c.clasegratis_recetario_url) return null;
+  if (!esAdmin(req) && !(req.session && req.session.vistaPreviaMasterclass)) return null;
+  return { fecha: c.clasegratis_fecha, accesoRecetarioUrl: c.clasegratis_recetario_url, accesoRecetarioNombre: c.clasegratis_recetario_nombre };
+}
+
 function registroMasterclassConRecetario(usuario) {
   if (!usuario || !usuario.email) return null;
   const correo = String(usuario.email).toLowerCase();
@@ -436,8 +455,7 @@ router.get('/contenido', (req, res) => {
     revistaDisponible: !!revistaUrl,
     recetarioLiveDisponible: !!claseRecetario && !yaEnSuRegalo,
     recetarioMasterclass: (() => {
-      const r = registroMasterclassConRecetario(usuario)
-        || (esAdmin(req) && store.getContent().clasegratis_recetario_url ? { fecha: store.getContent().clasegratis_fecha } : null);
+      const r = registroMasterclassConRecetario(usuario) || registroVistaPrevia(req);
       return r ? { titulo: store.getContent().clasegratis_titulo || 'Master class', fecha: r.fecha } : null;
     })(),
   });
@@ -529,8 +547,8 @@ router.get('/recetario-live', (req, res) => {
 });
 
 router.get('/recetario-masterclass', (req, res) => {
-  const c = store.getContent();
-  if (esAdmin(req) && c.clasegratis_recetario_url) return enviarArchivoSubido(res, c.clasegratis_recetario_url, c.clasegratis_recetario_nombre, 'No pudimos encontrar el recetario en este momento.');
+  const vista = registroVistaPrevia(req);
+  if (vista) return enviarArchivoSubido(res, vista.accesoRecetarioUrl, vista.accesoRecetarioNombre, 'No pudimos encontrar el recetario en este momento.');
   const usuario = miembroActivoDeRequest(req);
   if (!usuario) return res.status(403).send('Necesitas una membresía activa para descargar el recetario.');
   const r = registroMasterclassConRecetario(usuario);
@@ -542,6 +560,15 @@ router.get('/recetario-masterclass', (req, res) => {
 // del link personal de su acceso anticipado) y lo lleva a su membresia,
 // donde esta guardado el recetario.
 router.get('/entrar-masterclass', (req, res) => {
+  if (req.query.vista && req.query.e && Number(req.query.x) > Date.now()) {
+    const esperada = firmaVistaMasterclass(req.query.e, req.query.x);
+    const dada = String(req.query.vista);
+    if (dada.length === esperada.length && crypto.timingSafeEqual(Buffer.from(dada), Buffer.from(esperada))) {
+      const u = store.getUserByEmail(String(req.query.e));
+      if (u && req.session) { req.session.userId = u.id; req.session.vistaPreviaMasterclass = true; }
+    }
+    return res.redirect('/membresia#recetario-masterclass');
+  }
   const registro = store.getRegistroClaseGratisPorToken(req.query.id, req.query.token);
   const usuario = registro && registro.accesoEstado === 'pagado' ? store.getUserByEmail(registro.correo) : null;
   if (usuario && req.session) req.session.userId = usuario.id;
@@ -667,5 +694,6 @@ router.get('/ebooks/:id/pagina/:numero', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.linkVistaMasterclass = linkVistaMasterclass;
 module.exports.sincronizarPagosDePreapproval = sincronizarPagosDePreapproval;
 module.exports.sincronizarEstadoDePreapproval = sincronizarEstadoDePreapproval;
