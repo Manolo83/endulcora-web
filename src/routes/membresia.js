@@ -397,7 +397,7 @@ router.get('/estado', async (req, res) => {
     usuario = store.getUserById(usuario.id);
   }
   res.json({
-    activa: usuario.membresiaEstado === 'activa',
+    activa: usuario.membresiaEstado === 'activa' || !!req.session.vistaPreviaMasterclass,
     estado: usuario.membresiaEstado,
     regalo: regalo.resumenRegalo(usuario),
     elegibleRegalo: regalo.esElegibleRegalo(usuario),
