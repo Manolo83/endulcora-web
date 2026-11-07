@@ -872,6 +872,18 @@ async function init() {
         carpetaSeed: 'pasteleria-cientifica-diabeticos',
         archivos: { ebook: 'EBOOK_PASTELERIA_CIENTIFICA_DIABETICOS_Endulcora.pdf', anexo: 'ANEXO_1_Pasteleria_Diabeticos_Costeo_Merma_Precios_Endulcora.xlsx', app: 'ANEXO_2_Pasteleria_Diabeticos_APP_Costos_Endulcora.html' },
       },
+      {
+        tituloBase: 'Pumpkin Spice',
+        categoria: 'ebook',
+        carpetaSeed: 'pumpkin-spice',
+        archivos: { ebook: 'EBOOK_PUMPKIN_SPICE_Endulcora.pdf', anexo: 'ANEXO_1_Pumpkin_Spice_Costeo_Merma_Precios_Endulcora.xlsx', app: 'ANEXO_2_Pumpkin_Spice_APP_Costos_Endulcora.html', paquete: 'Paquete_Completo.zip' },
+      },
+      {
+        tituloBase: 'La Cosecha de Otoño',
+        categoria: 'ebook',
+        carpetaSeed: 'la-cosecha-de-otono',
+        archivos: { ebook: 'EBOOK_LA_COSECHA_DE_OTONO_Endulcora.pdf', anexo: 'ANEXO_1_La_Cosecha_de_Otono_Costeo_Merma_Precios_Endulcora.xlsx', app: 'ANEXO_2_La_Cosecha_de_Otono_APP_Costos_Endulcora.html', paquete: 'Paquete_Completo.zip' },
+      },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
       const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
@@ -889,6 +901,14 @@ async function init() {
       }
       await crearFamiliaEbookDesglosada(familia);
       data[flag] = true;
+      changed = true;
+    }
+    // Los eBooks de otono (nov 2026) van en Panaderia y Reposteria.
+    if (!data._migApartadoEbooksOtono) {
+      (data.products || []).forEach((p) => {
+        if (p.categoria === 'ebook' && !p.esPaquete && ['Pumpkin Spice', 'La Cosecha de Otoño'].includes(p.titulo)) p.apartado = 'panaderia';
+      });
+      data._migApartadoEbooksOtono = true;
       changed = true;
     }
     // Portadas con fotografia real del platillo/bebida, para reemplazar la
