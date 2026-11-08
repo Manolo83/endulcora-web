@@ -493,6 +493,7 @@ function resumen(contenido = store.getContent()) {
     todos8: registros.filter((r) => r.correo && !r.mc8Enviado).length,
     asistenciaSi: registros.filter((r) => r.asistenciaMc === 'si').length,
     asistenciaNo: registros.filter((r) => r.asistenciaMc === 'no').length,
+    aforo: String(contenido.clasegratis_horarios || '').split(',').map((h) => h.trim()).filter(Boolean).map((h) => ({ horario: h, ...acceso.estadoHorario(fecha, h) })),
     aplica: !!fecha && fecha >= (contenido.masterclass_correos_desde || ''),
   };
 }
