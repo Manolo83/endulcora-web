@@ -837,6 +837,27 @@ router.get('/buen-fin', (req, res) => {
 
 // ---- Acceso anticipado de la master class (ver src/accesoAnticipado.js) ----
 // Pagina personal del link del correo: solo con id + token del registro.
+// Respuesta del correo 8 "¿Asistirás?" de la masterclass (botones Si / No).
+router.get('/asistencia-masterclass', (req, res) => {
+  const registro = store.getRegistroClaseGratisPorToken(req.query.id, req.query.token);
+  const contenido = store.getContent();
+  const pagina = (titulo, cuerpo) => res.type('html').send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titulo}</title></head>
+<body style="margin:0;background:#F4ECF4;font-family:Arial,Helvetica,sans-serif;color:#1B0720;"><div style="max-width:480px;margin:40px auto;background:#fff;border-radius:22px;padding:32px 24px;text-align:center;">
+<p style="font-size:11px;letter-spacing:.22em;color:#7A2E7E;font-weight:700;margin:0 0 14px;">ENDULCORA</p>${cuerpo}</div></body></html>`);
+  if (!registro) return pagina('Registro no encontrado', '<h1 style="font-size:24px;">No encontramos tu registro</h1><p>Abre el botón del correo que te mandamos.</p>');
+  const va = req.query.va === 'no' ? 'no' : 'si';
+  store.updateRegistroClaseGratis(registro.id, { asistenciaMc: va, asistenciaMcEn: new Date().toISOString() });
+  const esc = (t) => String(t || '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  if (va === 'no') return pagina('¡Gracias!', `<div style="font-size:44px;">💜</div><h1 style="font-size:26px;margin:10px 0;">¡Muchas gracias por avisarnos${registro.nombre ? `, ${esc(String(registro.nombre).split(' ')[0])}` : ''}!</h1><p style="color:#4b3f4e;">Te esperamos en la próxima masterclass.</p>`);
+  const ubicacion = contenido.clasegratis_ubicacion || 'Endulcora Nativitas — Av. Antonio Rodríguez 34, Col. San Simón Ticumac, Benito Juárez, CDMX';
+  const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('Endulcora Nativitas, Av. Antonio Rodríguez 34, San Simón Ticumac, Benito Juárez, CDMX')}`;
+  return pagina('¡Te esperamos!', `<div style="font-size:44px;">🍪</div><h1 style="font-size:26px;margin:10px 0;">¡Te esperamos${registro.nombre ? `, ${esc(String(registro.nombre).split(' ')[0])}` : ''}!</h1>
+<p style="font-size:16px;"><strong>${esc(registro.horario)} h</strong> · Masterclass ${esc(contenido.clasegratis_titulo || '')}</p>
+<div style="background:#FBF4E9;border-radius:14px;padding:16px;margin:18px 0;"><div style="font-size:11px;letter-spacing:.15em;color:#7A2E7E;font-weight:700;">DIRECCIÓN</div><p style="margin:6px 0 0;font-size:15px;">${esc(ubicacion)}</p></div>
+<a href="${mapa}" style="display:block;background:#F5A623;color:#1B0720;padding:16px;border-radius:999px;text-decoration:none;font-weight:800;">📍 ABRIR EN GOOGLE MAPS</a>
+<p style="font-size:13px;color:#6b5a6e;margin-top:16px;">Llega 10 minutos antes.</p>`);
+});
+
 router.get('/acceso-anticipado', (req, res) => {
   const registro = store.getRegistroClaseGratisPorToken(req.query.id, req.query.token);
   if (!registro) return res.status(404).json({ error: 'No encontramos tu registro. Usa el link de tu correo.' });

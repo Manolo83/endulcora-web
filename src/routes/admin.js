@@ -684,6 +684,15 @@ router.post('/api/masterclass/correo7/mandar', requireAdmin, (req, res) => {
   require('../correosMasterclass').revisar().catch(() => {});
 });
 
+router.post('/api/masterclass/correo8/mandar', requireAdmin, (req, res) => {
+  const contenido = store.getContent();
+  if (!contenido.clasegratis_fecha) return res.status(400).json({ error: 'No hay masterclass configurada.' });
+  const publico = (req.body || {}).publico === 'pagados' ? 'pagados' : 'todos';
+  store.updateContent({ masterclass_correo8_fecha: contenido.clasegratis_fecha, masterclass_correo8_publico: publico });
+  res.status(202).json({ ok: true });
+  require('../correosMasterclass').revisar().catch(() => {});
+});
+
 router.post('/api/masterclass/correos/prueba', requireAdmin, async (req, res) => {
   const correos = require('../correosMasterclass');
   const { enviarCorreoHtml } = require('../email');

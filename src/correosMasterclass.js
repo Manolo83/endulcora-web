@@ -228,6 +228,40 @@ function correo7(registro, c) {
   return { asunto: `⏰ Último día: asegura tu lugar para mañana (${precio})`, html };
 }
 
+// 8. "¿Asistirás?" (8 nov 2026, Manuel): dos botones. La respuesta se guarda
+// en el registro (asistenciaMc 'si'/'no') desde /api/asistencia-masterclass.
+function linkAsistencia(registro, va) {
+  return `${SITE_URL}/api/asistencia-masterclass?id=${registro.id}&token=${registro.confirmToken}&va=${va}`;
+}
+function correo8(registro, c) {
+  const nombre = String(registro.nombre || '').trim().split(/\s+/)[0] || '';
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F4ECF4;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Confírmanos con un clic · ${esc(fechaLegible(registro.fecha))} ${esc(registro.horario)} h</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F4ECF4;"><tr><td align="center" style="padding:20px 12px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#ffffff;border-radius:22px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+  <tr><td style="background:#7A2E7E;padding:30px 24px;text-align:center;"><div style="font-size:44px;line-height:1;">🍪</div><div style="font-size:13px;letter-spacing:.2em;color:#F5C66B;font-weight:700;margin-top:10px;">MASTERCLASS</div><div style="font-size:30px;font-weight:900;color:#ffffff;margin-top:4px;">${esc(c.tema)}</div></td></tr>
+  <tr><td style="padding:28px 24px 6px;text-align:center;">
+    <p style="margin:0 0 6px;font-size:15px;color:#7A2E7E;">${nombre ? `¡Hola, ${esc(nombre)}!` : '¡Hola!'}</p>
+    <p style="margin:0;font-size:28px;line-height:1.2;font-weight:800;color:#1B0720;">¿Asistirás mañana?</p>
+  </td></tr>
+  <tr><td style="padding:16px 24px;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#FBF4E9;border-radius:14px;"><tr>
+      <td style="padding:14px 10px;text-align:center;"><div style="font-size:11px;letter-spacing:.15em;color:#7A2E7E;font-weight:700;">TU HORARIO</div><div style="font-size:18px;font-weight:800;color:#1B0720;margin-top:4px;">${esc(fechaLegible(registro.fecha))} · ${esc(registro.horario)} h</div></td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="padding:6px 24px 0;text-align:center;"><p style="margin:0;font-size:14px;color:#4b3f4e;">Confírmanos con un clic para tener todo listo para ti.</p></td></tr>
+  <tr><td style="padding:18px 24px 8px;">
+    <a href="${linkAsistencia(registro, 'si')}" style="display:block;background:#2E9E5B;color:#ffffff;padding:18px 20px;border-radius:999px;text-decoration:none;font-weight:800;font-size:18px;text-align:center;">✅ SÍ ASISTIRÉ</a>
+  </td></tr>
+  <tr><td style="padding:6px 24px 8px;">
+    <a href="${linkAsistencia(registro, 'no')}" style="display:block;background:#ffffff;color:#7A2E7E;border:2px solid #7A2E7E;padding:15px 20px;border-radius:999px;text-decoration:none;font-weight:800;font-size:16px;text-align:center;">NO PODRÉ ASISTIR</a>
+  </td></tr>
+  <tr><td style="padding:16px 24px 24px;">${c.pie || ''}</td></tr>
+</table></td></tr></table></body></html>`;
+  return { asunto: `¿Asistirás mañana a la masterclass? Confírmanos con un clic`, html };
+}
+
 const CORREOS = {
   1: { titulo: 'Confirmación de registro', armar: correo1 },
   2: { titulo: 'Recordatorio un día antes', armar: correo2 },
@@ -236,6 +270,7 @@ const CORREOS = {
   5: { titulo: 'El precio especial vence mañana', armar: correo5 },
   6: { titulo: 'Último aviso', armar: correo6 },
   7: { titulo: 'Confirmación y última oportunidad (manual)', armar: correo7 },
+  8: { titulo: '¿Asistirás? Sí / No (manual)', armar: correo8 },
 };
 
 // Cuando le toca a un registro cada correo (2 a 6).
@@ -363,6 +398,30 @@ async function mandarCorreo7(ahora, pausaMs) {
   return n;
 }
 
+async function mandarCorreo8(ahora, pausaMs) {
+  const contenido = store.getContent();
+  const fecha = contenido.clasegratis_fecha;
+  if (!fecha || contenido.masterclass_correo8_fecha !== fecha) return 0;
+  if (ahora >= enCDMX(fecha, 0, '18:00')) return 0;
+  const soloPagados = contenido.masterclass_correo8_publico === 'pagados';
+  const c = contexto(contenido);
+  let n = 0;
+  const pendientes = store.getRegistrosClaseGratis().filter((r) => r.fecha === fecha && r.correo && !r.mc8Enviado && (!soloPagados || r.accesoEstado === 'pagado'));
+  for (const r of pendientes) {
+    if (contactoDeBaja(r.correo)) { store.updateRegistroClaseGratis(r.id, { mc8Enviado: 'omitido-baja' }); continue; }
+    try {
+      const { asunto, html } = correo8(r, c);
+      await c.email.enviarCorreoHtml({ to: r.correo, asunto, html });
+      store.updateRegistroClaseGratis(r.id, { mc8Enviado: new Date().toISOString() });
+      n += 1;
+      if (pausaMs) await new Promise((ok) => setTimeout(ok, pausaMs));
+    } catch (err) {
+      console.error(`[masterclass] No se pudo mandar el correo 8 a ${r.correo}:`, err.message);
+    }
+  }
+  return n;
+}
+
 async function revisar(ahora = new Date(), { pausaMs = 250 } = {}) {
   if (corriendo) return { enviados: 0 };
   corriendo = true;
@@ -370,6 +429,7 @@ async function revisar(ahora = new Date(), { pausaMs = 250 } = {}) {
   try {
     enviados += await mandarRecetarios(ahora, pausaMs);
     enviados += await mandarCorreo7(ahora, pausaMs);
+    enviados += await mandarCorreo8(ahora, pausaMs);
     const contenido = store.getContent();
     if (contenido.masterclass_correos_activo === 'false') return { enviados };
     const desde = contenido.masterclass_correos_desde || hoyCDMX(ahora);
@@ -413,7 +473,7 @@ function resumen(contenido = store.getContent()) {
   const fecha = contenido.clasegratis_fecha;
   const registros = store.getRegistrosClaseGratis().filter((r) => r.fecha === fecha);
   const conteo = {};
-  [2, 3, 4, 5, 6, 7].forEach((n) => { conteo[n] = registros.filter((r) => r[`mc${n}Enviado`] && r[`mc${n}Enviado`] !== 'omitido-baja').length; });
+  [2, 3, 4, 5, 6, 7, 8].forEach((n) => { conteo[n] = registros.filter((r) => r[`mc${n}Enviado`] && r[`mc${n}Enviado`] !== 'omitido-baja').length; });
   const faltan = [];
   if (!contenido.clasegratis_arte) faltan.push('el arte');
   if (!contenido.clasegratis_link_clase) faltan.push('el link para entrar a la clase (correo 3)');
@@ -428,6 +488,11 @@ function resumen(contenido = store.getContent()) {
     faltan,
     pendientes7: registros.filter((r) => r.correo && r.accesoEstado !== 'pagado' && !r.mc7Enviado).length,
     envio7: contenido.masterclass_correo7_fecha === fecha,
+    envio8: contenido.masterclass_correo8_fecha === fecha ? (contenido.masterclass_correo8_publico || 'todos') : '',
+    pagados8: registros.filter((r) => r.correo && r.accesoEstado === 'pagado' && !r.mc8Enviado).length,
+    todos8: registros.filter((r) => r.correo && !r.mc8Enviado).length,
+    asistenciaSi: registros.filter((r) => r.asistenciaMc === 'si').length,
+    asistenciaNo: registros.filter((r) => r.asistenciaMc === 'no').length,
     aplica: !!fecha && fecha >= (contenido.masterclass_correos_desde || ''),
   };
 }
