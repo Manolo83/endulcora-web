@@ -188,15 +188,44 @@ function correo6(registro, c) {
 // ha comprado su acceso, confirmar asistencia + ultima oportunidad del acceso
 // anticipado. Sale una sola vez por registro (mc7Enviado).
 function correo7(registro, c) {
-  const incluye = '<ul style="margin:6px 0 0;padding-left:20px;"><li>Tu lugar asegurado en la sala</li><li>Recetario digital de la masterclass</li><li>Coffee break</li><li>La grabación de la clase</li><li>Un mes gratis de la membresía Club Endulcora</li></ul>';
-  const cuerpo = `${hola(registro)}
-    <p><strong>¡Mañana es la masterclass de ${esc(c.tema)}!</strong> Tu registro está confirmado para el <strong>${esc(fechaLegible(registro.fecha))} a las ${esc(registro.horario)}</strong>${c.ubicacion ? ` en ${esc(c.ubicacion)}` : ''}.</p>
-    <p>Ojo: con más de mil registrados, <strong>los lugares en sala son para quien tiene acceso anticipado</strong>${c.lugares ? ` (solo ${c.lugares} en total)` : ''}. Esta es tu <strong>última oportunidad</strong> de asegurarlo por <strong>${pesos(c.precioAcceso)}</strong>. Incluye:</p>
-    ${incluye}
-    ${c.email.botonPlan(`Asegurar mi lugar por ${pesos(c.precioAcceso)}`, acceso.linkAcceso(SITE_URL, registro))}
-    <p style="font-size:14px;">El acceso anticipado <strong>se cierra hoy a las 11:59 pm</strong> o antes, si se acaban los lugares. Si vives fuera de la CDMX, el mismo acceso te da la clase en línea con recetario y grabación.</p>
-    <p>¡Nos vemos mañana!<br><strong>Endulcora</strong></p>`;
-  return { asunto: `Última oportunidad: asegura tu lugar para mañana en ${c.tema}`, html: c.email.plantillaPlan({ arteUrl: c.arteUrl, cuerpo, pie: c.pie, preheader: `Mañana ${registro.horario} · quedan pocos lugares` }) };
+  const link = acceso.linkAcceso(SITE_URL, registro);
+  const precio = pesos(c.precioAcceso);
+  const nombre = String(registro.nombre || '').trim().split(/\s+/)[0] || '';
+  const item = (ico, txt) => `<tr><td style="width:34px;font-size:20px;padding:6px 0;vertical-align:middle;">${ico}</td><td style="font-size:15px;color:#1B0720;padding:6px 0;vertical-align:middle;">${txt}</td></tr>`;
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F4ECF4;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Mañana ${esc(registro.horario)} · solo ${c.lugares || 160} lugares en sala · se cierra hoy</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F4ECF4;"><tr><td align="center" style="padding:20px 12px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#ffffff;border-radius:22px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+  <tr><td style="background:#4E1454;padding:14px 22px;color:#F5C66B;font-size:11px;letter-spacing:.22em;font-weight:700;text-align:center;">⏰ ÚLTIMA OPORTUNIDAD · SE CIERRA HOY 11:59 PM</td></tr>
+  <tr><td style="background:#7A2E7E;padding:30px 24px;text-align:center;"><div style="font-size:44px;line-height:1;">🍪</div><div style="font-size:13px;letter-spacing:.2em;color:#F5C66B;font-weight:700;margin-top:10px;">MASTERCLASS</div><div style="font-size:30px;font-weight:900;color:#ffffff;margin-top:4px;">${esc(c.tema)}</div></td></tr>
+  <tr><td style="padding:26px 24px 8px;text-align:center;">
+    <p style="margin:0 0 6px;font-size:15px;color:#7A2E7E;">${nombre ? `¡${esc(nombre)}, ` : '¡'}mañana es tu masterclass!</p>
+    <p style="margin:0;font-size:26px;line-height:1.2;font-weight:800;color:#1B0720;">Asegura tu lugar en sala por solo ${precio}</p>
+  </td></tr>
+  <tr><td style="padding:16px 24px;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#FBF4E9;border-radius:14px;"><tr>
+      <td style="padding:14px 10px;text-align:center;width:50%;border-right:1px solid #F0DFC4;"><div style="font-size:11px;letter-spacing:.15em;color:#7A2E7E;font-weight:700;">CUÁNDO</div><div style="font-size:16px;font-weight:800;color:#1B0720;margin-top:4px;">${esc(fechaLegible(registro.fecha))}<br>${esc(registro.horario)} h</div></td>
+      <td style="padding:14px 10px;text-align:center;width:50%;"><div style="font-size:11px;letter-spacing:.15em;color:#7A2E7E;font-weight:700;">DÓNDE</div><div style="font-size:16px;font-weight:800;color:#1B0720;margin-top:4px;">Endulcora Nativitas<br><span style="font-size:12px;font-weight:400;">Metro Portales / Nativitas</span></div></td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="padding:4px 24px 0;">
+    <p style="margin:0 0 6px;font-size:14px;color:#4b3f4e;">Hay más de mil registrados y <strong>solo ${c.lugares || 160} lugares</strong>. Con tu acceso anticipado llevas:</p>
+    <table role="presentation" cellspacing="0" cellpadding="0">
+      ${item('🪑', '<strong>Tu lugar asegurado</strong> en la sala')}
+      ${item('📖', 'Recetario digital')}
+      ${item('☕', 'Coffee break')}
+      ${item('🎥', 'Grabación de la clase')}
+      ${item('🎁', '1 mes gratis del Club Endulcora')}
+    </table>
+  </td></tr>
+  <tr><td align="center" style="padding:22px 24px 8px;">
+    <a href="${link}" style="display:block;background:#F5A623;color:#1B0720;padding:18px 20px;border-radius:999px;text-decoration:none;font-weight:800;font-size:18px;text-align:center;">ASEGURAR MI LUGAR · ${precio} →</a>
+    <p style="margin:10px 0 0;font-size:12px;color:#6b5a6e;">Pago seguro con Mercado Pago · ¿Vives fuera de la CDMX? Es la clase en línea con recetario y grabación.</p>
+  </td></tr>
+  <tr><td style="padding:16px 24px 24px;">${c.pie || ''}</td></tr>
+</table></td></tr></table></body></html>`;
+  return { asunto: `⏰ Último día: asegura tu lugar para mañana (${precio})`, html };
 }
 
 const CORREOS = {
