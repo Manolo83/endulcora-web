@@ -4108,6 +4108,11 @@ module.exports = {
         declinados: delHorario.filter((r) => r.asistencia === 'no').length,
         cupoLleno: delHorario.filter((r) => r.asistencia === 'si' && !r.confirmado).length,
         sinResponder: delHorario.filter((r) => !r.asistencia).length,
+        // Respuestas del correo "¿Asistirás?" (asistenciaMc).
+        dijoSi: delHorario.filter((r) => r.asistenciaMc === 'si').map((r) => r.nombre || r.correo),
+        dijoNo: delHorario.filter((r) => r.asistenciaMc === 'no').map((r) => r.nombre || r.correo),
+        enLineaPorCupo: delHorario.filter((r) => r.asistenciaMc === 'lleno').map((r) => r.nombre || r.correo),
+        ocupados: delHorario.filter((r) => (r.confirmado && r.numeroInscrito) || r.asistenciaMc === 'si').length,
         cupo: this.cupoClaseGratisPorHorario(),
       };
     });
