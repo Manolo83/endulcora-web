@@ -77,7 +77,7 @@ function estadoHorario(fecha, horario, { excluirId = null, ahora = new Date() } 
   const ocupadas = store
     .getRegistrosClaseGratis()
     .filter((r) => r.fecha === fecha && r.horario === horario && r.id !== excluirId)
-    .filter((r) => (r.confirmado && r.numeroInscrito) || apartadoVigente(r, ahora)).length;
+    .filter((r) => (r.confirmado && r.numeroInscrito) || apartadoVigente(r, ahora) || r.asistenciaMc === 'si').length;
   return { cupo, ocupadas, quedan: Math.max(0, cupo - ocupadas) };
 }
 

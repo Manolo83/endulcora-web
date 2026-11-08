@@ -845,9 +845,16 @@ router.get('/asistencia-masterclass', (req, res) => {
 <body style="margin:0;background:#F4ECF4;font-family:Arial,Helvetica,sans-serif;color:#1B0720;"><div style="max-width:480px;margin:40px auto;background:#fff;border-radius:22px;padding:32px 24px;text-align:center;">
 <p style="font-size:11px;letter-spacing:.22em;color:#7A2E7E;font-weight:700;margin:0 0 14px;">ENDULCORA</p>${cuerpo}</div></body></html>`);
   if (!registro) return pagina('Registro no encontrado', '<h1 style="font-size:24px;">No encontramos tu registro</h1><p>Abre el botón del correo que te mandamos.</p>');
-  const va = req.query.va === 'no' ? 'no' : 'si';
+  let va = req.query.va === 'no' ? 'no' : 'si';
+  const conFicha = registro.confirmado && registro.numeroInscrito;
+  // Aforo de 40 por horario: fichas pagadas + quienes dicen "si" sin ficha.
+  if (va === 'si' && !conFicha && registro.asistenciaMc !== 'si') {
+    const { quedan } = acceso.estadoHorario(registro.fecha, registro.horario, { excluirId: registro.id });
+    if (quedan <= 0) va = 'lleno';
+  }
   store.updateRegistroClaseGratis(registro.id, { asistenciaMc: va, asistenciaMcEn: new Date().toISOString() });
   const esc = (t) => String(t || '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  if (va === 'lleno') return pagina('Cupo lleno', `<div style="font-size:44px;">😔</div><h1 style="font-size:24px;margin:10px 0;">Se llenó el cupo de las ${esc(registro.horario)} h</h1><p style="color:#4b3f4e;">El aforo de la sala es de 40 personas por horario y ya está completo. Gracias por avisarnos: te esperamos en la próxima masterclass.</p>`);
   if (va === 'no') return pagina('¡Gracias!', `<div style="font-size:44px;">💜</div><h1 style="font-size:26px;margin:10px 0;">¡Muchas gracias por avisarnos${registro.nombre ? `, ${esc(String(registro.nombre).split(' ')[0])}` : ''}!</h1><p style="color:#4b3f4e;">Te esperamos en la próxima masterclass.</p>`);
   const ubicacion = contenido.clasegratis_ubicacion || 'Endulcora Nativitas — Av. Antonio Rodríguez 34, Col. San Simón Ticumac, Benito Juárez, CDMX';
   const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('Endulcora Nativitas, Av. Antonio Rodríguez 34, San Simón Ticumac, Benito Juárez, CDMX')}`;
