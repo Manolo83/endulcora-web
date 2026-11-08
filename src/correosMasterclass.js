@@ -184,6 +184,21 @@ function correo6(registro, c) {
   return { asunto: 'Últimas horas del precio especial', html: c.email.plantillaPlan({ arteUrl: c.arteUrl, cuerpo, pie: c.pie }) };
 }
 
+// 7. Envio manual desde /admin (8 nov 2026, Manuel): a quien se registro y no
+// ha comprado su acceso, confirmar asistencia + ultima oportunidad del acceso
+// anticipado. Sale una sola vez por registro (mc7Enviado).
+function correo7(registro, c) {
+  const incluye = '<ul style="margin:6px 0 0;padding-left:20px;"><li>Tu lugar asegurado en la sala</li><li>Recetario digital de la masterclass</li><li>Coffee break</li><li>La grabación de la clase</li><li>Un mes gratis de la membresía Club Endulcora</li></ul>';
+  const cuerpo = `${hola(registro)}
+    <p><strong>¡Mañana es la masterclass de ${esc(c.tema)}!</strong> Tu registro está confirmado para el <strong>${esc(fechaLegible(registro.fecha))} a las ${esc(registro.horario)}</strong>${c.ubicacion ? ` en ${esc(c.ubicacion)}` : ''}.</p>
+    <p>Ojo: con más de mil registrados, <strong>los lugares en sala son para quien tiene acceso anticipado</strong>${c.lugares ? ` (solo ${c.lugares} en total)` : ''}. Esta es tu <strong>última oportunidad</strong> de asegurarlo por <strong>${pesos(c.precioAcceso)}</strong>. Incluye:</p>
+    ${incluye}
+    ${c.email.botonPlan(`Asegurar mi lugar por ${pesos(c.precioAcceso)}`, acceso.linkAcceso(SITE_URL, registro))}
+    <p style="font-size:14px;">El acceso anticipado <strong>se cierra hoy a las 11:59 pm</strong> o antes, si se acaban los lugares. Si vives fuera de la CDMX, el mismo acceso te da la clase en línea con recetario y grabación.</p>
+    <p>¡Nos vemos mañana!<br><strong>Endulcora</strong></p>`;
+  return { asunto: `Última oportunidad: asegura tu lugar para mañana en ${c.tema}`, html: c.email.plantillaPlan({ arteUrl: c.arteUrl, cuerpo, pie: c.pie, preheader: `Mañana ${registro.horario} · quedan pocos lugares` }) };
+}
+
 const CORREOS = {
   1: { titulo: 'Confirmación de registro', armar: correo1 },
   2: { titulo: 'Recordatorio un día antes', armar: correo2 },
@@ -191,6 +206,7 @@ const CORREOS = {
   4: { titulo: 'Grabación y oferta del taller', armar: correo4 },
   5: { titulo: 'El precio especial vence mañana', armar: correo5 },
   6: { titulo: 'Último aviso', armar: correo6 },
+  7: { titulo: 'Confirmación y última oportunidad (manual)', armar: correo7 },
 };
 
 // Cuando le toca a un registro cada correo (2 a 6).
@@ -293,12 +309,38 @@ async function mandarRecetarios(ahora, pausaMs) {
   return n;
 }
 
+// Correo 7: lo prende el admin (masterclass_correo7_fecha = fecha de la clase)
+// y sale a los registrados de esa fecha que no han pagado su acceso.
+async function mandarCorreo7(ahora, pausaMs) {
+  const contenido = store.getContent();
+  const fecha = contenido.clasegratis_fecha;
+  if (!fecha || contenido.masterclass_correo7_fecha !== fecha) return 0;
+  if (!acceso.accesoAbierto(contenido, ahora)) return 0;
+  const c = contexto(contenido);
+  let n = 0;
+  const pendientes = store.getRegistrosClaseGratis().filter((r) => r.fecha === fecha && r.correo && r.accesoEstado !== 'pagado' && !r.mc7Enviado);
+  for (const r of pendientes) {
+    if (contactoDeBaja(r.correo)) { store.updateRegistroClaseGratis(r.id, { mc7Enviado: 'omitido-baja' }); continue; }
+    try {
+      const { asunto, html } = correo7(r, c);
+      await c.email.enviarCorreoHtml({ to: r.correo, asunto, html });
+      store.updateRegistroClaseGratis(r.id, { mc7Enviado: new Date().toISOString() });
+      n += 1;
+      if (pausaMs) await new Promise((ok) => setTimeout(ok, pausaMs));
+    } catch (err) {
+      console.error(`[masterclass] No se pudo mandar el correo 7 a ${r.correo}:`, err.message);
+    }
+  }
+  return n;
+}
+
 async function revisar(ahora = new Date(), { pausaMs = 250 } = {}) {
   if (corriendo) return { enviados: 0 };
   corriendo = true;
   let enviados = 0;
   try {
     enviados += await mandarRecetarios(ahora, pausaMs);
+    enviados += await mandarCorreo7(ahora, pausaMs);
     const contenido = store.getContent();
     if (contenido.masterclass_correos_activo === 'false') return { enviados };
     const desde = contenido.masterclass_correos_desde || hoyCDMX(ahora);
@@ -342,7 +384,7 @@ function resumen(contenido = store.getContent()) {
   const fecha = contenido.clasegratis_fecha;
   const registros = store.getRegistrosClaseGratis().filter((r) => r.fecha === fecha);
   const conteo = {};
-  [2, 3, 4, 5, 6].forEach((n) => { conteo[n] = registros.filter((r) => r[`mc${n}Enviado`] && r[`mc${n}Enviado`] !== 'omitido-baja').length; });
+  [2, 3, 4, 5, 6, 7].forEach((n) => { conteo[n] = registros.filter((r) => r[`mc${n}Enviado`] && r[`mc${n}Enviado`] !== 'omitido-baja').length; });
   const faltan = [];
   if (!contenido.clasegratis_arte) faltan.push('el arte');
   if (!contenido.clasegratis_link_clase) faltan.push('el link para entrar a la clase (correo 3)');
@@ -355,6 +397,8 @@ function resumen(contenido = store.getContent()) {
     registrados: registros.length,
     conteo,
     faltan,
+    pendientes7: registros.filter((r) => r.correo && r.accesoEstado !== 'pagado' && !r.mc7Enviado).length,
+    envio7: contenido.masterclass_correo7_fecha === fecha,
     aplica: !!fecha && fecha >= (contenido.masterclass_correos_desde || ''),
   };
 }

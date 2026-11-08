@@ -2372,6 +2372,7 @@ const CUANDO_CORREO_MASTERCLASS = {
   4: '2 horas después de su horario',
   5: 'Día 2 después de la clase, 10:00 am',
   6: 'Día 3 después de la clase, 10:00 am',
+  7: 'Manual: a quien no ha pagado su acceso',
 };
 async function cargarCorreosMasterclass(){
   try{
@@ -2388,6 +2389,7 @@ async function cargarCorreosMasterclass(){
         <div class="flex shrink-0 gap-2">
           <a href="/admin/api/masterclass/correos/vista/${c.n}" target="_blank" class="rounded-full border border-vino/25 px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-wider text-vino">Ver correo</a>
           <button type="button" class="btnPruebaMasterclass rounded-full border border-vino/25 px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-wider text-vino" data-n="${c.n}">Enviarme prueba</button>
+          ${c.n === 7 ? (r.envio7 ? '<span class="rounded-full bg-green-50 px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-wider text-green-700">Enviando / enviado</span>' : `<button type="button" id="btnMandarCorreo7" class="rounded-full bg-vino px-3 py-1 font-ui text-[10px] font-700 uppercase tracking-wider text-white">Mandar a ${r.pendientes7} sin acceso</button>`) : ''}
         </div>
       </div>`).join('');
   }catch(e){
@@ -2395,6 +2397,14 @@ async function cargarCorreosMasterclass(){
   }
 }
 $('masterclassCorreosLista').addEventListener('click', async (e) => {
+  const m7 = e.target.closest('#btnMandarCorreo7');
+  if(m7){
+    if(!confirm('¿Mandar el correo 7 a todos los registrados que no han pagado su acceso? No se puede deshacer.')) return;
+    m7.disabled = true;
+    try{ await api('/admin/api/masterclass/correo7/mandar', { method: 'POST' }); toast('Enviando: sale poco a poco'); cargarCorreosMasterclass(); }
+    catch(err){ toast(err.message); m7.disabled = false; }
+    return;
+  }
   const b = e.target.closest('.btnPruebaMasterclass');
   if(!b) return;
   b.disabled = true;
