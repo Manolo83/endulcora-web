@@ -837,6 +837,14 @@ router.get('/buen-fin', (req, res) => {
 
 // ---- Acceso anticipado de la master class (ver src/accesoAnticipado.js) ----
 // Pagina personal del link del correo: solo con id + token del registro.
+// Link fijo a la transmision de la masterclass (lo que este en
+// clasegratis_link_clase del admin).
+router.get('/masterclass-en-vivo', (req, res) => {
+  const link = String(store.getContent().clasegratis_link_clase || '').trim();
+  if (/^https?:\/\//i.test(link)) return res.redirect(link);
+  res.type('html').send('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Transmisión en vivo</title></head><body style="margin:0;background:#F4ECF4;font-family:Arial,sans-serif;color:#1B0720;"><div style="max-width:480px;margin:40px auto;background:#fff;border-radius:22px;padding:32px 24px;text-align:center;"><div style="font-size:44px;">📺</div><h1 style="font-size:24px;">La transmisión todavía no empieza</h1><p>Regresa a esta página a la hora de tu clase: aquí se abrirá en vivo.</p></div></body></html>');
+});
+
 // Respuesta del correo 8 "¿Asistirás?" de la masterclass (botones Si / No).
 router.get('/asistencia-masterclass', (req, res) => {
   const registro = store.getRegistroClaseGratisPorToken(req.query.id, req.query.token);
@@ -854,7 +862,9 @@ router.get('/asistencia-masterclass', (req, res) => {
   }
   store.updateRegistroClaseGratis(registro.id, { asistenciaMc: va, asistenciaMcEn: new Date().toISOString() });
   const esc = (t) => String(t || '').replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-  if (va === 'lleno') return pagina('Cupo lleno', `<div style="font-size:44px;">😔</div><h1 style="font-size:24px;margin:10px 0;">Se llenó el cupo de las ${esc(registro.horario)} h</h1><p style="color:#4b3f4e;">El aforo de la sala es de 40 personas por horario y ya está completo. Gracias por avisarnos: te esperamos en la próxima masterclass.</p>`);
+  if (va === 'lleno') return pagina('Te esperamos en línea', `<div style="font-size:44px;">📺</div><h1 style="font-size:24px;margin:10px 0;">¡Te esperamos en la transmisión en vivo!</h1><p style="color:#4b3f4e;">La sala de las ${esc(registro.horario)} h ya llegó a su aforo de 40 personas, pero no te quedas fuera: toma la masterclass en vivo desde donde estés.</p>
+<a href="/api/masterclass-en-vivo" style="display:block;background:#F5A623;color:#1B0720;padding:16px;border-radius:999px;text-decoration:none;font-weight:800;margin-top:18px;">📺 VER LA TRANSMISIÓN EN VIVO</a>
+<p style="font-size:13px;color:#6b5a6e;margin-top:14px;">Guarda esta página: el botón se activa el día de la clase. También te mandamos el link 1 hora antes.</p>`);
   if (va === 'no') return pagina('¡Gracias!', `<div style="font-size:44px;">💜</div><h1 style="font-size:26px;margin:10px 0;">¡Muchas gracias por avisarnos${registro.nombre ? `, ${esc(String(registro.nombre).split(' ')[0])}` : ''}!</h1><p style="color:#4b3f4e;">Te esperamos en la próxima masterclass.</p>`);
   const ubicacion = contenido.clasegratis_ubicacion || 'Endulcora Nativitas — Av. Antonio Rodríguez 34, Col. San Simón Ticumac, Benito Juárez, CDMX';
   const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('Endulcora Nativitas, Av. Antonio Rodríguez 34, San Simón Ticumac, Benito Juárez, CDMX')}`;
