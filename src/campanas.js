@@ -11,7 +11,18 @@ function armarHtmlPersonal(html, contacto, unsubscribeUrl) {
   return String(html)
     .split('{nombre}').join(escaparHtml(nombre))
     .split('{baja}').join(unsubscribeUrl)
-    .split('{link_acceso}').join(link);
+    .split('{link_acceso}').join(link)
+    .split('{link_si}').join(linkAsistencia(contacto, 'si'))
+    .split('{link_no}').join(linkAsistencia(contacto, 'no'));
+}
+// {link_si} / {link_no}: botones "¿Asistirás?" de la masterclass vigente
+// (respuesta en /api/asistencia-masterclass, queda en el registro).
+function linkAsistencia(contacto, va) {
+  const correo = String(contacto.email || '').toLowerCase();
+  const fechaActual = store.getContent().clasegratis_fecha || '';
+  const registro = store.getRegistrosClaseGratis().find((r) => r.fecha === fechaActual && String(r.correo || '').toLowerCase() === correo);
+  if (!registro) return `${SITE_URL}/clase-gratis`;
+  return `${SITE_URL}/api/asistencia-masterclass?id=${registro.id}&token=${registro.confirmToken}&va=${va}`;
 }
 async function enviarCorreoHtml({ to, asunto, html, unsubscribeUrl }) {
   const { Resend } = require('resend');
