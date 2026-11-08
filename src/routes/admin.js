@@ -675,6 +675,15 @@ router.post('/api/masterclass/recetario/prueba', requireAdmin, async (req, res) 
   }
 });
 
+router.post('/api/masterclass/correo7/mandar', requireAdmin, (req, res) => {
+  const contenido = store.getContent();
+  if (!contenido.clasegratis_fecha) return res.status(400).json({ error: 'No hay masterclass configurada.' });
+  if (!acceso.accesoAbierto(contenido)) return res.status(400).json({ error: 'El acceso anticipado ya está cerrado.' });
+  store.updateContent({ masterclass_correo7_fecha: contenido.clasegratis_fecha });
+  res.status(202).json({ ok: true });
+  require('../correosMasterclass').revisar().catch(() => {});
+});
+
 router.post('/api/masterclass/correos/prueba', requireAdmin, async (req, res) => {
   const correos = require('../correosMasterclass');
   const { enviarCorreoHtml } = require('../email');
