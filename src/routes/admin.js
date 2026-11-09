@@ -1945,6 +1945,13 @@ router.post('/api/users/:id/membresia', requireAdmin, (req, res) => {
   }
   const user = store.getUserById(req.params.id);
   if (!user) return res.status(404).json({ error: 'No encontrado' });
+  // Alta manual (decision de Manuel, 9 nov 2026): igual que el acceso
+  // anticipado, 30 dias de acceso sin domiciliar con los recordatorios de
+  // 15, 3 y 1 dias para que domicilie; si no lo hace, termina sola.
+  if (estado === 'activa' && user.membresiaEstado !== 'activa') {
+    const act = regalo.activarMesPagado(user, { origen: 'manual' });
+    return res.json({ id: act.id, membresiaEstado: act.membresiaEstado });
+  }
   const patch = { membresiaEstado: estado };
   // Igual que en el webhook de Mercado Pago: solo reinicia el "reloj" de la
   // biblioteca de clases si de verdad estaba inactiva antes, y solo asigna

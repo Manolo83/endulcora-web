@@ -9,6 +9,7 @@ const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 const store = require('../store');
+const regalo = require('../membresiaRegalo');
 const email = require('../email');
 const enviosClient = require('../enviosClient');
 const { requireLex, checkLexCode } = require('../authLex');
@@ -277,9 +278,8 @@ function intentarActivarMembresia(correo, huboMembresia) {
   const user = store.getUserByEmail(correo);
   if (!user) return 'sinCuenta';
   if (user.membresiaEstado !== 'activa') {
-    const patch = { membresiaEstado: 'activa', membresiaActivaDesde: hoyISO() };
-    if (!user.membresiaPrimeraActivacion) patch.membresiaPrimeraActivacion = new Date().toISOString();
-    store.updateUser(user.id, patch);
+    // Igual que el alta manual de /admin: 30 dias con recordatorios para domiciliar.
+    regalo.activarMesPagado(user, { origen: 'manual' });
   }
   return 'activada';
 }

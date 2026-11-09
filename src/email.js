@@ -1055,7 +1055,16 @@ async function enviarCorreoRecordatorioRegalo({ to, nombre, siteUrl, dias, hasta
   let caja;
   let botonTexto;
   let letraChica;
-  if (origen === 'acceso_anticipado' && cancelada) {
+  if (origen === 'manual' && cancelada) {
+    // Membresia dada de alta a mano (admin o venta en sucursal), sin tarjeta:
+    // le ofrece domiciliar para no perder el acceso.
+    subject = dias === 1 ? 'Tu mes en Club Endulcora termina mañana' : `Tu mes en Club Endulcora termina ${cuando}`;
+    parrafos = [
+      `${dias === 1 ? 'Mañana' : `En ${dias} días`} termina tu mes de membresía. Para seguir con tu recetario del mes, el taller en línea y todos los ebooks, quédate por <b>$100 al mes</b>, con cargo automático. Puedes cancelar cuando quieras.`,
+    ];
+    caja = `Si te quedas, tu primer cargo sería el ${fecha}, cuando termine tu mes. No se te cobra nada antes.`;
+    botonTexto = 'Seguir en Club Endulcora';
+  } else if (origen === 'acceso_anticipado' && cancelada) {
     // Mes gratis con el acceso anticipado de la masterclass (pago unico) que
     // TODAVIA no domicilio su tarjeta: correo 8 del plan de ventas, le
     // ofrece domiciliar. Si ya domicilio, cae en el bloque de abajo (se
