@@ -386,6 +386,19 @@ async function init() {
       if (typeof u.regaloRecetarioUrl !== 'string') { u.regaloRecetarioUrl = ''; changed = true; }
       if (typeof u.regaloRecetarioNombre !== 'string') { u.regaloRecetarioNombre = ''; changed = true; }
       if (typeof u.regaloPreapprovalId !== 'string') { u.regaloPreapprovalId = ''; changed = true; }
+      // Altas manuales que ya existian (decision de Manuel, 9 nov 2026): activas
+      // sin suscripcion de Mercado Pago ni regalo reciben 30 dias desde hoy,
+      // sin domiciliar, con los recordatorios de 15, 3 y 1 dias. Corre una
+      // sola vez por cuenta (bandera migAltaManual).
+      if (typeof u.migAltaManual !== 'boolean') {
+        if (u.membresiaEstado === 'activa' && !u.membresiaPreapprovalId && !u.membresiaRegaloHasta) {
+          u.membresiaRegaloHasta = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+          u.membresiaRegaloCancelada = true;
+          u.regaloRecordatoriosEnviados = [];
+          u.membresiaOrigen = 'manual';
+        }
+        u.migAltaManual = true; changed = true;
+      }
       // Cuenta de Mercado Pago con la que se activo el regalo, y si se le
       // nego por ya haberlo usado antes con otra cuenta (anti "regalo doble").
       if (typeof u.regaloPayerId !== 'string') { u.regaloPayerId = ''; changed = true; }
