@@ -930,7 +930,7 @@ async function enviarCorreoAccesoAnticipado({ to, nombre, titulo, fecha, horario
             <li>Endulcora no se hace responsable por pérdida o extravío de objetos personales.</li>
           </ul>
         </div>
-        <p style="margin-top:22px;font-size:12px;color:#9C9C9C;">Recibiste este correo porque te registraste a la master class en endulcora.com. La membresía incluida es de un mes; renovarla es tu decisión.</p>
+        <p style="margin-top:22px;font-size:12px;color:#9C9C9C;">Recibiste este correo porque te registraste a la master class en endulcora.com. Tu primer mes de membresía es de regalo; después se cobran $100 al mes con tu tarjeta domiciliada y puedes cancelar cuando quieras.</p>
       </div>
     `,
   });
