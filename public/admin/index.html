@@ -4889,7 +4889,8 @@ async function cargarConfirmacionesClaseGratis(){
         </div>
         <p class="text-xs text-carbon/50">${h.registrados} registrados · <strong class="${h.confirmados >= h.cupo ? 'text-red-600' : 'text-verde'}">${h.confirmados}/${h.cupo} fichas</strong> · ${h.accesoOnline} en línea · ${h.accesoApartados} apartadas pagando </p>
         <p class="mt-1 text-xs"><strong class="text-verde">Sí asistirán: ${(h.dijoSi||[]).length}</strong> · <strong class="text-red-600">No asistirán: ${(h.dijoNo||[]).length}</strong> · En línea (sala llena): ${(h.enLineaPorCupo||[]).length} · <strong>Sala: ${h.ocupados||0}/${h.cupo}</strong></p>
-        ${(h.dijoSi||[]).length || (h.dijoNo||[]).length || (h.enLineaPorCupo||[]).length ? `<details class="mt-1 text-xs text-carbon/70"><summary class="cursor-pointer text-vino">Ver nombres</summary>
+        ${(h.pagadosLista||[]).length || (h.dijoSi||[]).length || (h.dijoNo||[]).length || (h.enLineaPorCupo||[]).length ? `<details class="mt-1 text-xs text-carbon/70"><summary class="cursor-pointer text-vino">Ver nombres</summary>
+          ${(h.pagadosLista||[]).length ? `<p class="mt-1"><strong>Pagaron acceso anticipado:</strong> ${h.pagadosLista.map(escapeHtml).join(', ')}</p>` : ''}
           ${(h.dijoSi||[]).length ? `<p class="mt-1"><strong>Sí:</strong> ${h.dijoSi.map(escapeHtml).join(', ')}</p>` : ''}
           ${(h.dijoNo||[]).length ? `<p class="mt-1"><strong>No:</strong> ${h.dijoNo.map(escapeHtml).join(', ')}</p>` : ''}
           ${(h.enLineaPorCupo||[]).length ? `<p class="mt-1"><strong>En línea:</strong> ${h.enLineaPorCupo.map(escapeHtml).join(', ')}</p>` : ''}

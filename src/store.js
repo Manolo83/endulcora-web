@@ -4109,6 +4109,7 @@ module.exports = {
         cupoLleno: delHorario.filter((r) => r.asistencia === 'si' && !r.confirmado).length,
         sinResponder: delHorario.filter((r) => !r.asistencia).length,
         // Respuestas del correo "¿Asistirás?" (asistenciaMc).
+        pagadosLista: pagados.map((r) => `#${r.numeroInscrito || '?'} ${r.nombre || r.correo}${r.accesoTipo === 'online' ? ' (en línea)' : ''}`),
         dijoSi: delHorario.filter((r) => r.asistenciaMc === 'si').map((r) => r.nombre || r.correo),
         dijoNo: delHorario.filter((r) => r.asistenciaMc === 'no').map((r) => r.nombre || r.correo),
         enLineaPorCupo: delHorario.filter((r) => r.asistenciaMc === 'lleno').map((r) => r.nombre || r.correo),
