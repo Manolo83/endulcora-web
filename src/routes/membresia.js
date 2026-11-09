@@ -30,7 +30,13 @@ async function crearSuscripcion(client, usuario, { reason = 'Membresía Endulcor
     transaction_amount: PRECIO_MEMBRESIA,
     currency_id: 'MXN',
   };
-  if (primerCobro) autoRecurring.start_date = new Date(primerCobro).toISOString();
+  // Con solo start_date Mercado Pago cobra el primer cargo al registrar la
+  // tarjeta (Manuel, 9 nov 2026: «me dicen que si cobran los 100»). El
+  // periodo sin cobro se pide como free_trial, en dias hasta primerCobro.
+  if (primerCobro) {
+    const dias = Math.max(1, Math.ceil((new Date(primerCobro).getTime() - Date.now()) / 86400000));
+    autoRecurring.free_trial = { frequency: dias, frequency_type: 'days' };
+  }
   const preapproval = new PreApproval(client);
   return preapproval.create({
     body: {
