@@ -129,7 +129,7 @@
         <span id="spinnerPagar" class="spinner hidden" style="border-top-color:#1B0720"></span>
         <span id="btnPagarTexto">Continuar a Mercado Pago</span>
       </button>
-      <p class="mt-3 text-[12px] leading-relaxed text-carbon/55">Pago único con Mercado Pago. La membresía incluida es de un mes; renovarla es tu decisión y puedes domiciliarla desde tu cuenta.</p>
+      <p class="mt-3 text-[12px] leading-relaxed text-carbon/55"><b>Tu acceso incluye la membresía Club Endulcora con domiciliación.</b> Pagas tu acceso hoy y te regalamos tu primer mes de membresía. Justo después del pago registras tu tarjeta en Mercado Pago y, al terminar tu mes de regalo, se cobran $100 al mes automáticamente. Cancelas cuando quieras desde tu cuenta.</p>
     </form>
 
     <div class="mt-4 rounded-2xl bg-[#fff4df] p-4 text-[13px] leading-relaxed text-carbon/80 ring-1 ring-flama/50">
@@ -160,8 +160,8 @@
       <p class="mt-3 text-left text-[12px] leading-relaxed text-carbon/60">Para hacer válido el descuento es tu responsabilidad mostrar esta ficha o tu correo al inscribirte en sucursal. Aplica para un solo taller.</p>
 
       <div id="bloqueDomiciliar" class="mt-5 hidden rounded-2xl bg-flama px-5 py-5 text-left">
-        <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Último paso para activar tu membresía</p>
-        <p class="mt-2 text-sm leading-relaxed text-carbon/85">Tu compra incluye 1 mes de membresía Club Endulcora (recetario, taller en línea, revista y eBooks). Para activarla, registra tu tarjeta con Mercado Pago — no se te cobra nada hoy. Si no cancelas antes, al terminar tu mes gratis se cobran $100 y tu membresía sigue sola cada mes; puedes cancelar cuando quieras desde tu cuenta.</p>
+        <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-vino">Último paso: registra tu tarjeta</p>
+        <p class="mt-2 text-sm leading-relaxed text-carbon/85">Tu compra incluye 1 mes de membresía Club Endulcora (recetario, taller en línea, revista y eBooks). Tu primer mes es de regalo. Registra tu tarjeta en Mercado Pago (hoy no se cobra nada más): al terminar tu mes de regalo se cobran $100 y tu membresía sigue sola cada mes. Puedes cancelar cuando quieras desde tu cuenta.<span id="domiciliarAuto" class="mt-2 hidden block font-700 text-vino">Te estamos llevando a Mercado Pago para registrar tu tarjeta…</span></p>
         <p id="domiciliarError" class="mt-3 hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
         <button type="button" id="btnDomiciliarAcceso" class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full boton-vivo bg-vino py-3.5 font-ui text-[12.5px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">
           <span id="spinnerDomiciliar" class="spinner hidden"></span> Registrar mi tarjeta y activar mi membresía
@@ -185,6 +185,7 @@ const ID = params.get('id'), TOKEN = params.get('token');
 let SESION_ACTIVA = false;
 const VIENE_DE_PAGO = params.get('pago') === '1';
 const PAGO_FALLIDO = params.get('pago') === 'error';
+let DOMICILIAR_AUTO = false;
 let ESTADO = null;
 let refresco = null;
 
@@ -291,6 +292,15 @@ function pintarPagado(e){
   // tarjeta domiciliada.
   document.getElementById('bloqueDomiciliar').classList.toggle('hidden', !e.cuenta.membresiaSinDomiciliar);
   SESION_ACTIVA = !!e.cuenta.sesionActiva;
+  // Recien pagado: la domiciliacion es parte de la compra, asi que se le
+  // lleva directo a registrar su tarjeta (con el primer cobro al terminar
+  // su mes de regalo).
+  if(VIENE_DE_PAGO && e.cuenta.membresiaSinDomiciliar && SESION_ACTIVA && !DOMICILIAR_AUTO){
+    DOMICILIAR_AUTO = true;
+    document.getElementById('domiciliarAuto').classList.remove('hidden');
+    document.getElementById('bloqueDomiciliar').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => document.getElementById('btnDomiciliarAcceso').click(), 3500);
+  }
 }
 
 document.getElementById('btnDomiciliarAcceso').addEventListener('click', async () => {

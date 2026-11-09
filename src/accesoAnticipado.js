@@ -7,7 +7,9 @@
 // - Cuando el horario llega al tope (50 por defecto): por el mismo precio,
 //   recetario y 1 mes de membresia (ve la clase en linea).
 //
-// El pago es unico (no domiciliado): el mes de membresia termina solo a los
+// Al pagar, la pagina lleva directo a domiciliar la tarjeta (Manuel, 9 nov
+// 2026): primer mes de regalo y luego $100/mes. Si no termina ese paso,
+// el mes de membresia termina solo a los
 // 30 dias y renovarla es responsabilidad de la asistente (los recordatorios
 // de 15, 3 y 1 dias la invitan a domiciliar, ver src/membresiaRegalo.js).
 const store = require('./store');
