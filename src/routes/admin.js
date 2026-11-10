@@ -967,6 +967,13 @@ router.delete('/api/inscripciones-taller/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// Casilla «Capturado por Lex» (control para que no se pierda ningun registro).
+router.patch('/api/inscripciones-taller/:id/capturado', requireAdmin, (req, res) => {
+  const item = store.marcarCapturadoInscripcionTaller(req.params.id, !!(req.body || {}).capturado);
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
+});
+
 // Marca a mano el pago de una inscripcion (anticipo o total) mientras no
 // existe el cobro automatico por Mercado Pago — ver Fase 3.
 const ESTADOS_PAGO_TALLER = ['pendiente', 'pagado', 'cancelado'];

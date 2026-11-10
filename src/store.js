@@ -3600,6 +3600,17 @@ module.exports = {
   },
   // Marcas de los correos y la reseña de una inscripcion (correo 11 del
   // plan de ventas, ver src/correosTaller.js). Solo estos campos.
+  // Casilla «Capturado por Lex» del admin: marca (o desmarca) que la
+  // inscripcion ya se paso al sistema de Lex, con fecha y hora.
+  marcarCapturadoInscripcionTaller(id, capturado) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    item.capturadoLex = !!capturado;
+    item.capturadoLexEn = capturado ? new Date().toISOString() : null;
+    save(data);
+    return item;
+  },
   marcarInscripcionTaller(id, patch) {
     const data = load();
     const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
