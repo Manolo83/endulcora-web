@@ -161,28 +161,40 @@ async function avisarEquipoNuevoTaller(inscripcion) {
 }
 
 let corriendo = false;
+// Cada paso corre por separado: si uno truena (p. ej. Sheets no responde al
+// mandar recordatorios), los demas siguen. Antes todos iban en un solo try,
+// y un error en el primer paso dejaba sin correr la lectura del calendario
+// fisico y los ajustes que dan de alta los talleres en el registro
+// (/inscripcion-taller) — asi se quedaban fuera talleres nuevos.
+async function paso(nombre, fn) {
+  try {
+    return await fn();
+  } catch (e) {
+    console.error(`[talleres] Error en «${nombre}»:`, e.message);
+    return null;
+  }
+}
+
 async function revisarAutomatizacionesTaller() {
   if (corriendo) return;
   corriendo = true;
   try {
-    await revisarRecordatoriosTaller();
-    await revisarSincronizacionSheets();
-    const calendario = await sincronizarCalendarioFisico();
-    if (calendario.creadas > 0 || calendario.errores.length || calendario.avisos.length) {
+    await paso('recordatorios', () => revisarRecordatoriosTaller());
+    await paso('sincronizacion con Sheets', () => revisarSincronizacionSheets());
+    const calendario = await paso('calendario fisico', () => sincronizarCalendarioFisico());
+    if (calendario && (calendario.creadas > 0 || calendario.errores.length || calendario.avisos.length)) {
       console.log(`[talleres] Calendario fisico: ${calendario.creadas} nuevos, ${calendario.saltadas} ya existian.`, calendario.errores, calendario.avisos);
     }
-    const cambiosNov26S1 = store.asegurarTalleresNov26S1();
+    const cambiosNov26S1 = await paso('talleres nov26 semana 1', () => store.asegurarTalleresNov26S1());
     if (cambiosNov26S1 > 0) {
       console.log(`[talleres] ${cambiosNov26S1} ajustes en los talleres de nov26 semana 1 (fusion/foto/precio).`);
     }
-    const ajustesCalNov26 = store.ajustarCalendarioNov26();
+    const ajustesCalNov26 = await paso('ajustes calendario nov26', () => store.ajustarCalendarioNov26());
     if (ajustesCalNov26 > 0) console.log(`[talleres] ${ajustesCalNov26} ajustes al calendario de noviembre (Manzanas 26, Galleta Decorada Navidena).`);
-    const cambiosNov26S2a4 = store.asegurarTalleresNov26S2a4();
+    const cambiosNov26S2a4 = await paso('talleres nov26 semanas 2 a 4', () => store.asegurarTalleresNov26S2a4());
     if (cambiosNov26S2a4 > 0) {
       console.log(`[talleres] ${cambiosNov26S2a4} ajustes en los talleres de nov26 semanas 2 a 4 (fusion/foto/precio/horario).`);
     }
-  } catch (e) {
-    console.error('[talleres] Error revisando automatizaciones:', e.message);
   } finally {
     corriendo = false;
   }
