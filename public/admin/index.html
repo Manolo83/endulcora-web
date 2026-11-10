@@ -103,7 +103,7 @@
         <div class="admin-nav-grupo-panel absolute left-0 top-full z-20 mt-2 hidden w-56 flex flex-col gap-1 rounded-2xl bg-white p-2 normal-case tracking-normal shadow-2xl ring-1 ring-vino/10">
           <a href="#seccionCursos" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Cursos</a>
           <a href="#seccionCalendario" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Calendario</a>
-          <a href="#seccionInscripcionesTaller" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Inscripciones a talleres</a>
+          <a href="#seccionInscripcionesTaller" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Inscripciones a talleres <span class="globoSinCapturar hidden ml-1 rounded-full bg-red-600 px-2 py-0.5 font-ui text-[10px] font-700 text-white"></span></a>
           <a href="#seccionClaseGratis" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Clase gratis</a>
           <a href="#seccionVideoEnVivo" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Video en vivo</a>
           <a href="#seccionRegistrosQr" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">QR de registro</a>
@@ -1366,7 +1366,7 @@
     <section id="seccionInscripcionesTaller" class="scroll-mt-32 mb-14">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 class="font-titulo text-2xl tracking-wide text-vino">Inscripciones a talleres</h2>
+          <h2 class="font-titulo text-2xl tracking-wide text-vino">Inscripciones a talleres <span class="globoSinCapturar hidden ml-2 align-middle rounded-full bg-red-600 px-3 py-1 font-ui text-xs font-700 text-white"></span></h2>
           <p class="mt-1 text-sm text-carbon/60">Registros del formulario público de inscripción (<a href="/inscripcion-taller" target="_blank" class="underline hover:text-vino">/inscripcion-taller</a>). Estos contactos también alimentan la base de datos general de Levent.</p>
         </div>
         <div class="flex gap-2">
@@ -1424,6 +1424,8 @@
         </form>
       </div>
 
+      <div id="resumenCapturaLex" class="mt-6 grid gap-4 sm:grid-cols-3"></div>
+      <div id="filtrosCapturaLex" class="mt-4 flex flex-wrap gap-2 font-ui text-xs font-600"></div>
       <div id="listaInscripcionesTaller" class="mt-6 space-y-6"></div>
     </section>
 
@@ -4559,6 +4561,31 @@ function agruparInscripcionesTaller(lista){
   return [...grupos.values()].sort((a, b) => (b.fecha || '').localeCompare(a.fecha || '') || a.taller.localeCompare(b.taller));
 }
 
+let FILTRO_CAPTURA = 'todos';
+function diaCdmx(f){ return f ? new Date(f).toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' }) : ''; }
+function renderResumenCapturaLex(){
+  const lista = INSCRIPCIONES_TALLER;
+  const hoy = diaCdmx(new Date());
+  const ayer = diaCdmx(Date.now() - 86400000);
+  const deHoy = lista.filter(i => diaCdmx(i.createdAt) === hoy);
+  const deAyer = lista.filter(i => diaCdmx(i.createdAt) === ayer).length;
+  const pendientes = lista.filter(i => !i.capturadoLex);
+  const pendHoy = pendientes.filter(i => diaCdmx(i.createdAt) === hoy).length;
+  const capHoy = deHoy.filter(i => i.capturadoLex).length;
+  document.querySelectorAll('.globoSinCapturar').forEach(g => {
+    g.textContent = `${pendientes.length} sin capturar`;
+    g.classList.toggle('hidden', !pendientes.length);
+  });
+  const tarjeta = (titulo, num, sub, color) => `<div class="rounded-2xl bg-white p-5 ring-1 ${color.ring}"><p class="font-ui text-[11px] uppercase tracking-widest ${color.txt}">${titulo}</p><p class="font-titulo text-4xl ${color.txt}">${num}</p><p class="text-xs text-carbon/50">${sub}</p></div>`;
+  $('resumenCapturaLex').innerHTML =
+    tarjeta('Inscritos hoy', deHoy.length, `ayer: ${deAyer}`, { ring: 'ring-vino/10', txt: 'text-vino' }) +
+    tarjeta('Pendientes de capturar (Lex)', pendientes.length, `${pendHoy} de hoy · ${pendientes.length - pendHoy} de días anteriores`, pendientes.length ? { ring: 'ring-red-200', txt: 'text-red-600' } : { ring: 'ring-emerald-200', txt: 'text-emerald-700' }) +
+    tarjeta('Ya capturados hoy', capHoy, `de ${deHoy.length}`, { ring: 'ring-emerald-200', txt: 'text-emerald-700' });
+  const boton = (clave, texto) => `<button type="button" data-filtro="${clave}" class="btnFiltroCaptura rounded-full px-4 py-2 ${FILTRO_CAPTURA === clave ? 'bg-vino text-white' : 'bg-white text-vino ring-1 ring-vino/20'}">${texto}</button>`;
+  $('filtrosCapturaLex').innerHTML = boton('todos', 'Todos') + boton('pendientes', `Solo pendientes de capturar (${pendientes.length})`) + boton('hoy', `Solo de hoy (${deHoy.length})`);
+  $('filtrosCapturaLex').querySelectorAll('.btnFiltroCaptura').forEach(b => b.addEventListener('click', () => { FILTRO_CAPTURA = b.dataset.filtro; renderInscripcionesTaller(); }));
+}
+
 async function cargarInscripcionesTaller(){
   const cont = $('listaInscripcionesTaller');
   cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Cargando…</p>';
@@ -4578,18 +4605,24 @@ function renderInscripcionesTaller(){
     return;
   }
   // Se muestra a todos los que se inscribieron (decision de Manuel, 4 nov 2026).
-  const lista = INSCRIPCIONES_TALLER;
+  renderResumenCapturaLex();
+  const hoy = diaCdmx(new Date());
+  const lista = INSCRIPCIONES_TALLER.filter(i =>
+    FILTRO_CAPTURA === 'pendientes' ? !i.capturadoLex :
+    FILTRO_CAPTURA === 'hoy' ? diaCdmx(i.createdAt) === hoy : true);
+  if(!lista.length){ cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">No hay registros con este filtro. ¡Todo al día!</p>'; return; }
   try{
     const grupos = agruparInscripcionesTaller(lista);
     cont.innerHTML = grupos.map(g => `
       <div class="overflow-hidden overflow-x-auto rounded-2xl bg-white ring-1 ring-vino/10">
         <div class="flex flex-wrap items-center justify-between gap-2 bg-vino/5 px-5 py-3">
           <h3 class="font-titulo text-base text-vino">${escapeHtml(g.taller || 'Sin nombre')} <span class="font-cuerpo text-sm font-400 text-carbon/60">· ${fechaLegibleCorta(g.fecha)}${g.sede ? ` · ${escapeHtml(g.sede)}` : ''}</span></h3>
-          <span class="font-ui text-[11px] uppercase tracking-wider text-carbon/45">${g.filas.length} inscrito${g.filas.length === 1 ? '' : 's'}</span>
+          <span class="font-ui text-[11px] uppercase tracking-wider text-carbon/45">${g.filas.length} inscrito${g.filas.length === 1 ? '' : 's'}${(() => { const n = g.filas.filter(f => !f.capturadoLex).length; return n ? ` · <b class="text-red-600">${n} sin capturar</b>` : ''; })()}</span>
         </div>
         <table class="w-full min-w-[760px] text-sm">
           <thead>
             <tr class="border-b border-vino/10 text-left font-ui text-[11px] uppercase tracking-wider text-carbon/45">
+              <th class="px-5 py-3 font-600">Capturado por Lex</th>
               <th class="px-5 py-3 font-600">Nombre</th>
               <th class="px-5 py-3 font-600">Contacto</th>
               <th class="px-5 py-3 font-600">Horario</th>
@@ -4607,8 +4640,9 @@ function renderInscripcionesTaller(){
           </thead>
           <tbody>
             ${g.filas.map(i => `
-              <tr class="border-b border-vino/10 last:border-0 align-top" data-row-id="${i.id}">
-                <td class="px-5 py-3 text-carbon/80">${escapeHtml(i.nombre)}${i.esPrimeraVez ? '<span class="ml-2 rounded-full bg-flama/20 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Nuevo</span>' : ''}</td>
+              <tr class="border-b border-vino/10 last:border-0 align-top ${i.capturadoLex ? '' : 'bg-red-50/60'}" data-row-id="${i.id}">
+                <td class="px-5 py-3"><input type="checkbox" class="chkCapturadoLex h-5 w-5 accent-emerald-600 cursor-pointer" data-id="${i.id}" ${i.capturadoLex ? 'checked' : ''}>${i.capturadoLex && i.capturadoLexEn ? `<div class="text-[10px] text-emerald-700">${new Date(i.capturadoLexEn).toLocaleString('es-MX', { timeZone: 'America/Mexico_City', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>` : ''}</td>
+                <td class="px-5 py-3 text-carbon/80">${escapeHtml(i.nombre)}${diaCdmx(i.createdAt) === hoy ? '<span class="ml-2 rounded-full bg-flama/25 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Hoy</span>' : ''}${i.esPrimeraVez ? '<span class="ml-2 rounded-full bg-flama/20 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Nuevo</span>' : ''}</td>
                 <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(i.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(i.correo)}</div></td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.horario)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.montoAnticipo)}${i.folioAnticipo ? `<div class="text-xs text-carbon/50">Folio: ${escapeHtml(i.folioAnticipo)}</div>` : ''}${(i.personasAnticipo || 1) > 1 ? `<div class="text-xs text-carbon/50">Grupo de ${i.personasAnticipo} · total $${escapeHtml(i.montoTotalAnticipo)}${i.anticipoPagadoPor ? ` · pagó ${escapeHtml(i.anticipoPagadoPor)}` : ''}</div>` : ''}</td>
@@ -4650,6 +4684,17 @@ function renderInscripcionesTaller(){
         toast(e.message);
       }
     }
+    cont.querySelectorAll('.chkCapturadoLex').forEach(el => {
+      el.addEventListener('change', async () => {
+        try{
+          const r = await api(`/admin/api/inscripciones-taller/${el.dataset.id}/capturado`, { method: 'PATCH', body: JSON.stringify({ capturado: el.checked }) });
+          const item = INSCRIPCIONES_TALLER.find(x => x.id === r.id);
+          if (item){ item.capturadoLex = r.capturadoLex; item.capturadoLexEn = r.capturadoLexEn; }
+          toast(el.checked ? 'Marcado como capturado' : 'Marcado como pendiente');
+          renderInscripcionesTaller();
+        }catch(e){ el.checked = !el.checked; toast(e.message); }
+      });
+    });
     cont.querySelectorAll('.selEstadoPagoTaller').forEach(el => {
       el.addEventListener('change', () => guardarPagoTaller(el.dataset.id));
     });
