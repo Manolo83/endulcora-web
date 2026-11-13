@@ -89,6 +89,8 @@ function estadoHorario(fecha, horario, { excluirId = null, ahora = new Date() } 
 function prepararPago(registroId, ahora = new Date()) {
   const registro = store.getRegistroClaseGratis(registroId);
   if (!registro) return null;
+  // Para el correo «Tu lugar sigue apartado» (1 h y 24 h despues, si no pago).
+  if (!registro.accesoPagoAbiertoEn) store.updateRegistroClaseGratis(registro.id, { accesoPagoAbiertoEn: ahora.toISOString() });
   if (apartadoVigente(registro, ahora)) {
     return { tipo: 'presencial', apartadoHasta: registro.accesoApartadoHasta };
   }
