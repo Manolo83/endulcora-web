@@ -53,7 +53,7 @@ function fechaLegible(fecha) {
 
 // "Clase gratis: Pan de Muerto" -> "Pan de Muerto"
 function temaDe(contenido) {
-  return String(contenido.clasegratis_titulo || 'la masterclass').replace(/^\s*(clase gratis|master\s*class|masterclass)\s*[:\-–]\s*/i, '').trim();
+  return String(contenido.clasegratis_titulo || 'la masterclass').replace(/^\s*(clase|master\s*class|masterclass)(\s+gratis)?\s*[:\-–]\s*/i, '').trim();
 }
 
 function urlCompleta(url) {
@@ -74,11 +74,16 @@ function contexto(contenido = store.getContent()) {
     lugares: horarios.length && cupo ? horarios.length * cupo : 0,
     precioAcceso: acceso.precioAcceso(contenido),
     linkClase: contenido.clasegratis_link_clase || '',
-    linkGrabacion: contenido.clasegratis_link_grabacion || '',
-    taller: String(contenido.clasegratis_taller_oferta || '').trim(),
+    // Manuel (13 nov 2026): la grabacion es el mismo link de la transmision.
+    linkGrabacion: contenido.clasegratis_link_grabacion || contenido.clasegratis_link_clase || '',
+    // Ningun correo ofrece precio especial de taller (Manuel, 13 nov 2026):
+    // esa promocion se cierra en persona con quien asiste. Solo aplica a las
+    // masterclasses dadas de alta en /admin Masterclasses.
+    taller: store.getMasterclassPorFecha(contenido.clasegratis_fecha) ? '' : String(contenido.clasegratis_taller_oferta || '').trim(),
     fechasNativitas: String(contenido.clasegratis_taller_fechas_nativitas || '').trim(),
     fechasDivision: String(contenido.clasegratis_taller_fechas_division || '').trim(),
     tel,
+    slug: (store.getMasterclassPorFecha(contenido.clasegratis_fecha) || {}).slug || '',
     pie: email.pieEndulcora(email.datosPie(contenido)),
     email,
   };
@@ -88,7 +93,14 @@ function pesos(n) {
   return `$${Number(n || 0).toLocaleString('es-MX', { maximumFractionDigits: 2 })}`;
 }
 
+// Sin taller con precio especial (Manuel, 13 nov 2026): el boton lleva al
+// calendario de talleres del sitio, precio normal apartando con $400.
+function linkTalleres(campana) {
+  return `${SITE_URL}/talleres?utm_source=correo&utm_medium=email&utm_campaign=${encodeURIComponent(campana)}`;
+}
+
 function linkWhatsTaller(c) {
+  if (!c.taller) return linkTalleres(`masterclass-${c.slug || 'talleres'}`);
   const texto = `Hola, estuve en la masterclass de ${c.tema} y quiero apartar mi lugar en el taller${c.taller ? ` de ${c.taller}` : ''} con el precio especial.`;
   return c.tel ? `https://wa.me/521${c.tel}?text=${encodeURIComponent(texto)}` : '';
 }
@@ -151,12 +163,13 @@ function correo4(registro, c) {
     ? `<p>Si quieres hacerlo con tus manos y con el chef a tu lado, tienes el <strong>taller de ${esc(c.taller)} con un precio especial</strong>, solo para quienes estuvieron en la masterclass. <strong>Vence en 3 días.</strong></p>
       ${avisoSucursal()}
       ${linkWhatsTaller(c) ? c.email.botonPlan('Quiero mi lugar en el taller', linkWhatsTaller(c), '#4E1454', '#FBF4E9') : ''}`
-    : '';
+    : `<p>¿Quieres hacerlo con tus manos y con el chef a tu lado? Estos son los <strong>talleres presenciales de este mes</strong>: apartas tu lugar con $400.</p>
+      ${c.email.botonPlan('Quiero mi lugar en un taller', linkWhatsTaller(c), '#4E1454', '#FBF4E9')}`;
   const cuerpo = `${hola(registro)}
     <p>Gracias por estar en la masterclass. Aquí tienes la grabación:</p>
     ${c.email.botonPlan('Ver la grabación', esc(c.linkGrabacion))}
     ${oferta}`;
-  return { asunto: 'Tu grabación y un precio solo para ti', html: c.email.plantillaPlan({ arteUrl: c.arteUrl, cuerpo, pie: c.pie }) };
+  return { asunto: c.taller ? 'Tu grabación y un precio solo para ti' : `Tu grabación de la masterclass de ${c.tema}`, html: c.email.plantillaPlan({ arteUrl: c.arteUrl, cuerpo, pie: c.pie }) };
 }
 
 function fechasTaller(c) {
@@ -167,6 +180,13 @@ function fechasTaller(c) {
 }
 
 function correo5(registro, c) {
+  if (!c.taller) {
+    const cuerpo = `${hola(registro)}
+    <p>Ya viste cómo lo hace el chef: ahora te toca a ti. Los talleres presenciales de este mes se están llenando y cada grupo es pequeño.</p>
+    <p>Aparta tu lugar con <strong>$400</strong> y el resto lo pagas el día del taller.</p>
+    ${c.email.botonPlan('Quiero mi lugar', linkWhatsTaller(c))}`;
+    return { asunto: 'Los talleres de este mes se están llenando', html: c.email.plantillaPlan({ arteUrl: c.arteUrl, cuerpo, pie: c.pie }) };
+  }
   const cuerpo = `${hola(registro)}
     <p>Mañana se acaba el precio especial del taller de <strong>${esc(c.taller)}</strong>. Después vuelve a su precio normal.</p>
     ${fechasTaller(c)}
@@ -176,6 +196,12 @@ function correo5(registro, c) {
 }
 
 function correo6(registro, c) {
+  if (!c.taller) {
+    const cuerpo = `${hola(registro)}
+    <p>Último aviso: quedan pocos lugares en los talleres presenciales de este mes. Cuando un grupo se llena, se cierra.</p>
+    ${c.email.botonPlan('Quiero mi lugar', linkWhatsTaller(c))}`;
+    return { asunto: 'Últimos lugares en los talleres del mes', html: c.email.plantillaPlan({ arteUrl: c.arteUrl, cuerpo, pie: c.pie }) };
+  }
   const cuerpo = `${hola(registro)}
     <p>Hoy es el último día para tomar el taller de <strong>${esc(c.taller)}</strong> con el precio especial de la masterclass.</p>
     ${fechasTaller(c)}
@@ -243,7 +269,7 @@ function correo8(registro, c) {
   <tr><td style="background:#7A2E7E;padding:30px 24px;text-align:center;"><div style="font-size:44px;line-height:1;">🍪</div><div style="font-size:13px;letter-spacing:.2em;color:#F5C66B;font-weight:700;margin-top:10px;">MASTERCLASS</div><div style="font-size:30px;font-weight:900;color:#ffffff;margin-top:4px;">${esc(c.tema)}</div></td></tr>
   <tr><td style="padding:28px 24px 6px;text-align:center;">
     <p style="margin:0 0 6px;font-size:15px;color:#7A2E7E;">${nombre ? `¡Hola, ${esc(nombre)}!` : '¡Hola!'}</p>
-    <p style="margin:0;font-size:28px;line-height:1.2;font-weight:800;color:#1B0720;">¿Asistirás mañana?</p>
+    <p style="margin:0;font-size:28px;line-height:1.2;font-weight:800;color:#1B0720;">¿Asistirás ${esc(cuandoEs(registro.fecha))}?</p>
   </td></tr>
   <tr><td style="padding:16px 24px;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#FBF4E9;border-radius:14px;"><tr>
@@ -259,7 +285,36 @@ function correo8(registro, c) {
   </td></tr>
   <tr><td style="padding:16px 24px 24px;">${c.pie || ''}</td></tr>
 </table></td></tr></table></body></html>`;
-  return { asunto: `¿Asistirás mañana a la masterclass? Confírmanos con un clic`, html };
+  return { asunto: `¿Asistirás ${cuandoEs(registro.fecha)} a la masterclass? Confírmanos con un clic`, html };
+}
+
+// "mañana" si la clase es al dia siguiente; si no, "el lunes 7 de diciembre".
+function cuandoEs(fecha, ahora = new Date()) {
+  const manana = enCDMX(hoyCDMX(ahora), 1, '12:00').toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+  return fecha === manana ? 'mañana' : `el ${fechaLegible(fecha)}`;
+}
+
+// 9. Pago sin terminar (13 nov 2026, Manuel): 1 h y 24 h despues de abrir
+// Mercado Pago sin pagar. En Galletas NY fueron 139 personas.
+function correo9(registro, c) {
+  const link = acceso.linkAcceso(SITE_URL, registro);
+  const cuerpo = `${hola(registro)}
+    <p>Vimos que empezaste a asegurar tu lugar para la masterclass de <strong>${esc(c.tema)}</strong> (${esc(fechaLegible(registro.fecha))}, ${esc(registro.horario)} h), pero el pago no se completó.</p>
+    <p>Tu acceso anticipado sigue disponible por <strong>${pesos(c.precioAcceso)}</strong>: lugar asegurado en sala, recetario, coffee break, grabación y tu primer mes del Club Endulcora de regalo. Los lugares en sala son pocos y se dan por orden de pago.</p>
+    ${c.email.botonPlan('Terminar mi pago', link)}
+    <p style="font-size:13px;">¿Tuviste algún problema con la tarjeta? Escríbenos por WhatsApp y te ayudamos.</p>`;
+  return { asunto: `Tu lugar en la masterclass de ${c.tema} sigue apartado`, html: c.email.plantillaPlan({ arteUrl: c.arteUrl, cuerpo, pie: c.pie }) };
+}
+
+// 10. Quedan X lugares (14 y 7 dias antes, 10 am), a quien no ha pagado.
+function correo10(registro, c) {
+  const { quedan } = acceso.estadoHorario(registro.fecha, registro.horario);
+  const link = acceso.linkAcceso(SITE_URL, registro);
+  const cuerpo = `${hola(registro)}
+    <p>En tu horario de la masterclass de <strong>${esc(c.tema)}</strong> (${esc(fechaLegible(registro.fecha))}, ${esc(registro.horario)} h) <strong>${quedan > 0 ? `quedan ${quedan} lugares en sala` : 'ya se llenó la sala'}</strong>.</p>
+    <p>${quedan > 0 ? 'Registrarte no te asegura la silla: la aseguras con tu acceso anticipado. Cuando se llena, se cierra.' : 'Con tu acceso anticipado recibes la clase en línea, el recetario, la grabación y tu primer mes del Club Endulcora de regalo.'}</p>
+    ${c.email.botonPlan(`Asegurar mi lugar · ${pesos(c.precioAcceso)}`, link)}`;
+  return { asunto: quedan > 0 ? `Quedan ${quedan} lugares en tu horario` : 'Tu horario se llenó: aún puedes verla en línea', html: c.email.plantillaPlan({ arteUrl: c.arteUrl, cuerpo, pie: c.pie }) };
 }
 
 const CORREOS = {
@@ -269,8 +324,10 @@ const CORREOS = {
   4: { titulo: 'Grabación y oferta del taller', armar: correo4 },
   5: { titulo: 'El precio especial vence mañana', armar: correo5 },
   6: { titulo: 'Último aviso', armar: correo6 },
-  7: { titulo: 'Confirmación y última oportunidad (manual)', armar: correo7 },
-  8: { titulo: '¿Asistirás? Sí / No (manual)', armar: correo8 },
+  7: { titulo: 'Último día del acceso (automático 1 día antes, 6 pm)', armar: correo7 },
+  8: { titulo: '¿Asistirás? Sí / No (automático 5 días antes y 3 días antes a quien no contestó)', armar: correo8 },
+  9: { titulo: 'Pago sin terminar (1 h y 24 h)', armar: correo9 },
+  10: { titulo: 'Quedan X lugares (14 y 7 días antes)', armar: correo10 },
 };
 
 // Cuando le toca a un registro cada correo (2 a 6).
@@ -424,6 +481,55 @@ async function mandarCorreo8(ahora, pausaMs) {
   return n;
 }
 
+// Correos automaticos del cronograma de Manuel (13 nov 2026). Solo para
+// masterclasses dadas de alta en /admin > Masterclasses. Cada uno sale una
+// vez por registro (campo mcXEnviado) y nunca a bajas.
+function cronogramaAuto(registro, ahora) {
+  const f = registro.fecha;
+  const sinPagar = registro.accesoEstado !== 'pagado';
+  const lista = [];
+  if (sinPagar && registro.accesoPagoAbiertoEn) {
+    const abierto = new Date(registro.accesoPagoAbiertoEn);
+    lista.push({ campo: 'mc9aEnviado', n: 9, desde: new Date(abierto.getTime() + HORA_MS), hasta: new Date(abierto.getTime() + 20 * HORA_MS) });
+    lista.push({ campo: 'mc9bEnviado', n: 9, desde: new Date(abierto.getTime() + DIA_MS), hasta: new Date(abierto.getTime() + 3 * DIA_MS) });
+  }
+  if (sinPagar) {
+    lista.push({ campo: 'mc10aEnviado', n: 10, desde: enCDMX(f, -14, '10:00'), hasta: enCDMX(f, -13, '00:00') });
+    lista.push({ campo: 'mc10bEnviado', n: 10, desde: enCDMX(f, -7, '10:00'), hasta: enCDMX(f, -6, '00:00') });
+    lista.push({ campo: 'mc7Enviado', n: 7, desde: enCDMX(f, -1, '18:00'), hasta: enCDMX(f, 0, '00:00') });
+  }
+  lista.push({ campo: 'mc8Enviado', n: 8, desde: enCDMX(f, -5, '10:00'), hasta: enCDMX(f, -4, '00:00') });
+  if (!registro.asistenciaMc) lista.push({ campo: 'mc8bEnviado', n: 8, desde: enCDMX(f, -3, '10:00'), hasta: enCDMX(f, -2, '00:00') });
+  return lista.filter((x) => !registro[x.campo] && ahora >= x.desde && ahora < x.hasta);
+}
+
+async function mandarCronogramaAuto(ahora, pausaMs) {
+  const contenido = store.getContent();
+  const fecha = contenido.clasegratis_fecha;
+  if (!fecha || contenido.masterclass_correos_activo === 'false' || !store.getMasterclassPorFecha(fecha)) return 0;
+  const abierto = acceso.accesoAbierto(contenido, ahora);
+  const c = contexto(contenido);
+  let n = 0;
+  for (const r of store.getRegistrosClaseGratis().filter((x) => x.fecha === fecha && x.correo)) {
+    for (const t of cronogramaAuto(r, ahora)) {
+      if ([7, 9, 10].includes(t.n) && !abierto) continue;
+      if (contactoDeBaja(r.correo)) { store.updateRegistroClaseGratis(r.id, { [t.campo]: 'omitido-baja' }); continue; }
+      try {
+        const actual = store.getRegistroClaseGratis(r.id) || r;
+        if (actual[t.campo] || ([7, 9, 10].includes(t.n) && actual.accesoEstado === 'pagado')) continue;
+        const { asunto, html } = CORREOS[t.n].armar(actual, c, { accesoAbierto: abierto });
+        await c.email.enviarCorreoHtml({ to: r.correo, asunto, html });
+        store.updateRegistroClaseGratis(r.id, { [t.campo]: new Date().toISOString() });
+        n += 1;
+        if (pausaMs) await new Promise((ok) => setTimeout(ok, pausaMs));
+      } catch (err) {
+        console.error(`[masterclass] No se pudo mandar el correo ${t.campo} a ${r.correo}:`, err.message);
+      }
+    }
+  }
+  return n;
+}
+
 async function revisar(ahora = new Date(), { pausaMs = 250 } = {}) {
   if (corriendo) return { enviados: 0 };
   corriendo = true;
@@ -432,6 +538,7 @@ async function revisar(ahora = new Date(), { pausaMs = 250 } = {}) {
     enviados += await mandarRecetarios(ahora, pausaMs);
     enviados += await mandarCorreo7(ahora, pausaMs);
     enviados += await mandarCorreo8(ahora, pausaMs);
+    enviados += await mandarCronogramaAuto(ahora, pausaMs);
     const contenido = store.getContent();
     if (contenido.masterclass_correos_activo === 'false') return { enviados };
     const desde = contenido.masterclass_correos_desde || hoyCDMX(ahora);
@@ -446,7 +553,9 @@ async function revisar(ahora = new Date(), { pausaMs = 250 } = {}) {
         const [desdeHora, hastaHora] = v[n];
         if (ahora < desdeHora || ahora >= hastaHora) continue;
         if (n === 4 && !c.linkGrabacion) continue; // espera a que se suba la grabacion
-        if ((n === 5 || n === 6) && !c.taller) continue;
+        // Sin taller especial, 5 y 6 mandan al calendario de talleres; solo
+        // aplica a masterclasses dadas de alta en /admin Masterclasses.
+        if ((n === 5 || n === 6) && !c.taller && !store.getMasterclassPorFecha(registro.fecha)) continue;
         if (n >= 4 && contactoDeBaja(registro.correo)) {
           store.updateRegistroClaseGratis(registro.id, { [campo]: 'omitido-baja' });
           continue;
@@ -475,11 +584,11 @@ function resumen(contenido = store.getContent()) {
   const fecha = contenido.clasegratis_fecha;
   const registros = store.getRegistrosClaseGratis().filter((r) => r.fecha === fecha);
   const conteo = {};
-  [2, 3, 4, 5, 6, 7, 8].forEach((n) => { conteo[n] = registros.filter((r) => r[`mc${n}Enviado`] && r[`mc${n}Enviado`] !== 'omitido-baja').length; });
+  ['2', '3', '4', '5', '6', '7', '8', '8b', '9a', '9b', '10a', '10b'].forEach((n) => { conteo[n] = registros.filter((r) => r[`mc${n}Enviado`] && r[`mc${n}Enviado`] !== 'omitido-baja').length; });
   const faltan = [];
   if (!contenido.clasegratis_arte) faltan.push('el arte');
   if (!contenido.clasegratis_link_clase) faltan.push('el link para entrar a la clase (correo 3)');
-  if (!contenido.clasegratis_link_grabacion) faltan.push('el link de la grabación (el correo 4 espera a que lo pongas)');
+  if (!contenido.clasegratis_link_grabacion && !contenido.clasegratis_link_clase) faltan.push('el link de la grabación (el correo 4 espera a que lo pongas)');
   if (!String(contenido.clasegratis_taller_oferta || '').trim()) faltan.push('el taller con precio especial (sin él no salen los correos 5 y 6)');
   return {
     activo: contenido.masterclass_correos_activo !== 'false',
@@ -506,7 +615,7 @@ function ejemplo(n, contenido = store.getContent()) {
   const horario = String(contenido.clasegratis_horarios || '11:00 am').split(',')[0].trim() || '11:00 am';
   const registro = { id: 0, confirmToken: 'ejemplo', nombre: 'Laura', fecha: contenido.clasegratis_fecha || hoyCDMX(), horario, accesoEstado: n === 3 ? 'pagado' : '', numeroInscrito: n === 3 ? 23 : null };
   if (!c.linkGrabacion) c.linkGrabacion = '#';
-  if (!c.taller) c.taller = 'Pan de Muerto Gourmet';
+  if (!c.taller && !store.getMasterclassPorFecha(contenido.clasegratis_fecha)) c.taller = 'Pan de Muerto Gourmet';
   return CORREOS[n].armar(registro, c, { accesoAbierto: true });
 }
 
@@ -516,4 +625,4 @@ function iniciarCorreosMasterclass() {
 }
 
 module.exports = {
-  pruebaRecetario, CORREOS, horaInicio, ventanas, revisar, resumen, ejemplo, mandarConfirmacionRegistro, iniciarCorreosMasterclass, temaDe };
+  pruebaRecetario, CORREOS, horaInicio, ventanas, cronogramaAuto, revisar, resumen, ejemplo, mandarConfirmacionRegistro, iniciarCorreosMasterclass, temaDe };
