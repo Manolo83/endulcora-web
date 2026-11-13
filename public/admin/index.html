@@ -104,6 +104,7 @@
           <a href="#seccionCursos" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Cursos</a>
           <a href="#seccionCalendario" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Calendario</a>
           <a href="#seccionInscripcionesTaller" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Inscripciones a talleres <span class="globoSinCapturar hidden ml-1 rounded-full bg-red-600 px-2 py-0.5 font-ui text-[10px] font-700 text-white"></span></a>
+          <a href="#seccionMasterclasses" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Masterclasses</a>
           <a href="#seccionClaseGratis" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Clase gratis</a>
           <a href="#seccionVideoEnVivo" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Video en vivo</a>
           <a href="#seccionRegistrosQr" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">QR de registro</a>
@@ -1449,6 +1450,31 @@
     </section>
 
     <!-- CLASE GRATIS EN SALA -->
+    <section id="seccionMasterclasses" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Masterclasses</h2>
+      <p class="mt-1 text-sm text-carbon/60">Da de alta la siguiente masterclass con su nombre, fecha y horarios. Al activarla queda lista la página <a href="/clase-gratis" target="_blank" class="underline hover:text-vino">/clase-gratis</a>, el acceso anticipado domiciliado, los correos automáticos y la etiqueta para Campañas. La anterior se queda guardada con sus números.</p>
+      <form id="formMasterclass" class="mt-5 grid gap-3 rounded-2xl bg-white p-5 ring-1 ring-vino/10 sm:grid-cols-2">
+        <label class="block sm:col-span-2"><span class="font-ui text-[11px] font-700 uppercase tracking-wider text-carbon/60">Nombre</span>
+          <input name="titulo" required placeholder="Casa de Jengibre" class="mt-1 w-full rounded-xl border border-vino/20 px-3 py-2 text-sm"></label>
+        <label class="block"><span class="font-ui text-[11px] font-700 uppercase tracking-wider text-carbon/60">Fecha</span>
+          <input name="fecha" type="date" required class="mt-1 w-full rounded-xl border border-vino/20 px-3 py-2 text-sm"></label>
+        <label class="block"><span class="font-ui text-[11px] font-700 uppercase tracking-wider text-carbon/60">Horarios (hora de inicio, separados por coma)</span>
+          <input name="horarios" required placeholder="10 am, 2 pm, 6 pm" class="mt-1 w-full rounded-xl border border-vino/20 px-3 py-2 text-sm"></label>
+        <label class="block sm:col-span-2"><span class="font-ui text-[11px] font-700 uppercase tracking-wider text-carbon/60">Grupo de WhatsApp de nurturing</span>
+          <input name="whatsappGrupo" placeholder="https://chat.whatsapp.com/..." class="mt-1 w-full rounded-xl border border-vino/20 px-3 py-2 text-sm"></label>
+        <label class="block sm:col-span-2"><span class="font-ui text-[11px] font-700 uppercase tracking-wider text-carbon/60">Descripción (opcional)</span>
+          <textarea name="descripcion" rows="2" class="mt-1 w-full rounded-xl border border-vino/20 px-3 py-2 text-sm"></textarea></label>
+        <label class="block"><span class="font-ui text-[11px] font-700 uppercase tracking-wider text-carbon/60">Cierre del acceso anticipado (opcional)</span>
+          <input name="accesoCierre" type="datetime-local" class="mt-1 w-full rounded-xl border border-vino/20 px-3 py-2 text-sm"></label>
+        <label class="flex items-center gap-2 self-end text-sm"><input type="checkbox" name="activar"> Activarla ya en /clase-gratis</label>
+        <div class="sm:col-span-2 flex items-center gap-3">
+          <button class="rounded-full bg-vino px-5 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-crema hover:bg-morado transition">Guardar masterclass</button>
+          <span id="msgMasterclass" class="text-sm text-carbon/60"></span>
+        </div>
+      </form>
+      <div id="listaMasterclasses" class="mt-6 grid gap-4"></div>
+    </section>
+
     <section id="seccionClaseGratis" class="scroll-mt-32 mb-14">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -1806,6 +1832,7 @@ const CARGA_DIFERIDA = [
   ['listaSuscriptores', () => cargarSuscriptores()],
   ['listaInscripcionesTaller', () => cargarInscripcionesTaller()],
   ['listaRegistrosQr', () => cargarRegistrosQr()],
+  ['listaMasterclasses', () => cargarMasterclasses()],
   ['listaClaseGratis', () => cargarClaseGratis()],
   ['claseGratisCupo', () => cargarConfirmacionesClaseGratis()],
   ['listaVideoEnVivo', () => cargarVideoEnVivoAdmin()],
@@ -4855,6 +4882,53 @@ $('btnExportarRegistrosQr').addEventListener('click', () => {
   a.click();
   URL.revokeObjectURL(url);
 });
+
+/* ---------- Masterclasses ---------- */
+function horaBonita(h){
+  const [hh, mm] = String(h).split(':').map(Number);
+  const s = hh >= 12 ? 'pm' : 'am'; const h12 = ((hh + 11) % 12) + 1;
+  return `${h12}${mm ? ':' + String(mm).padStart(2,'0') : ''} ${s}`;
+}
+async function cargarMasterclasses(){
+  const cont = $('listaMasterclasses');
+  if(!cont) return;
+  let lista = [];
+  try { lista = await api('/admin/api/masterclasses'); } catch(e){ cont.innerHTML = `<p class="text-sm text-red-700">${escapeHtml(e.message)}</p>`; return; }
+  cont.innerHTML = lista.map(m => {
+    const fecha = new Date(m.fecha + 'T12:00:00').toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    const celda = (v, extra='') => `<td class="px-3 py-2 text-center ${extra}">${v}</td>`;
+    const filas = m.resumen.porHorario.map(h => `<tr class="border-t border-vino/10"><td class="px-3 py-2 font-600">${escapeHtml(horaBonita(h.horario))}</td>${celda(h.registrados,'font-700')}${celda(h.pagados,'font-700 text-vino')}${celda(h.pagadosPresencial)}${celda(h.pagadosOnline)}${celda(h.apartados)}${celda(h.si)}${celda(h.no)}</tr>`).join('');
+    const t = m.resumen.total;
+    return `<div class="rounded-2xl bg-white p-5 ring-1 ${m.activa ? 'ring-2 ring-vino' : 'ring-vino/10'}">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div><h3 class="font-titulo text-lg text-vino">${escapeHtml(m.titulo)} ${m.activa ? '<span class="ml-2 rounded-full bg-vino px-2 py-0.5 font-ui text-[10px] font-700 uppercase text-crema">Activa</span>' : ''}</h3>
+        <p class="text-xs text-carbon/60">${escapeHtml(fecha)} · etiqueta <code>clase-gratis:${escapeHtml(m.slug)}</code>${m.whatsappGrupo ? ` · <a href="${escapeHtml(m.whatsappGrupo)}" target="_blank" class="underline">grupo WhatsApp</a>` : ''}</p></div>
+        ${m.activa || m.fecha < new Date().toLocaleDateString('en-CA',{timeZone:'America/Mexico_City'}) ? '' : `<button data-activar-mc="${m.id}" class="rounded-full border border-vino/30 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino hover:border-vino">Activar en /clase-gratis</button>`}
+      </div>
+      <div class="mt-3 overflow-x-auto"><table class="w-full text-sm"><thead class="font-ui text-[10px] uppercase tracking-wider text-carbon/50"><tr><th class="px-3 py-2 text-left">Horario</th><th class="px-3">Registrados</th><th class="px-3">Acceso pagado</th><th class="px-3">Presencial</th><th class="px-3">En línea</th><th class="px-3">Pagando</th><th class="px-3">Sí asiste</th><th class="px-3">No asiste</th></tr></thead>
+      <tbody>${filas}<tr class="border-t-2 border-vino/20 font-700"><td class="px-3 py-2">Total</td>${celda(t.registrados)}${celda(t.pagados,'text-vino')}${celda(t.pagadosPresencial)}${celda(t.pagadosOnline)}${celda(t.apartados)}${celda(t.si)}${celda(t.no)}</tr></tbody></table></div>
+    </div>`;
+  }).join('') || '<p class="text-sm text-carbon/60">Todavía no hay masterclasses.</p>';
+  cont.querySelectorAll('[data-activar-mc]').forEach(btn => btn.addEventListener('click', async () => {
+    if(!confirm('¿Activar esta masterclass? /clase-gratis y los correos automáticos pasan a ella.')) return;
+    try { await api(`/admin/api/masterclasses/${btn.dataset.activarMc}/activar`, { method:'POST' }); cargarMasterclasses(); }
+    catch(e){ alert(e.message); }
+  }));
+}
+if($('formMasterclass')) $('formMasterclass').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const f = new FormData(ev.target);
+  const datos = Object.fromEntries(f.entries());
+  datos.activar = f.get('activar') === 'on';
+  if(datos.activar && !confirm('¿Activarla ya? /clase-gratis y los correos automáticos pasan a esta masterclass.')) return;
+  try {
+    await api('/admin/api/masterclasses', { method:'POST', body: JSON.stringify(datos) });
+    $('msgMasterclass').textContent = 'Guardada.';
+    ev.target.reset();
+    cargarMasterclasses();
+  } catch(e){ $('msgMasterclass').textContent = e.message; }
+});
+setInterval(() => { if(document.visibilityState === 'visible' && $('listaMasterclasses') && $('listaMasterclasses').innerHTML) cargarMasterclasses(); }, 60000);
 
 /* ---------- Clase gratis en sala ---------- */
 $('btnCopiarLinkClaseGratis').addEventListener('click', async () => {

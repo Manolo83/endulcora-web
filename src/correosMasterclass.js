@@ -312,7 +312,9 @@ const RECETARIOS_INCLUIDOS = {
 };
 function asegurarRecetarioIncluido() {
   const contenido = store.getContent();
-  const incluido = RECETARIOS_INCLUIDOS[contenido.clasegratis_fecha];
+  const mc = store.getMasterclassPorFecha(contenido.clasegratis_fecha);
+  const incluido = RECETARIOS_INCLUIDOS[contenido.clasegratis_fecha]
+    || (mc && mc.recetarioArchivo ? { archivo: mc.recetarioArchivo, nombre: mc.recetarioNombre || mc.recetarioArchivo } : null);
   if (!incluido || contenido.clasegratis_recetario_url || contenido.clasegratis_recetario_incluido_puesto) return;
   const fs = require('fs');
   const path = require('path');

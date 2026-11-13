@@ -1119,6 +1119,22 @@ router.delete('/api/registros-qr/:id', requireAdmin, (req, res) => {
 // ---- Clase gratis en sala (p.ej. Pan de Muerto): registros + segmentacion
 // al cierre del dia (ver src/routes/api.js para el registro publico y
 // clasegratis_* en /api/content para la configuracion del evento) ----
+// ---- Masterclasses: alta, activar y conteo por horario ----
+router.get('/api/masterclasses', requireAdminOLectura, (req, res) => {
+  res.json(store.listMasterclasses());
+});
+router.post('/api/masterclasses', requireAdmin, (req, res) => {
+  const r = store.guardarMasterclass(req.body || {});
+  if (r.error) return res.status(400).json({ error: r.error });
+  if (req.body && req.body.activar) store.activarMasterclass(r.id);
+  res.json(r);
+});
+router.post('/api/masterclasses/:id/activar', requireAdmin, (req, res) => {
+  const m = store.activarMasterclass(req.params.id);
+  if (!m) return res.status(404).json({ error: 'No existe esa masterclass.' });
+  res.json(m);
+});
+
 router.get('/api/clase-gratis/registros', requireAdminOLectura, (req, res) => {
   res.json(store.getRegistrosClaseGratis());
 });

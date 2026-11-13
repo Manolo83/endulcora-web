@@ -296,6 +296,7 @@ function datosPorDefecto() {
     recetariosTaller: [],
     registrosQr: [],
     registrosClaseGratis: [],
+    masterclasses: [],
     envioConfirmacionClaseGratis: null,
     registrosVideoEnVivo: [],
     bibliotecaClases: [],
@@ -328,6 +329,22 @@ async function init() {
   if (res.rows.length) {
     data = res.rows[0].data;
     let changed = false;
+    // Historial de masterclasses (Manuel, 13 nov 2026): cada masterclass
+    // queda dada de alta con su fecha, horarios, etiqueta y recetario, para
+    // que una nueva solo sea "alta + activar" desde /admin. Siembra las dos
+    // pasadas y la de Casa de Jengibre (7 dic), que queda activa.
+    if (!Array.isArray(data.masterclasses)) { data.masterclasses = []; changed = true; }
+    if (!data._migMasterclasses) {
+      MASTERCLASSES_SEMILLA.forEach((m) => {
+        if (!data.masterclasses.some((x) => x.fecha === m.fecha)) {
+          data.masterclasses.push({ id: nextId(data.masterclasses), ...m, creadaEn: new Date().toISOString() });
+        }
+      });
+      const jengibre = data.masterclasses.find((m) => m.slug === 'casa-de-jengibre');
+      if (jengibre && data.content) Object.assign(data.content, contenidoDeMasterclass(jengibre, data.content));
+      data._migMasterclasses = true;
+      changed = true;
+    }
     const defaults = datosPorDefecto();
     for (const key of Object.keys(defaults)) {
       if (!data[key]) {
@@ -1925,7 +1942,76 @@ function proximaFechaClaseISO(diaSemana, hora, fechaEspecifica) {
 // quedaban como "pan-de-muerto").
 const SLUGS_CLASE_GRATIS = { '2026-10-26': 'pan-de-muerto', '2026-11-09': 'galletas-ny' };
 function slugClaseGratis(fecha) {
+  const m = data && Array.isArray(data.masterclasses) ? data.masterclasses.find((x) => x.fecha === fecha) : null;
+  if (m && m.slug) return m.slug;
   return SLUGS_CLASE_GRATIS[fecha] || (fecha ? String(fecha) : 'sin-fecha');
+}
+
+// ---- Masterclasses (alta en /admin > Masterclasses) ----
+const MASTERCLASSES_SEMILLA = [
+  { slug: 'pan-de-muerto', titulo: 'Clase gratis: Pan de Muerto', fecha: '2026-10-26', horarios: [], descripcion: '', whatsappGrupo: '', recetarioArchivo: '', recetarioNombre: '', accesoCierre: '' },
+  { slug: 'galletas-ny', titulo: 'Masterclass gratis: Galletas NY', fecha: '2026-11-09', horarios: ['9:00', '12:00', '15:00', '18:00'], descripcion: '', whatsappGrupo: 'https://chat.whatsapp.com/Fk4F3fomJpj1nl0h8IWNHq', recetarioArchivo: 'Endulcora_Recetario_MasterClass_Galletas_NY.pdf', recetarioNombre: 'Recetario Galletas NY Endulcora.pdf', accesoCierre: '' },
+  {
+    slug: 'casa-de-jengibre',
+    titulo: 'Masterclass gratis: Casa de Jengibre',
+    fecha: '2026-12-07',
+    horarios: ['10:00', '14:00', '18:00'],
+    descripcion: 'Clase demo gratis: el chef arma frente a ti una casa de jengibre paso a paso, con piezas ya horneadas y glasé real para pegar paredes y techo. Tú solo ves y aprendes; no necesitas traer nada.',
+    whatsappGrupo: 'https://chat.whatsapp.com/EJcOvY37NeTBYmz779PvSa',
+    recetarioArchivo: 'Endulcora_Recetario_MasterClass_Casa_de_Jengibre.pdf',
+    recetarioNombre: 'Recetario Casa de Jengibre Endulcora.pdf',
+    accesoCierre: '2026-12-06T23:59',
+  },
+];
+
+function slugDeTitulo(t) {
+  return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/^(masterclass|clase)( gratis)?:?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'masterclass';
+}
+
+function diaAntes(fecha) {
+  const d = new Date(`${fecha}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+// Valores de /admin > Contenido que deja una masterclass al activarse. Lo
+// propio de la anterior (links, grabación, recetario, oferta) se limpia.
+function contenidoDeMasterclass(m, actual = {}) {
+  return {
+    clasegratis_activo: 'true',
+    clasegratis_titulo: m.titulo,
+    clasegratis_descripcion: m.descripcion || '',
+    clasegratis_fecha: m.fecha,
+    clasegratis_horarios: (m.horarios || []).join(', '),
+    clasegratis_whatsapp_grupo: m.whatsappGrupo || actual.clasegratis_whatsapp_grupo || '',
+    clasegratis_confirmacion_limite: diaAntes(m.fecha),
+    clasegratis_acceso_cierre: m.accesoCierre || `${diaAntes(m.fecha)}T23:59`,
+    clasegratis_link_clase: '',
+    clasegratis_link_grabacion: '',
+    clasegratis_arte: m.arte || '',
+    clasegratis_recetario_url: '',
+    clasegratis_recetario_nombre: '',
+    clasegratis_recetario_incluido_puesto: '',
+    clasegratis_taller_oferta: '',
+    clasegratis_taller_fechas_nativitas: '',
+    clasegratis_taller_fechas_division: '',
+  };
+}
+
+// Convierte "10 am, 2 pm, 6:00 pm" o "10:00, 14:00" a horas de inicio de 24 h.
+function normalizarHorarios(valor) {
+  const lista = Array.isArray(valor) ? valor : String(valor || '').split(/[,;\n]+/);
+  return lista.map((h) => {
+    const t = String(h).trim().toLowerCase().replace(/\./g, '');
+    const m = t.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/);
+    if (!m) return '';
+    let hora = Number(m[1]);
+    if (m[3] === 'pm' && hora < 12) hora += 12;
+    if (m[3] === 'am' && hora === 12) hora = 0;
+    if (hora > 23) return '';
+    return `${hora}:${m[2] || '00'}`;
+  }).filter(Boolean);
 }
 
 // Recalcula las etiquetas "clase-gratis:<clase>" y "<clase>:acceso-pagado" /
@@ -2306,6 +2392,86 @@ module.exports = {
     data.membresiaPagos.push(item);
     save(data);
     return item;
+  },
+
+  // ---- Masterclasses: alta, historial y conteo por horario ----
+  listMasterclasses() {
+    const d = load();
+    const activa = d.content.clasegratis_activo === 'true' ? d.content.clasegratis_fecha : null;
+    return [...(d.masterclasses || [])]
+      .sort((a, b) => (a.fecha < b.fecha ? 1 : -1))
+      .map((m) => ({ ...m, activa: m.fecha === activa, resumen: this.resumenMasterclass(m.fecha) }));
+  },
+  getMasterclassPorFecha(fecha) {
+    return (load().masterclasses || []).find((m) => m.fecha === fecha) || null;
+  },
+  // Alta (o edición si ya hay una con esa fecha). Regresa { error } o la masterclass.
+  guardarMasterclass(campos) {
+    const d = load();
+    if (!Array.isArray(d.masterclasses)) d.masterclasses = [];
+    const titulo = String(campos.titulo || '').trim();
+    const fecha = String(campos.fecha || '').trim();
+    const horarios = normalizarHorarios(campos.horarios);
+    if (!titulo) return { error: 'Falta el nombre de la masterclass.' };
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return { error: 'La fecha va como AAAA-MM-DD.' };
+    if (!horarios.length) return { error: 'Faltan los horarios (por ejemplo: 10 am, 2 pm, 6 pm).' };
+    const tituloCompleto = /^(masterclass|clase)/i.test(titulo) ? titulo : `Masterclass gratis: ${titulo}`;
+    let m = d.masterclasses.find((x) => x.fecha === fecha);
+    const datos = {
+      titulo: tituloCompleto,
+      fecha,
+      horarios,
+      descripcion: String(campos.descripcion || '').trim(),
+      whatsappGrupo: String(campos.whatsappGrupo || '').trim(),
+      accesoCierre: String(campos.accesoCierre || '').trim(),
+    };
+    if (m) Object.assign(m, datos);
+    else {
+      let slug = slugDeTitulo(titulo);
+      if (d.masterclasses.some((x) => x.slug === slug)) slug = `${slug}-${fecha}`;
+      m = { id: nextId(d.masterclasses), slug, recetarioArchivo: '', recetarioNombre: '', ...datos, creadaEn: new Date().toISOString() };
+      d.masterclasses.push(m);
+    }
+    // Si es la activa, los cambios pasan directo a la página de registro.
+    if (d.content.clasegratis_activo === 'true' && d.content.clasegratis_fecha === fecha) {
+      const c = contenidoDeMasterclass(m, d.content);
+      ['clasegratis_titulo', 'clasegratis_descripcion', 'clasegratis_horarios', 'clasegratis_whatsapp_grupo', 'clasegratis_acceso_cierre']
+        .forEach((k) => { d.content[k] = c[k]; });
+    }
+    save(d);
+    return m;
+  },
+  // Pone esta masterclass en /clase-gratis (registro, acceso anticipado y correos).
+  activarMasterclass(id) {
+    const d = load();
+    const m = (d.masterclasses || []).find((x) => x.id === Number(id));
+    if (!m) return null;
+    if (d.content.clasegratis_fecha === m.fecha && d.content.clasegratis_activo === 'true') return m;
+    Object.assign(d.content, contenidoDeMasterclass(m, d.content));
+    save(d);
+    return m;
+  },
+  // Por horario: registrados, accesos pagados (presencial / en línea),
+  // apartados en pago, Sí y No del correo «¿Asistirás?».
+  resumenMasterclass(fecha) {
+    const d = load();
+    const m = (d.masterclasses || []).find((x) => x.fecha === fecha);
+    const regs = (d.registrosClaseGratis || []).filter((r) => r.fecha === fecha);
+    const horarios = [...new Set([...(m ? m.horarios : []), ...regs.map((r) => r.horario)])];
+    const fila = (lista) => ({
+      registrados: lista.length,
+      pagados: lista.filter((r) => r.accesoEstado === 'pagado').length,
+      pagadosPresencial: lista.filter((r) => r.accesoEstado === 'pagado' && r.accesoTipo !== 'online').length,
+      pagadosOnline: lista.filter((r) => r.accesoEstado === 'pagado' && r.accesoTipo === 'online').length,
+      apartados: lista.filter((r) => r.accesoEstado === 'apartado').length,
+      si: lista.filter((r) => r.asistencia === 'si').length,
+      no: lista.filter((r) => r.asistencia === 'no').length,
+      asistieron: lista.filter((r) => r.asistio === true).length,
+    });
+    return {
+      porHorario: horarios.map((h) => ({ horario: h, ...fila(regs.filter((r) => r.horario === h)) })),
+      total: fila(regs),
+    };
   },
 
   // ---- Contenido general del sitio (clave/valor) ----
