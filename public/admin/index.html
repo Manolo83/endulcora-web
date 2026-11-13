@@ -1487,7 +1487,7 @@
       <label class="mt-4 block max-w-xs">
         <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Ver la clase gratis de</span>
         <select id="claseGratisFiltroFecha" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-white px-4 py-2.5 text-sm"></select>
-        <span class="mt-1 block text-xs text-carbon/50">Cada clase gratis tiene su propia fecha; aquí se juntan los registros de todas las que has hecho. Elige una para ver solo esos registros.</span>
+        <span class="mt-1 block text-xs text-carbon/50">Alta de masterclasses y tablero por horario (registrados, acceso pagado, Sí/No): <a href="#seccionMasterclasses" class="underline hover:text-vino">Masterclasses</a>. Cada clase gratis tiene su propia fecha; aquí se juntan los registros de todas las que has hecho. Elige una para ver solo esos registros.</span>
       </label>
 
       <div class="mt-4 flex flex-wrap items-center gap-4 rounded-2xl bg-vino p-6 text-crema">
@@ -4953,8 +4953,9 @@ function formatoFechaClaseGratis(fecha){
 function pintarFiltroFechaClaseGratis(){
   const sel = $('claseGratisFiltroFecha');
   const anterior = sel.value;
-  const fechas = [...new Set(REGISTROS_CLASE_GRATIS.map(r => r.fecha || ''))].sort().reverse();
   const fechaActual = CONTENIDO_ACTUAL.clasegratis_fecha || '';
+  // La clase activa aparece aunque todavia no tenga registros.
+  const fechas = [...new Set([...REGISTROS_CLASE_GRATIS.map(r => r.fecha || ''), fechaActual].filter(Boolean))].sort().reverse();
   sel.innerHTML = `<option value="">Todas las fechas (${REGISTROS_CLASE_GRATIS.length})</option>` + fechas.map(f => {
     const esActual = f && f === fechaActual;
     const etiqueta = `${formatoFechaClaseGratis(f)}${esActual ? ' — clase gratis actual' : ''}`;
