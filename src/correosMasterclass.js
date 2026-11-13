@@ -61,6 +61,20 @@ function urlCompleta(url) {
   return /^https?:\/\//.test(url) ? url : `${SITE_URL}${url}`;
 }
 
+// Bloque fijo de TODOS los correos de la masterclass (Manuel, 13 nov 2026):
+// el registro no asegura lugar, el acceso anticipado si; 48 h antes sale el
+// correo para confirmar los lugares gratis que queden; boton al grupo de
+// WhatsApp de la clase para avisos.
+function bloqueMasterclass(contenido, email) {
+  if (!store.getMasterclassPorFecha(contenido.clasegratis_fecha)) return '';
+  const grupo = contenido.clasegratis_whatsapp_grupo;
+  return `<div style="margin:18px 0;padding:14px 16px;background:#FBF4E9;border:1px solid #F0DFC4;border-radius:14px;font-size:13px;line-height:1.6;color:#4b3f4e;">
+    <p style="margin:0 0 6px;"><strong>Importante:</strong> registrarte no asegura tu lugar en sala. <strong>Tu lugar lo asegura el pago del acceso anticipado.</strong></p>
+    <p style="margin:0;">48 horas antes de la masterclass te mandamos un correo para confirmar los lugares gratis que queden después de dar las fichas del acceso anticipado.</p>
+  </div>
+  ${grupo ? email.botonPlan('Unirme al grupo de WhatsApp de la clase', esc(grupo), '#25D366', '#ffffff') + '<p style="font-size:12px;color:#6b5a6e;text-align:center;margin-top:-4px;">Ahí avisamos todo lo de la clase gratuita.</p>' : ''}`;
+}
+
 function contexto(contenido = store.getContent()) {
   const email = require('./email');
   const horarios = String(contenido.clasegratis_horarios || '').split(',').map((h) => h.trim()).filter(Boolean);
@@ -84,7 +98,7 @@ function contexto(contenido = store.getContent()) {
     fechasDivision: String(contenido.clasegratis_taller_fechas_division || '').trim(),
     tel,
     slug: (store.getMasterclassPorFecha(contenido.clasegratis_fecha) || {}).slug || '',
-    pie: email.pieEndulcora(email.datosPie(contenido)),
+    pie: bloqueMasterclass(contenido, email) + email.pieEndulcora(email.datosPie(contenido)),
     email,
   };
 }
@@ -276,7 +290,7 @@ function correo8(registro, c) {
       <td style="padding:14px 10px;text-align:center;"><div style="font-size:11px;letter-spacing:.15em;color:#7A2E7E;font-weight:700;">TU HORARIO</div><div style="font-size:18px;font-weight:800;color:#1B0720;margin-top:4px;">${esc(fechaLegible(registro.fecha))} · ${esc(registro.horario)} h</div></td>
     </tr></table>
   </td></tr>
-  <tr><td style="padding:6px 24px 0;text-align:center;"><p style="margin:0;font-size:14px;color:#4b3f4e;">Confírmanos con un clic para tener todo listo para ti.</p></td></tr>
+  <tr><td style="padding:6px 24px 0;text-align:center;"><p style="margin:0;font-size:14px;color:#4b3f4e;">Ya se dieron las fichas del acceso anticipado. Los <strong>lugares gratis que quedan</strong> se asignan por orden de confirmación: si vas a venir, confírmalo con un clic.</p></td></tr>
   <tr><td style="padding:18px 24px 8px;">
     <a href="${linkAsistencia(registro, 'si')}" style="display:block;background:#2E9E5B;color:#ffffff;padding:18px 20px;border-radius:999px;text-decoration:none;font-weight:800;font-size:18px;text-align:center;">✅ SÍ ASISTIRÉ</a>
   </td></tr>
@@ -325,7 +339,7 @@ const CORREOS = {
   5: { titulo: 'El precio especial vence mañana', armar: correo5 },
   6: { titulo: 'Último aviso', armar: correo6 },
   7: { titulo: 'Último día del acceso (automático 1 día antes, 6 pm)', armar: correo7 },
-  8: { titulo: '¿Asistirás? Sí / No (automático 5 días antes y 3 días antes a quien no contestó)', armar: correo8 },
+  8: { titulo: '¿Asistirás? Lugares gratis (automático 48 h antes, a quien no pagó)', armar: correo8 },
   9: { titulo: 'Pago sin terminar (1 h y 24 h)', armar: correo9 },
   10: { titulo: 'Quedan X lugares (14 y 7 días antes)', armar: correo10 },
 };
@@ -498,8 +512,9 @@ function cronogramaAuto(registro, ahora) {
     lista.push({ campo: 'mc10bEnviado', n: 10, desde: enCDMX(f, -7, '10:00'), hasta: enCDMX(f, -6, '00:00') });
     lista.push({ campo: 'mc7Enviado', n: 7, desde: enCDMX(f, -1, '18:00'), hasta: enCDMX(f, 0, '00:00') });
   }
-  lista.push({ campo: 'mc8Enviado', n: 8, desde: enCDMX(f, -5, '10:00'), hasta: enCDMX(f, -4, '00:00') });
-  if (!registro.asistenciaMc) lista.push({ campo: 'mc8bEnviado', n: 8, desde: enCDMX(f, -3, '10:00'), hasta: enCDMX(f, -2, '00:00') });
+  // 48 h antes: confirmar los lugares gratis que quedan tras las fichas del
+  // acceso anticipado (los pagados ya tienen su ficha).
+  if (sinPagar) lista.push({ campo: 'mc8Enviado', n: 8, desde: enCDMX(f, -2, '10:00'), hasta: enCDMX(f, -1, '00:00') });
   return lista.filter((x) => !registro[x.campo] && ahora >= x.desde && ahora < x.hasta);
 }
 
