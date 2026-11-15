@@ -1159,7 +1159,7 @@ function htmlCorreoBuenFin({ nombre, unsubscribeUrl, siteUrl, precioUno, precioP
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${filas.join('')}</table>
     <div style="height:8px;"></div>` : '');
   const pruebaSocial = comprasComunidad >= 5 ? `<div style="border:1px dashed #cdb8cf;border-radius:12px;padding:10px 12px;text-align:center;font-size:14px;margin:0 0 16px;">🔥 <b>${comprasComunidad} personas</b> de la comunidad ya se llevaron sus eBooks.</div>` : '';
-  const whats = (texto) => (tel ? boton(`https://wa.me/52${tel}?text=${encodeURIComponent(texto)}`, `¿Dudas? WhatsApp ${telVisible}`, '#25D366', '#ffffff', 13) : '');
+  const whats = (texto) => (tel ? boton(`https://wa.me/52${tel}?text=${encodeURIComponent(texto)}`, `¿Dudas? WhatsApp ${telVisible}`, '#25D366', '#ffffff', 13) : '') + boton('https://chat.whatsapp.com/F4og9zbWdb32SoMek9rH7J', 'Únete a la Comunidad Endulcora', '#4E1454', '#FBF4E9', 13);
   const ps = (texto) => `<p style="margin:0 0 18px;font-size:14px;border-left:3px solid #F5A623;padding-left:12px;"><b>P.D.</b> ${texto}</p>`;
 
   let preheader;

@@ -170,7 +170,8 @@ function datosCorreo(ebookIds) {
     precioPaquete: c.precioPaquete,
     precioNormal: precioNormalTipico(todos),
     fin: c.fin,
-    whatsapp: contenido.whatsapp_numero || '',
+    // Numero oficial (31 oct 2026): el 5665271901 ya no se usa.
+    whatsapp: ['', '5665271901'].includes(String(contenido.whatsapp_numero || '').replace(/\D/g, '')) ? '5575933916' : contenido.whatsapp_numero,
     ebooks: elegidos.map((e) => ({ id: e.id, titulo: e.titulo, imagen: e.imagen || '' })),
   };
 }
