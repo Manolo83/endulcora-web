@@ -267,15 +267,12 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <a href="/tienda" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Tienda</a>
     <a href="/ebooks" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">eBooks</a>
     <a href="/anexos" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anexos</a>
-    <a href="/blog" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Blog</a>
     <a href="/endulcora-en-vivo" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Clases en vivo</a>
     <a href="/clase-gratis" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Clase gratis</a>
     <a href="/calculadora" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calculadora</a>
     <a href="/calendario" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Calendario</a>
-    <a href="/galeria" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Galería</a>
     <a href="/resenas" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Reseñas</a>
-    <a href="/anuncios" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Anuncios</a>
-    <a href="/comunidad" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Comunidad</a>
+    <a href="/anuncios" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Talleres de la semana</a>
     <a href="/membresia" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Membresía</a>
     <a href="/juego" class="block border-b border-vino/10 py-3.5 font-ui text-sm uppercase tracking-widest text-carbon/75">Juego</a>
     <button type="button" onclick="toggleMenu();abrirModal('carrito')" class="mt-5 w-full rounded-full boton-vivo border border-vino/25 py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-vino">Ver carrito</button>
@@ -486,18 +483,22 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 
 <svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-white" aria-hidden="true"><path d="M0,22 C220,2 460,38 720,20 C980,4 1220,34 1440,16 L1440,40 L0,40 Z" fill="#FAECD5"/></svg>
 
-<!-- ══════════════ ANUNCIOS (dinámico, desde el panel de administración) ══════════════ -->
+<!-- ══════════════ TALLERES DE LA SEMANA (carrusel con los artes, sale solo del calendario) ══════════════ -->
 <section id="anuncios" class="scroll-mt-24 bg-flama/10 py-14">
   <div class="mx-auto max-w-7xl px-5 lg:px-8">
     <div class="reveal mb-8 flex flex-wrap items-end justify-between gap-6">
       <div>
         <div class="rule-flama mb-5 w-24"></div>
-        <h2 class="font-display text-2xl leading-tight text-vino sm:text-3xl">Anuncios y novedades</h2>
+        <h2 class="font-display text-2xl leading-tight text-vino sm:text-3xl">Talleres de esta semana</h2>
       </div>
-      <p class="max-w-md text-sm leading-relaxed text-carbon/70">Fechas de clases, lanzamientos y avisos, publicados directamente desde el panel de administración.</p>
+      <p class="max-w-md text-sm leading-relaxed text-carbon/70">Toca el taller que te guste para ver fechas y apartar tu lugar con $400.</p>
     </div>
-    <div id="listaAnuncios" class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-      <p class="text-sm text-carbon/50">Cargando anuncios…</p>
+    <div class="relative">
+      <div id="carruselTalleres" class="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-3" style="scrollbar-width:none">
+        <p class="text-sm text-carbon/50">Cargando talleres…</p>
+      </div>
+      <button type="button" id="carruselAnt" aria-label="Anterior" class="absolute left-1 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/90 px-3 py-2 text-xl text-vino shadow ring-1 ring-vino/10 sm:block">‹</button>
+      <button type="button" id="carruselSig" aria-label="Siguiente" class="absolute right-1 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/90 px-3 py-2 text-xl text-vino shadow ring-1 ring-vino/10 sm:block">›</button>
     </div>
   </div>
 </section>
@@ -774,7 +775,6 @@ trufada, paso a paso</h2>
           <li><a href="#simulador" class="hover:text-vino transition">Apps y calculadoras</a></li>
           <li><a href="/calendario" class="hover:text-vino transition">Calendario de talleres</a></li>
           <li><a href="/endulcora-en-vivo" class="hover:text-vino transition">Clases en vivo</a></li>
-          <li><a href="/galeria"   class="hover:text-vino transition">Galería</a></li>
           <li><a href="/membresia" class="hover:text-vino transition">Membresía</a></li>
         </ul>
       </div>
@@ -1993,23 +1993,49 @@ function limpiarBusquedaTienda(){
 
 
 async function cargarAnuncios(){
-  const cont = document.getElementById('listaAnuncios');
+  // Talleres de la semana: salen solos del calendario (/api/sesiones-taller).
+  // Uno por taller y sede, con su arte; al tocarlo va a la pagina de compra.
+  const cont = document.getElementById('carruselTalleres');
   try{
-    const res = await fetch('/api/announcements');
-    const items = await res.json();
-    if(!items.length){
-      cont.innerHTML = '<p class="text-sm text-carbon/50">Por ahora no hay anuncios publicados. Vuelve pronto.</p>';
-      return;
-    }
-    cont.innerHTML = items.map(a => `
-      <article class="reveal visible tarjeta-viva rounded-2xl bg-white p-6 ring-1 ring-vino/10">
-        <p class="font-ui text-[11px] uppercase tracking-widest text-morado">${new Date(a.createdAt).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})}</p>
-        <h3 class="mt-2 font-titulo text-xl tracking-wide text-vino">${escapeHtml(a.title)}</h3>
-        <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-carbon/70">${escapeHtml(a.body)}</p>
-      </article>
-    `).join('');
+    const res = await fetch('/api/sesiones-taller');
+    let ses = await res.json();
+    ses = Array.isArray(ses) ? ses : (ses.sesiones || []);
+    const hoy = new Date(Date.now() - 6*3600*1000).toISOString().slice(0,10);
+    const sumar = (d, n) => new Date(new Date(d+'T12:00:00Z').getTime() + n*86400000).toISOString().slice(0,10);
+    const dia = new Date(hoy+'T12:00:00Z').getUTCDay();
+    let hasta = sumar(hoy, (7 - dia) % 7);
+    const vigentes = ses.filter(x => x.fecha >= hoy && x.fotoUrl && x.slug && x.estado !== 'agotado' && x.cupoRestante !== 0)
+      .sort((a,b) => a.fecha.localeCompare(b.fecha));
+    let semana = vigentes.filter(x => x.fecha <= hasta);
+    if(semana.length < 4){ hasta = sumar(hasta, 7); semana = vigentes.filter(x => x.fecha <= hasta); }
+    const vistos = new Map();
+    semana.forEach(x => { const k = x.titulo + '|' + x.sedeId; if(!vistos.has(k)) vistos.set(k, x); });
+    const items = [...vistos.values()];
+    if(!items.length){ cont.innerHTML = '<p class="text-sm text-carbon/50">Muy pronto publicamos los talleres de la semana. Revisa el <a href="/calendario" class="underline">calendario</a>.</p>'; return; }
+    const fechaCorta = f => new Date(f+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
+    cont.innerHTML = items.map(x => `
+      <a href="/talleres/${encodeURIComponent(x.slug)}?utm_source=portada&utm_medium=carrusel" class="tarjeta-viva block w-[78%] shrink-0 snap-start overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10 sm:w-[46%] lg:w-[23.5%]">
+        <img src="${x.fotoUrl}" alt="${escapeHtml(x.titulo)}" loading="lazy" class="aspect-square w-full object-cover">
+        <div class="p-4">
+          <p class="font-titulo text-base text-vino">${escapeHtml(x.titulo)}</p>
+          <p class="mt-1 text-xs uppercase tracking-wider text-carbon/55">${fechaCorta(x.fecha)}</p>
+          <span class="mt-3 inline-block rounded-full bg-vino px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-crema">Apartar mi lugar</span>
+        </div>
+      </a>`).join('');
+    const paso = () => { const t = cont.querySelector('a'); return t ? t.getBoundingClientRect().width + 16 : 300; };
+    const avanzar = (dir = 1) => {
+      const fin = cont.scrollLeft + cont.clientWidth >= cont.scrollWidth - 5;
+      if(dir > 0 && fin) cont.scrollTo({ left: 0, behavior: 'smooth' });
+      else cont.scrollBy({ left: dir * paso(), behavior: 'smooth' });
+    };
+    document.getElementById('carruselSig').onclick = () => avanzar(1);
+    document.getElementById('carruselAnt').onclick = () => avanzar(-1);
+    let pausa = false;
+    ['mouseenter','touchstart','focusin'].forEach(e => cont.addEventListener(e, () => { pausa = true; }, { passive: true }));
+    ['mouseleave','touchend','focusout'].forEach(e => cont.addEventListener(e, () => { setTimeout(() => { pausa = false; }, 4000); }, { passive: true }));
+    setInterval(() => { if(!pausa && !document.hidden) avanzar(1); }, 3500);
   }catch(e){
-    cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudieron cargar los anuncios.</p>';
+    cont.innerHTML = '<p class="text-sm text-carbon/50">No se pudieron cargar los talleres. Revisa el <a href="/calendario" class="underline">calendario</a>.</p>';
   }
 }
 
