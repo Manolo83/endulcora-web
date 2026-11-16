@@ -17,6 +17,12 @@ const MAX_AL_DIA = 3; // tope de avisos automaticos por dia (sin contar los de c
 const HORA_INICIO = 9; // no se manda nada antes de las 9 ni despues de las 21 (CDMX)
 const HORA_FIN = 21;
 const NURTURING_HORAS = [11, 18];
+const fs = require('fs');
+const path = require('path');
+// Nurturing programado (semana por semana) en config/nurturing-app.json.
+function programados() {
+  try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'config', 'nurturing-app.json'), 'utf8')).avisos || []; } catch (_) { return []; }
+}
 
 let llaves = null;
 
@@ -248,7 +254,21 @@ function opcionesNurturing(t) {
   return ops;
 }
 
+function avisoProgramado(t) {
+  const ahora = t.hora * 60 + t.min;
+  const a = programados().find((x) => {
+    if (x.fecha !== t.fecha) return false;
+    const [h, m] = String(x.hora || '').split(':').map(Number);
+    const min = h * 60 + (m || 0);
+    return ahora >= min && ahora < min + 90;
+  });
+  if (!a) return null;
+  const url = /^https?:/.test(a.url || '') ? a.url : utm(SITE + (a.url || '/'), 'nurturing-semana');
+  return { clave: `prog-${a.id}`, tipo: 'nurturing', titulo: a.titulo, cuerpo: a.cuerpo, url, imagen: img(a.imagen) };
+}
+
 async function avisoNurturing(t) {
+  if (programados().some((x) => x.fecha === t.fecha)) return null; // ese dia manda el nurturing programado
   if (!NURTURING_HORAS.includes(t.hora) || t.min >= 30) return null;
   const ops = opcionesNurturing(t);
   if (!ops.length) return null;
@@ -260,6 +280,8 @@ async function avisoNurturing(t) {
 // Lo que saldria en la proxima vuelta (para la vista previa del panel).
 async function proximos() {
   const t = ahoraCdmx();
+  const prog = programados().filter((x) => `${x.fecha} ${x.hora}` >= `${t.fecha} ${String(t.hora).padStart(2, '0')}:00`).slice(0, 8);
+  if (prog.length) return prog.map((x) => ({ tipo: 'nurturing', cuando: `${x.fecha} ${x.hora}`, titulo: x.titulo, cuerpo: x.cuerpo, url: x.url, imagen: x.imagen }));
   const ops = opcionesNurturing(t).slice(0, 6);
   return ops.map((o) => ({ tipo: 'nurturing', titulo: o.titulo, cuerpo: o.cuerpo, url: o.url, imagen: o.imagen }));
 }
@@ -274,6 +296,8 @@ async function revisar() {
     for (const a of avisosClaseEnVivo(t)) await enviar(a);
     if (t.hora < HORA_INICIO || t.hora >= HORA_FIN) return;
     if ((await enviadosHoy(t.fecha)) >= MAX_AL_DIA) return;
+    const prog = avisoProgramado(t); // el programado sale a su hora, aunque haya salido otro hace poco
+    if (prog && (await enviar(prog))) return;
     if ((await ultimoEnvioHaceMin()) < 120) return; // al menos 2 h entre avisos
     const candidatos = [avisoCalendarioNuevo, avisoTallerNuevo, avisoEbookNuevo, avisoPocosLugares, avisoNurturing];
     for (const f of candidatos) {
