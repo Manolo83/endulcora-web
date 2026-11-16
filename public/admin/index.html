@@ -953,11 +953,11 @@
         <div class="mt-3 flex flex-wrap items-end gap-3">
           <label>
             <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Precio total (MXN)</span>
-            <input id="importarPrecioTotal" type="text" inputmode="numeric" value="949" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+            <input id="importarPrecioTotal" type="text" inputmode="numeric" value="1049" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
           </label>
           <label>
             <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Anticipo (MXN)</span>
-            <input id="importarAnticipo" type="text" inputmode="numeric" value="200" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+            <input id="importarAnticipo" type="text" inputmode="numeric" value="400" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
           </label>
           <label>
             <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Cupo máximo</span>
@@ -974,11 +974,11 @@
         <div class="mt-3 flex flex-wrap items-end gap-3">
           <label>
             <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Precio total (MXN)</span>
-            <input id="fijarPrecioTotal" type="text" inputmode="numeric" value="949" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+            <input id="fijarPrecioTotal" type="text" inputmode="numeric" value="1049" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
           </label>
           <label>
             <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Anticipo (MXN)</span>
-            <input id="fijarAnticipo" type="text" inputmode="numeric" value="200" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
+            <input id="fijarAnticipo" type="text" inputmode="numeric" value="400" class="mt-1 w-28 rounded-lg border border-vino/15 bg-white px-3 py-2 text-sm">
           </label>
           <label>
             <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Cupo máximo</span>
@@ -4148,9 +4148,9 @@ function abrirFormSesion(sesion){
   $('sesionEstado').value = sesion.estado || 'disponible';
   $('sesionSlug').value = sesion.slug || '';
   $('sesionPrecioTotal').value = sesion.precioTotal || '';
-  // El anticipo casi siempre es $200 — se precarga solo en talleres nuevos
+  // El anticipo casi siempre es $400 — se precarga solo en talleres nuevos
   // (si ya tiene id, se respeta lo que ya estaba guardado, aunque sea 0).
-  $('sesionAnticipo').value = sesion.id ? (sesion.anticipo || '') : (sesion.anticipo ?? 200);
+  $('sesionAnticipo').value = sesion.id ? (sesion.anticipo || '') : (sesion.anticipo ?? 400);
   $('sesionCupoMaximo').value = sesion.cupoMaximo ?? '';
   $('sesionHojaSheets').value = sesion.hojaSheets || '';
   $('sesionDescripcion').value = sesion.descripcion || '';
