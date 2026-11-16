@@ -172,6 +172,9 @@ router.get('/api/push', requireAdmin, async (req, res) => {
 router.post('/api/push/pausa', requireAdmin, async (req, res) => {
   try { await push.setPausa(!!(req.body && req.body.pausa)); res.json(await push.resumen()); } catch (e) { res.status(500).json({ error: e.message }); }
 });
+router.post('/api/push/nurturing-prueba', requireAdmin, async (req, res) => {
+  try { res.json(await push.nurturingPrueba()); } catch (e) { res.status(500).json({ error: e.message }); }
+});
 router.post('/api/push/prueba', requireAdmin, async (req, res) => {
   try {
     const b = req.body || {};
