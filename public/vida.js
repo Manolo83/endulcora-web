@@ -142,7 +142,14 @@
     });
     var yaAvisos = false; try { yaAvisos = localStorage.getItem('endulcoraAvisos') === '1'; } catch(e){}
     if (instalada && soportaPush && Notification.permission === 'granted') { navigator.serviceWorker.ready.then(function(reg){ activarAvisos(); }); document.querySelectorAll('#btnInstalarApp').forEach(function(b){ b.style.display='none'; }); }
-    else if (instalada && soportaPush && Notification.permission === 'default' && !yaAvisos) setTimeout(function(){ aviso('🔔 Activa los avisos para enterarte de talleres nuevos y clases en vivo.', 'Activar', activarAvisos); }, 2500);
+    else if (instalada && soportaPush && Notification.permission === 'default') {
+      // Al abrir la app se pide el permiso solo (ventana del sistema «Permitir»).
+      // Si el telefono exige un toque, se pide con el primer toque en cualquier parte.
+      activarAvisos();
+      var alTocar = function(){ document.removeEventListener('pointerdown', alTocar, true); if (Notification.permission === 'default') activarAvisos(); };
+      document.addEventListener('pointerdown', alTocar, true);
+      if (!yaAvisos) setTimeout(function(){ if (Notification.permission === 'default') aviso('🔔 Activa los avisos para enterarte de talleres nuevos y clases en vivo.', 'Activar', activarAvisos); }, 4000);
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', listo); else listo();
 })();
