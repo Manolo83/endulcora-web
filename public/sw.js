@@ -9,7 +9,7 @@ self.addEventListener('push', (e) => {
   const titulo = d.titulo || 'Endulcora';
   e.waitUntil(self.registration.showNotification(titulo, {
     body: d.cuerpo || '',
-    icon: '/app/icono-192.png',
+    icon: '/app/icono-192.png?v=2',
     badge: '/app/badge-96.png',
     image: d.imagen || undefined,
     tag: d.clave || undefined,
