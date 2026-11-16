@@ -42,6 +42,7 @@ async function init() {
   await q(`CREATE TABLE IF NOT EXISTS push_envios (
     id SERIAL PRIMARY KEY, clave TEXT UNIQUE NOT NULL, tipo TEXT, titulo TEXT, cuerpo TEXT, url TEXT, imagen TEXT,
     enviado_en TIMESTAMPTZ DEFAULT now(), total INTEGER DEFAULT 0, ok INTEGER DEFAULT 0, fallidos INTEGER DEFAULT 0, abiertas INTEGER DEFAULT 0)`);
+  await q('ALTER TABLE push_subs ADD COLUMN IF NOT EXISTS bienvenida BOOLEAN DEFAULT false');
   let pub = process.env.VAPID_PUBLIC_KEY || (await getConfig('vapid_public'));
   let priv = process.env.VAPID_PRIVATE_KEY || (await getConfig('vapid_private'));
   if (!pub || !priv) {
@@ -63,6 +64,19 @@ async function suscribir(sub, { userId, plataforma } = {}) {
     ON CONFLICT (endpoint) DO UPDATE SET p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, activo = true,
     user_id = COALESCE(EXCLUDED.user_id, push_subs.user_id), plataforma = COALESCE(EXCLUDED.plataforma, push_subs.plataforma)`,
     [sub.endpoint, sub.keys.p256dh, sub.keys.auth, userId || null, String(plataforma || '').slice(0, 40) || null]);
+  setTimeout(() => mandarBienvenidas().catch(() => {}), 1500);
+}
+
+// Bienvenida: le llega una sola vez a cada telefono que activa los avisos
+// (tambien a los que ya estaban activos antes de existir este aviso).
+const BIENVENIDA = { clave: 'bienvenida', titulo: '🧁 ¡Bienvenida a la app de Endulcora!', cuerpo: 'Aquí te avisaremos primero de talleres nuevos, clases en vivo y lugares que se acaban. Toca para ver los talleres de esta semana.', url: SITE + '/calendario?utm_source=app&utm_medium=push&utm_campaign=bienvenida' };
+async function mandarBienvenidas() {
+  const subs = (await q('SELECT id, endpoint, p256dh, auth FROM push_subs WHERE activo AND NOT bienvenida')).rows;
+  for (const s of subs) {
+    await q('UPDATE push_subs SET bienvenida = true WHERE id = $1', [s.id]);
+    await mandarA([s], BIENVENIDA);
+  }
+  return subs.length;
 }
 
 async function baja(endpoint) {
@@ -269,6 +283,7 @@ async function revisar() {
 
 function iniciar() {
   init().then(() => {
+    setTimeout(() => mandarBienvenidas().catch((e) => console.error('[push] bienvenida:', e.message)), 20 * 1000);
     setTimeout(revisar, 60 * 1000);
     setInterval(revisar, 10 * 60 * 1000);
   }).catch((e) => console.error('[push] No se pudo iniciar:', e.message));
