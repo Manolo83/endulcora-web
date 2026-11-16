@@ -1,0 +1,50 @@
+/* Vida Endulcora: el mismo diseño y animaciones de la portada en todas las páginas (16 nov 2026) */
+.vida-hero { position:relative; overflow:hidden; color:#FBF4E9; background: radial-gradient(120% 90% at 85% 10%, #7A2E7E 0%, transparent 55%), radial-gradient(90% 80% at 0% 100%, #5C2360 0%, transparent 60%), linear-gradient(160deg,#2a0b30 0%,#1B0720 60%,#120414 100%) !important; }
+.vida-hero > * { position:relative; z-index:1; }
+.vida-hero :is(h1,h2,h3,.text-vino,.text-carbon,.text-uva,.text-morado):not(:is(.bg-white,.bg-crema,[class*="bg-white/"],[class*="bg-crema/"],.bg-flama,input,select,textarea) *):not(.bg-white,.bg-crema,.bg-flama) { color:#FBF4E9; }
+.vida-hero :is([class*="text-carbon/"],[class*="text-vino/"]):not(:is(.bg-white,.bg-crema,[class*="bg-white/"],[class*="bg-crema/"],.bg-flama) *) { color: rgba(251,244,233,.75); }
+.vida-hero :is(.text-flama) { color:#F5A623; }
+.vida-hero h1 { animation: vidaEntra .9s cubic-bezier(.2,.8,.2,1) both; }
+.vida-hero h1 + *, .vida-hero h1 ~ p { animation: vidaEntra .9s .2s cubic-bezier(.2,.8,.2,1) both; }
+.vida-chispas { position:absolute; inset:0; pointer-events:none; z-index:0 !important; overflow:hidden; }
+.vida-chispas i { position:absolute; bottom:-20px; width:8px; height:8px; border-radius:3px; opacity:0; animation: vidaSubir linear infinite; }
+.vida-chispas i:nth-child(3n){ border-radius:50%; width:6px; height:6px; }
+.vida-chispas i:nth-child(4n){ width:4px; height:12px; }
+.vida-luz { position:absolute; border-radius:50%; filter: blur(110px); pointer-events:none; z-index:0 !important; animation: vidaDeriva 18s ease-in-out infinite; }
+@keyframes vidaSubir { 0%{ transform: translateY(0) rotate(0); opacity:0 } 10%{ opacity:.8 } 90%{ opacity:.6 } 100%{ transform: translateY(-110vh) rotate(540deg); opacity:0 } }
+@keyframes vidaDeriva { 0%,100%{ transform: translate(0,0) scale(1);} 50%{ transform: translate(40px,-30px) scale(1.15);} }
+@keyframes vidaEntra { from { opacity:0; transform: translateY(36px); filter: blur(5px);} to { opacity:1; transform:none; filter:none; } }
+.vida-cinta { overflow:hidden; background:#F5A623; color:#1B0720; padding:.7rem 0; transform: rotate(-1.2deg); margin:-12px -10px 0; position:relative; z-index:5; box-shadow:0 10px 30px -10px rgba(27,7,32,.5); font-family:"Bebas Neue",sans-serif; font-size:1.4rem; letter-spacing:.18em; }
+.vida-cinta div { display:flex; gap:2rem; width:max-content; white-space:nowrap; animation: vidaCinta 32s linear infinite; }
+.vida-cinta b { color:#4E1454; font-weight:400; }
+@keyframes vidaCinta { to { transform: translateX(-50%); } }
+.vida-aparece { opacity:0; transform: translateY(36px) scale(.97); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
+.vida-aparece.vida-visible { opacity:1; transform:none; }
+.vida-tarjeta { transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .28s ease; }
+.vida-tarjeta:hover { transform: translateY(-6px) rotate(-.4deg); box-shadow: 0 22px 44px -14px rgba(78,20,84,.32); }
+.vida-tarjeta img { transition: transform .6s cubic-bezier(.2,.7,.3,1); }
+.vida-tarjeta:hover img { transform: scale(1.06); }
+.vida-boton { transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease; }
+.vida-boton:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 12px 26px -8px rgba(245,166,35,.55); }
+.vida-boton:active { transform: scale(.95); }
+.vida-latido { animation: vidaLatido 2.4s ease-in-out infinite; }
+@keyframes vidaLatido { 0%,100%{ transform: scale(1);} 8%{ transform: scale(1.06);} 16%{ transform: scale(1);} 24%{ transform: scale(1.04);} 32%{ transform: scale(1);} }
+h2.font-display, h2.font-titulo { letter-spacing:-.01em; }
+.vida-hero { padding-top: max(2.5rem, var(--vida-pt, 0px)); padding-bottom: 3rem; border-radius: 0; }
+main h1:not(.vida-hero h1) { animation: vidaEntra .9s cubic-bezier(.2,.8,.2,1) both; }
+/* Menú hamburguesa: panel flotante del ancho del apartado más largo, con emoji por página */
+#menuMovil { position:absolute; right:1rem; top:calc(100% + .5rem); width:max-content; min-width:230px; max-width:calc(100vw - 2rem); border:0 !important; border-radius:1.5rem; padding:.6rem !important; background:#FBF4E9; box-shadow:0 30px 60px -20px rgba(27,7,32,.45), 0 0 0 1px rgba(78,20,84,.08); transform-origin: top right; }
+#menuMovil:not(.hidden) { animation: vidaMenu .32s cubic-bezier(.34,1.4,.64,1) both; }
+@keyframes vidaMenu { from { opacity:0; transform: translateY(-10px) scale(.92); } to { opacity:1; transform:none; } }
+#menuMovil > a { display:flex !important; align-items:center; gap:.75rem; border:0 !important; border-radius:999px; padding:.7rem 1.1rem .7rem .8rem !important; letter-spacing:.12em !important; color:#4E1454 !important; transition: background .2s, transform .2s; }
+#menuMovil > a:hover, #menuMovil > a[aria-current] { background:#4E1454; color:#FBF4E9 !important; transform: translateX(3px); }
+#menuMovil > a .vida-emoji { display:grid; place-items:center; width:2rem; height:2rem; border-radius:50%; background:#fff; font-size:1.05rem; letter-spacing:0; box-shadow:0 2px 6px -2px rgba(78,20,84,.25); flex-shrink:0; }
+#menuMovil > a:not(.hidden) { animation: vidaEntra .4s cubic-bezier(.2,.8,.2,1) both; }
+#menuMovil > button { margin-top:.5rem !important; }
+.vida-banda { padding: 3.5rem 0 3.25rem; margin-bottom: 2rem; }
+.vida-banda h1 { font-size: clamp(2.2rem, 6vw, 4rem) !important; line-height: 1.02 !important; }
+.vida-banda p { max-width: 42rem; }
+.vida-banda { width:100vw; margin-left:calc(50% - 50vw); margin-right:calc(50% - 50vw); margin-top:-2rem; }
+.vida-banda > div { max-width:72rem; }
+.vida-cinta { margin-bottom: 2.25rem; width:calc(100vw + 20px); margin-left:calc(50% - 50vw - 10px); }
+body { overflow-x: hidden; }
