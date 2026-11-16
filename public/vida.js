@@ -70,3 +70,73 @@
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 })();
+
+// ---- App de Endulcora: instalar y activar avisos (16 nov 2026) ----
+(function(){
+  var ua = navigator.userAgent || '';
+  var esIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var instalada = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  var promptInstalar = null;
+  var soportaPush = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); promptInstalar = e; });
+  window.addEventListener('appinstalled', function(){ instalada = true; setTimeout(function(){ activarAvisos(); }, 800); });
+
+  function b64(s){ var p = '='.repeat((4 - s.length % 4) % 4); var r = atob((s + p).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from(r, function(c){ return c.charCodeAt(0); }); }
+
+  function activarAvisos(){
+    if (!soportaPush) return Promise.resolve(false);
+    return Notification.requestPermission().then(function(p){
+      if (p !== 'granted') return false;
+      return Promise.all([navigator.serviceWorker.ready, fetch('/api/push/clave').then(function(r){ return r.json(); })]).then(function(x){
+        var reg = x[0], clave = x[1].clave; if (!clave) return false;
+        return reg.pushManager.getSubscription().then(function(s){ return s || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(clave) }); })
+          .then(function(sub){ return fetch('/api/push/suscribir', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'same-origin', body: JSON.stringify({ subscription: sub, plataforma: esIOS ? 'ios' : (/android/i.test(ua) ? 'android' : 'compu') }) }); })
+          .then(function(){ try{ localStorage.setItem('endulcoraAvisos','1'); }catch(e){} aviso('🎉 ¡Listo! Te avisaremos de talleres nuevos y clases en vivo.'); return true; });
+      });
+    }).catch(function(){ return false; });
+  }
+  window.endulcoraActivarAvisos = activarAvisos;
+
+  function aviso(txt, boton, accion){
+    var v = document.querySelector('.app-aviso-flotante'); if (v) v.remove();
+    var d = document.createElement('div'); d.className = 'app-aviso-flotante'; d.innerHTML = '<span style="flex:1">'+txt+'</span>';
+    if (boton){ var b = document.createElement('button'); b.textContent = boton; b.onclick = function(){ d.remove(); accion(); }; d.appendChild(b); }
+    document.body.appendChild(d); setTimeout(function(){ d.remove(); }, boton ? 15000 : 5000);
+  }
+
+  function hoja(html){
+    var m = document.createElement('div'); m.className = 'app-modal'; m.innerHTML = '<div class="app-hoja" role="dialog" aria-modal="true">'+html+'<button type="button" class="app-cerrar">Ahora no</button></div>';
+    m.addEventListener('click', function(e){ if (e.target === m || e.target.classList.contains('app-cerrar')) m.remove(); });
+    document.body.appendChild(m); return m;
+  }
+  var BENEFICIOS = '<div class="app-beneficios"><span>🔔 Talleres nuevos</span><span>🎥 Clases en vivo</span><span>⏳ Últimos lugares</span><span>🛍️ Compra en 1 toque</span></div>';
+
+  function instalar(){
+    if (instalada){ activarAvisos().then(function(ok){ if(!ok) aviso('Activa las notificaciones de Endulcora en los ajustes de tu teléfono.'); }); return; }
+    if (promptInstalar){
+      promptInstalar.prompt();
+      promptInstalar.userChoice.then(function(r){ promptInstalar = null; if (r.outcome === 'accepted') activarAvisos(); });
+      return;
+    }
+    if (esIOS){
+      hoja('<p style="font-size:2rem">📲</p><h3>Instala la app de Endulcora en tu iPhone</h3><p style="margin-top:.4rem;font-size:.9rem;color:rgba(27,7,32,.7)">Es gratis y tarda 10 segundos. Ábrela desde Safari:</p>'+
+        '<ol><li><b>1</b><span>Toca el botón <strong>Compartir</strong> <span style="font-size:1.1rem">⬆️</span> abajo de la pantalla.</span></li><li><b>2</b><span>Elige <strong>«Agregar a inicio»</strong> ➕.</span></li><li><b>3</b><span>Abre <strong>Endulcora</strong> desde tu pantalla y acepta los avisos.</span></li></ol>'+BENEFICIOS);
+      return;
+    }
+    var m = hoja('<p style="font-size:2rem">🔔</p><h3>Recibe los avisos de Endulcora</h3><p style="margin-top:.4rem;font-size:.9rem;color:rgba(27,7,32,.7)">Te avisamos de talleres nuevos, clases en vivo y lugares que se acaban. Para instalarla como app, en el menú de tu navegador elige <strong>«Instalar app»</strong> o <strong>«Agregar a pantalla de inicio»</strong>.</p>'+BENEFICIOS+'<button type="button" class="app-boton">🔔 Activar avisos</button>');
+    m.querySelector('.app-boton').onclick = function(){ m.remove(); activarAvisos(); };
+  }
+
+  function listo(){
+    document.querySelectorAll('#btnInstalarApp, [data-instalar-app]').forEach(function(b){
+      b.addEventListener('click', instalar);
+      if (instalada) b.innerHTML = '<span class="boton-app-icono" aria-hidden="true">🔔</span><span class="hidden sm:inline">Activar avisos</span><span class="sm:hidden">Avisos</span>';
+    });
+    var yaAvisos = false; try { yaAvisos = localStorage.getItem('endulcoraAvisos') === '1'; } catch(e){}
+    if (instalada && soportaPush && Notification.permission === 'granted') { navigator.serviceWorker.ready.then(function(reg){ reg.pushManager.getSubscription().then(function(s){ if(!s) activarAvisos(); }); }); document.querySelectorAll('#btnInstalarApp').forEach(function(b){ b.style.display='none'; }); }
+    else if (instalada && soportaPush && Notification.permission === 'default' && !yaAvisos) setTimeout(function(){ aviso('🔔 Activa los avisos para enterarte de talleres nuevos y clases en vivo.', 'Activar', activarAvisos); }, 2500);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', listo); else listo();
+})();
