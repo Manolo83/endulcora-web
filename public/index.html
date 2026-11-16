@@ -251,7 +251,6 @@ section h2.font-display { letter-spacing: -.01em; }
 .rule-flama { height: 4px; background-image: linear-gradient(90deg,#F5A623 0 34px,transparent 34px); }
 .rule-flama::after { left: 40px; width: 8px; height: 8px; }
 #chefImagenWrap { box-shadow: 18px 18px 0 -2px #F5A623; }
-@media (prefers-reduced-motion: reduce) { .blob-a,.blob-b,.blob-c,.texto-fuego,.banner-club,.banner-club::after,.cinta-pista { animation:none !important; } }
 
 /* ════ Vida Endulcora ════ */
 .chispas i { position:absolute; bottom:-20px; width:8px; height:8px; border-radius:3px; background:var(--c); opacity:0; animation: subir linear infinite; }
@@ -276,7 +275,6 @@ section h2.font-display { letter-spacing: -.01em; }
 .boton-latido { animation: latido 2.4s ease-in-out infinite; }
 @keyframes latido { 0%,100%{ transform: scale(1);} 8%{ transform: scale(1.06);} 16%{ transform: scale(1);} 24%{ transform: scale(1.04);} 32%{ transform: scale(1);} }
 #chefImagenWrap { transition: box-shadow .4s, transform .4s; } #chefImagenWrap:hover { box-shadow: -18px 18px 0 -2px #F5A623; transform: rotate(-1.5deg); }
-@media (prefers-reduced-motion: reduce) { .chispas, .entra-titulo, #carruselTalleres > a, .boton-latido { animation:none !important; } .rule-flama { transform:none !important; } }
 </style>
 </head>
 <body class="font-cuerpo text-carbon antialiased">
@@ -2403,7 +2401,7 @@ fetch('/api/clase-gratis').then(r => r.json()).then(info => {
 }).catch(() => {});
 </script>
 <script>
-(()=>{ if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+(()=>{
  const w=document.querySelector('#heroImagenWrap')?.closest('.relative.mx-auto.w-full');
  if(w && matchMedia('(hover:hover)').matches){ w.classList.add('tilt'); w.addEventListener('mousemove',e=>{const r=w.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;w.style.transform=`perspective(900px) rotateY(${x*8}deg) rotateX(${-y*8}deg)`;}); w.addEventListener('mouseleave',()=>w.style.transform='');}
  const contar=el=>{const fin=parseInt(el.textContent,10); if(!(fin>0)) return; let t0=null; const f=t=>{t0??=t; const k=Math.min((t-t0)/1400,1); el.textContent=Math.round(fin*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(f);}; requestAnimationFrame(f);};
