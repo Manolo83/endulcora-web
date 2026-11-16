@@ -120,6 +120,19 @@ async function enviarCorreoConfirmacionInscripcionTaller({ to, nombre, taller, f
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+// Invitacion a la membresia que va en la confirmacion de compra de un
+// taller (Manuel, 16 nov 2026): 2 talleres presenciales al mes a $600 para
+// miembros, sujeto a disponibilidad.
+function bloqueMembresiaTaller() {
+  return `
+    <div style="margin:22px 0 4px;border:2px solid #E8B04A;border-radius:16px;padding:18px 20px;background:#FFFBF2;">
+      <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#E8541E;font-weight:700;">Club Endulcora · $100 al mes</p>
+      <p style="margin:6px 0 0;font-size:19px;font-weight:700;color:#4A1650;">Tu siguiente taller puede costarte $600</p>
+      <p style="margin:8px 0 0;font-size:14px;line-height:1.6;">Con la membresía tienes <strong>2 talleres presenciales al mes a $600</strong> cada uno, en Nativitas o en División (sujeto a disponibilidad), y entras al portal: recetario del mes, revista, taller online mensual, grabaciones y todos los ebooks para leer.</p>
+      <p style="margin:16px 0 0;"><a href="https://www.endulcora.com/membresia?utm_source=correo&utm_medium=email&utm_campaign=confirmacion_taller" style="display:inline-block;background:#E8541E;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:999px;font-size:14px;">QUIERO MI MEMBRESÍA →</a></p>
+    </div>`;
+}
+
 // Correo 9 del plan de ventas (tambien se usa para la vista previa en /admin).
 function correoConfirmacionPagoTaller({
   nombre, taller, fecha, horario, sede, direccion, mapaLink, queAprendes,
@@ -134,7 +147,8 @@ function correoConfirmacionPagoTaller({
     ${sede || direccion ? `<p>📍 ${escapeHtml([sede, direccion].filter(Boolean).join(' · '))}${mapaLink ? ` · <a href="${escapeHtml(mapaLink)}" style="color:#7A2E7E;">Ver mapa</a>` : ''}</p>` : ''}
     ${tipoPago === 'anticipo' && saldo ? `<p>Recuerda que el resto (<strong>$${formatoMonto(saldo)}</strong>) se paga el día del taller.</p>` : ''}
     <p>Lleva mandil, cofia o paliacate y recipientes para llevarte lo que prepares.</p>
-    ${queAprendes ? `<p style="font-size:14px;"><strong>Qué aprenderás:</strong> ${escapeHtml(queAprendes)}</p>` : ''}`;
+    ${queAprendes ? `<p style="font-size:14px;"><strong>Qué aprenderás:</strong> ${escapeHtml(queAprendes)}</p>` : ''}
+    ${bloqueMembresiaTaller()}`;
   return {
     asunto: `Tu taller de ${taller || 'Endulcora'} está confirmado`,
     html: plantillaPlan({ arteUrl, cuerpo, pie: pieEndulcora({ numeroWhatsapp, comunidadLink }) }),
