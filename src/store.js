@@ -169,8 +169,8 @@ const DEFAULT_CONTENT = {
   // fisico en Google Sheets, ver src/syncCalendarioTalleres.js) — todos los
   // talleres cuestan lo mismo segun el dueño del sitio. Un taller ya
   // existente nunca se toca aunque esto cambie despues.
-  taller_precio_default: '949',
-  taller_anticipo_default: '200',
+  taller_precio_default: '1049',
+  taller_anticipo_default: '400',
   taller_cupo_default: '20',
   // Beneficio del Club Endulcora (Manuel, 16 nov 2026): los miembros con
   // membresia activa pagan este precio en hasta N talleres presenciales al
@@ -385,6 +385,27 @@ async function init() {
         i.saldo = Math.max(0, ses.precioTotal - (Number(i.montoPagado) || 0));
       });
       data._migPrecioTaller949 = true;
+      changed = true;
+    }
+    // Ajuste de Manuel (16 nov 2026, tarde): el precio real del taller es
+    // $1,049 apartando con $400. Quien ya compro o aparto un taller futuro
+    // a $949 conserva ese precio (precioPactado), asi su saldo no sube.
+    if (data._migPrecioTaller949 && !data._migPrecioTaller1049) {
+      const hoy = new Date(Date.now() - 6 * 3600 * 1000).toISOString().slice(0, 10);
+      if (data.content.taller_precio_default === '949') data.content.taller_precio_default = '1049';
+      if (data.content.taller_anticipo_default === '200') data.content.taller_anticipo_default = '400';
+      const futuras = new Map();
+      (data.sesionesTaller || []).forEach((s) => {
+        if (!s.fecha || String(s.fecha).slice(0, 10) < hoy) return;
+        futuras.set(Number(s.id), Number(s.precioTotal) || 0);
+        if (Number(s.precioTotal) === 949) s.precioTotal = 1049;
+        if (Number(s.anticipo) === 200) s.anticipo = 400;
+      });
+      (data.inscripcionesTaller || []).forEach((i) => {
+        const anterior = futuras.get(Number(i.sesionTallerId));
+        if (anterior === 949 && !(Number(i.precioMiembro) > 0) && i.estadoPago !== 'cancelado') i.precioPactado = 949;
+      });
+      data._migPrecioTaller1049 = true;
       changed = true;
     }
     (data.products || []).forEach((p) => {
@@ -1757,8 +1778,8 @@ async function init() {
             descripcion: t.descripcion,
             queAprendes: t.queAprendes,
             fotoUrl,
-            precioTotal: 949,
-            anticipo: 200,
+            precioTotal: 1049,
+            anticipo: 400,
             cupoMaximo: 20,
             hojaSheets: `${t.titulo}${esSedeDivision(t.sede.nombre) ? ' div' : ''}`,
           });
@@ -2208,6 +2229,7 @@ function cupoRestanteTaller(data, sesionTallerId) {
 // con el descuento del Club, si no el del taller.
 function precioTotalDeInscripcion(i, sesion) {
   if (i && Number(i.precioMiembro) > 0) return Number(i.precioMiembro);
+  if (i && Number(i.precioPactado) > 0) return Number(i.precioPactado);
   return sesion ? Number(sesion.precioTotal) || 0 : 0;
 }
 
@@ -3399,8 +3421,8 @@ module.exports = {
         if (!sobreviviente.fotoUrl) { sobreviviente.fotoUrl = copiarImagen(def.imagen); cambios += 1; }
         if (!sobreviviente.descripcion) { sobreviviente.descripcion = def.descripcion; cambios += 1; }
         if (!sobreviviente.queAprendes) { sobreviviente.queAprendes = def.queAprendes; cambios += 1; }
-        if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 949; cambios += 1; }
-        if (!sobreviviente.anticipo) { sobreviviente.anticipo = 200; cambios += 1; }
+        if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 1049; cambios += 1; }
+        if (!sobreviviente.anticipo) { sobreviviente.anticipo = 400; cambios += 1; }
         if (sobreviviente.cupoMaximo == null) { sobreviviente.cupoMaximo = 20; cambios += 1; }
         encontradas.filter((s) => s.id !== sobreviviente.id).forEach((dup) => {
           (data.inscripcionesTaller || []).forEach((i) => {
@@ -3681,8 +3703,8 @@ module.exports = {
         }
         if (!sobreviviente.descripcion) { sobreviviente.descripcion = def.descripcion; cambios += 1; }
         if (!sobreviviente.queAprendes) { sobreviviente.queAprendes = def.queAprendes; cambios += 1; }
-        if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 949; cambios += 1; }
-        if (!sobreviviente.anticipo) { sobreviviente.anticipo = 200; cambios += 1; }
+        if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 1049; cambios += 1; }
+        if (!sobreviviente.anticipo) { sobreviviente.anticipo = 400; cambios += 1; }
         if (sobreviviente.cupoMaximo == null) { sobreviviente.cupoMaximo = 20; cambios += 1; }
         encontradas.filter((s) => s.id !== sobreviviente.id).forEach((dup) => {
           (data.inscripcionesTaller || []).forEach((i) => {
