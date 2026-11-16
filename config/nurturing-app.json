@@ -1,16 +1,701 @@
 {
   "_leeme": "Nurturing programado de la app (notificaciones push). Una entrada por aviso: fecha (AAAA-MM-DD) y hora (HH:MM, hora CDMX), titulo corto, cuerpo, url y imagen (opcional, ruta publica). Sale una sola vez, hasta 90 min despues de su hora. Los dias que tienen avisos aqui NO sale el nurturing automatico de 11:00 y 18:00. Respeta el tope de 3 al dia, de 9 a 21 h. Para cargar una semana nueva: agregar sus entradas (imagenes en public/img/app/nurturing/<lunes>/) y publicar.",
   "avisos": [
-    { "id": "2026-11-16-01", "fecha": "2026-11-16", "hora": "20:00", "titulo": "🗓️ ¡Ya llegaron los talleres de esta semana!", "cuerpo": "Del jueves 19 al domingo 22: 8 talleres en Nativitas y División. Aparta con $400.", "url": "/calendario", "imagen": "/img/app/nurturing/2026-11-16/01.jpg" },
-    { "id": "2026-11-16-02", "fecha": "2026-11-17", "hora": "12:00", "titulo": "🥐 Cuernitos con capas perfectas, hechos por ti", "cuerpo": "Panes Laminados · Nativitas · jueves 19 o domingo 22, 10 AM. ¡Ya es esta semana!", "url": "/talleres/panes-laminado-2", "imagen": "/img/app/nurturing/2026-11-16/02.jpg" },
-    { "id": "2026-11-16-03", "fecha": "2026-11-17", "hora": "18:00", "titulo": "🍓 Fresas cubiertas que se venden solas", "cuerpo": "División del Norte · jueves 19 o sábado 21, 10 AM. Grupo pequeño: cuando se llena, se cierra.", "url": "/talleres/fresas-cubiertas-4", "imagen": "/img/app/nurturing/2026-11-16/03.jpg" },
-    { "id": "2026-11-16-04", "fecha": "2026-11-18", "hora": "12:00", "titulo": "🍪 Este diciembre, vende tus cajas de galletas", "cuerpo": "Galletería Fina para Venta · Nativitas · viernes 20 o sábado 21, 10 AM.", "url": "/talleres/galleteria-fina", "imagen": "/img/app/nurturing/2026-11-16/04.jpg" },
-    { "id": "2026-11-16-05", "fecha": "2026-11-18", "hora": "18:00", "titulo": "🍫 Bombones de chocolatería fina, hechos por ti", "cuerpo": "Bombonería · Nativitas · viernes 20 o domingo 22, 10 AM. Quedan pocos lugares.", "url": "/talleres/bomboneria-3", "imagen": "/img/app/nurturing/2026-11-16/05.jpg" },
-    { "id": "2026-11-16-06", "fecha": "2026-11-18", "hora": "20:30", "titulo": "📲 Comparte la app de Endulcora", "cuerpo": "Que tus amigas se enteren antes que nadie de talleres y clases en vivo. Es gratis.", "url": "/", "imagen": "/img/app/nurturing/2026-11-16/06.jpg" },
-    { "id": "2026-11-16-07", "fecha": "2026-11-19", "hora": "12:00", "titulo": "🥟 Empanadas Argentinas con repulgue perfecto", "cuerpo": "División del Norte · mañana viernes 20 o domingo 22, 10 AM. ¿Cuál te apartamos?", "url": "/talleres/empanadas-argentinas-3", "imagen": "/img/app/nurturing/2026-11-16/07.jpg" },
-    { "id": "2026-11-16-08", "fecha": "2026-11-19", "hora": "18:00", "titulo": "🍹 ¿Plan para el sábado? Coctelería de Barrio", "cuerpo": "Nativitas · sábado 21, 4 a 8 PM. Una sola fecha, solo mayores de 18.", "url": "/talleres/cocteleria-de-barrio-3", "imagen": "/img/app/nurturing/2026-11-16/08.jpg" },
-    { "id": "2026-11-16-09", "fecha": "2026-11-20", "hora": "12:00", "titulo": "🌮 Este domingo hay barbacoa… ¡y la haces tú!", "cuerpo": "Nativitas · domingo 22, 10 AM. Barbacoa, consomé y salsas. Una sola fecha.", "url": "/talleres/barbacoa-4", "imagen": "/img/app/nurturing/2026-11-16/09.jpg" },
-    { "id": "2026-11-16-10", "fecha": "2026-11-20", "hora": "18:00", "titulo": "🙌 ¡Este fin de semana todavía hay lugar!", "cuerpo": "Sábado 21 y domingo 22 en Nativitas y División. Si lo estabas pensando, es ahora.", "url": "/calendario", "imagen": "/img/app/nurturing/2026-11-16/10.jpg" },
-    { "id": "2026-11-16-11", "fecha": "2026-11-21", "hora": "19:00", "titulo": "⏰ Última llamada para mañana domingo", "cuerpo": "Panes Laminados, Bombonería, Barbacoa y Empanadas Argentinas, 10 AM. Aparta hoy.", "url": "/calendario" }
+    {
+      "id": "2026-11-16-01",
+      "fecha": "2026-11-16",
+      "hora": "20:00",
+      "titulo": "🗓️ ¡Ya llegaron los talleres de esta semana!",
+      "cuerpo": "Del jueves 19 al domingo 22: 8 talleres en Nativitas y División. Aparta con $400.",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/2026-11-16/01.jpg"
+    },
+    {
+      "id": "2026-11-16-02",
+      "fecha": "2026-11-17",
+      "hora": "12:00",
+      "titulo": "🥐 Cuernitos con capas perfectas, hechos por ti",
+      "cuerpo": "Panes Laminados · Nativitas · jueves 19 o domingo 22, 10 AM. ¡Ya es esta semana!",
+      "url": "/talleres/panes-laminado-2",
+      "imagen": "/img/app/nurturing/2026-11-16/02.jpg"
+    },
+    {
+      "id": "2026-11-16-03",
+      "fecha": "2026-11-17",
+      "hora": "18:00",
+      "titulo": "🍓 Fresas cubiertas que se venden solas",
+      "cuerpo": "División del Norte · jueves 19 o sábado 21, 10 AM. Grupo pequeño: cuando se llena, se cierra.",
+      "url": "/talleres/fresas-cubiertas-4",
+      "imagen": "/img/app/nurturing/2026-11-16/03.jpg"
+    },
+    {
+      "id": "2026-11-16-04",
+      "fecha": "2026-11-18",
+      "hora": "12:00",
+      "titulo": "🍪 Este diciembre, vende tus cajas de galletas",
+      "cuerpo": "Galletería Fina para Venta · Nativitas · viernes 20 o sábado 21, 10 AM.",
+      "url": "/talleres/galleteria-fina",
+      "imagen": "/img/app/nurturing/2026-11-16/04.jpg"
+    },
+    {
+      "id": "2026-11-16-05",
+      "fecha": "2026-11-18",
+      "hora": "18:00",
+      "titulo": "🍫 Bombones de chocolatería fina, hechos por ti",
+      "cuerpo": "Bombonería · Nativitas · viernes 20 o domingo 22, 10 AM. Quedan pocos lugares.",
+      "url": "/talleres/bomboneria-3",
+      "imagen": "/img/app/nurturing/2026-11-16/05.jpg"
+    },
+    {
+      "id": "2026-11-16-06",
+      "fecha": "2026-11-18",
+      "hora": "20:30",
+      "titulo": "📲 Comparte la app de Endulcora",
+      "cuerpo": "Que tus amigas se enteren antes que nadie de talleres y clases en vivo. Es gratis.",
+      "url": "/",
+      "imagen": "/img/app/nurturing/2026-11-16/06.jpg"
+    },
+    {
+      "id": "2026-11-16-07",
+      "fecha": "2026-11-19",
+      "hora": "12:00",
+      "titulo": "🥟 Empanadas Argentinas con repulgue perfecto",
+      "cuerpo": "División del Norte · mañana viernes 20 o domingo 22, 10 AM. ¿Cuál te apartamos?",
+      "url": "/talleres/empanadas-argentinas-3",
+      "imagen": "/img/app/nurturing/2026-11-16/07.jpg"
+    },
+    {
+      "id": "2026-11-16-08",
+      "fecha": "2026-11-19",
+      "hora": "18:00",
+      "titulo": "🍹 ¿Plan para el sábado? Coctelería de Barrio",
+      "cuerpo": "Nativitas · sábado 21, 4 a 8 PM. Una sola fecha, solo mayores de 18.",
+      "url": "/talleres/cocteleria-de-barrio-3",
+      "imagen": "/img/app/nurturing/2026-11-16/08.jpg"
+    },
+    {
+      "id": "2026-11-16-09",
+      "fecha": "2026-11-20",
+      "hora": "12:00",
+      "titulo": "🌮 Este domingo hay barbacoa… ¡y la haces tú!",
+      "cuerpo": "Nativitas · domingo 22, 10 AM. Barbacoa, consomé y salsas. Una sola fecha.",
+      "url": "/talleres/barbacoa-4",
+      "imagen": "/img/app/nurturing/2026-11-16/09.jpg"
+    },
+    {
+      "id": "2026-11-16-10",
+      "fecha": "2026-11-20",
+      "hora": "18:00",
+      "titulo": "🙌 ¡Este fin de semana todavía hay lugar!",
+      "cuerpo": "Sábado 21 y domingo 22 en Nativitas y División. Si lo estabas pensando, es ahora.",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/2026-11-16/10.jpg"
+    },
+    {
+      "id": "2026-11-16-11",
+      "fecha": "2026-11-21",
+      "hora": "19:00",
+      "titulo": "⏰ Última llamada para mañana domingo",
+      "cuerpo": "Panes Laminados, Bombonería, Barbacoa y Empanadas Argentinas, 10 AM. Aparta hoy.",
+      "url": "/calendario"
+    },
+    {
+      "id": "14-20dic-01",
+      "fecha": "2026-12-14",
+      "hora": "20:00",
+      "titulo": "🗓️ ¡Ya llegaron los talleres de esta semana! 🙌",
+      "cuerpo": "Del jueves 17 al domingo 20: talleres en Nativitas y División. Aparta con $400.",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/14-20dic/01.jpg"
+    },
+    {
+      "id": "14-20dic-02",
+      "fecha": "2026-12-15",
+      "hora": "11:00",
+      "titulo": "Parece vela, se enciende… ¡y se come! 🕯️",
+      "cuerpo": "División del Norte · jueves 17 o sábado 19 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/velas-comestibles-para-emprender",
+      "imagen": "/img/app/nurturing/14-20dic/02.jpg"
+    },
+    {
+      "id": "14-20dic-03",
+      "fecha": "2026-12-15",
+      "hora": "14:00",
+      "titulo": "La caja de trufas que todos quieren regalar esta Navidad. 🎁",
+      "cuerpo": "División del Norte · jueves 17 o sábado 19 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/trufas-navidenas",
+      "imagen": "/img/app/nurturing/14-20dic/03.jpg"
+    },
+    {
+      "id": "14-20dic-04",
+      "fecha": "2026-12-15",
+      "hora": "18:00",
+      "titulo": "Macarons lisos, con «pie» y sin grietas. 💜",
+      "cuerpo": "Nativitas · jueves 17 o sábado 19 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/macarons-para-principiantes",
+      "imagen": "/img/app/nurturing/14-20dic/04.jpg"
+    },
+    {
+      "id": "14-20dic-05",
+      "fecha": "2026-12-16",
+      "hora": "11:00",
+      "titulo": "Postres sin azúcar añadida, con sabor de verdad. 💚",
+      "cuerpo": "Nativitas · jueves 17 o sábado 19 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/postres-para-diabeticos",
+      "imagen": "/img/app/nurturing/14-20dic/05.jpg"
+    },
+    {
+      "id": "14-20dic-06",
+      "fecha": "2026-12-16",
+      "hora": "14:00",
+      "titulo": "Postres ricos, con menos azúcar y menos harina. 🌿",
+      "cuerpo": "Nativitas · jueves 17 o sábado 19 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/postres-saludables",
+      "imagen": "/img/app/nurturing/14-20dic/06.jpg"
+    },
+    {
+      "id": "14-20dic-07",
+      "fecha": "2026-12-16",
+      "hora": "18:00",
+      "titulo": "La rosca clásica que vas a vender en enero. 👑",
+      "cuerpo": "Nativitas · jueves 17 o sábado 19 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/rosca-de-reyes-para-venta",
+      "imagen": "/img/app/nurturing/14-20dic/07.jpg"
+    },
+    {
+      "id": "14-20dic-09",
+      "fecha": "2026-12-17",
+      "hora": "11:00",
+      "titulo": "La tabla que se roba las posadas (y que puedes vender). 🧀",
+      "cuerpo": "División del Norte · viernes 18 o domingo 20 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/charcuteria-para-emprender",
+      "imagen": "/img/app/nurturing/14-20dic/08.jpg"
+    },
+    {
+      "id": "14-20dic-10",
+      "fecha": "2026-12-17",
+      "hora": "14:00",
+      "titulo": "Bases que no se encogen ni se humedecen. 🥧",
+      "cuerpo": "División del Norte · viernes 18 o domingo 20 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/pays-y-tartas-5",
+      "imagen": "/img/app/nurturing/14-20dic/09.jpg"
+    },
+    {
+      "id": "14-20dic-11",
+      "fecha": "2026-12-17",
+      "hora": "18:00",
+      "titulo": "Tu cena de Navidad completa, sin estrés y sin gastar de…",
+      "cuerpo": "Nativitas · viernes 18 o domingo 20 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/cena-navidena",
+      "imagen": "/img/app/nurturing/14-20dic/10.jpg"
+    },
+    {
+      "id": "14-20dic-12",
+      "fecha": "2026-12-18",
+      "hora": "11:00",
+      "titulo": "Galletas de aparador para esta Navidad. 🎄",
+      "cuerpo": "Nativitas · viernes 18 o domingo 20 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/galleta-decorada-navidena-7",
+      "imagen": "/img/app/nurturing/14-20dic/11.jpg"
+    },
+    {
+      "id": "14-20dic-13",
+      "fecha": "2026-12-18",
+      "hora": "14:00",
+      "titulo": "8 cocteles navideños para ser el mejor anfitrión de la…",
+      "cuerpo": "Nativitas · viernes 18 o domingo 20 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/cocteleria-navidena",
+      "imagen": "/img/app/nurturing/14-20dic/12.jpg"
+    },
+    {
+      "id": "14-20dic-15",
+      "fecha": "2026-12-18",
+      "hora": "20:00",
+      "titulo": "🙌 ¡Este fin de semana todavía hay lugar!",
+      "cuerpo": "Todavía hay lugar en Nativitas y División. Si lo estabas pensando, es ahora ⏰",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/14-20dic/14.jpg"
+    },
+    {
+      "id": "14-20dic-16",
+      "fecha": "2026-12-19",
+      "hora": "19:00",
+      "titulo": "⏰ ¡Última llamada para mañana domingo! 🏃‍♀️",
+      "cuerpo": "Mañana domingo todavía puedes entrar a tu taller. Aparta hoy con $400.",
+      "url": "/calendario"
+    },
+    {
+      "id": "21-27dic-01",
+      "fecha": "2026-12-21",
+      "hora": "20:00",
+      "titulo": "🗓️ ¡Ya llegaron los talleres de esta semana! 🙌",
+      "cuerpo": "Del miércoles 23 al sábado 26: talleres en Nativitas y División. Aparta con $400.",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/21-27dic/01.jpg"
+    },
+    {
+      "id": "21-27dic-02",
+      "fecha": "2026-12-22",
+      "hora": "11:00",
+      "titulo": "La caja de trufas que todos quieren regalar esta Navidad. 🎁",
+      "cuerpo": "División del Norte · miércoles 23 o sábado 26 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/trufas-navidenas-3",
+      "imagen": "/img/app/nurturing/21-27dic/02.jpg"
+    },
+    {
+      "id": "21-27dic-03",
+      "fecha": "2026-12-22",
+      "hora": "14:00",
+      "titulo": "Parece vela, se enciende… ¡y se come! 🕯️",
+      "cuerpo": "División del Norte · miércoles 23 o sábado 26 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/velas-comestibles-para-emprender-3",
+      "imagen": "/img/app/nurturing/21-27dic/03.jpg"
+    },
+    {
+      "id": "21-27dic-04",
+      "fecha": "2026-12-22",
+      "hora": "18:00",
+      "titulo": "Postres ricos, con menos azúcar y menos harina. 🌿",
+      "cuerpo": "Nativitas · miércoles 23 o sábado 26 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/postres-saludables-3",
+      "imagen": "/img/app/nurturing/21-27dic/04.jpg"
+    },
+    {
+      "id": "21-27dic-05",
+      "fecha": "2026-12-23",
+      "hora": "11:00",
+      "titulo": "La rosca clásica que vas a vender en enero. 👑",
+      "cuerpo": "Nativitas · miércoles 23 o sábado 26 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/rosca-de-reyes-para-venta-3",
+      "imagen": "/img/app/nurturing/21-27dic/05.jpg"
+    },
+    {
+      "id": "21-27dic-06",
+      "fecha": "2026-12-23",
+      "hora": "14:00",
+      "titulo": "Macarons lisos, con «pie» y sin grietas. 💜",
+      "cuerpo": "Nativitas · miércoles 23 o sábado 26 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/macarons-para-principiantes-3",
+      "imagen": "/img/app/nurturing/21-27dic/06.jpg"
+    },
+    {
+      "id": "21-27dic-09",
+      "fecha": "2026-12-23",
+      "hora": "20:45",
+      "titulo": "🙌 ¡Este fin de semana todavía hay lugar!",
+      "cuerpo": "Todavía hay lugar en Nativitas y División. Si lo estabas pensando, es ahora ⏰",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/21-27dic/08.jpg"
+    },
+    {
+      "id": "23-29nov-01",
+      "fecha": "2026-11-23",
+      "hora": "20:00",
+      "titulo": "🗓️ ¡Ya llegaron los talleres de esta semana! 🙌",
+      "cuerpo": "Del jueves 26 al domingo 29: talleres en Nativitas y División. Aparta con $400.",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/23-29nov/01.jpg"
+    },
+    {
+      "id": "23-29nov-02",
+      "fecha": "2026-11-24",
+      "hora": "11:00",
+      "titulo": "Santa, reno y esfera: la manzana navideña que todos van a…",
+      "cuerpo": "Nativitas · viernes 4 o domingo 6 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/23-29nov/02.jpg"
+    },
+    {
+      "id": "23-29nov-03",
+      "fecha": "2026-11-24",
+      "hora": "14:00",
+      "titulo": "Galletas de aparador para esta Navidad. 🎄",
+      "cuerpo": "Nativitas · jueves 26 o sábado 28 de noviembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/galleta-decorada-navidena",
+      "imagen": "/img/app/nurturing/23-29nov/03.jpg"
+    },
+    {
+      "id": "23-29nov-04",
+      "fecha": "2026-11-24",
+      "hora": "18:00",
+      "titulo": "Roles esponjosos, cinco sabores. 🌀",
+      "cuerpo": "Nativitas · jueves 26 o domingo 29 de noviembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/roles-gourmet-5",
+      "imagen": "/img/app/nurturing/23-29nov/04.jpg"
+    },
+    {
+      "id": "23-29nov-05",
+      "fecha": "2026-11-25",
+      "hora": "11:00",
+      "titulo": "Bases que no se encogen ni se humedecen. 🥧",
+      "cuerpo": "División del Norte · viernes 27 o domingo 29 de noviembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/pays-y-tartas-3",
+      "imagen": "/img/app/nurturing/23-29nov/05.jpg"
+    },
+    {
+      "id": "23-29nov-06",
+      "fecha": "2026-11-25",
+      "hora": "14:00",
+      "titulo": "Masa de maíz hecha por ti, desde el grano. 🌽",
+      "cuerpo": "Nativitas · viernes 27 o sábado 28 de noviembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/nixtamalizacion",
+      "imagen": "/img/app/nurturing/23-29nov/06.jpg"
+    },
+    {
+      "id": "23-29nov-07",
+      "fecha": "2026-11-25",
+      "hora": "18:00",
+      "titulo": "El pastel vintage que está de vuelta. 🎂",
+      "cuerpo": "Nativitas · viernes 27 o domingo 29 de noviembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/pastel-vintage",
+      "imagen": "/img/app/nurturing/23-29nov/07.jpg"
+    },
+    {
+      "id": "23-29nov-09",
+      "fecha": "2026-11-26",
+      "hora": "11:00",
+      "titulo": "Los tragos de barrio, bien hechos. 🍹",
+      "cuerpo": "División del Norte · sábado 28 de noviembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/cocteleria-de-barrio-4",
+      "imagen": "/img/app/nurturing/23-29nov/08.jpg"
+    },
+    {
+      "id": "23-29nov-10",
+      "fecha": "2026-11-27",
+      "hora": "20:00",
+      "titulo": "🙌 ¡Este fin de semana todavía hay lugar!",
+      "cuerpo": "Todavía hay lugar en Nativitas y División. Si lo estabas pensando, es ahora ⏰",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/23-29nov/09.jpg"
+    },
+    {
+      "id": "23-29nov-11",
+      "fecha": "2026-11-28",
+      "hora": "19:00",
+      "titulo": "⏰ ¡Última llamada para mañana domingo! 🏃‍♀️",
+      "cuerpo": "Mañana domingo todavía puedes entrar a tu taller. Aparta hoy con $400.",
+      "url": "/calendario"
+    },
+    {
+      "id": "28dic-3ene-01",
+      "fecha": "2026-12-28",
+      "hora": "20:00",
+      "titulo": "🗓️ ¡Ya llegaron los talleres de esta semana! 🙌",
+      "cuerpo": "Del miércoles 30 al domingo 3: talleres en Nativitas y División. Aparta con $400.",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/28dic-3ene/01.jpg"
+    },
+    {
+      "id": "28dic-3ene-02",
+      "fecha": "2026-12-29",
+      "hora": "11:00",
+      "titulo": "Bases que no se encogen ni se humedecen. 🥧",
+      "cuerpo": "División del Norte · miércoles 30 de diciembre o sábado 2 de enero · 10:00 AM a 2:00 PM",
+      "url": "/talleres/pays-y-tartas-7",
+      "imagen": "/img/app/nurturing/28dic-3ene/02.jpg"
+    },
+    {
+      "id": "28dic-3ene-03",
+      "fecha": "2026-12-29",
+      "hora": "14:00",
+      "titulo": "La tabla que se roba las posadas (y que puedes vender). 🧀",
+      "cuerpo": "División del Norte · miércoles 30 de diciembre o sábado 2 de enero · 4:00 PM a 8:00 PM",
+      "url": "/talleres/charcuteria-para-emprender-3",
+      "imagen": "/img/app/nurturing/28dic-3ene/03.jpg"
+    },
+    {
+      "id": "28dic-3ene-04",
+      "fecha": "2026-12-29",
+      "hora": "18:00",
+      "titulo": "Gruesas, crujientes por fuera y suaves por dentro. 🍪",
+      "cuerpo": "Nativitas · miércoles 30 de diciembre o sábado 2 de enero · 10:00 AM a 2:00 PM",
+      "url": "/talleres/galletas-ny",
+      "imagen": "/img/app/nurturing/28dic-3ene/04.jpg"
+    },
+    {
+      "id": "28dic-3ene-05",
+      "fecha": "2026-12-30",
+      "hora": "11:00",
+      "titulo": "Los postres japoneses que están de moda. 🍡",
+      "cuerpo": "Nativitas · miércoles 30 de diciembre o sábado 2 de enero · 10:00 AM a 2:00 PM",
+      "url": "/talleres/postres-japoneses",
+      "imagen": "/img/app/nurturing/28dic-3ene/05.jpg"
+    },
+    {
+      "id": "28dic-3ene-06",
+      "fecha": "2026-12-30",
+      "hora": "14:00",
+      "titulo": "Crujientes por fuera, con el famoso cheese pull por…",
+      "cuerpo": "Nativitas · miércoles 30 de diciembre o sábado 2 de enero · 4:00 PM a 8:00 PM",
+      "url": "/talleres/banderillas-coreanas-3",
+      "imagen": "/img/app/nurturing/28dic-3ene/06.jpg"
+    },
+    {
+      "id": "28dic-3ene-07",
+      "fecha": "2026-12-30",
+      "hora": "18:00",
+      "titulo": "Las bebidas más virales y vendibles del momento. 🧋",
+      "cuerpo": "Nativitas · miércoles 30 de diciembre o sábado 2 de enero · 4:00 PM a 8:00 PM",
+      "url": "/talleres/bubble-tea",
+      "imagen": "/img/app/nurturing/28dic-3ene/07.jpg"
+    },
+    {
+      "id": "28dic-3ene-09",
+      "fecha": "2026-12-31",
+      "hora": "11:00",
+      "titulo": "8 sabores de palomitas gourmet para vender o regalar. 🍿",
+      "cuerpo": "División del Norte · domingo 3 de enero · 4:00 PM a 8:00 PM",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/28dic-3ene/08.jpg"
+    },
+    {
+      "id": "28dic-3ene-10",
+      "fecha": "2026-12-31",
+      "hora": "20:00",
+      "titulo": "🙌 ¡Este fin de semana todavía hay lugar!",
+      "cuerpo": "Todavía hay lugar en Nativitas y División. Si lo estabas pensando, es ahora ⏰",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/28dic-3ene/09.jpg"
+    },
+    {
+      "id": "28dic-3ene-11",
+      "fecha": "2027-01-02",
+      "hora": "19:00",
+      "titulo": "⏰ ¡Última llamada para mañana domingo! 🏃‍♀️",
+      "cuerpo": "Mañana domingo todavía puedes entrar a tu taller. Aparta hoy con $400.",
+      "url": "/calendario"
+    },
+    {
+      "id": "30nov-6dic-01",
+      "fecha": "2026-11-30",
+      "hora": "20:00",
+      "titulo": "🗓️ ¡Ya llegaron los talleres de esta semana! 🙌",
+      "cuerpo": "Del jueves 3 al domingo 6: talleres en Nativitas y División. Aparta con $400.",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/30nov-6dic/01.jpg"
+    },
+    {
+      "id": "30nov-6dic-02",
+      "fecha": "2026-12-01",
+      "hora": "11:00",
+      "titulo": "Gruesas, crujientes por fuera y suaves por dentro. 🍪",
+      "cuerpo": "Nativitas · miércoles 30 de diciembre o sábado 2 de enero · 10:00 AM a 2:00 PM",
+      "url": "/talleres/galletas-ny-2",
+      "imagen": "/img/app/nurturing/30nov-6dic/02.jpg"
+    },
+    {
+      "id": "30nov-6dic-03",
+      "fecha": "2026-12-01",
+      "hora": "14:00",
+      "titulo": "8 sabores de palomitas gourmet para vender o regalar. 🍿",
+      "cuerpo": "División del Norte · jueves 3 o sábado 5 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/palomitas-gourmet-6",
+      "imagen": "/img/app/nurturing/30nov-6dic/03.jpg"
+    },
+    {
+      "id": "30nov-6dic-04",
+      "fecha": "2026-12-01",
+      "hora": "18:00",
+      "titulo": "Fresas cubiertas limpias, brillantes y en tendencia. 🍓",
+      "cuerpo": "Nativitas · jueves 3 o sábado 5 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/fresas-cubiertas-6",
+      "imagen": "/img/app/nurturing/30nov-6dic/04.jpg"
+    },
+    {
+      "id": "30nov-6dic-05",
+      "fecha": "2026-12-02",
+      "hora": "11:00",
+      "titulo": "La caja de galletas que todos te van a pedir esta Navidad. 🎁",
+      "cuerpo": "Nativitas · jueves 3 o sábado 5 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/galletas-finas-para-venta",
+      "imagen": "/img/app/nurturing/30nov-6dic/05.jpg"
+    },
+    {
+      "id": "30nov-6dic-06",
+      "fecha": "2026-12-02",
+      "hora": "14:00",
+      "titulo": "El rollo pintado que se roba la cena de Navidad. 🎂",
+      "cuerpo": "Nativitas · jueves 3 o sábado 5 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/cake-roll-decorado",
+      "imagen": "/img/app/nurturing/30nov-6dic/06.jpg"
+    },
+    {
+      "id": "30nov-6dic-07",
+      "fecha": "2026-12-02",
+      "hora": "18:00",
+      "titulo": "El tiramisú que está arrasando en redes. 🍮",
+      "cuerpo": "Nativitas · jueves 3 o sábado 5 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/tiramisu-douyin-5",
+      "imagen": "/img/app/nurturing/30nov-6dic/07.jpg"
+    },
+    {
+      "id": "30nov-6dic-09",
+      "fecha": "2026-12-03",
+      "hora": "11:00",
+      "titulo": "Santa, reno y esfera: la manzana navideña que todos van a…",
+      "cuerpo": "Nativitas · viernes 4 o domingo 6 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/manzana-decorada-navidena",
+      "imagen": "/img/app/nurturing/30nov-6dic/08.jpg"
+    },
+    {
+      "id": "30nov-6dic-10",
+      "fecha": "2026-12-03",
+      "hora": "14:00",
+      "titulo": "Los 3 postres que van a lucir en tu mesa de Navidad. 🎄",
+      "cuerpo": "Nativitas · viernes 4 o domingo 6 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/postres-navidenos",
+      "imagen": "/img/app/nurturing/30nov-6dic/09.jpg"
+    },
+    {
+      "id": "30nov-6dic-11",
+      "fecha": "2026-12-03",
+      "hora": "18:00",
+      "titulo": "Galletas de aparador para esta Navidad. 🎄",
+      "cuerpo": "Nativitas · viernes 4 o domingo 6 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/galleta-decorada-navidena-3",
+      "imagen": "/img/app/nurturing/30nov-6dic/10.jpg"
+    },
+    {
+      "id": "30nov-6dic-12",
+      "fecha": "2026-12-04",
+      "hora": "11:00",
+      "titulo": "Las gelatinas de temporada que se venden solas en…",
+      "cuerpo": "Nativitas · viernes 4 o domingo 6 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/gelatinas-navidenas",
+      "imagen": "/img/app/nurturing/30nov-6dic/11.jpg"
+    },
+    {
+      "id": "30nov-6dic-13",
+      "fecha": "2026-12-04",
+      "hora": "20:00",
+      "titulo": "🙌 ¡Este fin de semana todavía hay lugar!",
+      "cuerpo": "Todavía hay lugar en Nativitas y División. Si lo estabas pensando, es ahora ⏰",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/30nov-6dic/12.jpg"
+    },
+    {
+      "id": "30nov-6dic-14",
+      "fecha": "2026-12-05",
+      "hora": "19:00",
+      "titulo": "⏰ ¡Última llamada para mañana domingo! 🏃‍♀️",
+      "cuerpo": "Mañana domingo todavía puedes entrar a tu taller. Aparta hoy con $400.",
+      "url": "/calendario"
+    },
+    {
+      "id": "7-13dic-01",
+      "fecha": "2026-12-07",
+      "hora": "20:00",
+      "titulo": "🗓️ ¡Ya llegaron los talleres de esta semana! 🙌",
+      "cuerpo": "Del jueves 10 al domingo 13: talleres en Nativitas y División. Aparta con $400.",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/7-13dic/01.jpg"
+    },
+    {
+      "id": "7-13dic-02",
+      "fecha": "2026-12-08",
+      "hora": "11:00",
+      "titulo": "8 sabores de palomitas gourmet para vender o regalar. 🍿",
+      "cuerpo": "División del Norte · jueves 10 o sábado 12 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/palomitas-gourmet-8",
+      "imagen": "/img/app/nurturing/7-13dic/02.jpg"
+    },
+    {
+      "id": "7-13dic-03",
+      "fecha": "2026-12-08",
+      "hora": "14:00",
+      "titulo": "Gruesas, crujientes por fuera y suaves por dentro. 🍪",
+      "cuerpo": "Nativitas · miércoles 30 de diciembre o sábado 2 de enero · 10:00 AM a 2:00 PM",
+      "url": "/talleres/galletas-ny-8",
+      "imagen": "/img/app/nurturing/7-13dic/03.jpg"
+    },
+    {
+      "id": "7-13dic-04",
+      "fecha": "2026-12-08",
+      "hora": "18:00",
+      "titulo": "El rollo pintado que se roba la cena de Navidad. 🎂",
+      "cuerpo": "Nativitas · jueves 10 o sábado 12 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/cake-roll-decorado-3",
+      "imagen": "/img/app/nurturing/7-13dic/04.jpg"
+    },
+    {
+      "id": "7-13dic-05",
+      "fecha": "2026-12-09",
+      "hora": "11:00",
+      "titulo": "El tiramisú que está arrasando en redes. 🍮",
+      "cuerpo": "Nativitas · jueves 10 o sábado 12 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/tiramisu-douyin-11",
+      "imagen": "/img/app/nurturing/7-13dic/05.jpg"
+    },
+    {
+      "id": "7-13dic-06",
+      "fecha": "2026-12-09",
+      "hora": "14:00",
+      "titulo": "Fresas cubiertas limpias, brillantes y en tendencia. 🍓",
+      "cuerpo": "Nativitas · jueves 10 o sábado 12 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/fresas-cubiertas-8",
+      "imagen": "/img/app/nurturing/7-13dic/06.jpg"
+    },
+    {
+      "id": "7-13dic-07",
+      "fecha": "2026-12-09",
+      "hora": "18:00",
+      "titulo": "La caja de galletas que todos te van a pedir esta Navidad. 🎁",
+      "cuerpo": "Nativitas · jueves 10 o sábado 12 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/galletas-finas-para-venta-3",
+      "imagen": "/img/app/nurturing/7-13dic/07.jpg"
+    },
+    {
+      "id": "7-13dic-09",
+      "fecha": "2026-12-10",
+      "hora": "11:00",
+      "titulo": "Galletas de aparador para esta Navidad. 🎄",
+      "cuerpo": "Nativitas · viernes 11 o domingo 13 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/galleta-decorada-navidena-5",
+      "imagen": "/img/app/nurturing/7-13dic/08.jpg"
+    },
+    {
+      "id": "7-13dic-10",
+      "fecha": "2026-12-10",
+      "hora": "14:00",
+      "titulo": "Las gelatinas de temporada que se venden solas en…",
+      "cuerpo": "Nativitas · viernes 11 o domingo 13 de diciembre · 10:00 AM a 2:00 PM",
+      "url": "/talleres/gelatinas-navidenas-3",
+      "imagen": "/img/app/nurturing/7-13dic/09.jpg"
+    },
+    {
+      "id": "7-13dic-11",
+      "fecha": "2026-12-10",
+      "hora": "18:00",
+      "titulo": "Santa, reno y esfera: la manzana navideña que todos van a…",
+      "cuerpo": "Nativitas · viernes 11 o sábado 12 o domingo 13 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/manzana-decorada-navidena-3",
+      "imagen": "/img/app/nurturing/7-13dic/10.jpg"
+    },
+    {
+      "id": "7-13dic-12",
+      "fecha": "2026-12-11",
+      "hora": "11:00",
+      "titulo": "Los 3 postres que van a lucir en tu mesa de Navidad. 🎄",
+      "cuerpo": "Nativitas · viernes 11 o domingo 13 de diciembre · 4:00 PM a 8:00 PM",
+      "url": "/talleres/postres-navidenos-3",
+      "imagen": "/img/app/nurturing/7-13dic/11.jpg"
+    },
+    {
+      "id": "7-13dic-13",
+      "fecha": "2026-12-11",
+      "hora": "20:00",
+      "titulo": "🙌 ¡Este fin de semana todavía hay lugar!",
+      "cuerpo": "Todavía hay lugar en Nativitas y División. Si lo estabas pensando, es ahora ⏰",
+      "url": "/calendario",
+      "imagen": "/img/app/nurturing/7-13dic/12.jpg"
+    },
+    {
+      "id": "7-13dic-14",
+      "fecha": "2026-12-12",
+      "hora": "19:00",
+      "titulo": "⏰ ¡Última llamada para mañana domingo! 🏃‍♀️",
+      "cuerpo": "Mañana domingo todavía puedes entrar a tu taller. Aparta hoy con $400.",
+      "url": "/calendario"
+    }
   ]
 }
