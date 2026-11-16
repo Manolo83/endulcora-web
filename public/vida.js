@@ -49,7 +49,7 @@
       var cs=['#F5A623','#FBF4E9','#C77DCB'];
       for(var i=0;i<10;i++){ var x=document.createElement('i'); x.style.cssText='left:'+(5+i*9.3)+'%;background:'+cs[i%3]+';animation-delay:'+((i*1.7)%9)+'s;animation-duration:'+(11+(i*3)%6)+'s'; ch.appendChild(x); }
       hero.prepend(ch);
-      if(!document.querySelector('.cinta, .vida-cinta') && b.dataset.cinta !== 'no'){
+      if(!document.querySelector('.cinta, .vida-cinta') && b.dataset.cinta !== 'no' && hero.dataset.cinta !== 'no'){
         var t = '<span>Talleres presenciales</span><b>✦</b><span>Nativitas y División</span><b>✦</b><span>Aparta con $400</span><b>✦</b><span>Club Endulcora · 2 talleres al mes a $600</span><b>✦</b><span>eBooks $150</span><b>✦</b>';
         var c = document.createElement('div'); c.className='vida-cinta'; c.setAttribute('aria-hidden','true'); c.innerHTML='<div>'+t+t+'</div>'; hero.after(c);
       }
