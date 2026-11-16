@@ -11,8 +11,15 @@
     });
     document.addEventListener('click', function(ev){ if(!m.classList.contains('hidden') && !m.contains(ev.target) && !ev.target.closest('#btnMenu, [onclick*="toggleMenu"]') && typeof toggleMenu === 'function') toggleMenu(); });
   }
+  function logo(){
+    document.querySelectorAll('img[src*="logo-endulcora"]').forEach(function(im){
+      if(im.closest('a, button, [data-sin-link]')) return;
+      var a = document.createElement('a'); a.href = '/'; a.setAttribute('aria-label','Ir al inicio'); a.style.display = getComputedStyle(im).display === 'block' ? 'block' : 'inline-block';
+      im.before(a); a.appendChild(im);
+    });
+  }
   function iniciar(){
-    menu();
+    menu(); logo();
     var b = document.body; if(!b || b.dataset.vida === 'no' || document.querySelector('.hero-noche')) return;
     var hero = document.querySelector('[data-vida-hero]') || (function(){
       var h1 = document.querySelector('main h1, section h1, body h1'); if(!h1 || h1.closest('.fixed, [role=dialog]')) return null;
