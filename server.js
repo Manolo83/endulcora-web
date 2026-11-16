@@ -195,6 +195,10 @@ const leventSyncLimiter = rateLimit({
 });
 app.use('/api/levent-sync', leventSyncLimiter, leventSyncRoutes);
 
+// Secciones retiradas (Manuel, 16 nov 2026: Blog, Galeria y Comunidad
+// llevaban semanas sin uso). Los links viejos regresan al inicio. Sus datos
+// siguen guardados en la base por si algun dia se quieren recuperar.
+app.get(/^\/(blog|galeria|comunidad)(\.html|\/.*)?$/, (req, res) => res.redirect(301, '/'));
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
 // El contenido de /api cambia en cualquier momento desde /admin (precios,
 // productos, disponibilidad...), asi que nunca debe quedar en cache de
@@ -554,16 +558,13 @@ app.get('/sitemap.xml', (req, res) => {
     { loc: '/talleres', prioridad: '0.7', frecuencia: 'weekly' },
     { loc: '/inscripcion-taller', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/clase-gratis', prioridad: '0.5', frecuencia: 'weekly' },
-    { loc: '/galeria', prioridad: '0.5', frecuencia: 'weekly' },
     { loc: '/membresia', prioridad: '0.6', frecuencia: 'monthly' },
     { loc: '/endulcora-en-vivo', prioridad: '0.6', frecuencia: 'weekly' },
     { loc: '/biblioteca-clases', prioridad: '0.5', frecuencia: 'weekly' },
-    { loc: '/comunidad', prioridad: '0.4', frecuencia: 'weekly' },
     { loc: '/juego', prioridad: '0.4', frecuencia: 'monthly' },
     { loc: '/calculadora', prioridad: '0.5', frecuencia: 'monthly' },
     { loc: '/resenas', prioridad: '0.5', frecuencia: 'monthly' },
     { loc: '/anuncios', prioridad: '0.4', frecuencia: 'weekly' },
-    { loc: '/blog', prioridad: '0.7', frecuencia: 'weekly' },
   ];
 
   const paginasDeProducto = store.getProducts()

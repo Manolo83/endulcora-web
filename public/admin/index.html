@@ -84,8 +84,6 @@
           <a href="#seccionVistaPrevia" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Vista previa</a>
           <a href="#seccionContenido" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Contenido general</a>
           <a href="#seccionProductos" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Productos</a>
-          <a href="#seccionBlog" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Blog</a>
-          <a href="#seccionGaleria" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Galería</a>
           <a href="#seccionLegales" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Legales</a>
         </div>
       </div>
@@ -101,7 +99,6 @@
       <div class="admin-nav-grupo relative">
         <button type="button" class="admin-nav-grupo-btn flex items-center gap-1 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Clases y talleres <span class="admin-chevron-grupo">▾</span></button>
         <div class="admin-nav-grupo-panel absolute left-0 top-full z-20 mt-2 hidden w-56 flex flex-col gap-1 rounded-2xl bg-white p-2 normal-case tracking-normal shadow-2xl ring-1 ring-vino/10">
-          <a href="#seccionCursos" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Cursos</a>
           <a href="#seccionCalendario" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Calendario</a>
           <a href="#seccionInscripcionesTaller" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Inscripciones a talleres <span class="globoSinCapturar hidden ml-1 rounded-full bg-red-600 px-2 py-0.5 font-ui text-[10px] font-700 text-white"></span></a>
           <a href="#seccionMasterclasses" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Masterclasses</a>
@@ -115,7 +112,6 @@
         <div class="admin-nav-grupo-panel absolute left-0 top-full z-20 mt-2 hidden w-56 flex flex-col gap-1 rounded-2xl bg-white p-2 normal-case tracking-normal shadow-2xl ring-1 ring-vino/10">
           <a href="#seccionCampanas" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Campañas de correo</a>
           <a href="#seccionAnuncios" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Anuncios</a>
-          <a href="#seccionComunidad" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Comunidad</a>
           <a href="#seccionResenas" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Reseñas</a>
           <a href="#seccionSuscriptores" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Suscriptores</a>
         </div>
@@ -483,7 +479,7 @@
               <input id="masterclassPruebaCorreo" type="email" placeholder="tu@correo.com" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
             </label>
           </div>
-          <p class="mt-4 text-xs text-carbon/40">El precio del Curso de Masa Madre se edita en la pestaña <a href="#seccionCursos" class="underline hover:text-vino">Cursos</a>; el del Recetario suelto, en <a href="#seccionProductos" class="underline hover:text-vino">Productos</a>.</p>
+          <p class="mt-4 text-xs text-carbon/40">El del Recetario suelto, en <a href="#seccionProductos" class="underline hover:text-vino">Productos</a>.</p>
         </div>
 
         <div class="rounded-2xl bg-white p-6 ring-1 ring-vino/10">
@@ -811,7 +807,7 @@
     </section>
 
     <!-- CURSOS -->
-    <section id="seccionCursos" class="scroll-mt-32 mb-14">
+    <section id="seccionCursos" hidden class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Cursos</h2>
       <p class="mt-1 text-sm text-carbon/60">Cursos presenciales o en línea con agenda por WhatsApp (sin descarga). Para el curso de Masa Madre, llena "Precio de miembro" solo si se decide dar rebaja — vacío significa que no la hay.</p>
 
@@ -844,7 +840,7 @@
     </section>
 
     <!-- BLOG -->
-    <section id="seccionBlog" class="scroll-mt-32 mb-14">
+    <section id="seccionBlog" hidden class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Blog de recetas gratuitas</h2>
       <p class="mt-1 text-sm text-carbon/60">Entradas de blog para atraer tráfico de búsqueda. Se ven en <a href="/blog" target="_blank" class="text-vino hover:underline">/blog</a> solo cuando están "Publicada". Puedes ligar cada entrada a un producto (para vender el eBook completo) o dejarla sin ligar (se invita a la membresía).</p>
 
@@ -1688,8 +1684,8 @@
       <div id="listaResenas" class="mt-6 grid gap-4"></div>
     </section>
 
-    <!-- COMUNIDAD -->
-    <section id="seccionComunidad" class="scroll-mt-32 mb-14">
+    <!-- COMUNIDAD (retirada 16 nov 2026) -->
+    <section id="seccionComunidadPosts" hidden class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Comunidad</h2>
       <p class="mt-1 text-sm text-carbon/60">Crea publicaciones (con foto opcional) para que tus clientes con cuenta las comenten, como una publicación de Facebook. Se ven en <a href="/comunidad" target="_blank" class="text-vino hover:underline">/comunidad</a>.</p>
 
@@ -1715,7 +1711,7 @@
     <!-- ANUNCIOS -->
     <section id="seccionAnuncios" class="scroll-mt-32 mb-14">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Anuncios</h2>
-      <p class="mt-1 text-sm text-carbon/60">Publica avisos, fechas de clases o novedades. Aparecen de inmediato en la sección "Anuncios" del sitio.</p>
+      <p class="mt-1 text-sm text-carbon/60"><strong>La portada ya no usa estos avisos:</strong> ahora muestra sola un carrusel con los artes de los talleres de la semana (los toma del calendario, con la foto/arte de cada taller). Para que un taller salga, súbele su arte en Calendario.</p>
 
       <form id="formAnuncio" class="mt-6 grid gap-4 rounded-2xl bg-white p-6 ring-1 ring-vino/10 sm:grid-cols-2">
         <label class="block sm:col-span-2">
@@ -1739,7 +1735,7 @@
     </section>
 
     <!-- GALERÍA -->
-    <section id="seccionGaleria" class="scroll-mt-32">
+    <section id="seccionGaleria" hidden class="scroll-mt-32">
       <h2 class="font-titulo text-2xl tracking-wide text-vino">Galería (fotos y video)</h2>
       <p class="mt-1 text-sm text-carbon/60">Sube fotos o video (hasta 150&nbsp;MB), o pega un enlace de YouTube/Vimeo para videos más pesados. Aparecen de inmediato en la sección "Galería" del sitio.</p>
 
