@@ -108,7 +108,7 @@ function pesos(n) {
 }
 
 // Sin taller con precio especial (Manuel, 13 nov 2026): el boton lleva al
-// calendario de talleres del sitio, precio normal apartando con $400.
+// calendario de talleres del sitio, precio normal apartando con $200.
 function linkTalleres(campana) {
   return `${SITE_URL}/talleres?utm_source=correo&utm_medium=email&utm_campaign=${encodeURIComponent(campana)}`;
 }
@@ -177,7 +177,7 @@ function correo4(registro, c) {
     ? `<p>Si quieres hacerlo con tus manos y con el chef a tu lado, tienes el <strong>taller de ${esc(c.taller)} con un precio especial</strong>, solo para quienes estuvieron en la masterclass. <strong>Vence en 3 días.</strong></p>
       ${avisoSucursal()}
       ${linkWhatsTaller(c) ? c.email.botonPlan('Quiero mi lugar en el taller', linkWhatsTaller(c), '#4E1454', '#FBF4E9') : ''}`
-    : `<p>¿Quieres hacerlo con tus manos y con el chef a tu lado? Estos son los <strong>talleres presenciales de este mes</strong>: apartas tu lugar con $400.</p>
+    : `<p>¿Quieres hacerlo con tus manos y con el chef a tu lado? Estos son los <strong>talleres presenciales de este mes</strong>: apartas tu lugar con $200.</p>
       ${c.email.botonPlan('Quiero mi lugar en un taller', linkWhatsTaller(c), '#4E1454', '#FBF4E9')}`;
   const cuerpo = `${hola(registro)}
     <p>Gracias por estar en la masterclass. Aquí tienes la grabación:</p>
@@ -197,7 +197,7 @@ function correo5(registro, c) {
   if (!c.taller) {
     const cuerpo = `${hola(registro)}
     <p>Ya viste cómo lo hace el chef: ahora te toca a ti. Los talleres presenciales de este mes se están llenando y cada grupo es pequeño.</p>
-    <p>Aparta tu lugar con <strong>$400</strong> y el resto lo pagas el día del taller.</p>
+    <p>Aparta tu lugar con <strong>$200</strong> y el resto lo pagas el día del taller.</p>
     ${c.email.botonPlan('Quiero mi lugar', linkWhatsTaller(c))}`;
     return { asunto: 'Los talleres de este mes se están llenando', html: c.email.plantillaPlan({ arteUrl: c.arteUrl, cuerpo, pie: c.pie }) };
   }

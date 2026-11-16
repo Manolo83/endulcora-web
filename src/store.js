@@ -169,8 +169,8 @@ const DEFAULT_CONTENT = {
   // fisico en Google Sheets, ver src/syncCalendarioTalleres.js) — todos los
   // talleres cuestan lo mismo segun el dueño del sitio. Un taller ya
   // existente nunca se toca aunque esto cambie despues.
-  taller_precio_default: '1149',
-  taller_anticipo_default: '400',
+  taller_precio_default: '949',
+  taller_anticipo_default: '200',
   taller_cupo_default: '20',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
@@ -357,6 +357,30 @@ async function init() {
         data.content[key] = DEFAULT_CONTENT[key];
         changed = true;
       }
+    }
+    // Precio nuevo de talleres (Manuel, 16 nov 2026): $949 en la pagina y
+    // en WhatsApp, apartado con $200. Una sola vez: cambia el precio con el
+    // que se dan de alta los talleres y el de los talleres que aun no se dan
+    // (los que seguian con $1,149/$400). A quien ya aparto un taller futuro
+    // con anticipo se le recalcula el saldo con el precio nuevo (paga menos).
+    if (!data._migPrecioTaller949) {
+      const hoy = new Date(Date.now() - 6 * 3600 * 1000).toISOString().slice(0, 10);
+      if (data.content.taller_precio_default === '1149') data.content.taller_precio_default = '949';
+      if (data.content.taller_anticipo_default === '400') data.content.taller_anticipo_default = '200';
+      const futuras = new Map();
+      (data.sesionesTaller || []).forEach((s) => {
+        if (!s.fecha || String(s.fecha).slice(0, 10) < hoy) return;
+        if (Number(s.precioTotal) === 1149) s.precioTotal = 949;
+        if (Number(s.anticipo) === 400) s.anticipo = 200;
+        futuras.set(Number(s.id), s);
+      });
+      (data.inscripcionesTaller || []).forEach((i) => {
+        const ses = futuras.get(Number(i.sesionTallerId));
+        if (!ses || i.tipoPago !== 'anticipo' || !ses.precioTotal) return;
+        i.saldo = Math.max(0, ses.precioTotal - (Number(i.montoPagado) || 0));
+      });
+      data._migPrecioTaller949 = true;
+      changed = true;
     }
     (data.products || []).forEach((p) => {
       if (typeof p.descripcionLarga !== 'string') { p.descripcionLarga = ''; changed = true; }
@@ -1728,8 +1752,8 @@ async function init() {
             descripcion: t.descripcion,
             queAprendes: t.queAprendes,
             fotoUrl,
-            precioTotal: 1149,
-            anticipo: 400,
+            precioTotal: 949,
+            anticipo: 200,
             cupoMaximo: 20,
             hojaSheets: `${t.titulo}${esSedeDivision(t.sede.nombre) ? ' div' : ''}`,
           });
@@ -3354,8 +3378,8 @@ module.exports = {
         if (!sobreviviente.fotoUrl) { sobreviviente.fotoUrl = copiarImagen(def.imagen); cambios += 1; }
         if (!sobreviviente.descripcion) { sobreviviente.descripcion = def.descripcion; cambios += 1; }
         if (!sobreviviente.queAprendes) { sobreviviente.queAprendes = def.queAprendes; cambios += 1; }
-        if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 1149; cambios += 1; }
-        if (!sobreviviente.anticipo) { sobreviviente.anticipo = 400; cambios += 1; }
+        if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 949; cambios += 1; }
+        if (!sobreviviente.anticipo) { sobreviviente.anticipo = 200; cambios += 1; }
         if (sobreviviente.cupoMaximo == null) { sobreviviente.cupoMaximo = 20; cambios += 1; }
         encontradas.filter((s) => s.id !== sobreviviente.id).forEach((dup) => {
           (data.inscripcionesTaller || []).forEach((i) => {
@@ -3636,8 +3660,8 @@ module.exports = {
         }
         if (!sobreviviente.descripcion) { sobreviviente.descripcion = def.descripcion; cambios += 1; }
         if (!sobreviviente.queAprendes) { sobreviviente.queAprendes = def.queAprendes; cambios += 1; }
-        if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 1149; cambios += 1; }
-        if (!sobreviviente.anticipo) { sobreviviente.anticipo = 400; cambios += 1; }
+        if (!sobreviviente.precioTotal) { sobreviviente.precioTotal = 949; cambios += 1; }
+        if (!sobreviviente.anticipo) { sobreviviente.anticipo = 200; cambios += 1; }
         if (sobreviviente.cupoMaximo == null) { sobreviviente.cupoMaximo = 20; cambios += 1; }
         encontradas.filter((s) => s.id !== sobreviviente.id).forEach((dup) => {
           (data.inscripcionesTaller || []).forEach((i) => {
