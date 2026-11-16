@@ -91,7 +91,13 @@
       if (p !== 'granted') return false;
       return Promise.all([navigator.serviceWorker.ready, fetch('/api/push/clave').then(function(r){ return r.json(); })]).then(function(x){
         var reg = x[0], clave = x[1].clave; if (!clave) return false;
-        return reg.pushManager.getSubscription().then(function(s){ return s || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(clave) }); })
+        return reg.pushManager.getSubscription().then(function(s){
+          var nueva = function(){ return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(clave) }); };
+          if(!s) return nueva();
+          // Si la suscripcion se hizo con otra llave, se rehace (si no, el aviso nunca llega).
+          try { var k = s.options && s.options.applicationServerKey; if(k){ var a = new Uint8Array(k), c = b64(clave); var igual = a.length === c.length && a.every(function(v,i){ return v === c[i]; }); if(!igual) return s.unsubscribe().then(nueva); } } catch(_){}
+          return s;
+        })
           .then(function(sub){ return fetch('/api/push/suscribir', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'same-origin', body: JSON.stringify({ subscription: sub, plataforma: esIOS ? 'ios' : (/android/i.test(ua) ? 'android' : 'compu') }) }); })
           .then(function(){ try{ localStorage.setItem('endulcoraAvisos','1'); }catch(e){} aviso('🎉 ¡Listo! Te avisaremos de talleres nuevos y clases en vivo.'); return true; });
       });
@@ -135,7 +141,7 @@
       if (instalada) b.innerHTML = '<span class="boton-app-icono" aria-hidden="true">🔔</span><span class="hidden sm:inline">Activar avisos</span><span class="sm:hidden">Avisos</span>';
     });
     var yaAvisos = false; try { yaAvisos = localStorage.getItem('endulcoraAvisos') === '1'; } catch(e){}
-    if (instalada && soportaPush && Notification.permission === 'granted') { navigator.serviceWorker.ready.then(function(reg){ reg.pushManager.getSubscription().then(function(s){ if(!s) activarAvisos(); }); }); document.querySelectorAll('#btnInstalarApp').forEach(function(b){ b.style.display='none'; }); }
+    if (instalada && soportaPush && Notification.permission === 'granted') { navigator.serviceWorker.ready.then(function(reg){ activarAvisos(); }); document.querySelectorAll('#btnInstalarApp').forEach(function(b){ b.style.display='none'; }); }
     else if (instalada && soportaPush && Notification.permission === 'default' && !yaAvisos) setTimeout(function(){ aviso('🔔 Activa los avisos para enterarte de talleres nuevos y clases en vivo.', 'Activar', activarAvisos); }, 2500);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', listo); else listo();

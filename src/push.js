@@ -43,6 +43,7 @@ async function init() {
     id SERIAL PRIMARY KEY, clave TEXT UNIQUE NOT NULL, tipo TEXT, titulo TEXT, cuerpo TEXT, url TEXT, imagen TEXT,
     enviado_en TIMESTAMPTZ DEFAULT now(), total INTEGER DEFAULT 0, ok INTEGER DEFAULT 0, fallidos INTEGER DEFAULT 0, abiertas INTEGER DEFAULT 0)`);
   await q('ALTER TABLE push_subs ADD COLUMN IF NOT EXISTS bienvenida BOOLEAN DEFAULT false');
+  await q('ALTER TABLE push_subs ADD COLUMN IF NOT EXISTS ultimo_error TEXT');
   let pub = process.env.VAPID_PUBLIC_KEY || (await getConfig('vapid_public'));
   let priv = process.env.VAPID_PRIVATE_KEY || (await getConfig('vapid_private'));
   if (!pub || !priv) {
@@ -94,10 +95,14 @@ async function mandarA(subs, payload) {
   let ok = 0, fallidos = 0;
   for (const s of subs) {
     try {
-      await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: 60 * 60 * 12 });
+      await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: 60 * 60 * 12, urgency: 'high' });
       ok += 1;
+      q('UPDATE push_subs SET ultimo_error = NULL WHERE endpoint = $1', [s.endpoint]).catch(() => {});
     } catch (e) {
       fallidos += 1;
+      const err = `${e.statusCode || ''} ${(e.body || e.message || '').toString().slice(0, 200)}`.trim();
+      console.error('[push] fallo', s.endpoint.slice(0, 40), err);
+      q('UPDATE push_subs SET ultimo_error = $2 WHERE endpoint = $1', [s.endpoint, err]).catch(() => {});
       if (e.statusCode === 404 || e.statusCode === 410) await baja(s.endpoint).catch(() => {});
     }
   }
@@ -130,7 +135,8 @@ async function resumen() {
   const subs = (await q(`SELECT count(*) FILTER (WHERE activo) AS activos, count(*) AS total,
     count(*) FILTER (WHERE activo AND creado_en > now() - interval '7 days') AS nuevos7 FROM push_subs`)).rows[0];
   const envios = (await q('SELECT id, tipo, titulo, cuerpo, url, enviado_en, total, ok, fallidos, abiertas FROM push_envios ORDER BY enviado_en DESC LIMIT 50')).rows;
-  return { activos: Number(subs.activos), total: Number(subs.total), nuevos7: Number(subs.nuevos7), pausa: await enPausa(), envios, proximos: await proximos() };
+  const dispositivos = (await q(`SELECT id, plataforma, activo, creado_en, ultimo_error, split_part(endpoint, '/', 3) AS servicio FROM push_subs ORDER BY id DESC LIMIT 30`)).rows;
+  return { dispositivos, activos: Number(subs.activos), total: Number(subs.total), nuevos7: Number(subs.nuevos7), pausa: await enPausa(), envios, proximos: await proximos() };
 }
 
 // ---------- Avisos automaticos ----------
