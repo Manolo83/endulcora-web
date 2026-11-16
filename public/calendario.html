@@ -76,6 +76,17 @@ body { background: #FBF4E9; }
 </style>
 <link rel="stylesheet" href="/vida.css">
 <script src="/vida.js" defer></script>
+<style>
+.cal-hero .texto-fuego-cal { background: linear-gradient(90deg,#F5A623,#FFD27A,#F5A623,#E8742A,#F5A623); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: calFuego 6s linear infinite; }
+@keyframes calFuego { to { background-position:300% 0; } }
+.cal-sede, .cal-dato { background: rgba(255,255,255,.07); border:1px solid rgba(251,244,233,.14); backdrop-filter: blur(6px); transition: transform .3s, background .3s; }
+.cal-sede:hover { transform: translateX(6px); background: rgba(255,255,255,.12); }
+.cal-num { display:inline-grid; place-items:center; width:2.4rem; height:2.4rem; border-radius:50%; background:#4E1454; color:#F5A623; font-family:"Bebas Neue",sans-serif; font-size:1.4rem; }
+.cal-paso { transition: transform .3s, box-shadow .3s; } .cal-paso:hover { transform: translateY(-5px) rotate(-.5deg); box-shadow:0 20px 40px -18px rgba(78,20,84,.35); }
+#calendarioTarjeta { box-shadow: 0 30px 60px -30px rgba(78,20,84,.45) !important; border-radius: 2rem !important; }
+#sedeTabsCalendario button { padding:.8rem 1.5rem !important; font-size:.8rem !important; transition: transform .2s; } #sedeTabsCalendario button:hover { transform: translateY(-2px); }
+.font-bebas { font-family:"Bebas Neue",sans-serif; }
+</style>
 </head>
 <body class="font-cuerpo text-carbon antialiased">
 
@@ -112,13 +123,34 @@ body { background: #FBF4E9; }
   </div>
 </header>
 
-<main class="mx-auto max-w-6xl px-5 py-10 lg:px-8 lg:py-14">
-  <div class="mb-10 flex flex-wrap items-end justify-between gap-6">
+<section data-vida-hero class="cal-hero">
+  <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 lg:grid-cols-[1.1fr_.9fr] lg:px-8 lg:py-20">
     <div>
-      <div class="rule-flama mb-5 w-24"></div>
-      <h1 class="font-display text-3xl leading-tight text-vino sm:text-4xl">Calendario de talleres</h1>
+      <p class="inline-flex items-center gap-2 rounded-full border border-crema/20 bg-white/10 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-crema"><span class="h-1.5 w-1.5 rounded-full bg-flama"></span> Talleres presenciales · CDMX</p>
+      <h1 class="mt-5 font-display text-5xl leading-[1] text-crema sm:text-6xl lg:text-7xl">Calendario<br><span class="texto-fuego-cal">de talleres</span></h1>
+      <p class="mt-5 max-w-lg text-[17px] leading-relaxed text-crema/75">Elige tu sede y tu taller, y aparta tu lugar en línea con $400. El resto ($649) lo liquidas el día del taller.</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="#calendarioTarjeta" class="rounded-full bg-flama px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-carbon">Ver fechas</a>
+        <a href="/membresia" class="rounded-full border border-crema/30 bg-white/5 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-crema">💜 Miembros: $600</a>
+      </div>
     </div>
-    <p class="max-w-md text-[15px] leading-relaxed text-carbon/70">Elige tu sede, revisa la disponibilidad y aparta tu lugar directo por WhatsApp.</p>
+    <div class="grid gap-4">
+      <div class="cal-sede rounded-3xl p-5"><p class="font-bebas text-sm tracking-[.3em] text-flama">Sede 1</p><p class="font-display text-2xl text-crema">📍 Nativitas</p><p class="mt-1 text-sm text-crema/70">Talleres entre semana y fin de semana, mañana y tarde.</p></div>
+      <div class="cal-sede rounded-3xl p-5"><p class="font-bebas text-sm tracking-[.3em] text-flama">Sede 2</p><p class="font-display text-2xl text-crema">📍 División del Norte</p><p class="mt-1 text-sm text-crema/70">Otros talleres cada semana: elige el que te quede.</p></div>
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="cal-dato rounded-2xl p-3"><p class="font-display text-2xl text-flama">$1,049</p><p class="font-ui text-[10px] uppercase tracking-widest text-crema/60">por taller</p></div>
+        <div class="cal-dato rounded-2xl p-3"><p class="font-display text-2xl text-flama">$400</p><p class="font-ui text-[10px] uppercase tracking-widest text-crema/60">apartas</p></div>
+        <div class="cal-dato rounded-2xl p-3"><p class="font-display text-2xl text-flama">4 h</p><p class="font-ui text-[10px] uppercase tracking-widest text-crema/60">de práctica</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="mx-auto max-w-6xl px-5 py-10 lg:px-8 lg:py-14">
+  <div class="mb-8 grid gap-3 sm:grid-cols-3">
+    <div class="cal-paso rounded-2xl bg-white p-5 ring-1 ring-vino/10"><span class="cal-num">1</span><p class="mt-3 font-titulo text-lg text-vino">Elige sede y semana</p><p class="text-sm text-carbon/60">Muévete con las flechas para ver más fechas.</p></div>
+    <div class="cal-paso rounded-2xl bg-white p-5 ring-1 ring-vino/10"><span class="cal-num">2</span><p class="mt-3 font-titulo text-lg text-vino">Toca tu taller</p><p class="text-sm text-carbon/60">Ves el temario, el horario y los lugares que quedan.</p></div>
+    <div class="cal-paso rounded-2xl bg-white p-5 ring-1 ring-vino/10"><span class="cal-num">3</span><p class="mt-3 font-titulo text-lg text-vino">Aparta con $400</p><p class="text-sm text-carbon/60">Pagas en línea y te llega todo por correo.</p></div>
   </div>
 
   <div id="sedeTabsCalendario" class="mb-6 flex flex-wrap gap-2"></div>
