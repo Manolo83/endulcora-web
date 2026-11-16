@@ -65,8 +65,9 @@ function correoGracias(inscripcion, sesion, contenido = store.getContent()) {
     <p>Hola${inscripcion.nombre ? ` ${esc(String(inscripcion.nombre).split(' ')[0])}` : ''}:</p>
     <p>Gracias por venir al taller de <strong>${esc(inscripcion.taller || '')}</strong>. Nos ayudas mucho si nos dejas tu opinión en un minuto:</p>
     ${email.botonPlan('Dejar mi reseña', linkResena(inscripcion))}
-    ${ebook ? `<p>Si quieres seguir practicando en casa, el ebook <strong>${esc(ebook.titulo)}</strong> tiene las recetas paso a paso con costeo.</p>
-    ${email.botonPlan('Ver ebook', `${SITE_URL}/ebooks/${ebook.slug}`, '#4E1454', '#FBF4E9')}` : ''}`;
+    ${ebook ? `<p>Si quieres seguir practicando en casa, el ebook <strong>${esc(ebook.titulo)}</strong> tiene las recetas paso a paso con costeo: <strong>$${esc(ebook.precio)}</strong>, con el PDF y la app para usarlo desde tu celular.</p>
+    ${email.botonPlan('Ver ebook', `${SITE_URL}/ebooks/${ebook.slug}`, '#4E1454', '#FBF4E9')}` : ''}
+    ${email.bloqueMembresiaTaller()}`;
   return {
     asunto: 'Gracias por cocinar con nosotros',
     html: email.plantillaPlan({ arteUrl: urlCompleta(sesion && sesion.fotoUrl), cuerpo, pie: email.pieEndulcora(email.datosPie(contenido)) }),
