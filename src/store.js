@@ -172,6 +172,11 @@ const DEFAULT_CONTENT = {
   taller_precio_default: '949',
   taller_anticipo_default: '200',
   taller_cupo_default: '20',
+  // Beneficio del Club Endulcora (Manuel, 16 nov 2026): los miembros con
+  // membresia activa pagan este precio en hasta N talleres presenciales al
+  // mes (mes de la fecha del taller), sujeto a disponibilidad.
+  taller_precio_miembro: '600',
+  taller_miembro_talleres_mes: '2',
   footer_descripcion:
     'Publicaciones y talleres para quien cocina con oficio y quiere vivir de eso. Ciudad de México, México.',
   whatsapp_numero: '5575933916',
@@ -376,7 +381,7 @@ async function init() {
       });
       (data.inscripcionesTaller || []).forEach((i) => {
         const ses = futuras.get(Number(i.sesionTallerId));
-        if (!ses || i.tipoPago !== 'anticipo' || !ses.precioTotal) return;
+        if (!ses || i.tipoPago !== 'anticipo' || !ses.precioTotal || Number(i.precioMiembro) > 0) return;
         i.saldo = Math.max(0, ses.precioTotal - (Number(i.montoPagado) || 0));
       });
       data._migPrecioTaller949 = true;
@@ -1572,7 +1577,7 @@ async function init() {
           i.montoPagado = parseFloat(String(i.montoAnticipo || '').replace(/[^0-9.]/g, '')) || 0;
           i.formaPago = 'Transferencia';
           const ses = (data.sesionesTaller || []).find((x) => x.id === i.sesionTallerId);
-          i.saldo = ses && ses.precioTotal ? Math.max(0, ses.precioTotal - i.montoPagado) : null;
+          i.saldo = precioTotalDeInscripcion(i, ses) ? Math.max(0, precioTotalDeInscripcion(i, ses) - i.montoPagado) : null;
         }
       });
       data._migFolioPagadoTaller = true;
@@ -2197,6 +2202,22 @@ function cupoRestanteTaller(data, sesionTallerId) {
     (i) => i.sesionTallerId === Number(sesionTallerId) && i.estadoPago === 'pagado'
   ).length;
   return Math.max(0, sesion.cupoMaximo - ocupados);
+}
+
+// Precio total que le toca a una inscripcion: el de miembro si se aparto
+// con el descuento del Club, si no el del taller.
+function precioTotalDeInscripcion(i, sesion) {
+  if (i && Number(i.precioMiembro) > 0) return Number(i.precioMiembro);
+  return sesion ? Number(sesion.precioTotal) || 0 : 0;
+}
+
+// Inscripciones con descuento de miembro que cuentan contra el limite del
+// mes: pagadas, o pendientes cuyo apartado aun no vence.
+function inscripcionCuentaDescuento(i) {
+  if (!i || !(Number(i.precioMiembro) > 0)) return false;
+  if (i.estadoPago === 'pagado') return true;
+  if (i.estadoPago === 'pendiente' && i.vencePendienteEn && new Date(i.vencePendienteEn) > new Date()) return true;
+  return false;
 }
 
 // Etiqueta de campañas a partir del pais/estado de un registro, para poder
@@ -3925,6 +3946,40 @@ module.exports = {
   // Marca a mano el estado del pago de una inscripcion. Mientras no exista
   // el cobro automatico por Mercado Pago (Fase 3), es como el admin
   // registra que alguien ya pago su anticipo o el total por WhatsApp.
+  // Descuento de miembro (Club Endulcora): cuantos talleres con precio de
+  // miembro lleva un usuario en el mes (YYYY-MM) de la fecha del taller.
+  usosDescuentoMiembro(userId, mes) {
+    const data = load();
+    return (data.inscripcionesTaller || []).filter((i) => i.usuarioId === Number(userId)
+      && String(i.fecha || '').slice(0, 7) === mes && inscripcionCuentaDescuento(i)).length;
+  },
+  marcarDescuentoMiembroInscripcion(id, { usuarioId, precioMiembro }) {
+    const data = load();
+    const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
+    if (!item) return null;
+    item.usuarioId = Number(usuarioId);
+    item.precioMiembro = Number(precioMiembro) || 0;
+    save(data);
+    return item;
+  },
+  // Lista para /admin: quien uso su descuento de miembro y en que taller.
+  getDescuentosMiembro() {
+    const data = load();
+    const usuarios = new Map((data.users || []).map((u) => [u.id, u]));
+    return (data.inscripcionesTaller || [])
+      .filter((i) => Number(i.precioMiembro) > 0)
+      .map((i) => {
+        const u = usuarios.get(i.usuarioId);
+        return {
+          id: i.id, nombre: i.nombre, correo: i.correo || (u && u.email) || '', whatsapp: i.whatsapp,
+          taller: i.taller, fecha: i.fecha, sede: i.sede, mes: String(i.fecha || '').slice(0, 7),
+          precioMiembro: i.precioMiembro, montoPagado: i.montoPagado, saldo: i.saldo,
+          estadoPago: i.estadoPago, cuenta: inscripcionCuentaDescuento(i),
+        };
+      })
+      .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+  },
+  precioTotalDeInscripcion,
   actualizarPagoInscripcionTaller(id, { tipoPago, montoPagado, estadoPago, pagoId, vencePendienteEn, formaPago }) {
     const data = load();
     const item = data.inscripcionesTaller.find((i) => i.id === Number(id));
@@ -3936,7 +3991,8 @@ module.exports = {
     if (vencePendienteEn !== undefined) item.vencePendienteEn = vencePendienteEn;
     if (typeof formaPago === 'string') item.formaPago = formaPago;
     const sesion = data.sesionesTaller.find((s) => s.id === item.sesionTallerId);
-    item.saldo = sesion && sesion.precioTotal ? Math.max(0, sesion.precioTotal - item.montoPagado) : null;
+    const total = precioTotalDeInscripcion(item, sesion);
+    item.saldo = total ? Math.max(0, total - item.montoPagado) : null;
     save(data);
     return item;
   },

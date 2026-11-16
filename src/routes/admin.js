@@ -956,6 +956,12 @@ router.get('/api/newsletter', requireAdmin, (req, res) => {
 });
 
 // ---- Inscripciones a talleres (formulario publico) ----
+// Control del beneficio del Club: quien uso su precio de miembro en talleres.
+router.get('/api/descuentos-miembro', requireAdminOLectura, (req, res) => {
+  const c = store.getContent();
+  res.json({ precio: c.taller_precio_miembro, limite: c.taller_miembro_talleres_mes, items: store.getDescuentosMiembro() });
+});
+
 router.get('/api/inscripciones-taller', requireAdminOLectura, (req, res) => {
   // Mismo criterio que en Ventas: "comoSeEntero" es lo que la persona dice,
   // "origen" es lo que de verdad paso segun los ids de clic que traia.
