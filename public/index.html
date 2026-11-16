@@ -99,7 +99,7 @@ window.MEDICION = fetch('/api/medicion')
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Archivo+Black&family=Bebas+Neue&family=Great+Vibes&family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -111,7 +111,8 @@ window.MEDICION = fetch('/api/medicion')
           titulo: ['"Baloo 2"', 'sans-serif'],
           firma: ['"Great Vibes"', 'cursive'],
           cuerpo: ['Poppins', 'sans-serif'],
-          ui: ['Montserrat', 'sans-serif']
+          ui: ['Montserrat', 'sans-serif'],
+          bebas: ['"Bebas Neue"', 'sans-serif']
         }
       }
     }
@@ -226,6 +227,56 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
   .boton-vivo:hover, .boton-vivo:active { transform:none; }
   .postit-vivo { transform: rotate(3deg) !important; }
 }
+
+/* ════ Rediseño 16 nov 2026 ════ */
+.hero-noche { background: radial-gradient(120% 90% at 85% 10%, #7A2E7E 0%, transparent 55%), radial-gradient(90% 80% at 0% 100%, #5C2360 0%, transparent 60%), linear-gradient(160deg,#2a0b30 0%,#1B0720 60%,#120414 100%); }
+.hero-grano { opacity:.5; background-image: radial-gradient(rgba(251,244,233,.07) 1px, transparent 1.2px); background-size: 22px 22px; mask-image: linear-gradient(180deg,#000,transparent 85%); }
+.blob-a { animation: deriva 16s ease-in-out infinite; } .blob-b { animation: deriva 20s ease-in-out infinite reverse; } .blob-c { animation: deriva 18s ease-in-out infinite 3s; }
+@keyframes deriva { 0%,100%{ transform: translate(0,0) scale(1);} 50%{ transform: translate(40px,-30px) scale(1.12);} }
+.texto-fuego { background: linear-gradient(90deg,#F5A623,#FFD27A,#F5A623,#E8742A,#F5A623); background-size: 300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: fuego 6s linear infinite; }
+@keyframes fuego { to { background-position: 300% 0; } }
+.banner-club { position:relative; background: linear-gradient(120deg,#4E1454,#7A2E7E 55%,#4E1454); background-size:200% 100%; animation: fuego 9s linear infinite; }
+.banner-club::after { content:''; position:absolute; inset:0; background: linear-gradient(115deg,transparent 35%,rgba(255,255,255,.18) 50%,transparent 65%); transform: translateX(-100%); animation: brillo 4.5s ease-in-out infinite; pointer-events:none; }
+@keyframes brillo { 60%,100% { transform: translateX(100%); } }
+.cinta { transform: rotate(-1.2deg); margin: -14px -10px 0; position: relative; z-index: 5; box-shadow: 0 10px 30px -10px rgba(27,7,32,.5); }
+.cinta-pista { display:flex; width:max-content; gap:2rem; white-space:nowrap; animation: cinta 32s linear infinite; }
+.cinta-pista b { color:#4E1454; font-weight:400; }
+@keyframes cinta { to { transform: translateX(-50%); } }
+.seccion-carrusel { background: radial-gradient(80% 120% at 100% 0%, #7A2E7E 0%, transparent 60%), #4E1454; }
+.seccion-carrusel #carruselTalleres > a { background:#FBF4E9; box-shadow: 0 25px 50px -20px rgba(0,0,0,.55); }
+.arte-zoom { transition: transform .6s cubic-bezier(.2,.7,.3,1); }
+.tarjeta-viva:hover .arte-zoom { transform: scale(1.07); }
+section h2.font-display { letter-spacing: -.01em; }
+#seccionCalendarioSemana h2, #chef h2, #simulador h2, #resenas h2 { font-size: clamp(2rem, 4.5vw, 3.25rem); line-height: 1.02; }
+.rule-flama { height: 4px; background-image: linear-gradient(90deg,#F5A623 0 34px,transparent 34px); }
+.rule-flama::after { left: 40px; width: 8px; height: 8px; }
+#chefImagenWrap { box-shadow: 18px 18px 0 -2px #F5A623; }
+@media (prefers-reduced-motion: reduce) { .blob-a,.blob-b,.blob-c,.texto-fuego,.banner-club,.banner-club::after,.cinta-pista { animation:none !important; } }
+
+/* ════ Vida Endulcora ════ */
+.chispas i { position:absolute; bottom:-20px; width:8px; height:8px; border-radius:3px; background:var(--c); opacity:0; animation: subir linear infinite; }
+.chispas i:nth-child(3n){ border-radius:50%; width:6px; height:6px; }
+.chispas i:nth-child(4n){ width:4px; height:12px; }
+@keyframes subir { 0%{ transform: translateY(0) rotate(0); opacity:0 } 10%{ opacity:.8 } 90%{ opacity:.6 } 100%{ transform: translateY(-110vh) rotate(540deg); opacity:0 } }
+.entra-titulo { display:inline-block; animation: entraTitulo .9s cubic-bezier(.2,.8,.2,1) both; }
+.entra-2 { animation-delay:.25s, 0s; animation-name: entraTitulo, fuego; animation-duration: .9s, 6s; animation-iteration-count: 1, infinite; animation-timing-function: cubic-bezier(.2,.8,.2,1), linear; }
+@keyframes entraTitulo { from { opacity:0; transform: translateY(40px) rotate(-3deg); filter: blur(6px);} to { opacity:1; transform:none; filter:none; } }
+.reveal { transform: translateY(36px) scale(.97); }
+.rule-flama { transform-origin:left; }
+.reveal .rule-flama, .reveal.rule-flama { transform: scaleX(0); transition: transform .9s .2s cubic-bezier(.2,.8,.2,1); }
+.reveal.visible .rule-flama, .reveal.visible.rule-flama { transform: scaleX(1); }
+#carruselTalleres > a { animation: entraTarjeta .7s cubic-bezier(.34,1.4,.64,1) both; }
+#carruselTalleres > a:nth-child(2){animation-delay:.1s} #carruselTalleres > a:nth-child(3){animation-delay:.2s} #carruselTalleres > a:nth-child(4){animation-delay:.3s} #carruselTalleres > a:nth-child(5){animation-delay:.4s}
+@keyframes entraTarjeta { from { opacity:0; transform: translateY(40px) rotate(2deg) scale(.92);} to {opacity:1; transform:none;} }
+#carruselTalleres > a:hover { transform: translateY(-8px) rotate(-1deg); }
+#carruselTalleres > a span.rounded-full { transition: background .25s, transform .25s; }
+#carruselTalleres > a:hover span.rounded-full { background:#F5A623; color:#1B0720; transform: scale(1.05); }
+.tilt { transition: transform .2s ease-out; transform-style: preserve-3d; }
+#homeCalendarioGrid > * { transition: transform .2s; } #homeCalendarioGrid > *:hover { transform: translateY(-3px) scale(1.03); }
+.boton-latido { animation: latido 2.4s ease-in-out infinite; }
+@keyframes latido { 0%,100%{ transform: scale(1);} 8%{ transform: scale(1.06);} 16%{ transform: scale(1);} 24%{ transform: scale(1.04);} 32%{ transform: scale(1);} }
+#chefImagenWrap { transition: box-shadow .4s, transform .4s; } #chefImagenWrap:hover { box-shadow: -18px 18px 0 -2px #F5A623; transform: rotate(-1.5deg); }
+@media (prefers-reduced-motion: reduce) { .chispas, .entra-titulo, #carruselTalleres > a, .boton-latido { animation:none !important; } .rule-flama { transform:none !important; } }
 </style>
 </head>
 <body class="font-cuerpo text-carbon antialiased">
@@ -281,10 +332,12 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 </header>
 
 <!-- ══════════════ HERO ══════════════ -->
-<section class="relative overflow-hidden bg-gradient-to-b from-crema to-flama/10 text-carbon">
-  <div class="pointer-events-none absolute -left-32 -top-20 h-[460px] w-[460px] rounded-full bg-[#A9D9BE] opacity-40 blur-[110px]"></div>
-  <div class="pointer-events-none absolute right-[-60px] top-1/4 h-[480px] w-[480px] rounded-full bg-morado/40 opacity-40 blur-[120px]"></div>
-  <div class="pointer-events-none absolute -left-10 bottom-[-160px] h-[420px] w-[420px] rounded-full bg-flama/45 opacity-45 blur-[120px]"></div>
+<section class="hero-noche relative overflow-hidden text-crema">
+  <div class="hero-grano pointer-events-none absolute inset-0"></div>
+  <div class="chispas pointer-events-none absolute inset-0" aria-hidden="true"><i style="left:6%;animation-delay:0s;animation-duration:11s;--c:#F5A623"></i><i style="left:14%;animation-delay:3s;animation-duration:14s;--c:#FBF4E9"></i><i style="left:23%;animation-delay:6s;animation-duration:12s;--c:#C77DCB"></i><i style="left:35%;animation-delay:1.5s;animation-duration:15s;--c:#F5A623"></i><i style="left:47%;animation-delay:8s;animation-duration:13s;--c:#FBF4E9"></i><i style="left:58%;animation-delay:4s;animation-duration:11s;--c:#F5A623"></i><i style="left:66%;animation-delay:9s;animation-duration:16s;--c:#C77DCB"></i><i style="left:74%;animation-delay:2s;animation-duration:12s;--c:#FBF4E9"></i><i style="left:83%;animation-delay:6.5s;animation-duration:14s;--c:#F5A623"></i><i style="left:92%;animation-delay:0.8s;animation-duration:13s;--c:#C77DCB"></i></div>
+  <div class="pointer-events-none absolute -left-32 -top-20 h-[460px] w-[460px] rounded-full bg-morado opacity-60 blob-a blur-[110px]"></div>
+  <div class="pointer-events-none absolute right-[-60px] top-1/4 h-[480px] w-[480px] rounded-full bg-uva opacity-70 blob-b blur-[120px]"></div>
+  <div class="pointer-events-none absolute -left-10 bottom-[-160px] h-[420px] w-[420px] rounded-full bg-flama/50 opacity-40 blob-c blur-[120px]"></div>
 
   <!-- Post-it: recetario del mes, gratis con membresía o por $100 -->
   <div id="promoRecetarioMes" class="postit-vivo hidden absolute right-3 top-3 z-20 w-[168px] origin-top rounded-md bg-flama px-3.5 pb-3.5 pt-6 text-carbon shadow-2xl sm:right-8 sm:top-8 sm:w-[210px] sm:px-4 sm:pt-7">
@@ -307,27 +360,27 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 
   <!-- Banner "Hazte miembro" (4 nov 2026): mes gratis para todos -->
   <div class="relative z-10 mx-auto max-w-7xl px-5 pt-[180px] sm:pt-[230px] lg:px-8 lg:pt-10">
-    <a href="/membresia" class="group flex flex-col gap-5 overflow-hidden rounded-3xl bg-vino px-6 py-7 text-crema shadow-xl ring-1 ring-vino/20 transition hover:bg-morado sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-9 lg:mr-[250px]">
+    <a href="/membresia" class="group flex flex-col gap-5 overflow-hidden banner-club rounded-3xl px-6 py-7 text-crema shadow-2xl ring-1 ring-flama/30 transition sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-9 lg:mr-[250px]">
       <div>
         <p class="font-ui text-[11px] font-700 uppercase tracking-[0.25em] text-flama">Club Endulcora · tu primer mes es gratis</p>
         <p class="mt-2 font-titulo text-4xl font-800 leading-none sm:text-5xl lg:text-6xl">Hazte miembro</p>
         <p class="mt-3 max-w-xl text-sm text-crema/85 sm:text-base">Recetario del mes, taller en línea, revista y todos los eBooks. Registra tu tarjeta, hoy no se te cobra nada; después $100 al mes y cancelas cuando quieras.</p>
       </div>
-      <span class="inline-flex shrink-0 items-center justify-center rounded-full bg-flama px-7 py-4 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon transition group-hover:bg-crema">Quiero mi mes gratis</span>
+      <span class="boton-latido inline-flex shrink-0 items-center justify-center rounded-full bg-flama px-7 py-4 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon transition group-hover:bg-crema">Quiero mi mes gratis</span>
     </a>
   </div>
   <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 pt-12 pb-16 sm:pb-20 lg:grid-cols-[.95fr_1.05fr] lg:px-8 lg:pt-12 lg:pb-28">
     <div>
-      <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-morado/30 bg-white/60 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-vino">
+      <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-crema/20 bg-white/10 px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-[.22em] text-crema backdrop-blur">
         <span class="h-1.5 w-1.5 rounded-full bg-flama"></span> <span id="heroBadge">Ciudad de México · Desde 2024</span>
       </p>
 
-      <h1 class="font-display text-4xl leading-[1.05] text-vino sm:text-5xl lg:text-6xl">
-        <span id="heroTitulo1">Aprende la técnica.</span><br>
-        <span id="heroTitulo2" class="text-flama">Cobra lo que vale.</span>
+      <h1 class="font-display text-5xl leading-[1] text-crema sm:text-6xl lg:text-7xl">
+        <span id="heroTitulo1" class="entra-titulo">Aprende la técnica.</span><br>
+        <span id="heroTitulo2" class="texto-fuego entra-titulo entra-2">Cobra lo que vale.</span>
       </h1>
 
-      <p id="heroParrafo" class="mt-6 max-w-xl text-[17px] leading-relaxed text-carbon/70">
+      <p id="heroParrafo" class="mt-6 max-w-xl text-[17px] leading-relaxed text-crema/75">
         Manuales técnicos, hojas de costeo listas para usar, aplicaciones de bolsillo y talleres en vivo
         para reposteros, banqueteros y emprendedores que quieren cocinar bien y vender con margen real.
       </p>
@@ -337,27 +390,27 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>
           <span id="heroCtaPrimario">Ir a la tienda</span>
         </a>
-        <a href="/calendario" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/30 bg-morado/10 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-vino hover:border-flama hover:bg-flama/10 transition">
+        <a href="/calendario" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-crema/30 bg-white/5 px-7 py-4 font-ui text-sm font-700 uppercase tracking-wider text-crema backdrop-blur hover:border-flama hover:bg-flama/10 transition">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.6V16c0 1.1 2.7 3 6 3s6-1.9 6-3v-5.4"/></svg>
           <span id="heroCtaSecundario">Ver calendario de talleres</span>
         </a>
       </div>
 
-      <dl class="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-vino/10 pt-7">
+      <dl class="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-crema/15 pt-7">
         <div>
           <svg viewBox="0 0 24 24" class="h-6 w-6 text-flama" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
           <dt id="heroStat1Valor" class="mt-1.5 font-titulo text-4xl text-flama">137</dt>
-          <dd id="heroStat1Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Páginas de manual</dd>
+          <dd id="heroStat1Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-crema/55">Páginas de manual</dd>
         </div>
         <div>
-          <svg viewBox="0 0 24 24" class="h-6 w-6 text-morado" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <svg viewBox="0 0 24 24" class="h-6 w-6 text-flama" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
           <dt id="heroStat2Valor" class="mt-1.5 font-titulo text-4xl text-flama">50</dt>
-          <dd id="heroStat2Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Fórmulas costeadas</dd>
+          <dd id="heroStat2Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-crema/55">Fórmulas costeadas</dd>
         </div>
         <div>
-          <svg viewBox="0 0 24 24" class="h-6 w-6 text-vino" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>
+          <svg viewBox="0 0 24 24" class="h-6 w-6 text-flama" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>
           <dt id="heroStat3Valor" class="mt-1.5 font-titulo text-4xl text-flama">2</dt>
-          <dd id="heroStat3Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-carbon/55">Anexos en Excel</dd>
+          <dd id="heroStat3Etiqueta" class="font-ui text-[11px] uppercase tracking-widest text-crema/55">Anexos en Excel</dd>
         </div>
       </dl>
     </div>
@@ -392,8 +445,31 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
           <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
-      <p id="heroCaption" class="mt-6 text-center font-firma text-2xl text-vino">se enciende, se derrite, se come</p>
-      <p id="heroCaptionSub" class="mt-1 text-center font-ui text-[11px] uppercase tracking-[.25em] text-carbon/45">Receta 01 · Sección gourmet</p>
+      <p id="heroCaption" class="mt-6 text-center font-firma text-3xl text-flama">se enciende, se derrite, se come</p>
+      <p id="heroCaptionSub" class="mt-1 text-center font-ui text-[11px] uppercase tracking-[.25em] text-crema/45">Receta 01 · Sección gourmet</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CINTA ══════════════ -->
+<div class="cinta overflow-hidden bg-flama py-3 text-carbon" aria-hidden="true"><div class="cinta-pista font-bebas text-2xl tracking-[.18em]"><span>Talleres presenciales</span><b>✦</b><span>Nativitas y División</span><b>✦</b><span>Aparta con $400</span><b>✦</b><span>Club Endulcora · 2 talleres al mes a $600</span><b>✦</b><span>eBooks $150</span><b>✦</b><span>Talleres presenciales</span><b>✦</b><span>Nativitas y División</span><b>✦</b><span>Aparta con $400</span><b>✦</b><span>Club Endulcora · 2 talleres al mes a $600</span><b>✦</b><span>eBooks $150</span><b>✦</b></div></div>
+
+<!-- ══════════════ TALLERES DE LA SEMANA (carrusel con los artes, sale solo del calendario) ══════════════ -->
+<section id="anuncios" class="seccion-carrusel scroll-mt-24 relative overflow-hidden py-16 lg:py-20">
+  <div class="mx-auto max-w-7xl px-5 lg:px-8">
+    <div class="reveal mb-8 flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <div class="rule-flama mb-5 w-24"></div>
+        <h2 class="font-display text-4xl leading-none text-crema sm:text-5xl"><span class="block font-bebas text-lg tracking-[.3em] text-flama">Elige y aparta</span>Talleres de esta semana</h2>
+      </div>
+      <p class="max-w-md text-sm leading-relaxed text-crema/70">Toca el taller que te guste para ver fechas y apartar tu lugar con $400.</p>
+    </div>
+    <div class="relative">
+      <div id="carruselTalleres" class="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-3" style="scrollbar-width:none">
+        <p class="text-sm text-carbon/50">Cargando talleres…</p>
+      </div>
+      <button type="button" id="carruselAnt" aria-label="Anterior" class="absolute left-1 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/90 px-3 py-2 text-xl text-vino shadow ring-1 ring-vino/10 sm:block">‹</button>
+      <button type="button" id="carruselSig" aria-label="Siguiente" class="absolute right-1 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/90 px-3 py-2 text-xl text-vino shadow ring-1 ring-vino/10 sm:block">›</button>
     </div>
   </div>
 </section>
@@ -406,7 +482,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
     <div class="reveal mb-8 flex flex-wrap items-end justify-between gap-6">
       <div>
         <div class="rule-flama mb-4 w-20"></div>
-        <h2 class="font-display text-2xl leading-tight text-vino sm:text-3xl">Talleres de esta semana</h2>
+        <h2 class="font-display text-2xl leading-tight text-vino sm:text-3xl">Calendario por sede</h2>
         <p class="mt-2 max-w-md text-sm leading-relaxed text-carbon/60">Elige tu sede, revisa la disponibilidad y aparta tu lugar directo en línea.</p>
       </div>
       <a href="/calendario" class="inline-flex items-center gap-2 rounded-full boton-vivo border border-vino/25 px-6 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:bg-vino hover:text-crema transition">Ver calendario completo</a>
@@ -483,25 +559,7 @@ input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%
 
 <svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-white" aria-hidden="true"><path d="M0,22 C220,2 460,38 720,20 C980,4 1220,34 1440,16 L1440,40 L0,40 Z" fill="#FAECD5"/></svg>
 
-<!-- ══════════════ TALLERES DE LA SEMANA (carrusel con los artes, sale solo del calendario) ══════════════ -->
-<section id="anuncios" class="scroll-mt-24 bg-flama/10 py-14">
-  <div class="mx-auto max-w-7xl px-5 lg:px-8">
-    <div class="reveal mb-8 flex flex-wrap items-end justify-between gap-6">
-      <div>
-        <div class="rule-flama mb-5 w-24"></div>
-        <h2 class="font-display text-2xl leading-tight text-vino sm:text-3xl">Talleres de esta semana</h2>
-      </div>
-      <p class="max-w-md text-sm leading-relaxed text-carbon/70">Toca el taller que te guste para ver fechas y apartar tu lugar con $400.</p>
-    </div>
-    <div class="relative">
-      <div id="carruselTalleres" class="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-3" style="scrollbar-width:none">
-        <p class="text-sm text-carbon/50">Cargando talleres…</p>
-      </div>
-      <button type="button" id="carruselAnt" aria-label="Anterior" class="absolute left-1 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/90 px-3 py-2 text-xl text-vino shadow ring-1 ring-vino/10 sm:block">‹</button>
-      <button type="button" id="carruselSig" aria-label="Siguiente" class="absolute right-1 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/90 px-3 py-2 text-xl text-vino shadow ring-1 ring-vino/10 sm:block">›</button>
-    </div>
-  </div>
-</section>
+
 
 <svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="divisor-ondulado bg-flama/10" aria-hidden="true"><path d="M0,20 C240,40 480,0 720,14 C960,28 1200,40 1440,18 L1440,40 L0,40 Z" fill="#FBF4E9"/></svg>
 
@@ -2011,11 +2069,11 @@ async function cargarAnuncios(){
     const vistos = new Map();
     semana.forEach(x => { const k = x.titulo + '|' + x.sedeId; if(!vistos.has(k)) vistos.set(k, x); });
     const items = [...vistos.values()];
-    if(!items.length){ cont.innerHTML = '<p class="text-sm text-carbon/50">Muy pronto publicamos los talleres de la semana. Revisa el <a href="/calendario" class="underline">calendario</a>.</p>'; return; }
+    if(!items.length){ cont.innerHTML = '<p class="text-sm text-crema/60">Muy pronto publicamos los talleres de la semana. Revisa el <a href="/calendario" class="underline">calendario</a>.</p>'; return; }
     const fechaCorta = f => new Date(f+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
     cont.innerHTML = items.map(x => `
       <a href="/talleres/${encodeURIComponent(x.slug)}?utm_source=portada&utm_medium=carrusel" class="tarjeta-viva block w-[78%] shrink-0 snap-start overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10 sm:w-[46%] lg:w-[23.5%]">
-        <img src="${x.fotoUrl}" alt="${escapeHtml(x.titulo)}" loading="lazy" class="aspect-square w-full object-cover">
+        <div class="overflow-hidden"><img src="${x.fotoUrl}" alt="${escapeHtml(x.titulo)}" loading="lazy" class="arte-zoom aspect-square w-full object-cover"></div>
         <div class="p-4">
           <p class="font-titulo text-base text-vino">${escapeHtml(x.titulo)}</p>
           <p class="mt-1 text-xs uppercase tracking-wider text-carbon/55">${fechaCorta(x.fecha)}</p>
@@ -2343,6 +2401,14 @@ function abrirCarritoSiSeSolicito(){
 fetch('/api/clase-gratis').then(r => r.json()).then(info => {
   if (!info.activo) document.querySelectorAll('a[href="/clase-gratis"]').forEach(a => a.remove());
 }).catch(() => {});
+</script>
+<script>
+(()=>{ if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+ const w=document.querySelector('#heroImagenWrap')?.closest('.relative.mx-auto.w-full');
+ if(w && matchMedia('(hover:hover)').matches){ w.classList.add('tilt'); w.addEventListener('mousemove',e=>{const r=w.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;w.style.transform=`perspective(900px) rotateY(${x*8}deg) rotateX(${-y*8}deg)`;}); w.addEventListener('mouseleave',()=>w.style.transform='');}
+ const contar=el=>{const fin=parseInt(el.textContent,10); if(!(fin>0)) return; let t0=null; const f=t=>{t0??=t; const k=Math.min((t-t0)/1400,1); el.textContent=Math.round(fin*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(f);}; requestAnimationFrame(f);};
+ setTimeout(()=>['heroStat1Valor','heroStat2Valor','heroStat3Valor'].forEach(id=>{const el=document.getElementById(id); el&&contar(el);}),900);
+})();
 </script>
 </body>
 </html>
