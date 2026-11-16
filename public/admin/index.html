@@ -4617,7 +4617,7 @@ function renderResumenCapturaLex(){
     tarjeta('Pendientes de capturar (Lex)', pendientes.length, `${pendHoy} de hoy · ${pendientes.length - pendHoy} de días anteriores`, pendientes.length ? { ring: 'ring-red-200', txt: 'text-red-600' } : { ring: 'ring-emerald-200', txt: 'text-emerald-700' }) +
     tarjeta('Ya capturados hoy', capHoy, `de ${deHoy.length}`, { ring: 'ring-emerald-200', txt: 'text-emerald-700' });
   const boton = (clave, texto) => `<button type="button" data-filtro="${clave}" class="btnFiltroCaptura rounded-full px-4 py-2 ${FILTRO_CAPTURA === clave ? 'bg-vino text-white' : 'bg-white text-vino ring-1 ring-vino/20'}">${texto}</button>`;
-  $('filtrosCapturaLex').innerHTML = boton('todos', 'Todos') + boton('pendientes', `Solo pendientes de capturar (${pendientes.length})`) + boton('hoy', `Solo de hoy (${deHoy.length})`);
+  $('filtrosCapturaLex').innerHTML = boton('todos', 'Todos') + boton('pendientes', `Solo pendientes de capturar (${pendientes.length})`) + boton('hoy', `Solo de hoy (${deHoy.length})`) + boton('miembros', `Precio de miembro (${INSCRIPCIONES_TALLER.filter(i => Number(i.precioMiembro) > 0).length})`);
   $('filtrosCapturaLex').querySelectorAll('.btnFiltroCaptura').forEach(b => b.addEventListener('click', () => { FILTRO_CAPTURA = b.dataset.filtro; renderInscripcionesTaller(); }));
 }
 
@@ -4644,6 +4644,7 @@ function renderInscripcionesTaller(){
   const hoy = diaCdmx(new Date());
   const lista = INSCRIPCIONES_TALLER.filter(i =>
     FILTRO_CAPTURA === 'pendientes' ? !i.capturadoLex :
+    FILTRO_CAPTURA === 'miembros' ? Number(i.precioMiembro) > 0 :
     FILTRO_CAPTURA === 'hoy' ? diaCdmx(i.createdAt) === hoy : true);
   if(!lista.length){ cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">No hay registros con este filtro. ¡Todo al día!</p>'; return; }
   try{
@@ -4677,7 +4678,7 @@ function renderInscripcionesTaller(){
             ${g.filas.map(i => `
               <tr class="border-b border-vino/10 last:border-0 align-top ${i.capturadoLex ? '' : 'bg-red-50/60'}" data-row-id="${i.id}">
                 <td class="px-5 py-3"><input type="checkbox" class="chkCapturadoLex h-5 w-5 accent-emerald-600 cursor-pointer" data-id="${i.id}" ${i.capturadoLex ? 'checked' : ''}>${i.capturadoLex && i.capturadoLexEn ? `<div class="text-[10px] text-emerald-700">${new Date(i.capturadoLexEn).toLocaleString('es-MX', { timeZone: 'America/Mexico_City', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>` : ''}</td>
-                <td class="px-5 py-3 text-carbon/80">${escapeHtml(i.nombre)}${diaCdmx(i.createdAt) === hoy ? '<span class="ml-2 rounded-full bg-flama/25 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Hoy</span>' : ''}${i.esPrimeraVez ? '<span class="ml-2 rounded-full bg-flama/20 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Nuevo</span>' : ''}</td>
+                <td class="px-5 py-3 text-carbon/80">${escapeHtml(i.nombre)}${diaCdmx(i.createdAt) === hoy ? '<span class="ml-2 rounded-full bg-flama/25 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Hoy</span>' : ''}${i.esPrimeraVez ? '<span class="ml-2 rounded-full bg-flama/20 px-2 py-0.5 font-ui text-[10px] uppercase tracking-wider text-vino">Nuevo</span>' : ''}${Number(i.precioMiembro) > 0 ? '<span class="ml-2 whitespace-nowrap rounded-full bg-[#E8B04A]/30 px-2 py-0.5 font-ui text-[10px] font-700 uppercase tracking-wider text-vino">Miembro $' + Number(i.precioMiembro) + '</span>' : ''}</td>
                 <td class="px-5 py-3 text-carbon/70"><div>${escapeHtml(i.whatsapp)}</div><div class="text-xs text-carbon/50">${escapeHtml(i.correo)}</div></td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.horario)}</td>
                 <td class="px-5 py-3 text-carbon/70">${escapeHtml(i.montoAnticipo)}${i.folioAnticipo ? `<div class="text-xs text-carbon/50">Folio: ${escapeHtml(i.folioAnticipo)}</div>` : ''}${(i.personasAnticipo || 1) > 1 ? `<div class="text-xs text-carbon/50">Grupo de ${i.personasAnticipo} · total $${escapeHtml(i.montoTotalAnticipo)}${i.anticipoPagadoPor ? ` · pagó ${escapeHtml(i.anticipoPagadoPor)}` : ''}</div>` : ''}</td>

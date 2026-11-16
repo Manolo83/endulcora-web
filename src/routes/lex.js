@@ -170,6 +170,7 @@ router.get('/api/talleres/:id/inscritos', requireLex, (req, res) => {
       correo: i.correo,
       montoPagado: i.montoPagado,
       saldo: i.saldo,
+      precioMiembro: Number(i.precioMiembro) || 0,
       estadoPago: i.estadoPago,
       // Una compra pagada de verdad en linea (Mercado Pago) nunca trae
       // formaPago -- el cobro automatico no la llena, solo el estado y el
