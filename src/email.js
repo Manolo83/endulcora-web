@@ -189,7 +189,7 @@ async function enviarCorreoInfoYPagoTaller({
     ${queAprendes ? `<p style="font-size:14px;line-height:1.6;"><strong>Qué aprenderás:</strong> ${escapeHtml(queAprendes)}</p>` : ''}
     ${lugares ? `<p style="font-size:14px;line-height:1.6;">De este taller quedan <strong>${lugares} ${lugares === 1 ? 'lugar' : 'lugares'}</strong> — el cupo se ocupa por orden de pago, no de registro.</p>` : ''}
     <p style="font-size:14px;line-height:1.6;">${tipoPago === 'anticipo'
-      ? `Tu lugar se aparta con <strong>$${formatoMonto(monto)} de anticipo</strong>${saldo ? `; el resto ($${formatoMonto(saldo)}) se paga el día del taller.` : '.'}`
+      ? `Tu lugar se aparta con <strong>$${formatoMonto(monto)} de anticipo</strong>${saldo ? `; el resto ($${formatoMonto(saldo)}) se paga el día del taller.` : '.'} El anticipo <strong>no es reembolsable</strong>.`
       : `Apartas tu lugar pagando el <strong>total de $${formatoMonto(monto)}</strong>.`}</p>`;
   const boton = link ? botonPlan(`Apartar mi lugar — $${formatoMonto(monto)}`, link, '#4E1454', '#FBF4E9') : '';
   // Boton de WhatsApp con el taller y la fecha ya escritos en el mensaje.
@@ -1391,7 +1391,7 @@ async function enviarCorreoRecuperacionTaller({
   // La objeción más común es el monto. Si había elegido pagar completo, se le
   // recuerda que con el anticipo basta para asegurarlo.
   const salida = anticipo
-    ? `<p style="margin:14px 0 0;font-size:14px;line-height:1.6;color:#1B0720;">Si ahorita no te acomoda el pago completo, <strong>con $${formatoMonto(anticipo)} de anticipo tu lugar queda asegurado</strong> y lo demás lo liquidas el día del taller.</p>`
+    ? `<p style="margin:14px 0 0;font-size:14px;line-height:1.6;color:#1B0720;">Si ahorita no te acomoda el pago completo, <strong>con $${formatoMonto(anticipo)} de anticipo tu lugar queda asegurado</strong> y lo demás lo liquidas el día del taller. El anticipo no es reembolsable.</p>`
     : '';
 
   const html = `
