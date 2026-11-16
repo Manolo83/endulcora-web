@@ -95,6 +95,10 @@ window.MEDICION = fetch('/api/medicion')
 <meta name="twitter:image" content="https://www.endulcora.com/og-image.png">
 
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/app/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Endulcora">
 <link rel="alternate icon" href="/favicon.svg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -296,7 +300,11 @@ section h2.font-display { letter-spacing: -.01em; }
         </a>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button type="button" id="btnInstalarApp" class="boton-app" aria-label="Descarga la app de Endulcora">
+          <span class="boton-app-icono" aria-hidden="true">📲</span>
+          <span class="hidden sm:inline">Descarga la app</span><span class="sm:hidden">App</span>
+        </button>
         <button type="button" id="btnAccesoDesktop" onclick="abrirCuenta()"
           class="hidden sm:inline-flex items-center gap-2 rounded-full boton-vivo bg-flama px-5 py-2.5 font-ui text-[13px] font-700 uppercase tracking-wider text-carbon hover:bg-vino hover:text-crema transition">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 11V7a4 4 0 1 0-8 0v4"/><rect x="5" y="11" width="14" height="10" rx="2"/></svg>

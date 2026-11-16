@@ -164,6 +164,22 @@ router.delete('/api/media/:id', requireAdmin, (req, res) => {
 });
 
 // ---- Contenido general del sitio ----
+// ---- App de Endulcora: notificaciones ----
+const push = require('../push');
+router.get('/api/push', requireAdmin, async (req, res) => {
+  try { res.json(await push.resumen()); } catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.post('/api/push/pausa', requireAdmin, async (req, res) => {
+  try { await push.setPausa(!!(req.body && req.body.pausa)); res.json(await push.resumen()); } catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.post('/api/push/prueba', requireAdmin, async (req, res) => {
+  try {
+    const b = req.body || {};
+    const r = await push.probar(String(b.endpoint || ''), { titulo: String(b.titulo || '🧁 Prueba de Endulcora').slice(0, 80), cuerpo: String(b.cuerpo || 'Así se ven los avisos de la app.').slice(0, 200), url: String(b.url || '/'), imagen: b.imagen || undefined });
+    res.json(r);
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
 router.get('/api/content', requireAdmin, (req, res) => {
   res.json(store.getContent());
 });

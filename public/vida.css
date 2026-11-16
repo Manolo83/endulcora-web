@@ -48,3 +48,32 @@ main h1:not(.vida-hero h1) { animation: vidaEntra .9s cubic-bezier(.2,.8,.2,1) b
 .vida-banda > div { max-width:72rem; }
 .vida-cinta { margin-bottom: 2.25rem; width:calc(100vw + 20px); margin-left:calc(50% - 50vw - 10px); }
 body { overflow-x: hidden; }
+/* App de Endulcora: botón de descarga y ventana de instalación */
+.boton-app { position:relative; display:inline-flex; align-items:center; gap:.5rem; border-radius:999px; padding:.65rem 1.1rem; font-family:Montserrat,sans-serif; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#FBF4E9; background: linear-gradient(110deg,#4E1454,#7A2E7E 45%,#4E1454); background-size:200% 100%; box-shadow:0 10px 24px -8px rgba(122,46,126,.65), inset 0 0 0 2px rgba(245,166,35,.85); animation: appBrillo 4s linear infinite, vidaLatido 2.8s ease-in-out infinite; overflow:hidden; white-space:nowrap; }
+.boton-app::after { content:''; position:absolute; inset:0; background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%); transform:translateX(-100%); animation: brilloApp 3s ease-in-out infinite; }
+.boton-app-icono { font-size:1.05rem; }
+.boton-app:hover { filter:brightness(1.12); }
+@keyframes appBrillo { to { background-position:200% 0; } }
+@keyframes brilloApp { 55%,100% { transform:translateX(100%); } }
+@media (max-width:639px){ .boton-app { padding:.55rem .8rem; font-size:11px; } }
+.app-modal { position:fixed; inset:0; z-index:100; display:grid; place-items:end center; background:rgba(27,7,32,.6); backdrop-filter:blur(4px); animation: vidaEntra .3s both; }
+@media (min-width:640px){ .app-modal { place-items:center; } }
+.app-hoja { width:min(440px,100%); background:#FBF4E9; border-radius:1.75rem 1.75rem 0 0; padding:1.6rem 1.5rem 2rem; box-shadow:0 -20px 60px -20px rgba(0,0,0,.5); animation: appSube .45s cubic-bezier(.2,.8,.2,1) both; font-family:Poppins,sans-serif; color:#1B0720; }
+@media (min-width:640px){ .app-hoja { border-radius:1.75rem; } }
+@keyframes appSube { from { transform:translateY(60px); opacity:0; } to { transform:none; opacity:1; } }
+.app-hoja h3 { font-family:"Baloo 2",sans-serif; font-weight:800; font-size:1.6rem; color:#4E1454; line-height:1.1; }
+.app-hoja ol { margin:1rem 0 0; padding:0; list-style:none; display:grid; gap:.7rem; }
+.app-hoja li { display:flex; gap:.75rem; align-items:center; background:#fff; border-radius:1rem; padding:.8rem 1rem; box-shadow:0 0 0 1px rgba(78,20,84,.08); font-size:.92rem; }
+.app-hoja li b { display:grid; place-items:center; flex-shrink:0; width:1.9rem; height:1.9rem; border-radius:50%; background:#4E1454; color:#F5A623; font-family:"Bebas Neue",sans-serif; font-size:1.1rem; font-weight:400; }
+.app-boton { display:block; width:100%; margin-top:1.1rem; border-radius:999px; padding:.95rem; text-align:center; font-family:Montserrat,sans-serif; font-weight:700; font-size:.85rem; text-transform:uppercase; letter-spacing:.08em; background:#F5A623; color:#1B0720; }
+.app-cerrar { display:block; width:100%; margin-top:.5rem; padding:.6rem; font-size:.8rem; color:rgba(27,7,32,.55); }
+.app-beneficios { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.8rem; }
+.app-beneficios span { font-size:.75rem; background:#fff; border-radius:999px; padding:.35rem .7rem; box-shadow:0 0 0 1px rgba(78,20,84,.1); }
+.app-aviso-flotante { position:fixed; left:50%; bottom:1rem; z-index:90; transform:translateX(-50%); width:min(420px,calc(100% - 2rem)); display:flex; align-items:center; gap:.8rem; background:#1B0720; color:#FBF4E9; border-radius:1.25rem; padding:.85rem 1rem; box-shadow:0 20px 50px -15px rgba(0,0,0,.6); font-family:Poppins,sans-serif; font-size:.85rem; animation: appSube .5s cubic-bezier(.2,.8,.2,1) both; }
+.app-aviso-flotante button { flex-shrink:0; border-radius:999px; background:#F5A623; color:#1B0720; font-weight:700; padding:.55rem .9rem; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; }
+@media (max-width:639px){
+  header#top img[src="/logo-endulcora.png"] { height:2.4rem !important; }
+  header#top a[aria-label="Levent"], header#top .h-9.w-px { display:none !important; }
+  header#top .gap-6 { gap:.5rem !important; }
+  header#top button.h-11 { width:2.5rem !important; height:2.5rem !important; }
+}

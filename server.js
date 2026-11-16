@@ -211,6 +211,22 @@ app.use('/api/checkout', checkoutRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/asistente', asistenteRoutes);
 app.use('/api/membresia', membresiaRoutes);
+// App de Endulcora: notificaciones push (src/push.js).
+const push = require('./src/push');
+app.get('/api/push/clave', (req, res) => res.json({ clave: push.clavePublica() }));
+app.post('/api/push/suscribir', express.json({ limit: '10kb' }), async (req, res) => {
+  try {
+    await push.suscribir(req.body && req.body.subscription, { userId: req.session && req.session.userId, plataforma: req.body && req.body.plataforma });
+    res.json({ ok: true });
+  } catch (e) { res.status(400).json({ error: 'No se pudieron activar los avisos.' }); }
+});
+app.post('/api/push/baja', express.json({ limit: '10kb' }), async (req, res) => {
+  try { await push.baja(String((req.body && req.body.endpoint) || '')); res.json({ ok: true }); } catch (e) { res.status(400).json({ error: 'No se pudo.' }); }
+});
+app.post('/api/push/abierta', express.json({ limit: '2kb' }), async (req, res) => {
+  try { await push.marcarAbierta(req.body && req.body.envio); } catch (e) {}
+  res.json({ ok: true });
+});
 app.use('/api', apiRoutes);
 // El panel de /admin (HTML y JS incluidos) cambia seguido con cada deploy;
 // sin esto el navegador puede seguir mostrando una version vieja de la
@@ -654,6 +670,9 @@ store.init()
     // Confirmacion de lugar de la clase gratis (control de aforo con tope
     // de cupo) y sus recordatorios a quien ya confirmo.
     require('./src/confirmacionClaseGratis').iniciarAutomatizacionClaseGratis();
+    // App de Endulcora: avisos push automaticos (talleres, clases en vivo,
+    // eBooks y nurturing). Se pausan desde /admin > Notificaciones.
+    push.iniciar();
   })
   .catch((err) => {
     console.error('No se pudo conectar a la base de datos, el servidor no arranco:', err.message);

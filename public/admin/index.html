@@ -111,6 +111,7 @@
         <button type="button" class="admin-nav-grupo-btn flex items-center gap-1 rounded-full px-3 py-1.5 hover:bg-vino/10 hover:text-vino transition">Marketing <span class="admin-chevron-grupo">▾</span></button>
         <div class="admin-nav-grupo-panel absolute left-0 top-full z-20 mt-2 hidden w-56 flex flex-col gap-1 rounded-2xl bg-white p-2 normal-case tracking-normal shadow-2xl ring-1 ring-vino/10">
           <a href="#seccionCampanas" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Campañas de correo</a>
+          <a href="#seccionNotificaciones" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">📲 Notificaciones de la app</a>
           <a href="#seccionAnuncios" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Anuncios</a>
           <a href="#seccionResenas" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Reseñas</a>
           <a href="#seccionSuscriptores" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Suscriptores</a>
@@ -1356,6 +1357,25 @@
     </section>
 
     <!-- SUSCRIPTORES -->
+    <section id="seccionNotificaciones" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl text-vino">📲 Notificaciones de la app</h2>
+      <p class="mt-1 text-sm text-carbon/60">Los avisos salen solos con la información del sitio: talleres nuevos, calendario nuevo, últimos lugares, eBooks nuevos, clase en vivo (1 h antes y al empezar) y nurturing a las 11:00 y 18:00. Máximo 3 al día (más los de la clase en vivo), entre 9 am y 9 pm. Aquí ves lo que salió y puedes pausarlos.</p>
+      <div class="mt-5 grid gap-3 sm:grid-cols-4">
+        <div class="rounded-2xl bg-white p-4 ring-1 ring-vino/10"><p class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Con avisos activos</p><p id="pushActivos" class="font-titulo text-3xl text-vino">—</p></div>
+        <div class="rounded-2xl bg-white p-4 ring-1 ring-vino/10"><p class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Nuevos en 7 días</p><p id="pushNuevos" class="font-titulo text-3xl text-vino">—</p></div>
+        <div class="rounded-2xl bg-white p-4 ring-1 ring-vino/10"><p class="font-ui text-[10px] uppercase tracking-widest text-carbon/50">Estado</p><p id="pushEstado" class="font-titulo text-2xl text-vino">—</p></div>
+        <div class="flex flex-col justify-center gap-2 rounded-2xl bg-white p-4 ring-1 ring-vino/10">
+          <button type="button" id="pushBtnPausa" class="rounded-full bg-vino px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-crema">Pausar avisos</button>
+          <button type="button" id="pushBtnPrueba" class="rounded-full border border-vino/30 px-4 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-vino">Probar en este dispositivo</button>
+        </div>
+      </div>
+      <p id="pushMsg" class="mt-2 text-sm text-morado"></p>
+      <h3 class="mt-8 font-titulo text-lg text-vino">Así se verán los próximos avisos de nurturing</h3>
+      <div id="pushProximos" class="mt-3 grid gap-3 sm:grid-cols-2"></div>
+      <h3 class="mt-8 font-titulo text-lg text-vino">Avisos que ya salieron</h3>
+      <div id="pushEnvios" class="mt-3 overflow-x-auto rounded-2xl bg-white ring-1 ring-vino/10"><p class="p-4 text-sm text-carbon/50">Cargando…</p></div>
+    </section>
+
     <section id="seccionSuscriptores" class="scroll-mt-32 mb-14">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -1825,6 +1845,7 @@ async function api(url, options = {}){
 // lo basico carga al entrar y cada seccion pesada se pide cuando se
 // acerca a la pantalla (al bajar o al dar clic en el menu).
 const CARGA_DIFERIDA = [
+  ['pushEnvios', () => cargarPush()],
   ['listaHeroCarrusel', () => cargarHeroCarrusel()],
   ['listaClaseBiblioteca', () => cargarBibliotecaClasesAdmin()],
   ['listaContactosCampana', () => cargarContactosCampana()],
@@ -6175,6 +6196,42 @@ inicializarNavAgrupada();
 inicializarBusquedaAdmin(adminEstadosSecciones);
 
 verificarSesion();
+
+// ---- Notificaciones de la app (src/push.js) ----
+function tarjetaPush(n){
+  return `<div class="flex gap-3 rounded-2xl bg-[#1B0720] p-3 text-crema shadow"><img src="/app/icono-192.png" class="h-10 w-10 rounded-xl" alt=""><div class="min-w-0 flex-1"><p class="text-[11px] text-crema/50">Endulcora · ahora</p><p class="truncate text-sm font-600">${escapeHtml(n.titulo)}</p><p class="text-xs text-crema/75">${escapeHtml(n.cuerpo)}</p></div>${n.imagen ? `<img src="${escapeHtml(n.imagen)}" class="h-14 w-14 shrink-0 rounded-lg object-cover" alt="">` : ''}</div>`;
+}
+async function cargarPush(){
+  try{
+    const r = await api('/admin/api/push');
+    $('pushActivos').textContent = r.activos;
+    $('pushNuevos').textContent = r.nuevos7;
+    $('pushEstado').textContent = r.pausa ? '⏸ En pausa' : '✅ Activos';
+    $('pushBtnPausa').textContent = r.pausa ? 'Reanudar avisos' : 'Pausar avisos';
+    $('pushBtnPausa').dataset.pausa = r.pausa ? '1' : '0';
+    $('pushProximos').innerHTML = r.proximos.map(tarjetaPush).join('') || '<p class="text-sm text-carbon/50">Sin avisos por ahora.</p>';
+    $('pushEnvios').innerHTML = r.envios.length ? `<table class="w-full text-sm"><thead class="bg-crema text-left font-ui text-[10px] uppercase tracking-widest text-carbon/50"><tr><th class="p-3">Fecha</th><th class="p-3">Tipo</th><th class="p-3">Aviso</th><th class="p-3">Llegó a</th><th class="p-3">Abrieron</th></tr></thead><tbody>${r.envios.map((e) => `<tr class="border-t border-vino/5"><td class="p-3 whitespace-nowrap">${new Date(e.enviado_en).toLocaleString('es-MX',{timeZone:'America/Mexico_City',dateStyle:'short',timeStyle:'short'})}</td><td class="p-3">${escapeHtml(e.tipo||'')}</td><td class="p-3"><b>${escapeHtml(e.titulo)}</b><br><span class="text-carbon/60">${escapeHtml(e.cuerpo||'')}</span></td><td class="p-3">${e.ok} de ${e.total}</td><td class="p-3">${e.abiertas}</td></tr>`).join('')}</tbody></table>` : '<p class="p-4 text-sm text-carbon/50">Todavía no sale ningún aviso.</p>';
+  }catch(e){ $('pushEnvios').innerHTML = `<p class="p-4 text-sm text-red-700">${escapeHtml(e.message)}</p>`; }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const bp = $('pushBtnPausa'); if(!bp) return;
+  bp.addEventListener('click', async () => { await api('/admin/api/push/pausa', { method:'POST', body: JSON.stringify({ pausa: bp.dataset.pausa !== '1' }) }); cargarPush(); });
+  $('pushBtnPrueba').addEventListener('click', async () => {
+    const msg = $('pushMsg');
+    try{
+      if(!('serviceWorker' in navigator) || !('PushManager' in window)) throw new Error('Este navegador no recibe notificaciones. En iPhone, abre el sitio desde la app instalada.');
+      const reg = await navigator.serviceWorker.register('/sw.js'); await navigator.serviceWorker.ready;
+      if(await Notification.requestPermission() !== 'granted') throw new Error('Permite las notificaciones para probar.');
+      const { clave } = await (await fetch('/api/push/clave')).json();
+      const pad = '='.repeat((4 - clave.length % 4) % 4); const raw = atob((clave + pad).replace(/-/g,'+').replace(/_/g,'/'));
+      const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: Uint8Array.from(raw, (c) => c.charCodeAt(0)) });
+      await fetch('/api/push/suscribir', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ subscription: sub, plataforma: 'admin' }) });
+      const primero = document.querySelector('#pushProximos') && (await api('/admin/api/push')).proximos[0];
+      await api('/admin/api/push/prueba', { method:'POST', body: JSON.stringify({ endpoint: sub.endpoint, ...(primero || {}) }) });
+      msg.textContent = 'Listo: te debe llegar un aviso de prueba en unos segundos.';
+    }catch(e){ msg.textContent = e.message; }
+  });
+});
 </script>
 </body>
 </html>
