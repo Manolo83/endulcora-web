@@ -185,6 +185,16 @@ router.post('/preference', async (req, res) => {
     const precio = usarPrecioMiembro ? parsePrecio(item.precioMembresia) : parsePrecio(item.precio);
     if (precio <= 0) continue;
     resueltos.push({ tipo: linea.tipo, itemId: item.id, titulo: item.titulo, precio, cantidad });
+    // Archivos que vienen incluidos con el ebook (la app HTML): van en el
+    // pedido en $0 para que se entreguen con el PDF; no se cobran aparte.
+    if (linea.tipo === 'producto' && Array.isArray(item.incluye)) {
+      for (const idIncluido of item.incluye) {
+        const extra = store.getProduct(idIncluido);
+        if (extra && entregas.sePuedeEntregar(extra) && !resueltos.some((r) => r.tipo === 'producto' && r.itemId === extra.id)) {
+          resueltos.push({ tipo: 'producto', itemId: extra.id, titulo: extra.titulo, precio: 0, cantidad: 1, incluidoCon: item.id });
+        }
+      }
+    }
   }
 
   if (!resueltos.length) {
@@ -212,7 +222,7 @@ router.post('/preference', async (req, res) => {
     const preference = new Preference(client);
     const resultado = await preference.create({
       body: {
-        items: resueltos.map((r) => ({
+        items: resueltos.filter((r) => r.precio > 0).map((r) => ({
           id: String(r.itemId),
           title: r.titulo,
           quantity: r.cantidad,

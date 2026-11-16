@@ -390,6 +390,27 @@ async function init() {
     // Ajuste de Manuel (16 nov 2026, tarde): el precio real del taller es
     // $1,049 apartando con $400. Quien ya compro o aparto un taller futuro
     // a $949 conserva ese precio (precioPactado), asi su saldo no sube.
+    // Ebooks (Manuel, 16 nov 2026): cada ebook a $150 y se entrega solo con
+    // dos archivos: el PDF y la app HTML. El anexo Excel y el paquete ZIP
+    // dejan de ofrecerse (quedan ocultos, no se borran). La app va como
+    // "incluye" del ebook: al comprarlo se agrega sola al pedido en $0.
+    if (!data._migEbooks150PdfHtml) {
+      const porId = new Map((data.products || []).map((p) => [p.id, p]));
+      (data.products || []).forEach((eb) => {
+        if (eb.categoria !== 'ebook' || eb.esPaquete || !Array.isArray(eb.productosRelacionados)) return;
+        const rel = eb.productosRelacionados.map((id) => porId.get(id)).filter(Boolean);
+        const app = rel.find((r) => /\.html?$/i.test(r.archivoNombre || '') || /^App · /.test(r.titulo || ''));
+        if (!app || String(eb.precio) !== '200') return;
+        eb.precio = '150';
+        eb.incluye = [app.id];
+        eb.productosRelacionados = [];
+        if (!Array.isArray(eb.bullets)) eb.bullets = [];
+        if (!eb.bullets.some((b) => /HTML/.test(b))) eb.bullets.unshift('Incluye 2 archivos: el eBook en PDF y la app HTML para usarlo desde tu celular');
+        rel.forEach((r) => { r.ocultoEnCatalogo = true; });
+      });
+      data._migEbooks150PdfHtml = true;
+      changed = true;
+    }
     if (data._migPrecioTaller949 && !data._migPrecioTaller1049) {
       const hoy = new Date(Date.now() - 6 * 3600 * 1000).toISOString().slice(0, 10);
       if (data.content.taller_precio_default === '949') data.content.taller_precio_default = '1049';
@@ -702,7 +723,7 @@ async function init() {
     // Para agregar un producto nuevo a esta lista: sube sus 3 archivos a
     // seed-archivos/<carpetaSeed>/ y agrega una entrada a
     // FAMILIAS_A_DESGLOSAR. Cada entrada corre una sola vez.
-    const PRECIOS_LINEA_EBOOKS = { ebook: '200', anexo: '50', app: '50', paquete: '250' };
+    const PRECIOS_LINEA_EBOOKS = { ebook: '150', anexo: '50', app: '50', paquete: '250' };
     async function crearFamiliaEbookDesglosada({ tituloBase, categoria, carpetaSeed, archivos }) {
       const SEED_DIR = path.join(__dirname, '..', 'seed-archivos', carpetaSeed);
       const nuevoProducto = (titulo, categoriaItem, precio, boton, nombreArchivo) => {
@@ -753,7 +774,9 @@ async function init() {
       paquete.ocultoEnCatalogo = true;
       paquete.precioMembresia = '100';
       const ebook = nuevoProducto(tituloBase, categoria, PRECIOS_LINEA_EBOOKS.ebook, 'Agregar al carrito', archivos.ebook);
-      ebook.productosRelacionados = [anexo.id, app.id, paquete.id];
+      ebook.productosRelacionados = [];
+      ebook.incluye = [app.id];
+      ebook.bullets = ['Incluye 2 archivos: el eBook en PDF y la app HTML para usarlo desde tu celular'];
       // Portada: si se manda una foto pre-generada, se usa esa. Si no, se
       // genera sola a partir de la primera pagina del PDF del ebook, igual
       // que cuando el administrador sube un PDF a mano desde /admin.
