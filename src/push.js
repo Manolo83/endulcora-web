@@ -289,4 +289,13 @@ function iniciar() {
   }).catch((e) => console.error('[push] No se pudo iniciar:', e.message));
 }
 
-module.exports = { iniciar, clavePublica, suscribir, baja, marcarAbierta, enviar, probar, resumen, setPausa, opcionesNurturing, ahoraCdmx };
+// Prueba de nurturing a TODOS los telefonos activos (pedido de Manuel cuando
+// solo el tenia la app). No cuenta para el tope diario.
+async function nurturingPrueba() {
+  const o = opcionesNurturing(ahoraCdmx())[0];
+  const subs = (await q('SELECT endpoint, p256dh, auth FROM push_subs WHERE activo')).rows;
+  const r = await mandarA(subs, { clave: 'prueba-nurt-' + Date.now(), titulo: o.titulo, cuerpo: o.cuerpo, url: o.url, imagen: o.imagen });
+  return { total: subs.length, ...r, aviso: o };
+}
+
+module.exports = { nurturingPrueba, iniciar, clavePublica, suscribir, baja, marcarAbierta, enviar, probar, resumen, setPausa, opcionesNurturing, ahoraCdmx };
