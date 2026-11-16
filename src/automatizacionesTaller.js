@@ -95,7 +95,7 @@ function fechaCortaSheets(fechaISOStr) {
 // formato ni color, solo agrega texto plano con la API de valores de
 // Sheets (values.append), que no toca el formato de la fila.
 function filaParaSheets({ inscripcion, sesion }) {
-  const precioTotal = sesion ? Number(sesion.precioTotal) || 0 : 0;
+  const precioTotal = store.precioTotalDeInscripcion(inscripcion, sesion);
   const montoPagado = Number(inscripcion.montoPagado) || 0;
   const faltante = Math.max(0, precioTotal - montoPagado);
   const debe = precioTotal > 0 ? (faltante > 0 ? faltante : 'PAGADO') : '';

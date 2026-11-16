@@ -106,7 +106,16 @@ router.post('/preference', async (req, res) => {
       if (sesion.estado === 'agotado' || sesion.cupoRestante === 0) {
         return res.status(400).json({ error: 'Ese taller ya no tiene lugares disponibles.' });
       }
-      const precio = tipoPago === 'completo' ? parsePrecio(sesion.precioTotal) : parsePrecio(sesion.anticipo);
+      // Club Endulcora: con membresia activa, hasta N talleres al mes (mes
+      // de la fecha del taller) a precio de miembro. El anticipo es el mismo.
+      const contenidoTaller = store.getContent();
+      const precioMiembro = parsePrecio(contenidoTaller.taller_precio_miembro);
+      const limiteMes = parseInt(contenidoTaller.taller_miembro_talleres_mes, 10) || 0;
+      const aplicaMiembro = esMiembroActivo && precioMiembro > 0 && limiteMes > 0
+        && precioMiembro < parsePrecio(sesion.precioTotal)
+        && store.usosDescuentoMiembro(usuario.id, String(sesion.fecha || '').slice(0, 7)) < limiteMes;
+      const precioTotalAplicado = aplicaMiembro ? precioMiembro : parsePrecio(sesion.precioTotal);
+      const precio = tipoPago === 'completo' ? precioTotalAplicado : Math.min(parsePrecio(sesion.anticipo), precioTotalAplicado);
       if (precio <= 0) {
         return res.status(400).json({ error: 'Ese taller todavía no tiene precio configurado. Escríbenos por WhatsApp.' });
       }
@@ -136,6 +145,7 @@ router.post('/preference', async (req, res) => {
         // el origen tambien en la lista de inscritos.
         ...origenTrafico.idsDeClic({ fbp, fbc, gclid, gbraid, wbraid }),
       });
+      if (aplicaMiembro) store.marcarDescuentoMiembroInscripcion(inscripcion.id, { usuarioId: usuario.id, precioMiembro });
       store.actualizarPagoInscripcionTaller(inscripcion.id, { tipoPago, estadoPago: 'pendiente', vencePendienteEn });
       // Igual que el formulario gratuito: se intenta mandar a "Inscritos
       // 2026" desde que se crea, no hasta que se confirme el pago — asi
@@ -147,7 +157,7 @@ router.post('/preference', async (req, res) => {
       resueltos.push({
         tipo: 'taller',
         itemId: sesion.id,
-        titulo: `${tipoPago === 'completo' ? 'Pago completo' : 'Anticipo'}: ${sesion.titulo} (${sesion.fecha})`,
+        titulo: `${tipoPago === 'completo' ? 'Pago completo' : 'Anticipo'}${aplicaMiembro ? ' (precio de miembro)' : ''}: ${sesion.titulo} (${sesion.fecha})`,
         precio,
         cantidad: 1,
         sesionTallerId: sesion.id,
@@ -242,7 +252,7 @@ router.post('/preference', async (req, res) => {
         const inscripcion = store.getInscripcionTaller(item.inscripcionTallerId);
         const sesion = store.getSesionesTaller().find((s) => s.id === item.sesionTallerId);
         const sedeInfo = sesion ? store.getSedes().find((s) => s.id === sesion.sedeId) : null;
-        const precioTotal = sesion ? parsePrecio(sesion.precioTotal) : 0;
+        const precioTotal = store.precioTotalDeInscripcion(inscripcion, sesion);
         enviarCorreoInfoYPagoTaller({
           to: order.email,
           nombre: inscripcion ? inscripcion.nombre : '',

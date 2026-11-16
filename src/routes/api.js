@@ -427,9 +427,24 @@ router.get('/talleres/:slug', (req, res) => {
   // segunda pagina de venta para el mismo taller.
   const canonicalSlug = [sesion, ...otrasFechas].sort((a, b) => a.fecha.localeCompare(b.fecha))[0].slug;
 
+  // Club Endulcora: si quien ve la pagina es miembro activo y aun le quedan
+  // talleres con descuento en el mes de este taller, se le muestra su precio.
+  const contenido = store.getContent();
+  const precioMiembro = parseFloat(String(contenido.taller_precio_miembro || 0).replace(/,/g, '')) || 0;
+  const limiteMes = parseInt(contenido.taller_miembro_talleres_mes, 10) || 0;
+  const userId = req.session && req.session.userId ? req.session.userId : null;
+  const usuario = userId ? store.getUserById(userId) : null;
+  let miembro = null;
+  if (usuario && usuario.membresiaEstado === 'activa' && precioMiembro > 0 && limiteMes > 0) {
+    const usados = store.usosDescuentoMiembro(usuario.id, String(sesion.fecha || '').slice(0, 7));
+    miembro = { precio: precioMiembro, limite: limiteMes, usados, disponibles: Math.max(0, limiteMes - usados) };
+  }
+
   res.json({
     ...sesion,
     sede: sede ? { id: sede.id, nombre: sede.nombre, direccion: sede.direccion, mapaLink: sede.mapaLink } : null,
+    miembro,
+    precioMiembroAnuncio: precioMiembro > 0 && limiteMes > 0 ? precioMiembro : null,
     otrasFechas,
     canonicalSlug,
   });

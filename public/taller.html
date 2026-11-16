@@ -166,6 +166,7 @@ body { background: #FBF4E9; }
           <div>
             <p class="font-ui text-[11px] uppercase tracking-wider text-humo">Precio total</p>
             <p id="tPrecioTotal" class="font-display text-3xl text-vino"></p>
+          <p id="tNotaMiembro" class="mt-2 hidden text-sm leading-relaxed text-carbon/75"></p>
           </div>
           <span id="tCupo" class="rounded-full bg-crema px-3 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-vino"></span>
         </div>
@@ -468,8 +469,22 @@ function pintarTaller(t){
     }
   }
 
-  const precioTotal = parseFloat(String(t.precioTotal || 0).replace(/,/g,'')) || 0;
-  const anticipo = parseFloat(String(t.anticipo || 0).replace(/,/g,'')) || 0;
+  const precioLista = parseFloat(String(t.precioTotal || 0).replace(/,/g,'')) || 0;
+  const conMiembro = !!(t.miembro && t.miembro.disponibles > 0 && t.miembro.precio > 0 && t.miembro.precio < precioLista);
+  const precioTotal = conMiembro ? t.miembro.precio : precioLista;
+  const anticipo = Math.min(parseFloat(String(t.anticipo || 0).replace(/,/g,'')) || 0, precioTotal);
+  const nota = document.getElementById('tNotaMiembro');
+  if(conMiembro){
+    nota.innerHTML = `<span class="line-through">$${formatoMonto(precioLista)}</span> · <strong>Precio de miembro del Club Endulcora.</strong> Te quedan ${t.miembro.disponibles} de ${t.miembro.limite} talleres con descuento este mes.`;
+    nota.classList.remove('hidden');
+  }else if(t.miembro){
+    nota.innerHTML = `Ya usaste tus ${t.miembro.limite} talleres con precio de miembro de ese mes.`;
+    nota.classList.remove('hidden');
+  }else if(t.precioMiembroAnuncio && t.precioMiembroAnuncio < precioLista){
+    nota.innerHTML = `¿Eres del <a href="/membresia?utm_source=taller" class="font-600 text-vino underline">Club Endulcora</a>? Los miembros pagan <strong>$${formatoMonto(t.precioMiembroAnuncio)}</strong> en 2 talleres al mes (sujeto a disponibilidad). Si ya eres miembro, inicia sesión para verlo.`;
+    nota.classList.remove('hidden');
+  }else{ nota.classList.add('hidden'); }
+  TALLER._precioAplicado = precioTotal; TALLER._anticipoAplicado = anticipo;
   document.getElementById('tPrecioTotal').textContent = precioTotal > 0 ? `$${formatoMonto(precioTotal)} MXN` : 'Precio por confirmar';
   document.getElementById('tMontoCompleto').textContent = precioTotal > 0 ? `$${formatoMonto(precioTotal)} MXN` : '—';
   document.getElementById('tMontoAnticipo').textContent = anticipo > 0 ? `$${formatoMonto(anticipo)} MXN` : '—';
@@ -530,8 +545,8 @@ document.getElementById('formCompraTaller').addEventListener('submit', async (e)
     return;
   }
 
-  const precioTotal = parseFloat(String(TALLER.precioTotal || 0).replace(/,/g,'')) || 0;
-  const anticipo = parseFloat(String(TALLER.anticipo || 0).replace(/,/g,'')) || 0;
+  const precioTotal = TALLER._precioAplicado ?? (parseFloat(String(TALLER.precioTotal || 0).replace(/,/g,'')) || 0);
+  const anticipo = TALLER._anticipoAplicado ?? (parseFloat(String(TALLER.anticipo || 0).replace(/,/g,'')) || 0);
   const valorElegido = tipoPago === 'completo' ? precioTotal : anticipo;
 
   if(typeof fbq === 'function'){

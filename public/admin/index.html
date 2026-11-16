@@ -1349,6 +1349,14 @@
         </div>
         <div id="listaSuscriptoresMembresia" class="mt-4 divide-y divide-vino/10"></div>
       </div>
+
+      <div class="mt-6 rounded-2xl bg-white ring-1 ring-vino/10">
+        <div class="p-6 pb-0">
+          <h3 class="font-ui text-sm font-700 uppercase tracking-wider text-vino">Talleres con precio de miembro</h3>
+          <p class="mt-1 text-xs text-carbon/50">Cada miembro activo puede comprar en la página hasta <strong id="descMiembroLimite">2</strong> talleres presenciales al mes a <strong id="descMiembroPrecio">$600</strong> (el mes es el de la fecha del taller). El sistema los cuenta solo: al tercero ya le cobra el precio normal. Cuentan los pagados y los que están pagando (apartado sin vencer).</p>
+        </div>
+        <div id="listaDescuentosMiembro" class="mt-4 divide-y divide-vino/10"></div>
+      </div>
     </section>
 
     <!-- SUSCRIPTORES -->
@@ -5848,6 +5856,22 @@ async function cargarMembresiaAdmin(){
   }
 }
 cargarMembresiaAdmin();
+
+async function cargarDescuentosMiembro(){
+  try{
+    const r = await api('/admin/api/descuentos-miembro');
+    $('descMiembroLimite').textContent = r.limite;
+    $('descMiembroPrecio').textContent = `$${r.precio}`;
+    const cont = $('listaDescuentosMiembro');
+    if(!r.items.length){ cont.innerHTML = '<p class="p-6 text-sm text-carbon/50">Todavía nadie ha usado su descuento de miembro.</p>'; return; }
+    cont.innerHTML = r.items.map(i => `
+      <div class="flex flex-wrap items-center justify-between gap-2 px-6 py-3 text-sm">
+        <div><p class="font-600 text-vino">${escapeHtml(i.nombre || '')}</p><p class="text-xs text-carbon/60">${escapeHtml(i.correo || '')} · ${escapeHtml(i.whatsapp || '')}</p></div>
+        <div class="text-right"><p>${escapeHtml(i.taller || '')} · ${escapeHtml(i.sede || '')}</p><p class="text-xs text-carbon/60">${escapeHtml(i.fecha || '')} · pagó $${i.montoPagado || 0}${i.saldo ? ` · debe $${i.saldo}` : ''} · ${i.cuenta ? (i.estadoPago === 'pagado' ? 'Pagado' : 'Pagando') : 'No cuenta (venció o se canceló)'}</p></div>
+      </div>`).join('');
+  }catch(e){ toast(e.message); }
+}
+cargarDescuentosMiembro();
 cargarSuscriptoresMembresia();
 
 $('formRecetarioMembresia').addEventListener('submit', async (e) => {
