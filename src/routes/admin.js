@@ -953,7 +953,31 @@ router.post('/api/membresia/sincronizar-pagos', requireAdmin, async (req, res) =
 // fueron miembros, para que no cambie si alguien cancela) — pero la lista
 // que se muestra solo incluye a quien tiene la membresia activa ahora mismo,
 // no a cancelados ni pendientes. Por eso puede haber huecos en los numeros.
+// «Activa» = tiene acceso hoy, no = paga. Se separa en 4 grupos:
+// pagando (ultimo cobro aprobado), mes gratis con tarjeta domiciliada,
+// mes gratis sin tarjeta (termina solo en `hasta`) y cobro fallido
+// (Mercado Pago reintenta; conserva el acceso por decision de Manuel).
+function categoriaMembresia(u, ultimoCobro, ahora) {
+  if (regalo.regaloActivo(u, ahora)) {
+    return u.membresiaRegaloCancelada
+      ? { categoria: 'gratis_sin_tarjeta', hasta: u.membresiaRegaloHasta }
+      : { categoria: 'gratis_domiciliado', hasta: u.membresiaRegaloHasta };
+  }
+  if (!u.membresiaPreapprovalId) return { categoria: 'gratis_sin_tarjeta', hasta: '' };
+  const cobro = ultimoCobro.get(u.id);
+  if (cobro && cobro.estado === 'aprobado') return { categoria: 'pagando', ultimoCobro: cobro.fecha };
+  return { categoria: 'cobro_fallido', ultimoCobro: cobro ? cobro.fecha : '' };
+}
+
 router.get('/api/membresia/suscriptores', requireAdmin, (req, res) => {
+  const ahora = new Date();
+  // Ultimo cobro de cada quien (getMembresiaPagos viene del mas nuevo al
+  // mas viejo); los "programado" no cuentan como intento.
+  const ultimoCobro = new Map();
+  for (const p of store.getMembresiaPagos()) {
+    if (!p.userId || p.estado === 'programado' || ultimoCobro.has(p.userId)) continue;
+    ultimoCobro.set(p.userId, p);
+  }
   const lista = store
     .getUsers()
     .filter((u) => u.membresiaPrimeraActivacion)
@@ -964,6 +988,7 @@ router.get('/api/membresia/suscriptores', requireAdmin, (req, res) => {
       email: u.email,
       membresiaEstado: u.membresiaEstado,
       membresiaPrimeraActivacion: u.membresiaPrimeraActivacion,
+      ...categoriaMembresia(u, ultimoCobro, ahora),
     }))
     .filter((u) => u.membresiaEstado === 'activa');
   res.json(lista);
