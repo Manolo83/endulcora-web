@@ -3,7 +3,7 @@
   "short_name": "Endulcora",
   "description": "Talleres, clases en vivo, eBooks y el Club Endulcora en tu celular.",
   "id": "/",
-  "start_url": "/?utm_source=app&utm_medium=pwa",
+  "start_url": "/app?utm_source=app&utm_medium=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
