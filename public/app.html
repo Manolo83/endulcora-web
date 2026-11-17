@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Endulcora</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#4E1454">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/app/icono-192.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--vino:#4E1454;--tinta:#1B0720;--crema:#FBF4E9;--oro:#F5A623;--suave:#5C2360}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--crema);color:var(--tinta);font-family:Poppins,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  a{color:var(--vino)}
+  .top{padding:calc(18px + env(safe-area-inset-top)) 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .saludo{font-size:13px;color:var(--suave)}
+  h1{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;line-height:1.1;margin:2px 0 0}
+  h2{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;margin:0}
+  .redondo{width:44px;height:44px;border-radius:22px;border:none;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .redondo img{width:30px;height:30px;object-fit:contain}
+  main{padding:0 20px 24px;display:flex;flex-direction:column;gap:20px}
+  .banner{background:var(--vino);border-radius:22px;padding:18px;color:var(--crema);display:flex;gap:14px;align-items:center;text-decoration:none}
+  .banner .eti{font-size:11px;font-weight:600;letter-spacing:1px;color:var(--oro)}
+  .banner b{display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;line-height:1.15;margin:4px 0}
+  .banner small{font-size:12px}
+  .boton{display:inline-block;margin-top:10px;background:var(--oro);color:var(--tinta);font-weight:600;font-size:13px;padding:11px 16px;border-radius:22px;text-decoration:none}
+  .banner img{width:104px;height:124px;object-fit:cover;border-radius:16px;flex-shrink:0}
+  .accesos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .accesos a{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:var(--tinta);font-size:11px;font-weight:500;text-align:center}
+  .accesos span{width:58px;height:58px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center}
+  .accesos svg,.club svg{width:26px;height:26px;stroke:var(--vino);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .fila{display:flex;align-items:baseline;justify-content:space-between}
+  .fila a{font-size:13px;font-weight:600;text-decoration:none}
+  .carrusel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:2px 20px 6px;scrollbar-width:none}
+  .carrusel::-webkit-scrollbar{display:none}
+  .taller{width:168px;flex-shrink:0;scroll-snap-align:start;background:#fff;border-radius:18px;overflow:hidden;text-decoration:none;color:var(--tinta);display:flex;flex-direction:column}
+  .taller img,.taller .sinfoto{width:168px;height:126px;object-fit:cover;background:#eadff0}
+  .taller b{padding:10px 12px 2px;font-weight:600;font-size:13px;line-height:1.25}
+  .taller small{padding:0 12px 12px;font-size:12px;color:var(--suave)}
+  .vacio{font-size:13px;color:var(--suave)}
+  .club{background:var(--tinta);color:var(--crema);border-radius:22px;padding:18px;display:flex;align-items:center;gap:14px;text-decoration:none}
+  .club svg{stroke:var(--oro)}
+  .club b{display:block;font-weight:600;font-size:15px}
+  .club small{font-size:12px;opacity:.85}
+  .wa{background:#fff;border-radius:20px;padding:14px 16px;display:flex;gap:12px;align-items:center;text-decoration:none;color:var(--tinta);font-size:13px}
+  .wa svg{width:26px;height:26px;stroke:#1a8d4a;fill:none;stroke-width:2;flex-shrink:0}
+</style>
+<script src="/app-shell.js"></script>
+</head>
+<body data-vida="no">
+<div class="top">
+  <div><div class="saludo" id="saludo">¡Hola!</div><h1>¿Qué horneamos hoy?</h1></div>
+  <a class="redondo" href="/" aria-label="Endulcora" onclick="return false"><img src="/logo-endulcora.png" alt=""></a>
+</div>
+<main>
+  <a class="banner" id="banner" href="/clase-gratis" hidden>
+    <div style="flex:1">
+      <div class="eti">CLASE GRATIS</div>
+      <b id="bTitulo">Clase gratis</b>
+      <small id="bFecha"></small><br>
+      <span class="boton">Apartar mi lugar</span>
+    </div>
+    <img id="bArte" alt="" hidden>
+  </a>
+
+  <nav class="accesos" aria-label="Accesos rápidos">
+    <a href="/talleres"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 13.9A4 4 0 0 1 7 6a5 5 0 0 1 10 0 4 4 0 0 1 1 7.9V20H6z"/><path d="M6 17h12"/></svg></span>Talleres</a>
+    <a href="/calendario"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>Calendario</a>
+    <a href="/ebooks"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M19 19v2H6"/></svg></span>Ebooks</a>
+    <a href="/endulcora-en-vivo"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9l5 3-5 3z"/></svg></span>En vivo</a>
+  </nav>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <div class="fila"><h2>Próximos talleres</h2><a href="/calendario">Ver todos</a></div>
+    <div class="carrusel" id="talleres"><span class="vacio">Cargando talleres…</span></div>
+  </section>
+
+  <a class="club" href="/membresia">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>
+    <div style="flex:1"><b id="clubTitulo">Club Endulcora</b><small id="clubTexto">Recetario del mes, taller online, grabaciones y ebooks para leer.</small></div>
+  </a>
+
+  <a class="wa" id="wa" href="https://wa.me/5215575933916" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.7 7.1L3 21l1.9-6.3A8 8 0 1 1 21 12z"/></svg>
+    <span>Pregunta por tu taller en WhatsApp: ahí las promociones quedan más bajas.</span>
+  </a>
+</main>
+<script>
+(function(){
+  var SEDES = { 1: 'Nativitas', 2: 'División' };
+  var DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'], MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  function fecha(f){ var p = f.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]); return DIAS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()]; }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  var hoy = new Date(); hoy = hoy.getFullYear() + '-' + String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0');
+
+  fetch('/api/sesiones-taller').then(function(r){ return r.json(); }).then(function(lista){
+    var prox = lista.filter(function(s){ return s.fecha >= hoy && s.estado !== 'agotado' && s.estado !== 'oculto' && s.slug; })
+      .sort(function(a,b){ return a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : (a.orden||0) - (b.orden||0); }).slice(0, 10);
+    var c = document.getElementById('talleres');
+    if (!prox.length) { c.innerHTML = '<span class="vacio">Pronto publicamos fechas nuevas.</span>'; return; }
+    c.innerHTML = prox.map(function(s){
+      var foto = s.fotoUrl ? '<img src="' + esc(s.fotoUrl) + '" alt="" loading="lazy">' : '<div class="sinfoto"></div>';
+      return '<a class="taller" href="/talleres/' + encodeURIComponent(s.slug) + '">' + foto + '<b>' + esc(s.titulo) + '</b><small>' + fecha(s.fecha) + ' · ' + (SEDES[s.sedeId] || '') + '</small></a>';
+    }).join('');
+  }).catch(function(){ document.getElementById('talleres').innerHTML = '<span class="vacio">No pudimos cargar los talleres. Revisa tu conexión.</span>'; });
+
+  fetch('/api/content').then(function(r){ return r.json(); }).then(function(c){
+    if (String(c.clasegratis_activo) === 'true' && c.clasegratis_fecha && c.clasegratis_fecha >= hoy) {
+      document.getElementById('bTitulo').textContent = (c.clasegratis_titulo || 'Clase gratis').replace(/^Masterclass gratis:\s*/i, '');
+      document.getElementById('bFecha').textContent = fecha(c.clasegratis_fecha) + (c.clasegratis_horarios ? ' · ' + c.clasegratis_horarios : '');
+      if (c.clasegratis_arte) { var im = document.getElementById("bArte"); im.src = c.clasegratis_arte; im.hidden = false; }
+      document.getElementById('banner').hidden = false;
+    }
+    if (c.whatsapp_numero) document.getElementById('wa').href = 'https://wa.me/521' + String(c.whatsapp_numero).replace(/\D/g,'').slice(-10) + '?text=' + encodeURIComponent('Hola, vengo de la app de Endulcora y quiero preguntar por un taller');
+  }).catch(function(){});
+
+  fetch('/api/auth/session', { credentials: 'same-origin' }).then(function(r){ return r.json(); }).then(function(s){
+    if (s && s.isLoggedIn && s.user) {
+      var n = String(s.user.nombre || '').trim().split(/\s+/)[0];
+      if (n) document.getElementById('saludo').textContent = '¡Hola, ' + n + '!';
+      document.getElementById('clubTitulo').textContent = 'Mi membresía';
+      document.getElementById('clubTexto').textContent = 'Entra a tu recetario, tus clases y tus ebooks.';
+    }
+  }).catch(function(){});
+})();
+</script>
+<script src="/vida.js" defer></script>
+</body>
+</html>
