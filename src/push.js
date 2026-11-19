@@ -168,7 +168,7 @@ async function ultimoEnvioHaceMin() {
 function sesionesFuturas(hoy) {
   const sedes = Object.fromEntries(store.getSedes().map((s) => [s.id, s.nombre]));
   return store.getSesionesTaller()
-    .filter((s) => s.fecha >= hoy && s.slug && s.estado !== 'agotado' && s.cupoRestante !== 0)
+    .filter((s) => !s.cancelado && s.fecha >= hoy && s.slug && s.estado !== 'agotado' && s.cupoRestante !== 0)
     .map((s) => ({ ...s, sede: sedes[s.sedeId] || '' }));
 }
 

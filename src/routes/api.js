@@ -397,14 +397,14 @@ router.get('/sedes', (req, res) => {
 });
 
 router.get('/sesiones-taller', (req, res) => {
-  res.json(store.getSesionesTaller(req.query.sedeId));
+  res.json(store.getSesionesTaller(req.query.sedeId).filter((s) => !s.cancelado));
 });
 
 // Pagina publica de un taller por slug (/talleres/<slug>): trae tambien el
 // nombre, direccion y link de mapa de su sede, para no hacer dos pedidos.
 router.get('/talleres/:slug', (req, res) => {
   const sesion = store.getSesionTallerPorSlug(req.params.slug);
-  if (!sesion) return res.status(404).json({ error: 'Ese taller ya no está disponible.' });
+  if (!sesion || sesion.cancelado) return res.status(404).json({ error: 'Ese taller ya no está disponible.' });
   const sede = store.getSedes().find((s) => s.id === sesion.sedeId);
 
   // Otras fechas del MISMO taller (mismo titulo y sede) — varios talleres
@@ -415,7 +415,7 @@ router.get('/talleres/:slug', (req, res) => {
   // (no agotadas, no ya pasadas).
   const hoyISO = new Date().toISOString().slice(0, 10);
   const otrasFechas = store.getSesionesTaller(sede ? sede.id : undefined)
-    .filter((s) => s.id !== sesion.id && s.titulo === sesion.titulo
+    .filter((s) => !s.cancelado && s.id !== sesion.id && s.titulo === sesion.titulo
       && s.fecha >= hoyISO && s.estado !== 'agotado' && s.cupoRestante !== 0)
     .sort((a, b) => a.fecha.localeCompare(b.fecha))
     .map((s) => ({ slug: s.slug, fecha: s.fecha, horario: s.horario, cupoRestante: s.cupoRestante }));
@@ -568,7 +568,7 @@ router.post('/inscripcion-taller', async (req, res) => {
   if (!b.aceptaAvisoPrivacidad) return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para inscribirte.' });
 
   const sesion = store.getSesionesTaller().find((s) => s.id === sesionTallerId);
-  if (!sesion) return res.status(400).json({ error: 'Ese taller ya no está disponible en el calendario. Elige otro.' });
+  if (!sesion || sesion.cancelado) return res.status(400).json({ error: 'Ese taller ya no está disponible en el calendario. Elige otro.' });
   if (sesion.fecha && sesion.fecha < new Date().toISOString().slice(0, 10)) {
     return res.status(400).json({ error: 'Ese taller ya se realizó.' });
   }

@@ -387,7 +387,7 @@ app.get('/talleres-landing', (req, res) => {
 // vistas previas al anunciar.
 app.get('/talleres/:slug', (req, res) => {
   const sesion = store.getSesionTallerPorSlug(req.params.slug);
-  if (!sesion) {
+  if (!sesion || sesion.cancelado) {
     return res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
   }
   let html;
@@ -603,7 +603,7 @@ app.get('/sitemap.xml', (req, res) => {
   // tienen precio no tienen una pagina de compra util que anunciar).
   const hoyISO = new Date().toISOString().slice(0, 10);
   const paginasDeTaller = store.getSesionesTaller()
-    .filter((s) => s.slug && s.fecha >= hoyISO && (parseFloat(String(s.precioTotal || 0).replace(/,/g, '')) || 0) > 0)
+    .filter((s) => !s.cancelado && s.slug && s.fecha >= hoyISO && (parseFloat(String(s.precioTotal || 0).replace(/,/g, '')) || 0) > 0)
     .map((s) => ({ loc: `/talleres/${s.slug}`, prioridad: '0.7', frecuencia: 'daily' }));
 
   const urls = [...paginasEstaticas, ...paginasDeProducto, ...paginasDeBlog, ...paginasDeTaller]

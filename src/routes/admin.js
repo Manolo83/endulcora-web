@@ -1773,6 +1773,13 @@ router.post('/api/sesiones-taller', requireAdmin, (req, res) => {
   res.status(201).json(store.addSesionTaller({ sedeId, fecha, titulo, estado, horario, descripcion, queAprendes, fotoUrl, precioTotal, anticipo, cupoMaximo, hojaSheets }));
 });
 
+router.post('/api/sesiones-taller/:id/cancelar', requireAdmin, (req, res) => {
+  const { cancelado, por } = req.body || {};
+  const item = store.cancelarSesionTaller(req.params.id, cancelado !== false, por);
+  if (!item) return res.status(404).json({ error: 'No encontramos ese taller.' });
+  res.json(item);
+});
+
 router.patch('/api/sesiones-taller/:id', requireAdmin, (req, res) => {
   if (req.body && req.body.horario && !HORARIOS_VALIDOS.includes(req.body.horario)) {
     return res.status(400).json({ error: 'Ese horario no es válido.' });

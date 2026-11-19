@@ -62,7 +62,7 @@ function fechaLarga(iso) {
 function talleresDeLaSemana(lunes) {
   const desde = sumarDias(lunes, 2);
   const hasta = sumarDias(lunes, 6);
-  return store.getSesionesTaller().filter((s) => s.fecha >= desde && s.fecha <= hasta && s.titulo);
+  return store.getSesionesTaller().filter((s) => !s.cancelado && s.fecha >= desde && s.fecha <= hasta && s.titulo);
 }
 
 function ebooksCandidatos() {

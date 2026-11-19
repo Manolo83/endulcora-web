@@ -99,7 +99,7 @@ router.post('/preference', async (req, res) => {
         return res.status(400).json({ error: 'Tienes que aceptar el aviso de privacidad para apartar tu lugar.' });
       }
       const sesion = store.getSesionesTaller().find((s) => s.id === sesionTallerId);
-      if (!sesion) return res.status(404).json({ error: 'Ese taller ya no está disponible.' });
+      if (!sesion || sesion.cancelado) return res.status(404).json({ error: 'Ese taller ya no está disponible.' });
       if (sesion.fecha && sesion.fecha < new Date().toISOString().slice(0, 10)) {
         return res.status(400).json({ error: 'Ese taller ya se realizó.' });
       }

@@ -3211,6 +3211,19 @@ module.exports = {
     save(data);
     return item;
   },
+  // Cancelar / volver a abrir un taller desde /admin (Alexa, 19 nov 2026).
+  // Un taller cancelado sigue existiendo (sus inscritos no se pierden),
+  // pero ya no sale en ninguna pagina publica ni acepta inscripciones.
+  cancelarSesionTaller(id, cancelado, por) {
+    const data = load();
+    const item = data.sesionesTaller.find((s) => s.id === Number(id));
+    if (!item) return null;
+    item.cancelado = !!cancelado;
+    item.canceladoEn = cancelado ? new Date().toISOString() : null;
+    item.canceladoPor = cancelado ? String(por || '').slice(0, 60) : '';
+    save(data);
+    return { ...item, cupoRestante: cupoRestanteTaller(data, item.id) };
+  },
   deleteSesionTaller(id) {
     const data = load();
     data.sesionesTaller = data.sesionesTaller.filter((s) => s.id !== Number(id));
