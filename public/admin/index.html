@@ -1452,7 +1452,26 @@
 
       <div id="resumenCapturaLex" class="mt-6 grid gap-4 sm:grid-cols-3"></div>
       <div id="filtrosCapturaLex" class="mt-4 flex flex-wrap gap-2 font-ui text-xs font-600"></div>
+      <details id="cajaCancelarTalleres" class="mt-6 rounded-2xl bg-white ring-1 ring-red-200">
+        <summary class="cursor-pointer select-none px-5 py-4 font-titulo text-lg text-red-600">🚫 Cancelar un taller (o volver a abrirlo) <span class="font-cuerpo text-sm font-400 text-carbon/55">· toca aquí para ver los próximos talleres</span></summary>
+        <div class="px-5 pb-5">
+          <p class="text-sm text-carbon/60">Cuando cancelas un taller, desaparece solo de la página de inscripción y de la web. Las personas inscritas no se borran.</p>
+          <div id="listaCancelarTalleres" class="mt-4 space-y-3"></div>
+        </div>
+      </details>
       <div id="listaInscripcionesTaller" class="mt-6 space-y-6"></div>
+      <div id="modalCancelarTaller" class="fixed inset-0 z-50 hidden items-center justify-center bg-carbon/60 p-4">
+        <div class="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl ring-4 ring-red-200">
+          <h3 id="mctTitulo" class="font-titulo text-2xl text-red-600"></h3>
+          <p id="mctTaller" class="mt-2 text-lg font-500"></p>
+          <div id="mctAviso" class="mt-4 hidden rounded-2xl bg-amber-50 p-4 ring-2 ring-amber-300"></div>
+          <p id="mctTexto" class="mt-4 text-sm text-carbon/70"></p>
+          <div class="mt-5 flex flex-col gap-3 md:flex-row">
+            <button type="button" id="mctSi" class="flex-1 rounded-full px-6 py-4 font-ui text-lg font-700 text-white"></button>
+            <button type="button" id="mctNo" class="flex-1 rounded-full border-2 border-vino/30 bg-white px-6 py-4 font-ui text-lg font-700 text-vino">No, regresar</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- QR DE REGISTRO -->
@@ -4593,6 +4612,73 @@ $('btnExportarSuscriptores').addEventListener('click', () => {
 
 /* ---------- Inscripciones a talleres ---------- */
 let INSCRIPCIONES_TALLER = [];
+// ---- Cancelar talleres (Alexa, 19 nov 2026): botones grandes, confirmar y
+// poder deshacer. Un taller cancelado ya no sale en la pagina publica.
+let SESIONES_TALLER_CANCELAR = [];
+function nombreSedeTaller(s){ const sd = (typeof SEDES !== 'undefined' && SEDES || []).find(x => x.id === s.sedeId); return sd ? sd.nombre : ''; }
+function fechaLargaTaller(f){ return f ? new Date(`${f}T12:00:00`).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }) : ''; }
+function inscritosDeSesion(id){ return INSCRIPCIONES_TALLER.filter(i => i.sesionTallerId === id && i.estadoPago !== 'cancelado').length; }
+function botonCancelarTaller(s){
+  return s.cancelado
+    ? `<button type="button" data-sesion="${s.id}" class="btnCancelarTaller shrink-0 rounded-full border-2 border-emerald-600 bg-white px-6 py-3 font-ui text-base font-700 text-emerald-700">↩ Volver a abrirlo</button>`
+    : `<button type="button" data-sesion="${s.id}" class="btnCancelarTaller shrink-0 rounded-full bg-red-600 px-6 py-3 font-ui text-base font-700 text-white shadow">✖ Cancelar este taller</button>`;
+}
+function estadoCancelTaller(s){
+  if(!s.cancelado) return `<p class="font-ui text-xs uppercase text-emerald-700">✅ Abierto en la página</p>`;
+  const cuando = s.canceladoEn ? new Date(s.canceladoEn).toLocaleString('es-MX', { timeZone: 'America/Mexico_City', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+  return `<p class="font-ui text-sm font-700 text-red-600">🚫 CANCELADO · ya no aparece en la página</p>${cuando ? `<p class="text-xs text-carbon/50">Se canceló el ${cuando}</p>` : ''}`;
+}
+function renderCancelarTalleres(){
+  const cont = $('listaCancelarTalleres'); if(!cont) return;
+  const hoy = diaCdmx(new Date());
+  const lista = SESIONES_TALLER_CANCELAR.filter(s => s.titulo && s.fecha >= hoy)
+    .sort((a, b) => (b.cancelado ? 1 : 0) - (a.cancelado ? 1 : 0) || a.fecha.localeCompare(b.fecha));
+  if(!lista.length){ cont.innerHTML = '<p class="text-sm text-carbon/50">No hay talleres próximos en el calendario.</p>'; return; }
+  cont.innerHTML = lista.map(s => {
+    const n = inscritosDeSesion(s.id);
+    return `<div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 ${s.cancelado ? 'bg-gray-100 ring-2 ring-red-300' : 'bg-vino/5'}">
+      <div><p class="font-titulo text-base ${s.cancelado ? 'text-carbon/50 line-through' : 'text-vino'}">${escapeHtml(s.titulo)} · ${fechaLargaTaller(s.fecha)}${nombreSedeTaller(s) ? ` · ${escapeHtml(nombreSedeTaller(s))}` : ''}</p>
+      ${estadoCancelTaller(s)}<p class="text-xs text-carbon/55">${n} inscrito${n === 1 ? '' : 's'}</p></div>
+      ${botonCancelarTaller(s)}</div>`;
+  }).join('');
+  conectarBotonesCancelarTaller(cont);
+}
+function conectarBotonesCancelarTaller(cont){
+  cont.querySelectorAll('.btnCancelarTaller').forEach(b => b.addEventListener('click', () => abrirModalCancelarTaller(Number(b.dataset.sesion))));
+}
+function abrirModalCancelarTaller(id){
+  const s = SESIONES_TALLER_CANCELAR.find(x => x.id === id); if(!s) return;
+  const cancelar = !s.cancelado;
+  const n = inscritosDeSesion(id);
+  $('mctTitulo').textContent = cancelar ? '¿Seguro que quieres cancelar este taller?' : '¿Volver a abrir este taller?';
+  $('mctTitulo').className = `font-titulo text-2xl ${cancelar ? 'text-red-600' : 'text-emerald-700'}`;
+  $('mctTaller').textContent = `${s.titulo} · ${fechaLargaTaller(s.fecha)}${nombreSedeTaller(s) ? ' · ' + nombreSedeTaller(s) : ''}`;
+  const aviso = $('mctAviso');
+  if(cancelar && n){
+    aviso.innerHTML = `<p class="text-base font-500 text-amber-900">⚠️ Este taller ya tiene <b>${n} persona${n === 1 ? '' : 's'} inscrita${n === 1 ? '' : 's'}</b>.</p><p class="mt-1 text-sm text-amber-900">La página NO les avisa sola. Hay que escribirles por WhatsApp para moverlas a otra fecha o devolverles su dinero.</p>`;
+    aviso.classList.remove('hidden');
+  } else aviso.classList.add('hidden');
+  $('mctTexto').textContent = cancelar
+    ? 'Al cancelarlo, ya nadie nuevo se podrá inscribir. Si te equivocas, lo puedes volver a abrir con un botón.'
+    : 'Va a volver a aparecer en la página de inscripción y la gente se podrá inscribir otra vez.';
+  const si = $('mctSi');
+  si.textContent = cancelar ? 'Sí, cancelar taller' : 'Sí, volver a abrirlo';
+  si.className = `flex-1 rounded-full px-6 py-4 font-ui text-lg font-700 text-white ${cancelar ? 'bg-red-600' : 'bg-emerald-600'}`;
+  si.onclick = async () => {
+    si.disabled = true;
+    try{
+      const r = await api(`/admin/api/sesiones-taller/${id}/cancelar`, { method: 'POST', body: JSON.stringify({ cancelado: cancelar }) });
+      Object.assign(s, r);
+      cerrarModalCancelarTaller();
+      toast(cancelar ? 'Taller cancelado. Ya no aparece en la página.' : 'Listo, el taller volvió a la página.');
+      renderCancelarTalleres(); renderInscripcionesTaller();
+    }catch(e){ toast(e.message); }
+    si.disabled = false;
+  };
+  const m = $('modalCancelarTaller'); m.classList.remove('hidden'); m.classList.add('flex');
+}
+function cerrarModalCancelarTaller(){ const m = $('modalCancelarTaller'); m.classList.add('hidden'); m.classList.remove('flex'); }
+document.addEventListener('click', e => { if(e.target && (e.target.id === 'mctNo' || e.target.id === 'modalCancelarTaller')) cerrarModalCancelarTaller(); });
 const MESES_CORTOS = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 function fechaLegibleCorta(fecha){
@@ -4608,7 +4694,7 @@ function agruparInscripcionesTaller(lista){
   const grupos = new Map();
   lista.forEach(i => {
     const clave = i.sesionTallerId || `${i.taller}|||${i.fecha}|||${i.sede}`;
-    if (!grupos.has(clave)) grupos.set(clave, { taller: i.taller, fecha: i.fecha, sede: i.sede, filas: [] });
+    if (!grupos.has(clave)) grupos.set(clave, { taller: i.taller, fecha: i.fecha, sede: i.sede, sesionTallerId: i.sesionTallerId, filas: [] });
     grupos.get(clave).filas.push(i);
   });
   return [...grupos.values()].sort((a, b) => (b.fecha || '').localeCompare(a.fecha || '') || a.taller.localeCompare(b.taller));
@@ -4643,8 +4729,12 @@ async function cargarInscripcionesTaller(){
   const cont = $('listaInscripcionesTaller');
   cont.innerHTML = '<p class="p-5 text-sm text-carbon/50">Cargando…</p>';
   try{
-    INSCRIPCIONES_TALLER = await api('/admin/api/inscripciones-taller');
+    [INSCRIPCIONES_TALLER, SESIONES_TALLER_CANCELAR] = await Promise.all([
+      api('/admin/api/inscripciones-taller'),
+      api('/admin/api/sesiones-taller').catch(() => []),
+    ]);
     renderInscripcionesTaller();
+    renderCancelarTalleres();
   }catch(e){
     cont.innerHTML = `<p class="p-5 text-sm text-red-600">${escapeHtml(e.message)}</p>`;
   }
@@ -4672,6 +4762,7 @@ function renderInscripcionesTaller(){
         <div class="flex flex-wrap items-center justify-between gap-2 bg-vino/5 px-5 py-3">
           <h3 class="font-titulo text-base text-vino">${escapeHtml(g.taller || 'Sin nombre')} <span class="font-cuerpo text-sm font-400 text-carbon/60">· ${fechaLegibleCorta(g.fecha)}${g.sede ? ` · ${escapeHtml(g.sede)}` : ''}</span></h3>
           <span class="font-ui text-[11px] uppercase tracking-wider text-carbon/45">${g.filas.length} inscrito${g.filas.length === 1 ? '' : 's'}${(() => { const n = g.filas.filter(f => !f.capturadoLex).length; return n ? ` · <b class="text-red-600">${n} sin capturar</b>` : ''; })()}</span>
+          ${(() => { const s = SESIONES_TALLER_CANCELAR.find(x => x.id === g.sesionTallerId); return s && s.fecha >= diaCdmx(new Date()) ? `<div class="flex w-full flex-wrap items-center justify-between gap-3">${estadoCancelTaller(s)}${botonCancelarTaller(s)}</div>` : ''; })()}
         </div>
         <table class="w-full min-w-[760px] text-sm">
           <thead>
@@ -4738,6 +4829,7 @@ function renderInscripcionesTaller(){
         toast(e.message);
       }
     }
+    conectarBotonesCancelarTaller(cont);
     cont.querySelectorAll('.chkCapturadoLex').forEach(el => {
       el.addEventListener('change', async () => {
         try{

@@ -21,7 +21,7 @@ function construirCalendario() {
   const sedes = store.getSedes();
   const bloques = sedes
     .map((sede) => {
-      const sesiones = store.getSesionesTaller(sede.id);
+      const sesiones = store.getSesionesTaller(sede.id).filter((s) => !s.cancelado);
       if (!sesiones.length) return null;
       const lineas = sesiones
         .map((s) => {
