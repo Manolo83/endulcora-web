@@ -17,6 +17,7 @@
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.endulcora.com/inscripcion-taller">
 <meta name="theme-color" content="#1B0720">
+<style>html,body{overflow-x:clip;max-width:100%}</style>
 
 <!-- Meta Pixel Code -->
 <script>
@@ -90,11 +91,11 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4E1454; }
   <div class="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-5 lg:px-8">
     <div class="flex items-center gap-3 shrink-0">
       <a href="/" class="flex items-center">
-        <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-12 w-auto sm:h-14">
+        <img src="/logo-endulcora.png" alt="Endulcora · Estudio Gastronómico" class="h-10 w-auto max-w-[150px] object-contain sm:h-14 sm:max-w-none">
       </a>
       <div class="h-9 w-px bg-carbon/15"></div>
       <a href="https://levent-web-production.up.railway.app/" target="_blank" rel="noopener" aria-label="Levent" title="Acompañados por Levent" class="shrink-0 opacity-70 hover:opacity-100 transition">
-        <img src="/levent-icono.png" alt="" class="h-10 w-10">
+        <img src="/levent-icono.png" alt="" class="h-8 w-8 sm:h-10 sm:w-10">
       </a>
     </div>
     <a href="/calendario" class="shrink-0 rounded-full border border-vino/25 px-4 py-2.5 font-ui text-[12px] font-700 uppercase tracking-wider text-vino hover:border-vino transition">Ver calendario</a>
@@ -242,7 +243,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4E1454; }
     <p id="errorInscripcion" class="hidden rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"></p>
 
     <button type="submit" id="btnEnviarInscripcion" class="w-full rounded-full bg-vino py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-crema transition hover:bg-uva disabled:opacity-60">
-      Confirmar mi inscripción
+      Revisar y confirmar
     </button>
   </form>
 
@@ -269,6 +270,23 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4E1454; }
     </div>
   </div>
 </footer>
+
+<!-- Recuadro para revisar los datos antes de enviar -->
+<div id="modalRevision" class="fixed inset-0 z-[70] hidden items-end justify-center bg-carbon/60 p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="tituloRevision">
+  <div class="flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
+    <div class="border-b border-vino/10 px-6 pb-4 pt-6">
+      <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">Último paso</p>
+      <h3 id="tituloRevision" class="mt-1 font-titulo text-2xl text-vino">Revisa que todo esté bien</h3>
+      <p class="mt-1 text-sm text-carbon/65">Así quedará tu inscripción. Si algo no está bien, puedes corregirlo antes de confirmar.</p>
+    </div>
+    <div id="contenidoRevision" class="flex-1 space-y-4 overflow-y-auto px-6 py-5 text-sm"></div>
+    <div class="space-y-2 border-t border-vino/10 px-6 pb-6 pt-4">
+      <p class="rounded-xl bg-flama/15 px-4 py-2.5 text-xs leading-relaxed text-carbon/80"><b>Recuerda:</b> el apartado no es reembolsable.</p>
+      <button type="button" id="btnConfirmarRevision" class="w-full rounded-full bg-vino py-3.5 font-ui text-sm font-700 uppercase tracking-wider text-crema transition hover:bg-uva disabled:opacity-60">Sí, todo está bien · Confirmar</button>
+      <button type="button" id="btnCorregirRevision" class="w-full rounded-full border border-vino/25 py-3 font-ui text-[12px] font-700 uppercase tracking-wider text-vino transition hover:bg-vino/5">Corregir mis datos</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal del aviso de privacidad -->
 <div id="modalPrivacidad" class="fixed inset-0 z-[60] hidden items-center justify-center bg-carbon/50 p-4">
@@ -497,6 +515,7 @@ campoMonto.addEventListener('input', pintarMontoPorPersona);
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorBox.classList.add('hidden');
+  if (!form.reportValidity()) return;
 
   const datos = new FormData(form);
   const esDeMexico = datos.get('esDeMexico');
@@ -528,6 +547,71 @@ form.addEventListener('submit', async (e) => {
   };
   const textoSesion = selectSesion.options[selectSesion.selectedIndex] ? selectSesion.options[selectSesion.selectedIndex].textContent : '';
 
+  abrirRevision(cuerpo, textoSesion, datos);
+});
+
+// ---- Recuadro de revision: muestra lo capturado y pide confirmar ----
+const modalRevision = document.getElementById('modalRevision');
+const btnConfirmarRev = document.getElementById('btnConfirmarRevision');
+let pendiente = null;
+function filaRev(etiqueta, valor){
+  if (valor === undefined || valor === null || String(valor).trim() === '') return '';
+  return `<div class="flex flex-col gap-0.5 border-b border-vino/5 py-2 last:border-0 sm:flex-row sm:justify-between sm:gap-4"><span class="text-carbon/55">${escapeHtml(etiqueta)}</span><span class="font-700 text-carbon sm:text-right">${escapeHtml(valor)}</span></div>`;
+}
+function grupoRev(titulo, filas){
+  if (!filas.trim()) return '';
+  return `<div class="rounded-2xl bg-crema/50 px-4 py-2 ring-1 ring-vino/10"><p class="pt-1 font-ui text-[11px] font-700 uppercase tracking-widest text-vino">${escapeHtml(titulo)}</p>${filas}</div>`;
+}
+function abrirRevision(cuerpo, textoSesion, datos){
+  pendiente = { cuerpo, textoSesion };
+  const sede = selectSede.options[selectSede.selectedIndex] ? selectSede.options[selectSede.selectedIndex].textContent : '';
+  const opt = selectSesion.options[selectSesion.selectedIndex];
+  const fecha = opt && opt.parentElement && opt.parentElement.tagName === 'OPTGROUP' ? opt.parentElement.label : '';
+  const montoNum = parseFloat(String(cuerpo.montoAnticipo || '').replace(/[^0-9.]/g, ''));
+  const monto = montoNum > 0 ? `$${montoNum.toLocaleString('es-MX')} MXN` : cuerpo.montoAnticipo;
+  const mes = Number(cuerpo.cumpleMes);
+  const cumple = cuerpo.cumpleDia && mes ? `${cuerpo.cumpleDia} de ${NOMBRES_MES[mes - 1].toLowerCase()}` : '';
+  const selComo = document.getElementById('campoComoSeEntero');
+  const comoSe = selComo && selComo.value ? selComo.selectedOptions[0].textContent : '';
+  let html = '';
+  html += grupoRev('Tu taller', filaRev('Taller', textoSesion) + filaRev('Día', fecha) + filaRev('Sede', sede));
+  html += grupoRev('Tus datos', filaRev('Nombre', cuerpo.nombre) + filaRev('WhatsApp', cuerpo.whatsapp) + filaRev('Correo', cuerpo.correo));
+  html += grupoRev('Tu apartado', filaRev('Personas', String(cuerpo.personasAnticipo)) + filaRev('Monto pagado', monto) + filaRev('Folio del comprobante', cuerpo.folioAnticipo));
+  cuerpo.acompanantes.forEach((p, i) => {
+    html += grupoRev(`Persona ${i + 2}`, filaRev('Nombre', p.nombre || '(sin nombre)') + filaRev('WhatsApp', p.whatsapp) + filaRev('Correo', p.correo));
+  });
+  html += grupoRev('Otros datos', filaRev('Cómo nos conociste', comoSe) + filaRev('Cumpleaños', cumple)
+    + filaRev('Vives en', cuerpo.esDeMexico ? ('México' + (cuerpo.estado ? ' · ' + cuerpo.estado : '')) : cuerpo.pais)
+    + filaRev('Primera vez con nosotros', datos.get('esPrimeraVez') ? (cuerpo.esPrimeraVez ? 'Sí' : 'No') : '')
+    + filaRev('Talleres que te gustarían', cuerpo.preferencias));
+  document.getElementById('contenidoRevision').innerHTML = html;
+  btnConfirmarRev.disabled = false;
+  btnConfirmarRev.textContent = 'Sí, todo está bien · Confirmar';
+  modalRevision.classList.remove('hidden');
+  modalRevision.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+function cerrarRevision(){
+  modalRevision.classList.add('hidden');
+  modalRevision.classList.remove('flex');
+  document.body.style.overflow = '';
+}
+document.getElementById('btnCorregirRevision').addEventListener('click', () => {
+  cerrarRevision();
+  document.getElementById('campoNombre').scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+modalRevision.addEventListener('click', (e) => { if (e.target === modalRevision) cerrarRevision(); });
+btnConfirmarRev.addEventListener('click', async () => {
+  if (!pendiente) return;
+  btnConfirmarRev.disabled = true;
+  btnConfirmarRev.textContent = 'Enviando…';
+  const ok = await enviarInscripcion(pendiente.cuerpo, pendiente.textoSesion);
+  cerrarRevision();
+  if (ok) window.scrollTo({ top: 0, behavior: 'smooth' });
+  else errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+async function enviarInscripcion(cuerpo, textoSesion){
   btnEnviar.disabled = true;
   btnEnviar.textContent = 'Enviando…';
   try{
@@ -547,13 +631,15 @@ form.addEventListener('submit', async (e) => {
     }
     form.classList.add('hidden');
     document.getElementById('tarjetaExito').classList.remove('hidden');
+    return true;
   }catch(err){
     errorBox.textContent = err.message;
     errorBox.classList.remove('hidden');
     btnEnviar.disabled = false;
-    btnEnviar.textContent = 'Confirmar mi inscripción';
+    btnEnviar.textContent = 'Revisar y confirmar';
+    return false;
   }
-});
+}
 </script>
 </body>
 </html>
