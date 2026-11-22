@@ -25,12 +25,19 @@ function ultimoCobroAprobado(usuario, pagos) {
   return fechas.length ? Math.max(...fechas) : null;
 }
 
-// Desde cuando corre el plazo: el ultimo cobro aprobado, o si nunca pago,
-// el fin de su mes de regalo o su primera activacion.
-function inicioDelPeriodo(usuario, pagos) {
-  const candidatos = [ultimoCobroAprobado(usuario, pagos)];
-  if (usuario.membresiaRegaloHasta) candidatos.push(new Date(usuario.membresiaRegaloHasta).getTime() - DIAS_PERIODO * DIA_MS);
-  if (usuario.membresiaPrimeraActivacion) candidatos.push(new Date(usuario.membresiaPrimeraActivacion).getTime());
+// Fecha en que le tocaba pagar: 30 dias despues del ultimo cobro aprobado.
+// Si nunca ha pagado, el cobro tocaba al activar (o al terminar su mes de
+// regalo): sin esto, quien domiciliaba con una tarjeta que rechaza el primer
+// cobro tenia 35 dias gratis.
+function fechaDePago(usuario, pagos) {
+  const ultimo = ultimoCobroAprobado(usuario, pagos);
+  const candidatos = [];
+  if (ultimo) candidatos.push(ultimo + DIAS_PERIODO * DIA_MS);
+  else {
+    if (usuario.membresiaActivaDesde) candidatos.push(new Date(usuario.membresiaActivaDesde).getTime());
+    if (usuario.membresiaPrimeraActivacion) candidatos.push(new Date(usuario.membresiaPrimeraActivacion).getTime());
+  }
+  if (usuario.membresiaRegaloHasta) candidatos.push(new Date(usuario.membresiaRegaloHasta).getTime());
   const validos = candidatos.filter((t) => t && !Number.isNaN(t));
   return validos.length ? Math.max(...validos) : null;
 }
@@ -39,9 +46,9 @@ function estaMoroso(usuario, pagos, ahora = new Date()) {
   if (!usuario || usuario.membresiaEstado !== 'activa') return false;
   if (!usuario.membresiaPreapprovalId) return false; // alta manual: vence sola
   if (regalo.regaloActivo(usuario, ahora)) return false;
-  const inicio = inicioDelPeriodo(usuario, pagos);
-  if (!inicio) return false;
-  return ahora.getTime() > inicio + (DIAS_PERIODO + DIAS_GRACIA) * DIA_MS;
+  const toca = fechaDePago(usuario, pagos);
+  if (!toca) return false;
+  return ahora.getTime() > toca + DIAS_GRACIA * DIA_MS;
 }
 
 async function revisarMorosos(ahora = new Date()) {
