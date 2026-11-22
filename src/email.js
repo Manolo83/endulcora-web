@@ -1445,7 +1445,34 @@ ${ubicacion ? `<tr><td style="padding:16px 24px 0;font-size:14px;line-height:1.6
   if (error) throw new Error(error.message || 'Resend rechazó el correo.');
 }
 
+// Aviso de que se suspendio la membresia por falta de pago (src/membresiaMorosos.js).
+async function enviarCorreoMembresiaSuspendida({ to, nombre, siteUrl, precio, numeroWhatsapp }) {
+  const client = resendClient();
+  if (!client) throw new Error('El envío de correos todavía no está configurado.');
+  const from = process.env.RESEND_FROM || 'Endulcora <onboarding@resend.dev>';
+  const digitos = String(numeroWhatsapp || '').replace(/[^0-9]/g, '').slice(-10);
+  const wa = digitos ? `https://wa.me/521${digitos}` : '';
+  const { error } = await client.emails.send({
+    from,
+    to,
+    subject: 'Tu membresía Endulcora quedó suspendida',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1B0720;">
+        <p style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7A2E7E;">Endulcora</p>
+        <h1 style="font-size:20px;color:#4E1454;">Hola${nombre ? ` ${escapeHtml(nombre)}` : ''}:</h1>
+        <p style="font-size:14px;line-height:1.6;">No pudimos cobrar tu membresía de este mes, así que <strong>tu acceso quedó suspendido</strong>: recetario del mes, taller online, biblioteca de talleres grabados, lectura de eBooks y el precio especial de talleres para miembros.</p>
+        <p style="font-size:14px;line-height:1.6;">Puedes volver cuando quieras. Al reactivarla, tu membresía queda en <strong>$${precio} MXN al mes</strong>.</p>
+        <p style="margin-top:16px;"><a href="${siteUrl}/membresia" style="background:#F5A623;color:#1B0720;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">Reactivar mi membresía</a></p>
+        ${wa ? `<p style="font-size:13px;line-height:1.6;margin-top:18px;">¿Crees que es un error? Escríbenos por <a href="${wa}" style="color:#4E1454;font-weight:700;">WhatsApp</a>.</p>` : ''}
+        <p style="margin-top:24px;font-size:12px;color:#9C9C9C;">Recibiste este correo porque tenías una membresía en endulcora.com.</p>
+      </div>
+    `,
+  });
+  if (error) throw new Error(error.message || 'Resend rechazó el correo.');
+}
+
 module.exports = {
+  enviarCorreoMembresiaSuspendida,
   bloqueMembresiaTaller,
   enviarCorreoRecetarioAcceso,
   pieEndulcora,
