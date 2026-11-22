@@ -2,7 +2,12 @@
 // No guarda paginas en cache: la app siempre muestra el sitio al dia.
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
-self.addEventListener('fetch', () => {});
+// Sin internet: en lugar del error del navegador, una pantalla de Endulcora.
+const SIN_CONEXION = '<!doctype html><html lang="es-MX"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sin conexión · Endulcora</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#FBF4E9;font-family:system-ui,sans-serif;color:#1B0720;text-align:center;padding:24px}b{display:block;font-size:22px;color:#4E1454;margin-bottom:8px}button{margin-top:18px;border:0;border-radius:999px;background:#4E1454;color:#FBF4E9;padding:12px 22px;font-size:15px}</style></head><body><div><b>Sin conexión</b>Revisa tu internet y vuelve a intentarlo.<br><button onclick="location.reload()">Intentar de nuevo</button></div></body></html>';
+self.addEventListener('fetch', (e) => {
+  if (e.request.mode !== 'navigate') return;
+  e.respondWith(fetch(e.request).catch(() => new Response(SIN_CONEXION, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })));
+});
 self.addEventListener('push', (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (_) { d = { cuerpo: e.data && e.data.text() }; }

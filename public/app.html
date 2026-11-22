@@ -42,6 +42,17 @@
   .taller img,.taller .sinfoto{width:168px;height:126px;object-fit:cover;background:#eadff0}
   .taller b{padding:10px 12px 2px;font-weight:600;font-size:13px;line-height:1.25}
   .taller small{padding:0 12px 12px;font-size:12px;color:var(--suave)}
+  .taller .precio{padding:0 12px 4px;font-size:12px;font-weight:600;color:var(--tinta)}
+  .taller .precio s{font-weight:400;color:var(--suave);margin-right:4px}
+  .taller .miembro{color:#1a8d4a}
+  .taller .cupo{margin:0 12px 12px;align-self:flex-start;background:#fde9c9;color:#7a4b00;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600}
+  .cuenta{background:#fff;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .cuenta h3{margin:0;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--suave)}
+  .cuenta .item{display:flex;justify-content:space-between;gap:10px;align-items:center;text-decoration:none;color:var(--tinta);font-size:13px;padding:8px 0;border-top:1px solid #f0e8f2}
+  .cuenta .item small{display:block;color:var(--suave);font-size:12px}
+  .cuenta .pill{flex-shrink:0;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600;background:#e6f4ec;color:#1a6b3a}
+  .cuenta .pill.debe{background:#fde9c9;color:#7a4b00}
+  .cuenta .entrar{align-self:flex-start;background:var(--tinta);color:var(--crema);border-radius:999px;padding:8px 16px;font-size:13px;text-decoration:none}
   .vacio{font-size:13px;color:var(--suave)}
   .club{background:var(--tinta);color:var(--crema);border-radius:22px;padding:18px;display:flex;align-items:center;gap:14px;text-decoration:none}
   .club svg{stroke:var(--oro)}
@@ -80,6 +91,8 @@
     <div class="carrusel" id="talleres"><span class="vacio">Cargando talleres…</span></div>
   </section>
 
+  <section class="cuenta" id="cuenta" hidden></section>
+
   <a class="club" href="/membresia">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>
     <div style="flex:1"><b id="clubTitulo">Club Endulcora</b><small id="clubTexto">Recetario del mes, taller online, grabaciones y ebooks para leer.</small></div>
@@ -87,7 +100,7 @@
 
   <a class="wa" id="wa" href="https://wa.me/5215575933916" target="_blank" rel="noopener">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.7 7.1L3 21l1.9-6.3A8 8 0 1 1 21 12z"/></svg>
-    <span>Pregunta por tu taller en WhatsApp: ahí las promociones quedan más bajas.</span>
+    <span>¿Dudas sobre un taller? Escríbenos por WhatsApp.</span>
   </a>
 </main>
 <script>
@@ -98,15 +111,28 @@
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   var hoy = new Date(); hoy = hoy.getFullYear() + '-' + String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0');
 
-  fetch('/api/sesiones-taller').then(function(r){ return r.json(); }).then(function(lista){
-    var prox = lista.filter(function(s){ return s.fecha >= hoy && s.estado !== 'agotado' && s.estado !== 'oculto' && s.slug; })
-      .sort(function(a,b){ return a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : (a.orden||0) - (b.orden||0); }).slice(0, 10);
+  function peso(n){ return '$' + Number(n).toLocaleString('es-MX'); }
+  function miniatura(u){ return /^\/uploads\//.test(u) ? u + '?w=480' : u; }
+  var MIEMBRO = null; // { precio, quedan } si tiene membresia activa
+  var LISTA = [];
+  function pintarTalleres(){
     var c = document.getElementById('talleres');
+    var prox = LISTA;
     if (!prox.length) { c.innerHTML = '<span class="vacio">Pronto publicamos fechas nuevas.</span>'; return; }
     c.innerHTML = prox.map(function(s){
-      var foto = s.fotoUrl ? '<img src="' + esc(s.fotoUrl) + '" alt="" loading="lazy">' : '<div class="sinfoto"></div>';
-      return '<a class="taller" href="/talleres/' + encodeURIComponent(s.slug) + '">' + foto + '<b>' + esc(s.titulo) + '</b><small>' + fecha(s.fecha) + ' · ' + (SEDES[s.sedeId] || '') + '</small></a>';
+      var foto = s.fotoUrl ? '<img src="' + esc(miniatura(s.fotoUrl)) + '" alt="' + esc(s.titulo) + '" loading="lazy">' : '<div class="sinfoto"></div>';
+      var total = Number(s.precioTotal) || 0, precio = '';
+      if (MIEMBRO && MIEMBRO.quedan > 0 && MIEMBRO.precio > 0 && MIEMBRO.precio < total) precio = '<div class="precio"><s>' + peso(total) + '</s><span class="miembro">' + peso(MIEMBRO.precio) + ' para ti</span></div>';
+      else if (total) precio = '<div class="precio">' + peso(total) + (s.anticipo ? ' · aparta con ' + peso(s.anticipo) : '') + '</div>';
+      var cupo = (typeof s.cupoRestante === 'number' && s.cupoRestante > 0 && s.cupoRestante <= 8) ? '<span class="cupo">Quedan ' + s.cupoRestante + ' lugares</span>' : '';
+      return '<a class="taller" href="/talleres/' + encodeURIComponent(s.slug) + '">' + foto + '<b>' + esc(s.titulo) + '</b><small>' + fecha(s.fecha) + ' · ' + (SEDES[s.sedeId] || '') + '</small>' + precio + cupo + '</a>';
     }).join('');
+  }
+
+  fetch('/api/sesiones-taller').then(function(r){ return r.json(); }).then(function(lista){
+    var prox = lista.filter(function(s){ return s.fecha > hoy && s.estado !== 'agotado' && s.estado !== 'oculto' && s.slug; })
+      .sort(function(a,b){ return a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : (a.orden||0) - (b.orden||0); }).slice(0, 10);
+    LISTA = prox; pintarTalleres();
   }).catch(function(){ document.getElementById('talleres').innerHTML = '<span class="vacio">No pudimos cargar los talleres. Revisa tu conexión.</span>'; });
 
   fetch('/api/content').then(function(r){ return r.json(); }).then(function(c){
@@ -125,8 +151,33 @@
       if (n) document.getElementById('saludo').textContent = '¡Hola, ' + n + '!';
       document.getElementById('clubTitulo').textContent = 'Mi membresía';
       document.getElementById('clubTexto').textContent = 'Entra a tu recetario, tus clases y tus ebooks.';
+      cargarCuenta();
+    } else {
+      var cu = document.getElementById('cuenta');
+      cu.innerHTML = '<h3>Mi cuenta</h3><div style="font-size:13px">Entra para ver tus talleres apartados, tus eBooks y tu precio de miembro.</div><a class="entrar" href="/membresia?volver=/app">Iniciar sesión</a>';
+      cu.hidden = false;
     }
   }).catch(function(){});
+
+  function cargarCuenta(){
+    fetch('/api/auth/mi-cuenta', { credentials: 'same-origin' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      if (!d) return;
+      var m = d.membresia || {};
+      if (m.activa && m.precioMiembro > 0) { MIEMBRO = { precio: m.precioMiembro, quedan: Math.max(0, (m.limite || 0) - (m.usados || 0)) }; pintarTalleres(); }
+      var h = '<h3>Mi cuenta</h3>';
+      if (m.activa) h += '<div style="font-size:13px">Club Endulcora activo' + (m.limite ? ' · te quedan <b>' + Math.max(0, m.limite - m.usados) + ' de ' + m.limite + '</b> talleres a ' + peso(m.precioMiembro) + ' este mes' : '') + '.</div>';
+      if (d.talleres && d.talleres.length) {
+        h += d.talleres.map(function(t){
+          var pill = t.saldo > 0 ? '<span class="pill debe">Liquida ' + peso(t.saldo) + '</span>' : '<span class="pill">Pagado</span>';
+          return '<a class="item" href="' + (t.slug ? '/talleres/' + encodeURIComponent(t.slug) : '#') + '"><span>' + esc(t.taller) + '<small>' + fecha(t.fecha) + (t.horario ? ' · ' + esc(t.horario) : '') + ' · ' + esc(t.sede) + '</small></span>' + pill + '</a>';
+        }).join('');
+      } else h += '<div class="vacio">Aún no tienes talleres apartados.</div>';
+      if (d.ebooks && d.ebooks.length) {
+        h += d.ebooks.map(function(e){ return '<a class="item" href="' + esc(e.url) + '"><span>' + esc(e.titulo) + '<small>eBook</small></span><span class="pill">Descargar</span></a>'; }).join('');
+      }
+      var cu = document.getElementById('cuenta'); cu.innerHTML = h; cu.hidden = false;
+    }).catch(function(){});
+  }
 })();
 </script>
 <script src="/vida.js" defer></script>
