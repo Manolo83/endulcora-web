@@ -10,6 +10,8 @@
 // manuales, que ya vencen solas.
 const store = require('./store');
 const regalo = require('./membresiaRegalo');
+const email = require('./email');
+const { SITE_URL } = require('./config');
 
 const DIAS_PERIODO = 30;
 const DIAS_GRACIA = 5;
@@ -43,7 +45,7 @@ function estaMoroso(usuario, pagos, ahora = new Date()) {
 }
 
 async function revisarMorosos(ahora = new Date()) {
-  const { sincronizarPagosDePreapproval } = require('./routes/membresia');
+  const { sincronizarPagosDePreapproval, cancelarPreapprovalEnMercadoPago, PRECIO_REINGRESO } = require('./routes/membresia');
   let pagos = store.getMembresiaPagos();
   const candidatos = store.getUsers().filter((u) => estaMoroso(u, pagos, ahora));
   let suspendidos = 0;
@@ -56,6 +58,23 @@ async function revisarMorosos(ahora = new Date()) {
     if (!estaMoroso(actual, pagos, ahora)) continue;
     store.updateUser(actual.id, { membresiaEstado: 'suspendida', membresiaMorosa: true, membresiaSuspendidaEn: ahora.toISOString() });
     suspendidos += 1;
+    // Se cancela la suscripcion vieja de $100: para volver se domicilia de
+    // nuevo, ya al precio de reingreso.
+    try { cancelarPreapprovalEnMercadoPago(actual.membresiaPreapprovalId); } catch (e) { /* no detiene la suspension */ }
+    if (!actual.correoSuspensionEnviado) {
+      try {
+        await email.enviarCorreoMembresiaSuspendida({
+          to: actual.email,
+          nombre: actual.nombre,
+          siteUrl: SITE_URL,
+          precio: PRECIO_REINGRESO,
+          numeroWhatsapp: store.getContent().whatsapp_numero,
+        });
+        store.updateUser(actual.id, { correoSuspensionEnviado: true });
+      } catch (e) {
+        console.error('No se pudo mandar el aviso de suspensión a', actual.email, e.message);
+      }
+    }
     console.warn(`[membresia] Acceso suspendido por falta de pago: ${actual.email}`);
   }
   return suspendidos;

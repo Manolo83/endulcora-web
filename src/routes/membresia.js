@@ -12,6 +12,12 @@ const { enviarCorreoRegaloActivado } = require('../email');
 const router = express.Router();
 
 const PRECIO_MEMBRESIA = 100;
+// Quien dejo de pagar y fue suspendido vuelve pagando $200 al mes
+// (Manuel, 21 nov 2026).
+const PRECIO_REINGRESO = 200;
+function precioPara(usuario) {
+  return usuario && usuario.membresiaMorosa ? PRECIO_REINGRESO : PRECIO_MEMBRESIA;
+}
 
 function mpClient() {
   const accessToken = process.env.MP_ACCESS_TOKEN;
@@ -23,11 +29,11 @@ function mpClient() {
 // clienta registre su tarjeta. Con primerCobro (fecha futura) el primer
 // cargo se programa para ese dia en vez de hacerse de inmediato — asi
 // funciona el mes de regalo.
-async function crearSuscripcion(client, usuario, { reason = 'Membresía Endulcora', primerCobro = null, backUrl = `${SITE_URL}/membresia` } = {}) {
+async function crearSuscripcion(client, usuario, { reason = 'Membresía Endulcora', primerCobro = null, backUrl = `${SITE_URL}/membresia`, monto = PRECIO_MEMBRESIA } = {}) {
   const autoRecurring = {
     frequency: 1,
     frequency_type: 'months',
-    transaction_amount: PRECIO_MEMBRESIA,
+    transaction_amount: monto,
     currency_id: 'MXN',
   };
   // Con solo start_date Mercado Pago cobra el primer cargo al registrar la
@@ -84,7 +90,14 @@ router.post('/suscribirse', requireCliente, async (req, res) => {
   }
 
   try {
-    const creado = await crearSuscripcion(client, usuario, { primerCobro: reactivaRegalo ? usuario.membresiaRegaloHasta : null });
+    const monto = precioPara(usuario);
+    const creado = await crearSuscripcion(client, usuario, {
+      primerCobro: reactivaRegalo ? usuario.membresiaRegaloHasta : null,
+      monto,
+      reason: monto === PRECIO_REINGRESO ? 'Membresía Endulcora · reingreso' : 'Membresía Endulcora',
+    });
+    // membresiaMorosa se queda hasta que entre el primer cobro aprobado (ver
+    // guardarPagoDesdeInfo y aplicarEstadoDesdePreapprovalInfo).
     store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id });
     res.status(201).json({ url: creado.init_point });
   } catch (err) {
@@ -171,7 +184,7 @@ function guardarPagoDesdeInfo(info, usuario) {
   });
   // Le regresa el acceso a quien se habia suspendido por falta de pago.
   if (usuario && usuario.membresiaMorosa && MAPA_ESTADO_PAGO[info.status] === 'aprobado') {
-    store.updateUser(usuario.id, { membresiaEstado: 'activa', membresiaMorosa: false });
+    store.updateUser(usuario.id, { membresiaEstado: 'activa', membresiaMorosa: false, correoSuspensionEnviado: false });
   }
   return true;
 }
@@ -416,6 +429,8 @@ router.get('/estado', async (req, res) => {
     regalo: regalo.resumenRegalo(usuario),
     elegibleRegalo: regalo.esElegibleRegalo(usuario),
     regaloRechazado: !!usuario.regaloRechazado,
+    precioMensual: precioPara(usuario),
+    suspendidaPorPago: !!usuario.membresiaMorosa,
   });
 });
 
@@ -712,3 +727,5 @@ module.exports = router;
 module.exports.linkVistaMasterclass = linkVistaMasterclass;
 module.exports.sincronizarPagosDePreapproval = sincronizarPagosDePreapproval;
 module.exports.sincronizarEstadoDePreapproval = sincronizarEstadoDePreapproval;
+module.exports.cancelarPreapprovalEnMercadoPago = cancelarPreapprovalEnMercadoPago;
+module.exports.PRECIO_REINGRESO = PRECIO_REINGRESO;

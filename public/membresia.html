@@ -220,8 +220,9 @@ body { background: #FBF4E9; }
 
   <!-- Con sesion, sin membresia activa: oferta -->
   <div id="bloqueOferta" class="mt-8 hidden rounded-3xl bg-vino p-6 text-crema sm:p-8">
-    <p class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">$100 MXN / mes</p>
+    <p id="ofertaPrecio" class="font-ui text-[11px] font-700 uppercase tracking-widest text-flama">$100 MXN / mes</p>
     <h2 class="mt-2 font-display text-2xl">Hazte miembro</h2>
+    <p id="ofertaReingreso" class="mt-2 hidden text-sm text-crema/85">Tu membresía se suspendió por falta de pago. Al reactivarla queda en $200 MXN al mes.</p>
     <ul class="mt-4 space-y-2 text-sm text-crema/85">
       <li class="flex gap-2"><span class="text-flama">▸</span> Recetario del mes, exclusivo para miembros</li>
       <li class="flex gap-2"><span class="text-flama">▸</span> Revista mensual, para leer en línea</li>
@@ -565,6 +566,8 @@ async function cargarVistaMembresia(){
       // Con el mes gratis disponible, esa es la oferta: no se muestra ademas
       // la de pagar $100 desde hoy.
       if(data.elegibleRegalo) document.getElementById('bloqueOferta').classList.add('hidden');
+      if(data.precioMensual){ document.getElementById('ofertaPrecio').textContent = '$' + data.precioMensual + ' MXN / mes'; }
+      document.getElementById('ofertaReingreso').classList.toggle('hidden', !data.suspendidaPorPago);
     }
   }catch(e){
     mostrarVista('oferta');
