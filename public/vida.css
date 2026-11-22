@@ -1,3 +1,4 @@
+html,body{overflow-x:clip}
 /* Vida Endulcora: el mismo diseño y animaciones de la portada en todas las páginas (16 nov 2026) */
 .vida-hero { position:relative; overflow:hidden; color:#FBF4E9; background: radial-gradient(120% 90% at 85% 10%, #7A2E7E 0%, transparent 55%), radial-gradient(90% 80% at 0% 100%, #5C2360 0%, transparent 60%), linear-gradient(160deg,#2a0b30 0%,#1B0720 60%,#120414 100%) !important; }
 .vida-hero > * { position:relative; z-index:1; }

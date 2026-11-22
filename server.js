@@ -199,6 +199,10 @@ app.use('/api/levent-sync', leventSyncLimiter, leventSyncRoutes);
 // llevaban semanas sin uso). Los links viejos regresan al inicio. Sus datos
 // siguen guardados en la base por si algun dia se quieren recuperar.
 app.get(/^\/(blog|galeria|comunidad)(\.html|\/.*)?$/, (req, res) => res.redirect(301, '/'));
+// Miniaturas (22 nov 2026): /uploads/foto.jpg?w=480 sirve una copia chica
+// (se genera una vez y se guarda en uploads/_mini). Las portadas de eBooks
+// pesaban ~3 MB y la sala en vivo bajaba casi 40 MB en el celular.
+app.get('/uploads/:archivo', require('./src/miniaturas')(UPLOAD_DIR));
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
 // El contenido de /api cambia en cualquier momento desde /admin (precios,
 // productos, disponibilidad...), asi que nunca debe quedar en cache de
