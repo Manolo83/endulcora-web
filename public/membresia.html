@@ -712,6 +712,9 @@ document.getElementById('formLoginMembresia').addEventListener('submit', async (
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo iniciar sesión');
     SESION = { isLoggedIn: true, user: data.user };
+    // Si vino desde un taller (aviso de precio de miembro), regresa ahi.
+    const volver = new URLSearchParams(location.search).get('volver') || '';
+    if(/^\/talleres\/[\w-]+$/.test(volver)){ location.href = volver; return; }
     cargarVistaMembresia();
   }catch(err2){
     err.textContent = err2.message;
@@ -740,6 +743,9 @@ document.getElementById('formRegistroMembresia').addEventListener('submit', asyn
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'No se pudo crear la cuenta');
     SESION = { isLoggedIn: true, user: data.user };
+    // Si vino desde un taller (aviso de precio de miembro), regresa ahi.
+    const volver = new URLSearchParams(location.search).get('volver') || '';
+    if(/^\/talleres\/[\w-]+$/.test(volver)){ location.href = volver; return; }
     cargarVistaMembresia();
   }catch(err2){
     err.textContent = err2.message;

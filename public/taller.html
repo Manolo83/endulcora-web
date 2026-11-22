@@ -487,7 +487,7 @@ function pintarTaller(t){
     nota.innerHTML = `Ya usaste tus ${t.miembro.limite} talleres con precio de miembro de ese mes.`;
     nota.classList.remove('hidden');
   }else if(t.precioMiembroAnuncio && t.precioMiembroAnuncio < precioLista){
-    nota.innerHTML = `¿Eres del <a href="/membresia?utm_source=taller" class="font-600 text-vino underline">Club Endulcora</a>? Los miembros pagan <strong>$${formatoMonto(t.precioMiembroAnuncio)}</strong> en 2 talleres al mes (sujeto a disponibilidad). Si ya eres miembro, inicia sesión para verlo.`;
+    nota.innerHTML = `<span class="block rounded-xl bg-flama/15 px-4 py-3 ring-1 ring-flama/40"><strong class="text-vino">¿Eres del Club Endulcora?</strong> Los miembros pagan <strong>$${formatoMonto(t.precioMiembroAnuncio)}</strong> en 2 talleres al mes (sujeto a disponibilidad).<br><a href="/membresia?volver=${encodeURIComponent(location.pathname)}" class="mt-2 inline-block rounded-full bg-vino px-4 py-1.5 font-ui text-[11px] font-700 uppercase tracking-wider text-crema">Ya soy miembro: iniciar sesión</a> <a href="/membresia?utm_source=taller" class="ml-2 font-600 text-vino underline">Quiero ser miembro</a></span>`;
     nota.classList.remove('hidden');
   }else{ nota.classList.add('hidden'); }
   TALLER._precioAplicado = precioTotal; TALLER._anticipoAplicado = anticipo;
