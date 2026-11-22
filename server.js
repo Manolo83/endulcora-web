@@ -486,6 +486,9 @@ app.get('/galeria', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'galeria.html'));
 });
 
+app.get('/app/talleres', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'app-talleres.html'));
+});
 app.get('/app', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'app.html'));
 });
