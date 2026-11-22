@@ -61,6 +61,43 @@ router.get('/session', (req, res) => {
   res.json({ isLoggedIn: !!user, user: user ? usuarioPublico(user) : null });
 });
 
+// "Mi cuenta" de la app (22 nov 2026): talleres apartados con su saldo,
+// eBooks comprados con su enlace de descarga y la membresia con el precio
+// de miembro que le queda este mes.
+router.get('/mi-cuenta', requireCliente, (req, res) => {
+  const user = store.getUserById(req.session.userId);
+  if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
+  const correo = String(user.email || '').toLowerCase();
+  const hoy = new Date(Date.now() - 6 * 3600 * 1000).toISOString().slice(0, 10);
+  const sesiones = store.getSesionesTaller();
+  const talleres = store.getInscripcionesTaller()
+    .filter((i) => (i.usuarioId === user.id || (correo && i.correo === correo))
+      && i.estadoPago === 'pagado' && String(i.fecha || '') >= hoy)
+    .sort((a, b) => (a.fecha < b.fecha ? -1 : 1))
+    .map((i) => {
+      const s = sesiones.find((x) => x.id === i.sesionTallerId);
+      return { taller: i.taller, fecha: i.fecha, sede: i.sede, horario: i.horario,
+        saldo: Number(i.saldo) || 0, slug: s ? s.slug : '' };
+    });
+  const ebooks = [];
+  store.getOrdersByUser(user.id, correo).filter((o) => o.estado === 'aprobado' && o.descargaToken).forEach((o) => {
+    (o.items || []).filter((it) => it.tipo !== 'taller').forEach((it) => {
+      ebooks.push({ titulo: it.titulo, url: `/api/pedidos/${o.id}/ebooks?token=${encodeURIComponent(o.descargaToken)}` });
+    });
+  });
+  const c = store.getContent();
+  const activa = user.membresiaEstado === 'activa';
+  const limite = parseInt(c.taller_miembro_talleres_mes, 10) || 0;
+  const usados = activa ? store.usosDescuentoMiembro(user.id, hoy.slice(0, 7)) : 0;
+  res.set('Cache-Control', 'no-store');
+  res.json({
+    nombre: user.nombre,
+    membresia: { activa, precioMiembro: activa ? Number(String(c.taller_precio_miembro || 0).replace(/,/g, '')) || 0 : 0, limite, usados },
+    talleres: talleres.slice(0, 10),
+    ebooks: ebooks.slice(0, 30),
+  });
+});
+
 router.patch('/me', requireCliente, (req, res) => {
   const user = store.getUserById(req.session.userId);
   if (!user) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
