@@ -366,6 +366,25 @@ async function init() {
       data._migReembolsoApartado = true;
       changed = true;
     }
+    // Cambio de fechas (Manuel, 22 nov 2026): Manzanas Navidenas (Division)
+    // pasa del jue 26 al vie 27 nov y Galleta Decorada Navidena (Nativitas)
+    // del sab 28 al dom 29 nov. Se mueve la sesion y la copia de la fecha en
+    // quien ya estuviera inscrito, para que sus correos digan la fecha nueva.
+    if (!data._migFechas22Nov) {
+      [
+        { id: 398, titulo: /manzana/i, de: '2026-11-26', a: '2026-11-27' },
+        { id: 534, titulo: /galleta decorada/i, de: '2026-11-28', a: '2026-11-29' },
+      ].forEach((m) => {
+        const ses = (data.sesionesTaller || []).find((x) => Number(x.id) === m.id);
+        if (!ses || !m.titulo.test(ses.titulo || '') || !String(ses.fecha || '').startsWith(m.de)) return;
+        ses.fecha = String(ses.fecha).replace(m.de, m.a);
+        const ins = (data.inscripcionesTaller || []).filter((i) => Number(i.sesionTallerId) === m.id);
+        ins.forEach((i) => { if (String(i.fecha || '').startsWith(m.de)) i.fecha = String(i.fecha).replace(m.de, m.a); });
+        console.log('[fechas 22 nov] sesion ' + m.id + ' -> ' + m.a + ', inscritos: ' + ins.length);
+      });
+      data._migFechas22Nov = true;
+      changed = true;
+    }
     if (!data._migMasterclasses) {
       MASTERCLASSES_SEMILLA.forEach((m) => {
         if (!data.masterclasses.some((x) => x.fecha === m.fecha)) {
