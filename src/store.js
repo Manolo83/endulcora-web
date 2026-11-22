@@ -14,6 +14,7 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+const TEXTO_APARTADO_NO_REEMBOLSABLE = 'El apartado para reservar tu lugar en un taller presencial NO es reembolsable. Si no puedes asistir, avísanos y lo vemos contigo.';
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 const DEFAULT_CONTENT = {
@@ -185,7 +186,7 @@ const DEFAULT_CONTENT = {
   legal_terminos:
     'La compra de cualquier producto digital de Endulcora otorga una licencia personal e intransferible de uso.\n\nLos precios están en pesos mexicanos. La entrega de eBooks y anexos es inmediata al confirmarse el pago, mediante enlace de descarga a tu correo.\n\nLas clases en vivo se imparten en la fecha publicada; si no puedes asistir, la grabación queda disponible 30 días.',
   legal_reembolso:
-    'Por tratarse de productos digitales descargables, no hay devoluciones una vez entregado el archivo.\n\nSi el archivo llega dañado, incompleto o no puedes abrirlo, lo reponemos sin costo. Escríbenos dentro de los 7 días siguientes a tu compra.\n\nEn cursos en vivo puedes cambiar tu fecha hasta 48 horas antes de la sesión.',
+    'El apartado para reservar tu lugar en un taller presencial NO es reembolsable. Si no puedes asistir, avísanos y lo vemos contigo.\n\nPor tratarse de productos digitales descargables, no hay devoluciones una vez entregado el archivo.\n\nSi el archivo llega dañado, incompleto o no puedes abrirlo, lo reponemos sin costo. Escríbenos dentro de los 7 días siguientes a tu compra.\n\nEn cursos en vivo puedes cambiar tu fecha hasta 48 horas antes de la sesión.',
   legal_licencia:
     'Puedes usar el contenido para producir y vender tus propios productos, sin límite de piezas.\n\nNo puedes revender, regalar, subir a plataformas de descarga ni reproducir total o parcialmente el manual o las hojas de cálculo.\n\nSi vas a impartir clases con este material, escríbenos: existe una licencia para escuelas y talleres.',
   legal_inocuidad:
@@ -318,6 +319,25 @@ function datosPorDefecto() {
   };
 }
 
+// Respaldo diario (22 nov 2026): guarda una copia completa de la base en
+// app_data_respaldos y conserva los ultimos 14 dias. Si una escritura
+// dana los datos, se puede regresar a la copia del dia anterior.
+async function respaldarAhora() {
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS app_data_respaldos (
+      id SERIAL PRIMARY KEY, data JSONB NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT now())`);
+    const ult = await pool.query('SELECT creado_en FROM app_data_respaldos ORDER BY creado_en DESC LIMIT 1');
+    if (ult.rows.length && Date.now() - new Date(ult.rows[0].creado_en).getTime() < 20 * 60 * 60 * 1000) return;
+    await pool.query('INSERT INTO app_data_respaldos (data) SELECT data FROM app_data WHERE id = 1');
+    await pool.query("DELETE FROM app_data_respaldos WHERE creado_en < now() - interval '14 days'");
+    console.log('[store] Respaldo diario guardado.');
+  } catch (e) {
+    console.error('[store] No se pudo guardar el respaldo diario:', e.message);
+  }
+}
+setTimeout(respaldarAhora, 5 * 60 * 1000).unref();
+setInterval(respaldarAhora, 60 * 60 * 1000).unref();
+
 async function persistirAhora() {
   await pool.query('UPDATE app_data SET data = $1, updated_at = now() WHERE id = 1', [JSON.stringify(data)]);
 }
@@ -339,6 +359,13 @@ async function init() {
     // que una nueva solo sea "alta + activar" desde /admin. Siembra las dos
     // pasadas y la de Casa de Jengibre (7 dic), que queda activa.
     if (!Array.isArray(data.masterclasses)) { data.masterclasses = []; changed = true; }
+    // Politica de reembolso (22 nov 2026): el apartado de talleres no se
+    // reembolsa (regla de Manuel). Se agrega una vez al texto guardado.
+    if (!data._migReembolsoApartado && data.content && typeof data.content.legal_reembolso === 'string') {
+      if (!/apartado/i.test(data.content.legal_reembolso)) data.content.legal_reembolso += '\n\n' + TEXTO_APARTADO_NO_REEMBOLSABLE;
+      data._migReembolsoApartado = true;
+      changed = true;
+    }
     if (!data._migMasterclasses) {
       MASTERCLASSES_SEMILLA.forEach((m) => {
         if (!data.masterclasses.some((x) => x.fecha === m.fecha)) {

@@ -1265,7 +1265,7 @@ async function cargarCatalogoLive(){
     grid.innerHTML = ebooks.map(p => `
       <div class="overflow-hidden rounded-2xl bg-white ring-1 ring-vino/10">
         <a href="/ebooks/${p.slug}" class="block aspect-[3/4] w-full overflow-hidden bg-carbon">
-          ${p.imagen ? `<img src="${escapeHtml(p.imagen)}" alt="" class="h-full w-full object-cover">` : ''}
+          ${p.imagen ? `<img src="${escapeHtml(/^\/uploads\//.test(p.imagen) ? p.imagen + '?w=480' : p.imagen)}" alt="${escapeHtml(p.titulo || p.nombre || '')}" loading="lazy" decoding="async" class="h-full w-full object-cover">` : ''}
         </a>
         <div class="p-4">
           <a href="/ebooks/${p.slug}" class="font-titulo text-base text-vino hover:underline">${escapeHtml(p.titulo)}</a>
