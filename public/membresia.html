@@ -936,7 +936,7 @@ function pintarBibliotecaEbooks(){
     const g = grupos[Number(el.dataset.grupo)];
     crearCoverflow(el, g.items, {
       ancho: 150, alto: 300, proporcion: 4/3,
-      portada: e => e.imagen ? `<img src="${escapeHtml(e.imagen)}" alt="" loading="lazy">` : `<div class="grid h-full place-items-center p-3 text-center font-titulo text-sm text-crema">${escapeHtml(e.titulo)}</div>`,
+      portada: e => e.imagen ? `<img src="${escapeHtml(e.imagen)}" alt="${escapeHtml(e.titulo || '')}" loading="lazy">` : `<div class="grid h-full place-items-center p-3 text-center font-titulo text-sm text-crema">${escapeHtml(e.titulo)}</div>`,
       titulo: e => `<p class="font-titulo text-base text-crema">${escapeHtml(e.titulo)}</p><p class="mt-0.5 font-ui text-[10px] uppercase tracking-widest text-crema/50">${e.totalPaginas} páginas · toca para leer</p>`,
       abrir: e => abrirLectorEbook(e.id),
     });
