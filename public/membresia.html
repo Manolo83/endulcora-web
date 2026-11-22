@@ -714,7 +714,7 @@ document.getElementById('formLoginMembresia').addEventListener('submit', async (
     SESION = { isLoggedIn: true, user: data.user };
     // Si vino desde un taller (aviso de precio de miembro), regresa ahi.
     const volver = new URLSearchParams(location.search).get('volver') || '';
-    if(/^\/talleres\/[\w-]+$/.test(volver) || volver === '/app'){ location.href = volver; return; }
+    if(/^\/talleres\/[\w-]+$/.test(volver) || volver === '/app' || volver === '/app/talleres'){ location.href = volver; return; }
     cargarVistaMembresia();
   }catch(err2){
     err.textContent = err2.message;
@@ -745,7 +745,7 @@ document.getElementById('formRegistroMembresia').addEventListener('submit', asyn
     SESION = { isLoggedIn: true, user: data.user };
     // Si vino desde un taller (aviso de precio de miembro), regresa ahi.
     const volver = new URLSearchParams(location.search).get('volver') || '';
-    if(/^\/talleres\/[\w-]+$/.test(volver) || volver === '/app'){ location.href = volver; return; }
+    if(/^\/talleres\/[\w-]+$/.test(volver) || volver === '/app' || volver === '/app/talleres'){ location.href = volver; return; }
     cargarVistaMembresia();
   }catch(err2){
     err.textContent = err2.message;

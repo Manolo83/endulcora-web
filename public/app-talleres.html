@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Talleres · App Endulcora</title>
+<meta name="description" content="Talleres presenciales de Endulcora en Nativitas y División del Norte. Aparta tu lugar con $400.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#4E1454">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--vino:#4E1454;--tinta:#1B0720;--crema:#FBF4E9;--oro:#F5A623;--suave:#5C2360;--verde:#1a8d4a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--crema);color:var(--tinta);font-family:Poppins,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  .cab{padding:calc(18px + env(safe-area-inset-top)) 20px 6px}
+  h1{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:28px;line-height:1.1;margin:0}
+  .cab p{margin:4px 0 0;font-size:13px;color:var(--suave)}
+  h2{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;margin:0 0 10px}
+  main{padding:8px 20px 24px;display:flex;flex-direction:column;gap:22px}
+  .gancho{background:var(--vino);color:var(--crema);border-radius:22px;padding:16px 18px}
+  .gancho > b{font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:800;color:var(--oro);display:block;line-height:1.15}
+  .gancho ul{margin:8px 0 0;padding:0;list-style:none;font-size:13px;display:flex;flex-direction:column;gap:4px}
+  .gancho li::before{content:'✓ ';color:var(--oro);font-weight:600}
+  .gancho .miembro{margin-top:10px;background:rgba(255,255,255,.12);border-radius:14px;padding:8px 12px;font-size:13px}
+  .gancho .miembro a{color:var(--oro);font-weight:600}
+  .filtros{display:flex;gap:8px;overflow-x:auto;margin:0 -20px;padding:0 20px;scrollbar-width:none}
+  .filtros::-webkit-scrollbar{display:none}
+  .filtros button{flex-shrink:0;border:1px solid #e3d5e6;background:#fff;color:var(--tinta);border-radius:999px;padding:8px 14px;font:500 13px Poppins,sans-serif}
+  .filtros button.on{background:var(--tinta);color:var(--crema);border-color:var(--tinta)}
+  .carrusel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:2px 20px 6px;scrollbar-width:none}
+  .carrusel::-webkit-scrollbar{display:none}
+  .lista{display:flex;flex-direction:column;gap:14px}
+  .t{background:#fff;border-radius:20px;overflow:hidden;text-decoration:none;color:var(--tinta);display:flex;flex-direction:column;position:relative}
+  .carrusel .t{width:230px;flex-shrink:0;scroll-snap-align:start}
+  .t img,.t .sinfoto{width:100%;aspect-ratio:4/3;object-fit:cover;background:#eadff0;display:block}
+  .t .cuerpo{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
+  .t b{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;line-height:1.15}
+  .t small{font-size:12px;color:var(--suave)}
+  .t .precio{font-size:14px;font-weight:600;margin-top:4px}
+  .t .precio s{font-weight:400;color:#8a7a8e;margin-right:6px}
+  .t .precio .mio{color:var(--verde)}
+  .t .aparta{font-size:12px;color:var(--suave)}
+  .t .cta{margin-top:8px;align-self:stretch;text-align:center;background:var(--oro);color:var(--tinta);font-weight:600;font-size:14px;padding:11px;border-radius:999px}
+  .eti{position:absolute;top:10px;left:10px;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:600}
+  .eti.pocos{background:#d9342b;color:#fff}
+  .eti.finde{background:var(--oro);color:var(--tinta)}
+  .lista .t{flex-direction:row}
+  .lista .t img,.lista .t .sinfoto{width:118px;aspect-ratio:auto;height:auto;min-height:100%;flex-shrink:0}
+  .lista .t .cuerpo{flex:1;min-width:0;padding:10px 12px 12px}
+  .lista .t b{font-size:16px}
+  .lista .t .cta{padding:8px;font-size:13px}
+  .lista .eti{top:8px;left:8px;font-size:10px;padding:3px 8px}
+  .vacio{font-size:13px;color:var(--suave)}
+  .confianza{background:#fff;border-radius:20px;padding:16px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+  .confianza a{color:var(--verde);font-weight:600}
+</style>
+<script src="/app-shell.js"></script>
+</head>
+<body data-vida="no">
+<div class="cab">
+  <h1>Talleres</h1>
+  <p>Presenciales en Nativitas y División del Norte</p>
+</div>
+<main>
+  <section class="gancho">
+    <b>Aparta tu lugar con $400</b>
+    <ul>
+      <li>Liquidas el resto el día del taller</li>
+      <li>Cupo limitado por taller</li>
+      <li>Te llega la confirmación a tu correo</li>
+    </ul>
+    <div class="miembro" id="miembro">¿Eres del Club Endulcora? Tus talleres salen en $600. <a href="/membresia?volver=/app/talleres">Inicia sesión</a></div>
+  </section>
+
+  <section id="secPocos" hidden>
+    <h2>🔥 Últimos lugares</h2>
+    <div class="carrusel" id="pocos"></div>
+  </section>
+
+  <section id="secFinde" hidden>
+    <h2>Este fin de semana</h2>
+    <div class="carrusel" id="finde"></div>
+  </section>
+
+  <section>
+    <h2>Todos los talleres</h2>
+    <div class="filtros" id="filtros">
+      <button type="button" data-f="todos" class="on">Todos</button>
+      <button type="button" data-f="1">Nativitas</button>
+      <button type="button" data-f="2">División</button>
+      <button type="button" data-f="manana">Mañana</button>
+      <button type="button" data-f="tarde">Tarde</button>
+    </div>
+    <div class="lista" id="lista" style="margin-top:14px"><span class="vacio">Cargando talleres…</span></div>
+  </section>
+
+  <section class="confianza">
+    <b>¿Tienes dudas antes de apartar?</b>
+    <span>Pregúntanos por WhatsApp qué se prepara, qué llevar o cómo llegar.</span>
+    <a id="wa" href="https://wa.me/5215575933916?text=Hola%2C%20vengo%20de%20la%20app%20y%20tengo%20dudas%20de%20un%20taller" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+    <span style="font-size:11px;color:#8a7a8e">El anticipo para apartar tu lugar no es reembolsable.</span>
+  </section>
+</main>
+<script>
+(function(){
+  var SEDES = { 1: 'Nativitas', 2: 'División' };
+  var DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'], MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  function dt(f){ var p = f.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function fecha(f){ var d = dt(f); return DIAS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()]; }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function peso(n){ return '$' + Number(n).toLocaleString('es-MX'); }
+  function mini(u){ return /^\/uploads\//.test(u) ? u + '?w=480' : u; }
+  function iso(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+  var hoyD = new Date(), hoy = iso(hoyD);
+  // Este fin de semana: de viernes a domingo (si hoy ya es fin, desde hoy).
+  var dow = hoyD.getDay(), ini = new Date(hoyD), fin = new Date(hoyD);
+  if (dow >= 1 && dow <= 5) { ini.setDate(hoyD.getDate() + (5 - dow)); fin.setDate(ini.getDate() + 2); }
+  else if (dow === 6) { fin.setDate(hoyD.getDate() + 1); }
+  var finIni = iso(ini), finFin = iso(fin);
+
+  var TODOS = [], MIEMBRO = null, FILTRO = 'todos';
+  function esTarde(s){ return /(^|\D)(1[2-9]|[4-8])(:\d\d)?\s*pm/i.test(String(s.horario || '').split('–')[0]); }
+  function tarjeta(s, etiqueta){
+    var total = Number(s.precioTotal) || 0, precio = '';
+    if (MIEMBRO && MIEMBRO.quedan > 0 && MIEMBRO.precio > 0 && MIEMBRO.precio < total) precio = '<div class="precio"><s>' + peso(total) + '</s><span class="mio">' + peso(MIEMBRO.precio) + ' para ti</span></div>';
+    else if (total) precio = '<div class="precio">' + peso(total) + '</div>';
+    var aparta = s.anticipo ? '<div class="aparta">Aparta con ' + peso(s.anticipo) + '</div>' : '';
+    var eti = '';
+    if (typeof s.cupoRestante === 'number' && s.cupoRestante > 0 && s.cupoRestante <= 8) eti = '<span class="eti pocos">Quedan ' + s.cupoRestante + '</span>';
+    else if (etiqueta) eti = '<span class="eti finde">' + etiqueta + '</span>';
+    var foto = s.fotoUrl ? '<img src="' + esc(mini(s.fotoUrl)) + '" alt="' + esc(s.titulo) + '" loading="lazy">' : '<div class="sinfoto"></div>';
+    return '<a class="t" href="/talleres/' + encodeURIComponent(s.slug) + '">' + eti + foto + '<div class="cuerpo"><b>' + esc(s.titulo) + '</b><small>' + fecha(s.fecha) + (s.horario ? ' · ' + esc(s.horario) : '') + ' · ' + (SEDES[s.sedeId] || '') + '</small>' + precio + aparta + '<span class="cta">Apartar mi lugar</span></div></a>';
+  }
+  function pintar(){
+    var pocos = TODOS.filter(function(s){ return typeof s.cupoRestante === 'number' && s.cupoRestante > 0 && s.cupoRestante <= 8; }).slice(0, 8);
+    document.getElementById('secPocos').hidden = !pocos.length;
+    document.getElementById('pocos').innerHTML = pocos.map(function(s){ return tarjeta(s); }).join('');
+    var finde = TODOS.filter(function(s){ return s.fecha >= finIni && s.fecha <= finFin; }).slice(0, 10);
+    document.getElementById('secFinde').hidden = !finde.length;
+    document.getElementById('finde').innerHTML = finde.map(function(s){ return tarjeta(s, 'Este finde'); }).join('');
+    var lista = TODOS.filter(function(s){
+      if (FILTRO === '1' || FILTRO === '2') return String(s.sedeId) === FILTRO;
+      if (FILTRO === 'tarde') return esTarde(s);
+      if (FILTRO === 'manana') return !esTarde(s);
+      return true;
+    });
+    document.getElementById('lista').innerHTML = lista.length ? lista.map(function(s){ return tarjeta(s); }).join('') : '<span class="vacio">No hay talleres con ese filtro por ahora.</span>';
+  }
+  document.getElementById('filtros').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    FILTRO = b.dataset.f;
+    [].forEach.call(this.children, function(x){ x.classList.toggle('on', x === b); });
+    pintar();
+  });
+
+  fetch('/api/sesiones-taller').then(function(r){ return r.json(); }).then(function(l){
+    TODOS = l.filter(function(s){ return s.fecha > hoy && s.estado !== 'agotado' && s.estado !== 'oculto' && s.slug && s.cupoRestante !== 0; })
+      .sort(function(a,b){ return a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : (a.orden||0) - (b.orden||0); });
+    pintar();
+  }).catch(function(){ document.getElementById('lista').innerHTML = '<span class="vacio">No pudimos cargar los talleres. Revisa tu conexión.</span>'; });
+
+  fetch('/api/auth/mi-cuenta', { credentials: 'same-origin' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+    var box = document.getElementById('miembro');
+    if (!d) return;
+    var m = d.membresia || {};
+    if (m.activa && m.precioMiembro > 0) {
+      var quedan = Math.max(0, (m.limite || 0) - (m.usados || 0));
+      MIEMBRO = { precio: m.precioMiembro, quedan: quedan };
+      box.innerHTML = quedan > 0 ? 'Eres del Club: te quedan <b>' + quedan + '</b> talleres a ' + peso(m.precioMiembro) + ' este mes.' : 'Ya usaste tus talleres a precio de miembro de este mes.';
+      pintar();
+    } else {
+      box.innerHTML = 'Hazte del Club Endulcora y tus talleres salen en $600. <a href="/membresia?utm_source=app-talleres">Conocer el Club</a>';
+    }
+  }).catch(function(){});
+
+  fetch('/api/content').then(function(r){ return r.json(); }).then(function(c){
+    if (c.whatsapp_numero) document.getElementById('wa').href = 'https://wa.me/521' + String(c.whatsapp_numero).replace(/\D/g,'').slice(-10) + '?text=' + encodeURIComponent('Hola, vengo de la app y tengo dudas de un taller');
+  }).catch(function(){});
+})();
+</script>
+</body>
+</html>

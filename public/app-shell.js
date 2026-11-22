@@ -35,7 +35,7 @@
   };
   var TABS = [
     ['inicio', 'Inicio', '/app', /^\/app$/],
-    ['talleres', 'Talleres', '/talleres', /^\/(talleres|taller|inscripcion-taller)/],
+    ['talleres', 'Talleres', '/app/talleres', /^\/(app\/talleres|talleres|taller|inscripcion-taller)/],
     ['calendario', 'Calendario', '/calendario', /^\/calendario/],
     ['membresia', 'Membresía', '/membresia', /^\/membresia/],
     ['whatsapp', 'WhatsApp', 'https://wa.me/5215575933916?text=' + encodeURIComponent('Hola, vengo de la app de Endulcora y quiero preguntar por un taller'), null]
