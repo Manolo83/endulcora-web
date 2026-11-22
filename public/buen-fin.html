@@ -338,7 +338,7 @@ function pintarGrid(){
     return `
       <article class="flex flex-col overflow-hidden rounded-2xl bg-white ring-1 transition ${sel ? 'ring-2 ring-flama' : 'ring-vino/10'}">
         <div class="relative aspect-[3/4] bg-vino/10">
-          ${e.imagen ? `<img src="${escapeHtml(e.imagen)}" alt="" loading="lazy" class="h-full w-full object-cover">` : `<div class="grid h-full place-items-center p-4 text-center font-display text-lg text-vino">${escapeHtml(e.titulo)}</div>`}
+          ${e.imagen ? `<img src="${escapeHtml(e.imagen)}" alt="${escapeHtml(e.titulo || '')}" loading="lazy" class="h-full w-full object-cover">` : `<div class="grid h-full place-items-center p-4 text-center font-display text-lg text-vino">${escapeHtml(e.titulo)}</div>`}
           <span class="absolute left-2 top-2 rounded-full bg-rojo px-2.5 py-1 font-ui text-[10px] font-700 text-white">-${Math.round((1 - PROMO.precioUno / normal) * 100)}%</span>
           ${sel ? '<span class="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-flama text-base font-800 text-carbon shadow">✓</span>' : ''}
         </div>
