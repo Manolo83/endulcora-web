@@ -79,9 +79,15 @@ router.get('/mi-cuenta', requireCliente, (req, res) => {
       return { taller: i.taller, fecha: i.fecha, sede: i.sede, horario: i.horario,
         saldo: Number(i.saldo) || 0, slug: s ? s.slug : '' };
     });
+  // Un eBook comprado varias veces sale una sola vez (el pedido mas reciente).
   const ebooks = [];
+  const vistos = new Set();
+  const clave = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
   store.getOrdersByUser(user.id, correo).filter((o) => o.estado === 'aprobado' && o.descargaToken).forEach((o) => {
     (o.items || []).filter((it) => it.tipo !== 'taller').forEach((it) => {
+      const k = clave(it.titulo);
+      if (!k || vistos.has(k)) return;
+      vistos.add(k);
       ebooks.push({ titulo: it.titulo, url: `/api/pedidos/${o.id}/ebooks?token=${encodeURIComponent(o.descargaToken)}` });
     });
   });
