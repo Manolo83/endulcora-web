@@ -169,6 +169,10 @@ function guardarPagoDesdeInfo(info, usuario) {
     mpPaymentId: info.payment && info.payment.id ? info.payment.id : '',
     fecha: info.date_created,
   });
+  // Le regresa el acceso a quien se habia suspendido por falta de pago.
+  if (usuario && usuario.membresiaMorosa && MAPA_ESTADO_PAGO[info.status] === 'aprobado') {
+    store.updateUser(usuario.id, { membresiaEstado: 'activa', membresiaMorosa: false });
+  }
   return true;
 }
 
@@ -234,6 +238,10 @@ function aplicarEstadoDesdePreapprovalInfo(info) {
     store.updateUser(usuario.id, { membresiaRegaloCancelada: true });
     return true;
   }
+
+  // Suspendido por falta de pago: que Mercado Pago diga "autorizada" no basta,
+  // el acceso vuelve solo cuando entra un cobro aprobado.
+  if (usuario.membresiaMorosa && nuevoEstado === 'activa' && usuario.membresiaPreapprovalId === idInfo) return false;
 
   const reactivoRegalo = nuevoEstado === 'activa' && usuario.membresiaRegaloCancelada;
   if (usuario.membresiaEstado === nuevoEstado && usuario.membresiaPreapprovalId === idInfo && !reactivoRegalo) return false;
