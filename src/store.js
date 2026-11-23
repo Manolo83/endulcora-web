@@ -1915,6 +1915,23 @@ async function init() {
       data._migTalleresNov26Semana1Fusion = true;
       changed = true;
     }
+    // Cambio de fecha pedido por Manuel (23 nov 2026): Liliana Vilchis Soto
+    // (inscripcion 198) pasa de Fresas Cubiertas 3 dic (sesion 444) al 5 dic
+    // (sesion 446), misma sede Nativitas y mismo horario. Una sola vez.
+    if (!data._migCambioFechaInscripcion198) {
+      const ins = (data.inscripcionesTaller || []).find((i) => i.id === 198 && i.sesionTallerId === 444);
+      const destino = data.sesionesTaller.find((s) => s.id === 446);
+      if (ins && destino) {
+        ins.sesionTallerId = 446;
+        ins.fecha = destino.fecha;
+        ins.horario = destino.horario;
+        ins.recordatorio2diasEnviado = false;
+        ins.recordatorioMismoDiaEnviado = false;
+        ins.sheetsSincronizado = false;
+      }
+      data._migCambioFechaInscripcion198 = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
