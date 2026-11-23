@@ -91,6 +91,12 @@
     <div class="carrusel" id="talleres"><span class="vacio">Cargando talleres…</span></div>
   </section>
 
+  <a class="banner" id="regaloApp" href="/app/regalo" hidden style="background:#F5A623;color:#1B0720">
+    <span style="font-size:34px" aria-hidden="true">🎁</span>
+    <div><span class="eti" style="color:#4E1454">GRACIAS POR INSTALAR LA APP</span><b>Tu recetario de regalo</b><small>Toca aquí para descargarlo gratis.</small></div>
+  </a>
+  <script>if (matchMedia('(display-mode: standalone)').matches || navigator.standalone === true) document.getElementById('regaloApp').hidden = false;</script>
+
   <section class="cuenta" id="cuenta" hidden></section>
 
   <a class="club" href="/membresia">
