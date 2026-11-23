@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Descarga la app de Endulcora</title>
+<meta name="description" content="Instala gratis la app de Endulcora y llévate un recetario de regalo.">
+<meta property="og:title" content="Descarga la app de Endulcora 🎁">
+<meta property="og:description" content="Gratis, en 10 segundos, y te regalamos un recetario.">
+<meta property="og:image" content="/app/icono-512.png">
+<meta name="theme-color" content="#4E1454">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/app/icono-192.png?v=2">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vida.css">
+<style>
+  :root{--vino:#4E1454;--tinta:#1B0720;--crema:#FBF4E9;--oro:#F5A623}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--crema);color:var(--tinta);font-family:Poppins,system-ui,sans-serif}
+  main{max-width:460px;margin:0 auto;padding:calc(28px + env(safe-area-inset-top)) 20px 40px;text-align:center}
+  img.icono{width:96px;height:96px;border-radius:24px;box-shadow:0 12px 30px -12px rgba(78,20,84,.6)}
+  h1{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:30px;line-height:1.1;margin:18px 0 8px}
+  p{margin:0 0 14px;line-height:1.5}
+  .regalo{background:var(--vino);color:var(--crema);border-radius:22px;padding:18px;margin:18px 0}
+  .regalo b{display:block;font-family:'Baloo 2',sans-serif;font-size:21px;color:var(--oro)}
+  .boton{display:block;width:100%;border:none;border-radius:999px;background:var(--oro);color:var(--tinta);font:600 17px Poppins,sans-serif;padding:16px;margin:8px 0;cursor:pointer;text-decoration:none}
+  ul{list-style:none;padding:0;margin:18px 0;text-align:left;display:grid;gap:8px}
+  li{background:#fff;border-radius:14px;padding:12px 14px;font-size:14px}
+  small{color:rgba(27,7,32,.6)}
+</style>
+</head>
+<body>
+<main>
+  <img class="icono" src="/app/icono-192.png?v=2" alt="App Endulcora">
+  <h1>Descarga la app de Endulcora</h1>
+  <p>Gratis, sin tienda de apps y en 10 segundos.</p>
+  <div class="regalo">
+    <b>🎁 Recetario de regalo</b>
+    Al instalarla, ábrela desde tu pantalla de inicio y descarga tu recetario gratis.
+  </div>
+  <button type="button" class="boton" data-instalar-app>📲 Instalar la app</button>
+  <ul>
+    <li>🔔 Te avisamos de talleres nuevos y últimos lugares</li>
+    <li>🎥 Clases en vivo a un toque</li>
+    <li>🛍️ Aparta tu taller y compra ebooks más rápido</li>
+  </ul>
+  <small>En iPhone ábrela desde Safari. En Android, desde Chrome.</small>
+</main>
+<script src="/vida.js" defer></script>
+</body>
+</html>

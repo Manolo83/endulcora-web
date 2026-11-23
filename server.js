@@ -489,6 +489,14 @@ app.get('/galeria', (req, res) => {
 app.get('/app/talleres', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'app-talleres.html'));
 });
+// Link directo para compartir la app (Comunidad de WhatsApp) y recetario
+// de regalo que se descarga desde la app ya instalada (23 nov 2026).
+app.get(['/instalar-app', '/descargar-app'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'instalar-app.html'));
+});
+app.get('/app/regalo', (req, res) => {
+  res.download(path.join(__dirname, 'regalos-app', 'recetario-regalo.pdf'), 'Endulcora_Recetario_de_regalo.pdf');
+});
 app.get('/app', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'app.html'));
 });
