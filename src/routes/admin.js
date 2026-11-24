@@ -994,6 +994,37 @@ router.get('/api/membresia/suscriptores', requireAdmin, (req, res) => {
   res.json(lista);
 });
 
+// Quien suspendio la revision de pagos (src/membresiaMorosos.js), con su
+// ultimo cobro aprobado segun Mercado Pago, para avisarles (24 nov 2026).
+router.get('/api/membresia/suspensiones', requireAdminOLectura, async (req, res) => {
+  const { cobrosDePreapprovalEnMercadoPago } = require('./membresia');
+  const afectados = store.getUsers().filter((u) => u.membresiaSuspendidaEn || u.membresiaSuspensionErronea);
+  const filas = [];
+  for (const u of afectados) {
+    const cobros = await cobrosDePreapprovalEnMercadoPago(u.membresiaPreapprovalId);
+    const aprobados = (cobros || []).filter((c) => c.estado === 'aprobado').map((c) => c.fecha).sort();
+    const ultimo = aprobados.length ? aprobados[aprobados.length - 1] : '';
+    let situacion;
+    if (u.membresiaSuspensionErronea) situacion = 'Suspendida por error, acceso regresado';
+    else if (cobros === null) situacion = 'Suspendida (no se pudo consultar Mercado Pago)';
+    else if (ultimo) situacion = 'Suspendida; su último cobro tiene más de 30 días';
+    else situacion = 'Suspendida; nunca le entró un cobro';
+    filas.push({
+      nombre: u.nombre || '', email: u.email, telefono: u.telefono || u.whatsapp || '',
+      estadoActual: u.membresiaEstado, situacion,
+      suspendidaEn: u.membresiaSuspendidaEn || u.membresiaSuspensionErronea || '',
+      ultimoCobroAprobado: ultimo, accesoHasta: u.membresiaRegaloHasta || '',
+    });
+  }
+  if (req.query.formato === 'csv') {
+    const cols = Object.keys(filas[0] || { nombre: '', email: '' });
+    const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    res.type('text/csv; charset=utf-8').set('Content-Disposition', 'attachment; filename="membresias-suspendidas.csv"');
+    return res.send('\ufeff' + [cols.join(','), ...filas.map((f) => cols.map((c) => esc(f[c])).join(','))].join('\n'));
+  }
+  res.json(filas);
+});
+
 // ---- Suscriptores del correo (footer) ----
 router.get('/api/newsletter', requireAdmin, (req, res) => {
   res.json(store.getSubscribers());
