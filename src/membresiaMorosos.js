@@ -19,7 +19,7 @@ const DIA_MS = 24 * 60 * 60 * 1000;
 
 function ultimoCobroAprobado(usuario, pagos) {
   const fechas = pagos
-    .filter((p) => p.estado === 'aprobado' && (p.userId === usuario.id || (p.email && p.email === usuario.email)))
+    .filter((p) => p.estado === 'aprobado' && (p.mp || p.userId === usuario.id || (p.email && p.email === usuario.email)))
     .map((p) => new Date(p.fecha).getTime())
     .filter((t) => !Number.isNaN(t));
   return fechas.length ? Math.max(...fechas) : null;
@@ -52,7 +52,7 @@ function estaMoroso(usuario, pagos, ahora = new Date()) {
 }
 
 async function revisarMorosos(ahora = new Date()) {
-  const { sincronizarPagosDePreapproval, cancelarPreapprovalEnMercadoPago, PRECIO_REINGRESO } = require('./routes/membresia');
+  const { sincronizarPagosDePreapproval, cancelarPreapprovalEnMercadoPago, cobrosDePreapprovalEnMercadoPago, PRECIO_REINGRESO } = require('./routes/membresia');
   let pagos = store.getMembresiaPagos();
   const candidatos = store.getUsers().filter((u) => estaMoroso(u, pagos, ahora));
   let suspendidos = 0;
@@ -60,7 +60,13 @@ async function revisarMorosos(ahora = new Date()) {
     // Antes de cortar, se trae de Mercado Pago cualquier cobro que no haya
     // llegado por webhook, para no quitarle el acceso a quien si pago.
     try { await sincronizarPagosDePreapproval(usuario.membresiaPreapprovalId, usuario); } catch (e) { /* se decide con lo que hay */ }
-    pagos = store.getMembresiaPagos();
+    // Y se decide con los cobros que Mercado Pago tiene de SU suscripcion,
+    // no solo con los de la base: un cobro guardado sin usuario (llego por
+    // webhook antes de ligarse) hacia ver moroso a quien si pago (caso del
+    // 24 nov 2026). Si Mercado Pago no responde, no se corta a nadie.
+    const cobrosMp = await cobrosDePreapprovalEnMercadoPago(usuario.membresiaPreapprovalId);
+    if (!cobrosMp) continue;
+    pagos = store.getMembresiaPagos().concat(cobrosMp.map((c) => ({ ...c, mp: true })));
     const actual = store.getUserById(usuario.id);
     if (!estaMoroso(actual, pagos, ahora)) continue;
     store.updateUser(actual.id, { membresiaEstado: 'suspendida', membresiaMorosa: true, membresiaSuspendidaEn: ahora.toISOString() });
@@ -87,4 +93,25 @@ async function revisarMorosos(ahora = new Date()) {
   return suspendidos;
 }
 
-module.exports = { revisarMorosos, estaMoroso, DIAS_GRACIA };
+// Una sola vez: regresa el acceso a quien se suspendio aunque Mercado Pago
+// si tenia un cobro aprobado de su suscripcion en los 30 dias previos. Como
+// su suscripcion ya se cancelo, queda con acceso hasta 30 dias despues de
+// ese cobro (sin domiciliar) y puede volver a domiciliar a $100, no a $200.
+async function repararSuspendidosPorError(ahora = new Date()) {
+  const { cobrosDePreapprovalEnMercadoPago } = require('./routes/membresia');
+  const reparados = [];
+  for (const u of store.getUsers()) {
+    if (!u.membresiaMorosa || u.membresiaEstado !== 'suspendida' || !u.membresiaPreapprovalId) continue;
+    const cobros = await cobrosDePreapprovalEnMercadoPago(u.membresiaPreapprovalId);
+    if (!cobros) continue;
+    const ultimo = Math.max(0, ...cobros.filter((c) => c.estado === 'aprobado').map((c) => new Date(c.fecha).getTime()).filter((t) => !Number.isNaN(t)));
+    if (!ultimo || ahora.getTime() > ultimo + DIAS_PERIODO * DIA_MS) continue;
+    regalo.activarMesPagado(store.getUserById(u.id), { origen: 'pago-recuperado', ahora: new Date(ultimo) });
+    store.updateUser(u.id, { membresiaMorosa: false, correoSuspensionEnviado: false, membresiaSuspendidaEn: '' });
+    reparados.push(u.email);
+    console.warn(`[membresia] Acceso regresado (si habia pagado): ${u.email}`);
+  }
+  return reparados;
+}
+
+module.exports = { repararSuspendidosPorError, revisarMorosos, estaMoroso, DIAS_GRACIA };

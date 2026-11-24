@@ -220,6 +220,26 @@ async function sincronizarPagosDePreapproval(preapprovalId, usuario) {
   return agregados;
 }
 
+// Cobros de una suscripcion tal como los tiene Mercado Pago (no la base).
+// null si no se pudo consultar: quien llama no debe cortar a nadie con eso.
+async function cobrosDePreapprovalEnMercadoPago(preapprovalId) {
+  const accessToken = process.env.MP_ACCESS_TOKEN;
+  if (!accessToken || !preapprovalId) return null;
+  try {
+    const res = await fetch(`https://api.mercadopago.com/authorized_payments/search?preapproval_id=${encodeURIComponent(preapprovalId)}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data.results || []).map((info) => ({
+      estado: MAPA_ESTADO_PAGO[info.status] || info.status || 'desconocido',
+      fecha: info.date_created,
+    }));
+  } catch (e) {
+    return null;
+  }
+}
+
 const MAPA_ESTADO_PREAPPROVAL = {
   authorized: 'activa',
   paused: 'pausada',
@@ -729,3 +749,4 @@ module.exports.sincronizarPagosDePreapproval = sincronizarPagosDePreapproval;
 module.exports.sincronizarEstadoDePreapproval = sincronizarEstadoDePreapproval;
 module.exports.cancelarPreapprovalEnMercadoPago = cancelarPreapprovalEnMercadoPago;
 module.exports.PRECIO_REINGRESO = PRECIO_REINGRESO;
+module.exports.cobrosDePreapprovalEnMercadoPago = cobrosDePreapprovalEnMercadoPago;
