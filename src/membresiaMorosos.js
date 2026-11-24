@@ -107,7 +107,7 @@ async function repararSuspendidosPorError(ahora = new Date()) {
     const ultimo = Math.max(0, ...cobros.filter((c) => c.estado === 'aprobado').map((c) => new Date(c.fecha).getTime()).filter((t) => !Number.isNaN(t)));
     if (!ultimo || ahora.getTime() > ultimo + DIAS_PERIODO * DIA_MS) continue;
     regalo.activarMesPagado(store.getUserById(u.id), { origen: 'pago-recuperado', ahora: new Date(ultimo) });
-    store.updateUser(u.id, { membresiaMorosa: false, correoSuspensionEnviado: false, membresiaSuspendidaEn: '' });
+    store.updateUser(u.id, { membresiaMorosa: false, correoSuspensionEnviado: false, membresiaSuspendidaEn: '', membresiaSuspensionErronea: u.membresiaSuspendidaEn || new Date().toISOString(), membresiaRestauradaEn: ahora.toISOString() });
     reparados.push(u.email);
     console.warn(`[membresia] Acceso regresado (si habia pagado): ${u.email}`);
   }
