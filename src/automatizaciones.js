@@ -136,6 +136,7 @@ async function revisarRegalosSinTraslape() {
   corriendoRegalos = true;
   try {
     await revisarRegalosMembresia();
+    await require('./membresiaMorosos').repararSuspendidosPorError();
     await require('./membresiaMorosos').revisarMorosos();
   } catch (e) {
     console.error('Error revisando los meses de regalo:', e.message);
