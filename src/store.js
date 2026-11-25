@@ -123,6 +123,11 @@ const DEFAULT_CONTENT = {
   // cual aplican: no se mandan a masterclasses anteriores a la publicacion.
   masterclass_correos_activo: 'true',
   masterclass_correos_desde: '',
+  // Envios manuales desde /admin (correo 7 y 8): fecha de la masterclass a
+  // la que se mandan. Sin estas claves updateContent las ignoraba.
+  masterclass_correo7_fecha: '',
+  masterclass_correo8_fecha: '',
+  masterclass_correo8_publico: '',
   clasegratis_acceso_precio: '100',
   // Fecha y hora (AAAA-MM-DDTHH:MM, hora de CDMX) en que se cierra la venta
   // del acceso anticipado. Vacio = abierto hasta el dia de la clase.
