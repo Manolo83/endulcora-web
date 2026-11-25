@@ -280,7 +280,7 @@ function correo8(registro, c) {
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Confírmanos con un clic · ${esc(fechaLegible(registro.fecha))} ${esc(registro.horario)} h</div>
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F4ECF4;"><tr><td align="center" style="padding:20px 12px;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#ffffff;border-radius:22px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
-  <tr><td style="background:#7A2E7E;padding:30px 24px;text-align:center;"><div style="font-size:44px;line-height:1;">🍪</div><div style="font-size:13px;letter-spacing:.2em;color:#F5C66B;font-weight:700;margin-top:10px;">MASTERCLASS</div><div style="font-size:30px;font-weight:900;color:#ffffff;margin-top:4px;">${esc(c.tema)}</div></td></tr>
+  <tr><td style="background:#7A2E7E;padding:30px 24px;text-align:center;"><div style="font-size:44px;line-height:1;">${c.tema.toLowerCase().includes('jengibre') ? '🏠' : '🍪'}</div><div style="font-size:13px;letter-spacing:.2em;color:#F5C66B;font-weight:700;margin-top:10px;">MASTERCLASS</div><div style="font-size:30px;font-weight:900;color:#ffffff;margin-top:4px;">${esc(c.tema)}</div></td></tr>
   <tr><td style="padding:28px 24px 6px;text-align:center;">
     <p style="margin:0 0 6px;font-size:15px;color:#7A2E7E;">${nombre ? `¡Hola, ${esc(nombre)}!` : '¡Hola!'}</p>
     <p style="margin:0;font-size:28px;line-height:1.2;font-weight:800;color:#1B0720;">¿Asistirás ${esc(cuandoEs(registro.fecha))}?</p>
@@ -290,13 +290,20 @@ function correo8(registro, c) {
       <td style="padding:14px 10px;text-align:center;"><div style="font-size:11px;letter-spacing:.15em;color:#7A2E7E;font-weight:700;">TU HORARIO</div><div style="font-size:18px;font-weight:800;color:#1B0720;margin-top:4px;">${esc(fechaLegible(registro.fecha))} · ${esc(registro.horario)} h</div></td>
     </tr></table>
   </td></tr>
-  <tr><td style="padding:6px 24px 0;text-align:center;"><p style="margin:0;font-size:14px;color:#4b3f4e;">Ya se dieron las fichas del acceso anticipado. Los <strong>lugares gratis que quedan</strong> se asignan por orden de confirmación: si vas a venir, confírmalo con un clic.</p></td></tr>
+  <tr><td style="padding:6px 24px 0;text-align:center;"><p style="margin:0;font-size:14px;color:#4b3f4e;">Si vas a venir, confírmalo con un clic. Los <strong>lugares gratis</strong> que queden después del acceso anticipado se asignan por orden de confirmación.</p></td></tr>
   <tr><td style="padding:18px 24px 8px;">
     <a href="${linkAsistencia(registro, 'si')}" style="display:block;background:#2E9E5B;color:#ffffff;padding:18px 20px;border-radius:999px;text-decoration:none;font-weight:800;font-size:18px;text-align:center;">✅ SÍ ASISTIRÉ</a>
   </td></tr>
   <tr><td style="padding:6px 24px 8px;">
     <a href="${linkAsistencia(registro, 'no')}" style="display:block;background:#ffffff;color:#7A2E7E;border:2px solid #7A2E7E;padding:15px 20px;border-radius:999px;text-decoration:none;font-weight:800;font-size:16px;text-align:center;">NO PODRÉ ASISTIR</a>
   </td></tr>
+  ${registro.accesoEstado !== 'pagado' && acceso.accesoAbierto(c.contenido) ? `<tr><td style="padding:14px 24px 0;">
+    <div style="background:#4E1454;border-radius:16px;padding:18px 18px 20px;text-align:center;color:#ffffff;">
+      <div style="font-size:11px;letter-spacing:.2em;color:#F5C66B;font-weight:700;">ACCESO ANTICIPADO · ${pesos(c.precioAcceso)}</div>
+      <p style="margin:8px 0 0;font-size:15px;line-height:1.5;">Tu registro no asegura tu silla. <strong>El acceso anticipado sí:</strong> lugar asegurado, recetario en tu membresía, coffee break, grabación y tu primer mes del Club Endulcora de regalo.</p>
+      <a href="${acceso.linkAcceso(SITE_URL, registro)}" style="display:block;margin-top:14px;background:#F5A623;color:#1B0720;padding:16px 20px;border-radius:999px;text-decoration:none;font-weight:800;font-size:16px;">ASEGURAR MI LUGAR · ${pesos(c.precioAcceso)} →</a>
+    </div>
+  </td></tr>` : ''}
   <tr><td style="padding:16px 24px 24px;">${c.pie || ''}</td></tr>
 </table></td></tr></table></body></html>`;
   return { asunto: `¿Asistirás ${cuandoEs(registro.fecha)} a la masterclass? Confírmanos con un clic`, html };
