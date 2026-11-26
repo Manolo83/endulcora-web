@@ -5658,7 +5658,12 @@ function etiquetaMembresiaCliente(u){
   }
   if(u.regaloRechazado && u.membresiaEstado !== 'activa') return 'Regalo rechazado (ya lo había usado)';
   const base = ETIQUETA_MEMBRESIA[u.membresiaEstado] || u.membresiaEstado;
-  return u.origenRegalo ? `${base} · vino del live` : base;
+  const conOrigen = u.origenRegalo ? `${base} · vino del live` : base;
+  // El plan (mensual/anual) solo importa mientras la membresía esta activa
+  // de verdad pagando — en cualquier otro estado el campo es irrelevante.
+  return u.membresiaEstado === 'activa'
+    ? `${conOrigen} · ${u.membresiaPlan === 'anual' ? 'Anual' : 'Mensual'}`
+    : conOrigen;
 }
 
 async function cargarResumenRegalos(){
@@ -5791,7 +5796,7 @@ function mostrarDetalleCliente(user){
         </form>
         <div class="mt-5 border-t border-vino/10 pt-4">
           <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Membresía (a mano, sin pasar por Mercado Pago)</span>
-          <p class="mt-1 text-xs text-carbon/50">Estado actual: <strong>${escapeHtml(ETIQUETA_MEMBRESIA[user.membresiaEstado] || user.membresiaEstado)}</strong>. Si la pones "Activa" a mano (sin que se haya suscrito), el cliente no tiene un cobro recurrente real — tendrás que quitarle el acceso tú mismo cuando corresponda.</p>
+          <p class="mt-1 text-xs text-carbon/50">Estado actual: <strong>${escapeHtml(ETIQUETA_MEMBRESIA[user.membresiaEstado] || user.membresiaEstado)}${user.membresiaEstado === 'activa' ? ` · Plan ${user.membresiaPlan === 'anual' ? 'anual ($1,000/año)' : 'mensual ($100/mes)'}` : ''}</strong>. Si la pones "Activa" a mano (sin que se haya suscrito), el cliente no tiene un cobro recurrente real — tendrás que quitarle el acceso tú mismo cuando corresponda.</p>
           <form id="formMembresiaCliente" class="mt-3 flex flex-wrap gap-3">
             <select id="clienteMembresiaEstado" class="min-w-[180px] flex-1 rounded-xl border border-vino/15 bg-crema/60 px-4 py-3">
               <option value="ninguna" ${user.membresiaEstado === 'ninguna' ? 'selected' : ''}>Sin membresía</option>

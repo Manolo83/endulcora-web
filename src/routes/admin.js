@@ -2005,6 +2005,7 @@ router.get('/api/users', requireAdmin, (req, res) => {
       nombre: u.nombre || '',
       telefono: telefonoConLada,
       membresiaEstado: u.membresiaEstado || 'ninguna',
+      membresiaPlan: u.membresiaPlan === 'anual' ? 'anual' : 'mensual',
       regalo: regalo.resumenRegalo(u),
       regaloRechazado: !!u.regaloRechazado,
       origenRegalo: u.membresiaOrigen === 'regalo_live' && !!u.membresiaRegaloHasta,
@@ -2043,6 +2044,7 @@ router.get('/api/users/buscar', requireAdmin, (req, res) => {
     nombre: user.nombre,
     telefono: user.telefono || '',
     membresiaEstado: user.membresiaEstado || 'ninguna',
+    membresiaPlan: user.membresiaPlan === 'anual' ? 'anual' : 'mensual',
   })));
 });
 
