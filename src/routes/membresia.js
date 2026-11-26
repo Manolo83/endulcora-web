@@ -15,6 +15,11 @@ const PRECIO_MEMBRESIA = 100;
 // Quien dejo de pagar y fue suspendido vuelve pagando $200 al mes
 // (Manuel, 21 nov 2026).
 const PRECIO_REINGRESO = 200;
+// Plan anual (Manuel, 26 nov 2026): cobro unico de $1000 una vez al año, sin
+// mes de prueba (el mes gratis es solo para quien entra por el plan
+// mensual). No tiene precio de reingreso aparte: quien volvio a ser moroso y
+// elige anual paga los $1000 normales.
+const PRECIO_MEMBRESIA_ANUAL = 1000;
 function precioPara(usuario) {
   return usuario && usuario.membresiaMorosa ? PRECIO_REINGRESO : PRECIO_MEMBRESIA;
 }
@@ -29,9 +34,9 @@ function mpClient() {
 // clienta registre su tarjeta. Con primerCobro (fecha futura) el primer
 // cargo se programa para ese dia en vez de hacerse de inmediato — asi
 // funciona el mes de regalo.
-async function crearSuscripcion(client, usuario, { reason = 'Membresía Endulcora', primerCobro = null, backUrl = `${SITE_URL}/membresia`, monto = PRECIO_MEMBRESIA } = {}) {
+async function crearSuscripcion(client, usuario, { reason = 'Membresía Endulcora', primerCobro = null, backUrl = `${SITE_URL}/membresia`, monto = PRECIO_MEMBRESIA, frequency = 1 } = {}) {
   const autoRecurring = {
-    frequency: 1,
+    frequency,
     frequency_type: 'months',
     transaction_amount: monto,
     currency_id: 'MXN',
@@ -63,24 +68,34 @@ router.post('/suscribirse', requireCliente, async (req, res) => {
 
   const usuario = store.getUserById(req.session.userId);
   if (!usuario) return res.status(401).json({ error: 'Tienes que iniciar sesión.' });
+  const planPedido = req.body && req.body.plan === 'anual' ? 'anual' : 'mensual';
   // Quien cancelo durante su mes de regalo sigue "activa" hasta que se le
   // acabe; puede volver a domiciliar su membresia antes, y el primer cobro
   // se programa para el dia en que termina el regalo (no se le cobra doble).
   const reactivaRegalo = usuario.membresiaEstado === 'activa' && regalo.regaloActivo(usuario) && usuario.membresiaRegaloCancelada;
-  if (usuario.membresiaEstado === 'activa' && !reactivaRegalo) {
+  // Miembro mensual activo que pide cambiarse a anual (Manuel, 26 nov 2026):
+  // se le crea la suscripcion anual nueva y, solo si eso funciona, se
+  // cancela la mensual vieja — nunca al reves, para no dejarla sin ninguna
+  // suscripcion si Mercado Pago llega a fallar al crear la anual.
+  const preapprovalAnterior = usuario.membresiaPreapprovalId;
+  const cambioAAnual = usuario.membresiaEstado === 'activa' && !reactivaRegalo
+    && planPedido === 'anual' && usuario.membresiaPlan !== 'anual' && !!preapprovalAnterior;
+  if (usuario.membresiaEstado === 'activa' && !reactivaRegalo && !cambioAAnual) {
     return res.status(400).json({ error: 'Ya tienes la membresía activa.' });
   }
 
   // Mes gratis para todos (4 nov 2026): quien todavia no lo usa registra su
-  // tarjeta hoy y el primer cobro de $100 llega a los 30 dias.
-  if (!reactivaRegalo && regalo.esElegibleRegalo(usuario)) {
+  // tarjeta hoy y el primer cobro de $100 llega a los 30 dias. El plan anual
+  // no tiene mes de prueba (Manuel, 26 nov 2026): se cobra completo desde
+  // el dia uno, asi que este bloque solo aplica al plan mensual.
+  if (planPedido === 'mensual' && !reactivaRegalo && regalo.esElegibleRegalo(usuario)) {
     try {
       const creado = await crearSuscripcion(client, usuario, {
         reason: 'Membresía Endulcora · 1 mes gratis',
         primerCobro: regalo.fechaFinRegalo(),
         backUrl: `${SITE_URL}/membresia?regalo=1`,
       });
-      store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id, regaloPreapprovalId: creado.id, regaloSolicitadoEn: new Date().toISOString(), membresiaOrigen: 'mes_gratis' });
+      store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id, membresiaPlan: 'mensual', regaloPreapprovalId: creado.id, regaloSolicitadoEn: new Date().toISOString(), membresiaOrigen: 'mes_gratis' });
       return res.status(201).json({ url: creado.init_point });
     } catch (err) {
       const detalle = (err && err.cause && JSON.stringify(err.cause)) || (err && err.message) || String(err);
@@ -90,15 +105,18 @@ router.post('/suscribirse', requireCliente, async (req, res) => {
   }
 
   try {
-    const monto = precioPara(usuario);
+    const monto = planPedido === 'anual' ? PRECIO_MEMBRESIA_ANUAL : precioPara(usuario);
     const creado = await crearSuscripcion(client, usuario, {
       primerCobro: reactivaRegalo ? usuario.membresiaRegaloHasta : null,
       monto,
-      reason: monto === PRECIO_REINGRESO ? 'Membresía Endulcora · reingreso' : 'Membresía Endulcora',
+      frequency: planPedido === 'anual' ? 12 : 1,
+      reason: planPedido === 'anual' ? 'Membresía Endulcora · anual' : (monto === PRECIO_REINGRESO ? 'Membresía Endulcora · reingreso' : 'Membresía Endulcora'),
     });
     // membresiaMorosa se queda hasta que entre el primer cobro aprobado (ver
     // guardarPagoDesdeInfo y aplicarEstadoDesdePreapprovalInfo).
-    store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id });
+    store.updateUser(usuario.id, { membresiaPreapprovalId: creado.id, membresiaPlan: planPedido });
+    // La anual nueva ya quedo creada: ahora si se cancela la mensual vieja.
+    if (cambioAAnual) cancelarPreapprovalEnMercadoPago(preapprovalAnterior);
     res.status(201).json({ url: creado.init_point });
   } catch (err) {
     const detalle = (err && err.cause && JSON.stringify(err.cause)) || (err && err.message) || String(err);
@@ -450,6 +468,8 @@ router.get('/estado', async (req, res) => {
     elegibleRegalo: regalo.esElegibleRegalo(usuario),
     regaloRechazado: !!usuario.regaloRechazado,
     precioMensual: precioPara(usuario),
+    precioAnual: PRECIO_MEMBRESIA_ANUAL,
+    plan: usuario.membresiaPlan === 'anual' ? 'anual' : 'mensual',
     suspendidaPorPago: !!usuario.membresiaMorosa,
   });
 });
@@ -749,4 +769,5 @@ module.exports.sincronizarPagosDePreapproval = sincronizarPagosDePreapproval;
 module.exports.sincronizarEstadoDePreapproval = sincronizarEstadoDePreapproval;
 module.exports.cancelarPreapprovalEnMercadoPago = cancelarPreapprovalEnMercadoPago;
 module.exports.PRECIO_REINGRESO = PRECIO_REINGRESO;
+module.exports.PRECIO_MEMBRESIA_ANUAL = PRECIO_MEMBRESIA_ANUAL;
 module.exports.cobrosDePreapprovalEnMercadoPago = cobrosDePreapprovalEnMercadoPago;

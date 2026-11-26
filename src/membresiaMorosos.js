@@ -13,9 +13,18 @@ const regalo = require('./membresiaRegalo');
 const email = require('./email');
 const { SITE_URL } = require('./config');
 
-const DIAS_PERIODO = 30;
+const DIAS_PERIODO_MENSUAL = 30;
+// Plan anual (26 nov 2026): el cobro solo toca una vez al año, asi que el
+// periodo contra el que se mide "ya se tardo" tiene que ser de 365 dias,
+// no de 30 -- si no, a cualquier miembro anual se le corta el acceso un mes
+// despues de su unico cobro del año.
+const DIAS_PERIODO_ANUAL = 365;
 const DIAS_GRACIA = 5;
 const DIA_MS = 24 * 60 * 60 * 1000;
+
+function diasPeriodo(usuario) {
+  return usuario.membresiaPlan === 'anual' ? DIAS_PERIODO_ANUAL : DIAS_PERIODO_MENSUAL;
+}
 
 function ultimoCobroAprobado(usuario, pagos) {
   const fechas = pagos
@@ -32,7 +41,7 @@ function ultimoCobroAprobado(usuario, pagos) {
 function fechaDePago(usuario, pagos) {
   const ultimo = ultimoCobroAprobado(usuario, pagos);
   const candidatos = [];
-  if (ultimo) candidatos.push(ultimo + DIAS_PERIODO * DIA_MS);
+  if (ultimo) candidatos.push(ultimo + diasPeriodo(usuario) * DIA_MS);
   else {
     if (usuario.membresiaActivaDesde) candidatos.push(new Date(usuario.membresiaActivaDesde).getTime());
     if (usuario.membresiaPrimeraActivacion) candidatos.push(new Date(usuario.membresiaPrimeraActivacion).getTime());
@@ -105,7 +114,7 @@ async function repararSuspendidosPorError(ahora = new Date()) {
     const cobros = await cobrosDePreapprovalEnMercadoPago(u.membresiaPreapprovalId);
     if (!cobros) continue;
     const ultimo = Math.max(0, ...cobros.filter((c) => c.estado === 'aprobado').map((c) => new Date(c.fecha).getTime()).filter((t) => !Number.isNaN(t)));
-    if (!ultimo || ahora.getTime() > ultimo + DIAS_PERIODO * DIA_MS) continue;
+    if (!ultimo || ahora.getTime() > ultimo + diasPeriodo(u) * DIA_MS) continue;
     regalo.activarMesPagado(store.getUserById(u.id), { origen: 'pago-recuperado', ahora: new Date(ultimo) });
     store.updateUser(u.id, { membresiaMorosa: false, correoSuspensionEnviado: false, membresiaSuspendidaEn: '', membresiaSuspensionErronea: u.membresiaSuspendidaEn || new Date().toISOString(), membresiaRestauradaEn: ahora.toISOString() });
     reparados.push(u.email);
