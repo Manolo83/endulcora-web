@@ -1038,6 +1038,39 @@ async function init() {
         carpetaSeed: 'la-cosecha-de-otono',
         archivos: { ebook: 'EBOOK_LA_COSECHA_DE_OTONO_Endulcora.pdf', anexo: 'ANEXO_1_La_Cosecha_de_Otono_Costeo_Merma_Precios_Endulcora.xlsx', app: 'ANEXO_2_La_Cosecha_de_Otono_APP_Costos_Endulcora.html', paquete: 'Paquete_Completo.zip' },
       },
+      // Los 5 que mando Manuel el 26 nov — sin paquete completo ni portada,
+      // igual que el lote del 23 oct: la portada se genera sola de la
+      // primera pagina del PDF.
+      {
+        tituloBase: 'Cocina Argentina',
+        categoria: 'ebook',
+        carpetaSeed: 'cocina-argentina',
+        archivos: { ebook: 'Cocina_Argentina_Endulcora.pdf', anexo: 'Anexo1_Cocina_Argentina.xlsx', app: 'Anexo2_App_Cocina_Argentina.html' },
+      },
+      {
+        tituloBase: 'Empanadas Argentinas',
+        categoria: 'ebook',
+        carpetaSeed: 'empanadas-argentinas',
+        archivos: { ebook: 'Empanadas_Argentinas_Endulcora.pdf', anexo: 'Anexo1_Empanadas_Argentinas.xlsx', app: 'Anexo2_App_Empanadas_Argentinas.html' },
+      },
+      {
+        tituloBase: 'Bombonería',
+        categoria: 'ebook',
+        carpetaSeed: 'bomboneria',
+        archivos: { ebook: 'Bomboneria_Endulcora.pdf', anexo: 'Anexo1_Bomboneria.xlsx', app: 'Anexo2_App_Bomboneria.html' },
+      },
+      {
+        tituloBase: 'Panes Laminados',
+        categoria: 'ebook',
+        carpetaSeed: 'panes-laminados',
+        archivos: { ebook: 'Panes_Laminados_Endulcora.pdf', anexo: 'Anexo1_Panes_Laminados.xlsx', app: 'Anexo2_App_Panes_Laminados.html' },
+      },
+      {
+        tituloBase: 'Galletería Fina',
+        categoria: 'ebook',
+        carpetaSeed: 'galleteria-fina',
+        archivos: { ebook: 'Galleteria_Fina_Endulcora.pdf', anexo: 'Anexo1_Galleteria_Fina.xlsx', app: 'Anexo2_App_Galleteria_Fina.html' },
+      },
     ];
     for (const familia of FAMILIAS_A_DESGLOSAR) {
       const flag = `_migDesglose_${slugify(familia.tituloBase)}`;
@@ -1063,6 +1096,22 @@ async function init() {
         if (p.categoria === 'ebook' && !p.esPaquete && ['Pumpkin Spice', 'La Cosecha de Otoño'].includes(p.titulo)) p.apartado = 'panaderia';
       });
       data._migApartadoEbooksOtono = true;
+      changed = true;
+    }
+    // Los 5 del 26 nov: Argentina en Comida Internacional (junto con Cocina
+    // Española), el resto en Panaderia y Reposteria.
+    if (!data._migApartadoEbooks26Nov) {
+      const APARTADO_26_NOV = {
+        'Cocina Argentina': 'internacional',
+        'Empanadas Argentinas': 'internacional',
+        'Bombonería': 'panaderia',
+        'Panes Laminados': 'panaderia',
+        'Galletería Fina': 'panaderia',
+      };
+      (data.products || []).forEach((p) => {
+        if (p.categoria === 'ebook' && !p.esPaquete && APARTADO_26_NOV[p.titulo]) p.apartado = APARTADO_26_NOV[p.titulo];
+      });
+      data._migApartadoEbooks26Nov = true;
       changed = true;
     }
     // Portadas con fotografia real del platillo/bebida, para reemplazar la
