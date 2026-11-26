@@ -1692,6 +1692,21 @@ router.get('/api/sesiones-taller', requireAdminOLectura, (req, res) => {
   res.json(store.getSesionesTaller(req.query.sedeId));
 });
 
+// Calculadora de insumos: recetarios guardados (uno por titulo de taller),
+// con su desglose de insumos y, si Lex ya subio uno, el PDF del recetario.
+router.get('/api/recetarios-taller', requireAdminOLectura, (req, res) => {
+  res.json(store.getRecetariosTaller());
+});
+
+router.post('/api/recetarios-taller/insumos', requireAdmin, (req, res) => {
+  const titulo = String((req.body && req.body.titulo) || '').trim();
+  const secciones = (req.body && req.body.secciones) || [];
+  if (!titulo) return res.status(400).json({ error: 'Falta el nombre del taller.' });
+  if (!Array.isArray(secciones)) return res.status(400).json({ error: 'Formato de recetas invalido.' });
+  const item = store.guardarInsumosRecetarioTaller(titulo, secciones);
+  res.json(item);
+});
+
 // Diagnostico de una sola vez: los 14 links reales (8 talleres x fecha) de
 // la campaña de noviembre semana 1, para pegarlos en Meta Ads sin adivinar
 // el slug.

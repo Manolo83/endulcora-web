@@ -4246,6 +4246,9 @@ module.exports = {
     if (!clave) return null;
     return load().recetariosTaller.find((r) => r.titulo === clave) || null;
   },
+  getRecetariosTaller() {
+    return load().recetariosTaller;
+  },
   guardarRecetarioTaller(titulo, { archivo, archivoNombre }) {
     const data = load();
     const clave = String(titulo || '').trim().toLowerCase();
@@ -4258,6 +4261,39 @@ module.exports = {
     item.archivo = archivo;
     item.archivoNombre = archivoNombre || '';
     item.actualizadoEn = new Date().toISOString();
+    save(data);
+    return item;
+  },
+  // Desglose de insumos por receta/componente del taller (Calculadora de
+  // insumos del admin): mismo registro "uno por titulo" de arriba, pero con
+  // las cantidades base que trae cada recetario, para sacar cuanto comprar
+  // segun los inscritos reales. Es un campo aparte del PDF que sube Lex —
+  // guardar uno no borra el otro.
+  guardarInsumosRecetarioTaller(titulo, secciones) {
+    const data = load();
+    const clave = String(titulo || '').trim().toLowerCase();
+    if (!clave) return null;
+    let item = data.recetariosTaller.find((r) => r.titulo === clave);
+    if (!item) {
+      item = { titulo: clave, archivo: '', archivoNombre: '' };
+      data.recetariosTaller.push(item);
+    }
+    item.insumosSecciones = Array.isArray(secciones)
+      ? secciones.map((s) => ({
+          nombre: String((s && s.nombre) || '').trim(),
+          rendimiento: Number(s && s.rendimiento) || 2,
+          items: Array.isArray(s && s.items)
+            ? s.items
+                .map((it) => ({
+                  cantidad: Number(it && it.cantidad) || 0,
+                  unidad: String((it && it.unidad) || '').trim(),
+                  insumo: String((it && it.insumo) || '').trim(),
+                }))
+                .filter((it) => it.insumo)
+            : [],
+        })).filter((s) => s.items.length)
+      : [];
+    item.insumosActualizadoEn = new Date().toISOString();
     save(data);
     return item;
   },

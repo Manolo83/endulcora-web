@@ -101,6 +101,7 @@
         <div class="admin-nav-grupo-panel absolute left-0 top-full z-20 mt-2 hidden w-56 flex flex-col gap-1 rounded-2xl bg-white p-2 normal-case tracking-normal shadow-2xl ring-1 ring-vino/10">
           <a href="#seccionCalendario" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Calendario</a>
           <a href="#seccionInscripcionesTaller" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Inscripciones a talleres <span class="globoSinCapturar hidden ml-1 rounded-full bg-red-600 px-2 py-0.5 font-ui text-[10px] font-700 text-white"></span></a>
+          <a href="#seccionCalculadoraInsumos" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Calculadora de insumos</a>
           <a href="#seccionMasterclasses" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Masterclasses</a>
           <a href="#seccionClaseGratis" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Clase gratis</a>
           <a href="#seccionVideoEnVivo" class="block rounded-xl px-3 py-2 text-[13px] font-600 text-carbon hover:bg-vino/5 hover:text-vino">Video en vivo</a>
@@ -1818,9 +1819,52 @@
 
       <div id="listaGaleriaAdmin" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
     </section>
+
+    <!-- CALCULADORA DE INSUMOS -->
+    <section id="seccionCalculadoraInsumos" class="scroll-mt-32 mb-14">
+      <h2 class="font-titulo text-2xl tracking-wide text-vino">Calculadora de insumos</h2>
+      <p class="mt-1 text-sm text-carbon/60">Arma la lista de compras de un taller a partir de su recetario y de las personas realmente inscritas. Cada receta o componente trae su "rinde para ___ personas" (2 por defecto); la calculadora saca cuánto comprar en total para que no falte ni sobre.</p>
+
+      <div class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-vino/10">
+        <div class="grid gap-4 sm:grid-cols-3">
+          <label class="block sm:col-span-1">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Elegir sesión programada</span>
+            <select id="calcTallerSelect" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm"></select>
+          </label>
+          <label class="block sm:col-span-1">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Taller (nombre del recetario)</span>
+            <input id="calcTituloManual" type="text" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm" placeholder="Ej. Roles Gourmet">
+          </label>
+          <label class="block sm:col-span-1">
+            <span class="font-ui text-[11px] font-600 uppercase tracking-widest text-carbon/60">Personas inscritas</span>
+            <input id="calcPersonasInscritas" type="number" min="0" step="1" inputmode="numeric" class="mt-1.5 w-full rounded-xl border border-vino/15 bg-crema/60 px-4 py-3 text-sm" placeholder="Se llena solo al elegir sesión">
+          </label>
+        </div>
+        <p class="mt-2 text-xs text-carbon/45">Al elegir una sesión programada se autocompletan el nombre del taller y las personas inscritas reales (según Inscripciones a talleres); puedes corregirlas a mano si hace falta.</p>
+        <div id="calcPdfExistenteBox" class="mt-3"></div>
+      </div>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
+        <div id="calcBuilder" class="space-y-4"></div>
+
+        <aside class="rounded-2xl bg-vino p-5 text-crema lg:sticky lg:top-24">
+          <h3 class="font-titulo text-lg">Lista de compras</h3>
+          <p id="calcResumenSub" class="mt-0.5 text-xs text-crema/70">Insumos totales a comprar</p>
+          <div id="calcResumenBody" class="mt-3"></div>
+          <div class="mt-4 flex gap-2">
+            <button type="button" id="calcCopiarBtn" class="flex-1 rounded-full bg-flama px-3 py-2 font-ui text-[11px] font-700 uppercase tracking-wider text-[#5C3B00] hover:brightness-105 transition">Copiar lista</button>
+            <button type="button" id="calcImprimirBtn" class="flex-1 rounded-full border border-white/30 px-3 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-white hover:bg-white/10 transition">Imprimir</button>
+          </div>
+          <button type="button" id="calcGuardarBtn" class="mt-2 w-full rounded-full border border-white/30 px-3 py-2 font-ui text-[11px] font-600 uppercase tracking-wider text-white hover:bg-white/10 transition">Guardar recetario de insumos</button>
+          <p id="calcCopyFlash" class="mt-2 min-h-[1em] text-xs text-flama"></p>
+        </aside>
+      </div>
+    </section>
   </main>
 </section>
 
+<!-- pdf.js: lectura de texto de recetarios en PDF para la Calculadora de insumos -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 
@@ -1876,6 +1920,7 @@ const CARGA_DIFERIDA = [
   ['resumenRegalos', () => cargarResumenRegalos()],
   ['listaSuscriptores', () => cargarSuscriptores()],
   ['listaInscripcionesTaller', () => cargarInscripcionesTaller()],
+  ['calcBuilder', () => cargarCalculadoraInsumos()],
   ['listaRegistrosQr', () => cargarRegistrosQr()],
   ['listaMasterclasses', () => cargarMasterclasses()],
   ['listaClaseGratis', () => cargarClaseGratis()],
@@ -4884,6 +4929,387 @@ async function cargarOpcionesSesionManual(){
   }
 }
 cargarOpcionesSesionManual();
+
+// ---- Calculadora de insumos (lista de compras por taller) ----
+// Cada "seccion" es una receta o componente del taller (masa, relleno,
+// glaseado...) con su propio "rinde para ___ personas" (2 por defecto,
+// como vienen armados los recetarios). El resumen suma, entre todas las
+// secciones, (cantidad base / rendimiento) x personas inscritas, agrupando
+// por insumo + unidad. El recetario (las secciones con sus insumos) se
+// guarda una vez por TITULO de taller, igual que el PDF que sube Lex, asi
+// que no hay que volver a capturarlo para cada sesion futura del mismo
+// taller.
+let CALC_SESIONES = [];
+let CALC_RECETARIOS = [];
+const calcState = { secciones: [], checked: {} };
+
+function calcUid(){ return 'c' + Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function calcNuevoItem(){ return { id: calcUid(), cantidad: '', unidad: '', insumo: '' }; }
+function calcNuevaSeccion(nombre){ return { id: calcUid(), nombre: nombre || '', rendimiento: 2, items: [calcNuevoItem()] }; }
+function calcFindSeccion(id){ return calcState.secciones.find(s => s.id === id); }
+
+const CALC_UNIT_WORDS = ['kilogramos','kilogramo','mililitros','mililitro','cucharaditas','cucharadita','cucharadas','cucharada','gramos','gramo','piezas','pieza','unidades','unidad','rebanadas','rebanada','dientes','diente','pizcas','pizca','onzas','onza','litros','litro','tazas','taza','ramas','rama','hojas','hoja','kilos','kilo','gr','kg','ml','lt','l','g','cdas','cda','cdtas','cdta','pzas','pza','oz'];
+const CALC_LINE_RE = new RegExp('^(?:[-•*\\u2022\\u25aa]\\s*)?(\\d+(?:[.,]\\d+)?(?:\\s*/\\s*\\d+)?)\\s*(' + CALC_UNIT_WORDS.join('|') + ')?\\.?\\s+(?:de\\s+)?(.{2,70})$', 'i');
+
+function calcParseQty(str){
+  str = String(str).replace(',', '.').trim();
+  if(str.indexOf('/') !== -1){
+    const [a, b] = str.split('/').map(parseFloat);
+    return b ? a / b : a;
+  }
+  return parseFloat(str);
+}
+function calcParseLinesToItems(text){
+  const lines = String(text || '').split(/\r?\n/);
+  const out = [];
+  for(const raw of lines){
+    const line = raw.trim();
+    if(!line) continue;
+    const m = line.match(CALC_LINE_RE);
+    if(m){
+      const qty = calcParseQty(m[1]);
+      const insumo = m[3].replace(/[.:]+$/, '').trim();
+      if(!isNaN(qty) && insumo.length >= 2 && !/^\d+$/.test(insumo)){
+        out.push({ cantidad: Math.round(qty * 10000) / 10000, unidad: m[2] ? m[2].trim() : '', insumo });
+      }
+    }
+    if(out.length >= 60) break;
+  }
+  return out;
+}
+function calcFmtQty(n){
+  if(!isFinite(n)) return '0';
+  const r = Math.round(n * 100) / 100;
+  if(Math.abs(r - Math.round(r)) < 0.005) return String(Math.round(r));
+  return String(r.toFixed(2)).replace(/0$/, '').replace(/\.$/, '');
+}
+
+if(window.pdfjsLib){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+async function calcExtraerTextoPdf(arrayBuffer){
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const maxPages = Math.min(pdf.numPages, 30);
+  const textos = [];
+  for(let p = 1; p <= maxPages; p++){
+    const page = await pdf.getPage(p);
+    const tc = await page.getTextContent();
+    textos.push(tc.items.map(it => it.str).join(' '));
+  }
+  return textos.join('\n');
+}
+
+async function cargarCalculadoraInsumos(){
+  try{
+    [CALC_SESIONES, CALC_RECETARIOS] = await Promise.all([
+      api('/admin/api/sesiones-taller'),
+      api('/admin/api/recetarios-taller'),
+    ]);
+  }catch(e){ CALC_SESIONES = []; CALC_RECETARIOS = []; }
+
+  const hoy = diaCdmx(new Date());
+  const futuras = (CALC_SESIONES || []).filter(s => s.titulo && s.fecha >= hoy).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const select = $('calcTallerSelect');
+  select.innerHTML = '<option value="">— Elegir una sesión programada —</option>' + futuras.map(s => {
+    const sede = (SEDES.find(x => x.id === s.sedeId) || {}).nombre || '';
+    return `<option value="${s.id}">${escapeHtml(s.titulo)} · ${fechaLegibleCorta(s.fecha)}${s.horario ? ' ' + escapeHtml(s.horario) : ''}${sede ? ' (' + escapeHtml(sede) + ')' : ''}</option>`;
+  }).join('');
+
+  if(!calcState.secciones.length) calcState.secciones.push(calcNuevaSeccion());
+  calcRender();
+  calcRenderResumen();
+}
+
+async function calcAlElegirSesion(){
+  const id = Number($('calcTallerSelect').value);
+  $('calcPdfExistenteBox').innerHTML = '';
+  const sesion = (CALC_SESIONES || []).find(s => s.id === id);
+  if(!sesion) return;
+
+  $('calcTituloManual').value = sesion.titulo;
+
+  try{
+    const inscripciones = await api('/admin/api/inscripciones-taller');
+    $('calcPersonasInscritas').value = inscripciones.filter(i => i.sesionTallerId === sesion.id).length;
+  }catch(e){}
+
+  const clave = sesion.titulo.trim().toLowerCase();
+  const rec = (CALC_RECETARIOS || []).find(r => r.titulo === clave);
+  if(rec && Array.isArray(rec.insumosSecciones) && rec.insumosSecciones.length){
+    calcState.secciones = rec.insumosSecciones.map(s => ({
+      id: calcUid(),
+      nombre: s.nombre || '',
+      rendimiento: s.rendimiento || 2,
+      items: (s.items && s.items.length ? s.items : [{}]).map(it => ({ id: calcUid(), cantidad: it.cantidad ?? '', unidad: it.unidad || '', insumo: it.insumo || '' })),
+    }));
+    toast('Se cargó el recetario guardado de "' + sesion.titulo + '"');
+  } else {
+    calcState.secciones = [calcNuevaSeccion()];
+  }
+
+  if(rec && rec.archivo){
+    $('calcPdfExistenteBox').innerHTML = `<p class="rounded-xl bg-crema/60 px-4 py-3 text-xs text-carbon/70">Lex ya subió un recetario en PDF para este taller: <a href="${escapeHtml(rec.archivo)}" target="_blank" class="font-600 text-vino underline">${escapeHtml(rec.archivoNombre || 'recetario.pdf')}</a> — <button type="button" id="calcAnalizarPdfExistente" class="font-600 text-vino underline">analizarlo aquí</button></p>`;
+    $('calcAnalizarPdfExistente').addEventListener('click', async () => {
+      const btn = $('calcAnalizarPdfExistente');
+      btn.textContent = 'Leyendo…';
+      try{
+        const buf = await (await fetch(rec.archivo)).arrayBuffer();
+        const texto = await calcExtraerTextoPdf(buf);
+        const found = calcParseLinesToItems(texto);
+        if(!found.length){ toast('No detecté renglones de ingredientes en ese PDF.'); btn.textContent = 'analizarlo aquí'; return; }
+        const sec = calcNuevaSeccion(sesion.titulo);
+        sec.items = found.map(f => ({ id: calcUid(), cantidad: f.cantidad, unidad: f.unidad, insumo: f.insumo }));
+        if(calcState.secciones.length === 1 && !calcState.secciones[0].items.some(it => it.insumo)) calcState.secciones = [sec];
+        else calcState.secciones.push(sec);
+        toast('Detecté ' + found.length + ' insumo(s) — revísalos antes de calcular.');
+        calcRender();
+        calcRenderResumen();
+      }catch(e){ toast('No se pudo leer ese PDF.'); btn.textContent = 'analizarlo aquí'; }
+    });
+  }
+
+  calcRender();
+  calcRenderResumen();
+}
+$('calcTallerSelect').addEventListener('change', calcAlElegirSesion);
+$('calcPersonasInscritas').addEventListener('input', calcRenderResumen);
+
+function calcRender(){
+  const builder = $('calcBuilder');
+  builder.innerHTML = calcState.secciones.map(calcRenderSeccion).join('') +
+    `<button type="button" id="calcAddSeccionBtn" class="w-full rounded-2xl border-2 border-dashed border-vino/25 bg-crema/40 py-4 font-titulo text-base text-vino hover:bg-crema/70 transition">+ Agregar receta o componente del taller</button>`;
+  $('calcAddSeccionBtn').addEventListener('click', () => {
+    calcState.secciones.push(calcNuevaSeccion());
+    calcRender();
+  });
+}
+
+function calcRenderSeccion(sec){
+  const filas = sec.items.map(it => `
+    <tr data-item="${it.id}">
+      <td class="w-20 py-1 pr-2"><input type="text" inputmode="decimal" class="calc-f-cantidad w-full rounded-lg border border-vino/15 bg-crema/40 px-2 py-1.5 text-sm" value="${escapeHtml(it.cantidad)}" placeholder="500"></td>
+      <td class="w-24 py-1 pr-2"><input type="text" class="calc-f-unidad w-full rounded-lg border border-vino/15 bg-crema/40 px-2 py-1.5 text-sm" value="${escapeHtml(it.unidad)}" placeholder="g"></td>
+      <td class="py-1 pr-2"><input type="text" class="calc-f-insumo w-full rounded-lg border border-vino/15 bg-crema/40 px-2 py-1.5 text-sm" value="${escapeHtml(it.insumo)}" placeholder="Harina de fuerza"></td>
+      <td class="w-8 py-1 text-center"><button type="button" class="calc-rm-item text-carbon/40 hover:text-red-600" title="Quitar insumo">✕</button></td>
+    </tr>`).join('');
+
+  return `
+  <div class="rounded-2xl bg-white p-5 ring-1 ring-vino/10" data-seccion="${sec.id}">
+    <div class="flex flex-wrap items-end gap-3">
+      <label class="min-w-[200px] flex-1">
+        <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Receta / componente</span>
+        <input type="text" class="calc-f-nombre mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm" value="${escapeHtml(sec.nombre)}" placeholder="Ej. Masa, relleno, glaseado...">
+      </label>
+      <label class="w-36">
+        <span class="block font-ui text-[10px] uppercase tracking-widest text-carbon/50">Rinde para (personas)</span>
+        <input type="number" min="1" step="1" class="calc-f-rendimiento mt-1 w-full rounded-lg border border-vino/15 bg-crema/60 px-3 py-2 text-sm" value="${escapeHtml(sec.rendimiento)}">
+      </label>
+      ${calcState.secciones.length > 1 ? `<button type="button" class="calc-rm-seccion rounded-full border border-red-200 px-3 py-2 font-ui text-[11px] font-600 uppercase text-red-600 hover:bg-red-50 transition">Quitar</button>` : ''}
+    </div>
+
+    <div class="mt-3 flex flex-wrap items-center gap-3">
+      <label class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-dashed border-vino/30 bg-crema/40 px-3 py-1.5 font-ui text-[11px] font-600 text-vino hover:bg-crema/70 transition">
+        📄 Subir recetario (PDF)<input type="file" accept="application/pdf" class="calc-f-pdf hidden">
+      </label>
+      <span class="calc-status text-xs text-carbon/55"></span>
+    </div>
+
+    <details class="mt-2">
+      <summary class="cursor-pointer text-xs font-600 text-vino">O pega aquí el texto de la receta</summary>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <textarea class="calc-f-paste min-h-[80px] flex-1 rounded-lg border border-vino/15 bg-crema/40 px-3 py-2 text-sm" placeholder="500 g harina de fuerza&#10;250 g mantequilla sin sal&#10;2 huevos..."></textarea>
+        <button type="button" class="calc-detect self-start rounded-full border border-vino/20 px-3 py-2 font-ui text-[11px] font-600 uppercase text-vino hover:border-vino transition">Detectar ingredientes</button>
+      </div>
+    </details>
+
+    <table class="mt-4 w-full border-collapse text-sm">
+      <thead>
+        <tr class="text-left font-ui text-[10px] uppercase tracking-widest text-carbon/50">
+          <th class="pb-1.5">Cantidad</th><th class="pb-1.5">Unidad</th><th class="pb-1.5">Insumo (receta base)</th><th></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-vino/5">${filas}</tbody>
+    </table>
+    <button type="button" class="calc-add-item mt-2 rounded-full border border-vino/20 px-3 py-1.5 font-ui text-[11px] font-600 uppercase text-vino hover:border-vino transition">+ Agregar insumo</button>
+  </div>`;
+}
+
+function calcAplicarDetectados(sec, found, statusEl){
+  if(!found.length){
+    statusEl.textContent = 'No detecté renglones de ingredientes automáticamente. Captúralos a mano en la tabla.';
+    statusEl.className = 'calc-status text-xs text-red-600';
+    return;
+  }
+  sec.items = sec.items.filter(i => i.insumo || i.cantidad);
+  found.forEach(f => sec.items.push({ id: calcUid(), cantidad: f.cantidad, unidad: f.unidad, insumo: f.insumo }));
+  if(!sec.items.length) sec.items.push(calcNuevoItem());
+  statusEl.textContent = 'Detecté ' + found.length + ' insumo(s). Revisa y corrige antes de calcular — la detección automática no es perfecta.';
+  statusEl.className = 'calc-status text-xs text-green-700';
+  calcRender();
+  calcRenderResumen();
+}
+
+const calcBuilderEl = $('calcBuilder');
+calcBuilderEl.addEventListener('input', (e) => {
+  const cardEl = e.target.closest('[data-seccion]'); if(!cardEl) return;
+  const sec = calcFindSeccion(cardEl.getAttribute('data-seccion')); if(!sec) return;
+  if(e.target.classList.contains('calc-f-nombre')) sec.nombre = e.target.value;
+  else if(e.target.classList.contains('calc-f-rendimiento')) sec.rendimiento = parseFloat(e.target.value) || 0;
+  else{
+    const rowEl = e.target.closest('tr[data-item]');
+    if(rowEl){
+      const it = sec.items.find(i => i.id === rowEl.getAttribute('data-item'));
+      if(it){
+        if(e.target.classList.contains('calc-f-cantidad')) it.cantidad = e.target.value;
+        else if(e.target.classList.contains('calc-f-unidad')) it.unidad = e.target.value;
+        else if(e.target.classList.contains('calc-f-insumo')) it.insumo = e.target.value;
+      }
+    }
+  }
+  calcRenderResumen();
+});
+
+calcBuilderEl.addEventListener('click', (e) => {
+  const cardEl = e.target.closest('[data-seccion]'); if(!cardEl) return;
+  const sec = calcFindSeccion(cardEl.getAttribute('data-seccion')); if(!sec) return;
+
+  if(e.target.closest('.calc-rm-seccion')){
+    calcState.secciones = calcState.secciones.filter(s => s.id !== sec.id);
+    calcRender(); calcRenderResumen();
+    return;
+  }
+  if(e.target.closest('.calc-add-item')){
+    sec.items.push(calcNuevoItem());
+    calcRender();
+    const inputs = $('calcBuilder').querySelector(`[data-seccion="${sec.id}"]`).querySelectorAll('.calc-f-insumo');
+    if(inputs.length) inputs[inputs.length - 1].focus();
+    return;
+  }
+  if(e.target.closest('.calc-rm-item')){
+    const rowEl = e.target.closest('tr[data-item]');
+    sec.items = sec.items.filter(i => i.id !== rowEl.getAttribute('data-item'));
+    if(!sec.items.length) sec.items.push(calcNuevoItem());
+    calcRender(); calcRenderResumen();
+    return;
+  }
+  if(e.target.closest('.calc-detect')){
+    const ta = cardEl.querySelector('.calc-f-paste');
+    calcAplicarDetectados(sec, calcParseLinesToItems(ta.value), cardEl.querySelector('.calc-status'));
+    return;
+  }
+});
+
+calcBuilderEl.addEventListener('change', (e) => {
+  if(!e.target.classList.contains('calc-f-pdf')) return;
+  const cardEl = e.target.closest('[data-seccion]');
+  const sec = calcFindSeccion(cardEl.getAttribute('data-seccion'));
+  const statusEl = cardEl.querySelector('.calc-status');
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  if(!window.pdfjsLib){
+    statusEl.textContent = 'No se pudo cargar el lector de PDF.';
+    statusEl.className = 'calc-status text-xs text-red-600';
+    return;
+  }
+  statusEl.textContent = 'Leyendo ' + file.name + '…';
+  statusEl.className = 'calc-status text-xs text-carbon/55';
+  file.arrayBuffer().then(calcExtraerTextoPdf).then(texto => {
+    calcAplicarDetectados(sec, calcParseLinesToItems(texto), statusEl);
+  }).catch(() => {
+    statusEl.textContent = 'No se pudo leer ese PDF. Pega el texto abajo o captura los insumos a mano.';
+    statusEl.className = 'calc-status text-xs text-red-600';
+  });
+});
+
+function calcResumenRows(){
+  const personas = parseFloat($('calcPersonasInscritas').value);
+  if(!personas || personas <= 0) return null;
+  const totals = {};
+  calcState.secciones.forEach(sec => {
+    const rend = parseFloat(sec.rendimiento);
+    if(!rend || rend <= 0) return;
+    sec.items.forEach(it => {
+      const qty = parseFloat(String(it.cantidad).replace(',', '.'));
+      const nombre = (it.insumo || '').trim();
+      if(!nombre || isNaN(qty)) return;
+      const unidad = (it.unidad || '').trim();
+      const key = nombre.toLowerCase() + '|' + unidad.toLowerCase();
+      if(!totals[key]) totals[key] = { insumo: nombre, unidad, total: 0 };
+      totals[key].total += (qty / rend) * personas;
+    });
+  });
+  return Object.values(totals).sort((a, b) => a.insumo.localeCompare(b.insumo, 'es'));
+}
+
+function calcRenderResumen(){
+  const rows = calcResumenRows();
+  const body = $('calcResumenBody');
+  const personas = parseFloat($('calcPersonasInscritas').value);
+  if(rows === null){
+    body.innerHTML = `<p class="text-sm text-crema/70">Indica cuántas personas están inscritas para calcular la lista de compras.</p>`;
+    $('calcResumenSub').textContent = 'Insumos totales a comprar';
+    return;
+  }
+  if(!rows.length){
+    body.innerHTML = `<p class="text-sm text-crema/70">Agrega insumos con cantidad e indica para cuántas personas rinde cada receta.</p>`;
+    $('calcResumenSub').textContent = 'Insumos totales a comprar';
+    return;
+  }
+  $('calcResumenSub').textContent = `${rows.length} insumo${rows.length === 1 ? '' : 's'} para ${personas} persona${personas === 1 ? '' : 's'}`;
+  body.innerHTML = '<ul class="max-h-[50vh] space-y-0.5 overflow-y-auto">' + rows.map(r => {
+    const key = r.insumo.toLowerCase() + '|' + r.unidad.toLowerCase();
+    const checked = !!calcState.checked[key];
+    return `<li class="flex items-center gap-2.5 border-b border-white/10 py-2" data-key="${escapeHtml(key)}">
+      <input type="checkbox" ${checked ? 'checked' : ''} class="h-4 w-4 accent-flama">
+      <span class="flex-1 text-sm ${checked ? 'text-crema/50 line-through' : ''}">${escapeHtml(r.insumo)}</span>
+      <span class="font-600 text-sm text-flama ${checked ? 'text-crema/50 line-through' : ''}">${calcFmtQty(r.total)}${r.unidad ? ' ' + escapeHtml(r.unidad) : ''}</span>
+    </li>`;
+  }).join('') + '</ul>';
+}
+
+$('calcResumenBody').addEventListener('change', (e) => {
+  if(e.target.type !== 'checkbox') return;
+  const li = e.target.closest('li');
+  calcState.checked[li.getAttribute('data-key')] = e.target.checked;
+  calcRenderResumen();
+});
+
+$('calcCopiarBtn').addEventListener('click', () => {
+  const rows = calcResumenRows() || [];
+  const flash = $('calcCopyFlash');
+  if(!rows.length){ flash.textContent = 'No hay lista que copiar todavía.'; return; }
+  const titulo = $('calcTituloManual').value.trim();
+  const personas = $('calcPersonasInscritas').value;
+  const text = (titulo ? titulo + '\n' : '') + `Lista de compras (${personas} personas)\n` + rows.map(r => `- ${r.insumo}: ${calcFmtQty(r.total)}${r.unidad ? ' ' + r.unidad : ''}`).join('\n');
+  const done = () => { flash.textContent = 'Lista copiada ✓'; setTimeout(() => flash.textContent = '', 2500); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done, () => { flash.textContent = 'No se pudo copiar automáticamente.'; });
+  }
+});
+
+$('calcImprimirBtn').addEventListener('click', () => window.print());
+
+$('calcGuardarBtn').addEventListener('click', async () => {
+  const titulo = $('calcTituloManual').value.trim();
+  if(!titulo){ toast('Escribe o elige el taller antes de guardar.'); return; }
+  const secciones = calcState.secciones
+    .map(s => ({
+      nombre: s.nombre,
+      rendimiento: parseFloat(s.rendimiento) || 2,
+      items: s.items.filter(it => (it.insumo || '').trim()).map(it => ({
+        cantidad: parseFloat(String(it.cantidad).replace(',', '.')) || 0,
+        unidad: (it.unidad || '').trim(),
+        insumo: (it.insumo || '').trim(),
+      })),
+    }))
+    .filter(s => s.items.length);
+  try{
+    await api('/admin/api/recetarios-taller/insumos', { method: 'POST', body: JSON.stringify({ titulo, secciones }) });
+    toast('Recetario de insumos guardado para "' + titulo + '"');
+    CALC_RECETARIOS = await api('/admin/api/recetarios-taller');
+  }catch(e){ toast(e.message || 'No se pudo guardar.'); }
+});
 
 $('formInscripcionManual').addEventListener('submit', async (e) => {
   e.preventDefault();
