@@ -1986,6 +1986,24 @@ async function init() {
       data._migCambioFechaInscripcion198 = true;
       changed = true;
     }
+    // Cambio de fecha pedido por Manuel (27 nov 2026): Blanca Estela Guevara
+    // Cruz (inscripcion 254) pasa de Galleta Decorada Navideña 28 nov
+    // (sesion 540) al 29 nov (sesion 534), misma sede Nativitas y mismo
+    // horario. Una sola vez.
+    if (!data._migCambioFechaInscripcion254) {
+      const ins = (data.inscripcionesTaller || []).find((i) => i.id === 254 && i.sesionTallerId === 540);
+      const destino = data.sesionesTaller.find((s) => s.id === 534);
+      if (ins && destino) {
+        ins.sesionTallerId = 534;
+        ins.fecha = destino.fecha;
+        ins.horario = destino.horario;
+        ins.recordatorio2diasEnviado = false;
+        ins.recordatorioMismoDiaEnviado = false;
+        ins.sheetsSincronizado = false;
+      }
+      data._migCambioFechaInscripcion254 = true;
+      changed = true;
+    }
     // Migra el antiguo muro unico de comunidad (sin publicacion) a una
     // publicacion "General" para no perder los mensajes ya escritos.
     const mensajesSinPublicacion = (data.mensajesComunidad || []).filter((m) => !m.publicacionId);
